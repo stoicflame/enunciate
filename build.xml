@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar" name="enunciate" basedir=".">
+  <property name="lib.dir" value="lib"/>
+  <property name="build.dir" value="target/classes"/>
+  <property name="gen.dir" value="target/gen"/>
+  <property name="conf.dir" value="src/conf"/>
+  <property name="test.build.dir" value="target/test-classes"/>
+  <property name="test.report.dir" value="target/test-reports"/>
+  <property name="docs.dir" value="docs"/>
+  <property name="javadoc.dir" value="${docs.dir}/api"/>
+  <property name="final.name" value="enunciate-1.0-alpha1"/>
+
+  <path id="build.classpath">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement location="${java.home}/../lib/tools.jar"/>
+  </path>
+
+  <path id="run.classpath">
+    <path refid="build.classpath"/>
+    <pathelement path="${build.dir}"/>
+    <pathelement path="${conf.dir}"/>
+  </path>
+
+  <target name="init" description="initializes some properties">
+    <mkdir dir="${lib.dir}"/>
+  </target>
+
+  <target name="compile" description="compile the code" depends="get-deps">
+    <mkdir dir="${build.dir}"/>
+
+    <javac destdir="${build.dir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
+      <src>
+        <pathelement location="src/java"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+
+    <copy todir="${build.dir}">
+      <fileset dir="src/java">
+        <include name="**/*.xsd"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.jelly"/>
+        <include name="**/*.fmt"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="jar" description="create the jar" depends="compile,test">
+    <jar jarfile="target/${final.name}.jar" excludes="**/package.html" basedir="${build.dir}"/>
+  </target>
+
+  <target name="jar-only" description="create the jar" depends="compile">
+    <jar jarfile="target/${final.name}.jar" excludes="**/package.html" basedir="${build.dir}"/>
+  </target>
+
+  <target name="clean" description="clean up the generated directories">
+    <delete dir="target"/>
+  </target>
+
+  <target name="clean-lib" description="clean up the downloaded libraries">
+    <delete dir="${lib.dir}"/>
+  </target>
+
+  <target name="test" description="run the test cases" if="test.failure" depends="internal-test">
+    <fail message="There were test failures."/>
+  </target>
+
+  <target name="internal-test" depends="compile-tests">
+    <mkdir dir="${test.report.dir}"/>
+    <junit dir="./" failureproperty="test.failure" printSummary="yes" fork="false" haltonerror="true">
+      <sysproperty key="basedir" value="."/>
+      <formatter type="xml"/>
+      <formatter usefile="false" type="plain"/>
+      <classpath>
+        <fileset dir="${lib.dir}">
+          <include name="*.jar"/>
+        </fileset>
+        <pathelement path="${test.build.dir}"/>
+        <pathelement path="${build.dir}"/>
+      </classpath>
+
+      <batchtest todir="${test.report.dir}">
+        <fileset dir="src/test">
+          <include name="**/Test*"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="compile-tests" depends="compile">
+    <mkdir dir="${test.build.dir}"/>
+    <javac destdir="${test.build.dir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
+      <src>
+        <pathelement location="src/test"/>
+      </src>
+      <classpath refid="run.classpath"/>
+    </javac>
+
+      <copy todir="${test.build.dir}">
+        <fileset dir="src/test">
+          <include name="**/*.xml"/>
+          <include name="**/*.fmt"/>
+        </fileset>
+      </copy>
+  </target>
+
+  <target name="javadoc" description="generate javadoc" depends="jar">
+    <mkdir dir="${javadoc.dir}"/>
+    <property name="title" value="enunciate-docs"/>
+
+    <javadoc use="true" private="true" destdir="${javadoc.dir}" author="true" version="true" sourcepath="src/java" packagenames="*">
+      <classpath refid="run.classpath"/>
+    </javadoc>
+  </target>
+
+  <target name="get-deps" unless="noget" depends="init">
+    <!--<get dest="${lib.dir}/commons-logging-1.0.2.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-logging/jars/commons-logging-1.0.2.jar"/>-->
+  </target>
+
+  <target name="generate-api" depends="jar">
+    <property name="api" value="xml"/>
+
+    <mkdir dir="${gen.dir}"/>
+
+    <taskdef name="apt" classname="com.sun.tools.ws.ant.Apt">
+      <classpath refid="build.classpath"/>
+    </taskdef>
+
+    <apt fork="true" debug="true" noCompile="true"
+         sourceDestDir="${gen.dir}" sourcePath="src/samples"
+         factory="net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory">
+      <classpath refid="run.classpath"/>
+      <source dir="src/samples">
+        <include name="**/*.java"/>
+      </source>
+      <option key="api" value="${api}"/>
+    </apt>
+  </target>
+
+</project>

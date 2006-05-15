@@ -1,0 +1,193 @@
+[#ftl]
+[#--
+Template for a WSDL.  Assumes the existence of a variable
+named "wsdl" present in the model describing the WSDL to output.
+--]
+
+[#-- assign the prefix variable for the "this" namespace --]
+[#assign tns=prefix(wsdl.targetNamespace)]
+
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
+    [#list wsdl.importedNamespaces as importedNamespace]
+   xmlns:${prefix(importedNamespace)}="${importedNamespace}"
+    [/#list]
+   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+   xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <types>
+    <xs:schema>
+    [#list wsdl.importedSchemas as schema]
+      <xs:import namespace="${schema.namespace}" location="${schema.location}"/>
+    [/#list]
+    </xs:schema>
+
+    [#-- todo: output the inlined schema... --]
+  </types>
+
+    [#--
+    example
+    <message name="getPerson">
+      <part name="parameters" element="tns:getPerson"/>
+    </message>
+    --]
+    [@forEachEndpointInterface]
+      [@forEachWebMethod]
+        [@forEachWebMessage includeSimple=false]
+  <message name="${webMessage.messageName}">
+          [#list webMessage.parts as part]
+    <part name="${part.partName}" element="?????"/>
+          [/#list]
+  </message>
+        [/@forEachWebMessage]
+      [/@forEachWebMethod]
+    [/@forEachEndpointInterface]
+    [#t]
+    [#--output the web faults globablly.--]
+    [@forEachWebFault]
+  <message name="${webFault.messageName}">
+    <part name="${webFault.partName}" element="?????"/>
+  </message>
+    [/@forEachWebFault]
+
+    [#--
+    example:
+    <portType name="PersonService">
+      <operation name="getPerson">
+        <input message="tns:getPerson"/>
+        <output message="tns:getPersonResponse"/>
+        <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
+      </operation>
+      <operation name="findPersons">
+        <input message="tns:findPersons"/>
+        <output message="tns:findPersonsResponse"/>
+        <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
+      </operation>
+    </portType>
+    --]
+    [@forEachEndpointInterface]
+  <portType name="${endpointInterface.portName}">
+      [@forEachWebMethod]
+    <operation name="${webMethod.operationName}">
+        [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false]
+      <input message="${tns}:${input.messageName}"/>
+        [/@forEachWebMessage]
+        [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeInput=false]
+      <output message="${tns}:${output.messageName}"/>
+        [/@forEachWebMessage]
+        [@forEachWebMessage var="fault" includeHeaders=false includeInput=false includeComplex=false]
+      <fault message="${tns}:${fault.partName}"/>
+        [/@forEachWebMessage]
+    </operation>
+      [/@forEachWebMethod]
+  </portType>
+    [/@forEachEndpointInterface]
+    [#t]
+    [#--
+    example:
+    <binding name="PersonServiceBinding" type="tns:PersonService">
+      <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+      <operation name="getPerson">
+        <soap:operation soapAction=""/>
+        <input>
+          <soap:body use="literal"/>
+        </input>
+        <output>
+          <soap:body use="literal"/>
+        </output>
+        <fault name="PersonNotFoundException">
+          <soap:fault name="PersonNotFoundException" use="literal"/>
+        </fault>
+      </operation>
+      <operation name="findPersons">
+        <soap:operation soapAction=""/>
+        <input>
+          <soap:body use="literal"/>
+        </input>
+        <output>
+          <soap:body use="literal"/>
+        </output>
+        <fault name="PersonNotFoundException">
+          <soap:fault name="PersonNotFoundException" use="literal"/>
+        </fault>
+      </operation>
+    </binding>
+    --]
+    [@forEachEndpointInterface]
+      [@forEachBindingType]
+        [#if bindingType.soap11 || bindingType.soap12]
+
+  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portName}">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
+          [@forEachWebMethod]
+    <operation name="${webMethod.operationName}">
+      <soap:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
+      <input>
+            [@forEachWebMessage var="header" includeFaults=false includeOutput=false includeComplex=false]
+        <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
+            [/@forEachWebMessage]
+        [#-- todo: figure out if this element is valid even if there isn't a body. --]
+        <soap:body use="${webMethod.soapUse?lower_case}"/>
+      </input>
+      <output>
+            [@forEachWebMessage var="header" includeFaults=false includeInput=false includeComplex=false]
+        <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
+            [/@forEachWebMessage]
+        [#-- todo: figure out if this element is valid even if there isn't a body. --]
+        <soap:body use="${webMethod.soapUse?lower_case}"/>
+      </output>
+            [@forEachThrownWebFault]
+      <fault>
+        <soap:fault name="${webFault.messageName}" use="${webFault.soapUse?lower_case}"/>
+      </fault>
+            [/@forEachThrownWebFault]
+    </operation>
+          [/@forEachWebMethod]
+  </binding>
+        [#elseif bindingType.http]
+
+  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portName}">
+    <http:binding verb="POST"/>
+          [@forEachWebMethod]
+    <operation name="${webMethod.operationName}">
+      <http:operation location="TBD"/>
+      <input>
+        <http:urlEncoded/>
+      </input>
+      <output>
+        <http:urlEncoded/>
+      </output>
+    </operation>
+  </binding>
+          [/@forEachWebMethod]
+        [#else]
+          [#stop "unknown binding type: " + bindingType.namespace]
+        [/#if]
+      [/@forEachBindingType]
+    [/@forEachEndpointInterface]
+
+    [#--
+    example:
+    <service name="PersonServiceService">
+      <port name="PersonService" binding="tns:PersonServiceBinding">
+        <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
+      </port>
+    </service>
+    --]
+    [@forEachEndpointInterface]
+  <service name="${endpointInterface.serviceName}">
+      [@forEachBindingType]
+    <port name="${endpointInterface.getPortNameFor(bindingType)}" binding="${tns}:${endpointInterface.getBindingNameFor(bindingType)}">
+        [#if bindingType.soap11 || bindingType.soap12]
+      <soap:address location="TBD"/>
+        [#elseif bindingType.http]
+      <http:address location="TBD"/>
+        [/#if]
+    </port>
+      [/@forEachBindingType]
+  </service>
+    [/@forEachEndpointInterface]
+</definitions>

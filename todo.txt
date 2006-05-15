@@ -1,0 +1,23 @@
+Move to Freemarker
+Open enunciate on sourceforge
+get rid of NamespaceUtils (it's wrong!)
+set up testing framework and write some tests!
+do schema generation (jaxb)
+put in wsdl/schema documentation from javadocs
+generate client code
+  Java 5
+  Java 1.3+
+  .NET
+  C++
+support an enunciate.xml config file:
+  soap endpoint addresses
+  namespace2prefix map
+  namespace2schema file map
+  namespace2wsdl file map
+  package-mapping
+  option to not inline request/response wrappers into the wsdl.
+support a deployment mechanism
+  generate the RESTful endpoint mechanism as needed
+support rpc-style web services
+support in/out, out parameters
+tests, tests, tests!!!!!

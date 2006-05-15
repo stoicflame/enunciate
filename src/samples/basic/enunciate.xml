@@ -1,0 +1,10 @@
+<enunciate>
+  <namespaces>
+    <namespace id="pets" uri="http://net.sf.enunciate/samples/petclinic/pets"/>
+    <namespace id="owners" uri="http://net.sf.enunciate/samples/petclinic/owners"/>
+    <namespace id="vets" uri="http://net.sf.enunciate/samples/petclinic/vets"/>
+  </namespaces>
+  <schemas>
+    <schema namespaceRef="pets" generate="true" file="pet.xsd" location="http://net.sf.enunciate/samples/schemas/pet.xsd"/>
+  </schemas>
+</enunciate>

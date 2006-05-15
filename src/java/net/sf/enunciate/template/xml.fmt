@@ -1,0 +1,8 @@
+[#ftl strip_text=true]
+
+[#--first generate each wsdl.--]
+[@forEachWsdl]
+  [@file name=wsdl.file]
+    [#include "wsdl.fmt"]
+  [/@file]
+[/@forEachWsdl]

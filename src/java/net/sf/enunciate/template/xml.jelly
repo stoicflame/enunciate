@@ -1,0 +1,172 @@
+<j:jelly xmlns:j="jelly:core"
+         xmlns:x="jelly:xml"
+         xmlns:apt="jelly:net.sf.jelly.apt.tags.APTTagLibrary"
+         xmlns:enunciate="jelly:net.sf.enunciate.jelly.EnunciateTagLibrary"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <enunciate:forEachWsdl>
+    <enunciate:wsdl endpointInterfacesVar="endpointInterfaces">
+      <types>
+        <!--define the schema for this wsdl.-->
+        <enunciate:element name="xs:schema">
+
+          <!--first import any necessary schemas.-->
+          <enunciate:forEachSchemaImport namespaceVar="namespace" schemaVar="schema">
+            <enunciate:element name="xs:import">
+              <x:attribute name="namespace">
+                <j:out value="${namespace}"/>
+              </x:attribute>
+              <x:attribute name="schemaLocation">
+                <j:out value="${schema.location}"/>
+              </x:attribute>
+            </enunciate:element>
+          </enunciate:forEachSchemaImport>
+
+          <!--todo: define the doc/lit wrapper elements for this wsdl.-->
+          <j:forEach items="${endpointInterfaces}" var="ei">
+
+          </j:forEach>
+        </enunciate:element>
+      </types>
+
+      <!--
+      example
+      <message name="getPerson">
+        <part name="parameters" element="tns:getPerson"/>
+      </message>
+      -->
+      <j:forEach items="${endpointInterfaces}" var="ei">
+        <enunciate:forEachWebMethod endpointInterface="${ei}" var="webMethod">
+          <!--declare each complex web message-->
+          <enunciate:forEachWebMessage webMethod="${webMethod}" includeSimple="false" var="io">
+            <message name="${io.messageName}">
+              <j:forEach items="${io.parts}" var="part">
+                <part name="${part.partName}" element="?????"/>
+              </j:forEach>
+            </message>
+          </enunciate:forEachWebMessage>
+        </enunciate:forEachWebMethod>
+      </j:forEach>
+      <enunciate:forEachWebFault endpointInterfaces="${endpointInterfaces}" var="webFault">
+        <message name="${webFault.messageName}">
+          <part name="${webFault.partName}" element="?????"/>
+        </message>
+      </enunciate:forEachWebFault>
+
+      <!--
+      example:
+      <portType name="PersonService">
+        <operation name="getPerson">
+          <input message="tns:getPerson"/>
+          <output message="tns:getPersonResponse"/>
+          <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
+        </operation>
+        <operation name="findPersons">
+          <input message="tns:findPersons"/>
+          <output message="tns:findPersonsResponse"/>
+          <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
+        </operation>
+      </portType>
+      -->
+      <j:forEach items="${endpointInterfaces}" var="sei">
+        <portType name="${sei.portName}">
+          <enunciate:forEachWebMethod declaration="${sei}" var="webMethod">
+            <operation name="${webMethod.operationName}">
+              <enunciate:forEachWebMessage webMethod="${webMethod}" includeHeaders="false" includeFaults="false" includeOutput="false" var="input">
+                <!--todo: ns-qualify the message name reference-->
+                <input message="${input.messageName}"/>
+              </enunciate:forEachWebMessage>
+              <enunciate:forEachWebMessage webMethod="${webMethod}" includeHeaders="false" includeFaults="false" includeInput="false" var="output">
+                <!--todo: ns-qualify the message name reference-->
+                <output message="${output.messageName}"/>
+              </enunciate:forEachWebMessage>
+              <enunciate:forEachWebMessage webMethod="${webMethod}" includeHeaders="false" includeInput="false" includeComplex="false" var="fault">
+                <!--todo: ns-qualify the message name reference-->
+                <fault message="${fault.partName}"/>
+              </enunciate:forEachWebMessage>
+            </operation>
+          </enunciate:forEachWebMethod>
+        </portType>
+      </j:forEach>
+
+
+      <!--
+      example:
+      <binding name="PersonServiceBinding" type="tns:PersonService">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <operation name="getPerson">
+          <soap:operation soapAction=""/>
+          <input>
+            <soap:body use="literal"/>
+          </input>
+          <output>
+            <soap:body use="literal"/>
+          </output>
+          <fault name="PersonNotFoundException">
+            <soap:fault name="PersonNotFoundException" use="literal"/>
+          </fault>
+        </operation>
+        <operation name="findPersons">
+          <soap:operation soapAction=""/>
+          <input>
+            <soap:body use="literal"/>
+          </input>
+          <output>
+            <soap:body use="literal"/>
+          </output>
+          <fault name="PersonNotFoundException">
+            <soap:fault name="PersonNotFoundException" use="literal"/>
+          </fault>
+        </operation>
+      </binding>
+      -->
+      <j:forEach items="${endpointInterfaces}" var="sei">
+        <enunciate:forEachBindingType endpointInterface="${sei}" var="bindingType">
+          <binding name="${sei.bindingNames[bindingType]}" type="${sei.portName}">
+            <enunciate:wsdlExtensibilityElementsForWebService webService="${sei}" bindingType="${bindingType}"/>
+            <enunciate:forEachWebMethod declaration="${sei}" var="webMethod">
+              <operation name="${webMethod.operationName}">
+                <enunciate:wsdlExtensibilityElementsForWebMethod webMethod="${webMethod}" bindingType="${bindingType}"/>
+                <input>
+                  <enunciate:wsdlExtensibilityElementsForInput webMethod="${webMethod}" bindingType="${bindingType}"/>
+                </input>
+                <output>
+                  <enunciate:wsdlExtensibilityElementsForOutput webMethod="${webMethod}" bindingType="${bindingType}"/>
+                </output>
+                <enunciate:forEachThrownWebFault faultVar="webFault">
+                  <fault>
+                    <enunciate:wsdlExtensibilityElementsForWebFault webFault="${webFault}" bindingType="${bindingType}"/>
+                  </fault>
+                </enunciate:forEachThrownWebFault>
+              </operation>
+            </enunciate:forEachWebMethod>
+          </binding>
+        </enunciate:forEachBindingType>
+      </j:forEach>
+
+      <!--
+      example:
+      <service name="PersonServiceService">
+        <port name="PersonService" binding="tns:PersonServiceBinding">
+          <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
+        </port>
+      </service>
+      -->
+      <j:forEach items="${endpointInterfaces}" var="sei">
+        <service name="${sei.serviceName}">
+          <enunciate:forEachBindingType endpointInterface="${sei}" var="bindingType">
+            <!--todo: ns-qualify the binding name reference-->
+            <port name="${sei.portNames[bindingType]}" binding="${sei.bindingNames[bindingType]}">
+              <enunciate:wsdlPortExtensibilityElements webService="${sei}" bindingType="${bindingType}"/>
+            </port>
+          </enunciate:forEachBindingType>
+        </service>
+      </j:forEach>
+    </enunciate:wsdl>
+  </enunciate:forEachWsdl>
+
+  <enunciate:forEachSchema>
+    
+  </enunciate:forEachSchema>
+
+</j:jelly>
