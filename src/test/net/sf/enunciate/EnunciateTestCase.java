@@ -16,66 +16,27 @@
 
 package net.sf.enunciate;
 
-import junit.framework.TestCase;
-import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
+import com.sun.mirror.apt.AnnotationProcessorFactory;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
-import java.io.*;
-import java.net.URL;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class EnunciateTestCase extends TestCase {
+public abstract class EnunciateTestCase {
 
-  private File outputDir;
-
-  protected void setUp() throws Exception {
-    super.setUp();
-
-    outputDir = File.createTempFile("enunciatetest", "");
+  protected File createOutputDir() throws IOException {
+    File outputDir = File.createTempFile("enunciatetest", "");
     outputDir.delete();
     outputDir.mkdirs();
-  }
-
-  public void runTemplate() {
-    runTemplate(getName() + ".fmt");
-  }
-
-  /**
-   * Run a the template found at the specified relative resource path.
-   *
-   * @param relativeResource The relative resource.
-   */
-  public void runTemplate(String relativeResource) {
-    URL resource = getClass().getResource(relativeResource);
-    if (resource == null) {
-      throw new IllegalStateException(String.format("Cannot load resource: %s",relativeResource));
-    }
-    runTemplate(resource);
-  }
-
-  /**
-   * Run the template at the specified url.
-   *
-   * @param url The url.
-   */
-  public void runTemplate(URL url) {
-    ArrayList<String> sourceFiles = getAllJavaFiles(getSampleSourceSubdirectoryName());
-    runTemplate(url, sourceFiles);
-  }
-
-  /**
-   * Run the template at the specified url on all java files in the specified subdirectory.
-   *
-   * @param url The url.
-   * @param subdir The subdirectory.
-   */
-  public void runTemplate(URL url, String subdir) {
-    ArrayList<String> sourceFiles = getAllJavaFiles(subdir);
-    runTemplate(url, sourceFiles);
+    return outputDir;
   }
 
   /**
@@ -84,24 +45,33 @@ public abstract class EnunciateTestCase extends TestCase {
    * @param subdir The subdir.
    * @return The list of all java files in the specified subdir.
    */
-  protected ArrayList<String> getAllJavaFiles(String subdir) {
+  protected List<String> getAllJavaFiles(String subdir) {
     ArrayList<String> sourceFiles = new ArrayList<String>();
     findJavaFiles(getSourceFileDirectory(subdir), sourceFiles);
     return sourceFiles;
   }
 
   /**
-   * Run the template at the specified url on the specified files.
+   * Invoke APT on the given factory, options and source files.
    *
-   * @param url The url of the template.
-   * @param files The list of absolute file names of the source files.
+   * @param apf The factory.
+   * @param aptOptions The options.
+   * @param sourceFiles The source files.
    */
-  public void runTemplate(URL url, Collection<String> files) {
-    ArrayList<String> aptOpts = getAptOptions();
-    aptOpts.addAll(files);
+  protected void invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
+    ArrayList<String> args = new ArrayList<String>();
+    if (aptOptions != null) {
+      args.addAll(aptOptions);
+    }
 
-    int procCode = com.sun.tools.apt.Main.process(new EnunciateTestProcessorFactory(url), aptOpts.toArray(new String[aptOpts.size()]));
-    assertTrue(procCode == 0);
+    if ((sourceFiles == null) || (sourceFiles.isEmpty())) {
+      fail("No source files were specified on which to invoke APT.");
+    }
+
+    args.addAll(sourceFiles);
+
+    int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    assertTrue(procCode == 0, "APT failed.");
   }
 
   /**
@@ -110,38 +80,21 @@ public abstract class EnunciateTestCase extends TestCase {
    * @return The source file directory.
    */
   protected File getSourceFileDirectory(String subdir) {
-    String srcDirPath = System.getProperty("enunciate.base.sample.src.dir");
+    String srcDirPath = System.getProperty("enunciate.sample.src.dir");
     if (srcDirPath == null) {
-      fail("The base directory for the sample source code must be specified in the 'enunciate.base.sample.src.dir' property.");
+      fail("The base directory for the sample source code must be specified in the 'enunciate.sample.src.dir' property.");
     }
 
     return new File(new File(srcDirPath), subdir);
   }
 
   /**
-   * The name subdirectory of the sample source, relative to the base directory.
+   * Recursively finds all the java files in the specified directory and adds them all to the given collection.
    *
-   * @return The subdirectory of the sample source.
+   * @param dir The directory.
+   * @param filenames The collection.
    */
-  protected String getSampleSourceSubdirectoryName() {
-    return "basic";
-  }
-
-  protected ArrayList<String> getAptOptions() {
-    ArrayList<String> aptOpts = new ArrayList<String>();
-    aptOpts.add("-cp");
-    aptOpts.add(System.getProperty("java.class.path"));
-    aptOpts.add("-s");
-    aptOpts.add(getOutputDir().getAbsolutePath());
-    aptOpts.add("-nocompile");
-    return aptOpts;
-  }
-
-  public File getOutputDir() {
-    return outputDir;
-  }
-
-  protected void findJavaFiles(File dir, Collection<String> filenames) {
+  private void findJavaFiles(File dir, Collection<String> filenames) {
     File[] javaFiles = dir.listFiles(JAVA_FILTER);
     for (File javaFile : javaFiles) {
       filenames.add(javaFile.getAbsolutePath());
@@ -164,43 +117,5 @@ public abstract class EnunciateTestCase extends TestCase {
       return pathname.isDirectory();
     }
   };
-
-  protected Properties readOutputAsProperties(String output) throws IOException {
-    FileInputStream inStream = readOutputAsStream(output);
-    Properties results = new Properties();
-    try {
-      results.load(inStream);
-    }
-    finally {
-      inStream.close();
-    }
-    return results;
-  }
-
-  protected FileInputStream readOutputAsStream(String output) throws FileNotFoundException {
-    File outputFile = new File(getOutputDir(), output);
-    assertTrue("No outputFile found.", outputFile.exists());
-    return new FileInputStream(outputFile);
-  }
-
-  /**
-   * An ProcessorFactory that can be invoked more than once in the same JVM.
-   */
-  private class EnunciateTestProcessorFactory extends EnunciateAnnotationProcessorFactory {
-
-    private final URL api;
-
-    public EnunciateTestProcessorFactory(URL template) {
-      this.api = template;
-      round = 0; //reset the round.
-    }
-
-    //Inherited.
-    @Override
-    protected URL getTemplateURL() {
-      return this.api;
-    }
-
-  }
 
 }

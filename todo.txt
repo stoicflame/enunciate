@@ -1,9 +1,8 @@
-Move to Freemarker
-Open enunciate on sourceforge
 get rid of NamespaceUtils (it's wrong!)
 set up testing framework and write some tests!
 do schema generation (jaxb)
 put in wsdl/schema documentation from javadocs
+create pluggable validation/compiling mechanism
 generate client code
   Java 5
   Java 1.3+

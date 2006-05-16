@@ -86,6 +86,7 @@ named "wsdl" present in the model describing the WSDL to output.
   </portType>
     [/@forEachEndpointInterface]
     [#t]
+
     [#--
     example:
     <binding name="PersonServiceBinding" type="tns:PersonService">

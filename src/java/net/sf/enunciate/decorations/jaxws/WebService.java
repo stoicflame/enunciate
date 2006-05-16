@@ -26,9 +26,9 @@ public class WebService extends DecoratedTypeDeclaration {
 
     annotation = getAnnotation(javax.jws.WebService.class);
 
-    if (isInterface() && !isEndpointInterface()) {
+    if (isInterface() && isEndpointImplmentation()) {
       throw new IllegalArgumentException(getAnnotations().get(javax.jws.WebService.class.getName()).getPosition() +
-          ": an endpoint interface must not be specified on an interface type declaration.");
+          ": an interface type declaration cannot be an endpoint implementation (the specified endpoint interface is not empty).");
     }
   }
 
