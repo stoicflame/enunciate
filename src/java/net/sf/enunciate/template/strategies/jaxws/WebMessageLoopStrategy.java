@@ -1,15 +1,15 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
+import net.sf.enunciate.contract.jaxws.WebMessage;
+import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import net.sf.enunciate.decorations.jaxws.WebMessage;
-import net.sf.enunciate.decorations.jaxws.WebMethod;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
-import java.util.Iterator;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Loop through the web messages of a given web method.

@@ -1,7 +1,7 @@
 package net.sf.enunciate.config;
 
-import net.sf.enunciate.decorations.jaxws.WebService;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.*;
@@ -15,7 +15,7 @@ public class WsdlInfo {
 
   private String targetNamespace;
   private SchemaInfo schemaInfo;
-  private Collection<WebService> endpointInterfaces;
+  private Collection<EndpointInterface> endpointInterfaces;
   private boolean generate;
   private String file;
 
@@ -42,7 +42,7 @@ public class WsdlInfo {
    *
    * @return The endpoint interfaces making up this WSDL.
    */
-  public Collection<WebService> getEndpointInterfaces() {
+  public Collection<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
   }
 
@@ -51,7 +51,7 @@ public class WsdlInfo {
    *
    * @param endpointInterfaces The endpoint interfaces making up this WSDL.
    */
-  public void setEndpointInterfaces(Collection<WebService> endpointInterfaces) {
+  public void setEndpointInterfaces(Collection<EndpointInterface> endpointInterfaces) {
     this.endpointInterfaces = endpointInterfaces;
   }
 
@@ -115,16 +115,16 @@ public class WsdlInfo {
    * @return The imported namespaces used by this WSDL.
    */
   public Set<String> getImportedNamespaces() {
-    Collection<WebService> endpointInterfaces = getEndpointInterfaces();
+    Collection<EndpointInterface> endpointInterfaces = getEndpointInterfaces();
     if ((endpointInterfaces == null) || (endpointInterfaces.size() == 0)) {
       throw new IllegalStateException("WSDL for " + getTargetNamespace() + " has no endpoint interfaces!");
     }
 
     TreeSet<String> importedNamespaces = new TreeSet<String>();
-    for (WebService webService : endpointInterfaces) {
-      importedNamespaces.addAll(webService.getReferencedNamespaces());
+    for (EndpointInterface endpointInterface : endpointInterfaces) {
+      importedNamespaces.addAll(endpointInterface.getReferencedNamespaces());
     }
-    
+
     return importedNamespaces;
   }
 

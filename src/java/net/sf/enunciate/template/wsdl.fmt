@@ -131,18 +131,18 @@ named "wsdl" present in the model describing the WSDL to output.
         <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
             [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <soap:body use="${webMethod.soapUse?lower_case}"/>
+        <soap:body use="literal"/>
       </input>
       <output>
             [@forEachWebMessage var="header" includeFaults=false includeInput=false includeComplex=false]
         <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
             [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <soap:body use="${webMethod.soapUse?lower_case}"/>
+        <soap:body use="literal"/>
       </output>
             [@forEachThrownWebFault]
       <fault>
-        <soap:fault name="${webFault.messageName}" use="${webFault.soapUse?lower_case}"/>
+        <soap:fault name="${webFault.messageName}" use="literal"/>
       </fault>
             [/@forEachThrownWebFault]
     </operation>

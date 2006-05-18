@@ -4,7 +4,9 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
-import net.sf.enunciate.decorations.jaxws.WebService;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
+import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.enunciate.util.NamespaceUtils;
 import net.sf.jelly.apt.Context;
@@ -54,11 +56,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     HashSet<String> namespaces = new HashSet<String>();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+
+    //todo: read the type of validator from the config.
+    JAXWSValidator validator = new DefaultJAXWSValidator();
+
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
-      if (WebService.isWebService(declaration)) {
-        WebService webService = new WebService(declaration);
-        String namespace = webService.getTargetNamespace();
+      if (validator.isEndpointInterface(declaration)) {
+        EndpointInterface endpointInterface = new EndpointInterface(declaration, validator);
+        String namespace = endpointInterface.getTargetNamespace();
 
         if (isVerbose()) {
           System.out.println(declaration.getQualifiedName() + " to be considered as an endpoint interface.");
@@ -69,7 +75,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           wsdlInfo = new WsdlInfo();
           wsdlMap.put(namespace, wsdlInfo);
           wsdlInfo.setTargetNamespace(namespace);
-          wsdlInfo.setEndpointInterfaces(new ArrayList<WebService>());
+          wsdlInfo.setEndpointInterfaces(new ArrayList<EndpointInterface>());
 
           //todo: configure the schema info.
           //wsdlInfo.setSchemaInfo();
@@ -77,10 +83,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           //todo: configure whether to generate.
           //wsdlInfo.setGenerate();
         }
-        wsdlInfo.getEndpointInterfaces().add(webService);
+        wsdlInfo.getEndpointInterfaces().add(endpointInterface);
 
         //if it's a web service, add its referenced namespaces to the list of namespaces to consider.
-        namespaces.addAll(webService.getReferencedNamespaces());
+        namespaces.addAll(endpointInterface.getReferencedNamespaces());
       }
       else {
         //otherwise, treat is as a potential jaxb type.

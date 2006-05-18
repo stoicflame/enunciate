@@ -1,22 +1,21 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
-import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import net.sf.enunciate.decorations.jaxws.WebFault;
-import net.sf.enunciate.decorations.jaxws.WebService;
-import net.sf.enunciate.decorations.jaxws.WebMethod;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.ReferenceType;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebFault;
+import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.Collection;
 import java.util.ArrayList;
-
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ReferenceType;
-import com.sun.mirror.type.DeclaredType;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Loop through the web faults of a specified wsdl.
@@ -32,14 +31,14 @@ public class WebFaultLoopStrategy extends EnunciateTemplateLoopStrategy<WebFault
     WsdlInfo wsdl = this.wsdl;
     if (wsdl == null) {
       wsdl = (WsdlInfo) model.getVariable("wsdl");
-      
+
       if (wsdl == null) {
         throw new MissingParameterException("wsdl");
       }
     }
 
     HashMap<String, TypeDeclaration> thrownDeclaredTypes = new HashMap<String, TypeDeclaration>();
-    for (WebService ei : wsdl.getEndpointInterfaces()) {
+    for (EndpointInterface ei : wsdl.getEndpointInterfaces()) {
       Collection<WebMethod> webMethods = ei.getWebMethods();
       for (WebMethod webMethod : webMethods) {
         for (ReferenceType thrownType : webMethod.getThrownTypes()) {

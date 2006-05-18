@@ -1,10 +1,10 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
-import net.sf.enunciate.decorations.jaxws.WebFault;
-import net.sf.enunciate.decorations.jaxws.WebMethod;
+import net.sf.enunciate.contract.jaxws.WebFault;
+import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.TemplateException;
+import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
 import java.util.Iterator;

@@ -1,21 +1,13 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import net.sf.enunciate.decorations.jaxws.WebService;
-import net.sf.enunciate.decorations.jaxws.WebMethod;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
 import java.util.Iterator;
-import java.util.Collection;
-import java.util.ArrayList;
-
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
-
-import javax.xml.ws.Holder;
 
 /**
  * A loop strategy for all the web methods of an endpoint interface.
@@ -25,34 +17,19 @@ import javax.xml.ws.Holder;
 public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMethod> {
 
   private String var = "webMethod";
-  private WebService endpointInterface;
+  private EndpointInterface endpointInterface;
 
   protected Iterator<WebMethod> getLoop(TemplateModel model) throws TemplateException {
-    WebService endpointInterface = this.endpointInterface;
+    EndpointInterface endpointInterface = this.endpointInterface;
     if (endpointInterface == null) {
-      endpointInterface = (WebService) model.getVariable("endpointInterface");
-      
+      endpointInterface = (EndpointInterface) model.getVariable("endpointInterface");
+
       if (endpointInterface == null) {
         throw new MissingParameterException("endpointInterface");
       }
     }
 
-    Collection<WebMethod> webMethods = new ArrayList<WebMethod>();
-    for (MethodDeclaration method : endpointInterface.getMethods()) {
-      if (WebMethod.isWebMethod(method)) {
-        //todo: handle in/out parameters.
-        for (ParameterDeclaration parameter : method.getParameters()) {
-          DecoratedTypeMirror parameterType = (DecoratedTypeMirror) parameter.getType();
-          if (parameterType.isInstanceOf(Holder.class.getName())) {
-            throw new UnsupportedOperationException(parameter.getPosition() + ": enunciate currently doesn't support in/out parameters.  Maybe someday...");
-          }
-        }
-
-        webMethods.add(new WebMethod(method));
-      }
-    }
-
-    return webMethods.iterator();
+    return endpointInterface.getWebMethods().iterator();
   }
 
   // Inherited.
@@ -70,7 +47,7 @@ public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMeth
    *
    * @return The endpoint interface.
    */
-  public WebService getEndpointInterface() {
+  public EndpointInterface getEndpointInterface() {
     return endpointInterface;
   }
 
@@ -79,7 +56,7 @@ public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMeth
    *
    * @param endpointInterface The endpoint interface.
    */
-  public void setEndpointInterface(WebService endpointInterface) {
+  public void setEndpointInterface(EndpointInterface endpointInterface) {
     this.endpointInterface = endpointInterface;
   }
 

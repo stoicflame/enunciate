@@ -123,7 +123,7 @@
       <j:forEach items="${endpointInterfaces}" var="sei">
         <enunciate:forEachBindingType endpointInterface="${sei}" var="bindingType">
           <binding name="${sei.bindingNames[bindingType]}" type="${sei.portName}">
-            <enunciate:wsdlExtensibilityElementsForWebService webService="${sei}" bindingType="${bindingType}"/>
+            <enunciate:wsdlExtensibilityElementsForWebService endpointInterface="${sei}" bindingType="${bindingType}"/>
             <enunciate:forEachWebMethod declaration="${sei}" var="webMethod">
               <operation name="${webMethod.operationName}">
                 <enunciate:wsdlExtensibilityElementsForWebMethod webMethod="${webMethod}" bindingType="${bindingType}"/>
@@ -157,7 +157,7 @@
           <enunciate:forEachBindingType endpointInterface="${sei}" var="bindingType">
             <!--todo: ns-qualify the binding name reference-->
             <port name="${sei.portNames[bindingType]}" binding="${sei.bindingNames[bindingType]}">
-              <enunciate:wsdlPortExtensibilityElements webService="${sei}" bindingType="${bindingType}"/>
+              <enunciate:wsdlPortExtensibilityElements endpointInterface="${sei}" bindingType="${bindingType}"/>
             </port>
           </enunciate:forEachBindingType>
         </service>
@@ -166,7 +166,7 @@
   </enunciate:forEachWsdl>
 
   <enunciate:forEachSchema>
-    
+
   </enunciate:forEachSchema>
 
 </j:jelly>

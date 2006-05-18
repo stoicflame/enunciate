@@ -1,11 +1,8 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.AnnotationTypeDeclaration;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.decorations.jaxws.BindingType;
-import net.sf.enunciate.decorations.jaxws.WebService;
+import net.sf.enunciate.contract.jaxws.BindingType;
+import net.sf.enunciate.contract.jaxws.EndpointImplementation;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
@@ -23,14 +20,14 @@ import java.util.Iterator;
 public class BindingTypeLoopStrategy extends EnunciateTemplateLoopStrategy<BindingType> {
 
   private String var = "bindingType";
-  private WebService endpointInterface;
+  private EndpointInterface endpointInterface;
 
   //Inherited.
   protected Iterator<BindingType> getLoop(TemplateModel model) throws TemplateException {
-    WebService endpointInterface = this.endpointInterface;
+    EndpointInterface endpointInterface = this.endpointInterface;
 
     if (endpointInterface == null) {
-      endpointInterface = (WebService) model.getVariable("endpointInterface");
+      endpointInterface = (EndpointInterface) model.getVariable("endpointInterface");
 
       if (endpointInterface == null) {
         throw new MissingParameterException("endpointInterface");
@@ -38,26 +35,9 @@ public class BindingTypeLoopStrategy extends EnunciateTemplateLoopStrategy<Bindi
     }
 
     Collection<BindingType> bindingTypes = new ArrayList<BindingType>();
-
-    if (!endpointInterface.isEndpointImplmentation()) {
-      //if the specified ei is not an implementation, we iterate through each binding type of its implementing classes.
-      String eifqn = endpointInterface.getQualifiedName();
-      AnnotationProcessorEnvironment env = getAnnotationProcessorEnvironment();
-      Collection<Declaration> declarations = env.getDeclarationsAnnotatedWith((AnnotationTypeDeclaration) env.getTypeDeclaration(javax.jws.WebService.class.getName()));
-      for (Declaration declaration : declarations) {
-        WebService webService = new WebService((TypeDeclaration) declaration);
-        if ((eifqn.equals(webService.getQualifiedName()) || (eifqn.equals(webService.getEndpointInterface())))) {
-          String bindingType = webService.getBindingType();
-
-          if (bindingType != null) {
-            bindingTypes.add(BindingType.fromNamespace(bindingType));
-          }
-        }
-      }
-    }
-    else {
-      //if the specified ei is an implementation, just use its binding type.
-      String bindingType = endpointInterface.getBindingType();
+    Collection<EndpointImplementation> impls = this.endpointInterface.getEndpointImplementations();
+    for (EndpointImplementation implementation : impls) {
+      String bindingType = implementation.getBindingType();
       if (bindingType != null) {
         bindingTypes.add(BindingType.fromNamespace(bindingType));
       }
@@ -104,7 +84,7 @@ public class BindingTypeLoopStrategy extends EnunciateTemplateLoopStrategy<Bindi
    *
    * @return The endpoint interface for which to iterate over each binding type.
    */
-  public WebService getEndpointInterface() {
+  public EndpointInterface getEndpointInterface() {
     return endpointInterface;
   }
 
@@ -113,7 +93,7 @@ public class BindingTypeLoopStrategy extends EnunciateTemplateLoopStrategy<Bindi
    *
    * @param endpointInterface The endpoint interface for which to iterate over each binding type.
    */
-  public void setEndpointInterface(WebService endpointInterface) {
+  public void setEndpointInterface(EndpointInterface endpointInterface) {
     this.endpointInterface = endpointInterface;
   }
 

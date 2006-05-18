@@ -2,7 +2,7 @@ package net.sf.enunciate.template.freemarker;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
-import net.sf.enunciate.decorations.QName;
+import net.sf.enunciate.util.QName;
 
 import java.util.List;
 
@@ -15,6 +15,7 @@ public class QNameMethod implements TemplateMethodModel {
 
   /**
    * Returns the qname of the element that has the first parameter as the namespace, the second as the element.
+   *
    * @param list The arguments.
    * @return The qname.
    */
