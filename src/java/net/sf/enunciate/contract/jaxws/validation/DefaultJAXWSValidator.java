@@ -32,11 +32,9 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
     boolean is = false;
     WebService ws = declaration.getAnnotation(WebService.class);
     if (ws != null) {
-      is = (declaration instanceof InterfaceDeclaration);
-      if (!is && declaration instanceof ClassDeclaration) {
+      is = (declaration instanceof InterfaceDeclaration)
         //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
-        is = (ws.endpointInterface() == null);
-      }
+        || ((ws.endpointInterface() != null) && (!"".equals(ws.endpointInterface())));
     }
     return is;
   }
@@ -92,7 +90,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
       throw new ValidationException(delegate.getPosition() + ": enums cannot be endpoint interfaces.");
     }
 
-    if (ws.endpointInterface() != null) {
+    if ((ws.endpointInterface() != null) & (!"".equals(ws.endpointInterface()))) {
       throw new ValidationException(delegate + " is not an endpoint interface (it references another endpoint interface).");
     }
   }

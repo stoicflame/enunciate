@@ -2,14 +2,17 @@ package net.sf.enunciate.contract.jaxws.validation;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.contract.EnunciateContractTestCase;
+import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 /**
  * @author Ryan Heaton
  */
 public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
 
+  @Test
   public void testValidity() throws Exception {
     DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
@@ -18,7 +21,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
       new EndpointInterface(declaration, validator);
       fail("Should have thrown an IllegalArgumentException.");
     }
-    catch (IllegalArgumentException e) {
+    catch (ValidationException e) {
       //fall through.
     }
 
@@ -28,7 +31,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
       new EndpointInterface(declaration, validator);
       fail("Shouldn't have allowed an interface declaration to specify another endpoint interface.");
     }
-    catch (IllegalArgumentException e) {
+    catch (ValidationException e) {
       //fall through.
     }
 
@@ -38,7 +41,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
       new EndpointInterface(declaration, validator);
       fail("Shouldn't have allowed a reference to an endpoint interface that is a class.");
     }
-    catch (IllegalArgumentException e) {
+    catch (ValidationException e) {
       //fall through.
     }
 
@@ -48,7 +51,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
       new EndpointInterface(declaration, validator);
       fail("Shouldn't have allowed a reference to an unknown endpoint interface.");
     }
-    catch (IllegalArgumentException e) {
+    catch (ValidationException e) {
       //fall through.
     }
   }
