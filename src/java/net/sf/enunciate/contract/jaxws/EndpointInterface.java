@@ -2,6 +2,7 @@ package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
+import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
@@ -95,8 +96,8 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    */
   protected String calculateNamespaceURI() {
     PackageDeclaration pkg = getPackage();
-    if (pkg == null) {
-      throw new IllegalStateException(getPosition() + ": A web service in no package must specify a target namespace.");
+    if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
+      throw new ValidationException(getPosition() + ": A web service in no package must specify a target namespace.");
     }
 
     String[] tokens = pkg.getQualifiedName().split("\\.");
@@ -135,12 +136,24 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     ArrayList<WebMethod> webMethods = new ArrayList<WebMethod>();
 
     for (MethodDeclaration method : getMethods()) {
-      if (validator.isWebMethod(method)) {
+      if (isWebMethod(method)) {
         webMethods.add(new WebMethod(method, this));
       }
     }
 
     return webMethods;
+  }
+
+  /**
+   * A quick check to see if a method is a web method.
+   */
+  public boolean isWebMethod(MethodDeclaration method) {
+    boolean isWebMethod = method.getModifiers().contains(Modifier.PUBLIC);
+    javax.jws.WebMethod annotation = method.getAnnotation(javax.jws.WebMethod.class);
+    if (annotation != null) {
+      isWebMethod &= !annotation.exclude();
+    }
+    return isWebMethod;
   }
 
   /**
@@ -160,7 +173,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     }
     else {
       for (TypeDeclaration declaration : getAnnotationProcessorEnvironment().getTypeDeclarations()) {
-        if (validator.isEndpointImplementation(declaration)) {
+        if (isEndpointImplementation(declaration)) {
           WebService ws = declaration.getAnnotation(WebService.class);
           if (getQualifiedName().equals(ws.endpointInterface())) {
             impls.add(new EndpointImplementation((ClassDeclaration) declaration, this));
@@ -169,6 +182,13 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
       }
     }
     return impls;
+  }
+
+  /**
+   * A quick check to see if a declaration is an endpoint implementation.
+   */
+  protected boolean isEndpointImplementation(TypeDeclaration declaration) {
+    return ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(WebService.class) != null));
   }
 
   /**

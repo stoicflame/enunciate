@@ -16,7 +16,7 @@ public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
   /**
    * @param webMethod The web method to wrap.
    */
-  public RequestWrapper(WebMethod webMethod) {
+  protected RequestWrapper(WebMethod webMethod) {
     this.webMethod = webMethod;
 
     webMethod.getDeclaringEndpointInterface().getValidator().validate(this);

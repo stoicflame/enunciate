@@ -32,6 +32,11 @@ import java.util.List;
  */
 public abstract class EnunciateTestCase {
 
+  /**
+   * Creates a temporary output directory.
+   *
+   * @return A temporary output directory.
+   */
   protected File createOutputDir() throws IOException {
     File outputDir = File.createTempFile("enunciatetest", "");
     outputDir.delete();
@@ -54,8 +59,8 @@ public abstract class EnunciateTestCase {
   /**
    * Invoke APT on the given factory, options and source files.
    *
-   * @param apf The factory.
-   * @param aptOptions The options.
+   * @param apf         The factory.
+   * @param aptOptions  The options.
    * @param sourceFiles The source files.
    */
   protected void invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
@@ -91,7 +96,7 @@ public abstract class EnunciateTestCase {
   /**
    * Recursively finds all the java files in the specified directory and adds them all to the given collection.
    *
-   * @param dir The directory.
+   * @param dir       The directory.
    * @param filenames The collection.
    */
   private void findJavaFiles(File dir, Collection<String> filenames) {

@@ -19,13 +19,13 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class WebMethod extends DecoratedMethodDeclaration {
+public class WebMethod extends DecoratedMethodDeclaration implements Comparable<WebMethod> {
 
   private final javax.jws.WebMethod annotation;
   private final boolean oneWay;
   private final EndpointInterface endpointInterface;
 
-  public WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
+  protected WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
 
     annotation = getAnnotation(javax.jws.WebMethod.class);
@@ -75,7 +75,7 @@ public class WebMethod extends DecoratedMethodDeclaration {
         throw new IllegalStateException("Unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault(declaration));
+      webFaults.add(new WebFault(declaration, getDeclaringEndpointInterface().getValidator()));
     }
 
     return webFaults;
@@ -264,6 +264,16 @@ public class WebMethod extends DecoratedMethodDeclaration {
     }
 
     return style;
+  }
+
+  /**
+   * Web methods must be unique by name.  (JSR 181: 3.1.1)
+   *
+   * @param webMethod The web method to compare this to.
+   * @return The comparison.
+   */
+  public int compareTo(WebMethod webMethod) {
+    return getOperationName().compareTo(webMethod.getOperationName());
   }
 
 }

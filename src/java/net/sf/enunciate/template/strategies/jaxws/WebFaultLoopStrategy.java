@@ -1,8 +1,5 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.ReferenceType;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.WebFault;
@@ -12,7 +9,6 @@ import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,29 +33,17 @@ public class WebFaultLoopStrategy extends EnunciateTemplateLoopStrategy<WebFault
       }
     }
 
-    HashMap<String, TypeDeclaration> thrownDeclaredTypes = new HashMap<String, TypeDeclaration>();
+    HashMap<String, WebFault> declaredFaults = new HashMap<String, WebFault>();
     for (EndpointInterface ei : wsdl.getEndpointInterfaces()) {
       Collection<WebMethod> webMethods = ei.getWebMethods();
       for (WebMethod webMethod : webMethods) {
-        for (ReferenceType thrownType : webMethod.getThrownTypes()) {
-          if (thrownType instanceof DeclaredType) {
-            TypeDeclaration thrownDeclaration = ((DeclaredType) thrownType).getDeclaration();
-            if (thrownDeclaration != null) {
-              thrownDeclaredTypes.put(thrownDeclaration.getQualifiedName(), thrownDeclaration);
-            }
-          }
+        for (WebFault webFault : webMethod.getWebFaults()) {
+          declaredFaults.put(webFault.getQualifiedName(), webFault);
         }
       }
     }
 
-    Collection<TypeDeclaration> thrownTypes = thrownDeclaredTypes.values();
-
-    Collection<WebFault> webFaults = new ArrayList<WebFault>();
-    for (TypeDeclaration typeDeclaration : thrownTypes) {
-      webFaults.add(new WebFault(typeDeclaration));
-    }
-
-    return webFaults.iterator();
+    return declaredFaults.values().iterator();
   }
 
   @Override

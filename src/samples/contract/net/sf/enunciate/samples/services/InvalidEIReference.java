@@ -6,7 +6,7 @@ import javax.jws.WebService;
  * @author Ryan Heaton
  */
 @WebService (
-  endpointInterface = "net.sf.enunciate.samples.services.NamespacedWebService"
+  endpointInterface = "net.sf.enunciate.samples.services.NoNamespaceWebService"
 )
 public class InvalidEIReference {
 }

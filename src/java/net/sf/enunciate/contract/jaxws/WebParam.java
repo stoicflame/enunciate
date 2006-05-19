@@ -16,7 +16,7 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
 
-  public WebParam(ParameterDeclaration delegate, WebMethod method) {
+  protected WebParam(ParameterDeclaration delegate, WebMethod method) {
     super(delegate);
 
     this.method = method;

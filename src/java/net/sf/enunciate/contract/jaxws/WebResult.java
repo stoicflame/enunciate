@@ -21,7 +21,7 @@ public class WebResult extends SimpleHash implements TypeMirror {
   private final String targetNamespace;
   private final String partName;
 
-  public WebResult(TypeMirror delegate, WebMethod method) {
+  protected WebResult(TypeMirror delegate, WebMethod method) {
     this.delegate = delegate;
 
     try {

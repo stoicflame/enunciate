@@ -1,5 +1,6 @@
 package net.sf.enunciate.samples.services;
 
+import javax.jws.WebMethod;
 import javax.jws.WebService;
 
 /**
@@ -9,4 +10,23 @@ import javax.jws.WebService;
   targetNamespace = "http://enunciate.sf.net/samples/contract"
 )
 public class NamespacedWebService {
+
+  private boolean myPrivateMethod() {
+    return false;
+  }
+
+  protected boolean myProtectedMethod() {
+    return myPrivateMethod();
+  }
+
+  public boolean myPublicMethod() {
+    return myProtectedMethod();
+  }
+
+  @WebMethod (
+    exclude = true
+  )
+  public boolean myExcludedMethod() {
+    return myPublicMethod();
+  }
 }

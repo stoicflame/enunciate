@@ -1,11 +1,13 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
+import net.sf.enunciate.contract.jaxws.validation.ExceptionThrowingJAXWSValidatorWrapper;
 import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.enunciate.util.NamespaceUtils;
@@ -14,6 +16,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
+import javax.jws.WebService;
 import java.net.URL;
 import java.util.*;
 
@@ -60,9 +63,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     //todo: read the type of validator from the config.
     JAXWSValidator validator = new DefaultJAXWSValidator();
 
+    //todo: create a mechanism to report errors before doing any actions other than just throwing an exception on the first one.
+    validator = new ExceptionThrowingJAXWSValidatorWrapper(validator);
+
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
-      if (validator.isEndpointInterface(declaration)) {
+      if (isEndpointInterface(declaration)) {
         EndpointInterface endpointInterface = new EndpointInterface(declaration, validator);
         String namespace = endpointInterface.getTargetNamespace();
 
@@ -128,6 +134,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
     return model;
+  }
+
+  /**
+   * A quick check to see if a declaration is an endpoint interface.
+   */
+  public boolean isEndpointInterface(TypeDeclaration declaration) {
+    WebService ws = declaration.getAnnotation(WebService.class);
+    return (ws != null) && ((declaration instanceof InterfaceDeclaration)
+      //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
+      || (ws.endpointInterface() == null) || ("".equals(ws.endpointInterface())));
   }
 
   //Inherited.
