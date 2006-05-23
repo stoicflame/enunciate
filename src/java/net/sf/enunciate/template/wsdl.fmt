@@ -69,7 +69,7 @@ named "wsdl" present in the model describing the WSDL to output.
     </portType>
     --]
     [@forEachEndpointInterface]
-  <portType name="${endpointInterface.portName}">
+  <portType name="${endpointInterface.portTypeName}">
       [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
         [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false]
@@ -121,7 +121,7 @@ named "wsdl" present in the model describing the WSDL to output.
       [@forEachBindingType]
         [#if bindingType.soap11 || bindingType.soap12]
 
-  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portName}">
+  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
           [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
@@ -150,7 +150,7 @@ named "wsdl" present in the model describing the WSDL to output.
   </binding>
         [#elseif bindingType.http]
 
-  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portName}">
+  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
     <http:binding verb="POST"/>
           [@forEachWebMethod]
     <operation name="${webMethod.operationName}">

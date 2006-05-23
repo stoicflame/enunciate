@@ -36,7 +36,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    *
    * @return The name of this web service.
    */
-  public String getName() {
+  public String getPortTypeName() {
     String name = null;
 
     if (annotation != null) {

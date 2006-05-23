@@ -94,8 +94,8 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
     declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
     EndpointInterface notAnnotated = new EndpointInterface(declaration, validator);
 
-    assertEquals(annotated.getName(), "annotated-web-service", "The port type name of the web service should be customized by the annotation (JSR 181: 3.4)");
-    assertEquals(notAnnotated.getName(), "NoNamespaceWebService", "The port type name of the web service should be the simple name if not annotated (JSR 181: 3.4)");
+    assertEquals(annotated.getPortTypeName(), "annotated-web-service", "The port type name of the web service should be customized by the annotation (JSR 181: 3.4)");
+    assertEquals(notAnnotated.getPortTypeName(), "NoNamespaceWebService", "The port type name of the web service should be the simple name if not annotated (JSR 181: 3.4)");
   }
 
 }
