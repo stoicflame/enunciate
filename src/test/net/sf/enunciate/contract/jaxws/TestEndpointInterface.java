@@ -24,12 +24,12 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
   public void testTargetNamespace() throws Exception {
     JAXWSValidator validator = new AlwaysValidJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
-    assertEquals("http://services.samples.enunciate.sf.net/",
-                 new EndpointInterface(declaration, validator).getTargetNamespace(),
+    assertEquals(new EndpointInterface(declaration, validator).getTargetNamespace(),
+                 "http://services.samples.enunciate.sf.net/",
                  "calculated namespace doesn't conform to JSR 181: 3.2");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.NamespacedWebService");
-    assertEquals("http://enunciate.sf.net/samples/contract", new EndpointInterface(declaration, validator).getTargetNamespace());
+    assertEquals(new EndpointInterface(declaration, validator).getTargetNamespace(), "http://enunciate.sf.net/samples/contract");
 
     declaration = getDeclaration("NoPackageWebService");
     try {
@@ -66,12 +66,12 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
     JAXWSValidator validator = new AlwaysValidJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NamespacedWebService");
     Collection<WebMethod> webMethods = new EndpointInterface(declaration, validator).getWebMethods();
-    assertEquals(1, webMethods.size());
-    assertEquals("myPublicMethod", webMethods.iterator().next().getSimpleName());
+    assertEquals(webMethods.size(), 1);
+    assertEquals(webMethods.iterator().next().getSimpleName(), "myPublicMethod");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
     webMethods = new EndpointInterface(declaration, validator).getWebMethods();
-    assertEquals(2, webMethods.size());
+    assertEquals(webMethods.size(), 2);
     Iterator<WebMethod> it = webMethods.iterator();
     WebMethod first = it.next();
     WebMethod second = it.next();
@@ -80,7 +80,22 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.SuperNoNamespaceWebServiceImpl");
     webMethods = new EndpointInterface(declaration, validator).getWebMethods();
-    assertEquals(4, webMethods.size());
+    assertEquals(webMethods.size(), 4);
+  }
+
+  /**
+   * Tests the attributes of an ei.
+   */
+  @Test
+  public void testAttributes() throws Exception {
+    JAXWSValidator validator = new AlwaysValidJAXWSValidator();
+    TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NamespacedWebService");
+    EndpointInterface annotated = new EndpointInterface(declaration, validator);
+    declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
+    EndpointInterface notAnnotated = new EndpointInterface(declaration, validator);
+
+    assertEquals(annotated.getName(), "annotated-web-service", "The port type name of the web service should be customized by the annotation (JSR 181: 3.4)");
+    assertEquals(notAnnotated.getName(), "NoNamespaceWebService", "The port type name of the web service should be the simple name if not annotated (JSR 181: 3.4)");
   }
 
 }

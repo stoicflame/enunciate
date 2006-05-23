@@ -7,7 +7,8 @@ import javax.jws.WebService;
  * @author Ryan Heaton
  */
 @WebService (
-  targetNamespace = "http://enunciate.sf.net/samples/contract"
+  targetNamespace = "http://enunciate.sf.net/samples/contract",
+  name = "annotated-web-service"
 )
 public class NamespacedWebService {
 
