@@ -2,6 +2,7 @@ package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.ClassType;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.jelly.apt.Context;
@@ -138,6 +139,32 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     for (MethodDeclaration method : getMethods()) {
       if (isWebMethod(method)) {
         webMethods.add(new WebMethod(method, this));
+      }
+    }
+
+    if (isClass()) {
+      //the spec says we need to consider superclass methods, too...
+      ClassType superclass = ((ClassDeclaration) getDelegate()).getSuperclass();
+      if (superclass != null) {
+        ClassDeclaration declaration = superclass.getDeclaration();
+        while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
+          for (MethodDeclaration method : declaration.getMethods()) {
+            if ((isWebMethod(method)) &&
+              //NOTE: the spec doesn't say anything about overriding methods.  So, because methods can't have the
+              //same operation name, we're going to just exclude any methods of superclasses that have the same name.
+              (!webMethods.contains(method))) {
+              webMethods.add(new WebMethod(method, this));
+            }
+          }
+
+          superclass = declaration.getSuperclass();
+          if (superclass == null) {
+            declaration = null;
+          }
+          else {
+            declaration = superclass.getDeclaration();
+          }
+        }
       }
     }
 

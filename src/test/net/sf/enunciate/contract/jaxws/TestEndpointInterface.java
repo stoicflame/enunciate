@@ -75,8 +75,12 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
     Iterator<WebMethod> it = webMethods.iterator();
     WebMethod first = it.next();
     WebMethod second = it.next();
-    assertTrue("myImplicitlyPublicMethod".equals(first.getSimpleName()) || "myExplicitlyPublicMethod".equals(second.getSimpleName()));
-    assertTrue("myImplicitlyPublicMethod".equals(first.getSimpleName()) || "myExplicitlyPublicMethod".equals(second.getSimpleName()));
+    assertTrue("myImplicitlyPublicMethod".equals(first.getSimpleName()) || "myExplicitlyPublicMethod".equals(first.getSimpleName()));
+    assertTrue("myImplicitlyPublicMethod".equals(second.getSimpleName()) || "myExplicitlyPublicMethod".equals(second.getSimpleName()));
+
+    declaration = getDeclaration("net.sf.enunciate.samples.services.SuperNoNamespaceWebServiceImpl");
+    webMethods = new EndpointInterface(declaration, validator).getWebMethods();
+    assertEquals(4, webMethods.size());
   }
 
 }
