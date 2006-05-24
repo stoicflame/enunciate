@@ -1,16 +1,21 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
+import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
+import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
+import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
 import net.sf.enunciate.contract.jaxws.validation.ExceptionThrowingJAXWSValidatorWrapper;
 import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.enunciate.template.freemarker.*;
-import net.sf.enunciate.util.NamespaceUtils;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
@@ -18,7 +23,10 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -60,16 +68,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     HashSet<String> namespaces = new HashSet<String>();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
 
-    //todo: read the type of validator from the config.
-    JAXWSValidator validator = new DefaultJAXWSValidator();
+    //todo: read the jaxwsValidator types from the config.
+    JAXWSValidator jaxwsValidator = new DefaultJAXWSValidator();
+    JAXBValidator jaxbValidator = null;
 
     //todo: create a mechanism to report errors before doing any actions other than just throwing an exception on the first one.
-    validator = new ExceptionThrowingJAXWSValidatorWrapper(validator);
+    jaxwsValidator = new ExceptionThrowingJAXWSValidatorWrapper(jaxwsValidator);
 
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
       if (isEndpointInterface(declaration)) {
-        EndpointInterface endpointInterface = new EndpointInterface(declaration, validator);
+        EndpointInterface endpointInterface = new EndpointInterface(declaration, jaxwsValidator);
         String namespace = endpointInterface.getTargetNamespace();
 
         if (isVerbose()) {
@@ -81,7 +90,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           wsdlInfo = new WsdlInfo();
           wsdlMap.put(namespace, wsdlInfo);
           wsdlInfo.setTargetNamespace(namespace);
-          wsdlInfo.setEndpointInterfaces(new ArrayList<EndpointInterface>());
 
           //todo: configure the schema info.
           //wsdlInfo.setSchemaInfo();
@@ -95,15 +103,68 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         namespaces.addAll(endpointInterface.getReferencedNamespaces());
       }
       else {
-        //otherwise, treat is as a potential jaxb type.
-        String namespaceURI = NamespaceUtils.getNamespaceURI(declaration);
+        //otherwise, treat it as a potential jaxb type.
 
-        if (isVerbose()) {
-          System.out.println(String.format("Namespace {%s} found for %s", namespaceURI, declaration.getQualifiedName()));
+        TypeDefinition typeDef = null;
+        if (isComplexType(declaration)) {
+          ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
+          typeDef = complexType;
+          String namespace = complexType.getTargetNamespace();
+
+          if (isVerbose()) {
+            System.out.println(declaration.getQualifiedName() + " to be considered as a complex type definition.");
+          }
+
+          SchemaInfo schemaInfo = schemaMap.get(namespace);
+          if (schemaInfo == null) {
+            schemaInfo = new SchemaInfo();
+            schemaMap.put(namespace, schemaInfo);
+            schemaInfo.setNamespace(namespace);
+          }
+          schemaInfo.getComplexTypes().add(complexType);
+
+          //todo: add all referenced namespaces, too?
+          //namespaces.addAll(complexType.getReferencedNamespaces());
+
+          namespaces.add(complexType.getTargetNamespace());
+        }
+        else if (isSimpleType(declaration)) {
+          SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
+          typeDef = simpleType;
+          String namespace = simpleType.getTargetNamespace();
+
+          if (isVerbose()) {
+            System.out.println(declaration.getQualifiedName() + " to be considered as a simple type definition.");
+          }
+
+          SchemaInfo schemaInfo = schemaMap.get(namespace);
+          if (schemaInfo == null) {
+            schemaInfo = new SchemaInfo();
+            schemaMap.put(namespace, schemaInfo);
+            schemaInfo.setNamespace(namespace);
+          }
+          schemaInfo.getSimpleTypes().add(simpleType);
+          namespaces.add(simpleType.getTargetNamespace());
         }
 
-        if ((namespaceURI != null) && (!"".equals(namespaceURI))) {
-          namespaces.add(namespaceURI);
+        if ((typeDef != null) && (isRootSchemaElement(declaration))) {
+          GlobalElementDeclaration rootElement = new GlobalElementDeclaration((ClassDeclaration) declaration, typeDef, jaxbValidator);
+
+          if (isVerbose()) {
+            System.out.println(declaration.getQualifiedName() + " to be considered as a simple type definition.");
+          }
+
+          String namespace = rootElement.getTargetNamespace();
+
+          SchemaInfo schemaInfo = schemaMap.get(namespace);
+          if (schemaInfo == null) {
+            schemaInfo = new SchemaInfo();
+            schemaMap.put(namespace, schemaInfo);
+            schemaInfo.setNamespace(namespace);
+          }
+
+          schemaInfo.getGlobalElements().add(rootElement);
+          namespaces.add(rootElement.getTargetNamespace());
         }
       }
     }
@@ -119,10 +180,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         prefixMap.put(namespace, prefix);
       }
 
-      if (!schemaMap.containsKey(namespace)) {
-        SchemaInfo info = new SchemaInfo();
-        info.setNamespace(namespace);
-        schemaMap.put(namespace, info);
+      if (schemaMap.containsKey(namespace)) {
+        SchemaInfo schemaInfo = schemaMap.get(namespace);
+
+        //todo: set the file according to the config?
+        schemaInfo.setFile(prefix + ".xsd");
+
+        //todo: set the location according to the config?
+        schemaInfo.setLocation(schemaInfo.getFile());
+
+        //todo: set whether to generate?
+        //schemaInfo.setGenerate();
       }
 
       if (wsdlMap.containsKey(namespace)) {
@@ -144,6 +212,27 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     return (ws != null) && ((declaration instanceof InterfaceDeclaration)
       //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
       || (ws.endpointInterface() == null) || ("".equals(ws.endpointInterface())));
+  }
+
+  /**
+   * A quick check to see if a declaration defines a complex schema type.
+   */
+  public boolean isComplexType(TypeDeclaration declaration) {
+    return false;
+  }
+
+  /**
+   * A quick check to see if a declaration defines a simple schema type.
+   */
+  public boolean isSimpleType(TypeDeclaration declaration) {
+    return false;
+  }
+
+  /**
+   * A quick check to see if a declaration defines a root schema element.
+   */
+  public boolean isRootSchemaElement(TypeDeclaration declaration) {
+    return false;
   }
 
   //Inherited.

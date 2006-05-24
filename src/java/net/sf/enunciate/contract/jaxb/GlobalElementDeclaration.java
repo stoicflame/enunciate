@@ -1,45 +1,64 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
-import java.util.Map;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema element declaration with global scope.
  *
  * @author Ryan Heaton
  */
-public class GlobalElementDeclaration extends TypeDefinition {
+public class GlobalElementDeclaration extends DecoratedClassDeclaration {
 
-  public GlobalElementDeclaration(ClassDeclaration delegate, Map<String, String> ns2prefix) {
-    super(delegate, ns2prefix);
+  private final XmlRootElement rootElement;
+  private final TypeDefinition typeDefinition;
+  private final Schema schema;
+  private final JAXBValidator validator;
 
-    javax.xml.bind.annotation.XmlRootElement rootElement = getAnnotation(javax.xml.bind.annotation.XmlRootElement.class);
-    if (rootElement == null) {
-      throw new IllegalArgumentException(delegate.getQualifiedName() + " is not a root element.");
-    }
+  public GlobalElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition, JAXBValidator validator) {
+    super(delegate);
+
+    this.rootElement = getAnnotation(XmlRootElement.class);
+    this.typeDefinition = typeDefinition;
+    this.schema = new Schema(delegate.getPackage());
+    this.validator = validator;
+    validator.validate(this);
+  }
+
+  public TypeDefinition getTypeDefinition() {
+    return typeDefinition;
   }
 
   /**
-   * The namespace of the element.
+   * The namespace of the xml type element.
    *
-   * @return The namespace of the element.
+   * @return The namespace of the xml type element.
    */
-  public String getElementNamespace() {
-    //todo: implement
-    return null;
-  }
+  public String getTargetNamespace() {
+    String namespace = getPackage().getNamespace();
 
-  @Override
-  public String getTypeNamespace() {
-    String typeNamespace = getElementNamespace();
-
-    //see spec, table 8-4, {target namespace}
-    if ((xmlType != null) && ("".equals(xmlType.name())) && ("##default".equals(xmlType.namespace()))) {
-      typeNamespace = xmlType.namespace();
+    if ((rootElement != null) && (!"##default".equals(rootElement.namespace()))) {
+      namespace = rootElement.namespace();
     }
 
-    return typeNamespace;
+    return namespace;
   }
 
+  /**
+   * The schema for this complex type.
+   *
+   * @return The schema for this complex type.
+   */
+  public Schema getSchema() {
+    return schema;
+  }
+
+  // Inherited.
+  @Override
+  public Schema getPackage() {
+    return getSchema();
+  }
 }

@@ -15,7 +15,7 @@ public class WsdlInfo {
 
   private String targetNamespace;
   private SchemaInfo schemaInfo;
-  private Collection<EndpointInterface> endpointInterfaces;
+  private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private boolean generate;
   private String file;
 
@@ -44,15 +44,6 @@ public class WsdlInfo {
    */
   public Collection<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
-  }
-
-  /**
-   * The endpoint interfaces making up this WSDL.
-   *
-   * @param endpointInterfaces The endpoint interfaces making up this WSDL.
-   */
-  public void setEndpointInterfaces(Collection<EndpointInterface> endpointInterfaces) {
-    this.endpointInterfaces = endpointInterfaces;
   }
 
   /**

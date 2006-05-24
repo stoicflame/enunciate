@@ -6,3 +6,10 @@
     [#include "wsdl.fmt"]
   [/@file]
 [/@forEachWsdl]
+
+[#--then generate each schema.--]
+[@forEachSchema]
+  [@file name=schema.file]
+    [#include "schema.fmt"]
+  [/@file]
+[/@forEachSchema]
