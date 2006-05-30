@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlTransient;
  *
  * @author Ryan Heaton
  */
-public class JAXBFieldAccessorDeclaration extends DecoratedFieldDeclaration implements JAXBAccessorDeclaration {
+public class FieldAccessor extends DecoratedFieldDeclaration implements Accessor {
 
-  public JAXBFieldAccessorDeclaration(FieldDeclaration delegate) {
+  public FieldAccessor(FieldDeclaration delegate) {
     super(delegate);
 
     if (getAnnotation(XmlTransient.class) != null) {

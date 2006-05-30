@@ -4,6 +4,8 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 
 /**
+ * A simple type definition.  Also used for complex type definitions with simpleContent.
+ *
  * @author Ryan Heaton
  */
 public class SimpleTypeDefinition extends TypeDefinition {

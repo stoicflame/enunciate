@@ -7,7 +7,7 @@ import com.sun.mirror.declaration.MemberDeclaration;
  *
  * @author Ryan Heaton
  */
-public interface JAXBAccessorDeclaration extends MemberDeclaration {
+public interface Accessor extends MemberDeclaration {
 
   /**
    * The property name.

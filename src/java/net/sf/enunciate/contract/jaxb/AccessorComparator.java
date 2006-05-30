@@ -1,14 +1,16 @@
 package net.sf.enunciate.contract.jaxb;
 
+import net.sf.enunciate.contract.ValidationException;
+
 import javax.xml.bind.annotation.AccessorOrder;
 import java.util.Comparator;
 
 /**
- * A comparator for JAXB accessors.
+ * A comparator for accessors.
  *
  * @author Ryan Heaton
  */
-public class JAXBAccessorComparator implements Comparator<JAXBAccessorDeclaration> {
+public class AccessorComparator implements Comparator<Accessor> {
 
   private final AccessorOrder accessorOrder;
   private final String[] propOrder;
@@ -19,12 +21,13 @@ public class JAXBAccessorComparator implements Comparator<JAXBAccessorDeclaratio
    * @param propOrder The property order, or null if none is specified.
    * @param order     The accessor order.
    */
-  public JAXBAccessorComparator(String[] propOrder, AccessorOrder order) {
+  public AccessorComparator(String[] propOrder, AccessorOrder order) {
     this.accessorOrder = order;
     this.propOrder = propOrder;
   }
 
-  public int compare(JAXBAccessorDeclaration accessor1, JAXBAccessorDeclaration accessor2) {
+  // Inherited.
+  public int compare(Accessor accessor1, Accessor accessor2) {
     String propertyName1 = accessor1.getPropertyName();
     String propertyName2 = accessor2.getPropertyName();
 
@@ -34,10 +37,10 @@ public class JAXBAccessorComparator implements Comparator<JAXBAccessorDeclaratio
       int propertyIndex2 = find(this.propOrder, propertyName2);
 
       if (propertyIndex1 < 0) {
-        throw new IllegalStateException(accessor1.getPosition() + ": property '" + propertyName1 + "' isn't included in the specified property order.");
+        throw new ValidationException(accessor1.getPosition() + ": property '" + propertyName1 + "' isn't included in the specified property order.");
       }
       if (propertyIndex2 < 0) {
-        throw new IllegalStateException(accessor1.getPosition() + ": property '" + propertyName2 + "' isn't included in the specified property order.");
+        throw new ValidationException(accessor2.getPosition() + ": property '" + propertyName2 + "' isn't included in the specified property order.");
       }
 
       return propertyIndex1 - propertyIndex2;
@@ -46,8 +49,13 @@ public class JAXBAccessorComparator implements Comparator<JAXBAccessorDeclaratio
       return propertyName1.compareTo(propertyName2);
     }
 
-    //if no order is specified, it's undefined.
-    return propertyName1.hashCode() - propertyName2.hashCode();
+    //If no order is specified, it's undefined. We'll put it in source order.
+    int comparison = accessor1.getPosition().line() - accessor2.getPosition().line();
+    if (comparison == 0) {
+      comparison = accessor1.getPosition().column() - accessor2.getPosition().column();
+    }
+
+    return comparison;
   }
 
   /**
@@ -59,7 +67,7 @@ public class JAXBAccessorComparator implements Comparator<JAXBAccessorDeclaratio
    */
   protected int find(String[] propOrder, String propertyName) {
     for (int i = 0; i < propOrder.length; i++) {
-      if (propOrder[i].equals(propertyName)) {
+      if (propOrder[i].equalsIgnoreCase(propertyName)) {
         return i;
       }
     }

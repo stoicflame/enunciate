@@ -1,11 +1,10 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.*;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
@@ -22,11 +21,10 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -218,13 +216,25 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * A quick check to see if a declaration defines a complex schema type.
    */
   public boolean isComplexType(TypeDeclaration declaration) {
-    return false;
+    return !(declaration instanceof InterfaceDeclaration) && !isSimpleType(declaration);
   }
 
   /**
    * A quick check to see if a declaration defines a simple schema type.
    */
   public boolean isSimpleType(TypeDeclaration declaration) {
+    if (declaration instanceof InterfaceDeclaration) {
+      if (declaration.getAnnotation(XmlType.class) != null) {
+        throw new ValidationException("An interface must not be annotated with @XmlType.");
+      }
+
+      return false;
+    }
+
+    Collection<MemberDeclaration> particles = new ArrayList<MemberDeclaration>();
+    particles.addAll(declaration.getMethods());
+    particles.addAll(declaration.getFields());
+
     return false;
   }
 
@@ -233,6 +243,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   public boolean isRootSchemaElement(TypeDeclaration declaration) {
     return false;
+  }
+
+  /**
+   * Whether a declaration is xml transient.
+   *
+   * @param declaration The declaration on which to determine xml transience.
+   * @return Whether a declaration is xml transient.
+   */
+  protected boolean isXmlTransient(Declaration declaration) {
+    return (declaration.getAnnotation(XmlTransient.class) != null);
   }
 
   //Inherited.
@@ -257,6 +277,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected boolean isVerbose() {
     return Context.getCurrentEnvironment().getOptions().containsKey(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
+  }
+
+  /**
+   * Internal class used to inherit some functionality for determining whether a declaration is a simple type
+   * or a complex type.
+   */
+  protected static class GenericTypeDefinition extends TypeDefinition {
+
+    protected GenericTypeDefinition(ClassDeclaration delegate) {
+      super(delegate);
+    }
   }
 
 }
