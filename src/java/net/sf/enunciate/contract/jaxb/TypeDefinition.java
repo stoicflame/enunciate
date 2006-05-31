@@ -144,7 +144,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The (correctly sorted) accessors for this element.
    */
-  protected SortedSet<Accessor> getAccessors() {
+  public SortedSet<Accessor> getAccessors() {
     AccessorComparator comparator = new AccessorComparator(getPropertyOrder(), getAccessorOrder());
     SortedSet<Accessor> accessors = new TreeSet<Accessor>(comparator);
     AccessorFilter filter = new AccessorFilter(getAccessType());

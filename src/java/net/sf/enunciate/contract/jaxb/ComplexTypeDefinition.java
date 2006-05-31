@@ -50,4 +50,13 @@ public class ComplexTypeDefinition extends TypeDefinition {
     return new QName("http://www.w3.org/2001/XMLSchema", value);
   }
 
+  /**
+   * The content type of this complex type definition.
+   *
+   * @return The content type of this complex type definition.
+   */
+  public ContentType getContentType() {
+
+  }
+
 }

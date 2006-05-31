@@ -5,10 +5,7 @@ import com.sun.mirror.declaration.*;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.ValidationException;
-import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
-import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
-import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
@@ -21,6 +18,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
@@ -104,7 +102,45 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         //otherwise, treat it as a potential jaxb type.
 
         TypeDefinition typeDef = null;
-        if (isComplexType(declaration)) {
+        if (isEnumType(declaration)) {
+          EnumTypeDefinition enumType = new EnumTypeDefinition((EnumDeclaration) declaration, jaxbValidator);
+          typeDef = enumType;
+
+          String namespace = enumType.getTargetNamespace();
+
+          if (isVerbose()) {
+            System.out.println(declaration.getQualifiedName() + " to be considered as a enum type definition.");
+          }
+
+          SchemaInfo schemaInfo = schemaMap.get(namespace);
+          if (schemaInfo == null) {
+            schemaInfo = new SchemaInfo();
+            schemaMap.put(namespace, schemaInfo);
+            schemaInfo.setNamespace(namespace);
+          }
+
+          schemaInfo.getEnumTypes().add(enumType);
+          namespaces.add(namespace);
+        }
+        else if (isSimpleType(declaration)) {
+          SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
+          typeDef = simpleType;
+          String namespace = simpleType.getTargetNamespace();
+
+          if (isVerbose()) {
+            System.out.println(declaration.getQualifiedName() + " to be considered as a simple type definition.");
+          }
+
+          SchemaInfo schemaInfo = schemaMap.get(namespace);
+          if (schemaInfo == null) {
+            schemaInfo = new SchemaInfo();
+            schemaMap.put(namespace, schemaInfo);
+            schemaInfo.setNamespace(namespace);
+          }
+          schemaInfo.getSimpleTypes().add(simpleType);
+          namespaces.add(namespace);
+        }
+        else if (isComplexType(declaration)) {
           ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
           typeDef = complexType;
           String namespace = complexType.getTargetNamespace();
@@ -124,32 +160,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           //todo: add all referenced namespaces, too?
           //namespaces.addAll(complexType.getReferencedNamespaces());
 
-          namespaces.add(complexType.getTargetNamespace());
-        }
-        else if (isSimpleType(declaration)) {
-          SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
-          typeDef = simpleType;
-          String namespace = simpleType.getTargetNamespace();
-
-          if (isVerbose()) {
-            System.out.println(declaration.getQualifiedName() + " to be considered as a simple type definition.");
-          }
-
-          SchemaInfo schemaInfo = schemaMap.get(namespace);
-          if (schemaInfo == null) {
-            schemaInfo = new SchemaInfo();
-            schemaMap.put(namespace, schemaInfo);
-            schemaInfo.setNamespace(namespace);
-          }
-          schemaInfo.getSimpleTypes().add(simpleType);
-          namespaces.add(simpleType.getTargetNamespace());
+          namespaces.add(namespace);
         }
 
         if ((typeDef != null) && (isRootSchemaElement(declaration))) {
-          GlobalElementDeclaration rootElement = new GlobalElementDeclaration((ClassDeclaration) declaration, typeDef, jaxbValidator);
+          RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) declaration, typeDef, jaxbValidator);
 
           if (isVerbose()) {
-            System.out.println(declaration.getQualifiedName() + " to be considered as a simple type definition.");
+            System.out.println(declaration.getQualifiedName() + " to be considered as a root element.");
           }
 
           String namespace = rootElement.getTargetNamespace();
@@ -216,7 +234,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * A quick check to see if a declaration defines a complex schema type.
    */
   public boolean isComplexType(TypeDeclaration declaration) {
-    return !(declaration instanceof InterfaceDeclaration) && !isSimpleType(declaration);
+    return !(declaration instanceof InterfaceDeclaration) && !isEnumType(declaration) && !isSimpleType(declaration);
+  }
+
+  /**
+   * A quick check to see if a declaration defines a enum schema type.
+   */
+  public boolean isEnumType(TypeDeclaration declaration) {
+    return (declaration instanceof EnumDeclaration);
   }
 
   /**
@@ -231,18 +256,20 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       return false;
     }
 
-    Collection<MemberDeclaration> particles = new ArrayList<MemberDeclaration>();
-    particles.addAll(declaration.getMethods());
-    particles.addAll(declaration.getFields());
+    if (isEnumType(declaration)) {
+      return false;
+    }
 
-    return false;
+    GenericTypeDefinition typeDef = new GenericTypeDefinition((ClassDeclaration) declaration);
+    SortedSet<Accessor> accessors = typeDef.getAccessors();
+    return ((accessors.size() == 1) && (accessors.first().isXmlValue()));
   }
 
   /**
    * A quick check to see if a declaration defines a root schema element.
    */
   public boolean isRootSchemaElement(TypeDeclaration declaration) {
-    return false;
+    return declaration.getAnnotation(XmlRootElement.class) != null;
   }
 
   /**

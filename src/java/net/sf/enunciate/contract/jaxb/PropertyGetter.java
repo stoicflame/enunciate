@@ -3,6 +3,8 @@ package net.sf.enunciate.contract.jaxb;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
+import javax.xml.bind.annotation.XmlElement;
+
 /**
  * A property getter, most usefully paired with a property setter.
  *
@@ -24,7 +26,11 @@ public class PropertyGetter extends DecoratedMethodDeclaration {
    * @return The explicit property name of this getter, i.e. the one specified by an annotation, or null if none.
    */
   public String getExplicitPropertyName() {
-    fixme
+    XmlElement xmlElement = getAnnotation(XmlElement.class);
+    if ((xmlElement != null) && (!"##default".equals(xmlElement.name()))) {
+      return xmlElement.name();
+    }
+
     return null;
   }
 

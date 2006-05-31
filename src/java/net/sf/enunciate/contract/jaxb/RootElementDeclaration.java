@@ -7,18 +7,18 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * A class declaration decorated so as to be able to describe itself as an XML-Schema element declaration with global scope.
+ * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
  *
  * @author Ryan Heaton
  */
-public class GlobalElementDeclaration extends DecoratedClassDeclaration {
+public class RootElementDeclaration extends DecoratedClassDeclaration {
 
   private final XmlRootElement rootElement;
   private final TypeDefinition typeDefinition;
   private final Schema schema;
   private final JAXBValidator validator;
 
-  public GlobalElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition, JAXBValidator validator) {
+  public RootElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition, JAXBValidator validator) {
     super(delegate);
 
     this.rootElement = getAnnotation(XmlRootElement.class);
@@ -28,14 +28,38 @@ public class GlobalElementDeclaration extends DecoratedClassDeclaration {
     validator.validate(this);
   }
 
+  /**
+   * The type definition for this root element.
+   *
+   * @return The type definition for this root element.
+   */
   public TypeDefinition getTypeDefinition() {
     return typeDefinition;
   }
 
   /**
-   * The namespace of the xml type element.
+   * The name of the xml element declaration.
    *
-   * @return The namespace of the xml type element.
+   * @return The name of the xml element declaration.
+   */
+  public String getName() {
+    String name = getSimpleName();
+
+    if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
+      name = rootElement.name();
+
+      if ("".equals(name)) {
+        name = null;
+      }
+    }
+
+    return name;
+  }
+
+  /**
+   * The namespace of the xml element.
+   *
+   * @return The namespace of the xml element.
    */
   public String getTargetNamespace() {
     String namespace = getPackage().getNamespace();

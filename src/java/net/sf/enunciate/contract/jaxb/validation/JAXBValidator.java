@@ -2,7 +2,8 @@ package net.sf.enunciate.contract.jaxb.validation;
 
 import net.sf.enunciate.contract.ValidationResult;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
+import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 
 /**
@@ -29,10 +30,18 @@ public interface JAXBValidator {
   ValidationResult validate(SimpleTypeDefinition simpleType);
 
   /**
-   * Validate a global element declaration.
+   * Valiate an enum type definition.
    *
-   * @param globalElementDeclaration The global element declaration.
+   * @param enumType The simple type to validate.
    * @return The results of the validation.
    */
-  ValidationResult validate(GlobalElementDeclaration globalElementDeclaration);
+  ValidationResult validate(EnumTypeDefinition enumType);
+
+  /**
+   * Validate a global element declaration.
+   *
+   * @param rootElementDeclaration The global element declaration.
+   * @return The results of the validation.
+   */
+  ValidationResult validate(RootElementDeclaration rootElementDeclaration);
 }

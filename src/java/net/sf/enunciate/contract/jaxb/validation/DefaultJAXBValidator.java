@@ -5,7 +5,7 @@ import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.Modifier;
 import net.sf.enunciate.contract.ValidationResult;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
 
@@ -99,7 +99,7 @@ public class DefaultJAXBValidator implements JAXBValidator {
       }
 
       if (!hasNoArgConstructor) {
-        result.getErrors().add(typeDef.getPosition() + ": an TypeDefinition must have a public no-arg constructor or be annotated with a factory method.");
+        result.getErrors().add(typeDef.getPosition() + ": a TypeDefinition must have a public no-arg constructor or be annotated with a factory method.");
       }
     }
 
@@ -108,7 +108,7 @@ public class DefaultJAXBValidator implements JAXBValidator {
 
 // Inherited.
 
-  public ValidationResult validate(GlobalElementDeclaration globalElementDeclaration) {
+  public ValidationResult validate(RootElementDeclaration rootElementDeclaration) {
     return null;
   }
 

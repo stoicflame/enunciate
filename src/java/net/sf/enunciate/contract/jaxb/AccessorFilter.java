@@ -57,6 +57,10 @@ public class AccessorFilter {
       return ((accessType != AccessType.NONE) && (accessType != AccessType.FIELD));
     }
     else if (declaration instanceof FieldDeclaration) {
+      if (declaration.getModifiers().contains(Modifier.STATIC) || declaration.getModifiers().contains(Modifier.TRANSIENT)) {
+        return false;
+      }
+
       if ((accessType == AccessType.NONE) || (accessType == AccessType.PROPERTY)) {
         return false;
       }

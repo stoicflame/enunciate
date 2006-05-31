@@ -1,12 +1,15 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlValue;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +65,21 @@ public class PropertyAccessor extends DecoratedMethodDeclaration implements Acce
     else {
       return explicitPropertyName;
     }
+  }
+
+  // Inherited.
+  public boolean isXmlValue() {
+    return getAnnotation(XmlValue.class) != null;
+  }
+
+  // Inherited.
+  public boolean isXmlMixed() {
+    return getAnnotation(XmlMixed.class) != null;
+  }
+
+  // Inherited.
+  public TypeMirror getPropertyType() {
+    return getReturnType();
   }
 
   //Inherited.

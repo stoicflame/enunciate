@@ -1,7 +1,8 @@
 package net.sf.enunciate.config;
 
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.GlobalElementDeclaration;
+import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 
 import java.util.ArrayList;
@@ -20,7 +21,8 @@ public class SchemaInfo {
   private String location;
   private final Collection<ComplexTypeDefinition> complexTypes = new ArrayList<ComplexTypeDefinition>();
   private final Collection<SimpleTypeDefinition> simpleTypes = new ArrayList<SimpleTypeDefinition>();
-  private final Collection<GlobalElementDeclaration> globalElements = new ArrayList<GlobalElementDeclaration>();
+  private final Collection<EnumTypeDefinition> enumTypes = new ArrayList<EnumTypeDefinition>();
+  private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
 
   /**
    * The target namespace.
@@ -117,8 +119,17 @@ public class SchemaInfo {
    *
    * @return The collection of global elements defined in this schema.
    */
-  public Collection<GlobalElementDeclaration> getGlobalElements() {
+  public Collection<RootElementDeclaration> getGlobalElements() {
     return globalElements;
+  }
+
+  /**
+   * The collection of enum types defined in this schema.
+   *
+   * @return The collection of enum types defined in this schema.
+   */
+  public Collection<EnumTypeDefinition> getEnumTypes() {
+    return enumTypes;
   }
 
 }

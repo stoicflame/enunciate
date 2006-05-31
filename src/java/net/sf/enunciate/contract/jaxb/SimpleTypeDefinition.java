@@ -1,6 +1,7 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 
 /**
@@ -11,12 +12,31 @@ import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 public class SimpleTypeDefinition extends TypeDefinition {
 
   private final JAXBValidator validator;
+  private TypeMirror baseType;
 
   public SimpleTypeDefinition(ClassDeclaration delegate, JAXBValidator validator) {
     super(delegate);
 
     this.validator = validator;
+
+    //find the base type.
+    for (Accessor accessor : getAccessors()) {
+      if (accessor.isXmlValue()) {
+        this.baseType = accessor.getPropertyType();
+        break;
+      }
+    }
+
     validator.validate(this);
+  }
+
+  /**
+   * The base type for this simple type.
+   *
+   * @return The base type for this simple type.
+   */
+  public TypeMirror getBaseType() {
+    return this.baseType;
   }
 
 }
