@@ -1,41 +1,56 @@
 package net.sf.enunciate.contract.jaxb;
 
-import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.type.TypeMirror;
+import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
-interface is wrong.  The "accessor" needs to be divided into attributes, xmlValue, and child elements.
-  TypeDefinition should have a getXmlValue() method.  ComplexTypeDefinition should have getAttributes and
-  getChildElements.  The AccessorFilter should include XmlValue and XmlAttribute.  The AccessorComparator should
-  only compare child elements.
+/**
+ * An accessor for a field or method value into a type.
+ *
+ * @author Ryan Heaton
+ */
+public abstract class Accessor extends DecoratedMemberDeclaration {
 
-public interface Accessor extends MemberDeclaration {
+  private final FieldDeclaration fieldDelegate;
+  private final PropertyDeclaration methodDelegate;
 
-  /**
-   * The property name.
-   *
-   * @return The property name.
-   */
-  String getPropertyName();
+  public Accessor(FieldDeclaration delegate) {
+    super(delegate);
 
-  /**
-   * The property type.
-   *
-   * @return The property type.
-   */
-  TypeMirror getPropertyType();
+    this.fieldDelegate = delegate;
+    this.methodDelegate = null;
+  }
 
-  /**
-   * Whether this accessor is the xml value of the type definition.
-   *
-   * @return Whether this accessor is the xml value of the type definition.
-   */
-  boolean isXmlValue();
+  public Accessor(PropertyDeclaration delegate) {
+    super(delegate);
+
+    this.fieldDelegate = null;
+    this.methodDelegate = delegate;
+  }
 
   /**
-   * Whether this accessor is the mixed content of the type definition.
+   * The name of the accessor.
    *
-   * @return Whether this accessor is the mixed content of the type definition.
+   * @return The name of the accessor.
    */
-  boolean isXmlMixed();
+  public abstract String getAccessorName();
+
+  /**
+   * The type of the accessor.
+   *
+   * @return The type of the accessor.
+   */
+  public TypeMirror getAccessorType() {
+    TypeMirror propertyType;
+    if (fieldDelegate != null) {
+      propertyType = fieldDelegate.getType();
+    }
+    else {
+      propertyType = methodDelegate.getPropertyType();
+    }
+    return propertyType;
+  }
+
 
 }

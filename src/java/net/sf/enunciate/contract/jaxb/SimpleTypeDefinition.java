@@ -18,15 +18,6 @@ public class SimpleTypeDefinition extends TypeDefinition {
     super(delegate);
 
     this.validator = validator;
-
-    //find the base type.
-    for (Accessor accessor : getAccessors()) {
-      if (accessor.isXmlValue()) {
-        this.baseType = accessor.getPropertyType();
-        break;
-      }
-    }
-
     validator.validate(this);
   }
 
@@ -36,7 +27,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
    * @return The base type for this simple type.
    */
   public TypeMirror getBaseType() {
-    return this.baseType;
+    return getValue().getAccessorType();
   }
 
 }

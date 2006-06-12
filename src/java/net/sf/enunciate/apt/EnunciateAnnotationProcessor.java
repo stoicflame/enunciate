@@ -22,7 +22,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -261,8 +264,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     GenericTypeDefinition typeDef = new GenericTypeDefinition((ClassDeclaration) declaration);
-    SortedSet<Accessor> accessors = typeDef.getAccessors();
-    return ((accessors.size() == 1) && (accessors.first().isXmlValue()));
+    return ((typeDef.getValue() != null) && (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty()));
   }
 
   /**

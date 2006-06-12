@@ -10,7 +10,7 @@ import java.util.Comparator;
  *
  * @author Ryan Heaton
  */
-public class AccessorComparator implements Comparator<Accessor> {
+public class ElementAccessorComparator implements Comparator<ElementAccessor> {
 
   private final AccessorOrder accessorOrder;
   private final String[] propOrder;
@@ -21,15 +21,15 @@ public class AccessorComparator implements Comparator<Accessor> {
    * @param propOrder The property order, or null if none is specified.
    * @param order     The accessor order.
    */
-  public AccessorComparator(String[] propOrder, AccessorOrder order) {
+  public ElementAccessorComparator(String[] propOrder, AccessorOrder order) {
     this.accessorOrder = order;
     this.propOrder = propOrder;
   }
 
   // Inherited.
-  public int compare(Accessor accessor1, Accessor accessor2) {
-    String propertyName1 = accessor1.getPropertyName();
-    String propertyName2 = accessor2.getPropertyName();
+  public int compare(ElementAccessor accessor1, ElementAccessor accessor2) {
+    String propertyName1 = accessor1.getAccessorName();
+    String propertyName2 = accessor2.getAccessorName();
 
     if (this.propOrder != null) {
       //apply the specified property order

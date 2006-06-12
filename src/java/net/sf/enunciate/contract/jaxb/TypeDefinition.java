@@ -1,11 +1,13 @@
 package net.sf.enunciate.contract.jaxb;
 
-import com.sun.mirror.declaration.*;
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.FieldDeclaration;
+import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
 import net.sf.enunciate.contract.ValidationException;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
@@ -18,11 +20,95 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   protected final XmlType xmlType;
   private final Schema schema;
 
+  private SortedSet<ElementAccessor> elements;
+  private Collection<AttributeAccessor> attributes;
+  private ValueAccessor xmlValue;
+
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
 
     this.xmlType = getAnnotation(XmlType.class);
     this.schema = new Schema(delegate.getPackage());
+    init();
+  }
+
+  /**
+   * Initialize the type definition.
+   */
+  protected void init() {
+    ElementAccessorComparator comparator = new ElementAccessorComparator(getPropertyOrder(), getAccessorOrder());
+    AccessorFilter filter = new AccessorFilter(getAccessType());
+    SortedSet<ElementAccessor> elementAccessors = new TreeSet<ElementAccessor>(comparator);
+    Collection<AttributeAccessor> attributeAccessors = new ArrayList<AttributeAccessor>();
+    ValueAccessor value = null;
+
+    //first go through the fields.
+    for (FieldDeclaration field : getFields()) {
+      if (filter.accept(field)) {
+        if (isAttribute(field)) {
+          attributeAccessors.add(new AttributeAccessor(field));
+        }
+        else if (isValue(field)) {
+          if (value != null) {
+            throw new ValidationException(field.getPosition() + ": a type definition cannot have more than one xml value.");
+          }
+
+          value = new ValueAccessor(field);
+        }
+        else {
+          //its an element accessor.
+          if (!elementAccessors.add(new ElementAccessor(field))) {
+            throw new ValidationException(field.getPosition() + ": duplicate XML element.");
+          }
+        }
+      }
+    }
+
+    //then go through the properties.
+    for (PropertyDeclaration property : getProperties()) {
+      if (filter.accept(property)) {
+        if (isAttribute(property)) {
+          attributeAccessors.add(new AttributeAccessor(property));
+        }
+        else if (isValue(property)) {
+          if (value != null) {
+            throw new ValidationException(property.getPosition() + ": a type definition cannot have more than one xml value.");
+          }
+
+          value = new ValueAccessor(property);
+        }
+        else {
+          //its an element accessor.
+          if (!elementAccessors.add(new ElementAccessor(property))) {
+            throw new ValidationException(property.getPosition() + ": duplicate XML element.");
+          }
+        }
+      }
+    }
+
+    this.elements = Collections.unmodifiableSortedSet(elementAccessors);
+    this.attributes = Collections.unmodifiableCollection(attributeAccessors);
+    this.xmlValue = value;
+  }
+
+  /**
+   * Whether a declaration is an xml attribute.
+   *
+   * @param declaration The declaration to check.
+   * @return Whether a declaration is an attribute.
+   */
+  protected boolean isAttribute(MemberDeclaration declaration) {
+    return (declaration.getAnnotation(XmlAttribute.class) != null);
+  }
+
+  /**
+   * Whether a declaration is an xml value.
+   *
+   * @param declaration The declaration to check.
+   * @return Whether a declaration is an value.
+   */
+  protected boolean isValue(MemberDeclaration declaration) {
+    return (declaration.getAnnotation(XmlValue.class) != null);
   }
 
   /**
@@ -140,86 +226,30 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
-   * The (correctly sorted) accessors for this element.
+   * The elements of this type definition.
    *
-   * @return The (correctly sorted) accessors for this element.
+   * @return The elements of this type definition.
    */
-  public SortedSet<Accessor> getAccessors() {
-    AccessorComparator comparator = new AccessorComparator(getPropertyOrder(), getAccessorOrder());
-    SortedSet<Accessor> accessors = new TreeSet<Accessor>(comparator);
-    AccessorFilter filter = new AccessorFilter(getAccessType());
-
-    //first go through the fields.
-    for (FieldDeclaration field : getFields()) {
-      if (filter.accept(field)) {
-        FieldAccessor accessor = new FieldAccessor(field);
-        if (!accessors.add(accessor)) {
-          throw new ValidationException(field.getPosition() + ": duplicate accessor name: " + accessor.getPropertyName());
-        }
-      }
-    }
-
-    HashMap<String, PropertyGetter> getters = new HashMap<String, PropertyGetter>();
-    HashMap<String, PropertySetter> setters = new HashMap<String, PropertySetter>();
-    for (MethodDeclaration method : getMethods()) {
-      DecoratedMethodDeclaration decoratedMethod = (DecoratedMethodDeclaration) DeclarationDecorator.decorate(method);
-
-      if (decoratedMethod.isGetter()) {
-        PropertyGetter getter = new PropertyGetter(decoratedMethod);
-        if (filter.accept(getter)) {
-          getters.put(getter.getPropertyName(), getter);
-        }
-      }
-      else if (decoratedMethod.isSetter()) {
-        PropertySetter setter = new PropertySetter(decoratedMethod);
-        if (filter.accept(setter)) {
-          setters.put(setter.getPropertyName(), setter);
-        }
-      }
-    }
-
-    //now iterate through the getters and setters and pair them up....
-    Set<String> propertyNames = getters.keySet();
-    for (String propertyName : propertyNames) {
-      PropertyGetter getter = getters.get(propertyName);
-      PropertySetter setter = setters.get(propertyName);
-      if (isPaired(getter, setter)) {
-        accessors.add(new PropertyAccessor(getter, setter));
-      }
-    }
-
-    return accessors;
+  public SortedSet<ElementAccessor> getElements() {
+    return elements;
   }
 
   /**
-   * Whether a specified getter and setter are paired.
+   * The attributes of this type definition.
    *
-   * @param getter The getter.
-   * @param setter The setter.
-   * @return Whether a specified getter and setter are paired.
+   * @return The attributes of this type definition.
    */
-  protected boolean isPaired(PropertyGetter getter, PropertySetter setter) {
-    if ((getter == null) || (setter == null)) {
-      //if a getter or setter doesn't have a mirror, it's not a property.
-      //todo: should we allow the weird case that says java.util.List doesn't need a setter?
-      //todo: should we throw an exception?
-      return false;
-    }
+  public Collection<AttributeAccessor> getAttributes() {
+    return attributes;
+  }
 
-    if (!getter.getPropertyName().equals(setter.getPropertyName())) {
-      return false;
-    }
-
-    if (getter.getParameters().size() != 0) {
-      return false;
-    }
-
-    Collection<ParameterDeclaration> setterParams = setter.getParameters();
-    if ((setterParams == null) || (setterParams.size() != 1) || (!getter.getReturnType().equals(setterParams.iterator().next().getType()))) {
-      return false;
-    }
-
-    return true;
+  /**
+   * The value of this type definition.
+   *
+   * @return The value of this type definition.
+   */
+  public ValueAccessor getValue() {
+    return xmlValue;
   }
 
   /**
