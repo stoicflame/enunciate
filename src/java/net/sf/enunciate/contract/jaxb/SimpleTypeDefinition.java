@@ -5,29 +5,34 @@ import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 
 /**
- * A simple type definition.  Also used for complex type definitions with simpleContent.
+ * A simple type definition.
  *
  * @author Ryan Heaton
  */
 public class SimpleTypeDefinition extends TypeDefinition {
 
-  private final JAXBValidator validator;
-  private TypeMirror baseType;
-
   public SimpleTypeDefinition(ClassDeclaration delegate, JAXBValidator validator) {
     super(delegate);
-
-    this.validator = validator;
     validator.validate(this);
   }
 
+  protected SimpleTypeDefinition(ClassDeclaration delegate) {
+    super(delegate);
+  }
+
   /**
-   * The base type for this simple type.
+   * The base type for this simple type, or null if none exists.
    *
    * @return The base type for this simple type.
    */
   public TypeMirror getBaseType() {
-    return getValue().getAccessorType();
+    ValueAccessor value = getValue();
+
+    if (value != null) {
+      return value.getAccessorType();
+    }
+
+    return null;
   }
 
 }

@@ -1,7 +1,7 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.util.QName;
 
@@ -10,7 +10,7 @@ import net.sf.enunciate.util.QName;
  *
  * @author Ryan Heaton
  */
-public class ComplexTypeDefinition extends TypeDefinition {
+public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   private final JAXBValidator validator;
 
@@ -21,23 +21,15 @@ public class ComplexTypeDefinition extends TypeDefinition {
     validator.validate(this);
   }
 
-  /**
-   * The base type definition, or null if the distinguished ur-type definition.
-   *
-   * @return The base type definition, or null if the distinguished ur-type definition.
-   */
-  public TypeDefinition getBaseTypeDefinition() {
-    ClassType superclass = getSuperclass();
-    if (superclass != null) {
-      ClassDeclaration declaration = superclass.getDeclaration();
-      if (declaration != null) {
-        if (!Object.class.getName().equals(declaration.getQualifiedName())) {
-          return new ComplexTypeDefinition(declaration, this.validator);
-        }
-      }
+  @Override
+  public TypeMirror getBaseType() {
+    TypeMirror baseType = super.getBaseType();
+
+    if (baseType == null) {
+      baseType = getSuperclass();
     }
 
-    return null;
+    return baseType;
   }
 
   /**
@@ -56,7 +48,15 @@ public class ComplexTypeDefinition extends TypeDefinition {
    * @return The content type of this complex type definition.
    */
   public ContentType getContentType() {
-
+    if (!getElements().isEmpty()) {
+      return ContentType.COMPLEX;
+    }
+    else if (getValue() != null) {
+      return ContentType.SIMPLE;
+    }
+    else {
+      return ContentType.EMPTY;
+    }
   }
 
 }

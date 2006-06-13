@@ -13,9 +13,11 @@ import javax.xml.bind.annotation.*;
 import java.util.*;
 
 /**
+ * A xml type definition.
+ *
  * @author Ryan Heaton
  */
-public abstract class TypeDefinition extends DecoratedClassDeclaration {
+public class TypeDefinition extends DecoratedClassDeclaration {
 
   protected final XmlType xmlType;
   private final Schema schema;
@@ -54,6 +56,10 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
           }
 
           value = new ValueAccessor(field);
+        }
+        else if (isMixed(field)) {
+          //todo: support xml-mixed?
+          throw new ValidationException(field.getPosition() + ": sorry, enunciate currently doesn't support mixed complex types. maybe someday.");
         }
         else {
           //its an element accessor.
@@ -98,6 +104,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return Whether a declaration is an attribute.
    */
   protected boolean isAttribute(MemberDeclaration declaration) {
+    //todo: the attribute wildcard?
     return (declaration.getAnnotation(XmlAttribute.class) != null);
   }
 
@@ -109,6 +116,16 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   protected boolean isValue(MemberDeclaration declaration) {
     return (declaration.getAnnotation(XmlValue.class) != null);
+  }
+
+  /**
+   * Whether a declaration is an xml-mixed property.
+   *
+   * @param declaration The declaration to check.
+   * @return Whether a declaration is an mixed.
+   */
+  protected boolean isMixed(MemberDeclaration declaration) {
+    return (declaration.getAnnotation(XmlMixed.class) != null);
   }
 
   /**

@@ -101,7 +101,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         //if it's a web service, add its referenced namespaces to the list of namespaces to consider.
         namespaces.addAll(endpointInterface.getReferencedNamespaces());
       }
-      else {
+      else if ((!(declaration instanceof InterfaceDeclaration)) && (!isXmlTransient(declaration))) {
         //otherwise, treat it as a potential jaxb type.
 
         TypeDefinition typeDef = null;
@@ -125,7 +125,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           schemaInfo.getEnumTypes().add(enumType);
           namespaces.add(namespace);
         }
-        else if (isSimpleType(declaration)) {
+        else {
           SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
           typeDef = simpleType;
           String namespace = simpleType.getTargetNamespace();
@@ -144,27 +144,27 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           namespaces.add(namespace);
         }
         else if (isComplexType(declaration)) {
-          ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
-          typeDef = complexType;
-          String namespace = complexType.getTargetNamespace();
+        ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) declaration, jaxbValidator);
+        typeDef = complexType;
+        String namespace = complexType.getTargetNamespace();
 
-          if (isVerbose()) {
-            System.out.println(declaration.getQualifiedName() + " to be considered as a complex type definition.");
-          }
-
-          SchemaInfo schemaInfo = schemaMap.get(namespace);
-          if (schemaInfo == null) {
-            schemaInfo = new SchemaInfo();
-            schemaMap.put(namespace, schemaInfo);
-            schemaInfo.setNamespace(namespace);
-          }
-          schemaInfo.getComplexTypes().add(complexType);
-
-          //todo: add all referenced namespaces, too?
-          //namespaces.addAll(complexType.getReferencedNamespaces());
-
-          namespaces.add(namespace);
+        if (isVerbose()) {
+          System.out.println(declaration.getQualifiedName() + " to be considered as a complex type definition.");
         }
+
+        SchemaInfo schemaInfo = schemaMap.get(namespace);
+        if (schemaInfo == null) {
+          schemaInfo = new SchemaInfo();
+          schemaMap.put(namespace, schemaInfo);
+          schemaInfo.setNamespace(namespace);
+        }
+        schemaInfo.getComplexTypes().add(complexType);
+
+        //todo: add all referenced namespaces, too?
+        //namespaces.addAll(complexType.getReferencedNamespaces());
+
+        namespaces.add(namespace);
+      }
 
         if ((typeDef != null) && (isRootSchemaElement(declaration))) {
           RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) declaration, typeDef, jaxbValidator);

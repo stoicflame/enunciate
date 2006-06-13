@@ -26,7 +26,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   private final XmlEnum xmlEnum;
 
   public EnumTypeDefinition(EnumDeclaration delegate, JAXBValidator validator) {
-    super(delegate, validator);
+    super(delegate);
 
     this.xmlEnum = getAnnotation(XmlEnum.class);
     validator.validate(this);

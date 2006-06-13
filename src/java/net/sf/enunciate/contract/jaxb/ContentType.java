@@ -25,6 +25,41 @@ public enum ContentType {
   /**
    * Complex (element-only) content type.
    */
-  COMPLEX
+  COMPLEX;
 
+  /**
+   * Whether this is the empty content type.
+   *
+   * @return Whether this is the empty content type.
+   */
+  public boolean isEmpty() {
+    return this == EMPTY;
+  }
+
+  /**
+   * Whether this is the mixed content type.
+   *
+   * @return Whether this is the mixed content type.
+   */
+  public boolean isMixed() {
+    return this == MIXED;
+  }
+
+  /**
+   * Whether this is the simple content type.
+   *
+   * @return Whether this is the simple content type.
+   */
+  public boolean isSimple() {
+    return this == SIMPLE;
+  }
+
+  /**
+   * Whether this is the complex content type.
+   *
+   * @return Whether this is the complex content type.
+   */
+  public boolean isComplex() {
+    return this == COMPLEX;
+  }
 }
