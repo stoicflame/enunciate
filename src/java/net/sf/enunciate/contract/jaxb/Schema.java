@@ -79,8 +79,8 @@ public class Schema extends DecoratedPackageDeclaration {
    *
    * @return The default access type for the beans in this package.
    */
-  public AccessType getAccessType() {
-    AccessType accessType = AccessType.PUBLIC_MEMBER;
+  public XmlAccessType getAccessType() {
+    XmlAccessType accessType = XmlAccessType.PUBLIC_MEMBER;
 
     if (xmlAccessorType != null) {
       accessType = xmlAccessorType.value();
@@ -94,8 +94,8 @@ public class Schema extends DecoratedPackageDeclaration {
    *
    * @return The default accessor order of the beans in this package.
    */
-  public AccessorOrder getAccessorOrder() {
-    AccessorOrder order = AccessorOrder.UNDEFINED;
+  public XmlAccessOrder getAccessorOrder() {
+    XmlAccessOrder order = XmlAccessOrder.UNDEFINED;
 
     if (xmlAccessorOrder != null) {
       order = xmlAccessorOrder.value();

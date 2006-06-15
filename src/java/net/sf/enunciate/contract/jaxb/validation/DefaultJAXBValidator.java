@@ -4,10 +4,7 @@ import com.sun.mirror.declaration.ConstructorDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.Modifier;
 import net.sf.enunciate.contract.ValidationResult;
-import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
-import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
-import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.*;
 
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -66,7 +63,7 @@ public class DefaultJAXBValidator implements JAXBValidator {
       if ((factoryClass != XmlType.DEFAULT.class) || (!"".equals(factoryMethod))) {
         needsNoArgConstructor = false;
         try {
-          Method method = factoryClass.getMethod(factoryMethod, null);
+          Method method = factoryClass.getMethod(factoryMethod);
           if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
             //todo: is this really a requirement?
             result.getErrors().add(typeDef.getPosition() + ": '" + factoryMethod + "' must be a static, no-arg method on '" + factoryClass.getName() + "'.");
@@ -120,5 +117,9 @@ public class DefaultJAXBValidator implements JAXBValidator {
    */
   protected boolean isXmlTransient(Declaration declaration) {
     return (declaration.getAnnotation(XmlTransient.class) != null);
+  }
+
+  public ValidationResult validate(EnumTypeDefinition enumType) {
+    return null;
   }
 }

@@ -47,10 +47,6 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
 
     if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
       name = rootElement.name();
-
-      if ("".equals(name)) {
-        name = null;
-      }
     }
 
     return name;

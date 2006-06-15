@@ -9,6 +9,8 @@ import com.sun.mirror.util.Types;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -38,7 +40,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Types types = env.getTypeUtils();
     TypeDeclaration declaration = env.getTypeDeclaration(xmlEnum.value().getName());
-    return types.getDeclaredType(declaration);
+    return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
   }
 
   /**

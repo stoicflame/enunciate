@@ -2,12 +2,10 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
@@ -19,74 +17,52 @@ import java.util.*;
  */
 public class TypeDefinition extends DecoratedClassDeclaration {
 
-  protected final XmlType xmlType;
+  private final XmlType xmlType;
   private final Schema schema;
-
-  private SortedSet<ElementAccessor> elements;
-  private Collection<AttributeAccessor> attributes;
-  private ValueAccessor xmlValue;
+  private final SortedSet<Element> elements;
+  private final Collection<Attribute> attributes;
+  private final Value xmlValue;
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
 
     this.xmlType = getAnnotation(XmlType.class);
     this.schema = new Schema(delegate.getPackage());
-    init();
-  }
 
-  /**
-   * Initialize the type definition.
-   */
-  protected void init() {
-    ElementAccessorComparator comparator = new ElementAccessorComparator(getPropertyOrder(), getAccessorOrder());
+    ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder());
     AccessorFilter filter = new AccessorFilter(getAccessType());
-    SortedSet<ElementAccessor> elementAccessors = new TreeSet<ElementAccessor>(comparator);
-    Collection<AttributeAccessor> attributeAccessors = new ArrayList<AttributeAccessor>();
-    ValueAccessor value = null;
+    SortedSet<Element> elementAccessors = new TreeSet<Element>(comparator);
+    Collection<Attribute> attributeAccessors = new ArrayList<Attribute>();
+    Value value = null;
 
-    //first go through the fields.
-    for (FieldDeclaration field : getFields()) {
-      if (filter.accept(field)) {
-        if (isAttribute(field)) {
-          attributeAccessors.add(new AttributeAccessor(field));
+    ArrayList<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
+    accessors.addAll(getFields());
+    accessors.addAll(getProperties());
+    for (MemberDeclaration accessor : accessors) {
+      if (filter.accept(accessor)) {
+        if (isAttribute(accessor)) {
+          attributeAccessors.add(new Attribute(accessor, this));
         }
-        else if (isValue(field)) {
+        else if (isValue(accessor)) {
           if (value != null) {
-            throw new ValidationException(field.getPosition() + ": a type definition cannot have more than one xml value.");
+            throw new ValidationException(accessor.getPosition() + ": a type definition cannot have more than one xml value.");
           }
 
-          value = new ValueAccessor(field);
+          value = new Value(accessor, this);
         }
-        else if (isMixed(field)) {
+        else if (isElementRef(accessor)) {
+          if (!elementAccessors.add(new ElementRef(accessor, this))) {
+            throw new ValidationException(accessor.getPosition() + ": duplicate XML element.");
+          }
+        }
+        else if (isUnsupported(accessor)) {
           //todo: support xml-mixed?
-          throw new ValidationException(field.getPosition() + ": sorry, enunciate currently doesn't support mixed complex types. maybe someday.");
+          throw new ValidationException(accessor.getPosition() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
         }
         else {
           //its an element accessor.
-          if (!elementAccessors.add(new ElementAccessor(field))) {
-            throw new ValidationException(field.getPosition() + ": duplicate XML element.");
-          }
-        }
-      }
-    }
-
-    //then go through the properties.
-    for (PropertyDeclaration property : getProperties()) {
-      if (filter.accept(property)) {
-        if (isAttribute(property)) {
-          attributeAccessors.add(new AttributeAccessor(property));
-        }
-        else if (isValue(property)) {
-          if (value != null) {
-            throw new ValidationException(property.getPosition() + ": a type definition cannot have more than one xml value.");
-          }
-
-          value = new ValueAccessor(property);
-        }
-        else {
-          //its an element accessor.
-          if (!elementAccessors.add(new ElementAccessor(property))) {
-            throw new ValidationException(property.getPosition() + ": duplicate XML element.");
+          if (!elementAccessors.add(new Element(accessor, this))) {
+            throw new ValidationException(accessor.getPosition() + ": duplicate XML element.");
           }
         }
       }
@@ -119,13 +95,25 @@ public class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
+   * Whether a declaration is an xml element ref.
+   *
+   * @param declaration The declaration to check.
+   * @return Whether a declaration is an xml element ref.
+   */
+  protected boolean isElementRef(MemberDeclaration declaration) {
+    return ((declaration.getAnnotation(XmlElementRef.class) != null) || (declaration.getAnnotation(XmlElementRefs.class) != null));
+  }
+
+  /**
    * Whether a declaration is an xml-mixed property.
    *
    * @param declaration The declaration to check.
    * @return Whether a declaration is an mixed.
    */
-  protected boolean isMixed(MemberDeclaration declaration) {
-    return (declaration.getAnnotation(XmlMixed.class) != null);
+  protected boolean isUnsupported(MemberDeclaration declaration) {
+    return (declaration.getAnnotation(XmlMixed.class) != null)
+      || (declaration.getAnnotation(XmlAnyElement.class) != null)
+      || (declaration.getAnnotation(XmlAnyAttribute.class) != null);
   }
 
   /**
@@ -163,19 +151,19 @@ public class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
-   * The default access type for the beans in this package.
+   * The default access type for the beans in this class.
    *
-   * @return The default access type for the beans in this package.
+   * @return The default access type for the beans in this class.
    */
-  public AccessType getAccessType() {
-    AccessType accessType = getPackage().getAccessType();
+  public XmlAccessType getAccessType() {
+    XmlAccessType accessType = getPackage().getAccessType();
 
     XmlAccessorType xmlAccessorType = getAnnotation(XmlAccessorType.class);
     if (xmlAccessorType != null) {
       accessType = xmlAccessorType.value();
     }
     else {
-      AccessType inheritedAccessType = getInheritedAccessType(this);
+      XmlAccessType inheritedAccessType = getInheritedAccessType(this);
       if (inheritedAccessType != null) {
         accessType = inheritedAccessType;
       }
@@ -190,7 +178,7 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    * @param declaration The inherited accessor type.
    * @return The inherited accessor type of the given class, or null if none is found.
    */
-  protected AccessType getInheritedAccessType(ClassDeclaration declaration) {
+  protected XmlAccessType getInheritedAccessType(ClassDeclaration declaration) {
     ClassType superclass = declaration.getSuperclass();
     if (superclass != null) {
       ClassDeclaration superDeclaration = superclass.getDeclaration();
@@ -231,8 +219,8 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The default accessor order of the beans in this package.
    */
-  public AccessorOrder getAccessorOrder() {
-    AccessorOrder order = getPackage().getAccessorOrder();
+  public XmlAccessOrder getAccessorOrder() {
+    XmlAccessOrder order = getPackage().getAccessorOrder();
 
     XmlAccessorOrder xmlAccessorOrder = getAnnotation(XmlAccessorOrder.class);
     if (xmlAccessorOrder != null) {
@@ -247,7 +235,7 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The elements of this type definition.
    */
-  public SortedSet<ElementAccessor> getElements() {
+  public SortedSet<Element> getElements() {
     return elements;
   }
 
@@ -256,7 +244,7 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The attributes of this type definition.
    */
-  public Collection<AttributeAccessor> getAttributes() {
+  public Collection<Attribute> getAttributes() {
     return attributes;
   }
 
@@ -265,7 +253,7 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The value of this type definition.
    */
-  public ValueAccessor getValue() {
+  public Value getValue() {
     return xmlValue;
   }
 
@@ -277,6 +265,15 @@ public class TypeDefinition extends DecoratedClassDeclaration {
    */
   protected boolean isXmlTransient(Declaration declaration) {
     return (declaration.getAnnotation(XmlTransient.class) != null);
+  }
+
+  /**
+   * Whether this xml type is anonymous.
+   *
+   * @return Whether this xml type is anonymous.
+   */
+  public boolean isAnonymous() {
+    return getName() == null;
   }
 
   /**

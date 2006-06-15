@@ -5,7 +5,7 @@ import com.sun.mirror.type.AnnotationType;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
-import javax.xml.bind.annotation.AccessType;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
@@ -17,9 +17,9 @@ import java.util.Collection;
  */
 public class AccessorFilter {
 
-  private final AccessType accessType;
+  private final XmlAccessType accessType;
 
-  public AccessorFilter(AccessType accessType) {
+  public AccessorFilter(XmlAccessType accessType) {
     this.accessType = accessType;
 
     if (accessType == null) {
@@ -54,18 +54,18 @@ public class AccessorFilter {
         return false;
       }
 
-      return ((accessType != AccessType.NONE) && (accessType != AccessType.FIELD));
+      return ((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD));
     }
     else if (declaration instanceof FieldDeclaration) {
       if (declaration.getModifiers().contains(Modifier.STATIC) || declaration.getModifiers().contains(Modifier.TRANSIENT)) {
         return false;
       }
 
-      if ((accessType == AccessType.NONE) || (accessType == AccessType.PROPERTY)) {
+      if ((accessType == XmlAccessType.NONE) || (accessType == XmlAccessType.PROPERTY)) {
         return false;
       }
 
-      if (accessType == AccessType.PUBLIC_MEMBER) {
+      if (accessType == XmlAccessType.PUBLIC_MEMBER) {
         return declaration.getModifiers().contains(Modifier.PUBLIC);
       }
 

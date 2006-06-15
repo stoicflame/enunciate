@@ -26,7 +26,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
    * @return The base type for this simple type.
    */
   public TypeMirror getBaseType() {
-    ValueAccessor value = getValue();
+    Value value = getValue();
 
     if (value != null) {
       return value.getAccessorType();

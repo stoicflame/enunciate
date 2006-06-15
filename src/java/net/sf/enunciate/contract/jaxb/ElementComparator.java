@@ -2,7 +2,7 @@ package net.sf.enunciate.contract.jaxb;
 
 import net.sf.enunciate.contract.ValidationException;
 
-import javax.xml.bind.annotation.AccessorOrder;
+import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.Comparator;
 
 /**
@@ -10,9 +10,9 @@ import java.util.Comparator;
  *
  * @author Ryan Heaton
  */
-public class ElementAccessorComparator implements Comparator<ElementAccessor> {
+public class ElementComparator implements Comparator<Element> {
 
-  private final AccessorOrder accessorOrder;
+  private final XmlAccessOrder accessOrder;
   private final String[] propOrder;
 
   /**
@@ -21,15 +21,15 @@ public class ElementAccessorComparator implements Comparator<ElementAccessor> {
    * @param propOrder The property order, or null if none is specified.
    * @param order     The accessor order.
    */
-  public ElementAccessorComparator(String[] propOrder, AccessorOrder order) {
-    this.accessorOrder = order;
+  public ElementComparator(String[] propOrder, XmlAccessOrder order) {
+    this.accessOrder = order;
     this.propOrder = propOrder;
   }
 
   // Inherited.
-  public int compare(ElementAccessor accessor1, ElementAccessor accessor2) {
-    String propertyName1 = accessor1.getAccessorName();
-    String propertyName2 = accessor2.getAccessorName();
+  public int compare(Element accessor1, Element accessor2) {
+    String propertyName1 = accessor1.getName();
+    String propertyName2 = accessor2.getName();
 
     if (this.propOrder != null) {
       //apply the specified property order
@@ -45,7 +45,7 @@ public class ElementAccessorComparator implements Comparator<ElementAccessor> {
 
       return propertyIndex1 - propertyIndex2;
     }
-    else if (accessorOrder == AccessorOrder.ALPHABETICAL) {
+    else if (accessOrder == XmlAccessOrder.ALPHABETICAL) {
       return propertyName1.compareTo(propertyName2);
     }
 
