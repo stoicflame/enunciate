@@ -2,7 +2,6 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.TypeMirror;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.util.QName;
 
 /**
@@ -12,13 +11,8 @@ import net.sf.enunciate.util.QName;
  */
 public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
-  private final JAXBValidator validator;
-
-  public ComplexTypeDefinition(ClassDeclaration delegate, JAXBValidator validator) {
+  public ComplexTypeDefinition(ClassDeclaration delegate) {
     super(delegate);
-
-    this.validator = validator;
-    validator.validate(this);
   }
 
   @Override

@@ -2,7 +2,6 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.TypeMirror;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 
 /**
  * A simple type definition.
@@ -11,12 +10,7 @@ import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
  */
 public class SimpleTypeDefinition extends TypeDefinition {
 
-  public SimpleTypeDefinition(ClassDeclaration delegate, JAXBValidator validator) {
-    super(delegate);
-    validator.validate(this);
-  }
-
-  protected SimpleTypeDefinition(ClassDeclaration delegate) {
+  public SimpleTypeDefinition(ClassDeclaration delegate) {
     super(delegate);
   }
 

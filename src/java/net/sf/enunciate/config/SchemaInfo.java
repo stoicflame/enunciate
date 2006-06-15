@@ -1,9 +1,7 @@
 package net.sf.enunciate.config;
 
-import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
-import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
-import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
+import net.sf.enunciate.contract.jaxb.TypeDefinition;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,9 +17,7 @@ public class SchemaInfo {
   private boolean generate;
   private String file;
   private String location;
-  private final Collection<ComplexTypeDefinition> complexTypes = new ArrayList<ComplexTypeDefinition>();
-  private final Collection<SimpleTypeDefinition> simpleTypes = new ArrayList<SimpleTypeDefinition>();
-  private final Collection<EnumTypeDefinition> enumTypes = new ArrayList<EnumTypeDefinition>();
+  private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
 
   /**
@@ -97,21 +93,12 @@ public class SchemaInfo {
   }
 
   /**
-   * The collection of complex types defined in this schema.
+   * The collection of types defined in this schema.
    *
-   * @return The collection of complex types defined in this schema.
+   * @return The collection of types defined in this schema.
    */
-  public Collection<ComplexTypeDefinition> getComplexTypes() {
-    return complexTypes;
-  }
-
-  /**
-   * The collection of simple types defined in this schema.
-   *
-   * @return The collection of simple types defined in this schema.
-   */
-  public Collection<SimpleTypeDefinition> getSimpleTypes() {
-    return simpleTypes;
+  public Collection<TypeDefinition> getTypeDefinitions() {
+    return typeDefinitions;
   }
 
   /**
@@ -121,15 +108,6 @@ public class SchemaInfo {
    */
   public Collection<RootElementDeclaration> getGlobalElements() {
     return globalElements;
-  }
-
-  /**
-   * The collection of enum types defined in this schema.
-   *
-   * @return The collection of enum types defined in this schema.
-   */
-  public Collection<EnumTypeDefinition> getEnumTypes() {
-    return enumTypes;
   }
 
 }

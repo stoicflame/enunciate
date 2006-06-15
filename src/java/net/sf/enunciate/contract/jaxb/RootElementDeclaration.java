@@ -1,8 +1,9 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -16,16 +17,13 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
   private final XmlRootElement rootElement;
   private final TypeDefinition typeDefinition;
   private final Schema schema;
-  private final JAXBValidator validator;
 
-  public RootElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition, JAXBValidator validator) {
+  public RootElementDeclaration(ClassDeclaration delegate, TypeDefinition typeDefinition) {
     super(delegate);
 
     this.rootElement = getAnnotation(XmlRootElement.class);
     this.typeDefinition = typeDefinition;
     this.schema = new Schema(delegate.getPackage());
-    this.validator = validator;
-    validator.validate(this);
   }
 
   /**
@@ -34,6 +32,12 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
    * @return The type definition for this root element.
    */
   public TypeDefinition getTypeDefinition() {
+    TypeDefinition typeDefinition = this.typeDefinition;
+
+    if (typeDefinition == null) {
+      typeDefinition = ((EnunciateFreemarkerModel) FreemarkerModel.get()).findOrCreateTypeDefinition((ClassDeclaration) getDelegate());
+    }
+
     return typeDefinition;
   }
 

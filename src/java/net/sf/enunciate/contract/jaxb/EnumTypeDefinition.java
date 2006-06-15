@@ -7,7 +7,6 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.contract.ValidationException;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -27,11 +26,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private final XmlEnum xmlEnum;
 
-  public EnumTypeDefinition(EnumDeclaration delegate, JAXBValidator validator) {
+  public EnumTypeDefinition(EnumDeclaration delegate) {
     super(delegate);
 
     this.xmlEnum = getAnnotation(XmlEnum.class);
-    validator.validate(this);
   }
 
   // Inherited.

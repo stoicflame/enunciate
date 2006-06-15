@@ -22,7 +22,7 @@ public class PrefixMethod implements TemplateMethodModel {
    */
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The qname method must have a namespace as a parameter.");
+      throw new TemplateModelException("The prefix method must have a namespace as a parameter.");
     }
 
     String namespace = (String) list.get(0);
