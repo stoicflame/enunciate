@@ -103,8 +103,7 @@ public class DefaultJAXBValidator implements JAXBValidator {
     return result;
   }
 
-// Inherited.
-
+  // Inherited.
   public ValidationResult validate(RootElementDeclaration rootElementDeclaration) {
     return null;
   }
@@ -119,6 +118,7 @@ public class DefaultJAXBValidator implements JAXBValidator {
     return (declaration.getAnnotation(XmlTransient.class) != null);
   }
 
+  // Inherited.
   public ValidationResult validate(EnumTypeDefinition enumType) {
     return null;
   }
