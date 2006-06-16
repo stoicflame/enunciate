@@ -65,7 +65,12 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitEnumType(EnumType enumType) {
-    this.decoratedTypeMirror = new XmlEnumType(enumType);
+    try {
+      this.decoratedTypeMirror = new XmlEnumType(enumType);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = e.getMessage();
+    }
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
