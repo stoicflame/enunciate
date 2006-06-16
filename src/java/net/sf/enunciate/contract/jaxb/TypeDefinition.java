@@ -45,24 +45,24 @@ public class TypeDefinition extends DecoratedClassDeclaration {
         }
         else if (isValue(accessor)) {
           if (value != null) {
-            throw new ValidationException(accessor.getPosition() + ": a type definition cannot have more than one xml value.");
+            throw new ValidationException(accessor.getPosition(), "A type definition cannot have more than one xml value.");
           }
 
           value = new Value(accessor, this);
         }
         else if (isElementRef(accessor)) {
           if (!elementAccessors.add(new ElementRef(accessor, this))) {
-            throw new ValidationException(accessor.getPosition() + ": duplicate XML element.");
+            throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
           }
         }
         else if (isUnsupported(accessor)) {
           //todo: support xml-mixed?
-          throw new ValidationException(accessor.getPosition() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
+          throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
         }
         else {
           //its an element accessor.
           if (!elementAccessors.add(new Element(accessor, this))) {
-            throw new ValidationException(accessor.getPosition() + ": duplicate XML element.");
+            throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
           }
         }
       }

@@ -1,5 +1,7 @@
 package net.sf.enunciate.contract;
 
+import com.sun.mirror.util.SourcePosition;
+
 /**
  * A validation exception is thrown if any validation errors occur during validation.
  *
@@ -7,8 +9,8 @@ package net.sf.enunciate.contract;
  */
 public class ValidationException extends RuntimeException {
 
-  public ValidationException(String message) {
-    super(message);
+  public ValidationException(SourcePosition position, String message) {
+    super(position.toString() + ": " + message);
   }
 
 }

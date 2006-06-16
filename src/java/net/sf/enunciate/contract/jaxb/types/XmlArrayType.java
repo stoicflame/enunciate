@@ -12,9 +12,15 @@ public class XmlArrayType extends DecoratedArrayType implements XmlTypeMirror {
 
   private final XmlTypeMirror componentType;
 
-  public XmlArrayType(ArrayType delegate) {
+  public XmlArrayType(ArrayType delegate) throws XmlTypeException {
     super(delegate);
-    componentType = XmlTypeDecorator.decorate(super.getComponentType());
+
+    try {
+      componentType = XmlTypeDecorator.decorate(super.getComponentType());
+    }
+    catch (XmlTypeException e) {
+      throw new XmlTypeException("Problem with the array component type: " + e.getMessage());
+    }
   }
 
   /**

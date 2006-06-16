@@ -20,9 +20,11 @@ public class WebResult extends SimpleHash implements TypeMirror {
   private final String name;
   private final String targetNamespace;
   private final String partName;
+  private final WebMethod method;
 
   protected WebResult(TypeMirror delegate, WebMethod method) {
     this.delegate = delegate;
+    this.method = method;
 
     try {
       BeanInfo beanInfo = Introspector.getBeanInfo(delegate.getClass());
@@ -94,4 +96,12 @@ public class WebResult extends SimpleHash implements TypeMirror {
     return partName;
   }
 
+  /**
+   * The web method.
+   *
+   * @return The web method.
+   */
+  public WebMethod getWebMethod() {
+    return method;
+  }
 }

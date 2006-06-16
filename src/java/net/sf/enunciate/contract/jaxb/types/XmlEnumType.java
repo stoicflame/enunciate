@@ -9,7 +9,7 @@ import com.sun.mirror.type.EnumType;
  */
 public class XmlEnumType extends XmlClassType {
 
-  public XmlEnumType(EnumType delegate) {
+  public XmlEnumType(EnumType delegate) throws XmlTypeException {
     super(delegate);
   }
 

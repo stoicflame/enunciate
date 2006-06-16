@@ -11,15 +11,29 @@ import com.sun.mirror.util.TypeVisitor;
 public class XmlTypeDecorator implements TypeVisitor {
 
   private XmlTypeMirror decoratedTypeMirror;
+  private String errorMessage = null;
 
-  public static XmlTypeMirror decorate(TypeMirror typeMirror) {
+  /**
+   * Decorate a type mirror as an xml type.
+   *
+   * @param typeMirror The type mirror to decorate.
+   * @return The xml type for the specified type mirror.
+   * @throws XmlTypeException If the type is invalid or unknown as an xml type.
+   */
+  public static XmlTypeMirror decorate(TypeMirror typeMirror) throws XmlTypeException {
     XmlTypeDecorator instance = new XmlTypeDecorator();
     typeMirror.accept(instance);
+
+    if (instance.errorMessage == null) {
+      throw new XmlTypeException(instance.errorMessage);
+    }
+
     return instance.decoratedTypeMirror;
   }
 
   public void visitTypeMirror(TypeMirror typeMirror) {
-    throw new IllegalArgumentException(typeMirror + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "Unknown xml type: " + typeMirror;
   }
 
   public void visitPrimitiveType(PrimitiveType primitiveType) {
@@ -27,19 +41,27 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitVoidType(VoidType voidType) {
-    throw new IllegalArgumentException(voidType + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "Void is not a valid xml type.";
   }
 
   public void visitReferenceType(ReferenceType referenceType) {
-    throw new IllegalArgumentException(referenceType + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "Unknown xml type: " + referenceType;
   }
 
   public void visitDeclaredType(DeclaredType declaredType) {
-    throw new IllegalArgumentException(declaredType + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "Unknown xml type: " + declaredType;
   }
 
   public void visitClassType(ClassType classType) {
-    this.decoratedTypeMirror = new XmlClassType(classType);
+    try {
+      this.decoratedTypeMirror = new XmlClassType(classType);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = e.getMessage();
+    }
   }
 
   public void visitEnumType(EnumType enumType) {
@@ -47,22 +69,39 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
-    throw new IllegalArgumentException(interfaceType + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "An interface type cannot be an xml type.";
   }
 
   public void visitAnnotationType(AnnotationType annotationType) {
-    throw new IllegalArgumentException(annotationType + " isn't a valid xml type.");
+    this.decoratedTypeMirror = null;
+    this.errorMessage = "An annotation type cannot be an xml type.";
   }
 
   public void visitArrayType(ArrayType arrayType) {
-    this.decoratedTypeMirror = new XmlArrayType(arrayType);
+    try {
+      this.decoratedTypeMirror = new XmlArrayType(arrayType);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = e.getMessage();
+    }
   }
 
   public void visitTypeVariable(TypeVariable typeVariable) {
-    throw new IllegalArgumentException(typeVariable + " isn't a valid xml type.");
+    try {
+      this.decoratedTypeMirror = new XmlTypeVariable(typeVariable);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = e.getMessage();
+    }
   }
 
   public void visitWildcardType(WildcardType wildcardType) {
-    throw new IllegalArgumentException(wildcardType + " isn't a valid xml type.");
+    try {
+      this.decoratedTypeMirror = new XmlWildcardType(wildcardType);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = e.getMessage();
+    }
   }
 }

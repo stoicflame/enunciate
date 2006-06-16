@@ -57,7 +57,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       }
 
       if (!enumValues.add(value)) {
-        throw new ValidationException(enumConstant.getPosition() + ": duplicate enum value: " + value);
+        throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
       }
     }
 

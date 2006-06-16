@@ -4,8 +4,6 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.config.SchemaInfo;
-import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
@@ -21,9 +19,6 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import javax.jws.WebService;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -37,35 +32,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   //Inherited.
   @Override
   protected FreemarkerModel newRootModel() {
-    Map<String, String> prefixMap = new HashMap<String, String>();
-    prefixMap.put("http://schemas.xmlsoap.org/wsdl/", "wsdl");
-    prefixMap.put("http://schemas.xmlsoap.org/wsdl/http/", "http");
-    prefixMap.put("http://schemas.xmlsoap.org/wsdl/mime/", "mime");
-    prefixMap.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
-    prefixMap.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
-    prefixMap.put("http://www.w3.org/2001/XMLSchema", "xsd");
-    prefixMap.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
 
-    Map<String, SchemaInfo> schemaMap = new HashMap<String, SchemaInfo>();
-    Map<String, WsdlInfo> wsdlMap = new HashMap<String, WsdlInfo>();
-
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel(prefixMap, schemaMap, wsdlMap);
-
-/*
-    todo: read the config file into the prefixMap and schemaMap
-    todo: but don't overwrite the constant namespaces
-    String configFile = env.getOptions().get(EnunciateAnnotationProcessorFactory.CONFIG_OPTION);
-    if (configFile != null) {
-      try {
-        FileInputStream stream = new FileInputStream(configFile);
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-*/
-
-    HashSet<String> namespaces = new HashSet<String>();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
 
     //todo: read the jaxwsValidator types from the config.
@@ -86,11 +54,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         }
 
         model.add(endpointInterface);
-
       }
       else if (declaration instanceof ClassDeclaration) {
-        //otherwise, treat it as a potential jaxb type.
-
+        //otherwise, if it's a class, consider it a potential jaxb type.
         TypeDefinition typeDef = model.findOrCreateTypeDefinition((ClassDeclaration) declaration);
         if (typeDef != null) {
           if (isVerbose()) {
@@ -98,7 +64,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           }
 
           model.add(typeDef);
-          namespaces.add(typeDef.getTargetNamespace());
         }
 
         RootElementDeclaration rootElement = model.findOrCreateRootElementDeclaration((ClassDeclaration) declaration, typeDef);
@@ -108,42 +73,24 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           }
 
           model.add(rootElement);
-          namespaces.add(rootElement.getTargetNamespace());
         }
       }
     }
 
-    int index = 0;
-    for (String namespace : namespaces) {
-      String prefix = "ns" + (++index);
-      while (prefixMap.values().contains(prefix)) {
-        prefix = "ns" + (++index);
+/*
+    todo: read the config file into the prefixMap and schemaMap
+    todo: but don't overwrite the constant namespaces
+    String configFile = env.getOptions().get(EnunciateAnnotationProcessorFactory.CONFIG_OPTION);
+    if (configFile != null) {
+      try {
+        FileInputStream stream = new FileInputStream(configFile);
       }
-
-      if (!prefixMap.containsKey(namespace)) {
-        prefixMap.put(namespace, prefix);
-      }
-
-      if (schemaMap.containsKey(namespace)) {
-        SchemaInfo schemaInfo = schemaMap.get(namespace);
-
-        //todo: set the file according to the config?
-        schemaInfo.setFile(prefix + ".xsd");
-
-        //todo: set the location according to the config?
-        schemaInfo.setLocation(schemaInfo.getFile());
-
-        //todo: set whether to generate?
-        //schemaInfo.setGenerate();
-      }
-
-      if (wsdlMap.containsKey(namespace)) {
-        wsdlMap.get(namespace).setFile(prefix + ".wsdl");
+      catch (IOException e) {
+        throw new RuntimeException(e);
       }
     }
+*/
 
-    model.put("prefix", new PrefixMethod());
-    model.put("qname", new QNameMethod());
     return model;
   }
 

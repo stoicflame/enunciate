@@ -33,7 +33,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(impl.getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -53,7 +53,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(ei.getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -73,7 +73,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(webMethod.getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -93,7 +93,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(requestWrapper.getWebMethod().getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -113,7 +113,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(responseWrapper.getWebMethod().getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -133,7 +133,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(webParam.getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -153,7 +153,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(webResult.getWebMethod().getPosition(), result.getErrors().get(0));
     }
 
     return result;
@@ -173,7 +173,7 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
     }
 
     if (result.hasErrors()) {
-      throw new ValidationException(result.getErrors().get(0));
+      throw new ValidationException(webFault.getPosition(), result.getErrors().get(0));
     }
 
     return result;

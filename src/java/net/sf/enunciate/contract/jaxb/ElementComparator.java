@@ -37,10 +37,10 @@ public class ElementComparator implements Comparator<Element> {
       int propertyIndex2 = find(this.propOrder, propertyName2);
 
       if (propertyIndex1 < 0) {
-        throw new ValidationException(accessor1.getPosition() + ": property '" + propertyName1 + "' isn't included in the specified property order.");
+        throw new ValidationException(accessor1.getPosition(), "Property '" + propertyName1 + "' isn't included in the specified property order.");
       }
       if (propertyIndex2 < 0) {
-        throw new ValidationException(accessor2.getPosition() + ": property '" + propertyName2 + "' isn't included in the specified property order.");
+        throw new ValidationException(accessor2.getPosition(), "Property '" + propertyName2 + "' isn't included in the specified property order.");
       }
 
       return propertyIndex1 - propertyIndex2;

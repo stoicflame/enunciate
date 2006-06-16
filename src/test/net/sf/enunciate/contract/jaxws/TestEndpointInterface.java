@@ -47,7 +47,7 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
       //Inherited.
       @Override
       public ValidationResult validate(EndpointInterface ei) throws ValidationException {
-        throw new ValidationException("invalid");
+        throw new ValidationException(ei.getPosition(), "invalid");
       }
     };
 

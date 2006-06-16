@@ -5,7 +5,10 @@ import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.*;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.template.freemarker.PrefixMethod;
+import net.sf.enunciate.template.freemarker.QNameMethod;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
@@ -21,23 +24,75 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
   private static final Comparator<ClassDeclaration> CLASS_COMPARATOR = new ClassDeclarationComparator();
 
+  private int prefixIndex = 0;
   private final Map<String, String> namespacesToPrefixes;
   private final Map<String, SchemaInfo> namespacesToSchemas;
   private final Map<String, WsdlInfo> namespacesToWsdls;
+  private final Map<String, KnownXmlType> knownTypes;
 
   private final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
 
-  public EnunciateFreemarkerModel(Map<String, String> ns2prefix, Map<String, SchemaInfo> ns2schema, Map<String, WsdlInfo> ns2wsdl) {
+  public EnunciateFreemarkerModel() {
+    this.namespacesToPrefixes = loadKnownNamespaces();
+    this.knownTypes = loadKnownTypes();
+    this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
+    this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
+
+    setVariable("ns2prefix", this.namespacesToPrefixes);
+    setVariable("ns2schema", this.namespacesToSchemas);
+    setVariable("ns2wsdl", this.namespacesToWsdls);
+    put("prefix", new PrefixMethod());
+    put("qname", new QNameMethod());
+
     //todo: initialize the known types, and add the SchemaType annotations...
     //todo: use the known types in the Element class, if they exist...
     //todo: change all references to DecoratedTypeMirror and TypeMirror to be XmlTypeMirror, and reference the known types.
-    this.namespacesToPrefixes = ns2prefix;
-    this.namespacesToSchemas = ns2schema;
-    this.namespacesToWsdls = ns2wsdl;
-    setVariable("ns2prefix", ns2prefix);
-    setVariable("ns2schema", ns2schema);
-    setVariable("ns2wsdl", ns2wsdl);
+  }
+
+  /**
+   * Loads a map of known namespaces as keys to their associated prefixes.
+   *
+   * @return A map of known namespaces.
+   */
+  protected Map<String, String> loadKnownNamespaces() {
+    HashMap<String, String> knownNamespaces = new HashMap<String, String>();
+
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/", "wsdl");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/http/", "http");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/mime/", "mime");
+    knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
+    knownNamespaces.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
+    knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xsd");
+    knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
+
+    return knownNamespaces;
+  }
+
+  /**
+   * Loads the known types, keyed off the Java fqn.
+   *
+   * @return The map of known types, keyed off the Java fqn.
+   */
+  protected Map<String, KnownXmlType> loadKnownTypes() {
+    HashMap<String, KnownXmlType> knownTypes = new HashMap<String, KnownXmlType>();
+
+    knownTypes.put(String.class.getName(), KnownXmlType.STRING);
+    knownTypes.put(java.math.BigInteger.class.getName(), KnownXmlType.INTEGER);
+    knownTypes.put(java.math.BigDecimal.class.getName(), KnownXmlType.DECIMAL);
+    knownTypes.put(java.util.Calendar.class.getName(), KnownXmlType.DATE_TIME);
+    knownTypes.put(java.util.Date.class.getName(), KnownXmlType.DATE_TIME);
+    knownTypes.put(javax.xml.namespace.QName.class.getName(), KnownXmlType.QNAME);
+    knownTypes.put(java.net.URI.class.getName(), KnownXmlType.STRING);
+    knownTypes.put(javax.xml.datatype.XMLGregorianCalendar.class.getName(), KnownXmlType.ANY_SIMPLE_TYPE);
+    knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);
+    knownTypes.put(java.lang.Object.class.getName(), KnownXmlType.ANY_TYPE);
+    knownTypes.put(java.awt.Image.class.getName(), KnownXmlType.BASE64_BINARY);
+    knownTypes.put("javax.activation.DataHandler", KnownXmlType.BASE64_BINARY);
+    knownTypes.put(javax.xml.transform.Source.class.getName(), KnownXmlType.BASE64_BINARY);
+    knownTypes.put(java.util.UUID.class.getName(), KnownXmlType.STRING);
+
+    return knownTypes;
   }
 
   /**
@@ -73,13 +128,20 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param ei The endpoint interface to add to the model.
    */
   public void add(EndpointInterface ei) {
+    //todo: validate the ei;
     String namespace = ei.getTargetNamespace();
+
+    String prefix = addNamespace(namespace);
+    for (String reference : ei.getReferencedNamespaces()) {
+      addNamespace(reference);
+    }
 
     WsdlInfo wsdlInfo = namespacesToWsdls.get(namespace);
     if (wsdlInfo == null) {
       wsdlInfo = new WsdlInfo();
       namespacesToWsdls.put(namespace, wsdlInfo);
       wsdlInfo.setTargetNamespace(namespace);
+      wsdlInfo.setFile(prefix + ".wsdl");
 
       //todo: configure the schema info.
       //wsdlInfo.setSchemaInfo();
@@ -97,13 +159,17 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param typeDef The type definition to add to the model.
    */
   public void add(TypeDefinition typeDef) {
+    //todo: validate the typeDef;
     String namespace = typeDef.getTargetNamespace();
+    String prefix = addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
       namespacesToSchemas.put(namespace, schemaInfo);
       schemaInfo.setNamespace(namespace);
+      schemaInfo.setFile(prefix + ".xsd");
+      schemaInfo.setLocation(prefix + ".xsd");
     }
 
     schemaInfo.getTypeDefinitions().add(typeDef);
@@ -120,13 +186,17 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param rootElement The root element to add.
    */
   public void add(RootElementDeclaration rootElement) {
+    //todo: validate the root element.
     String namespace = rootElement.getTargetNamespace();
+    String prefix = addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
       namespacesToSchemas.put(namespace, schemaInfo);
       schemaInfo.setNamespace(namespace);
+      schemaInfo.setFile(prefix + ".xsd");
+      schemaInfo.setLocation(prefix + ".xsd");
     }
 
     schemaInfo.getGlobalElements().add(rootElement);
@@ -134,6 +204,34 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (position < 0) {
       this.rootElements.add(-position - 1, rootElement);
     }
+  }
+
+  /**
+   * Add a namespace.
+   *
+   * @param namespace The namespace to add.
+   */
+  public String addNamespace(String namespace) {
+    String prefix = namespacesToPrefixes.get(namespace);
+    if (prefix == null) {
+      prefix = generatePrefix(namespace);
+      namespacesToPrefixes.put(namespace, prefix);
+    }
+    return prefix;
+  }
+
+  /**
+   * Generate a prefix for the given namespace.
+   *
+   * @param namespace The namespace for which to generate a prefix.
+   * @return The prefix that was generated.
+   */
+  protected String generatePrefix(String namespace) {
+    String prefix = "ns" + (prefixIndex++);
+    while (this.namespacesToPrefixes.values().contains(prefix)) {
+      prefix = "ns" + (prefixIndex++);
+    }
+    return prefix;
   }
 
   /**
@@ -178,6 +276,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     else if (isXmlTransient(declaration)) {
       return null;
     }
+    else if (!isRootSchemaElement(declaration)) {
+      return null;
+    }
     else {
       return new RootElementDeclaration(declaration, typeDefinition);
     }
@@ -203,7 +304,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected boolean isSimpleType(TypeDeclaration declaration) {
     if (declaration instanceof InterfaceDeclaration) {
       if (declaration.getAnnotation(XmlType.class) != null) {
-        throw new ValidationException("An interface must not be annotated with @XmlType.");
+        throw new ValidationException(declaration.getPosition(), "An interface must not be annotated with @XmlType.");
       }
 
       return false;
