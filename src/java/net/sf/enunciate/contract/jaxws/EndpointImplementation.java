@@ -17,7 +17,6 @@ public class EndpointImplementation extends DecoratedClassDeclaration {
     super(delegate);
 
     this.endpointInterface = endpointInterface;
-    endpointInterface.getValidator().validate(this);
   }
 
   /**

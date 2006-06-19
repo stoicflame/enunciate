@@ -1,0 +1,38 @@
+[#ftl]
+[#--
+Template for a Schema.  Assumes the existence of a variable
+named "schema" present in the model describing the schema to output.
+--]
+
+[#-- assign the prefix variable for the "this" namespace --]
+[#assign tns=prefix(wsdl.targetNamespace)]
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" targetNamespace="${schema.targetNamespace}"
+    xmlns:testmodel="http://schemas.familysearch.org/web-service-framework/testmodel"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="person">
+    <xs:sequence>
+      <xs:element name="father" type="testmodel:person" minOccurs="0"/>
+      <xs:element name="id" type="xs:string" minOccurs="0"/>
+      <xs:element name="mother" type="testmodel:person" minOccurs="0"/>
+      <xs:element name="names" type="testmodel:name" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="name">
+    <xs:sequence>
+      <xs:element name="type" type="testmodel:nameType" minOccurs="0"/>
+      <xs:element name="value" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="nameType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="MIDDLE"/>
+      <xs:enumeration value="LAST"/>
+      <xs:enumeration value="FIRST"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

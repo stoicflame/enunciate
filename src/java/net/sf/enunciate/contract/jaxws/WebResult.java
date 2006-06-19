@@ -62,7 +62,6 @@ public class WebResult extends SimpleHash implements TypeMirror {
     this.partName = "return";
     put("partName", "return");
 
-    method.getDeclaringEndpointInterface().getValidator().validate(this);
   }
 
   public void accept(TypeVisitor typeVisitor) {

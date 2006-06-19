@@ -2,7 +2,6 @@ package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
 /**
@@ -14,11 +13,10 @@ public class WebFault extends DecoratedTypeDeclaration implements SimpleWebMessa
 
   private javax.xml.ws.WebFault annotation;
 
-  protected WebFault(TypeDeclaration delegate, JAXWSValidator validator) {
+  protected WebFault(TypeDeclaration delegate) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
-    validator.validate(this);
   }
 
   /**

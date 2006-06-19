@@ -31,7 +31,6 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
-    endpointInterface.getValidator().validate(this);
   }
 
   /**
@@ -75,7 +74,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
         throw new IllegalStateException("Unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault(declaration, getDeclaringEndpointInterface().getValidator()));
+      webFaults.add(new WebFault(declaration));
     }
 
     return webFaults;

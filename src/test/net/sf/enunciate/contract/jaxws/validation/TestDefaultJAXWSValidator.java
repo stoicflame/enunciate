@@ -25,26 +25,26 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
 
     //test validation of JSR 181, secion 3.3
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
-    EndpointInterface ei = new EndpointInterface(declaration, alwaysValidValidator);
-    assertTrue(validator.validate(ei).hasErrors(), "A class not annotated with @WebService shouldn't be a valid endpoint interface (jsr 181: 3.3).");
+    EndpointInterface ei = new EndpointInterface(declaration);
+    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "A class not annotated with @WebService shouldn't be a valid endpoint interface (jsr 181: 3.3).");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.InvalidEIReference");
-    ei = new EndpointInterface(declaration, alwaysValidValidator);
-    assertTrue(validator.validate(ei).hasErrors(), "An endpoint implementation with an ei reference to another class shouldn't be valid.");
+    ei = new EndpointInterface(declaration);
+    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint implementation with an ei reference to another class shouldn't be valid.");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.UnknownEIReference");
-    ei = new EndpointInterface(declaration, alwaysValidValidator);
-    assertTrue(validator.validate(ei).hasErrors(), "An endpoint implementation with an ei reference to something unknown shouldn't be valid.");
+    ei = new EndpointInterface(declaration);
+    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint implementation with an ei reference to something unknown shouldn't be valid.");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.InterfaceSpecifiedAsImplementation");
     //if an interface is specified as an implementation, it's still an endpoint interface, just not a valid one.
-    ei = new EndpointInterface(declaration, alwaysValidValidator);
-    assertTrue(validator.validate(ei).hasErrors(), "An interface declaration shouldn't be allowed to specify another endpoint interface (jsr 181: 3.3).");
+    ei = new EndpointInterface(declaration);
+    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An interface declaration shouldn't be allowed to specify another endpoint interface (jsr 181: 3.3).");
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.WebServiceWithoutUniqueMethodNames");
     //an unknown ei reference is correct, but not valid.
-    ei = new EndpointInterface(declaration, alwaysValidValidator);
-    assertTrue(validator.validate(ei).hasErrors(), "An endpoint without unique web method names shouldn't be valid.");
+    ei = new EndpointInterface(declaration);
+    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint without unique web method names shouldn't be valid.");
   }
 
   @Test
@@ -52,28 +52,28 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
     AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
     DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
 
-    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService"), alwaysValidValidator);
+    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService"));
 
     ClassDeclaration declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
     EndpointImplementation impl = new EndpointImplementation(declaration, ei) {
     };
-    assertTrue(validator.validate(impl).hasErrors(), "A class not annotated with @WebService shouldn't be seen as an endpoint implementation.");
+    assertTrue(validator.validateEndpointImplementation(impl).hasErrors(), "A class not annotated with @WebService shouldn't be seen as an endpoint implementation.");
 
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.InvalidEIReference");
     impl = new EndpointImplementation(declaration, ei) {
     };
-    assertTrue(validator.validate(impl).hasErrors(), "A class referencing an ei should be required to implement it.");
+    assertTrue(validator.validateEndpointImplementation(impl).hasErrors(), "A class referencing an ei should be required to implement it.");
 
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebServiceImpl");
     impl = new EndpointImplementation(declaration, ei) {
     };
-    assertFalse(validator.validate(impl).hasErrors());
+    assertFalse(validator.validateEndpointImplementation(impl).hasErrors());
   }
 
   @Test
   public void testWebMethodValidity() throws Exception {
     AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
-    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples"), alwaysValidValidator) {
+    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples")) {
       @Override
       public boolean isWebMethod(MethodDeclaration method) {
         return true;
@@ -131,17 +131,17 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
     }
 
     DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
-    assertTrue(validator.validate(privateMethod).hasErrors(), "A private method shouldn't be a web method.");
-    assertTrue(validator.validate(protectedMethod).hasErrors(), "A protected method shouldn't be a web method.");
-    assertTrue(validator.validate(excludedMethod).hasErrors(), "An excluded method shouldn't be a web method.");
-    assertTrue(validator.validate(nonVoidOneWayMethod).hasErrors(), "A one-way non-void web method shouldn't be valid.");
-    assertTrue(validator.validate(exceptionThrowingOneWayMethod).hasErrors(), "An exception-throwing one-way method shouldn't be valid.");
+    assertTrue(validator.validateWebMethod(privateMethod).hasErrors(), "A private method shouldn't be a web method.");
+    assertTrue(validator.validateWebMethod(protectedMethod).hasErrors(), "A protected method shouldn't be a web method.");
+    assertTrue(validator.validateWebMethod(excludedMethod).hasErrors(), "An excluded method shouldn't be a web method.");
+    assertTrue(validator.validateWebMethod(nonVoidOneWayMethod).hasErrors(), "A one-way non-void web method shouldn't be valid.");
+    assertTrue(validator.validateWebMethod(exceptionThrowingOneWayMethod).hasErrors(), "An exception-throwing one-way method shouldn't be valid.");
     //todo: support rpc methods
     //assertTrue(validator.validate(rpcBareMethod).hasErrors(), "An rpc/bare method shouldn't be valid.");
-    assertTrue(validator.validate(docBare2ParamMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 params.");
-    assertTrue(validator.validate(docBare2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
-    assertFalse(validator.validate(docBareWithHeadersMethod).hasErrors(), "A doc/bare method should be allowed to have headers.");
-    assertFalse(validator.validate(docBareVoidMethod).hasErrors(), "A doc/bare void method should be valid.");
-    assertTrue(validator.validate(docBareVoid2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
+    assertTrue(validator.validateWebMethod(docBare2ParamMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 params.");
+    assertTrue(validator.validateWebMethod(docBare2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
+    assertFalse(validator.validateWebMethod(docBareWithHeadersMethod).hasErrors(), "A doc/bare method should be allowed to have headers.");
+    assertFalse(validator.validateWebMethod(docBareVoidMethod).hasErrors(), "A doc/bare void method should be valid.");
+    assertTrue(validator.validateWebMethod(docBareVoid2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
   }
 }

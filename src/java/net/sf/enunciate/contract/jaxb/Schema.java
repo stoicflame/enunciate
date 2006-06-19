@@ -140,4 +140,18 @@ public class Schema extends DecoratedPackageDeclaration {
 
     return types;
   }
+
+  public Map<String, String> getSpecifiedNamespacePrefixes() {
+    HashMap<String, String> namespacePrefixes = new HashMap<String, String>();
+    if (xmlSchema != null) {
+      XmlNs[] xmlns = xmlSchema.xmlns();
+      if (xmlns != null) {
+        for (XmlNs ns : xmlns) {
+          namespacePrefixes.put(ns.namespaceURI(), ns.prefix());
+        }
+      }
+    }
+
+    return namespacePrefixes;
+  }
 }

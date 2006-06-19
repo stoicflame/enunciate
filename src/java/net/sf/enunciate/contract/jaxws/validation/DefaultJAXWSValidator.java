@@ -22,7 +22,7 @@ import java.util.TreeSet;
 public class DefaultJAXWSValidator implements JAXWSValidator {
 
   //Inherited.
-  public ValidationResult validate(EndpointImplementation impl) throws ValidationException {
+  public ValidationResult validateEndpointImplementation(EndpointImplementation impl) throws ValidationException {
     ValidationResult result = new ValidationResult();
     Declaration delegate = impl.getDelegate();
 
@@ -65,7 +65,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   //Inherited.
-  public ValidationResult validate(EndpointInterface ei) throws ValidationException {
+  public ValidationResult validateEndpointInterface(EndpointInterface ei) throws ValidationException {
     ValidationResult result = new ValidationResult();
 
     Declaration delegate = ei.getDelegate();
@@ -103,7 +103,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   // Inherited.
-  public ValidationResult validate(WebMethod webMethod) throws ValidationException {
+  public ValidationResult validateWebMethod(WebMethod webMethod) throws ValidationException {
     ValidationResult result = new ValidationResult();
     if (!webMethod.getModifiers().contains(Modifier.PUBLIC)) {
       result.getErrors().add("A non-public method cannot be a web method.");
@@ -168,7 +168,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   // Inherited.
-  public ValidationResult validate(RequestWrapper requestWrapper) throws ValidationException {
+  public ValidationResult validateRequestWrapper(RequestWrapper requestWrapper) throws ValidationException {
     ValidationResult result = new ValidationResult();
     if (requestWrapper.getWebMethod().getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
       result.getErrors().add("A BARE web method shouldn't have a request wrapper.");
@@ -177,7 +177,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   // Inherited.
-  public ValidationResult validate(ResponseWrapper responseWrapper) throws ValidationException {
+  public ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper) throws ValidationException {
     ValidationResult result = new ValidationResult();
     if (responseWrapper.getWebMethod().getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
       result.getErrors().add("A BARE web method shouldn't have a response wrapper.");
@@ -190,7 +190,7 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   // Inherited.
-  public ValidationResult validate(WebParam webParam) throws ValidationException {
+  public ValidationResult validateWebParam(WebParam webParam) throws ValidationException {
     ValidationResult result = new ValidationResult();
     DecoratedTypeMirror parameterType = (DecoratedTypeMirror) webParam.getType();
     if (parameterType.isInstanceOf(Holder.class.getName())) {
@@ -200,12 +200,12 @@ public class DefaultJAXWSValidator implements JAXWSValidator {
   }
 
   // Inherited.
-  public ValidationResult validate(WebResult webResult) throws ValidationException {
+  public ValidationResult validateWebResult(WebResult webResult) throws ValidationException {
     return new ValidationResult();
   }
 
   // Inherited.
-  public ValidationResult validate(WebFault webFault) throws ValidationException {
+  public ValidationResult validateWebFault(WebFault webFault) throws ValidationException {
     return new ValidationResult();
   }
 

@@ -11,9 +11,9 @@ import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.template.freemarker.PrefixMethod;
-import net.sf.enunciate.template.freemarker.QNameMethod;
+import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
@@ -34,11 +34,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   private final Map<String, SchemaInfo> namespacesToSchemas;
   private final Map<String, WsdlInfo> namespacesToWsdls;
   private final Map<String, XmlTypeMirror> knownTypes;
-
   private final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
+  private final JAXBValidator jaxbValidator;
+  private final JAXWSValidator jaxwsValidator;
 
-  public EnunciateFreemarkerModel() {
+  public EnunciateFreemarkerModel(JAXBValidator jaxbValidator, JAXWSValidator jaxwsValidator) {
+    this.jaxbValidator = jaxbValidator;
+    this.jaxwsValidator = jaxwsValidator;
     this.namespacesToPrefixes = loadKnownNamespaces();
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
@@ -47,12 +50,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("ns2prefix", this.namespacesToPrefixes);
     setVariable("ns2schema", this.namespacesToSchemas);
     setVariable("ns2wsdl", this.namespacesToWsdls);
-    put("prefix", new PrefixMethod());
-    put("qname", new QNameMethod());
-
-    //todo: initialize the known types, and add the SchemaType annotations...
-    //todo: use the known types in the Element class, if they exist...
-    //todo: change all references to DecoratedTypeMirror and TypeMirror to be XmlTypeMirror, and reference the known types.
   }
 
   /**
@@ -165,6 +162,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(TypeDefinition typeDef) {
     //todo: validate the typeDef;
+    this.knownTypes.putAll(typeDef.getSchema().getSpecifiedTypes());
+    this.namespacesToPrefixes.putAll(typeDef.getSchema().getSpecifiedNamespacePrefixes());
+
     String namespace = typeDef.getTargetNamespace();
     String prefix = addNamespace(namespace);
 
@@ -177,8 +177,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.setLocation(prefix + ".xsd");
     }
     schemaInfo.getTypeDefinitions().add(typeDef);
-
-    this.knownTypes.putAll(typeDef.getSchema().getSpecifiedTypes());
 
     int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
     if (position < 0) {
@@ -193,6 +191,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(RootElementDeclaration rootElement) {
     //todo: validate the root element.
+    this.knownTypes.putAll(rootElement.getSchema().getSpecifiedTypes());
+    this.namespacesToPrefixes.putAll(rootElement.getSchema().getSpecifiedNamespacePrefixes());
+
     String namespace = rootElement.getTargetNamespace();
     String prefix = addNamespace(namespace);
 
@@ -205,8 +206,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.setLocation(prefix + ".xsd");
     }
     schemaInfo.getGlobalElements().add(rootElement);
-
-    this.knownTypes.putAll(rootElement.getSchema().getSpecifiedTypes());
 
     int position = Collections.binarySearch(this.rootElements, rootElement, CLASS_COMPARATOR);
     if (position < 0) {

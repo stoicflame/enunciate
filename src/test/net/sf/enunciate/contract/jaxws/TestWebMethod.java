@@ -16,7 +16,7 @@ public class TestWebMethod extends EnunciateContractTestCase {
   @Test
   public void testName() throws Exception {
     AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
-    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples"), alwaysValidValidator);
+    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples"));
 
     WebMethod specialNameMethod = null;
     WebMethod docBareVoidMethod = null;

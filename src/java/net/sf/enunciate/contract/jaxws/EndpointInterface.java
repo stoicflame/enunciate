@@ -4,7 +4,6 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import net.sf.enunciate.contract.ValidationException;
-import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
@@ -21,14 +20,11 @@ import java.util.*;
 public class EndpointInterface extends DecoratedTypeDeclaration {
 
   private final javax.jws.WebService annotation;
-  private final JAXWSValidator validator;
 
-  public EndpointInterface(TypeDeclaration delegate, JAXWSValidator validator) {
+  public EndpointInterface(TypeDeclaration delegate) {
     super(delegate);
 
     annotation = getAnnotation(javax.jws.WebService.class);
-    this.validator = validator;
-    validator.validate(this);
   }
 
   /**
@@ -309,15 +305,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    */
   public String getPortAddressFor(BindingType bindingType) {
     return getPortAddresses().get(bindingType);
-  }
-
-  /**
-   * The validator used to validate this endpoint interface and its members.
-   *
-   * @return The validator used to validate this endpoint interface and its members.
-   */
-  public JAXWSValidator getValidator() {
-    return validator;
   }
 
   // Inherited.

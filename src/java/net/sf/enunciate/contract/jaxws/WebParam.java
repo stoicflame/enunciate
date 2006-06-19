@@ -25,7 +25,6 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
     }
 
     annotation = delegate.getAnnotation(javax.jws.WebParam.class);
-    method.getDeclaringEndpointInterface().getValidator().validate(this);
   }
 
   /**

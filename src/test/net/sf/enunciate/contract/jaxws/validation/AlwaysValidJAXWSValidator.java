@@ -8,35 +8,35 @@ import net.sf.enunciate.contract.jaxws.*;
  */
 public class AlwaysValidJAXWSValidator implements JAXWSValidator {
 
-  public ValidationResult validate(EndpointImplementation impl) {
+  public ValidationResult validateEndpointImplementation(EndpointImplementation impl) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(EndpointInterface ei) {
+  public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(WebMethod webMethod) {
+  public ValidationResult validateWebMethod(WebMethod webMethod) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(RequestWrapper requestWrapper) {
+  public ValidationResult validateRequestWrapper(RequestWrapper requestWrapper) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(ResponseWrapper responseWrapper) {
+  public ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(WebParam webParam) {
+  public ValidationResult validateWebParam(WebParam webParam) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(WebResult webResult) {
+  public ValidationResult validateWebResult(WebResult webResult) {
     return new ValidationResult();
   }
 
-  public ValidationResult validate(WebFault webFault) {
+  public ValidationResult validateWebFault(WebFault webFault) {
     return new ValidationResult();
   }
 }

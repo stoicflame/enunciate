@@ -16,7 +16,7 @@ public interface JAXWSValidator {
    *
    * @param impl The endpoint implementation to validate.
    */
-  ValidationResult validate(EndpointImplementation impl);
+  ValidationResult validateEndpointImplementation(EndpointImplementation impl);
 
   /**
    * Validates an endpoint interface.
@@ -24,7 +24,7 @@ public interface JAXWSValidator {
    * @param ei The endpoint interface to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(EndpointInterface ei);
+  ValidationResult validateEndpointInterface(EndpointInterface ei);
 
   /**
    * Validates a web method.
@@ -32,7 +32,7 @@ public interface JAXWSValidator {
    * @param webMethod The web method to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(WebMethod webMethod);
+  ValidationResult validateWebMethod(WebMethod webMethod);
 
   /**
    * Validates a request wrapper.
@@ -40,7 +40,7 @@ public interface JAXWSValidator {
    * @param requestWrapper The request wrapper to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(RequestWrapper requestWrapper);
+  ValidationResult validateRequestWrapper(RequestWrapper requestWrapper);
 
   /**
    * Validates a response wrapper.
@@ -48,7 +48,7 @@ public interface JAXWSValidator {
    * @param responseWrapper The response wrapper to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(ResponseWrapper responseWrapper);
+  ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper);
 
   /**
    * Validates a web param.
@@ -56,7 +56,7 @@ public interface JAXWSValidator {
    * @param webParam The web param to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(WebParam webParam);
+  ValidationResult validateWebParam(WebParam webParam);
 
   /**
    * Validates a web result.
@@ -64,7 +64,7 @@ public interface JAXWSValidator {
    * @param webResult The web result to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(WebResult webResult);
+  ValidationResult validateWebResult(WebResult webResult);
 
   /**
    * Validates a web fault.
@@ -72,5 +72,5 @@ public interface JAXWSValidator {
    * @param webFault The web fault to validate.
    * @throws ValidationException If there were validation errors.
    */
-  ValidationResult validate(WebFault webFault);
+  ValidationResult validateWebFault(WebFault webFault);
 }

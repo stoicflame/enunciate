@@ -1,7 +1,10 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.TypeMirror;
+import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.util.QName;
 
 /**
@@ -16,11 +19,16 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
   }
 
   @Override
-  public TypeMirror getBaseType() {
-    TypeMirror baseType = super.getBaseType();
+  public XmlTypeMirror getBaseType() {
+    XmlTypeMirror baseType = super.getBaseType();
 
     if (baseType == null) {
-      baseType = getSuperclass();
+      try {
+        baseType = XmlTypeDecorator.decorate(getSuperclass());
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
     }
 
     return baseType;

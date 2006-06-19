@@ -6,6 +6,7 @@ import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
 import net.sf.enunciate.contract.jaxws.validation.ExceptionThrowingJAXWSValidatorWrapper;
@@ -32,22 +33,23 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   //Inherited.
   @Override
   protected FreemarkerModel newRootModel() {
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
-
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-
     //todo: read the jaxwsValidator types from the config.
     JAXWSValidator jaxwsValidator = new DefaultJAXWSValidator();
     //todo: create a mechanism to report errors before doing any actions other than just throwing an exception on the first one.
     jaxwsValidator = new ExceptionThrowingJAXWSValidatorWrapper(jaxwsValidator);
 
     //todo: validate the jaxb types.
-    //JAXBValidator jaxbValidator = null;
+    JAXBValidator jaxbValidator = null;
 
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel(jaxbValidator, jaxwsValidator);
+    model.put("prefix", new PrefixMethod());
+    model.put("qname", new QNameMethod());
+
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
       if (isEndpointInterface(declaration)) {
-        EndpointInterface endpointInterface = new EndpointInterface(declaration, jaxwsValidator);
+        EndpointInterface endpointInterface = new EndpointInterface(declaration);
 
         if (isVerbose()) {
           System.out.println(declaration.getQualifiedName() + " to be considered as an endpoint interface.");
@@ -116,6 +118,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     transforms.add(new ForEachWebMessageTransform(namespace));
     transforms.add(new ForEachWebMethodTransform(namespace));
     transforms.add(new ForEachWsdlTransform(namespace));
+    transforms.add(new ForEachSchemaTransform(namespace));
     return transforms;
   }
 

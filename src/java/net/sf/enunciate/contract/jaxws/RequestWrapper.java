@@ -18,8 +18,6 @@ public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
    */
   protected RequestWrapper(WebMethod webMethod) {
     this.webMethod = webMethod;
-
-    webMethod.getDeclaringEndpointInterface().getValidator().validate(this);
   }
 
   /**

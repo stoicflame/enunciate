@@ -4,12 +4,12 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -34,11 +34,16 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   // Inherited.
   @Override
-  public TypeMirror getBaseType() {
+  public XmlTypeMirror getBaseType() {
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Types types = env.getTypeUtils();
     TypeDeclaration declaration = env.getTypeDeclaration(xmlEnum.value().getName());
-    return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
+    try {
+      return XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+    }
+    catch (XmlTypeException e) {
+      throw new ValidationException(getPosition(), e.getMessage());
+    }
   }
 
   /**

@@ -24,8 +24,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(EndpointImplementation impl) throws ValidationException {
-    ValidationResult result = delegate.validate(impl);
+  public ValidationResult validateEndpointImplementation(EndpointImplementation impl) throws ValidationException {
+    ValidationResult result = delegate.validateEndpointImplementation(impl);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -44,8 +44,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(EndpointInterface ei) throws ValidationException {
-    ValidationResult result = delegate.validate(ei);
+  public ValidationResult validateEndpointInterface(EndpointInterface ei) throws ValidationException {
+    ValidationResult result = delegate.validateEndpointInterface(ei);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -64,8 +64,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(WebMethod webMethod) throws ValidationException {
-    ValidationResult result = delegate.validate(webMethod);
+  public ValidationResult validateWebMethod(WebMethod webMethod) throws ValidationException {
+    ValidationResult result = delegate.validateWebMethod(webMethod);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -84,8 +84,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(RequestWrapper requestWrapper) throws ValidationException {
-    ValidationResult result = delegate.validate(requestWrapper);
+  public ValidationResult validateRequestWrapper(RequestWrapper requestWrapper) throws ValidationException {
+    ValidationResult result = delegate.validateRequestWrapper(requestWrapper);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -104,8 +104,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(ResponseWrapper responseWrapper) throws ValidationException {
-    ValidationResult result = delegate.validate(responseWrapper);
+  public ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper) throws ValidationException {
+    ValidationResult result = delegate.validateResponseWrapper(responseWrapper);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -124,8 +124,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(WebParam webParam) throws ValidationException {
-    ValidationResult result = delegate.validate(webParam);
+  public ValidationResult validateWebParam(WebParam webParam) throws ValidationException {
+    ValidationResult result = delegate.validateWebParam(webParam);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -144,8 +144,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(WebResult webResult) throws ValidationException {
-    ValidationResult result = delegate.validate(webResult);
+  public ValidationResult validateWebResult(WebResult webResult) throws ValidationException {
+    ValidationResult result = delegate.validateWebResult(webResult);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
@@ -164,8 +164,8 @@ public class ExceptionThrowingJAXWSValidatorWrapper implements JAXWSValidator {
    *
    * @throws ValidationException If there are any errors.
    */
-  public ValidationResult validate(WebFault webFault) throws ValidationException {
-    ValidationResult result = delegate.validate(webFault);
+  public ValidationResult validateWebFault(WebFault webFault) throws ValidationException {
+    ValidationResult result = delegate.validateWebFault(webFault);
     if (result.hasWarnings()) {
       for (String warning : result.getWarnings()) {
         Context.getCurrentEnvironment().getMessager().printWarning(warning);
