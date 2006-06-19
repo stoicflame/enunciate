@@ -1,7 +1,7 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.TypeMirror;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 
 /**
  * A simple type definition.
@@ -19,11 +19,11 @@ public class SimpleTypeDefinition extends TypeDefinition {
    *
    * @return The base type for this simple type.
    */
-  public TypeMirror getBaseType() {
+  public XmlTypeMirror getBaseType() {
     Value value = getValue();
 
     if (value != null) {
-      return value.getAccessorType();
+      return value.getBaseType();
     }
 
     return null;

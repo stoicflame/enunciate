@@ -1,10 +1,14 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.PackageDeclaration;
+import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
 
 import javax.xml.bind.annotation.*;
-import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,43 +113,28 @@ public class Schema extends DecoratedPackageDeclaration {
    *
    * @return The map of classes to their xml schema types.
    */
-  public Map<Class, QName> getXmlSchemaTypes() {
-    HashMap<Class, QName> types = new HashMap<Class, QName>();
+  public Map<String, XmlTypeMirror> getSpecifiedTypes() {
+    HashMap<String, XmlTypeMirror> types = new HashMap<String, XmlTypeMirror>();
 
     XmlSchemaType schemaType = getAnnotation(XmlSchemaType.class);
     XmlSchemaTypes schemaTypes = getAnnotation(XmlSchemaTypes.class);
-    if ((schemaType != null) && (schemaTypes != null)) {
-      throw new IllegalArgumentException(getPosition() + ": " + XmlSchemaType.class.getName() + " cannot be used with " +
-        XmlSchemaTypes.class.getName() + ", according to the spec.");
-    }
 
-    if (schemaType != null) {
-      if (schemaType.type() == XmlSchemaType.DEFAULT.class) {
-        throw new IllegalArgumentException(getPosition() + ": A type class must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+    if ((schemaType != null) || (schemaTypes != null)) {
+      ArrayList<XmlSchemaType> allSpecifiedTypes = new ArrayList<XmlSchemaType>();
+      if (schemaType != null) {
+        allSpecifiedTypes.add(schemaType);
       }
 
-      String name = schemaType.name();
-      //todo: validate that 'name' is a valid xml schema type as detailed in 6.2.2 in the spec.
+      if (schemaTypes != null) {
+        allSpecifiedTypes.addAll(Arrays.asList(schemaTypes.value()));
+      }
 
-      String namespace = schemaType.namespace();
-      //todo: validate that 'namespace' is a valid xml schema namespace?
-
-      types.put(schemaType.type(), new QName(namespace, name));
-    }
-    else if (schemaTypes != null) {
-      for (XmlSchemaType type : schemaTypes.value()) {
-        if (type.type() == XmlSchemaType.DEFAULT.class) {
-          throw new IllegalArgumentException(getPosition() + ": A type class must be specified in " + XmlSchemaType.class.getName() + " when being listed with "
-            + XmlSchemaTypes.class.getName() + ".");
+      for (XmlSchemaType specifiedType : allSpecifiedTypes) {
+        if (specifiedType.type() == XmlSchemaType.DEFAULT.class) {
+          throw new ValidationException(getPosition(), "A type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
         }
 
-        String name = type.name();
-        //todo: validate that 'name' is a valid xml schema type as detailed in 6.2.2 in the spec.
-
-        String namespace = type.namespace();
-        //todo: validate that 'namespace' is a valid xml schema namespace?
-
-        types.put(type.type(), new QName(namespace, name));
+        types.put(specifiedType.type().getName(), new SpecifiedXmlType(specifiedType));
       }
     }
 

@@ -5,9 +5,12 @@ import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.util.Types;
+import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.XmlClassType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -25,7 +28,7 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final DecoratedTypeMirror explicitBaseType;
+  private final XmlTypeMirror explicitBaseType;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef);
@@ -54,14 +57,20 @@ public class ElementRef extends Element {
     else if (isCollectionType()) {
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
       //todo: what if it's a parameteric collection type of JAXBElements?
-      DecoratedTypeMirror baseType = getBaseType();
+      XmlTypeMirror baseType = getBaseType();
       AnnotationProcessorEnvironment env = getEnv();
       Types typeUtils = env.getTypeUtils();
       for (TypeDeclaration type : env.getTypeDeclarations()) {
         XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
         DeclaredType declaredType = typeUtils.getDeclaredType(type);
         if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, baseType))) {
-          DecoratedTypeMirror explicitType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType);
+          XmlTypeMirror explicitType = null;
+          try {
+            explicitType = XmlTypeDecorator.decorate(declaredType);
+          }
+          catch (XmlTypeException e) {
+            throw new ValidationException(getPosition(), e.getMessage());
+          }
           this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
         }
       }
@@ -74,7 +83,12 @@ public class ElementRef extends Element {
       AnnotationProcessorEnvironment env = getEnv();
       Types types = env.getTypeUtils();
       TypeDeclaration declaration = env.getTypeDeclaration(xmlElementRef.type().getName());
-      this.explicitBaseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
+      try {
+        this.explicitBaseType = XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
     }
     else {
       this.explicitBaseType = null;
@@ -98,7 +112,12 @@ public class ElementRef extends Element {
       AnnotationProcessorEnvironment env = getEnv();
       Types types = env.getTypeUtils();
       TypeDeclaration declaration = env.getTypeDeclaration(xmlElementRef.type().getName());
-      this.explicitBaseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
+      try {
+        this.explicitBaseType = XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
     }
     else {
       this.explicitBaseType = null;
@@ -112,7 +131,7 @@ public class ElementRef extends Element {
    * @param typedef  The type definition.
    * @param baseType The specific base type.
    */
-  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, DecoratedTypeMirror baseType) {
+  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, XmlTypeMirror baseType) {
     super(delegate, typedef);
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
@@ -128,8 +147,8 @@ public class ElementRef extends Element {
    */
   @Override
   public String getName() {
-    DecoratedTypeMirror baseType = getBaseType();
-    if (baseType.isInstanceOf(JAXBElement.class.getName())) {
+    XmlTypeMirror baseType = getBaseType();
+    if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).isInstanceOf(JAXBElement.class.getName()))) {
       //todo: do some null checking?  What if XmlElementRefs is specified?
       //todo: what if this is referencing a non-global element for this namespace?
       return xmlElementRef.name();
@@ -155,8 +174,8 @@ public class ElementRef extends Element {
    */
   @Override
   public String getNamespace() {
-    DecoratedTypeMirror baseType = getBaseType();
-    if (baseType.isInstanceOf(JAXBElement.class.getName())) {
+    XmlTypeMirror baseType = getBaseType();
+    if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).isInstanceOf(JAXBElement.class.getName()))) {
       //todo: do some null checking?  What if XmlElementRefs is specified?
       return xmlElementRef.namespace();
     }
@@ -180,7 +199,7 @@ public class ElementRef extends Element {
    * @return The base type.
    */
   @Override
-  public DecoratedTypeMirror getBaseType() {
+  public XmlTypeMirror getBaseType() {
     if (explicitBaseType != null) {
       return explicitBaseType;
     }
@@ -212,17 +231,6 @@ public class ElementRef extends Element {
   @Override
   public int getMinOccurs() {
     return isRequired() ? 1 : 0;
-  }
-
-  /**
-   * Whether the accessor type is a collection type.
-   *
-   * @return Whether the accessor type is a collection type.
-   */
-  @Override
-  public boolean isCollectionType() {
-    DecoratedTypeMirror accessorType = getAccessorType();
-    return accessorType.isArray() || accessorType.isCollection();
   }
 
   /**

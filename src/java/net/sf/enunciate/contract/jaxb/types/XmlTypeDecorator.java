@@ -3,6 +3,8 @@ package net.sf.enunciate.contract.jaxb.types;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
 
+import java.util.Collection;
+
 /**
  * A decorator that decorates the relevant type mirrors as xml type mirrors.
  *
@@ -21,6 +23,9 @@ public class XmlTypeDecorator implements TypeVisitor {
    * @throws XmlTypeException If the type is invalid or unknown as an xml type.
    */
   public static XmlTypeMirror decorate(TypeMirror typeMirror) throws XmlTypeException {
+    if (typeMirror instanceof XmlTypeMirror) {
+      return ((XmlTypeMirror) typeMirror);
+    }
     XmlTypeDecorator instance = new XmlTypeDecorator();
     typeMirror.accept(instance);
 
@@ -57,7 +62,21 @@ public class XmlTypeDecorator implements TypeVisitor {
 
   public void visitClassType(ClassType classType) {
     try {
-      this.decoratedTypeMirror = new XmlClassType(classType);
+      XmlClassType xmlClassType = new XmlClassType(classType);
+      if (xmlClassType.isCollection()) {
+        //if it's a colleciton type, the xml type is its component type.
+        Collection<TypeMirror> actualTypeArguments = classType.getActualTypeArguments();
+        if (actualTypeArguments.isEmpty()) {
+          //no type arguments, java.lang.Object type.
+          this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
+        }
+
+        TypeMirror componentType = actualTypeArguments.iterator().next();
+        componentType.accept(this);
+      }
+      else {
+        this.decoratedTypeMirror = xmlClassType;
+      }
     }
     catch (XmlTypeException e) {
       this.errorMessage = e.getMessage();

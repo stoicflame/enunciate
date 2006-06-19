@@ -14,20 +14,20 @@ public interface XmlTypeMirror extends TypeMirror {
    *
    * @return The (local) name of this xml type.
    */
-  public String getName();
+  String getName();
 
   /**
    * The namespace for this xml type.
    *
    * @return The namespace for this xml type.
    */
-  public String getNamespace();
+  String getNamespace();
 
   /**
    * Whether this type is anonymous.
    *
    * @return Whether this type is anonymous.
    */
-  public boolean isAnonymous();
+  boolean isAnonymous();
 
 }

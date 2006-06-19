@@ -1,22 +1,22 @@
 package net.sf.enunciate.contract.jaxb;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.Types;
-import net.sf.jelly.apt.Context;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
-import javax.xml.bind.annotation.XmlList;
-import java.util.Collection;
+import javax.xml.bind.annotation.*;
 
 /**
  * An accessor for a field or method value into a type.
@@ -52,21 +52,18 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    *
    * @return The type of the accessor.
    */
-  public DecoratedTypeMirror getAccessorType() {
-    TypeMirror propertyType;
+  public TypeMirror getAccessorType() {
     Declaration delegate = getDelegate();
     if (delegate instanceof FieldDeclaration) {
-      propertyType = ((FieldDeclaration) delegate).getType();
+      return ((FieldDeclaration) delegate).getType();
     }
     else {
-      propertyType = ((PropertyDeclaration) delegate).getPropertyType();
+      return ((PropertyDeclaration) delegate).getPropertyType();
     }
-
-    return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(propertyType);
   }
 
   /**
-   * The base type of the accessor. The base type is either:
+   * The base xml type of the accessor. The base type is either:
    * <p/>
    * <ol>
    * <li>The accessor type.</li>
@@ -75,25 +72,35 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    *
    * @return The base type.
    */
-  public DecoratedTypeMirror getBaseType() {
-    DecoratedTypeMirror baseType = getAccessorType();
-
-    if (baseType.isArray()) {
-      baseType = (DecoratedTypeMirror) ((ArrayType) baseType).getComponentType();
-    }
-    else if (baseType.isCollection()) {
-      Collection<TypeMirror> actualTypeArguments = ((DeclaredType) baseType).getActualTypeArguments();
-      if (actualTypeArguments.isEmpty()) {
-        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-        Types types = env.getTypeUtils();
-        TypeDeclaration declaration = env.getTypeDeclaration(Object.class.getName());
-        return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
-      }
-
-      return (DecoratedTypeMirror) actualTypeArguments.iterator().next();
+  public XmlTypeMirror getBaseType() {
+    //first check to see if the base type is dictated by a specific annotation.
+    XmlSchemaType schemaType = getAnnotation(XmlSchemaType.class);
+    if (schemaType != null) {
+      return new SpecifiedXmlType(schemaType);
     }
 
-    return baseType;
+    XmlID xmlID = getAnnotation(XmlID.class);
+    if (xmlID != null) {
+      return KnownXmlType.ID;
+    }
+
+    XmlIDREF xmlIDREF = getAnnotation(XmlIDREF.class);
+    if (xmlIDREF != null) {
+      return KnownXmlType.IDREF;
+    }
+
+    XmlAttachmentRef attachmentRef = getAnnotation(XmlAttachmentRef.class);
+    if (attachmentRef != null) {
+      return KnownXmlType.SWAREF;
+    }
+
+    TypeMirror baseType = getAccessorType();
+    try {
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(baseType);
+    }
+    catch (XmlTypeException e) {
+      throw new ValidationException(getPosition(), e.getMessage());
+    }
   }
 
   /**
@@ -115,4 +122,13 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
   }
 
 
+  /**
+   * Whether the accessor type is a collection type.
+   *
+   * @return Whether the accessor type is a collection type.
+   */
+  public boolean isCollectionType() {
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
+    return accessorType.isArray() || accessorType.isCollection();
+  }
 }

@@ -1,11 +1,16 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.template.freemarker.PrefixMethod;
 import net.sf.enunciate.template.freemarker.QNameMethod;
@@ -28,7 +33,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   private final Map<String, String> namespacesToPrefixes;
   private final Map<String, SchemaInfo> namespacesToSchemas;
   private final Map<String, WsdlInfo> namespacesToWsdls;
-  private final Map<String, KnownXmlType> knownTypes;
+  private final Map<String, XmlTypeMirror> knownTypes;
 
   private final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
@@ -74,8 +79,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @return The map of known types, keyed off the Java fqn.
    */
-  protected Map<String, KnownXmlType> loadKnownTypes() {
-    HashMap<String, KnownXmlType> knownTypes = new HashMap<String, KnownXmlType>();
+  protected Map<String, XmlTypeMirror> loadKnownTypes() {
+    HashMap<String, XmlTypeMirror> knownTypes = new HashMap<String, XmlTypeMirror>();
 
     knownTypes.put(String.class.getName(), KnownXmlType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownXmlType.INTEGER);
@@ -171,8 +176,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.setFile(prefix + ".xsd");
       schemaInfo.setLocation(prefix + ".xsd");
     }
-
     schemaInfo.getTypeDefinitions().add(typeDef);
+
+    this.knownTypes.putAll(typeDef.getSchema().getSpecifiedTypes());
 
     int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
     if (position < 0) {
@@ -198,8 +204,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.setFile(prefix + ".xsd");
       schemaInfo.setLocation(prefix + ".xsd");
     }
-
     schemaInfo.getGlobalElements().add(rootElement);
+
+    this.knownTypes.putAll(rootElement.getSchema().getSpecifiedTypes());
+
     int position = Collections.binarySearch(this.rootElements, rootElement, CLASS_COMPARATOR);
     if (position < 0) {
       this.rootElements.add(-position - 1, rootElement);
@@ -232,6 +240,24 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       prefix = "ns" + (prefixIndex++);
     }
     return prefix;
+  }
+
+  /**
+   * Get the xml type for the specified type.
+   *
+   * @param type The type.
+   * @return The xml type for the specified type.
+   */
+  public XmlTypeMirror getXmlType(TypeMirror type) throws XmlTypeException {
+    //first make sure it's a known type.
+    if (type instanceof DeclaredType) {
+      TypeDeclaration declaration = ((DeclaredType) type).getDeclaration();
+      if ((declaration != null) && (knownTypes.containsKey(declaration.getQualifiedName()))) {
+        return knownTypes.get(declaration.getQualifiedName());
+      }
+    }
+
+    return XmlTypeDecorator.decorate(type);
   }
 
   /**

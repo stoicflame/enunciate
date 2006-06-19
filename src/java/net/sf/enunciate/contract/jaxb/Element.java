@@ -3,10 +3,16 @@ package net.sf.enunciate.contract.jaxb;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -94,12 +100,17 @@ public class Element extends Accessor {
    * @return The base type.
    */
   @Override
-  public DecoratedTypeMirror getBaseType() {
+  public XmlTypeMirror getBaseType() {
     if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
       AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
       Types types = env.getTypeUtils();
       TypeDeclaration declaration = env.getTypeDeclaration(xmlElement.type().getName());
-      return (DecoratedTypeMirror) TypeMirrorDecorator.decorate(types.getDeclaredType(declaration));
+      try {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(types.getDeclaredType(declaration));
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
     }
 
     return super.getBaseType();
@@ -145,7 +156,14 @@ public class Element extends Accessor {
       return 1;
     }
 
-    return getBaseType().isPrimitive() ? 1 : 0;
+    TypeMirror accessorType = getAccessorType();
+    boolean primitive = (accessorType instanceof PrimitiveType);
+    if ((!primitive) && (accessorType instanceof ArrayType)) {
+      //we have to check if the component type if its an array type, too.
+      primitive = (((ArrayType) accessorType).getComponentType() instanceof PrimitiveType);
+    }
+
+    return primitive ? 1 : 0;
   }
 
   /**
@@ -155,16 +173,6 @@ public class Element extends Accessor {
    */
   public String getMaxOccurs() {
     return isCollectionType() ? "unbounded" : "1";
-  }
-
-  /**
-   * Whether the accessor type is a collection type.
-   *
-   * @return Whether the accessor type is a collection type.
-   */
-  public boolean isCollectionType() {
-    DecoratedTypeMirror accessorType = getAccessorType();
-    return accessorType.isArray() || accessorType.isCollection();
   }
 
   /**
