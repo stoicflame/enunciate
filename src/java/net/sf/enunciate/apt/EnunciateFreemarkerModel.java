@@ -5,15 +5,15 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
-import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
@@ -36,12 +36,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   private final Map<String, XmlTypeMirror> knownTypes;
   private final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
-  private final JAXBValidator jaxbValidator;
-  private final JAXWSValidator jaxwsValidator;
+  private final Validator validator;
 
-  public EnunciateFreemarkerModel(JAXBValidator jaxbValidator, JAXWSValidator jaxwsValidator) {
-    this.jaxbValidator = jaxbValidator;
-    this.jaxwsValidator = jaxwsValidator;
+  public EnunciateFreemarkerModel(Validator validator) {
+    this.validator = validator;
     this.namespacesToPrefixes = loadKnownNamespaces();
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
@@ -128,8 +126,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Add an endpoint interface to the model.
    *
    * @param ei The endpoint interface to add to the model.
+   * @return The results of validating the endpoint interface.
    */
-  public void add(EndpointInterface ei) {
+  public ValidationResult add(EndpointInterface ei) {
     //todo: validate the ei;
     String namespace = ei.getTargetNamespace();
 
@@ -153,6 +152,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     }
 
     wsdlInfo.getEndpointInterfaces().add(ei);
+
+    return validator.validateEndpointInterface(ei);
   }
 
   /**
@@ -160,7 +161,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @param typeDef The type definition to add to the model.
    */
-  public void add(TypeDefinition typeDef) {
+  public ValidationResult add(TypeDefinition typeDef) {
     //todo: validate the typeDef;
     this.knownTypes.putAll(typeDef.getSchema().getSpecifiedTypes());
     this.namespacesToPrefixes.putAll(typeDef.getSchema().getSpecifiedNamespacePrefixes());
@@ -182,6 +183,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (position < 0) {
       this.typeDefinitions.add(-position - 1, typeDef);
     }
+
+    return typeDef.accept(this.validator);
   }
 
   /**
@@ -189,7 +192,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @param rootElement The root element to add.
    */
-  public void add(RootElementDeclaration rootElement) {
+  public ValidationResult add(RootElementDeclaration rootElement) {
     //todo: validate the root element.
     this.knownTypes.putAll(rootElement.getSchema().getSpecifiedTypes());
     this.namespacesToPrefixes.putAll(rootElement.getSchema().getSpecifiedNamespacePrefixes());
@@ -211,6 +214,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (position < 0) {
       this.rootElements.add(-position - 1, rootElement);
     }
+
+    return this.validator.validateRootElement(rootElement);
   }
 
   /**
@@ -368,6 +373,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     protected GenericTypeDefinition(ClassDeclaration delegate) {
       super(delegate);
+    }
+
+    public ValidationResult accept(Validator validator) {
+      return new ValidationResult();
     }
   }
 }

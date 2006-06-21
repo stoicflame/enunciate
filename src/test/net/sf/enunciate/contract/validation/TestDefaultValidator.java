@@ -1,4 +1,4 @@
-package net.sf.enunciate.contract.jaxws.validation;
+package net.sf.enunciate.contract.validation;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
@@ -16,12 +16,11 @@ import java.util.Collection;
 /**
  * @author Ryan Heaton
  */
-public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
+public class TestDefaultValidator extends EnunciateContractTestCase {
 
   @Test
   public void testEndpointInterfaceValidity() throws Exception {
-    AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
-    DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
+    DefaultValidator validator = new DefaultValidator();
 
     //test validation of JSR 181, secion 3.3
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
@@ -49,8 +48,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
 
   @Test
   public void testEndpointImplementationValidity() throws Exception {
-    AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
-    DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
+    DefaultValidator validator = new DefaultValidator();
 
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService"));
 
@@ -72,7 +70,6 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
 
   @Test
   public void testWebMethodValidity() throws Exception {
-    AlwaysValidJAXWSValidator alwaysValidValidator = new AlwaysValidJAXWSValidator();
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples")) {
       @Override
       public boolean isWebMethod(MethodDeclaration method) {
@@ -130,7 +127,7 @@ public class TestDefaultJAXWSValidator extends EnunciateContractTestCase {
       }
     }
 
-    DefaultJAXWSValidator validator = new DefaultJAXWSValidator();
+    DefaultValidator validator = new DefaultValidator();
     assertTrue(validator.validateWebMethod(privateMethod).hasErrors(), "A private method shouldn't be a web method.");
     assertTrue(validator.validateWebMethod(protectedMethod).hasErrors(), "A protected method shouldn't be a web method.");
     assertTrue(validator.validateWebMethod(excludedMethod).hasErrors(), "An excluded method shouldn't be a web method.");

@@ -24,44 +24,26 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   private final javax.jws.WebMethod annotation;
   private final boolean oneWay;
   private final EndpointInterface endpointInterface;
+  private final WebResult webResult;
+  private final Collection<WebParam> webParams;
+  private final Collection<WebFault> webFaults;
+  private final Collection<WebMessage> messages;
 
   protected WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
 
-    annotation = getAnnotation(javax.jws.WebMethod.class);
+    this.annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
-  }
+    this.webResult = new WebResult(getReturnType(), this);
 
-  /**
-   * The web result of this web method.
-   *
-   * @return The web result of this web method.
-   */
-  public WebResult getWebResult() {
-    return new WebResult(getReturnType(), this);
-  }
-
-  /**
-   * The list of web parameters for this method.
-   *
-   * @return The list of web parameters for this method.
-   */
-  public Collection<WebParam> getWebParameters() {
     Collection<ParameterDeclaration> parameters = getParameters();
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());
     for (ParameterDeclaration parameter : parameters) {
       webParameters.add(new WebParam(parameter, this));
     }
-    return webParameters;
-  }
+    this.webParams = webParameters;
 
-  /**
-   * The list of web faults thrown by this method.
-   *
-   * @return The list of web faults thrown by this method.
-   */
-  public Collection<WebFault> getWebFaults() {
     Collection<WebFault> webFaults = new ArrayList<WebFault>();
     for (ReferenceType referenceType : getThrownTypes()) {
       if (!(referenceType instanceof DeclaredType)) {
@@ -76,16 +58,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
       webFaults.add(new WebFault(declaration));
     }
+    this.webFaults = webFaults;
 
-    return webFaults;
-  }
-
-  /**
-   * The messages of this web method.
-   *
-   * @return The messages of this web method.
-   */
-  public Collection<WebMessage> getMessages() {
     Collection<WebMessage> messages = new ArrayList<WebMessage>();
     SOAPBinding.Style bindingStyle = getSoapBindingStyle();
 
@@ -122,7 +96,43 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
       throw new UnsupportedOperationException(getPosition() + ": Sorry, " + bindingStyle + "-style methods aren't supported yet.");
     }
 
-    return messages;
+    this.messages = messages;
+  }
+
+  /**
+   * The web result of this web method.
+   *
+   * @return The web result of this web method.
+   */
+  public WebResult getWebResult() {
+    return this.webResult;
+  }
+
+  /**
+   * The list of web parameters for this method.
+   *
+   * @return The list of web parameters for this method.
+   */
+  public Collection<WebParam> getWebParameters() {
+    return this.webParams;
+  }
+
+  /**
+   * The list of web faults thrown by this method.
+   *
+   * @return The list of web faults thrown by this method.
+   */
+  public Collection<WebFault> getWebFaults() {
+    return this.webFaults;
+  }
+
+  /**
+   * The messages of this web method.
+   *
+   * @return The messages of this web method.
+   */
+  public Collection<WebMessage> getMessages() {
+    return this.messages;
   }
 
   /**

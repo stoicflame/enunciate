@@ -3,7 +3,7 @@ package net.sf.enunciate.contract.jaxws;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
-import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
@@ -20,11 +20,63 @@ import java.util.*;
 public class EndpointInterface extends DecoratedTypeDeclaration {
 
   private final javax.jws.WebService annotation;
+  private final List<WebMethod> webMethods;
+  private final Collection<EndpointImplementation> impls;
 
   public EndpointInterface(TypeDeclaration delegate) {
     super(delegate);
 
     annotation = getAnnotation(javax.jws.WebService.class);
+    impls = new ArrayList<EndpointImplementation>();
+    if (annotation != null) {
+      if (isClass()) {
+        //if the declaration is a class, the endpoint interface is implied...
+        impls.add(new EndpointImplementation((ClassDeclaration) getDelegate(), this));
+      }
+      else {
+        for (TypeDeclaration declaration : getAnnotationProcessorEnvironment().getTypeDeclarations()) {
+          if (isEndpointImplementation(declaration)) {
+            WebService ws = declaration.getAnnotation(WebService.class);
+            if (getQualifiedName().equals(ws.endpointInterface())) {
+              impls.add(new EndpointImplementation((ClassDeclaration) declaration, this));
+            }
+          }
+        }
+      }
+    }
+
+    List<WebMethod> webMethods = new ArrayList<WebMethod>();
+    for (MethodDeclaration method : getMethods()) {
+      if (isWebMethod(method)) {
+        webMethods.add(new WebMethod(method, this));
+      }
+    }
+
+    if (isClass()) {
+      //the spec says we need to consider superclass methods, too...
+      ClassType superclass = ((ClassDeclaration) getDelegate()).getSuperclass();
+      if (superclass != null) {
+        ClassDeclaration declaration = superclass.getDeclaration();
+        while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
+          for (MethodDeclaration method : declaration.getMethods()) {
+            if (isWebMethod(method)) {
+              //todo: care about overridden methods?
+              webMethods.add(new WebMethod(method, this));
+            }
+          }
+
+          superclass = declaration.getSuperclass();
+          if (superclass == null) {
+            declaration = null;
+          }
+          else {
+            declaration = superclass.getDeclaration();
+          }
+        }
+      }
+    }
+
+    this.webMethods = webMethods;
   }
 
   /**
@@ -130,41 +182,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    * @return the web methods for this web service.
    */
   public Collection<WebMethod> getWebMethods() {
-    ArrayList<WebMethod> webMethods = new ArrayList<WebMethod>();
-
-    for (MethodDeclaration method : getMethods()) {
-      if (isWebMethod(method)) {
-        webMethods.add(new WebMethod(method, this));
-      }
-    }
-
-    if (isClass()) {
-      //the spec says we need to consider superclass methods, too...
-      ClassType superclass = ((ClassDeclaration) getDelegate()).getSuperclass();
-      if (superclass != null) {
-        ClassDeclaration declaration = superclass.getDeclaration();
-        while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
-          for (MethodDeclaration method : declaration.getMethods()) {
-            if ((isWebMethod(method)) &&
-              //NOTE: the spec doesn't say anything about overriding methods.  So, because methods can't have the
-              //same operation name, we're going to just exclude any methods of superclasses that have the same name.
-              (!webMethods.contains(method))) {
-              webMethods.add(new WebMethod(method, this));
-            }
-          }
-
-          superclass = declaration.getSuperclass();
-          if (superclass == null) {
-            declaration = null;
-          }
-          else {
-            declaration = superclass.getDeclaration();
-          }
-        }
-      }
-    }
-
-    return webMethods;
+    return this.webMethods;
   }
 
   /**
@@ -185,26 +203,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    * @return The endpoint implementations of this interface.
    */
   public Collection<EndpointImplementation> getEndpointImplementations() {
-    if (annotation == null) {
-      return null;
-    }
-
-    ArrayList<EndpointImplementation> impls = new ArrayList<EndpointImplementation>();
-    if (isClass()) {
-      //if the declaration is a class, the endpoint interface is implied...
-      impls.add(new EndpointImplementation((ClassDeclaration) getDelegate(), this));
-    }
-    else {
-      for (TypeDeclaration declaration : getAnnotationProcessorEnvironment().getTypeDeclarations()) {
-        if (isEndpointImplementation(declaration)) {
-          WebService ws = declaration.getAnnotation(WebService.class);
-          if (getQualifiedName().equals(ws.endpointInterface())) {
-            impls.add(new EndpointImplementation((ClassDeclaration) declaration, this));
-          }
-        }
-      }
-    }
-    return impls;
+    return this.impls;
   }
 
   /**

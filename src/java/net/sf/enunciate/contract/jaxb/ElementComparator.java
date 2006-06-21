@@ -1,6 +1,6 @@
 package net.sf.enunciate.contract.jaxb;
 
-import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationException;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.Comparator;

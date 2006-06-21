@@ -58,4 +58,5 @@ public interface WebMessage {
    * @return Whether this message is a web fault.
    */
   boolean isFault();
+
 }

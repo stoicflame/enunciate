@@ -5,11 +5,11 @@ import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.util.Types;
-import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 
 import javax.xml.bind.JAXBElement;

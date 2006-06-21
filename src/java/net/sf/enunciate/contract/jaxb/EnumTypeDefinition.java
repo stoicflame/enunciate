@@ -5,10 +5,12 @@ import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.util.Types;
-import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.jelly.apt.Context;
 
 import javax.xml.bind.annotation.XmlEnum;
@@ -67,6 +69,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     }
 
     return enumValues;
+  }
+
+  @Override
+  public ValidationResult accept(Validator validator) {
+    return validator.validateEnumType(this);
   }
 
 }

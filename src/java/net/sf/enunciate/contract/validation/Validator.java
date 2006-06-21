@@ -1,17 +1,25 @@
-package net.sf.enunciate.contract.jaxb.validation;
+package net.sf.enunciate.contract.validation;
 
-import net.sf.enunciate.contract.ValidationResult;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
 
 /**
- * A validator for JAXB contract implementation structures.
+ * Validator for the contract classes.
  *
  * @author Ryan Heaton
  */
-public interface JAXBValidator {
+public interface Validator {
+
+  /**
+   * Validates an endpoint interface.
+   *
+   * @param ei The endpoint interface to validate.
+   * @return The result of the validation.
+   */
+  ValidationResult validateEndpointInterface(EndpointInterface ei);
 
   /**
    * Validate a complex type definition.
@@ -19,7 +27,7 @@ public interface JAXBValidator {
    * @param complexType The complex type to validate.
    * @return The results of the validation.
    */
-  ValidationResult validate(ComplexTypeDefinition complexType);
+  ValidationResult validateComplexType(ComplexTypeDefinition complexType);
 
   /**
    * Valiate a simple type definition.
@@ -27,7 +35,7 @@ public interface JAXBValidator {
    * @param simpleType The simple type to validate.
    * @return The results of the validation.
    */
-  ValidationResult validate(SimpleTypeDefinition simpleType);
+  ValidationResult validateSimpleType(SimpleTypeDefinition simpleType);
 
   /**
    * Valiate an enum type definition.
@@ -35,7 +43,7 @@ public interface JAXBValidator {
    * @param enumType The simple type to validate.
    * @return The results of the validation.
    */
-  ValidationResult validate(EnumTypeDefinition enumType);
+  ValidationResult validateEnumType(EnumTypeDefinition enumType);
 
   /**
    * Validate a global element declaration.
@@ -43,5 +51,5 @@ public interface JAXBValidator {
    * @param rootElementDeclaration The global element declaration.
    * @return The results of the validation.
    */
-  ValidationResult validate(RootElementDeclaration rootElementDeclaration);
+  ValidationResult validateRootElement(RootElementDeclaration rootElementDeclaration);
 }

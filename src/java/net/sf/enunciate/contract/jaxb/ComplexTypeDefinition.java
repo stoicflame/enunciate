@@ -1,10 +1,12 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.util.QName;
 
 /**
@@ -59,6 +61,11 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     else {
       return ContentType.EMPTY;
     }
+  }
+
+  @Override
+  public ValidationResult accept(Validator validator) {
+    return validator.validateComplexType(this);
   }
 
 }

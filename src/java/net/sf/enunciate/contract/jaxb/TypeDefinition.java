@@ -4,7 +4,9 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
-import net.sf.enunciate.contract.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import javax.xml.bind.annotation.*;
@@ -15,7 +17,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class TypeDefinition extends DecoratedClassDeclaration {
+public abstract class TypeDefinition extends DecoratedClassDeclaration {
 
   private final XmlType xmlType;
   private final Schema schema;
@@ -290,5 +292,13 @@ public class TypeDefinition extends DecoratedClassDeclaration {
   public Schema getPackage() {
     return getSchema();
   }
+
+  /**
+   * Accept a validator.
+   *
+   * @param validator The validator to accept.
+   * @return The validation results.
+   */
+  public abstract ValidationResult accept(Validator validator);
 
 }

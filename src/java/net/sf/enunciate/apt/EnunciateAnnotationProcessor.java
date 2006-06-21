@@ -6,11 +6,11 @@ import com.sun.mirror.declaration.InterfaceDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
-import net.sf.enunciate.contract.jaxb.validation.JAXBValidator;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
-import net.sf.enunciate.contract.jaxws.validation.ExceptionThrowingJAXWSValidatorWrapper;
-import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
+import net.sf.enunciate.contract.validation.DefaultValidator;
+import net.sf.enunciate.contract.validation.ValidationMessage;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -33,18 +33,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   //Inherited.
   @Override
   protected FreemarkerModel newRootModel() {
-    //todo: read the jaxwsValidator types from the config.
-    JAXWSValidator jaxwsValidator = new DefaultJAXWSValidator();
-    //todo: create a mechanism to report errors before doing any actions other than just throwing an exception on the first one.
-    jaxwsValidator = new ExceptionThrowingJAXWSValidatorWrapper(jaxwsValidator);
+    //todo: read the validator type from the config.
+    Validator validator = new DefaultValidator();
 
-    //todo: validate the jaxb types.
-    JAXBValidator jaxbValidator = null;
-
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel(jaxbValidator, jaxwsValidator);
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel(validator);
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
 
+    ValidationResult validationResult = new ValidationResult();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
@@ -55,7 +51,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           System.out.println(declaration.getQualifiedName() + " to be considered as an endpoint interface.");
         }
 
-        model.add(endpointInterface);
+        ValidationResult result = model.add(endpointInterface);
+        validationResult.aggregate(result);
       }
       else if (declaration instanceof ClassDeclaration) {
         //otherwise, if it's a class, consider it a potential jaxb type.
@@ -65,7 +62,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
             System.out.println(declaration.getQualifiedName() + " to be considered as a type definition.");
           }
 
-          model.add(typeDef);
+          ValidationResult result = model.add(typeDef);
+          validationResult.aggregate(result);
         }
 
         RootElementDeclaration rootElement = model.findOrCreateRootElementDeclaration((ClassDeclaration) declaration, typeDef);
@@ -74,9 +72,24 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
             System.out.println(declaration.getQualifiedName() + " to be considered as a root element.");
           }
 
-          model.add(rootElement);
+          ValidationResult result = model.add(rootElement);
+          validationResult.aggregate(result);
         }
       }
+    }
+
+    if (validationResult.hasWarnings()) {
+      for (ValidationMessage warning : validationResult.getWarnings()) {
+        env.getMessager().printWarning(warning.getPosition(), warning.getText());
+      }
+    }
+
+    if (validationResult.hasErrors()) {
+      for (ValidationMessage error : validationResult.getErrors()) {
+        env.getMessager().printError(error.getPosition(), error.getText());
+      }
+
+      throw new RuntimeException("There were validation errors.");
     }
 
 /*

@@ -1,9 +1,9 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.PackageDeclaration;
-import net.sf.enunciate.contract.ValidationException;
 import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
 
 import javax.xml.bind.annotation.*;

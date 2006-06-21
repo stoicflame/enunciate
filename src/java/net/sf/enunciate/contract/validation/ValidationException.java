@@ -1,4 +1,4 @@
-package net.sf.enunciate.contract;
+package net.sf.enunciate.contract.validation;
 
 import com.sun.mirror.util.SourcePosition;
 

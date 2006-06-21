@@ -2,11 +2,7 @@ package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.contract.EnunciateContractTestCase;
-import net.sf.enunciate.contract.ValidationException;
-import net.sf.enunciate.contract.ValidationResult;
-import net.sf.enunciate.contract.jaxws.validation.AlwaysValidJAXWSValidator;
-import net.sf.enunciate.contract.jaxws.validation.DefaultJAXWSValidator;
-import net.sf.enunciate.contract.jaxws.validation.JAXWSValidator;
+import net.sf.enunciate.contract.validation.ValidationException;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
@@ -22,7 +18,6 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
 
   @Test
   public void testTargetNamespace() throws Exception {
-    JAXWSValidator validator = new AlwaysValidJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
     assertEquals(new EndpointInterface(declaration).getTargetNamespace(),
                  "http://services.samples.enunciate.sf.net/",
@@ -42,28 +37,7 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
   }
 
   @Test
-  public void testConstructInvalidEndpointInterface() throws Exception {
-    JAXWSValidator validator = new DefaultJAXWSValidator() {
-      //Inherited.
-      @Override
-      public ValidationResult validateEndpointInterface(EndpointInterface ei) throws ValidationException {
-        throw new ValidationException(ei.getPosition(), "invalid");
-      }
-    };
-
-    TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
-    try {
-      new EndpointInterface(declaration);
-      fail("Should have thrown a validation exception.");
-    }
-    catch (ValidationException e) {
-      //fall through.
-    }
-  }
-
-  @Test
   public void testGetWebMethods() throws Exception {
-    JAXWSValidator validator = new AlwaysValidJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NamespacedWebService");
     Collection<WebMethod> webMethods = new EndpointInterface(declaration).getWebMethods();
     assertEquals(webMethods.size(), 1);
@@ -88,7 +62,6 @@ public class TestEndpointInterface extends EnunciateContractTestCase {
    */
   @Test
   public void testAttributes() throws Exception {
-    JAXWSValidator validator = new AlwaysValidJAXWSValidator();
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NamespacedWebService");
     EndpointInterface annotated = new EndpointInterface(declaration);
     declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");
