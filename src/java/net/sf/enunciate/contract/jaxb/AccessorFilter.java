@@ -2,8 +2,8 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.AnnotationType;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlElement;
@@ -42,15 +42,28 @@ public class AccessorFilter {
       return true;
     }
 
-    if (declaration instanceof MethodDeclaration) {
-      if (!declaration.getModifiers().contains(Modifier.PUBLIC)) {
+    if (declaration instanceof PropertyDeclaration) {
+      PropertyDeclaration property = ((PropertyDeclaration) declaration);
+
+      DecoratedMethodDeclaration getter = property.getGetter();
+      if (getter == null) {
+        //needs a getter.
+        return false;
+      }
+
+      DecoratedMethodDeclaration setter = property.getSetter();
+      if (setter == null) {
+        //needs a setter.
+        return false;
+      }
+
+      if (!getter.getModifiers().contains(Modifier.PUBLIC)) {
         //we only have to worry about public methods ("properties" are only defined by public accessor methods).
         return false;
       }
 
-      DecoratedMethodDeclaration method = (DecoratedMethodDeclaration) DeclarationDecorator.decorate(declaration);
-      if (!method.isGetter() && !method.isSetter()) {
-        //only getters and setters define properties.
+      if (!setter.getModifiers().contains(Modifier.PUBLIC)) {
+        //we only have to worry about public methods ("properties" are only defined by public accessor methods).
         return false;
       }
 

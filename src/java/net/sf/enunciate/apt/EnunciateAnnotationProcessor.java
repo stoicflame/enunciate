@@ -124,6 +124,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   protected Collection<FreemarkerTransform> getTransforms() {
     String namespace = Context.getCurrentEnvironment().getOptions().get(EnunciateAnnotationProcessorFactory.FM_LIBRARY_NS_OPTION);
     Collection<FreemarkerTransform> transforms = super.getTransforms();
+
+    //jaxws transforms.
     transforms.add(new ForEachBindingTypeTransform(namespace));
     transforms.add(new ForEachEndpointInterfaceTransform(namespace));
     transforms.add(new ForEachThrownWebFaultTransform(namespace));
@@ -131,6 +133,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     transforms.add(new ForEachWebMessageTransform(namespace));
     transforms.add(new ForEachWebMethodTransform(namespace));
     transforms.add(new ForEachWsdlTransform(namespace));
+
+    //jaxb transforms.
     transforms.add(new ForEachSchemaTransform(namespace));
     return transforms;
   }

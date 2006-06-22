@@ -1,13 +1,14 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.util.QName;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
  * A complex type definition.
@@ -26,7 +27,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
     if (baseType == null) {
       try {
-        baseType = XmlTypeDecorator.decorate(getSuperclass());
+        baseType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getSuperclass());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());

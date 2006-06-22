@@ -1,8 +1,10 @@
 package net.sf.enunciate.apt;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.Types;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxb.*;
@@ -15,6 +17,7 @@ import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.util.ClassDeclarationComparator;
+import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -163,7 +166,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public ValidationResult add(TypeDefinition typeDef) {
     //todo: validate the typeDef;
-    this.knownTypes.putAll(typeDef.getSchema().getSpecifiedTypes());
     this.namespacesToPrefixes.putAll(typeDef.getSchema().getSpecifiedNamespacePrefixes());
 
     String namespace = typeDef.getTargetNamespace();
@@ -194,7 +196,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public ValidationResult add(RootElementDeclaration rootElement) {
     //todo: validate the root element.
-    this.knownTypes.putAll(rootElement.getSchema().getSpecifiedTypes());
     this.namespacesToPrefixes.putAll(rootElement.getSchema().getSpecifiedNamespacePrefixes());
 
     String namespace = rootElement.getTargetNamespace();
@@ -256,12 +257,38 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     //first make sure it's a known type.
     if (type instanceof DeclaredType) {
       TypeDeclaration declaration = ((DeclaredType) type).getDeclaration();
-      if ((declaration != null) && (knownTypes.containsKey(declaration.getQualifiedName()))) {
-        return knownTypes.get(declaration.getQualifiedName());
+      if (declaration != null) {
+        if (knownTypes.containsKey(declaration.getQualifiedName())) {
+          return knownTypes.get(declaration.getQualifiedName());
+        }
+        else {
+          Map<String, XmlTypeMirror> specifiedTypes = new Schema(declaration.getPackage()).getSpecifiedTypes();
+          if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
+            return specifiedTypes.get(declaration.getQualifiedName());
+          }
+        }
       }
     }
 
     return XmlTypeDecorator.decorate(type);
+  }
+
+  /**
+   * Get the xml type for a specific class.
+   *
+   * @param clazz The class.
+   * @return The xml type for a specific class.
+   * @throws XmlTypeException If there was an error getting the xml type for the specified class.
+   */
+  public XmlTypeMirror getXmlType(Class clazz) throws XmlTypeException {
+    if (knownTypes.containsKey(clazz.getName())) {
+      return knownTypes.get(clazz.getName());
+    }
+
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Types types = env.getTypeUtils();
+    TypeDeclaration declaration = env.getTypeDeclaration(clazz.getName());
+    return getXmlType(types.getDeclaredType(declaration));
   }
 
   /**
@@ -377,6 +404,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     public ValidationResult accept(Validator validator) {
       return new ValidationResult();
+    }
+
+    public XmlTypeMirror getBaseType() {
+      return KnownXmlType.ANY_TYPE;
     }
   }
 }

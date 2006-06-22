@@ -1,20 +1,28 @@
 package net.sf.enunciate.contract.validation;
 
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.InterfaceType;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.VoidType;
 import net.sf.enunciate.contract.jaxb.*;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlClassType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.*;
+import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Map;
 import java.util.TreeSet;
 
 /**
@@ -231,8 +239,25 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = validateTypeDefinition(complexType);
 
-    //todo: validate that no superclasses are simple type definitions.
+    XmlTypeMirror baseType = complexType.getBaseType();
+    while ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
+      ComplexTypeDefinition superType = (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition();
+      baseType = superType.getBaseType();
 
+      if (superType.getValue() != null) {
+        result.addError(complexType.getPosition(), "A complex type cannot subclass another complex type (" + superType.getQualifiedName() +
+          ") that has an xml value.");
+      }
+    }
+
+    if (complexType.getValue() != null) {
+      if (!complexType.getElements().isEmpty()) {
+        result.addError(complexType.getPosition(), "A type definition cannot have both an xml value and elements.");
+      }
+      else if (complexType.getAttributes().isEmpty()) {
+        result.addError(complexType.getPosition(), "Should be a simple type, not a complex type.");
+      }
+    }
 
     return result;
   }
@@ -241,9 +266,21 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = validateTypeDefinition(simpleType);
 
-    //todo: validate that all of its members (including members of superclass) are mapped to an attribute.
+    XmlTypeMirror baseType = simpleType.getBaseType();
+    if (baseType == null) {
+      result.addError(simpleType.getPosition(), "No base type specified.");
+    }
+    else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
+      result.addError(simpleType.getPosition(), "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+        + " is a complex type.");
+    }
+
 
     return result;
+  }
+
+  public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
+    return validateSimpleType(enumType);
   }
 
   /**
@@ -252,7 +289,7 @@ public class DefaultValidator implements Validator {
    * @param typeDef The type definition to validate.
    */
   public ValidationResult validateTypeDefinition(TypeDefinition typeDef) {
-    ValidationResult result = new ValidationResult();
+    ValidationResult result = validatePackage(typeDef.getSchema());
 
     if (isXmlTransient(typeDef)) {
       result.addError(typeDef.getPosition(), "XmlTransient type definition.");
@@ -260,7 +297,7 @@ public class DefaultValidator implements Validator {
 
     XmlType xmlType = typeDef.getAnnotation(XmlType.class);
 
-    boolean needsNoArgConstructor = true;
+    boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition));
     if (xmlType != null) {
       if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
         result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
@@ -309,6 +346,14 @@ public class DefaultValidator implements Validator {
       }
     }
 
+    if (typeDef.getValue() != null) {
+      result.aggregate(validateValue(typeDef.getValue()));
+    }
+
+    if (typeDef.getXmlID() != null) {
+
+    }
+
     return result;
   }
 
@@ -326,27 +371,157 @@ public class DefaultValidator implements Validator {
     return (declaration.getAnnotation(XmlTransient.class) != null);
   }
 
-  public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
-    return new ValidationResult();
-  }
+  public ValidationResult validatePackage(Schema schema) {
+    ValidationResult result = new ValidationResult();
 
-  public ValidationResult validateSchema(Schema schema) {
-    return new ValidationResult();
+    XmlSchemaType schemaType = schema.getAnnotation(XmlSchemaType.class);
+    if (schemaType != null) {
+      if (schemaType.type() == XmlSchemaType.DEFAULT.class) {
+        result.addError(schema.getPosition(), "A type must be specified at the package-level for @XmlSchemaType.");
+      }
+    }
+
+    XmlSchemaTypes schemaTypes = schema.getAnnotation(XmlSchemaTypes.class);
+    if (schemaTypes != null) {
+      for (XmlSchemaType xmlSchemaType : schemaTypes.value()) {
+        if (xmlSchemaType.type() == XmlSchemaType.DEFAULT.class) {
+          result.addError(schema.getPosition(), "A type must be specified at the package-level for all types of @XmlSchemaTypes.");
+        }
+      }
+    }
+
+    return result;
   }
 
   public ValidationResult validateAttribute(Attribute attribute) {
-    return new ValidationResult();
+    ValidationResult result = validateAccessor(attribute);
+
+    XmlTypeMirror baseType = attribute.getBaseType();
+    if (baseType == null) {
+      result.addError(attribute.getPosition(), "No base type specified.");
+    }
+    else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
+      result.addError(attribute.getPosition(), "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+        + " is a complex type.");
+    }
+
+    return result;
   }
 
   public ValidationResult validateElement(Element element) {
-    return new ValidationResult();
+    ValidationResult result = validateAccessor(element);
+
+    XmlTypeMirror collectionTypeParameter = element.getCollectionTypeParameter();
+    if ((collectionTypeParameter != null) && (collectionTypeParameter != KnownXmlType.ANY_TYPE)) {
+      XmlTypeMirror baseType = element.getBaseType();
+      if ((!collectionTypeParameter.getNamespace().equals(baseType.getNamespace())) && (!collectionTypeParameter.getName().equals(baseType.getName()))) {
+        String specifiedType = new QName(baseType.getNamespace(), baseType.getName()).toString();
+        String collectionType = new QName(collectionTypeParameter.getNamespace(), collectionTypeParameter.getName()).toString();
+
+        result.addError(element.getPosition(), "Type mismatch: the specified type " + specifiedType +
+          " doesn't match the parameterized collection item type " + collectionType + ".");
+      }
+
+      XmlElements xmlElements = element.getAnnotation(XmlElements.class);
+      if ((xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
+        result.addError(element.getPosition(),
+                        "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
+      }
+    }
+
+    if (element.isWrapped()) {
+      XmlElementWrapper wrapper = element.getAnnotation(XmlElementWrapper.class);
+
+      if ((!"##default".equals(wrapper.namespace())) && (!element.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
+        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
+          "The spec is unclear as to why this should be allowed because you could just use an @XmlType annotation to accomplish the same thing with more clarity.");
+      }
+    }
+
+
+    return result;
   }
 
   public ValidationResult validateValue(Value value) {
-    return new ValidationResult();
+    ValidationResult result = validateAccessor(value);
+
+    XmlTypeMirror baseType = value.getBaseType();
+    if (baseType == null) {
+      result.addError(value.getPosition(), "No base type specified.");
+    }
+    else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
+      result.addError(value.getPosition(), "An xml value must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+        + " is a complex type.");
+    }
+
+    return result;
   }
 
   public ValidationResult validateElementRef(ElementRef elementRef) {
-    return new ValidationResult();
+    ValidationResult result = validateAccessor(elementRef);
+
+    if (elementRef.getChoices().isEmpty()) {
+      XmlTypeMirror baseType = elementRef.getBaseType();
+      result.addError(elementRef.getPosition(), "No root elements found for " + new QName(baseType.getNamespace(), baseType.getName()).toString() + ".");
+    }
+
+    if ((elementRef.getAnnotation(XmlElement.class) != null) || (elementRef.getAnnotation(XmlElements.class) != null)) {
+      result.addError(elementRef.getPosition(), "The xml element ref cannot be annotated also with XmlElement or XmlElements.");
+    }
+
+    if (elementRef.isWrapped()) {
+      XmlElementWrapper wrapper = elementRef.getAnnotation(XmlElementWrapper.class);
+
+      if ((!"##default".equals(wrapper.namespace())) && (!elementRef.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
+        result.addError(elementRef.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
+          "The spec is unclear as to why this should be allowed because you could just use an @XmlType annotation to accomplish the same thing with more clarity.");
+      }
+    }
+
+    return result;
+  }
+
+  public ValidationResult validateAccessor(Accessor accessor) {
+    ValidationResult result = new ValidationResult();
+
+    if (accessor.getDelegate() instanceof PropertyDeclaration) {
+      PropertyDeclaration property = (PropertyDeclaration) accessor.getDelegate();
+      DecoratedMethodDeclaration getter = property.getGetter();
+      DecoratedMethodDeclaration setter = property.getSetter();
+
+      if ((getter != null) && (setter != null)) {
+        //find all JAXB annotations that are on both the setter and the getter...
+        Map<String, AnnotationMirror> getterAnnotations = getter.getAnnotations();
+        Map<String, AnnotationMirror> setterAnnotations = setter.getAnnotations();
+        for (String annotation : getterAnnotations.keySet()) {
+          if ((annotation.startsWith(XmlElement.class.getPackage().getName())) && (setterAnnotations.containsKey(annotation))) {
+            result.addError(setter.getPosition(), "'" + annotation + "' is duplicated between the getter and setter.");
+          }
+        }
+      }
+      else {
+        result.addError(accessor.getPosition(), "A property accessor needs both a setter and a getter.");
+      }
+    }
+
+    if (accessor.getAnnotation(XmlIDREF.class) != null) {
+      XmlTypeMirror baseType = accessor.getBaseType();
+      if ((!(baseType instanceof XmlClassType)) || (((XmlClassType) baseType).getTypeDefinition().getXmlID() == null)) {
+        result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+      }
+    }
+
+    return result;
+  }
+
+  public ValidationResult validateXmlID(Accessor accessor) {
+    ValidationResult result = new ValidationResult();
+
+    TypeMirror accessorType = accessor.getAccessorType();
+    if (!(accessorType instanceof DeclaredType) || !((DeclaredType) accessorType).getDeclaration().getQualifiedName().startsWith(String.class.getName())) {
+      result.addError(accessor.getPosition(), "An xml id must be a string.");
+    }
+
+    return result;
   }
 }

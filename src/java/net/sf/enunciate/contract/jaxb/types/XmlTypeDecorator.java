@@ -103,29 +103,37 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitArrayType(ArrayType arrayType) {
-    try {
-      this.decoratedTypeMirror = new XmlArrayType(arrayType);
-    }
-    catch (XmlTypeException e) {
-      this.errorMessage = e.getMessage();
+    arrayType.getComponentType().accept(this);
+
+    if (this.errorMessage != null) {
+      this.errorMessage = "Problem with the array component type: " + this.errorMessage;
     }
   }
 
   public void visitTypeVariable(TypeVariable typeVariable) {
-    try {
-      this.decoratedTypeMirror = new XmlTypeVariable(typeVariable);
+    Collection<ReferenceType> bounds = typeVariable.getDeclaration().getBounds();
+    if (bounds.isEmpty()) {
+      this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
     }
-    catch (XmlTypeException e) {
-      this.errorMessage = e.getMessage();
+    else {
+      bounds.iterator().next().accept(this);
+      if (this.errorMessage != null) {
+        this.errorMessage = "Problem with the type variable bounds: " + this.errorMessage;
+      }
     }
   }
 
   public void visitWildcardType(WildcardType wildcardType) {
-    try {
-      this.decoratedTypeMirror = new XmlWildcardType(wildcardType);
+    Collection<ReferenceType> upperBounds = wildcardType.getUpperBounds();
+    if (upperBounds.isEmpty()) {
+      this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
     }
-    catch (XmlTypeException e) {
-      this.errorMessage = e.getMessage();
+    else {
+      upperBounds.iterator().next().accept(this);
+
+      if (this.errorMessage != null) {
+        this.errorMessage = "Problem with wildcard bounds: " + this.errorMessage;
+      }
     }
   }
 }

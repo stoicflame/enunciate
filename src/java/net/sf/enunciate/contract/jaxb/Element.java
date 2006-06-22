@@ -1,22 +1,21 @@
 package net.sf.enunciate.contract.jaxb;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
-import net.sf.jelly.apt.Context;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -95,6 +94,26 @@ public class Element extends Accessor {
   }
 
   /**
+   * The qname for the referenced element, if this element is a reference to a global element, or null if
+   * this element is not a reference element.
+   *
+   * @return The qname for the referenced element, if exists.
+   */
+  public QName getRef() {
+    QName ref = super.getRef();
+    if (ref == null) {
+      XmlTypeMirror baseType = getBaseType();
+      if (baseType.isAnonymous()) {
+        if (((XmlClassType) baseType).getTypeDefinition().getAnnotation(XmlRootElement.class) != null) {
+          ref = new QName(getNamespace(), getName());
+        }
+      }
+    }
+
+    return ref;
+  }
+
+  /**
    * The base type of an element accessor can be specified by an annotation.
    *
    * @return The base type.
@@ -102,11 +121,8 @@ public class Element extends Accessor {
   @Override
   public XmlTypeMirror getBaseType() {
     if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
-      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-      Types types = env.getTypeUtils();
-      TypeDeclaration declaration = env.getTypeDeclaration(xmlElement.type().getName());
       try {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(types.getDeclaredType(declaration));
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElement.type());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());
@@ -222,22 +238,6 @@ public class Element extends Accessor {
     }
 
     return name;
-  }
-
-  /**
-   * The namespace of the wrapper element.
-   *
-   * @return The namespace of the wrapper element.
-   */
-  public String getWrapperNamespace() {
-    String namespace = getNamespace();
-
-    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
-    if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.namespace()))) {
-      namespace = xmlElementWrapper.namespace();
-    }
-
-    return namespace;
   }
 
   /**

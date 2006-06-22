@@ -5,12 +5,14 @@ import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.util.Types;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -28,7 +30,7 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final XmlTypeMirror explicitBaseType;
+  private final XmlTypeMirror referencedType;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef);
@@ -64,14 +66,13 @@ public class ElementRef extends Element {
         XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
         DeclaredType declaredType = typeUtils.getDeclaredType(type);
         if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, baseType))) {
-          XmlTypeMirror explicitType = null;
           try {
-            explicitType = XmlTypeDecorator.decorate(declaredType);
+            XmlTypeMirror explicitType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(declaredType);
+            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
           }
           catch (XmlTypeException e) {
             throw new ValidationException(getPosition(), e.getMessage());
           }
-          this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
         }
       }
     }
@@ -80,18 +81,15 @@ public class ElementRef extends Element {
     }
 
     if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-      AnnotationProcessorEnvironment env = getEnv();
-      Types types = env.getTypeUtils();
-      TypeDeclaration declaration = env.getTypeDeclaration(xmlElementRef.type().getName());
       try {
-        this.explicitBaseType = XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+        this.referencedType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElementRef.type());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());
       }
     }
     else {
-      this.explicitBaseType = null;
+      this.referencedType = getBaseType();
     }
   }
 
@@ -109,18 +107,15 @@ public class ElementRef extends Element {
     this.choices.add(this);
 
     if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-      AnnotationProcessorEnvironment env = getEnv();
-      Types types = env.getTypeUtils();
-      TypeDeclaration declaration = env.getTypeDeclaration(xmlElementRef.type().getName());
       try {
-        this.explicitBaseType = XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+        this.referencedType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElementRef.type());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());
       }
     }
     else {
-      this.explicitBaseType = null;
+      this.referencedType = getBaseType();
     }
   }
 
@@ -136,7 +131,7 @@ public class ElementRef extends Element {
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.explicitBaseType = baseType;
+    this.referencedType = baseType;
   }
 
   /**
@@ -193,18 +188,9 @@ public class ElementRef extends Element {
     }
   }
 
-  /**
-   * The base type of an element accessor can be specified by an annotation.
-   *
-   * @return The base type.
-   */
   @Override
-  public XmlTypeMirror getBaseType() {
-    if (explicitBaseType != null) {
-      return explicitBaseType;
-    }
-
-    return super.getBaseType();
+  public QName getRef() {
+    return new QName(this.referencedType.getNamespace(), this.referencedType.getName());
   }
 
   /**

@@ -1,17 +1,14 @@
 package net.sf.enunciate.contract.jaxb;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.util.Types;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
-import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -37,11 +34,8 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   // Inherited.
   @Override
   public XmlTypeMirror getBaseType() {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Types types = env.getTypeUtils();
-    TypeDeclaration declaration = env.getTypeDeclaration(xmlEnum.value().getName());
     try {
-      return XmlTypeDecorator.decorate(types.getDeclaredType(declaration));
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlEnum.value());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

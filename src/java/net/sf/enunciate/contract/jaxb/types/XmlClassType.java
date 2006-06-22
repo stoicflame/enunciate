@@ -61,7 +61,16 @@ public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
       return this.typeDef.isAnonymous();
     }
 
-    return true;
+    return false;
+  }
+
+  /**
+   * Get the type definition for this class type.
+   *
+   * @return The type definition for this class type.
+   */
+  public TypeDefinition getTypeDefinition() {
+    return typeDef;
   }
 
 }

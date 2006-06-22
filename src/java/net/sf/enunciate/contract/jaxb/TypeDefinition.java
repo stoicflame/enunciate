@@ -4,6 +4,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
@@ -24,6 +25,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final SortedSet<Element> elements;
   private final Collection<Attribute> attributes;
   private final Value xmlValue;
+  private final Accessor xmlID;
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
@@ -40,10 +42,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     ArrayList<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
     accessors.addAll(getFields());
     accessors.addAll(getProperties());
+    Accessor xmlID = null;
     for (MemberDeclaration accessor : accessors) {
       if (filter.accept(accessor)) {
+        Accessor added;
         if (isAttribute(accessor)) {
-          attributeAccessors.add(new Attribute(accessor, this));
+          Attribute attribute = new Attribute(accessor, this);
+          attributeAccessors.add(attribute);
+          added = attribute;
         }
         else if (isValue(accessor)) {
           if (value != null) {
@@ -51,11 +57,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
           }
 
           value = new Value(accessor, this);
+          added = value;
         }
         else if (isElementRef(accessor)) {
-          if (!elementAccessors.add(new ElementRef(accessor, this))) {
+          ElementRef elementRef = new ElementRef(accessor, this);
+          if (!elementAccessors.add(elementRef)) {
             throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
           }
+          added = elementRef;
         }
         else if (isUnsupported(accessor)) {
           //todo: support xml-mixed?
@@ -63,16 +72,28 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
         }
         else {
           //its an element accessor.
-          if (!elementAccessors.add(new Element(accessor, this))) {
+          Element element = new Element(accessor, this);
+          if (!elementAccessors.add(element)) {
             throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
           }
+          added = element;
         }
+
+        if (added.getAnnotation(XmlID.class) != null) {
+          if (xmlID != null) {
+            throw new ValidationException(added.getPosition(), "More than one XML id specified.");
+          }
+
+          xmlID = added;
+        }
+
       }
     }
 
     this.elements = Collections.unmodifiableSortedSet(elementAccessors);
     this.attributes = Collections.unmodifiableCollection(attributeAccessors);
     this.xmlValue = value;
+    this.xmlID = xmlID;
   }
 
   /**
@@ -260,6 +281,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
+   * The accessor that is the xml id of this type definition, or null if none.
+   *
+   * @return The accessor that is the xml id of this type definition, or null if none.
+   */
+  public Accessor getXmlID() {
+    return xmlID;
+  }
+
+  /**
    * Whether a declaration is xml transient.
    *
    * @param declaration The declaration on which to determine xml transience.
@@ -300,5 +330,12 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return The validation results.
    */
   public abstract ValidationResult accept(Validator validator);
+
+  /**
+   * The base type of this type definition.
+   *
+   * @return The base type of this type definition.
+   */
+  public abstract XmlTypeMirror getBaseType();
 
 }

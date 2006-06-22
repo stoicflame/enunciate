@@ -10,6 +10,7 @@ import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
@@ -104,6 +105,20 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
   }
 
   /**
+   * The qname for the referenced accessor, if this accessor is a reference to a global element, or null if
+   * this element is not a reference element.
+   *
+   * @return The qname for the referenced element, if exists.
+   */
+  public QName getRef() {
+    if ((!getNamespace().equals(getTypeDefinition().getTargetNamespace())) || (getBaseType().isAnonymous())) {
+      return new QName(getNamespace(), getName());
+    }
+
+    return null;
+  }
+
+  /**
    * The type definition for this accessor.
    *
    * @return The type definition for this accessor.
@@ -130,5 +145,24 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
   public boolean isCollectionType() {
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
     return accessorType.isArray() || accessorType.isCollection();
+  }
+
+  /**
+   * If this is a collection type, return the type parameter of the collection, or null if this isn't a
+   * parameterized collection type.
+   *
+   * @return the type parameter of the collection.
+   */
+  public XmlTypeMirror getCollectionTypeParameter() {
+    if (isCollectionType()) {
+      try {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getAccessorType());
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
+    }
+
+    return null;
   }
 }
