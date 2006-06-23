@@ -2,12 +2,12 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
@@ -42,9 +42,8 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The compositor for this type definition.
    */
-  public QName getCompositor() {
-    String value = getPropertyOrder() == null ? "all" : "sequence";
-    return new QName("http://www.w3.org/2001/XMLSchema", value);
+  public String getCompositorName() {
+    return getPropertyOrder() == null ? "all" : "sequence";
   }
 
   /**
@@ -54,7 +53,12 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
    */
   public ContentType getContentType() {
     if (!getElements().isEmpty()) {
-      return ContentType.COMPLEX;
+      if (getBaseType() == KnownXmlType.ANY_TYPE) {
+        return ContentType.IMPLIED;
+      }
+      else {
+        return ContentType.COMPLEX;
+      }
     }
     else if (getValue() != null) {
       return ContentType.SIMPLE;
@@ -62,6 +66,16 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
     else {
       return ContentType.EMPTY;
     }
+  }
+
+  @Override
+  public boolean isSimple() {
+    return false;
+  }
+
+  @Override
+  public boolean isComplex() {
+    return true;
   }
 
   @Override

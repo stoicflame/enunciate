@@ -35,4 +35,9 @@ public class SimpleTypeDefinition extends TypeDefinition {
     return validator.validateSimpleType(this);
   }
 
+  @Override
+  public boolean isSimple() {
+    return true;
+  }
+
 }

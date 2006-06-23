@@ -8,6 +8,7 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import javax.xml.bind.annotation.*;
@@ -174,6 +175,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
+   * The qname of this type definition.
+   *
+   * @return The qname of this type definition.
+   */
+  public QName getQname() {
+    return new QName(getTargetNamespace(), getName());
+  }
+
+  /**
    * The default access type for the beans in this class.
    *
    * @return The default access type for the beans in this class.
@@ -321,6 +331,33 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   @Override
   public Schema getPackage() {
     return getSchema();
+  }
+
+  /**
+   * Whether this is a complex type.
+   *
+   * @return Whether this is a complex type.
+   */
+  public boolean isComplex() {
+    return false;
+  }
+
+  /**
+   * Whether this is a enum type.
+   *
+   * @return Whether this is a enum type.
+   */
+  public boolean isEnum() {
+    return false;
+  }
+
+  /**
+   * Whether this is a simple type.
+   *
+   * @return Whether this is a simple type.
+   */
+  public boolean isSimple() {
+    return false;
   }
 
   /**

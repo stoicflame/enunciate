@@ -348,10 +348,10 @@ public class DefaultValidator implements Validator {
 
     if (typeDef.getValue() != null) {
       result.aggregate(validateValue(typeDef.getValue()));
-    }
 
-    if (typeDef.getXmlID() != null) {
-
+      if (!typeDef.getElements().isEmpty()) {
+        result.addError(typeDef.getValue().getPosition(), "A type definition cannot have both an xml value and a child element.");
+      }
     }
 
     return result;

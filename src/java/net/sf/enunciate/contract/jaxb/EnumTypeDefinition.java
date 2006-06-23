@@ -66,6 +66,16 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   }
 
   @Override
+  public boolean isSimple() {
+    return false;
+  }
+
+  @Override
+  public boolean isEnum() {
+    return true;
+  }
+
+  @Override
   public ValidationResult accept(Validator validator) {
     return validator.validateEnumType(this);
   }

@@ -25,7 +25,12 @@ public enum ContentType {
   /**
    * Complex (element-only) content type.
    */
-  COMPLEX;
+  COMPLEX,
+
+  /**
+   * Implied complex content type (i.e. complex content that restricts the distinguished ur-type definition).
+   */
+  IMPLIED;
 
   /**
    * Whether this is the empty content type.
@@ -60,6 +65,15 @@ public enum ContentType {
    * @return Whether this is the complex content type.
    */
   public boolean isComplex() {
-    return this == COMPLEX;
+    return ((this == COMPLEX) || (this == IMPLIED));
+  }
+
+  /**
+   * Whether this is the implied content type.
+   *
+   * @return Whether this is the implied content type.
+   */
+  public boolean isImplied() {
+    return this == IMPLIED;
   }
 }

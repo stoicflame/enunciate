@@ -128,7 +128,10 @@ public class WsdlInfo {
     Set<String> importedNamespaces = getImportedNamespaces();
     List<SchemaInfo> schemas = new ArrayList<SchemaInfo>();
     for (String ns : importedNamespaces) {
-      schemas.add(lookupSchema(ns));
+      SchemaInfo schema = lookupSchema(ns);
+      if (schema != null) {
+        schemas.add(schema);
+      }
     }
     return schemas;
   }

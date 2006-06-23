@@ -1,6 +1,7 @@
 package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.util.TypeVisitor;
+import net.sf.enunciate.util.QName;
 
 /**
  * Set of known xml types.
@@ -93,6 +94,15 @@ public enum KnownXmlType implements XmlTypeMirror {
    */
   public String getNamespace() {
     return namespace;
+  }
+
+  /**
+   * The qname of the known type.
+   *
+   * @return The qname of the known type.
+   */
+  public QName getQname() {
+    return new QName(getNamespace(), getName());
   }
 
   /**

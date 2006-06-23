@@ -1,6 +1,7 @@
 package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.util.TypeVisitor;
+import net.sf.enunciate.util.QName;
 
 import javax.xml.bind.annotation.XmlSchemaType;
 
@@ -33,6 +34,15 @@ public class SpecifiedXmlType implements XmlTypeMirror {
    */
   public String getNamespace() {
     return annotation.namespace();
+  }
+
+  /**
+   * The qname.
+   *
+   * @return The qname.
+   */
+  public QName getQname() {
+    return new QName(getNamespace(), getName());
   }
 
   /**

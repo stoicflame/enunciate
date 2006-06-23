@@ -1,6 +1,7 @@
 package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.PrimitiveType;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.type.DecoratedPrimitiveType;
 
 /**
@@ -35,6 +36,10 @@ public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlTypeM
 
   public String getNamespace() {
     return "http://www.w3.org/2001/XMLSchema";
+  }
+
+  public QName getQname() {
+    return new QName(getNamespace(), getName());
   }
 
   public boolean isAnonymous() {

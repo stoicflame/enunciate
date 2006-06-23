@@ -4,35 +4,135 @@ Template for a Schema.  Assumes the existence of a variable
 named "schema" present in the model describing the schema to output.
 --]
 
-[#-- assign the prefix variable for the "this" namespace --]
-[#assign tns=prefix(wsdl.targetNamespace)]
+[#--
+We need to define the "process_typedef" macro to process type
+definitions, as they could be inlined if they're anonymous.
+--]
+[#macro process_typedef typeDef]
+  [#--simple type definition--]
+  [#if typeDef.simple]
+<xs:simpleType name="${typeDef.name}">
+    [#if typeDef.value.list]
+  <xs:list itemType="${typeDef.baseType.qname}"/>
+    [#else]
+  <xs:restriction base="${typeDef.baseType.qname}"/>
+    [/#if]
+</xs:simpleType>
+
+  [#--enum type definition--]
+  [#elseif typeDef.enum]
+<xs:simpleType name="${typeDef.name}">
+  <xs:restriction base="${typeDef.baseType.qname}">
+    [#list typeDef.enumValues as enumValue]
+    <xs:enumeration value="${enumValue}"/>
+    [/#list]
+  </xs:restriction>
+</xs:simpleType>
+
+  [#--complex type definition--]
+  [#elseif typeDef.complex]
+<xs:complexType name="${typeDef.name}">
+    [#--complex type with complex content.--]
+    [#if typeDef.contentType.complex]
+      [#--if it's not implied, we need to declare the extension--]
+      [#if !typeDef.contentType.implied]
+  <xs:complexContent>
+    <xs:extension base="${typeDef.baseType.qname}">
+      [/#if]
+      <xs:${typeDef.compositor}>
+      [#list typeDef.elements as element]
+        [#if element.wrapped]
+        <xs:element name="${typeDef.wrapperName}">
+          <xs:complexType>
+            <xs:sequence>
+        [/#if]
+        [#if element.choices?size > 1]
+              <xs:choice minOccurs="0" maxOccurs="unbounded">
+          [#list element.choices as elementChoice]
+            [#if elementChoice.ref?exists]
+                <xs:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
+            [#elseif elementChoice.baseType.anonymous]
+                <xs:element name="${elementChoice.name}">
+                  [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
+                </xs:elment>
+            [#else]
+                <xs:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
+            [/#if]
+          [/#list]
+              </xs:choice>
+        [#else]
+          [#if element.ref?exists]
+              <xs:element name="${element.name}" ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}"/>
+          [#elseif element.baseType.anonymous]
+              <xs:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+                [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
+              </xs:elment>
+          [#else]
+              <xs:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}"/>
+          [/#if]
+        [/#if]
+        [#if element.wrapped]
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        [/#if]
+      [/#list]
+      </xs:${typeDef.compositor}>
+
+    [#--complex type with simple content--]
+    [#elseif typeDef.contentType.simple]
+  <xs:simpleContent>
+    <xs:extension base="${typeDef.value.baseType.qname}">
+    [/#if]
+
+    [#--list all the attributes.--]
+    [#list typeDef.attributes as attribute]
+      [#if attribute.ref?exists]
+      <xs:attribute required="${attribute.required}" ref="${attribute.ref}"/>
+      [/#else]
+      <xs:attribute required="${attribute.required}" type="${attribute.baseTye.qname}"/>
+      [/#if]
+    [/#list]
+
+    [#if !typeDef.contentType.implied]
+    </xs:extension>
+  </xs:complexContent>
+    [#elseif typeDef.contentType.simple]
+    </xs:extension>
+  </xs:simpleContent>
+    [/#if]
+</xs:complexType>
+
+  [#else]
+    [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]
+  [/#if]
+[/#macro]
 
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema version="1.0" targetNamespace="${schema.targetNamespace}"
-    xmlns:testmodel="http://schemas.familysearch.org/web-service-framework/testmodel"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  [#list schema.referencedNamespaces as referencedNamespace]
+  xmlns:${prefix(referencedNamespace)}="${importedNamespace}"
+  [/#list]
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <xs:complexType name="person">
-    <xs:sequence>
-      <xs:element name="father" type="testmodel:person" minOccurs="0"/>
-      <xs:element name="id" type="xs:string" minOccurs="0"/>
-      <xs:element name="mother" type="testmodel:person" minOccurs="0"/>
-      <xs:element name="names" type="testmodel:name" nillable="true" maxOccurs="unbounded" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
+  [#list wsdl.importedSchemas as schema]
+  <xs:import namespace="${schema.namespace}" location="${schema.location}"/>
+  [/#list]
 
-  <xs:complexType name="name">
-    <xs:sequence>
-      <xs:element name="type" type="testmodel:nameType" minOccurs="0"/>
-      <xs:element name="value" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
+  [#list schema.globalElements as globalElement]
+    [#if globalElement.typeDefinition.anonymous]
+  <xs:element name="${globalElement.name}">
+    [@process_typedef typeDef=globalElement.typeDefinition/]
+  </xs:elment>
+    [#else]
+  <xs:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
+    [/#if]
+  [/#list]
 
-  <xs:simpleType name="nameType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="MIDDLE"/>
-      <xs:enumeration value="LAST"/>
-      <xs:enumeration value="FIRST"/>
-    </xs:restriction>
-  </xs:simpleType>
+  [#list schema.typeDefinitions as typeDefinition]
+    [#if !typeDefinition.anonymous]
+      [@process_typedef typeDef=typeDefinition/]
+    [/#if]
+  [/#list]
+  
 </xs:schema>
