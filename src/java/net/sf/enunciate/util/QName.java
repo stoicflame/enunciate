@@ -14,6 +14,8 @@ import java.util.Map;
  */
 public class QName extends javax.xml.namespace.QName implements TemplateHashModel, TemplateScalarModel {
 
+  public static final String EMPTY_PREFIX = "<empty-prefix>";
+
   /**
    * A qname of the given namespace and localpart.  Prefix will be looked up.
    *
@@ -69,6 +71,10 @@ public class QName extends javax.xml.namespace.QName implements TemplateHashMode
    * @return The namespace prefix.
    */
   protected static String lookupPrefix(String namespace) {
+    if (namespace == null) {
+      return EMPTY_PREFIX;
+    }
+
     return getNamespacesToPrefixes().get(namespace);
   }
 
@@ -92,7 +98,11 @@ public class QName extends javax.xml.namespace.QName implements TemplateHashMode
 
   @Override
   public String toString() {
-    return getPrefix() + ":" + getLocalPart();
+    String string = getLocalPart();
+    if (getPrefix() != EMPTY_PREFIX) {
+      string = getPrefix() + ":" + string;
+    }
+    return string;
   }
 
 

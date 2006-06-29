@@ -22,6 +22,15 @@ public class SchemaInfo {
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
 
   /**
+   * Whether this is the schema for the empty namespace.
+   *
+   * @return Whether this is the schema for the empty namespace.
+   */
+  public boolean isEmptyNamespace() {
+    return getNamespace() == null;
+  }
+
+  /**
    * The target namespace.
    *
    * @return The target namespace.
@@ -150,7 +159,10 @@ public class SchemaInfo {
       referencedNamspaces.add(rootElement.getTargetNamespace());
     }
 
+    //remove the obvious referenced namespace.
     referencedNamspaces.remove("http://www.w3.org/2001/XMLSchema");
+    //remove the empty namespace.
+    referencedNamspaces.remove(null);
 
     return referencedNamspaces;
   }

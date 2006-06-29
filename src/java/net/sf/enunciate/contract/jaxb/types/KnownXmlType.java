@@ -1,6 +1,5 @@
 package net.sf.enunciate.contract.jaxb.types;
 
-import com.sun.mirror.util.TypeVisitor;
 import net.sf.enunciate.util.QName;
 
 /**
@@ -70,15 +69,6 @@ public enum KnownXmlType implements XmlTypeMirror {
   }
 
   /**
-   * Accept a type visitor.
-   *
-   * @param typeVisitor The type visitor to accept.
-   */
-  public void accept(TypeVisitor typeVisitor) {
-    typeVisitor.visitTypeMirror(this);
-  }
-
-  /**
    * The name of the known type.
    *
    * @return The name of the known type.
@@ -113,6 +103,5 @@ public enum KnownXmlType implements XmlTypeMirror {
   public boolean isAnonymous() {
     return false;
   }
-
 
 }

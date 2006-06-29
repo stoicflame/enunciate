@@ -30,13 +30,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     super(template);
   }
 
-  //Inherited.
   @Override
-  protected FreemarkerModel newRootModel() {
-    //todo: read the validator type from the config.
-    Validator validator = new DefaultValidator();
-
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel(validator);
+  protected FreemarkerModel getRootModel() {
+    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
 
@@ -59,7 +55,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         TypeDefinition typeDef = model.findOrCreateTypeDefinition((ClassDeclaration) declaration);
         if (typeDef != null) {
           if (isVerbose()) {
-            System.out.println(declaration.getQualifiedName() + " to be considered as a type definition.");
+            System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
+                                             declaration.getQualifiedName(),
+                                             typeDef.getClass().getSimpleName(),
+                                             typeDef.getTargetNamespace(),
+                                             typeDef.getName()));
           }
 
           ValidationResult result = model.add(typeDef);
@@ -107,6 +107,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 */
 
     return model;
+  }
+
+  //Inherited.
+  @Override
+  protected FreemarkerModel newRootModel() {
+    //todo: read the validator type from the config.
+    Validator validator = new DefaultValidator();
+    return new EnunciateFreemarkerModel(validator);
   }
 
   /**

@@ -111,8 +111,14 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    * @return The qname for the referenced element, if exists.
    */
   public QName getRef() {
-    if ((!getNamespace().equals(getTypeDefinition().getTargetNamespace())) || (getBaseType().isAnonymous())) {
-      return new QName(getNamespace(), getName());
+    String namespace = getNamespace();
+    String typeNamespace = getTypeDefinition().getTargetNamespace();
+
+    namespace = namespace == null ? "<empty namespace>" : namespace;
+    typeNamespace = typeNamespace == null ? "<empty namespace>" : typeNamespace;
+
+    if ((!namespace.equals(typeNamespace)) || (getBaseType().isAnonymous())) {
+      return new QName(namespace, getName());
     }
 
     return null;

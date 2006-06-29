@@ -1,11 +1,12 @@
 package net.sf.enunciate.template.freemarker;
 
-import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
-import net.sf.enunciate.util.QName;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A method used in templates to output the prefix for a given namespace.
@@ -26,7 +27,39 @@ public class PrefixMethod implements TemplateMethodModel {
     }
 
     String namespace = (String) list.get(0);
-    return new SimpleScalar(new QName(namespace, "").getPrefix());
+    String prefix = lookupPrefix(namespace);
+    if (prefix == null) {
+      throw new TemplateModelException("No prefix specified for {" + namespace + "}");
+    }
+    return prefix;
+  }
+
+  /**
+   * Convenience method to lookup a namespace prefix given a namespace.
+   *
+   * @param namespace The namespace for which to lookup the prefix.
+   * @return The namespace prefix.
+   */
+  protected static String lookupPrefix(String namespace) {
+    return getNamespacesToPrefixes().get(namespace);
+  }
+
+  /**
+   * The namespace to prefix map.
+   *
+   * @return The namespace to prefix map.
+   */
+  protected static Map<String, String> getNamespacesToPrefixes() {
+    return getModel().getNamespacesToPrefixes();
+  }
+
+  /**
+   * Get the current root model.
+   *
+   * @return The current root model.
+   */
+  protected static EnunciateFreemarkerModel getModel() {
+    return ((EnunciateFreemarkerModel) FreemarkerModel.get());
   }
 
 }

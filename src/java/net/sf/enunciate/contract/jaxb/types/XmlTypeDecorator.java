@@ -29,7 +29,7 @@ public class XmlTypeDecorator implements TypeVisitor {
     XmlTypeDecorator instance = new XmlTypeDecorator();
     typeMirror.accept(instance);
 
-    if (instance.errorMessage == null) {
+    if (instance.errorMessage != null) {
       throw new XmlTypeException(instance.errorMessage);
     }
 

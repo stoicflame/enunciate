@@ -4,6 +4,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
@@ -62,18 +63,25 @@ public class ElementRef extends Element {
       XmlTypeMirror baseType = getBaseType();
       AnnotationProcessorEnvironment env = getEnv();
       Types typeUtils = env.getTypeUtils();
-      for (TypeDeclaration type : env.getTypeDeclarations()) {
-        XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
-        DeclaredType declaredType = typeUtils.getDeclaredType(type);
-        if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, baseType))) {
-          try {
-            XmlTypeMirror explicitType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(declaredType);
-            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
-          }
-          catch (XmlTypeException e) {
-            throw new ValidationException(getPosition(), e.getMessage());
+      if (baseType instanceof TypeMirror) {
+        TypeMirror typeMirror = (TypeMirror) baseType;
+        for (TypeDeclaration type : env.getTypeDeclarations()) {
+          XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
+          DeclaredType declaredType = typeUtils.getDeclaredType(type);
+          if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, typeMirror))) {
+            try {
+              XmlTypeMirror explicitType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(declaredType);
+              this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
+            }
+            catch (XmlTypeException e) {
+              throw new ValidationException(getPosition(), e.getMessage());
+            }
           }
         }
+      }
+
+      if (this.choices.isEmpty()) {
+        throw new ValidationException(getPosition(), String.format("No known root element subtypes of {%s}%s.", baseType.getNamespace(), baseType.getName()));
       }
     }
     else {

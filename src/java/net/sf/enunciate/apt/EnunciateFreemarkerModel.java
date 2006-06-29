@@ -66,7 +66,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/mime/", "mime");
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
     knownNamespaces.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
-    knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xsd");
+    knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xs");
     knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
 
     return knownNamespaces;
@@ -80,6 +80,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected Map<String, XmlTypeMirror> loadKnownTypes() {
     HashMap<String, XmlTypeMirror> knownTypes = new HashMap<String, XmlTypeMirror>();
 
+    knownTypes.put(Boolean.class.getName(), KnownXmlType.BOOLEAN);
+    knownTypes.put(Byte.class.getName(), KnownXmlType.BYTE);
+    knownTypes.put(Double.class.getName(), KnownXmlType.DOUBLE);
+    knownTypes.put(Float.class.getName(), KnownXmlType.FLOAT);
+    knownTypes.put(Integer.class.getName(), KnownXmlType.INT);
+    knownTypes.put(Long.class.getName(), KnownXmlType.LONG);
+    knownTypes.put(Short.class.getName(), KnownXmlType.SHORT);
     knownTypes.put(String.class.getName(), KnownXmlType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownXmlType.INTEGER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownXmlType.DECIMAL);

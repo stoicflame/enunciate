@@ -14,7 +14,7 @@ import java.util.Iterator;
  */
 public class SchemaLoopStrategy extends EnunciateTemplateLoopStrategy<SchemaInfo> {
 
-  private String var = "wsdl";
+  private String var = "schema";
   private SchemaInfo currentSchema;
 
   /**

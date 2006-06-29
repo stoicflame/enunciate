@@ -139,6 +139,7 @@
         <include name="**/*.java"/>
       </source>
       <option key="api" value="${api}"/>
+      <option key="verbose" value="true"/>
     </apt>
   </target>
 

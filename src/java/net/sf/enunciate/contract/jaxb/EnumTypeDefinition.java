@@ -34,8 +34,13 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   // Inherited.
   @Override
   public XmlTypeMirror getBaseType() {
+    Class enumClass = java.lang.String.class;
+    if (xmlEnum != null) {
+      enumClass = xmlEnum.value();
+    }
+
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlEnum.value());
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(enumClass);
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

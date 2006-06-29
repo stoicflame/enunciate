@@ -1,6 +1,5 @@
 package net.sf.enunciate.contract.jaxb.types;
 
-import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.util.QName;
 
 /**
@@ -8,7 +7,7 @@ import net.sf.enunciate.util.QName;
  *
  * @author Ryan Heaton
  */
-public interface XmlTypeMirror extends TypeMirror {
+public interface XmlTypeMirror {
 
   /**
    * The (local) name of this xml type.
