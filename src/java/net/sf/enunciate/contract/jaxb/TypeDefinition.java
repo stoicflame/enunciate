@@ -343,15 +343,6 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
-   * Whether this is an empty complex type.
-   *
-   * @return Whether this is an empty complex type.
-   */
-  public boolean isEmpty() {
-    return false;
-  }
-
-  /**
    * Whether this is a enum type.
    *
    * @return Whether this is a enum type.

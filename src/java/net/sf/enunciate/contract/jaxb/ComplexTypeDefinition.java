@@ -79,11 +79,6 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
   }
 
   @Override
-  public boolean isEmpty() {
-    return getContentType().isEmpty();
-  }
-
-  @Override
   public ValidationResult accept(Validator validator) {
     return validator.validateComplexType(this);
   }

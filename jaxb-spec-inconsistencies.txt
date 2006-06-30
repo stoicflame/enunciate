@@ -1,0 +1,2 @@
+The following were noticed inconsistencies in the JAXB specification:
+

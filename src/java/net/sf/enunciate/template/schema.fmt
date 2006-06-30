@@ -29,10 +29,6 @@ definitions, as they could be inlined if they're anonymous.
   </xs:restriction>
 </xs:simpleType>
 
-  [#--empty complex type definition--]
-  [#elseif typeDef.empty]
-<xs:complexType name="${typeDef.name}"/>
-
   [#--complex type definition--]
   [#elseif typeDef.complex]
 <xs:complexType name="${typeDef.name}">
@@ -43,45 +39,47 @@ definitions, as they could be inlined if they're anonymous.
   <xs:complexContent>
     <xs:extension base="${typeDef.baseType.qname}">
       [/#if]
+      [#if !typeDef.contentType.empty]
       <xs:${typeDef.compositorName}>
-      [#list typeDef.elements as element]
-        [#if element.wrapped]
+        [#list typeDef.elements as element]
+          [#if element.wrapped]
         <xs:element name="${typeDef.wrapperName}">
           <xs:complexType>
             <xs:sequence>
-        [/#if]
-        [#if element.choices?size > 1]
+          [/#if]
+          [#if element.choices?size > 1]
               <xs:choice minOccurs="0" maxOccurs="unbounded">
-          [#list element.choices as elementChoice]
-            [#if elementChoice.ref?exists]
+            [#list element.choices as elementChoice]
+              [#if elementChoice.ref?exists]
                 <xs:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
-            [#elseif elementChoice.baseType.anonymous]
+              [#elseif elementChoice.baseType.anonymous]
                 <xs:element name="${elementChoice.name}">
                   [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
                 </xs:elment>
-            [#else]
+              [#else]
                 <xs:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
-            [/#if]
-          [/#list]
+              [/#if]
+            [/#list]
               </xs:choice>
-        [#else]
-          [#if element.ref?exists]
+          [#else]
+            [#if element.ref?exists]
               <xs:element name="${element.name}" ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}"/>
-          [#elseif element.baseType.anonymous]
+            [#elseif element.baseType.anonymous]
               <xs:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
                 [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
               </xs:elment>
-          [#else]
+            [#else]
               <xs:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}"/>
+            [/#if]
           [/#if]
-        [/#if]
-        [#if element.wrapped]
+          [#if element.wrapped]
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        [/#if]
-      [/#list]
+          [/#if]
+        [/#list]
       </xs:${typeDef.compositorName}>
+      [/#if]
 
     [#--complex type with simple content--]
     [#elseif typeDef.contentType.simple]
@@ -101,7 +99,7 @@ definitions, as they could be inlined if they're anonymous.
     [#if typeDef.contentType.simple]
     </xs:extension>
   </xs:simpleContent>
-    [#elseif typeDef.contentType.complex && !typeDef.contentType.implied]
+    [#elseif !typeDef.contentType.implied]
     </xs:extension>
   </xs:complexContent>
     [/#if]
@@ -115,12 +113,14 @@ definitions, as they could be inlined if they're anonymous.
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema version="1.0" [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if]
   [#list schema.referencedNamespaces as referencedNamespace]
+    [#if referencedNamespace?exists]
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
+    [/#if]
   [/#list]
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  [#list wsdl.importedSchemas as schema]
-  <xs:import namespace="${schema.namespace}" location="${schema.location}"/>
+  [#list schema.importedSchemas as schema]
+  <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
 
   [#list schema.globalElements as globalElement]

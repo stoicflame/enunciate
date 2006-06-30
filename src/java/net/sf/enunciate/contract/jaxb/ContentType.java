@@ -65,7 +65,7 @@ public enum ContentType {
    * @return Whether this is the complex content type.
    */
   public boolean isComplex() {
-    return ((this == COMPLEX) || (this == IMPLIED));
+    return ((this == COMPLEX) || (this == EMPTY) || (this == IMPLIED));
   }
 
   /**

@@ -1,7 +1,5 @@
 package net.sf.enunciate.util;
 
-import freemarker.ext.beans.InvalidPropertyException;
-import freemarker.template.*;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
@@ -12,7 +10,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class QName extends javax.xml.namespace.QName implements TemplateHashModel, TemplateScalarModel {
+public class QName extends javax.xml.namespace.QName {
 
   public static final String EMPTY_PREFIX = "<empty-prefix>";
 
@@ -24,7 +22,6 @@ public class QName extends javax.xml.namespace.QName implements TemplateHashMode
    */
   public QName(String namespaceURI, String localPart) {
     super(namespaceURI, localPart, lookupPrefix(namespaceURI));
-
   }
 
   /**
@@ -36,32 +33,6 @@ public class QName extends javax.xml.namespace.QName implements TemplateHashMode
    */
   public QName(String namespaceURI, String localPart, String prefix) {
     super(namespaceURI, localPart, prefix);
-  }
-
-  //Inherited.
-  public TemplateModel get(String property) throws TemplateModelException {
-    if ("prefix".equalsIgnoreCase(property)) {
-      return new SimpleScalar(getPrefix());
-    }
-    else if ("namespaceURI".equalsIgnoreCase(property)) {
-      return new SimpleScalar(getNamespaceURI());
-    }
-    else if ("localPart".equalsIgnoreCase(property)) {
-      return new SimpleScalar(getLocalPart());
-    }
-    else {
-      throw new InvalidPropertyException(property);
-    }
-  }
-
-  //Inherited.
-  public boolean isEmpty() throws TemplateModelException {
-    return false;
-  }
-
-  //Inherited.
-  public String getAsString() throws TemplateModelException {
-    return toString();
   }
 
   /**

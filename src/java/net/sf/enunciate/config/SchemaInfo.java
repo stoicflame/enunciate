@@ -157,12 +157,11 @@ public class SchemaInfo {
 
     for (RootElementDeclaration rootElement : getGlobalElements()) {
       referencedNamspaces.add(rootElement.getTargetNamespace());
+      referencedNamspaces.add(rootElement.getTypeDefinition().getTargetNamespace());
     }
 
     //remove the obvious referenced namespace.
     referencedNamspaces.remove("http://www.w3.org/2001/XMLSchema");
-    //remove the empty namespace.
-    referencedNamspaces.remove(null);
 
     return referencedNamspaces;
   }
@@ -174,11 +173,20 @@ public class SchemaInfo {
    */
   public List<SchemaInfo> getImportedSchemas() {
     Set<String> importedNamespaces = getReferencedNamespaces();
+    importedNamespaces.remove(getNamespace());
     List<SchemaInfo> schemas = new ArrayList<SchemaInfo>();
     for (String ns : importedNamespaces) {
       SchemaInfo schema = lookupSchema(ns);
       if (schema != null) {
         schemas.add(schema);
+      }
+      else {
+        // if it's not a schema we know about, we're going to leave the schemaLocation empty, giving no hints as
+        // to where to find the definitions of referenced components.  Not illegal according to XML-Schema, but
+        // probably not a good idea.
+        SchemaInfo schemaInfo = new SchemaInfo();
+        schemaInfo.setNamespace(ns);
+        schemas.add(schemaInfo);
       }
     }
     return schemas;

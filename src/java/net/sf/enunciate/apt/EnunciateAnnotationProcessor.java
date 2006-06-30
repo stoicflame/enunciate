@@ -1,16 +1,12 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
-import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import com.sun.mirror.declaration.*;
+import net.sf.enunciate.contract.jaxb.*;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.validation.DefaultValidator;
-import net.sf.enunciate.contract.validation.ValidationMessage;
-import net.sf.enunciate.contract.validation.ValidationResult;
-import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.contract.validation.*;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -18,6 +14,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Collection;
 
@@ -36,7 +34,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
 
-    ValidationResult validationResult = new ValidationResult();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
@@ -47,12 +44,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           System.out.println(declaration.getQualifiedName() + " to be considered as an endpoint interface.");
         }
 
-        ValidationResult result = model.add(endpointInterface);
-        validationResult.aggregate(result);
+        model.add(endpointInterface);
       }
-      else if (declaration instanceof ClassDeclaration) {
-        //otherwise, if it's a class, consider it a potential jaxb type.
-        TypeDefinition typeDef = model.findOrCreateTypeDefinition((ClassDeclaration) declaration);
+      else if (isPotentialSchemaType(declaration)) {
+        TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
         if (typeDef != null) {
           if (isVerbose()) {
             System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
@@ -62,21 +57,23 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
                                              typeDef.getName()));
           }
 
-          ValidationResult result = model.add(typeDef);
-          validationResult.aggregate(result);
-        }
+          model.add(typeDef);
 
-        RootElementDeclaration rootElement = model.findOrCreateRootElementDeclaration((ClassDeclaration) declaration, typeDef);
-        if (rootElement != null) {
-          if (isVerbose()) {
-            System.out.println(declaration.getQualifiedName() + " to be considered as a root element.");
+          RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) declaration, typeDef);
+          if (rootElement != null) {
+            if (isVerbose()) {
+              System.out.println(declaration.getQualifiedName() + " to be considered as a root element.");
+            }
+
+            model.add(rootElement);
           }
-
-          ValidationResult result = model.add(rootElement);
-          validationResult.aggregate(result);
         }
       }
     }
+
+    //todo: read the validator type from the config.
+    Validator validator = new DefaultValidator();
+    ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {
       for (ValidationMessage warning : validationResult.getWarnings()) {
@@ -112,9 +109,31 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   //Inherited.
   @Override
   protected FreemarkerModel newRootModel() {
-    //todo: read the validator type from the config.
-    Validator validator = new DefaultValidator();
-    return new EnunciateFreemarkerModel(validator);
+    return new EnunciateFreemarkerModel();
+  }
+
+  /**
+   * Whether the specified declaration is a potential schema type.
+   *
+   * @param declaration The declaration to determine whether it's a potential schema type.
+   * @return Whether the specified declaration is a potential schema type.
+   */
+  protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
+    if (!(declaration instanceof ClassDeclaration)) {
+      return false;
+    }
+
+    Collection<AnnotationMirror> annotationMirrors = declaration.getAnnotationMirrors();
+    for (AnnotationMirror mirror : annotationMirrors) {
+      AnnotationTypeDeclaration annotationDeclaration = mirror.getAnnotationType().getDeclaration();
+      if (annotationDeclaration != null) {
+        if ((annotationDeclaration.getQualifiedName().startsWith("javax.xml.ws") || (annotationDeclaration.getQualifiedName().startsWith("javax.jws")))) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -125,6 +144,82 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     return (ws != null) && ((declaration instanceof InterfaceDeclaration)
       //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
       || (ws.endpointInterface() == null) || ("".equals(ws.endpointInterface())));
+  }
+
+  /**
+   * Find the type definition for a class given the class's declaration, or null if the class is xml transient.
+   *
+   * @param declaration The declaration.
+   * @return The type definition.
+   */
+  public TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
+    if (isEnumType(declaration)) {
+      return new EnumTypeDefinition((EnumDeclaration) declaration);
+    }
+    else if (isSimpleType(declaration)) {
+      return new SimpleTypeDefinition(declaration);
+    }
+    else {
+      //assume its a complex type.
+      return new ComplexTypeDefinition(declaration);
+    }
+  }
+
+  /**
+   * Find or create the root element declaration for the specified type definition.
+   *
+   * @param declaration    The class declaration
+   * @param typeDefinition The specified type definition.
+   * @return The root element declaration.
+   */
+  public RootElementDeclaration createRootElementDeclaration(ClassDeclaration declaration, TypeDefinition typeDefinition) {
+    if (!isRootSchemaElement(declaration)) {
+      return null;
+    }
+    else {
+      return new RootElementDeclaration(declaration, typeDefinition);
+    }
+  }
+
+  /**
+   * A quick check to see if a declaration defines a complex schema type.
+   */
+  protected boolean isComplexType(TypeDeclaration declaration) {
+    return !(declaration instanceof InterfaceDeclaration) && !isEnumType(declaration) && !isSimpleType(declaration);
+  }
+
+  /**
+   * A quick check to see if a declaration defines a enum schema type.
+   */
+  protected boolean isEnumType(TypeDeclaration declaration) {
+    return (declaration instanceof EnumDeclaration);
+  }
+
+  /**
+   * A quick check to see if a declaration defines a simple schema type.
+   */
+  protected boolean isSimpleType(TypeDeclaration declaration) {
+    if (declaration instanceof InterfaceDeclaration) {
+      if (declaration.getAnnotation(XmlType.class) != null) {
+        throw new ValidationException(declaration.getPosition(), "An interface must not be annotated with @XmlType.");
+      }
+
+      return false;
+    }
+
+    if (isEnumType(declaration)) {
+      return false;
+    }
+
+    GenericTypeDefinition typeDef = new GenericTypeDefinition((ClassDeclaration) declaration);
+    return ((typeDef.getValue() != null) && (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty()));
+  }
+
+  /**
+   * A quick check to see if a declaration defines a root schema element.
+   */
+  protected boolean isRootSchemaElement(TypeDeclaration declaration) {
+    return declaration.getAnnotation(XmlRootElement.class) != null;
   }
 
   //Inherited.
@@ -154,6 +249,50 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected boolean isVerbose() {
     return Context.getCurrentEnvironment().getOptions().containsKey(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
+  }
+
+  /**
+   * Validates the model given a validator.
+   *
+   * @param model     The model to validate.
+   * @param validator The validator.
+   * @return The results of the validation.
+   */
+  protected ValidationResult validate(EnunciateFreemarkerModel model, Validator validator) {
+    ValidationResult validationResult = new ValidationResult();
+
+    for (EndpointInterface ei : model.endpointInterfaces) {
+      validationResult.aggregate(validator.validateEndpointInterface(ei));
+    }
+
+    for (TypeDefinition typeDefinition : model.typeDefinitions) {
+      validationResult.aggregate(typeDefinition.accept(validator));
+    }
+
+    for (RootElementDeclaration rootElement : model.rootElements) {
+      validationResult.aggregate(validator.validateRootElement(rootElement));
+    }
+
+    return validationResult;
+  }
+
+  /**
+   * Internal class used to inherit some functionality for determining whether a declaration is a simple type
+   * or a complex type.
+   */
+  protected static class GenericTypeDefinition extends TypeDefinition {
+
+    protected GenericTypeDefinition(ClassDeclaration delegate) {
+      super(delegate);
+    }
+
+    public ValidationResult accept(Validator validator) {
+      return new ValidationResult();
+    }
+
+    public XmlTypeMirror getBaseType() {
+      return KnownXmlType.ANY_TYPE;
+    }
   }
 
 }
