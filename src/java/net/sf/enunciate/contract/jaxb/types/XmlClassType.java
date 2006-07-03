@@ -24,10 +24,12 @@ public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
       throw new XmlTypeException("Unknown type definition: " + delegate);
     }
 
-    this.typeDef = ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration);
-    if (this.typeDef == null) {
+    TypeDefinition typeDef = ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration);
+    if (typeDef == null) {
       throw new XmlTypeException("Unknown xml type for " + classDeclaration.getQualifiedName());
     }
+
+    this.typeDef = typeDef;
   }
 
   /**

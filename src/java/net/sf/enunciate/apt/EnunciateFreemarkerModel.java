@@ -165,7 +165,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param typeDef The type definition to add to the model.
    */
   public void add(TypeDefinition typeDef) {
-    this.namespacesToPrefixes.putAll(typeDef.getSchema().getSpecifiedNamespacePrefixes());
+    Schema schema = typeDef.getSchema();
+    this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
     String namespace = typeDef.getTargetNamespace();
     String prefix = addNamespace(namespace);
@@ -174,6 +175,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
       namespacesToSchemas.put(namespace, schemaInfo);
+      if (schema.getElementFormDefault() != null) {
+        schemaInfo.setElementFormDefault(schema.getElementFormDefault().toString().toLowerCase());
+      }
+      if (schema.getAttributeFormDefault() != null) {
+        schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
+      }
       schemaInfo.setNamespace(namespace);
       schemaInfo.setFile(prefix + ".xsd");
       schemaInfo.setLocation(prefix + ".xsd");
@@ -192,7 +199,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param rootElement The root element to add.
    */
   public void add(RootElementDeclaration rootElement) {
-    this.namespacesToPrefixes.putAll(rootElement.getSchema().getSpecifiedNamespacePrefixes());
+    Schema schema = rootElement.getSchema();
+    this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
     String namespace = rootElement.getTargetNamespace();
     String prefix = addNamespace(namespace);
@@ -201,6 +209,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
       namespacesToSchemas.put(namespace, schemaInfo);
+      if (schema.getElementFormDefault() != null) {
+        schemaInfo.setElementFormDefault(schema.getElementFormDefault().toString().toLowerCase());
+      }
+      if (schema.getAttributeFormDefault() != null) {
+        schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
+      }
       schemaInfo.setNamespace(namespace);
       schemaInfo.setFile(prefix + ".xsd");
       schemaInfo.setLocation(prefix + ".xsd");
@@ -253,9 +267,11 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       TypeDeclaration declaration = ((DeclaredType) type).getDeclaration();
       if (declaration != null) {
         if (knownTypes.containsKey(declaration.getQualifiedName())) {
+          //first check the known types.
           return knownTypes.get(declaration.getQualifiedName());
         }
         else {
+          //not known, check the specified types.
           Map<String, XmlTypeMirror> specifiedTypes = new Schema(declaration.getPackage()).getSpecifiedTypes();
           if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
             return specifiedTypes.get(declaration.getQualifiedName());
@@ -296,17 +312,17 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (index >= 0) {
       return this.typeDefinitions.get(index);
     }
+
     return null;
   }
 
   /**
-   * Find or create the root element declaration for the specified type definition.
+   * Find the root element declaration for the specified class.
    *
-   * @param declaration    The class declaration
-   * @param typeDefinition The specified type definition.
+   * @param declaration The class declaration
    * @return The root element declaration.
    */
-  public RootElementDeclaration findRootElementDeclaration(ClassDeclaration declaration, TypeDefinition typeDefinition) {
+  public RootElementDeclaration findRootElementDeclaration(ClassDeclaration declaration) {
     int index = Collections.binarySearch(this.rootElements, declaration, CLASS_COMPARATOR);
     if (index >= 0) {
       return this.rootElements.get(index);

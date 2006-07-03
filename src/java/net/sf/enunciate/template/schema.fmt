@@ -12,7 +12,7 @@ definitions, as they could be inlined if they're anonymous.
   [#--simple type definition--]
   [#if typeDef.simple]
 <xs:simpleType name="${typeDef.name}">
-    [#if typeDef.value.list]
+    [#if typeDef.value.xmlList]
   <xs:list itemType="${typeDef.baseType.qname}"/>
     [#else]
   <xs:restriction base="${typeDef.baseType.qname}"/>
@@ -31,7 +31,7 @@ definitions, as they could be inlined if they're anonymous.
 
   [#--complex type definition--]
   [#elseif typeDef.complex]
-<xs:complexType name="${typeDef.name}">
+<xs:complexType name="${typeDef.name}"[#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
     [#--complex type with complex content.--]
     [#if typeDef.contentType.complex]
       [#--if it's not implied, we need to declare the extension--]
@@ -80,13 +80,13 @@ definitions, as they could be inlined if they're anonymous.
         [/#list]
       </xs:${typeDef.compositorName}>
       [/#if]
-
+[#t]
     [#--complex type with simple content--]
     [#elseif typeDef.contentType.simple]
   <xs:simpleContent>
     <xs:extension base="${typeDef.value.baseType.qname}">
     [/#if]
-
+[#t]
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
       [#if attribute.ref?exists]
@@ -95,7 +95,7 @@ definitions, as they could be inlined if they're anonymous.
       <xs:attribute required="${attribute.required}" type="${attribute.baseTye.qname}"/>
       [/#if]
     [/#list]
-
+[#t]
     [#if typeDef.contentType.simple]
     </xs:extension>
   </xs:simpleContent>
@@ -111,14 +111,17 @@ definitions, as they could be inlined if they're anonymous.
 [/#macro]
 [#t]
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema version="1.0" [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if]
+<xs:schema version="1.0"
+  [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if][#t]
+  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
+  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
     [#if referencedNamespace?exists]
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
     [/#if]
   [/#list]
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
+[#t]
   [#list schema.importedSchemas as schema]
   <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
@@ -132,11 +135,11 @@ definitions, as they could be inlined if they're anonymous.
   <xs:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
     [/#if]
   [/#list]
-
+[#t]
   [#list schema.typeDefinitions as typeDefinition]
     [#if !typeDefinition.anonymous]
       [@process_typedef typeDef=typeDefinition/]
     [/#if]
   [/#list]
-  
+[#t]
 </xs:schema>

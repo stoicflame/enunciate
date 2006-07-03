@@ -411,22 +411,11 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateElement(Element element) {
     ValidationResult result = validateAccessor(element);
 
-    XmlTypeMirror collectionTypeParameter = element.getCollectionTypeParameter();
-    if ((collectionTypeParameter != null) && (collectionTypeParameter != KnownXmlType.ANY_TYPE)) {
-      XmlTypeMirror baseType = element.getBaseType();
-      if ((!collectionTypeParameter.getNamespace().equals(baseType.getNamespace())) && (!collectionTypeParameter.getName().equals(baseType.getName()))) {
-        String specifiedType = new QName(baseType.getNamespace(), baseType.getName()).toString();
-        String collectionType = new QName(collectionTypeParameter.getNamespace(), collectionTypeParameter.getName()).toString();
-
-        result.addError(element.getPosition(), "Type mismatch: the specified type " + specifiedType +
-          " doesn't match the parameterized collection item type " + collectionType + ".");
-      }
-
-      XmlElements xmlElements = element.getAnnotation(XmlElements.class);
-      if ((xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
-        result.addError(element.getPosition(),
-                        "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
-      }
+    XmlElements xmlElements = element.getAnnotation(XmlElements.class);
+    if ((element.isCollectionType()) && (element.getBaseType() != KnownXmlType.ANY_TYPE) &&
+      (xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
+      result.addError(element.getPosition(),
+                      "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
     }
 
     if (element.isWrapped()) {
@@ -434,10 +423,9 @@ public class DefaultValidator implements Validator {
 
       if ((!"##default".equals(wrapper.namespace())) && (!element.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
         result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
-          "The spec is unclear as to why this should be allowed because you could just use an @XmlType annotation to accomplish the same thing with more clarity.");
+          "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
       }
     }
-
 
     return result;
   }
@@ -474,7 +462,7 @@ public class DefaultValidator implements Validator {
 
       if ((!"##default".equals(wrapper.namespace())) && (!elementRef.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
         result.addError(elementRef.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
-          "The spec is unclear as to why this should be allowed because you could just use an @XmlType annotation to accomplish the same thing with more clarity.");
+          "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
       }
     }
 

@@ -1,6 +1,7 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
@@ -8,7 +9,6 @@ import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.util.QName;
@@ -31,7 +31,7 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final XmlTypeMirror referencedType;
+  private final RootElementDeclaration ref;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef);
@@ -52,6 +52,7 @@ public class ElementRef extends Element {
 
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
+    XmlTypeMirror baseType = getBaseType();
     if (xmlElementRefs != null) {
       for (XmlElementRef elementRef : xmlElementRefs.value()) {
         this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), elementRef));
@@ -60,22 +61,18 @@ public class ElementRef extends Element {
     else if (isCollectionType()) {
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
       //todo: what if it's a parameteric collection type of JAXBElements?
-      XmlTypeMirror baseType = getBaseType();
-      AnnotationProcessorEnvironment env = getEnv();
-      Types typeUtils = env.getTypeUtils();
       if (baseType instanceof TypeMirror) {
         TypeMirror typeMirror = (TypeMirror) baseType;
+        AnnotationProcessorEnvironment env = getEnv();
+        Types typeUtils = env.getTypeUtils();
+        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
         for (TypeDeclaration type : env.getTypeDeclarations()) {
           XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
           DeclaredType declaredType = typeUtils.getDeclaredType(type);
-          if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, typeMirror))) {
-            try {
-              XmlTypeMirror explicitType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(declaredType);
-              this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), explicitType));
-            }
-            catch (XmlTypeException e) {
-              throw new ValidationException(getPosition(), e.getMessage());
-            }
+
+          if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, typeMirror)) && (declaredType.getDeclaration() instanceof ClassDeclaration)) {
+            RootElementDeclaration ref = model.findRootElementDeclaration((ClassDeclaration) declaredType.getDeclaration());
+            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), ref));
           }
         }
       }
@@ -88,17 +85,7 @@ public class ElementRef extends Element {
       this.choices.add(this);
     }
 
-    if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-      try {
-        this.referencedType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElementRef.type());
-      }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
-      }
-    }
-    else {
-      this.referencedType = getBaseType();
-    }
+    this.ref = loadRef();
   }
 
   /**
@@ -113,18 +100,7 @@ public class ElementRef extends Element {
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-
-    if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-      try {
-        this.referencedType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElementRef.type());
-      }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
-      }
-    }
-    else {
-      this.referencedType = getBaseType();
-    }
+    this.ref = loadRef();
   }
 
   /**
@@ -132,14 +108,46 @@ public class ElementRef extends Element {
    *
    * @param delegate The delegate.
    * @param typedef  The type definition.
-   * @param baseType The specific base type.
+   * @param ref      The referenced root element.
    */
-  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, XmlTypeMirror baseType) {
+  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, RootElementDeclaration ref) {
     super(delegate, typedef);
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.referencedType = baseType;
+    this.ref = ref;
+  }
+
+  /**
+   * Load the referenced root element declaration.
+   *
+   * @return the referenced root element declaration.
+   */
+  protected RootElementDeclaration loadRef() {
+    TypeDeclaration declaration = null;
+    String elementDeclaration;
+    RootElementDeclaration refElement;
+    if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
+      declaration = getEnv().getTypeDeclaration(xmlElementRef.type().getName());
+      elementDeclaration = xmlElementRef.type().getName();
+    }
+    else {
+      TypeMirror accessorType = isCollectionType() ? getCollectionItemType() : getAccessorType();
+      elementDeclaration = accessorType.toString();
+      if (accessorType instanceof DeclaredType) {
+        declaration = ((DeclaredType) accessorType).getDeclaration();
+      }
+    }
+
+    if ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(XmlRootElement.class) != null)) {
+      ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
+      refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
+    }
+    else {
+      throw new ValidationException(getPosition(), elementDeclaration + " is not a root element declaration.");
+    }
+
+    return refElement;
   }
 
   /**
@@ -198,7 +206,7 @@ public class ElementRef extends Element {
 
   @Override
   public QName getRef() {
-    return new QName(this.referencedType.getNamespace(), this.referencedType.getName());
+    return new QName(this.ref.getTargetNamespace(), this.ref.getName());
   }
 
   /**

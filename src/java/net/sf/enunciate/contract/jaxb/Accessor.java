@@ -1,9 +1,13 @@
 package net.sf.enunciate.contract.jaxb;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
@@ -11,6 +15,7 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.util.QName;
+import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
@@ -18,6 +23,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.*;
+import java.util.Collection;
 
 /**
  * An accessor for a field or method value into a type.
@@ -117,7 +123,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     namespace = namespace == null ? "<empty namespace>" : namespace;
     typeNamespace = typeNamespace == null ? "<empty namespace>" : typeNamespace;
 
-    if ((!namespace.equals(typeNamespace)) || (getBaseType().isAnonymous())) {
+    if (!namespace.equals(typeNamespace)) {
       return new QName(namespace, getName());
     }
 
@@ -159,13 +165,20 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    *
    * @return the type parameter of the collection.
    */
-  public XmlTypeMirror getCollectionTypeParameter() {
-    if (isCollectionType()) {
-      try {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getAccessorType());
+  public TypeMirror getCollectionItemType() {
+    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
+    if (accessorType.isArray()) {
+      return ((ArrayType) accessorType).getComponentType();
+    }
+    else if (accessorType.isCollection()) {
+      Collection<TypeMirror> itemTypes = ((DeclaredType) accessorType).getActualTypeArguments();
+      if (itemTypes.isEmpty()) {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        Types typeUtils = env.getTypeUtils();
+        return typeUtils.getDeclaredType(env.getTypeDeclaration(java.lang.Object.class.getName()));
       }
-      catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
+      else {
+        return itemTypes.iterator().next();
       }
     }
 

@@ -3,8 +3,6 @@ package net.sf.enunciate.apt;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import net.sf.enunciate.contract.jaxb.*;
-import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.*;
 import net.sf.enunciate.template.freemarker.*;
@@ -15,6 +13,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.net.URL;
 import java.util.Collection;
@@ -90,8 +89,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
 /*
-    todo: read the config file into the prefixMap and schemaMap
-    todo: but don't overwrite the constant namespaces
+    todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
+    todo: read the config file into the prefixMap and schemaMap (but don't overwrite the constant namespaces!)
+    todo: read the config file for element/attribute form default
     String configFile = env.getOptions().get(EnunciateAnnotationProcessorFactory.CONFIG_OPTION);
     if (configFile != null) {
       try {
@@ -120,6 +120,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
     if (!(declaration instanceof ClassDeclaration)) {
+      return false;
+    }
+
+    if (declaration.getAnnotation(XmlTransient.class) != null) {
       return false;
     }
 
@@ -274,25 +278,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     return validationResult;
-  }
-
-  /**
-   * Internal class used to inherit some functionality for determining whether a declaration is a simple type
-   * or a complex type.
-   */
-  protected static class GenericTypeDefinition extends TypeDefinition {
-
-    protected GenericTypeDefinition(ClassDeclaration delegate) {
-      super(delegate);
-    }
-
-    public ValidationResult accept(Validator validator) {
-      return new ValidationResult();
-    }
-
-    public XmlTypeMirror getBaseType() {
-      return KnownXmlType.ANY_TYPE;
-    }
   }
 
 }

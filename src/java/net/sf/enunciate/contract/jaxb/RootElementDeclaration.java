@@ -25,7 +25,7 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
   }
 
   /**
-   * The type definition for this root element.
+   * The type definition for this root element.  Note that the type definition may be unknown, in which case, return null.
    *
    * @return The type definition for this root element.
    */

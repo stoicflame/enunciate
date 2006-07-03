@@ -1,5 +1,6 @@
 package net.sf.enunciate.contract.jaxb;
 
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.PrimitiveType;
@@ -101,11 +102,14 @@ public class Element extends Accessor {
    */
   public QName getRef() {
     QName ref = super.getRef();
+
     if (ref == null) {
       XmlTypeMirror baseType = getBaseType();
       if (baseType.isAnonymous()) {
-        if (((XmlClassType) baseType).getTypeDefinition().getAnnotation(XmlRootElement.class) != null) {
-          ref = new QName(getNamespace(), getName());
+        TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
+        if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
+          RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
+          ref = new QName(rootElement.getTargetNamespace(), rootElement.getName());
         }
       }
     }

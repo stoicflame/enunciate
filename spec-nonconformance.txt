@@ -1,4 +1,8 @@
+-no support for rpc-style invocations
 -no support for out or in/out parameters (for now).
--support for only document/literal "wrapped" method invocations (for now).
 -wsdl: default part name for the parameter is the name of the parameter, rather than arg0, arg1, etc.  The spec isn't clear whether the "arg0" naming is a MUST, so we'll take it as a suggestion.
--jaxb: xmlns is ignored for across-the-board consistence through the enunciate.xml config file.
+-jaxb: xmlns at the package-level is global for across-the-board consistence and overridden by the enunciate.xml config file.
+-jaxb: elementFormDefault/attributeFormDefault at the package-level is global for across-the-board consistence and overridden by the enunciate.xml config file.
+-jaxb: no support yet for @XmlAdapter.
+-jaxb: xs:all compositor is never used because it's unclear how to extends types with the xs:all compositor and it's also unclear what to do when maxOccurs > 1
+-jaxb: no support for the exception that a property of type java.lang.List doesn't need a setter.

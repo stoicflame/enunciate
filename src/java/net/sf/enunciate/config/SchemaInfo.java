@@ -18,6 +18,8 @@ public class SchemaInfo {
   private boolean generate;
   private String file;
   private String location;
+  private String elementFormDefault;
+  private String attributeFormDefault;
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
 
@@ -118,6 +120,42 @@ public class SchemaInfo {
    */
   public Collection<RootElementDeclaration> getGlobalElements() {
     return globalElements;
+  }
+
+  /**
+   * The elementFormDefault for this schema.
+   *
+   * @return The elementFormDefault for this schema.
+   */
+  public String getElementFormDefault() {
+    return elementFormDefault;
+  }
+
+  /**
+   * The elementFormDefault for this schema.
+   *
+   * @param elementFormDefault The elementFormDefault for this schema.
+   */
+  public void setElementFormDefault(String elementFormDefault) {
+    this.elementFormDefault = elementFormDefault;
+  }
+
+  /**
+   * The attributeFormDefault for this schema.
+   *
+   * @return The attributeFormDefault for this schema.
+   */
+  public String getAttributeFormDefault() {
+    return attributeFormDefault;
+  }
+
+  /**
+   * The attributeFormDefault for this schema.
+   *
+   * @param attributeFormDefault The attributeFormDefault for this schema.
+   */
+  public void setAttributeFormDefault(String attributeFormDefault) {
+    this.attributeFormDefault = attributeFormDefault;
   }
 
   /**

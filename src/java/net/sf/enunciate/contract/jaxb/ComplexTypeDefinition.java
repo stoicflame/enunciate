@@ -43,7 +43,11 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
    * @return The compositor for this type definition.
    */
   public String getCompositorName() {
-    return getPropertyOrder() == null ? "all" : "sequence";
+    //"all" isn't supported because the spec isn't clear on what to do when:
+    // 1. A class with the "all" compositor is extended.
+    // 2. an "element" content elemnt has maxOccurs > 0
+    //return getPropertyOrder() == null ? "all" : "sequence";
+    return "sequence";
   }
 
   /**
