@@ -1,9 +1,22 @@
 package net.sf.enunciate.contract.jaxws;
 
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.jws.soap.SOAPBinding;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +24,7 @@ import java.util.Collection;
 /**
  * @author Ryan Heaton
  */
-public class WebParam extends DecoratedParameterDeclaration implements SimpleWebMessage, ComplexWebMessage, WebMessagePart {
+public class WebParam extends DecoratedParameterDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement, ImplicitChildElement {
 
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
@@ -28,11 +41,20 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
   }
 
   /**
+   * The web method for this web param.
+   *
+   * @return The web method for this web param.
+   */
+  public WebMethod getWebMethod() {
+    return method;
+  }
+
+  /**
    * The name of this web param.
    *
    * @return The name of this web param.
    */
-  public String getName() {
+  public String getElementName() {
     String name = getSimpleName();
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
@@ -48,11 +70,6 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
    * @return The part name of the message for this parameter.
    */
   public String getPartName() {
-    if (isHeader()) {
-      throw new UnsupportedOperationException("The part name is used for the WSDL and WSDL doesn't support header elements except " +
-        "through the extensibility mechanism.");
-    }
-
     return getSimpleName();
   }
 
@@ -62,31 +79,82 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
    * @return The message name of the message for this parameter.
    */
   public String getMessageName() {
-    if (isHeader()) {
-      throw new UnsupportedOperationException("The message name is used for the WSDL and WSDL doesn't support header elements except " +
-        "through the extensibility mechanism.");
-    }
-
     return method.getMessageName();
   }
 
   /**
-   * Gets the target namespace of this web service.
+   * The qname of the element for this part.
    *
-   * @return the target namespace of this web service.
+   * @return The qname of the element for this part.
    */
-  public String getTargetNamespace() {
-    String targetNamespace = null;
+  public QName getElementQName() {
+    TypeMirror parameterType = getType();
+    if (parameterType instanceof DeclaredType) {
+      TypeDeclaration parameterTypeDeclaration = ((DeclaredType) parameterType).getDeclaration();
+      if ((parameterTypeDeclaration instanceof ClassDeclaration) && (parameterTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
+        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
+        RootElementDeclaration rootElement = model.findRootElementDeclaration((ClassDeclaration) parameterTypeDeclaration);
+        if (rootElement == null) {
+          throw new ValidationException(getPosition(), parameterTypeDeclaration.getQualifiedName() +
+            " is not a known root element.  Please add it to the list of known classes.");
+        }
 
-    if (annotation != null) {
-      targetNamespace = annotation.targetNamespace();
+        return new QName(rootElement.getQualifiedName(), rootElement.getName());
+      }
     }
 
-    if ((targetNamespace == null) || ("".equals(targetNamespace))) {
-      targetNamespace = this.method.getDeclaringEndpointInterface().getTargetNamespace();
-    }
+    return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+  }
 
-    return targetNamespace;
+  /**
+   * This web parameter defines an implicit schema element if it is NOT of a class type that is an xml root element.
+   *
+   * @return Whether this web parameter is an implicit schema element.
+   */
+  public boolean isImplicitSchemaElement() {
+    TypeMirror parameterType = getType();
+    return !((parameterType instanceof DeclaredType) && (((DeclaredType) parameterType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
+  }
+
+  /**
+   * A web param never has any child elements.  It is either a BARE root element with a non-anonymous type, or a child
+   * element of a request/response wrapper.
+   *
+   * @return null.
+   */
+  public Collection<ImplicitChildElement> getChildElements() {
+    return null;
+  }
+
+  /**
+   * The qname of the type of this parameter.
+   *
+   * @return The qname of the type of this parameter.
+   * @throws ValidationException If the type is anonymous or otherwise problematic.
+   */
+  public QName getTypeQName() {
+    try {
+      EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
+      XmlTypeMirror xmlType = model.getXmlType(getType());
+      if (xmlType.isAnonymous()) {
+        throw new ValidationException(getPosition(), "Type of web parameter cannot be anonymous.");
+      }
+
+      return xmlType.getQname();
+    }
+    catch (XmlTypeException e) {
+      throw new ValidationException(getPosition(), e.getMessage());
+    }
+  }
+
+  public int getMinOccurs() {
+    DecoratedTypeMirror paramType = (DecoratedTypeMirror) getType();
+    return paramType.isPrimitive() ? 1 : 0;
+  }
+
+  public String getMaxOccurs() {
+    DecoratedTypeMirror paramType = (DecoratedTypeMirror) getType();
+    return paramType.isArray() || paramType.isCollection() ? "unbounded" : "1";
   }
 
   /**
@@ -120,20 +188,11 @@ public class WebParam extends DecoratedParameterDeclaration implements SimpleWeb
   }
 
   /**
-   * Whether this is a simple param.  A web parameter can only be a simple parameter if it's a header parameter.
-   *
-   * @return Whether this is a simple param.
-   */
-  public boolean isSimple() {
-    return isHeader();
-  }
-
-  /**
    * This web param can be considered complex only if it is BARE.
    *
    * @return This web param can be considered complex only if it is BARE.
    */
-  public boolean isComplex() {
+  private boolean isComplex() {
     return method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE;
   }
 

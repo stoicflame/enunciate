@@ -1,10 +1,13 @@
 package net.sf.enunciate.contract.jaxws;
 
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import javax.jws.Oneway;
@@ -47,16 +50,16 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     Collection<WebFault> webFaults = new ArrayList<WebFault>();
     for (ReferenceType referenceType : getThrownTypes()) {
       if (!(referenceType instanceof DeclaredType)) {
-        throw new IllegalStateException("How can a thrown type be anything other than a declared type?");
+        throw new ValidationException(getPosition(), "Thrown type must be a declared type.");
       }
 
       TypeDeclaration declaration = ((DeclaredType) referenceType).getDeclaration();
 
       if (declaration == null) {
-        throw new IllegalStateException("Unknown declaration for " + referenceType);
+        throw new ValidationException(getPosition(), "Unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault(declaration));
+      webFaults.add(new WebFault((ClassDeclaration) declaration, this));
     }
     this.webFaults = webFaults;
 
@@ -93,7 +96,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     }
     else {
       //todo: support rpc-style operations.
-      throw new UnsupportedOperationException(getPosition() + ": Sorry, " + bindingStyle + "-style methods aren't supported yet.");
+      throw new ValidationException(getPosition(), "Sorry, " + bindingStyle + "-style methods aren't supported yet.");
     }
 
     this.messages = messages;
@@ -144,13 +147,22 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     TreeSet<String> namespaces = new TreeSet<String>();
     Collection<WebMessage> messages = getMessages();
     for (WebMessage message : messages) {
-      if (message.isComplex()) {
-        for (WebMessagePart part : ((ComplexWebMessage) message).getParts()) {
-          namespaces.add(part.getTargetNamespace());
+      for (WebMessagePart part : message.getParts()) {
+        namespaces.add(part.getElementQName().getNamespaceURI(/**/));
+        if (part instanceof ImplicitSchemaElement) {
+          ImplicitSchemaElement implicitElement = (ImplicitSchemaElement) part;
+
+          QName typeQName = implicitElement.getTypeQName();
+          if (typeQName != null) {
+            namespaces.add(typeQName.getNamespaceURI());
+          }
+
+          if (implicitElement instanceof ImplicitRootElement) {
+            for (ImplicitChildElement childElement : ((ImplicitRootElement) implicitElement).getChildElements()) {
+              namespaces.add(childElement.getTypeQName().getNamespaceURI());
+            }
+          }
         }
-      }
-      else {
-        namespaces.add(((SimpleWebMessage) message).getTargetNamespace());
       }
     }
     return namespaces;
@@ -228,7 +240,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     if (style != SOAPBinding.Style.DOCUMENT) {
       //todo: support rpc-style web services.
-      throw new UnsupportedOperationException(getPosition() + ": Sorry, " + style + "-style web methods aren't supported yet.");
+      throw new ValidationException(getPosition(), "Sorry, " + style + "-style web methods aren't supported yet.");
     }
 
     return style;
@@ -254,6 +266,10 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     if (bindingInfo != null) {
       use = bindingInfo.use();
+    }
+
+    if (use != SOAPBinding.Use.LITERAL) {
+      throw new ValidationException(getPosition(), use.toString().toLowerCase() + "-use web methods are not supported by enunciate");
     }
 
     return use;

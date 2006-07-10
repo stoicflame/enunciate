@@ -6,3 +6,5 @@
 -jaxb: no support yet for @XmlAdapter.
 -jaxb: xs:all compositor is never used because it's unclear how to extends types with the xs:all compositor and it's also unclear what to do when maxOccurs > 1
 -jaxb: no support for the exception that a property of type java.lang.List doesn't need a setter.
+-jaxws: request wrappers, response wrappers, and web parameters each have to have the same target namespace as their associated endpoint interfaces.  However, BARE web parameters may be root elements in another namespace.
+-jaxws: endpoint interfaces cannot throw web faults that are declared to be in a different target namespace.  If an exception is thrown in endpoint interfaces with different target namespaces, it must not have the targetNamespace element value declared in a @WebFault annotation.  If a fault with a specific target namespace is needed to be thrown in more than one endpoint interface, make it match the pattern described in section 2.5 of the JAX-WS spec. 

@@ -2,6 +2,8 @@ package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import java.util.Collection;
 
@@ -64,15 +66,7 @@ public class XmlTypeDecorator implements TypeVisitor {
     try {
       XmlClassType xmlClassType = new XmlClassType(classType);
       if (xmlClassType.isCollection()) {
-        //if it's a colleciton type, the xml type is its component type.
-        Collection<TypeMirror> actualTypeArguments = classType.getActualTypeArguments();
-        if (actualTypeArguments.isEmpty()) {
-          //no type arguments, java.lang.Object type.
-          this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
-        }
-
-        TypeMirror componentType = actualTypeArguments.iterator().next();
-        componentType.accept(this);
+        visitCollectionType(classType);
       }
       else {
         this.decoratedTypeMirror = xmlClassType;
@@ -81,6 +75,18 @@ public class XmlTypeDecorator implements TypeVisitor {
     catch (XmlTypeException e) {
       this.errorMessage = e.getMessage();
     }
+  }
+
+  protected void visitCollectionType(DeclaredType classType) {
+    //if it's a colleciton type, the xml type is its component type.
+    Collection<TypeMirror> actualTypeArguments = classType.getActualTypeArguments();
+    if (actualTypeArguments.isEmpty()) {
+      //no type arguments, java.lang.Object type.
+      this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
+    }
+
+    TypeMirror componentType = actualTypeArguments.iterator().next();
+    componentType.accept(this);
   }
 
   public void visitEnumType(EnumType enumType) {
@@ -93,8 +99,14 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
-    this.decoratedTypeMirror = null;
-    this.errorMessage = "An interface type cannot be an xml type.";
+    DecoratedTypeMirror type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType);
+    if (type.isCollection()) {
+      visitCollectionType(interfaceType);
+    }
+    else {
+      this.decoratedTypeMirror = null;
+      this.errorMessage = "An interface type cannot be an xml type.";
+    }
   }
 
   public void visitAnnotationType(AnnotationType annotationType) {

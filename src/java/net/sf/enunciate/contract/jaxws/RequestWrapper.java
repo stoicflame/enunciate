@@ -1,5 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
+import net.sf.enunciate.util.QName;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,7 +11,7 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
+public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootElement {
 
   private WebMethod webMethod;
 
@@ -34,7 +36,7 @@ public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
    *
    * @return The local name of the element.
    */
-  public String getName() {
+  public String getElementName() {
     String name = webMethod.getSimpleName();
 
     javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
@@ -46,33 +48,43 @@ public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
   }
 
   /**
-   * The target namespace for the input.
-   *
-   * @return The target namespace for the input.
-   */
-  public String getTargetNamespace() {
-    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
-
-    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
-    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-      targetNamespace = annotation.targetNamespace();
-    }
-
-    return targetNamespace;
-  }
-
-  /**
-   * @return false
-   */
-  public boolean isSimple() {
-    return false;
-  }
-
-  /**
    * @return true
    */
-  public boolean isComplex() {
+  public boolean isImplicitSchemaElement() {
     return true;
+  }
+
+  /**
+   * The qname of the element for this request wrapper.
+   *
+   * @return The qname of the element for this request wrapper.
+   */
+  public QName getElementQName() {
+    return new QName(webMethod.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+  }
+
+  /**
+   * The schema type of a request wrapper is always anonymous.
+   *
+   * @return null
+   */
+  public QName getTypeQName() {
+    return null;
+  }
+
+  /**
+   * The web parameters for the method that this is wrapping.
+   *
+   * @return The web parameters for the method that this is wrapping.
+   */
+  public Collection<ImplicitChildElement> getChildElements() {
+    Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
+    for (WebParam webParam : webMethod.getWebParameters()) {
+      if (webParam.isInput() && !webParam.isHeader()) {
+        childElements.add(webParam);
+      }
+    }
+    return childElements;
   }
 
   /**
@@ -109,6 +121,7 @@ public class RequestWrapper implements ComplexWebMessage, WebMessagePart {
    * @return this.
    */
   public Collection<WebMessagePart> getParts() {
+    //todo: support rpc encoding.
     return new ArrayList<WebMessagePart>(Arrays.asList(this));
   }
 

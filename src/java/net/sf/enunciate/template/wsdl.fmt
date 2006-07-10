@@ -9,7 +9,9 @@ named "wsdl" present in the model describing the WSDL to output.
 
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
+      [#if importedNamespace?exists && !("" = importedNamespace)]
    xmlns:${prefix(importedNamespace)}="${importedNamespace}"
+      [/#if]
     [/#list]
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
@@ -19,13 +21,54 @@ named "wsdl" present in the model describing the WSDL to output.
    xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <types>
-    <xs:schema>
+    <xs:schema targetNamespace="${wsdl.targetNamespace}">
     [#list wsdl.importedSchemas as schema]
-      <xs:import namespace="${schema.namespace}" location="${schema.location}"/>
+      <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
     [/#list]
-    </xs:schema>
 
-    [#-- todo: output the inlined schema... --]
+    [@forEachEndpointInterface]
+      [@forEachWebMethod]
+        [@forEachWebMessage includeFaults=false]
+          [#list webMessage.parts as part]
+            [#if part.implicitSchemaElement]
+              [#if part.typeQName?exists]
+      <xs:element name="${part.elementName}" type="${part.typeQName}"/>
+              [#else]
+      <xs:element name="${part.elementName}">
+        <xs:complexType>
+          <xs:sequence>
+                [#list part.childElements as childElement]
+            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}"/>
+                [/#list]
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+              [/#if]
+            [/#if]
+          [/#list]
+        [/@forEachWebMessage]
+      [/@forEachWebMethod]
+    [/@forEachEndpointInterface]
+    [#t]
+    [@forEachWebFault]
+      [#if webFault.implicitSchemaElement]
+        [#if webFault.typeQName?exists]
+      <xs:element name="${webFault.elementName}" type="${webFault.typeQName}"/>
+        [#else]
+      <xs:element name="${webFault.elementName}">
+        <xs:complexType>
+          <xs:sequence>
+          [#list webFault.childElements as childElement]
+            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}"/>
+          [/#list]
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+        [/#if]
+      [/#if]
+    [/@forEachWebFault]
+
+    </xs:schema>
   </types>
 
     [#--
@@ -36,20 +79,20 @@ named "wsdl" present in the model describing the WSDL to output.
     --]
     [@forEachEndpointInterface]
       [@forEachWebMethod]
-        [@forEachWebMessage includeSimple=false]
+        [@forEachWebMessage includeFaults=false]
   <message name="${webMessage.messageName}">
           [#list webMessage.parts as part]
-    <part name="${part.partName}" element="?????"/>
+    <part name="${part.partName}" element="${part.elementQName}"/>
           [/#list]
   </message>
         [/@forEachWebMessage]
       [/@forEachWebMethod]
     [/@forEachEndpointInterface]
     [#t]
-    [#--output the web faults globablly.--]
+    [#--output the web faults globally.--]
     [@forEachWebFault]
   <message name="${webFault.messageName}">
-    <part name="${webFault.partName}" element="?????"/>
+    <part name="${webFault.partName}" element="${webFault.elementQName}"/>
   </message>
     [/@forEachWebFault]
 
@@ -72,15 +115,15 @@ named "wsdl" present in the model describing the WSDL to output.
   <portType name="${endpointInterface.portTypeName}">
       [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
-        [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false]
+        [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
       <input message="${tns}:${input.messageName}"/>
         [/@forEachWebMessage]
-        [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeInput=false]
+        [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
       <output message="${tns}:${output.messageName}"/>
         [/@forEachWebMessage]
-        [@forEachWebMessage var="fault" includeHeaders=false includeInput=false includeComplex=false]
+        [@forEachThrownWebFault var="fault"]
       <fault message="${tns}:${fault.partName}"/>
-        [/@forEachWebMessage]
+        [/@forEachThrownWebFault]
     </operation>
       [/@forEachWebMethod]
   </portType>
@@ -127,15 +170,19 @@ named "wsdl" present in the model describing the WSDL to output.
     <operation name="${webMethod.operationName}">
       <soap:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
       <input>
-            [@forEachWebMessage var="header" includeFaults=false includeOutput=false includeComplex=false]
-        <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
+            [@forEachWebMessage var="message" includeFaults=false includeOutput=false]
+              [#if message.header]
+        <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+              [/#if]
             [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
         <soap:body use="literal"/>
       </input>
       <output>
-            [@forEachWebMessage var="header" includeFaults=false includeInput=false includeComplex=false]
-        <soap:header message="${tns}:${header.messageName}" part="${header.partName}"/>
+            [@forEachWebMessage var="message" includeFaults=false includeInput=false]
+              [#if message.header]
+        <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+              [/#if]
             [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
         <soap:body use="literal"/>

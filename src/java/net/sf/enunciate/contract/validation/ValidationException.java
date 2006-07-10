@@ -10,7 +10,7 @@ import com.sun.mirror.util.SourcePosition;
 public class ValidationException extends RuntimeException {
 
   public ValidationException(SourcePosition position, String message) {
-    super(position.toString() + ": " + message);
+    super(String.valueOf(position) + ": " + message);
   }
 
 }

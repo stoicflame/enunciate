@@ -1,5 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
+import java.util.Collection;
+
 /**
  * A web message.  This could in include rpc-style parameters, web faults, header parameters, or in the case
  * of a document/literal wrapped method, the complex aggregate of the non-header input or output parameters.
@@ -16,20 +18,6 @@ public interface WebMessage {
    * @return The name of this web message.
    */
   String getMessageName();
-
-  /**
-   * Whether this message is simple (e.g. header, fault).
-   *
-   * @return Whether this message is simple (e.g. header, fault).
-   */
-  boolean isSimple();
-
-  /**
-   * Whether this method is complex, meaning it potentially has multiple parts.
-   *
-   * @return Whether this method is complex, meaning it potentially has multiple parts.
-   */
-  boolean isComplex();
 
   /**
    * Whether this is an input message.
@@ -59,4 +47,10 @@ public interface WebMessage {
    */
   boolean isFault();
 
+  /**
+   * The parts of this complex input/output.
+   *
+   * @return The parts of this complex input/output.
+   */
+  Collection<WebMessagePart> getParts();
 }

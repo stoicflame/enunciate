@@ -150,6 +150,11 @@ public class DefaultValidator implements Validator {
       int inParams = 0;
       int outParams = 0;
       for (WebParam webParam : webMethod.getWebParameters()) {
+        DecoratedTypeMirror paramType = ((DecoratedTypeMirror) webParam.getType());
+        if (paramType.isArray()) {
+          result.addError(webMethod.getPosition(), "A BARE web method must not have an array as a parameter.");
+        }
+
         if (!webParam.isHeader()) {
           javax.jws.WebParam.Mode mode = webParam.getMode();
 
@@ -200,21 +205,45 @@ public class DefaultValidator implements Validator {
 
   public ValidationResult validateRequestWrapper(RequestWrapper requestWrapper) {
     ValidationResult result = new ValidationResult();
-    if (requestWrapper.getWebMethod().getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
-      result.addError(requestWrapper.getWebMethod().getPosition(), "A BARE web method shouldn't have a request wrapper.");
+    WebMethod webMethod = requestWrapper.getWebMethod();
+    if (webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
+      result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a request wrapper.");
     }
+
+    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
+      if (!webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(annotation.targetNamespace())) {
+        result.addError(webMethod.getPosition(), "Enunciate doesn't allow declaring a target namespace for a request wrapper that is different " +
+          "from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root element from " +
+          "another namespace for the parameter.");
+      }
+    }
+
     return result;
   }
 
   public ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper) {
     ValidationResult result = new ValidationResult();
-    if (responseWrapper.getWebMethod().getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
-      result.addError(responseWrapper.getWebMethod().getPosition(), "A BARE web method shouldn't have a response wrapper.");
+    WebMethod webMethod = responseWrapper.getWebMethod();
+    if (webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
+      result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a response wrapper.");
     }
 
-    if (responseWrapper.getWebMethod().isOneWay()) {
-      result.addError(responseWrapper.getWebMethod().getPosition(), "A one-way method cannot have a response wrapper.");
+    if (webMethod.isOneWay()) {
+      result.addError(webMethod.getPosition(), "A one-way method cannot have a response wrapper.");
     }
+
+
+    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
+      String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+      if (!targetNamespace.equals(annotation.targetNamespace())) {
+        result.addError(webMethod.getPosition(), "Enunciate doesn't allow declaring a target namespace for a response wrapper that is " +
+          "different from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root " +
+          "element from another namespace for the return value.");
+      }
+    }
+
     return result;
   }
 
@@ -224,6 +253,17 @@ public class DefaultValidator implements Validator {
     if (parameterType.isInstanceOf(Holder.class.getName())) {
       result.addError(webParam.getPosition(), "Enunciate currently doesn't support in/out parameters.  Maybe someday...");
     }
+
+    javax.jws.WebParam annotation = webParam.getAnnotation(javax.jws.WebParam.class);
+    if ((annotation != null) && (!"".equals(annotation.targetNamespace()))) {
+      String targetNamespace = webParam.getWebMethod().getDeclaringEndpointInterface().getTargetNamespace();
+      if (!annotation.targetNamespace().equals(targetNamespace)) {
+        result.addError(webParam.getPosition(), "Enunciate doesn't allow declaring a target namespace for a web parameter that is different from the " +
+          "target namespace of the endpoint interface.  If you really want to, declare the parameter style BARE and use an xml root element from another " +
+          "namespace for the parameter.");
+      }
+    }
+
     return result;
   }
 
@@ -232,7 +272,18 @@ public class DefaultValidator implements Validator {
   }
 
   public ValidationResult validateWebFault(WebFault webFault) {
-    return new ValidationResult();
+    ValidationResult result = new ValidationResult();
+
+    WebMethod webMethod = webFault.getWebMethod();
+    javax.xml.ws.WebFault annotation = webFault.getAnnotation(javax.xml.ws.WebFault.class);
+    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+    if ((annotation != null) && (!"".equals(annotation.targetNamespace()) && (!targetNamespace.equals(annotation.targetNamespace())))) {
+      result.addError(webFault.getPosition(), "Enunciate doesn't allow methods to throw a web fault with a target namespace that is " +
+        "declared different from the target namespace of its endpoint interface (throw in " + webMethod.getPosition() +
+        ").  Either throw a different exception or remove the targetNamespace element declaration from the @WebFault parameter.");
+    }
+
+    return result;
   }
 
   // Inherited.

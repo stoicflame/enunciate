@@ -137,9 +137,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     String namespace = ei.getTargetNamespace();
 
     String prefix = addNamespace(namespace);
-    for (String reference : ei.getReferencedNamespaces()) {
-      addNamespace(reference);
-    }
 
     WsdlInfo wsdlInfo = namespacesToWsdls.get(namespace);
     if (wsdlInfo == null) {

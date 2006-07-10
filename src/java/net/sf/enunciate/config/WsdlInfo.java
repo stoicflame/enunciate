@@ -14,7 +14,6 @@ import java.util.*;
 public class WsdlInfo {
 
   private String targetNamespace;
-  private SchemaInfo schemaInfo;
   private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private boolean generate;
   private String file;
@@ -44,24 +43,6 @@ public class WsdlInfo {
    */
   public Collection<EndpointInterface> getEndpointInterfaces() {
     return endpointInterfaces;
-  }
-
-  /**
-   * The configuration information about the schema section of this WSDL.
-   *
-   * @return The configuration information about the schema section of this WSDL.
-   */
-  public SchemaInfo getSchemaInfo() {
-    return schemaInfo;
-  }
-
-  /**
-   * The configuration information about the inline schema of this WSDL.
-   *
-   * @param schemaInfo The configuration information about the inline schema of this WSDL.
-   */
-  public void setSchemaInfo(SchemaInfo schemaInfo) {
-    this.schemaInfo = schemaInfo;
   }
 
   /**

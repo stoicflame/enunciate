@@ -230,7 +230,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
       style = bindingInfo.style();
 
       if (style == SOAPBinding.Style.RPC) {
-        throw new UnsupportedOperationException(getPosition() + ": Sorry, " + bindingInfo.style() + "-style endpoint implementations aren't supported yet.");
+        throw new ValidationException(getPosition(), "Sorry, " + bindingInfo.style() + "-style endpoint implementations aren't supported yet.");
       }
     }
 

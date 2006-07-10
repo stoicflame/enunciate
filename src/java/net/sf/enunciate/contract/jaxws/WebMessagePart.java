@@ -1,5 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
+import net.sf.enunciate.util.QName;
+
 /**
  * A part of a complex web message.
  *
@@ -15,17 +17,17 @@ public interface WebMessagePart extends WebMessage {
   String getPartName();
 
   /**
-   * The local element name.
+   * The qname of the element for this part.
    *
-   * @return The local element name.
+   * @return The qname of the element for this part.
    */
-  String getName();
+  QName getElementQName();
 
   /**
-   * The target namespace.
+   * Whether this web message part defines an implicit schema element.
    *
-   * @return The target namespace.
+   * @return Whether this web message part defines an implicit schema element.
    */
-  String getTargetNamespace();
+  boolean isImplicitSchemaElement();
 
 }

@@ -23,8 +23,6 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
   private boolean includeOutput = true;
   private boolean includeHeaders = true;
   private boolean includeFaults = true;
-  private boolean includeComplex = true;
-  private boolean includeSimple = true;
   private WebMethod webMethod;
 
   // Inherited.
@@ -42,11 +40,9 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
     Collection<WebMessage> messages = webMethod.getMessages();
     for (WebMessage message : messages) {
       boolean include = (includeHeaders || !message.isHeader());
-      include &= (includeComplex || !message.isComplex());
       include &= (includeOutput || !message.isOutput());
       include &= (includeInput || !message.isInput());
       include &= (includeFaults || !message.isFault());
-      include &= (includeSimple || !message.isSimple());
       if (include) {
         io.add(message);
       }
@@ -154,42 +150,6 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
    */
   public void setIncludeFaults(boolean includeFaults) {
     this.includeFaults = includeFaults;
-  }
-
-  /**
-   * Whether or not to include simple messages.
-   *
-   * @return Whether or not to include simple messages.
-   */
-  public boolean isIncludeSimple() {
-    return includeSimple;
-  }
-
-  /**
-   * Whether or not to include simple messages.
-   *
-   * @param includeSimple Whether or not to include simple messages.
-   */
-  public void setIncludeSimple(boolean includeSimple) {
-    this.includeSimple = includeSimple;
-  }
-
-  /**
-   * Whether or not to include complex messages.
-   *
-   * @return Whether or not to include complex messages.
-   */
-  public boolean isIncludeComplex() {
-    return includeComplex;
-  }
-
-  /**
-   * Whether or not to include complex messages.
-   *
-   * @param includeComplex Whether or not to include complex messages.
-   */
-  public void setIncludeComplex(boolean includeComplex) {
-    this.includeComplex = includeComplex;
   }
 
   /**
