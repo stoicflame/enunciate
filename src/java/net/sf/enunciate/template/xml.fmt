@@ -1,15 +1,18 @@
 [#ftl strip_text=true]
 
+[#import "wsdl.fmt" as libWsdl/]
+[#import "schema.fmt" as libSchema/]
+
 [#--first generate each wsdl.--]
 [@forEachWsdl]
   [@file name=wsdl.file]
-    [#include "wsdl.fmt"]
+    [@libWsdl.processWsdl wsdl=wsdl/]
   [/@file]
 [/@forEachWsdl]
 
 [#--then generate each schema.--]
 [@forEachSchema]
   [@file name=schema.file]
-    [#include "schema.fmt"]
+    [@libSchema.processSchema schema=schema/]
   [/@file]
 [/@forEachSchema]

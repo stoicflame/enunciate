@@ -1,9 +1,14 @@
 [#ftl]
 [#--
-Template for a WSDL.  Assumes the existence of a variable
-named "wsdl" present in the model describing the WSDL to output.
+Template library for WSDL.
 --]
 
+[#--
+  The processWsdl macro outputs a given WSDL.
+
+  @param wsdl The WSDL to output.  (Instance of net.sf.enunciate.config.WsdlInfo)
+--]
+[#macro processWsdl wsdl]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
 [#t]
@@ -319,3 +324,4 @@ named "wsdl" present in the model describing the WSDL to output.
   </service>
     [/@forEachEndpointInterface]
 </definitions>
+[/#macro]

@@ -1,14 +1,60 @@
 [#ftl]
 [#--
-Template for a Schema.  Assumes the existence of a variable
-named "schema" present in the model describing the schema to output.
+ Template library for schema generation.
 --]
-[#t]
+
 [#--
-We need to define the "process_typedef" macro to process type
-definitions, as they could be inlined if they're anonymous.
+  The processSchema macro outputs a given schema
+
+  @param schema The schema to output (instance of net.sf.enunciate.config.SchemaInfo)
 --]
-[#macro process_typedef typeDef]
+[#macro processSchema schema]
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0"
+  [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if][#t]
+  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
+  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
+  [#list schema.referencedNamespaces as referencedNamespace]
+  xmlns:${prefix(referencedNamespace?default(""))}="${referencedNamespace}"
+  [/#list]
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  [#if schema.doc?exists]
+  <xs:annotation>
+    <xs:documentation>
+     ${schema.doc?trim}
+    </xs:documentation>
+  </xs:annotation>
+  [/#if]
+[#t]
+  [#list schema.importedSchemas as schema]
+  <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+  [/#list]
+
+  [#list schema.globalElements as globalElement]
+    [#if globalElement.typeDefinition.anonymous]
+  <xs:element name="${globalElement.name}">
+    [@processTypeDef typeDef=globalElement.typeDefinition/]
+  </xs:elment>
+    [#else]
+  <xs:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
+    [/#if]
+  [/#list]
+[#t]
+  [#list schema.typeDefinitions as typeDefinition]
+    [#if !typeDefinition.anonymous]
+      [@processTypeDef typeDef=typeDefinition/]
+    [/#if]
+  [/#list]
+[#t]
+</xs:schema>
+[/#macro]
+
+[#--
+  The "processTypeDef" macro outputs a given type definition.
+
+  @param typeDef the type definition to output (instance of net.sf.enunciate.contract.jaxb.TypeDefinition)
+--]
+[#macro processTypeDef typeDef]
   [#--simple type definition--]
   [#if typeDef.simple]
 <xs:simpleType name="${typeDef.name}">
@@ -82,7 +128,7 @@ definitions, as they could be inlined if they're anonymous.
                 <xs:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
               [#elseif elementChoice.baseType.anonymous]
                 <xs:element name="${elementChoice.name}">
-                  [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
+                  [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
                 </xs:elment>
               [#else]
                 <xs:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
@@ -109,7 +155,7 @@ definitions, as they could be inlined if they're anonymous.
                   </xs:documentation>
                 </xs:annotation>
               [/#if]
-                [@process_typedef typeDef=elementChoice.baseType.typeDefinition/]
+                [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
               </xs:elment>
             [#else]
               <xs:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
@@ -168,42 +214,3 @@ definitions, as they could be inlined if they're anonymous.
     [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]
   [/#if]
 [/#macro]
-[#t]
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema version="1.0"
-  [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if][#t]
-  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
-  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
-  [#list schema.referencedNamespaces as referencedNamespace]
-  xmlns:${prefix(referencedNamespace?default(""))}="${referencedNamespace}"
-  [/#list]
-  xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  [#if schema.doc?exists]
-  <xs:annotation>
-    <xs:documentation>
-     ${schema.doc?trim}
-    </xs:documentation>
-  </xs:annotation>
-  [/#if]
-[#t]
-  [#list schema.importedSchemas as schema]
-  <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
-  [/#list]
-
-  [#list schema.globalElements as globalElement]
-    [#if globalElement.typeDefinition.anonymous]
-  <xs:element name="${globalElement.name}">
-    [@process_typedef typeDef=globalElement.typeDefinition/]
-  </xs:elment>
-    [#else]
-  <xs:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
-    [/#if]
-  [/#list]
-[#t]
-  [#list schema.typeDefinitions as typeDefinition]
-    [#if !typeDefinition.anonymous]
-      [@process_typedef typeDef=typeDefinition/]
-    [/#if]
-  [/#list]
-[#t]
-</xs:schema>
