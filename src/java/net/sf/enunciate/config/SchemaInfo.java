@@ -29,7 +29,7 @@ public class SchemaInfo {
    * @return Whether this is the schema for the empty namespace.
    */
   public boolean isEmptyNamespace() {
-    return getNamespace() == null;
+    return ((getNamespace() == null) || "".equals(getNamespace()));
   }
 
   /**

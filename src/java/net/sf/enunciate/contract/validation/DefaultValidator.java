@@ -268,7 +268,16 @@ public class DefaultValidator implements Validator {
   }
 
   public ValidationResult validateWebResult(WebResult webResult) {
-    return new ValidationResult();
+    ValidationResult result = new ValidationResult();
+    WebMethod webMethod = webResult.getWebMethod();
+    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+    if (!targetNamespace.equals(webResult.getTargetNamespace())) {
+      result.addError(webMethod.getPosition(), "Enunciate doesn't allow methods to return a web result with a target namespace that is " +
+        "declared different from the target namespace of its endpoint interface.  If you really want to, declare the parameter style BARE and use " +
+        "an xml root element from another namespace for the return value.");
+    }
+
+    return result;
   }
 
   public ValidationResult validateWebFault(WebFault webFault) {

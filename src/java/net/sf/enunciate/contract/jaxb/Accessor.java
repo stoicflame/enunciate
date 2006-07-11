@@ -120,9 +120,6 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     String namespace = getNamespace();
     String typeNamespace = getTypeDefinition().getTargetNamespace();
 
-    namespace = namespace == null ? "<empty namespace>" : namespace;
-    typeNamespace = typeNamespace == null ? "<empty namespace>" : typeNamespace;
-
     if (!namespace.equals(typeNamespace)) {
       return new QName(namespace, getName());
     }

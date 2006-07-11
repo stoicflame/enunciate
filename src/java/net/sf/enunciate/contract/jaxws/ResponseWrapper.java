@@ -54,6 +54,20 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
+   * Documentation explaining this is a response wrapper for its method.
+   *
+   * @return Documentation explaining this is a response wrapper for its method.
+   */
+  public String getElementDocs() {
+    String docs = "doc/lit response wrapper for operation \"" + webMethod.getOperationName() + "\".";
+    String methodDocs = webMethod.getJavaDoc().toString();
+    if (methodDocs.trim().length() > 0) {
+      docs += " (" + methodDocs.trim() + ")";
+    }
+    return docs;
+  }
+
+  /**
    * The qname of the response element.
    *
    * @return The qname of the response element.
@@ -96,7 +110,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
         }
         int minOccurs = returnType.isPrimitive() ? 1 : 0;
         String maxOccurs = returnType.isArray() || returnType.isCollection() ? "unbounded" : "1";
-        childElements.add(new ReturnChildElement(xmlType, minOccurs, maxOccurs));
+        childElements.add(new ReturnChildElement(webMethod.getWebResult(), xmlType, minOccurs, maxOccurs));
       }
     }
     catch (XmlTypeException e) {
@@ -159,6 +173,27 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
+   * Documentation explaining this is a response message for its method.
+   *
+   * @return Documentation explaining this is a response message for its method.
+   */
+  public String getMessageDocs() {
+    String docs = "response message for operation \"" + webMethod.getOperationName() + "\".";
+    String methodDocs = webMethod.getJavaDoc().toString();
+    if (methodDocs.trim().length() > 0) {
+      docs += " (" + methodDocs.trim() + ")";
+    }
+    return docs;
+  }
+
+  /**
+   * @return null
+   */
+  public String getPartDocs() {
+    return null;
+  }
+
+  /**
    * The simple name of the method appended with "Response".
    *
    * @return The simple name of the method appended with "Response".
@@ -169,18 +204,24 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
 
   private static class ReturnChildElement implements ImplicitChildElement {
 
+    private final WebResult result;
     private final XmlTypeMirror xmlType;
     private final int minOccurs;
     private final String maxOccurs;
 
-    public ReturnChildElement(XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
+    public ReturnChildElement(WebResult result, XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
+      this.result = result;
       this.xmlType = xmlType;
       this.minOccurs = minOccurs;
       this.maxOccurs = maxOccurs;
     }
 
     public String getElementName() {
-      return "return";
+      return result.getName();
+    }
+
+    public String getElementDocs() {
+      return result.getDocComment();
     }
 
     public QName getTypeQName() {

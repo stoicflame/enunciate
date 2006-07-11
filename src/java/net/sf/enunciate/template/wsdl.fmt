@@ -6,12 +6,10 @@ named "wsdl" present in the model describing the WSDL to output.
 
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
-
+[#t]
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
-      [#if importedNamespace?exists && !("" = importedNamespace)]
-   xmlns:${prefix(importedNamespace)}="${importedNamespace}"
-      [/#if]
+   xmlns:${prefix(importedNamespace?default(""))}="${importedNamespace}"
     [/#list]
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
@@ -26,23 +24,52 @@ named "wsdl" present in the model describing the WSDL to output.
       <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
     [/#list]
 
+    [#--output the schema elements--]
     [@forEachEndpointInterface]
       [@forEachWebMethod]
         [@forEachWebMessage includeFaults=false]
           [#list webMessage.parts as part]
             [#if part.implicitSchemaElement]
               [#if part.typeQName?exists]
-      <xs:element name="${part.elementName}" type="${part.typeQName}"/>
+      <xs:element name="${part.elementName}" type="${part.typeQName}">
+                [#if part.elementDocs?exists]
+        <xs:annotation>
+          <xs:documentation>
+            ${part.elementDocs?trim}
+          </xs:documentation>
+        </xs:annotation>
+                [/#if]
+      </xs:element>
+
               [#else]
+                [#assign childElements=part.childElements]
       <xs:element name="${part.elementName}">
+                [#if part.elementDocs?exists]
+        <xs:annotation>
+          <xs:documentation>
+            ${part.elementDocs?trim}
+          </xs:documentation>
+        </xs:annotation>
+                [/#if]
+                [#if childElements?size > 0]
         <xs:complexType>
           <xs:sequence>
-                [#list part.childElements as childElement]
-            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}"/>
-                [/#list]
+                  [#list childElements as childElement]
+            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+                    [#if childElement.elementDocs?exists]
+              <xs:annotation>
+                <xs:documentation>
+                  ${childElement.elementDocs?trim}
+                </xs:documentation>
+              </xs:annotation>
+                    [/#if]
+            </xs:element>
+                  [/#list]
           </xs:sequence>
         </xs:complexType>
+                [/#if]
       </xs:element>
+
               [/#if]
             [/#if]
           [/#list]
@@ -53,36 +80,68 @@ named "wsdl" present in the model describing the WSDL to output.
     [@forEachWebFault]
       [#if webFault.implicitSchemaElement]
         [#if webFault.typeQName?exists]
-      <xs:element name="${webFault.elementName}" type="${webFault.typeQName}"/>
+      <xs:element name="${webFault.elementName}" type="${webFault.typeQName}">
+          [#if webFault.elementDocs?exists]
+        <xs:annotation>
+          <xs:documentation>
+            ${webFault.elementDocs?trim}
+          </xs:documentation>
+        </xs:annotation>
+          [/#if]
+      </xs:element>
         [#else]
+          [#assign childElements=webFault.childElements]
+          [#if childElements?size > 0]
       <xs:element name="${webFault.elementName}">
+          [#if webFault.elementDocs?exists]
+        <xs:annotation>
+          <xs:documentation>
+            ${webFault.elementDocs?trim}
+          </xs:documentation>
+        </xs:annotation>
+          [/#if]
         <xs:complexType>
           <xs:sequence>
-          [#list webFault.childElements as childElement]
-            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}"/>
-          [/#list]
+            [#list webFault.childElements as childElement]
+            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+              [#if childElement.elementDocs?exists]
+              <xs:annotation>
+                <xs:documentation>
+                  ${childElement.elementDocs?trim}
+                </xs:documentation>
+              </xs:annotation>
+              [/#if]
+            </xs:element>
+            [/#list]
           </xs:sequence>
         </xs:complexType>
+          [/#if]
       </xs:element>
+
         [/#if]
       [/#if]
     [/@forEachWebFault]
-
     </xs:schema>
   </types>
 
-    [#--
-    example
-    <message name="getPerson">
-      <part name="parameters" element="tns:getPerson"/>
-    </message>
-    --]
+    [#-- output the web messages --]
     [@forEachEndpointInterface]
       [@forEachWebMethod]
         [@forEachWebMessage includeFaults=false]
   <message name="${webMessage.messageName}">
+          [#if webMessage.messageDocs?exists]
+    <wsdl:documentation>
+      ${webMessage.messageDocs?trim}
+    </wsdl:documentation>
+          [/#if]
           [#list webMessage.parts as part]
-    <part name="${part.partName}" element="${part.elementQName}"/>
+    <part name="${part.partName}" element="${part.elementQName}">
+            [#if part.partDocs?exists]
+      <wsdl:documentation>
+        ${part.partDocs?trim}
+      </wsdl:documentation>
+            [/#if]
+    </part>
           [/#list]
   </message>
         [/@forEachWebMessage]
@@ -92,6 +151,11 @@ named "wsdl" present in the model describing the WSDL to output.
     [#--output the web faults globally.--]
     [@forEachWebFault]
   <message name="${webFault.messageName}">
+      [#if webFault.messageDocs?exists]
+    <wsdl:documentation>
+      ${webMesssage.messageDocs?trim}
+    </wsdl:documentation>
+      [/#if]
     <part name="${webFault.partName}" element="${webFault.elementQName}"/>
   </message>
     [/@forEachWebFault]
@@ -113,8 +177,18 @@ named "wsdl" present in the model describing the WSDL to output.
     --]
     [@forEachEndpointInterface]
   <portType name="${endpointInterface.portTypeName}">
+      [#if endpointInterface.docComment?exists]
+    <wsdl:documentation>
+      ${endpointInterface.javaDoc?trim}
+    </wsdl:documentation>
+      [/#if]
       [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
+        [#if webMethod.docComment?exists]
+      <wsdl:documentation>
+        ${webMethod.javaDoc?trim}
+      </wsdl:documentation>
+        [/#if]
         [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
       <input message="${tns}:${input.messageName}"/>
         [/@forEachWebMessage]
@@ -165,6 +239,9 @@ named "wsdl" present in the model describing the WSDL to output.
         [#if bindingType.soap11 || bindingType.soap12]
 
   <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
+    <wsdl:documentation>
+      SOAP Binding for ${endpointInterface.portTypeName}
+    </wsdl:documentation>
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
           [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
@@ -198,6 +275,9 @@ named "wsdl" present in the model describing the WSDL to output.
         [#elseif bindingType.http]
 
   <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
+    <wsdl:documentation>
+      HTTP Binding for ${endpointInterface.portTypeName}
+    </wsdl:documentation>
     <http:binding verb="POST"/>
           [@forEachWebMethod]
     <operation name="${webMethod.operationName}">

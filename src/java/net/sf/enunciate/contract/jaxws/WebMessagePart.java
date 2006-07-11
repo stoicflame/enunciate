@@ -7,7 +7,7 @@ import net.sf.enunciate.util.QName;
  *
  * @author Ryan Heaton
  */
-public interface WebMessagePart extends WebMessage {
+public interface WebMessagePart {
 
   /**
    * The part name.
@@ -15,6 +15,13 @@ public interface WebMessagePart extends WebMessage {
    * @return The part name.
    */
   String getPartName();
+
+  /**
+   * The documentation for this web message part.
+   *
+   * @return The documentation for this web message part.
+   */
+  String getPartDocs();
 
   /**
    * The qname of the element for this part.

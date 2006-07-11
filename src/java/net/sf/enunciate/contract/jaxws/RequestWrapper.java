@@ -48,6 +48,20 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   }
 
   /**
+   * Documentation explaining this is a request wrapper for its method.
+   *
+   * @return Documentation explaining this is a request wrapper for its method.
+   */
+  public String getElementDocs() {
+    String docs = "doc/lit request wrapper for operation \"" + webMethod.getOperationName() + "\".";
+    String methodDocs = webMethod.getJavaDoc().toString();
+    if (methodDocs.trim().length() > 0) {
+      docs += " (" + methodDocs.trim() + ")";
+    }
+    return docs;
+  }
+
+  /**
    * @return true
    */
   public boolean isImplicitSchemaElement() {
@@ -132,6 +146,27 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    */
   public String getMessageName() {
     return webMethod.getSimpleName();
+  }
+
+  /**
+   * Documentation explaining this is a request message for its method.
+   *
+   * @return Documentation explaining this is a request message for its method.
+   */
+  public String getMessageDocs() {
+    String docs = "request message for operation \"" + webMethod.getOperationName() + "\".";
+    String methodDocs = webMethod.getJavaDoc().toString();
+    if (methodDocs.trim().length() > 0) {
+      docs += " (" + methodDocs.trim() + ")";
+    }
+    return docs;
+  }
+
+  /**
+   * @return null
+   */
+  public String getPartDocs() {
+    return null;
   }
 
   /**

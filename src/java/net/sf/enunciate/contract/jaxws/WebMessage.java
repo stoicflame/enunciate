@@ -20,6 +20,13 @@ public interface WebMessage {
   String getMessageName();
 
   /**
+   * The documentation for this web message.
+   *
+   * @return The documentation for this web message.
+   */
+  String getMessageDocs();
+
+  /**
    * Whether this is an input message.
    *
    * @return Whether this is an input message.

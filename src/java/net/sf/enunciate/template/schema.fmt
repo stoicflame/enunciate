@@ -175,9 +175,7 @@ definitions, as they could be inlined if they're anonymous.
   [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
   [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
-    [#if referencedNamespace?exists]
-  xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
-    [/#if]
+  xmlns:${prefix(referencedNamespace?default(""))}="${referencedNamespace}"
   [/#list]
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
   [#if schema.doc?exists]

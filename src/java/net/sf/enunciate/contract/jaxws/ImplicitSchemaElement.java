@@ -17,6 +17,13 @@ public interface ImplicitSchemaElement {
   String getElementName();
 
   /**
+   * Documentation for the element, if it exists.
+   *
+   * @return Documentation for the element, or null if none.
+   */
+  String getElementDocs();
+
+  /**
    * The qname of the type for this element, if the type is not anonymous.
    *
    * @return The qname of the type for this element, or null if it's an anonymous type.

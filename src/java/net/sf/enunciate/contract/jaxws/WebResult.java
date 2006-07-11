@@ -3,6 +3,7 @@ package net.sf.enunciate.contract.jaxws;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.TypeVisitor;
 import freemarker.template.SimpleHash;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -21,6 +22,7 @@ public class WebResult extends SimpleHash implements TypeMirror {
   private final String targetNamespace;
   private final String partName;
   private final WebMethod method;
+  private final String docComment;
 
   protected WebResult(TypeMirror delegate, WebMethod method) {
     this.delegate = delegate;
@@ -49,18 +51,29 @@ public class WebResult extends SimpleHash implements TypeMirror {
     this.name = name;
     put("name", name);
 
-    String targetNamespace = null;
+    String targetNamespace = method.getDeclaringEndpointInterface().getTargetNamespace();
     if (annotation != null) {
-      targetNamespace = annotation.targetNamespace();
-      if ((targetNamespace == null) || ("".equals(targetNamespace))) {
-        targetNamespace = method.getDeclaringEndpointInterface().getTargetNamespace();
+      String annotatedNamespace = annotation.targetNamespace();
+      if ((annotatedNamespace != null) && (!"".equals(annotatedNamespace))) {
+        targetNamespace = annotatedNamespace;
       }
     }
     this.targetNamespace = targetNamespace;
     put("targetNamespace", targetNamespace);
 
-    this.partName = "return";
+    String partName = "return";
+    if ((annotation != null) && (!"".equals(annotation.partName()))) {
+      partName = annotation.partName();
+    }
+    this.partName = partName;
     put("partName", "return");
+
+    DecoratedTypeMirror returnType = (DecoratedTypeMirror) method.getReturnType();
+    String docComment = returnType.getDocComment();
+    if ("".equals(docComment)) {
+      docComment = null;
+    }
+    this.docComment = docComment;
 
   }
 
@@ -103,4 +116,14 @@ public class WebResult extends SimpleHash implements TypeMirror {
   public WebMethod getWebMethod() {
     return method;
   }
+
+  /**
+   * The doc comment for this web result.
+   *
+   * @return The doc comment for this web result.
+   */
+  public String getDocComment() {
+    return docComment;
+  }
+
 }

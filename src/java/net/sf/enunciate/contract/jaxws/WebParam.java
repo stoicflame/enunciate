@@ -65,6 +65,15 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
   }
 
   /**
+   * The doc comment associated with this web param.
+   *
+   * @return The doc comment associated with this web param.
+   */
+  public String getElementDocs() {
+    return getDelegate().getDocComment();
+  }
+
+  /**
    * The part name of the message for this parameter.
    *
    * @return The part name of the message for this parameter.
@@ -80,6 +89,32 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    */
   public String getMessageName() {
     return method.getMessageName();
+  }
+
+  /**
+   * There is only message documentation if this web parameter is BARE.
+   *
+   * @return The documentation if BARE, null otherwise.
+   */
+  public String getMessageDocs() {
+    if (isBare()) {
+      return getDelegate().getDocComment();
+    }
+
+    return null;
+  }
+
+  /**
+   * There is only part documentation if this web parameter is not BARE.
+   *
+   * @return null if BARE, the documantation otherwise.
+   */
+  public String getPartDocs() {
+    if (isBare()) {
+      return null;
+    }
+
+    return getDelegate().getDocComment();
   }
 
   /**
@@ -188,11 +223,11 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
   }
 
   /**
-   * This web param can be considered complex only if it is BARE.
+   * Whether this is a bare web param.
    *
-   * @return This web param can be considered complex only if it is BARE.
+   * @return Whether this is a bare web param.
    */
-  private boolean isComplex() {
+  private boolean isBare() {
     return method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE;
   }
 
@@ -228,7 +263,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @throws UnsupportedOperationException if this web param isn't complex.
    */
   public Collection<WebMessagePart> getParts() {
-    if (!isComplex()) {
+    if (!isBare()) {
       throw new UnsupportedOperationException("Web param doesn't represent a complex method input/output.");
     }
 

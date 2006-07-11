@@ -94,12 +94,21 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
+   * The message documentation for a fault is the documentation for its type.
+   *
+   * @return The documentation for its type.
+   */
+  public String getMessageDocs() {
+    return getElementDocs();
+  }
+
+  /**
    * The name of this web service.
    *
    * @return The name of this web service.
    */
   public String getElementName() {
-    String name = getSimpleName();
+    String name = getSimpleName() + "Bean";
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
@@ -109,12 +118,32 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
+   * The comments on the fault itself.
+   *
+   * @return The comments on the fault itself.
+   */
+  public String getElementDocs() {
+    String docs = getJavaDoc().toString();
+    if (docs.trim().length() == 0) {
+      docs = null;
+    }
+    return docs;
+  }
+
+  /**
    * The part name of this web fault as it would appear in wsdl.
    *
    * @return The part name of this web fault as it would appear in wsdl.
    */
   public String getPartName() {
     return getSimpleName();
+  }
+
+  /**
+   * @return null.
+   */
+  public String getPartDocs() {
+    return null;
   }
 
   /**
@@ -227,10 +256,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
         int minOccurs = propertyType.isPrimitive() ? 1 : 0;
         String maxOccurs = propertyType.isArray() || propertyType.isCollection() ? "unbounded" : "1";
 
-        childElements.add(new FaultBeanChildElement(xmlType, minOccurs, maxOccurs));
+        childElements.add(new FaultBeanChildElement(property, xmlType, minOccurs, maxOccurs));
       }
       catch (XmlTypeException e) {
-        throw new ValidationException(property.getPosition(), propertyName + ": " + e.getMessage());
+        throw new ValidationException(property.getPosition(), e.getMessage());
       }
     }
 
@@ -293,18 +322,28 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
   private static class FaultBeanChildElement implements ImplicitChildElement {
 
+    private final PropertyDeclaration property;
     private final XmlTypeMirror xmlType;
     private final int minOccurs;
     private final String maxOccurs;
 
-    public FaultBeanChildElement(XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
+    public FaultBeanChildElement(PropertyDeclaration property, XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
+      this.property = property;
       this.xmlType = xmlType;
       this.minOccurs = minOccurs;
       this.maxOccurs = maxOccurs;
     }
 
     public String getElementName() {
-      return "return";
+      return property.getPropertyName();
+    }
+
+    public String getElementDocs() {
+      String docs = property.getJavaDoc().toString();
+      if (docs.trim().length() == 0) {
+        docs = null;
+      }
+      return docs;
     }
 
     public QName getTypeQName() {
