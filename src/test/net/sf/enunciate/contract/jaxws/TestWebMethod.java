@@ -1,7 +1,6 @@
 package net.sf.enunciate.contract.jaxws;
 
 import net.sf.enunciate.contract.EnunciateContractTestCase;
-import net.sf.enunciate.contract.validation.AlwaysValidValidator;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.Test;
@@ -15,7 +14,6 @@ public class TestWebMethod extends EnunciateContractTestCase {
 
   @Test
   public void testName() throws Exception {
-    AlwaysValidValidator alwaysValidValidator = new AlwaysValidValidator();
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples"));
 
     WebMethod specialNameMethod = null;

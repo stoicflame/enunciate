@@ -24,163 +24,121 @@ Template library for WSDL.
    xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <types>
-    <xs:schema targetNamespace="${wsdl.targetNamespace}">
-    [#list wsdl.importedSchemas as schema]
-      <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
-    [/#list]
-
-    [#--output the schema elements--]
-    [@forEachEndpointInterface]
-      [@forEachWebMethod]
-        [@forEachWebMessage includeFaults=false]
-          [#list webMessage.parts as part]
-            [#if part.implicitSchemaElement]
-              [#if part.typeQName?exists]
-      <xs:element name="${part.elementName}" type="${part.typeQName}">
-                [#if part.elementDocs?exists]
-        <xs:annotation>
-          <xs:documentation>
-            ${part.elementDocs?trim}
-          </xs:documentation>
-        </xs:annotation>
-                [/#if]
-      </xs:element>
-
-              [#else]
-                [#assign childElements=part.childElements]
-      <xs:element name="${part.elementName}">
-                [#if part.elementDocs?exists]
-        <xs:annotation>
-          <xs:documentation>
-            ${part.elementDocs?trim}
-          </xs:documentation>
-        </xs:annotation>
-                [/#if]
-                [#if childElements?size > 0]
-        <xs:complexType>
-          <xs:sequence>
-                  [#list childElements as childElement]
-            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
-                    [#if childElement.elementDocs?exists]
-              <xs:annotation>
-                <xs:documentation>
-                  ${childElement.elementDocs?trim}
-                </xs:documentation>
-              </xs:annotation>
-                    [/#if]
-            </xs:element>
-                  [/#list]
-          </xs:sequence>
-        </xs:complexType>
-                [/#if]
-      </xs:element>
-
-              [/#if]
-            [/#if]
-          [/#list]
-        [/@forEachWebMessage]
-      [/@forEachWebMethod]
-    [/@forEachEndpointInterface]
-    [#t]
-    [@forEachWebFault]
-      [#if webFault.implicitSchemaElement]
-        [#if webFault.typeQName?exists]
-      <xs:element name="${webFault.elementName}" type="${webFault.typeQName}">
-          [#if webFault.elementDocs?exists]
-        <xs:annotation>
-          <xs:documentation>
-            ${webFault.elementDocs?trim}
-          </xs:documentation>
-        </xs:annotation>
-          [/#if]
-      </xs:element>
-        [#else]
-          [#assign childElements=webFault.childElements]
-          [#if childElements?size > 0]
-      <xs:element name="${webFault.elementName}">
-          [#if webFault.elementDocs?exists]
-        <xs:annotation>
-          <xs:documentation>
-            ${webFault.elementDocs?trim}
-          </xs:documentation>
-        </xs:annotation>
-          [/#if]
-        <xs:complexType>
-          <xs:sequence>
-            [#list webFault.childElements as childElement]
-            <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
-              [#if childElement.elementDocs?exists]
-              <xs:annotation>
-                <xs:documentation>
-                  ${childElement.elementDocs?trim}
-                </xs:documentation>
-              </xs:annotation>
-              [/#if]
-            </xs:element>
-            [/#list]
-          </xs:sequence>
-        </xs:complexType>
-          [/#if]
-      </xs:element>
-
-        [/#if]
-      [/#if]
-    [/@forEachWebFault]
-    </xs:schema>
+    [@processSchema wsdl=wsdl/]
   </types>
 
     [#-- output the web messages --]
+    [@forEachWebMessage]
+      [@processMessage webMessage=webMessage/]
+    [/@forEachWebMessage]
+
     [@forEachEndpointInterface]
-      [@forEachWebMethod]
-        [@forEachWebMessage includeFaults=false]
+      [@processPortType endpointInterface=endpointInterface/]
+    [/@forEachEndpointInterface]
+    [#t]
+
+    [@forEachEndpointInterface]
+      [@processBindings endpointInterface=endpointInterface/]
+    [/@forEachEndpointInterface]
+
+    [@forEachEndpointInterface]
+      [@processServices endpointInterface=endpointInterface/]
+    [/@forEachEndpointInterface]
+</definitions>
+[/#macro]
+
+[#--
+  The processSchema macro outputs a schema element for a specified wsdl.
+
+  @param wsdl The WSDL to output.  (Instance of net.sf.enunciate.config.WsdlInfo)
+--]
+[#macro processSchema wsdl]
+  <xs:schema targetNamespace="${wsdl.targetNamespace}">
+  [#list wsdl.importedSchemas as schema]
+    <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+  [/#list]
+
+  [#--output the schema elements--]
+  [@forEachWebMessage]
+    [#list webMessage.parts as part]
+      [#if part.implicitSchemaElement]
+        [#if part.typeQName?exists]
+    <xs:element name="${part.elementName}" type="${part.typeQName}">
+          [#if part.elementDocs?exists]
+      <xs:annotation>
+        <xs:documentation>
+          ${part.elementDocs?trim}
+        </xs:documentation>
+      </xs:annotation>
+          [/#if]
+    </xs:element>
+
+        [#else]
+          [#assign childElements=part.childElements]
+    <xs:element name="${part.elementName}">
+          [#if part.elementDocs?exists]
+      <xs:annotation>
+        <xs:documentation>
+          ${part.elementDocs?trim}
+        </xs:documentation>
+      </xs:annotation>
+          [/#if]
+          [#if childElements?size > 0]
+      <xs:complexType>
+        <xs:sequence>
+            [#list childElements as childElement]
+          <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+              [#if childElement.elementDocs?exists]
+            <xs:annotation>
+              <xs:documentation>
+                ${childElement.elementDocs?trim}
+              </xs:documentation>
+            </xs:annotation>
+              [/#if]
+          </xs:element>
+            [/#list]
+        </xs:sequence>
+      </xs:complexType>
+          [/#if]
+    </xs:element>
+
+        [/#if]
+      [/#if]
+    [/#list]
+  [/@forEachWebMessage]
+  </xs:schema>
+[/#macro]
+
+[#--
+  The processMessage macro outputs a message element for a specified web message.
+
+  @param webMessage The web message to output.  (Instance of net.sf.enunciate.contract.jaxws.WebMessage)
+--]
+[#macro processMessage webMessage]
   <message name="${webMessage.messageName}">
-          [#if webMessage.messageDocs?exists]
+      [#if webMessage.messageDocs?exists]
     <wsdl:documentation>
       ${webMessage.messageDocs?trim}
     </wsdl:documentation>
-          [/#if]
-          [#list webMessage.parts as part]
+      [/#if]
+      [#list webMessage.parts as part]
     <part name="${part.partName}" element="${part.elementQName}">
-            [#if part.partDocs?exists]
+        [#if part.partDocs?exists]
       <wsdl:documentation>
         ${part.partDocs?trim}
       </wsdl:documentation>
-            [/#if]
+        [/#if]
     </part>
-          [/#list]
+      [/#list]
   </message>
-        [/@forEachWebMessage]
-      [/@forEachWebMethod]
-    [/@forEachEndpointInterface]
-    [#t]
-    [#--output the web faults globally.--]
-    [@forEachWebFault]
-  <message name="${webFault.messageName}">
-      [#if webFault.messageDocs?exists]
-    <wsdl:documentation>
-      ${webMesssage.messageDocs?trim}
-    </wsdl:documentation>
-      [/#if]
-    <part name="${webFault.partName}" element="${webFault.elementQName}"/>
-  </message>
-    [/@forEachWebFault]
+[/#macro]
 
-    [#--
-    example:
-    <portType name="PersonService">
-      <operation name="getPerson">
-        <input message="tns:getPerson"/>
-        <output message="tns:getPersonResponse"/>
-        <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
-      </operation>
-      <operation name="findPersons">
-        <input message="tns:findPersons"/>
-        <output message="tns:findPersonsResponse"/>
-        <fault name="PersonNotFoundException" message="tns:PersonNotFoundException"/>
-      </operation>
-    </portType>
-    --]
-    [@forEachEndpointInterface]
+[#--
+  The processPortType macro outputs a portType element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processPortType endpointInterface]
   <portType name="${endpointInterface.portTypeName}">
       [#if endpointInterface.docComment?exists]
     <wsdl:documentation>
@@ -188,103 +146,108 @@ Template library for WSDL.
     </wsdl:documentation>
       [/#if]
       [@forEachWebMethod]
-    <operation name="${webMethod.operationName}">
-        [#if webMethod.docComment?exists]
-      <wsdl:documentation>
-        ${webMethod.javaDoc?trim}
-      </wsdl:documentation>
-        [/#if]
-        [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
-      <input message="${tns}:${input.messageName}"/>
-        [/@forEachWebMessage]
-        [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
-      <output message="${tns}:${output.messageName}"/>
-        [/@forEachWebMessage]
-        [@forEachThrownWebFault var="fault"]
-      <fault message="${tns}:${fault.partName}"/>
-        [/@forEachThrownWebFault]
-    </operation>
+        [@processOperation webMethod=webMethod/]
       [/@forEachWebMethod]
   </portType>
-    [/@forEachEndpointInterface]
-    [#t]
+[/#macro]
 
-    [#--
-    example:
-    <binding name="PersonServiceBinding" type="tns:PersonService">
-      <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-      <operation name="getPerson">
-        <soap:operation soapAction=""/>
-        <input>
-          <soap:body use="literal"/>
-        </input>
-        <output>
-          <soap:body use="literal"/>
-        </output>
-        <fault name="PersonNotFoundException">
-          <soap:fault name="PersonNotFoundException" use="literal"/>
-        </fault>
-      </operation>
-      <operation name="findPersons">
-        <soap:operation soapAction=""/>
-        <input>
-          <soap:body use="literal"/>
-        </input>
-        <output>
-          <soap:body use="literal"/>
-        </output>
-        <fault name="PersonNotFoundException">
-          <soap:fault name="PersonNotFoundException" use="literal"/>
-        </fault>
-      </operation>
-    </binding>
-    --]
-    [@forEachEndpointInterface]
-      [@forEachBindingType]
-        [#if bindingType.soap11 || bindingType.soap12]
+[#--
+  The processOperation macro outputs an operation element for a web method.
 
-  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
+  @param webMethod The web method to output.  (Instance of net.sf.enunciate.contract.jaxws.WebMethod)
+--]
+[#macro processOperation webMethod]
+  <operation name="${webMethod.operationName}">
+      [#if webMethod.docComment?exists]
+    <wsdl:documentation>
+      ${webMethod.javaDoc?trim}
+    </wsdl:documentation>
+      [/#if]
+      [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
+    <input message="${tns}:${input.messageName}"/>
+      [/@forEachWebMessage]
+      [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
+    <output message="${tns}:${output.messageName}"/>
+      [/@forEachWebMessage]
+      [@forEachThrownWebFault var="fault"]
+    <fault message="${tns}:${fault.partName}"/>
+      [/@forEachThrownWebFault]
+  </operation>
+[/#macro]
+
+[#--
+  The processBindings macro outputs a all binding elements for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processBindings endpointInterface]
+  [@forEachBindingType]
+    [#if bindingType.soap11 || bindingType.soap12]
+
+      [@processSOAPBinding endpointInterface=endpointInterface/]
+    [#elseif bindingType.http]
+
+      [@processHTTPBinding endpointInterface=endpointInterface/]
+    [#else]
+      [#stop "unknown binding type: " + bindingType.namespace]
+    [/#if]
+  [/@forEachBindingType]
+[/#macro]
+
+[#--
+  The processSOAPBinding macro outputs a soap binding element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processSOAPBinding endpointInterface]
+  <binding name="${endpointInterface.simpleName}SOAPBinding" type="${tns}:${endpointInterface.portTypeName}">
     <wsdl:documentation>
       SOAP Binding for ${endpointInterface.portTypeName}
     </wsdl:documentation>
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
-          [@forEachWebMethod]
+      [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
       <soap:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
       <input>
-            [@forEachWebMessage var="message" includeFaults=false includeOutput=false]
-              [#if message.header]
+        [@forEachWebMessage var="message" includeFaults=false includeOutput=false]
+          [#if message.header]
         <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
-              [/#if]
-            [/@forEachWebMessage]
+          [/#if]
+        [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
         <soap:body use="literal"/>
       </input>
       <output>
-            [@forEachWebMessage var="message" includeFaults=false includeInput=false]
-              [#if message.header]
+        [@forEachWebMessage var="message" includeFaults=false includeInput=false]
+          [#if message.header]
         <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
-              [/#if]
-            [/@forEachWebMessage]
+          [/#if]
+        [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
         <soap:body use="literal"/>
       </output>
-            [@forEachThrownWebFault]
+        [@forEachThrownWebFault]
       <fault>
         <soap:fault name="${webFault.messageName}" use="literal"/>
       </fault>
-            [/@forEachThrownWebFault]
+        [/@forEachThrownWebFault]
     </operation>
-          [/@forEachWebMethod]
+      [/@forEachWebMethod]
   </binding>
-        [#elseif bindingType.http]
+[/#macro]
 
-  <binding name="${endpointInterface.getBindingNameFor(bindingType)}" type="${tns}:${endpointInterface.portTypeName}">
+[#--
+  The processHTTPBinding macro outputs an HTTP binding element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processHTTPBinding endpointInterface]
+  <binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
     <wsdl:documentation>
       HTTP Binding for ${endpointInterface.portTypeName}
     </wsdl:documentation>
     <http:binding verb="POST"/>
-          [@forEachWebMethod]
+      [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
       <http:operation location="TBD"/>
       <input>
@@ -294,34 +257,45 @@ Template library for WSDL.
         <http:urlEncoded/>
       </output>
     </operation>
+      [/@forEachWebMethod]
   </binding>
-          [/@forEachWebMethod]
-        [#else]
-          [#stop "unknown binding type: " + bindingType.namespace]
-        [/#if]
-      [/@forEachBindingType]
-    [/@forEachEndpointInterface]
+[/#macro]
 
-    [#--
-    example:
-    <service name="PersonServiceService">
-      <port name="PersonService" binding="tns:PersonServiceBinding">
-        <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
-      </port>
-    </service>
-    --]
-    [@forEachEndpointInterface]
+[#--
+  The processServices macro outputs the service element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processServices endpointInterface]
   <service name="${endpointInterface.serviceName}">
       [@forEachBindingType]
-    <port name="${endpointInterface.getPortNameFor(bindingType)}" binding="${tns}:${endpointInterface.getBindingNameFor(bindingType)}">
         [#if bindingType.soap11 || bindingType.soap12]
-      <soap:address location="TBD"/>
+          [@processSOAPServicePort endpointInterface=endpointInterface/]
         [#elseif bindingType.http]
-      <http:address location="TBD"/>
+          [@processHTTPServicePort endpointInterface=endpointInterface/]
         [/#if]
-    </port>
       [/@forEachBindingType]
   </service>
-    [/@forEachEndpointInterface]
-</definitions>
+[/#macro]
+
+[#--
+  The processSOAPServicePort macro outputs a soap port element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processSOAPServicePort endpointInterface]
+    <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
+      <soap:address location="TBD"/>
+    </port>
+[/#macro]
+
+[#--
+  The processHTTPServicePort macro outputs a http port element for a specified endpoint interface.
+
+  @param endpointInterface The endpoint interface to output.  (Instance of net.sf.enunciate.contract.jaxws.EndpointInterface)
+--]
+[#macro processHTTPServicePort endpointInterface]
+    <port name="${endpointInterface.simpleName}HTTPPort" binding="${tns}:${endpointInterface.simpleName}HTTPBinding">
+      <http:address location="TBD"/>
+    </port>
 [/#macro]

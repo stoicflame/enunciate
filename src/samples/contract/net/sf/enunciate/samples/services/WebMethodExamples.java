@@ -40,13 +40,14 @@ public class WebMethodExamples {
   public void runtimeExceptionThrowingOneWayMethod() throws RuntimeException {
   }
 
-  @SOAPBinding (
-    style = SOAPBinding.Style.RPC,
-    parameterStyle = SOAPBinding.ParameterStyle.BARE
-  )
-  public Boolean rpcBareMethod() {
-    return Boolean.TRUE;
-  }
+//  todo: support rpc encoding
+//  @SOAPBinding (
+//    style = SOAPBinding.Style.RPC,
+//    parameterStyle = SOAPBinding.ParameterStyle.BARE
+//  )
+//  public Boolean rpcBareMethod() {
+//    return Boolean.TRUE;
+//  }
 
   @SOAPBinding (
     style = SOAPBinding.Style.DOCUMENT,

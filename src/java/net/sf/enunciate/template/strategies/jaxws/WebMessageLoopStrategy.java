@@ -1,5 +1,8 @@
 package net.sf.enunciate.template.strategies.jaxws;
 
+import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebFault;
 import net.sf.enunciate.contract.jaxws.WebMessage;
 import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
@@ -9,10 +12,11 @@ import net.sf.jelly.apt.strategies.MissingParameterException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * Loop through the web messages of a given web method.
+ * Loop through the web messages unique to either a web method or a wsdl.  Priority is given to the specified web method.
  *
  * @author Ryan Heaton
  */
@@ -24,20 +28,48 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
   private boolean includeHeaders = true;
   private boolean includeFaults = true;
   private WebMethod webMethod;
+  private WsdlInfo wsdl;
 
   // Inherited.
   protected Iterator<WebMessage> getLoop(TemplateModel model) throws TemplateException {
     WebMethod webMethod = this.webMethod;
     if (webMethod == null) {
       webMethod = (WebMethod) model.getVariable("webMethod");
+    }
 
-      if (webMethod == null) {
-        throw new MissingParameterException("webMethod");
+    WsdlInfo wsdlInfo = this.wsdl;
+    if (wsdlInfo == null) {
+      wsdlInfo = (WsdlInfo) model.getVariable("wsdl");
+    }
+
+    if ((webMethod == null) && (wsdlInfo == null)) {
+      throw new MissingParameterException("Either a webMethod or a wsdl must be specified to iterate over web messages.", "webMethod");
+    }
+
+    Collection<WebMessage> messages;
+    if (webMethod != null) {
+      messages = webMethod.getMessages();
+    }
+    else {
+      messages = new ArrayList<WebMessage>();
+      HashSet<String> foundFaults = new HashSet<String>();
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        Collection<WebMethod> webMethods = ei.getWebMethods();
+        for (WebMethod method : webMethods) {
+          for (WebMessage webMessage : method.getMessages()) {
+            if (webMessage.isFault() && !foundFaults.add(((WebFault) webMessage).getQualifiedName())) {
+              continue;
+            }
+
+            //todo: account for duplicate web message names since enunciate groups all endpoint interfaces of the same namespace into a single wsdl.
+            messages.add(webMessage);
+          }
+        }
       }
+
     }
 
     Collection<WebMessage> io = new ArrayList<WebMessage>();
-    Collection<WebMessage> messages = webMethod.getMessages();
     for (WebMessage message : messages) {
       boolean include = (includeHeaders || !message.isHeader());
       include &= (includeOutput || !message.isOutput());
@@ -168,6 +200,24 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
    */
   public void setWebMethod(WebMethod webMethod) {
     this.webMethod = webMethod;
+  }
+
+  /**
+   * The wsdl containing the web messages.
+   *
+   * @return The wsdl containing the web messages.
+   */
+  public WsdlInfo getWsdl() {
+    return wsdl;
+  }
+
+  /**
+   * The wsdl containing the web messages.
+   *
+   * @param wsdl The wsdl containing the web messages.
+   */
+  public void setWsdl(WsdlInfo wsdl) {
+    this.wsdl = wsdl;
   }
 
 }

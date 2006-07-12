@@ -1,31 +1,31 @@
 package net.sf.enunciate.contract;
 
 import com.sun.mirror.apt.AnnotationProcessor;
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.EnunciateTestCase;
-import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.ProcessorFactory;
 import static org.testng.Assert.assertNotNull;
+import org.testng.IHookCallBack;
+import org.testng.IHookable;
 
 import java.net.URL;
 import java.util.*;
 
 /**
- * Base test case for contract classes.  Initializes the APT environment with all java files in the
- * specified subdirectory.
+ * Base test case for contract.
  *
  * @author Ryan Heaton
  */
-public abstract class EnunciateContractTestCase extends EnunciateTestCase {
+public abstract class EnunciateContractTestCase extends EnunciateTestCase implements IHookable {
 
-  protected EnunciateContractTestCase() {
-    try {
-      assertNotNull(Context.getCurrentEnvironment());
-    }
-    catch (IllegalStateException ise) {
-      invokeAPT(new NoOpAPF(), getAptOptions(), getAllJavaFiles(getSubDirName()));
-    }
+  private IHookCallBack callback;
+  protected AnnotationProcessorEnvironment env;
+
+  public void run(IHookCallBack callback) {
+    this.callback = callback;
+    invokeAPT(new APFInternal(), getAptOptions(), getAllJavaFiles(getSubDirName()));
   }
 
   protected ArrayList<String> getAptOptions() {
@@ -47,16 +47,12 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase {
    * @return The declaration.
    */
   protected TypeDeclaration getDeclaration(String fqn) {
-    TypeDeclaration declaration = Context.getCurrentEnvironment().getTypeDeclaration(fqn);
+    TypeDeclaration declaration = this.env.getTypeDeclaration(fqn);
     assertNotNull(declaration, "No source def found: " + fqn);
     return declaration;
   }
 
-  /**
-   * Used just to set the current environment.
-   */
-  private class NoOpAPF extends ProcessorFactory implements AnnotationProcessor {
-
+  private class APFInternal extends ProcessorFactory implements AnnotationProcessor {
     @Override
     public Collection<String> supportedOptions() {
       return Collections.emptyList();
@@ -65,6 +61,12 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase {
     @Override
     public Collection<String> supportedAnnotationTypes() {
       return Arrays.asList("*");
+    }
+
+    @Override
+    public AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> set, AnnotationProcessorEnvironment ape) {
+      env = ape;
+      return super.getProcessorFor(set, ape);
     }
 
     @Override
@@ -77,7 +79,9 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase {
     }
 
     public void process() {
-      //no-op.
+      assertNotNull(callback, "Uninitialized callback.");
+      assertNotNull(env, "Uninitialized environment.");
+      callback.runTestMethod();
     }
 
   }
