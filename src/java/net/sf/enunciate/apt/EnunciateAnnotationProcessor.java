@@ -1,7 +1,10 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateModelException;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.*;
@@ -15,6 +18,9 @@ import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.Collection;
 
@@ -28,7 +34,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   @Override
-  protected FreemarkerModel getRootModel() {
+  protected FreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
@@ -85,7 +91,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         env.getMessager().printError(error.getPosition(), error.getText());
       }
 
-      throw new RuntimeException("There were validation errors.");
+      throw new ModelValidationException();
     }
 
 /*
@@ -110,6 +116,27 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   protected FreemarkerModel newRootModel() {
     return new EnunciateFreemarkerModel();
+  }
+
+  //Inherited.
+  @Override
+  protected void process(TemplateException e) {
+    Messager messager = Context.getCurrentEnvironment().getMessager();
+    if (e.getCauseException() instanceof ModelValidationException) {
+      messager.printError("There were validation errors.");
+    }
+    else {
+      StringWriter stackTrace = new StringWriter();
+      e.printStackTrace(new PrintWriter(stackTrace));
+      messager.printError(stackTrace.toString());
+    }
+  }
+
+  //Inherited.
+  @Override
+  protected void process(IOException e) {
+    Messager messager = Context.getCurrentEnvironment().getMessager();
+    messager.printError(e.getMessage());
   }
 
   /**
@@ -228,7 +255,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
   //Inherited.
   @Override
-  protected Collection<FreemarkerTransform> getTransforms() {
+  public Collection<FreemarkerTransform> getTransforms() {
     String namespace = Context.getCurrentEnvironment().getOptions().get(EnunciateAnnotationProcessorFactory.FM_LIBRARY_NS_OPTION);
     Collection<FreemarkerTransform> transforms = super.getTransforms();
 

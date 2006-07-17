@@ -40,7 +40,7 @@ public class PrefixMethod implements TemplateMethodModel {
    * @param namespace The namespace for which to lookup the prefix.
    * @return The namespace prefix.
    */
-  protected static String lookupPrefix(String namespace) {
+  protected String lookupPrefix(String namespace) {
     return getNamespacesToPrefixes().get(namespace);
   }
 
