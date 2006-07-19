@@ -4,6 +4,7 @@
   <property name="lib.dir" value="lib"/>
   <property name="build.dir" value="target/classes"/>
   <property name="gen.dir" value="target/gen"/>
+  <property name="wars.dir" value="target/wars"/>
   <property name="conf.dir" value="src/conf"/>
   <property name="test.build.dir" value="target/test-classes"/>
   <property name="test.report.dir" value="target/test-reports"/>
@@ -13,7 +14,7 @@
 
   <path id="build.classpath">
     <fileset dir="${lib.dir}">
-      <include name="*.jar"/>
+      <include name="**/*.jar"/>
     </fileset>
     <pathelement location="${java.home}/../lib/tools.jar"/>
   </path>
@@ -26,6 +27,8 @@
 
   <target name="init" description="initializes some properties">
     <mkdir dir="${lib.dir}"/>
+
+    <property file="${user.home}/.enunciate/build.properties"/>
   </target>
 
   <target name="compile" description="compile the code" depends="get-deps">
@@ -141,6 +144,53 @@
       <option key="api" value="${api}"/>
       <option key="verbose" value="true"/>
     </apt>
+  </target>
+
+  <target name="deploy-example" depends="init">
+    <fail unless="deploy.dir">
+      A deploy directory must be specified with the "deploy.dir" property.
+      Do you have it specified in ${user.home}/.enunciate/build.properties file?
+    </fail>
+
+    <!--the name of the example to deploy.-->
+    <property name="example" value="basic"/>
+
+    <property name="example.dir" value="src/samples/${example}"/>
+    <property name="example.build.dir" value="target/examples/${example}/classes"/>
+
+    <mkdir dir="${wars.dir}"/>
+    <mkdir dir="${example.build.dir}"/>
+
+    <javac destdir="${example.build.dir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
+      <src>
+        <pathelement location="${example.dir}"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+
+    <copy todir="${example.build.dir}">
+      <fileset dir="${example.dir}">
+        <include name="**/*.xsd"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.jelly"/>
+        <include name="**/*.fmt"/>
+      </fileset>
+    </copy>
+    <delete dir="${example.build.dir}/WEB-INF" failonerror="false"/>
+
+    <war destfile="${deploy.dir}/${example}.war" webxml="${example.dir}/WEB-INF/web.xml">
+      <webinf dir="${example.dir}/WEB-INF">
+        <exclude name="web.xml"/>
+      </webinf>
+      <classes dir="${example.build.dir}"/>
+      <lib dir="${lib.dir}">
+        <include name="*.jar"/>
+      </lib>
+      <lib dir="${lib.dir}/xfire">
+        <include name="*.jar"/>
+      </lib>
+    </war>
+
   </target>
 
 </project>
