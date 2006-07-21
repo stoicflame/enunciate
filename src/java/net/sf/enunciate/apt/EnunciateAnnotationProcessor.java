@@ -21,20 +21,36 @@ import javax.xml.bind.annotation.XmlType;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.Collection;
 
 /**
+ * Enunciate annotation processor for enunciate.  Even though it extends <code>FreemarkerProcessor</code>, it does not
+ * process any Freemarker templates.  It extends <code>FreemarkerProcessor</code> only to inherit certain
+ * functionality.
+ *
  * @author Ryan Heaton
  */
 public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
-  public EnunciateAnnotationProcessor(URL template) {
-    super(template);
+  public EnunciateAnnotationProcessor() {
+    super(null);
   }
 
   @Override
-  protected FreemarkerModel getRootModel() throws TemplateModelException {
+  public void process() {
+    try {
+      EnunciateFreemarkerModel model = getRootModel();
+
+      //process the xml.
+      new XMLAPIAnnotationProcessor(model).process();
+    }
+    catch (TemplateModelException e) {
+      process(e);
+    }
+  }
+
+  @Override
+  protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
@@ -116,27 +132,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   protected FreemarkerModel newRootModel() {
     return new EnunciateFreemarkerModel();
-  }
-
-  //Inherited.
-  @Override
-  protected void process(TemplateException e) {
-    Messager messager = Context.getCurrentEnvironment().getMessager();
-    if (e.getCauseException() instanceof ModelValidationException) {
-      messager.printError("There were validation errors.");
-    }
-    else {
-      StringWriter stackTrace = new StringWriter();
-      e.printStackTrace(new PrintWriter(stackTrace));
-      messager.printError(stackTrace.toString());
-    }
-  }
-
-  //Inherited.
-  @Override
-  protected void process(IOException e) {
-    Messager messager = Context.getCurrentEnvironment().getMessager();
-    messager.printError(e.getMessage());
   }
 
   /**
@@ -305,6 +300,27 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     return validationResult;
+  }
+
+  //Inherited.
+  @Override
+  protected void process(TemplateException e) {
+    Messager messager = Context.getCurrentEnvironment().getMessager();
+    if (e instanceof ModelValidationException) {
+      messager.printError("There were validation errors.");
+    }
+    else {
+      StringWriter stackTrace = new StringWriter();
+      e.printStackTrace(new PrintWriter(stackTrace));
+      messager.printError(stackTrace.toString());
+    }
+  }
+
+  //Inherited.
+  @Override
+  protected void process(IOException e) {
+    Messager messager = Context.getCurrentEnvironment().getMessager();
+    messager.printError(e.getMessage());
   }
 
 }

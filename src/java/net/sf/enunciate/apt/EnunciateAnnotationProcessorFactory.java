@@ -1,9 +1,7 @@
 package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessor;
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import net.sf.enunciate.API;
-import net.sf.jelly.apt.Context;
+import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import net.sf.jelly.apt.ProcessorFactory;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory;
 
@@ -11,16 +9,12 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Ryan Heaton
  */
 public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
-
-  /**
-   * Option to pass to the factory specifying which api to generate.
-   */
-  public static final String API_OPTION = "-Aapi";
 
   /**
    * Option to specify the config file to use.
@@ -37,8 +31,7 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
    */
   public static final String VERBOSE_OPTION = "-Averbose";
 
-  private static final Collection<String> SUPPORTED_OPTIONS = Collections.unmodifiableCollection(Arrays.asList(API_OPTION,
-                                                                                                               CONFIG_OPTION,
+  private static final Collection<String> SUPPORTED_OPTIONS = Collections.unmodifiableCollection(Arrays.asList(CONFIG_OPTION,
                                                                                                                FM_LIBRARY_NS_OPTION,
                                                                                                                FreemarkerProcessorFactory.FM_LIBRARY_NS_OPTION,
                                                                                                                VERBOSE_OPTION));
@@ -54,23 +47,14 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
     return SUPPORTED_TYPES;
   }
 
-  //Inherited.
-  protected AnnotationProcessor newProcessor(URL url) {
-    return new EnunciateAnnotationProcessor(url);
+  @Override
+  protected AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> annotations) {
+    return new EnunciateAnnotationProcessor();
   }
 
-  //Inherited.
-  @Override
-  protected URL getTemplateURL() {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-
-    String api = env.getOptions().get(API_OPTION);
-
-    if (api == null) {
-      throw new IllegalArgumentException(String.format("A valid api must be specified with the %s option.", API_OPTION));
-    }
-
-    return API.valueOf(api.toUpperCase()).getTemplate();
+  //no-op.
+  protected AnnotationProcessor newProcessor(URL url) {
+    return null;
   }
 
 }

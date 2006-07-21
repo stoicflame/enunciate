@@ -126,24 +126,22 @@
   </target>
 
   <target name="generate-api" depends="jar">
-    <property name="api" value="xml"/>
+    <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
+      <classpath>
+        <path refid="run.classpath"/>
+        <pathelement location="target/${final.name}.jar"/>
+      </classpath>
+    </taskdef>
 
     <mkdir dir="${gen.dir}"/>
 
-    <taskdef name="apt" classname="com.sun.tools.ws.ant.Apt">
-      <classpath refid="build.classpath"/>
-    </taskdef>
-
-    <apt fork="true" debug="true" noCompile="true"
-         sourceDestDir="${gen.dir}" sourcePath="src/samples/basic"
-         factory="net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory">
-      <classpath refid="run.classpath"/>
-      <source dir="src/samples/basic">
-        <include name="**/*.java"/>
-      </source>
-      <option key="api" value="${api}"/>
-      <option key="verbose" value="true"/>
-    </apt>
+    <enunciate verbose="true" preprocessdir="${gen.dir}" target="generate" basedir="src/samples/basic">
+      <include name="**/*.java"/>
+      <classpath>
+        <path refid="run.classpath"/>
+        <pathelement location="target/${final.name}.jar"/>
+      </classpath>
+    </enunciate>
   </target>
 
   <target name="deploy-example" depends="init">
@@ -176,7 +174,10 @@
         <include name="**/*.fmt"/>
       </fileset>
     </copy>
+
     <delete dir="${example.build.dir}/WEB-INF" failonerror="false"/>
+    <delete file="${deploy.dir}/${example}.war" failonerror="false"/>
+    <delete dir="${deploy.dir}/${example}" failonerror="false"/>
 
     <war destfile="${deploy.dir}/${example}.war" webxml="${example.dir}/WEB-INF/web.xml">
       <webinf dir="${example.dir}/WEB-INF">
