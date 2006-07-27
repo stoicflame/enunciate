@@ -5,14 +5,14 @@
 
 [#--first generate each wsdl.--]
 [@forEachWsdl]
-  [@file name=wsdl.file]
+  [@file name=wsdl.file package="xml"]
     [@libWsdl.processWsdl wsdl=wsdl/]
   [/@file]
 [/@forEachWsdl]
 
 [#--then generate each schema.--]
 [@forEachSchema]
-  [@file name=schema.file]
+  [@file name=schema.file package="xml"]
     [@libSchema.processSchema schema=schema/]
   [/@file]
 [/@forEachSchema]

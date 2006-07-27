@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * Main enunciate entry point.
@@ -44,8 +43,6 @@ public class Enunciate {
   private String classpath;
   private Target target = Target.PACKAGE;
 
-  private final HashMap<String, String> options = new HashMap<String, String>();
-
   public static void main(String[] args) {
     Enunciate enunciate = new Enunciate();
     //todo: compile the args, set the variables, then:
@@ -58,6 +55,21 @@ public class Enunciate {
    * @param sourceFiles The source files to enunciate.
    */
   public void execute(String[] sourceFiles) throws IOException {
+    boolean success = invokeApt(sourceFiles);
+
+    if (success && (getTarget().ordinal() >= Target.COMPILE.ordinal())) {
+      //todo: HERE put the code to compile, package up the war.
+
+    }
+  }
+
+  /**
+   * Invokes APT on the specified source files.
+   *
+   * @param sourceFiles The source files.
+   * @return Whether the invocation was successful.
+   */
+  protected boolean invokeApt(String[] sourceFiles) throws IOException {
     ArrayList<String> args = new ArrayList<String>();
     String classpath = getClasspath();
     if (classpath == null) {
@@ -67,25 +79,30 @@ public class Enunciate {
     args.add("-cp");
     args.add(classpath);
 
-    Target target = getTarget();
-    if (target.ordinal() < Target.COMPILE.ordinal()) {
-      args.add("-nocompile");
-    }
-
     if (isVerbose()) {
       args.add(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
     }
 
-    File destdir = getDestDir();
-    if (destdir == null) {
-      destdir = File.createTempFile("enunciate", "");
-      destdir.delete();
-      destdir.mkdirs();
-      setDestDir(destdir);
+    if (getTarget().ordinal() < Target.COMPILE.ordinal()) {
+      args.add("-nocompile");
+    }
+    else {
+      File destdir = getDestDir();
+      if (destdir == null) {
+        destdir = File.createTempFile("enunciate", "");
+        destdir.delete();
+        destdir.mkdirs();
+        setDestDir(destdir);
+      }
+
+      args.add("-d");
+      args.add(destdir.getAbsolutePath());
     }
 
-    args.add("-d");
-    args.add(destdir.getAbsolutePath());
+    if (getPreprocessDir() != null) {
+      args.add("-s");
+      args.add(getPreprocessDir().getAbsolutePath());
+    }
 
     args.addAll(Arrays.asList(sourceFiles));
 
@@ -97,10 +114,7 @@ public class Enunciate {
     }
 
     int procCode = com.sun.tools.apt.Main.process(new EnunciateAnnotationProcessorFactory(), args.toArray(new String[args.size()]));
-    if ((procCode != 0) && (target.ordinal() >= Target.PACKAGE.ordinal())) {
-      //todo: HERE put the code to compile, package up the war.
-
-    }
+    return (procCode == 0);
   }
 
   /**
