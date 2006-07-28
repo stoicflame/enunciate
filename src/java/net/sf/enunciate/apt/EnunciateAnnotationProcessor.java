@@ -8,6 +8,9 @@ import freemarker.template.TemplateModelException;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.*;
+import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.modules.DeploymentModule;
+import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -22,29 +25,47 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Enunciate annotation processor for enunciate.  Even though it extends <code>FreemarkerProcessor</code>, it does not
- * process any Freemarker templates.  It extends <code>FreemarkerProcessor</code> only to inherit certain
- * functionality.
+ * Root annotation processor for enunciate.  Initializes the model and signals the modules to generate.
+ * <p/>
+ * Even though it extends <code>FreemarkerProcessor</code>, it does not process any Freemarker templates directly.  It extends
+ * <code>FreemarkerProcessor</code> only to inherit certain functionality.
  *
  * @author Ryan Heaton
  */
 public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
-  public EnunciateAnnotationProcessor() {
+  private final List<DeploymentModule> modules;
+  private boolean processedSuccessfully = false;
+
+  public EnunciateAnnotationProcessor(List<DeploymentModule> modules) {
     super(null);
+    this.modules = modules;
   }
 
   @Override
   public void process() {
     try {
-      EnunciateFreemarkerModel model = getRootModel();
+      getRootModel();
 
-      //process the xml.
-      new XMLAPIAnnotationProcessor(model).process();
+      for (DeploymentModule module : modules) {
+        if (module instanceof FreemarkerDeploymentModule) {
+          //if it's a freemarker deployment module, we can handle the possible TemplateException.
+          ((FreemarkerDeploymentModule) module).processTemplate();
+        }
+        else {
+          module.step(Enunciate.Target.GENERATE);
+        }
+      }
+
+      processedSuccessfully = true;
     }
-    catch (TemplateModelException e) {
+    catch (TemplateException e) {
+      process(e);
+    }
+    catch (IOException e) {
       process(e);
     }
   }
@@ -321,6 +342,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   protected void process(IOException e) {
     Messager messager = Context.getCurrentEnvironment().getMessager();
     messager.printError(e.getMessage());
+  }
+
+  /**
+   * Whether this processor has been processed successfully.
+   *
+   * @return Whether this processor has been processed successfully.
+   */
+  public boolean isProcessedSuccessfully() {
+    return processedSuccessfully;
   }
 
 }

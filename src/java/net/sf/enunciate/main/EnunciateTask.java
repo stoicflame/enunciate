@@ -68,6 +68,15 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * Whether to print debugging information.
+   *
+   * @param debug Whether to print debugging information.
+   */
+  public void setDebug(boolean debug) {
+    proxy.setDebug(debug);
+  }
+
+  /**
    * The enunciate config file.
    *
    * @param config The enunciate config file.
@@ -83,6 +92,15 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setDestDir(File destDir) {
     proxy.setDestDir(destDir);
+  }
+
+  /**
+   * The directory to use to build the war.
+   *
+   * @param warBuildDir The directory to use to build the war.
+   */
+  public void setWarBuildDir(File warBuildDir) {
+    proxy.setWarBuildDir(warBuildDir);
   }
 
   /**

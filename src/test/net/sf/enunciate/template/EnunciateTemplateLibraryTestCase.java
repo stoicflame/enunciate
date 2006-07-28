@@ -126,7 +126,7 @@ public abstract class EnunciateTemplateLibraryTestCase extends EnunciateContract
    * @return The transforms to use for the model.
    */
   protected Collection<FreemarkerTransform> getTransforms() {
-    return new EnunciateAnnotationProcessor().getTransforms();
+    return new EnunciateAnnotationProcessor(null).getTransforms();
   }
 
   /**

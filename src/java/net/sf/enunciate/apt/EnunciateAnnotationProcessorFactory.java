@@ -2,14 +2,12 @@ package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
+import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.jelly.apt.ProcessorFactory;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -37,6 +35,12 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
                                                                                                                VERBOSE_OPTION));
   private static final Collection<String> SUPPORTED_TYPES = Collections.unmodifiableCollection(Arrays.asList("*"));
 
+  private final EnunciateAnnotationProcessor processor;
+
+  public EnunciateAnnotationProcessorFactory(List<DeploymentModule> modules) {
+    this.processor = new EnunciateAnnotationProcessor(modules);
+  }
+
   //Inherited.
   public Collection<String> supportedOptions() {
     return SUPPORTED_OPTIONS;
@@ -49,12 +53,16 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
 
   @Override
   protected AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> annotations) {
-    return new EnunciateAnnotationProcessor();
+    return processor;
   }
 
   //no-op.
   protected AnnotationProcessor newProcessor(URL url) {
     return null;
+  }
+
+  public boolean isProcessedSuccessfully() {
+    return processor.isProcessedSuccessfully();
   }
 
 }

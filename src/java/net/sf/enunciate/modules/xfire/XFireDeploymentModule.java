@@ -1,0 +1,35 @@
+package net.sf.enunciate.modules.xfire;
+
+import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.modules.FreemarkerDeploymentModule;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+/**
+ * Deployment module for XFire.
+ *
+ * @author Ryan Heaton
+ */
+public class XFireDeploymentModule extends FreemarkerDeploymentModule {
+
+  protected URL getTemplateURL() {
+    return XFireDeploymentModule.class.getResource("xfire-servlet.fmt");
+  }
+
+  @Override
+  protected void doBuild() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File webinf = enunciate.getWebInf();
+    File config = new File(new File(new File(webinf, "conf"), "spring"), "xfire-spring.xml");
+    File xfireConfigDir = new File(enunciate.getPreprocessDir(), "xfire");
+
+    //copy the web.xml file to WEB-INF.
+    enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
+
+    //copy the xfire config file from the xfire configuration directory to the WEB-INF/conf/spring directory.
+    enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), config);
+  }
+
+}

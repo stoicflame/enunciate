@@ -1,7 +1,7 @@
 package net.sf.enunciate;
 
 import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
-  
+
 import java.net.URL;
 
 /**
@@ -12,6 +12,7 @@ public class EnunciateTestProcessorFactory extends EnunciateAnnotationProcessorF
   private final URL api;
 
   public EnunciateTestProcessorFactory(URL template) {
+    super(null);
     this.api = template;
     round = 0; //reset the round.
   }

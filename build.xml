@@ -125,7 +125,41 @@
     <!--<get dest="${lib.dir}/commons-logging-1.0.2.jar" usetimestamp="true" ignoreerrors="true" src="http://www.ibiblio.org/maven/commons-logging/jars/commons-logging-1.0.2.jar"/>-->
   </target>
 
-  <target name="generate-api" depends="jar">
+  <target name="generate-example-api" description="generate the artifacts for an example api.">
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="generate"/>
+    </antcall>
+  </target>
+
+  <target name="compile-example-api" description="generate and compile the artifacts for an example api.">
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="compile"/>
+    </antcall>
+  </target>
+
+  <target name="build-example-api" description="generate and compile the artifacts for an example api.">
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="build"/>
+    </antcall>
+  </target>
+
+  <target name="package-example-api" description="generate, compile, and package the artifacts for an example api.">
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="package"/>
+    </antcall>
+  </target>
+
+  <target name="enunciate-example-api" depends="jar" description="enunciate an example api.">
+    <fail unless="enunciate.target">
+      You must specify an enunciate target.
+    </fail>
+
+    <!--the name of the example to deploy.-->
+    <property name="example" value="basic"/>
+    <property name="example.dir" value="src/samples/${example}"/>
+    <property name="example.gen.dir" value="${gen.dir}/examples/${example}"/>
+    <property name="example.build.dir" value="target/examples/${example}/classes"/>
+
     <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
       <classpath>
         <path refid="run.classpath"/>
@@ -133,9 +167,15 @@
       </classpath>
     </taskdef>
 
-    <mkdir dir="${gen.dir}"/>
+    <mkdir dir="${example.gen.dir}"/>
+    <mkdir dir="${example.build.dir}"/>
+    <mkdir dir="${wars.dir}"/>
 
-    <enunciate verbose="true" preprocessdir="${gen.dir}" target="generate" basedir="src/samples/basic">
+    <enunciate verbose="true" target="${enunciate.target}"
+               basedir="${example.dir}"
+               preprocessdir="${example.gen.dir}"
+               destdir="${example.build.dir}"
+               warbuilddir="${wars.dir}">
       <include name="**/*.java"/>
       <classpath>
         <path refid="run.classpath"/>
@@ -144,7 +184,7 @@
     </enunciate>
   </target>
 
-  <target name="deploy-example" depends="init">
+  <target name="deploy-example-api" depends="init">
     <fail unless="deploy.dir">
       A deploy directory must be specified with the "deploy.dir" property.
       Do you have it specified in ${user.home}/.enunciate/build.properties file?

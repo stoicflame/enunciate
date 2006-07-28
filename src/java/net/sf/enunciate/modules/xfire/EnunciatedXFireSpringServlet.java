@@ -1,4 +1,4 @@
-package net.sf.enunciate.xfire;
+package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.spring.XFireSpringServlet;
 import org.codehaus.xfire.transport.http.XFireServletController;
