@@ -11,7 +11,9 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @WebService (
-  endpointInterface = "net.sf.enunciate.samples.petclinic.services.OwnerService"
+  endpointInterface = "net.sf.enunciate.samples.petclinic.services.OwnerService",
+  //todo: fix or enforce having to do this for xfire.
+  serviceName = "OwnerService"
 )
 public class OwnerServiceImpl implements OwnerService {
 

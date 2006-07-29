@@ -11,14 +11,22 @@
 
   <servlet>
     <servlet-name>XFireServlet</servlet-name>
-    <servlet-class>
-      org.codehaus.xfire.spring.XFireSpringServlet
-    </servlet-class>
+    <servlet-class>net.sf.enunciate.modules.xfire.EnunciatedXFireSpringServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>XMLAPIServlet</servlet-name>
+    <servlet-class>net.sf.enunciate.modules.xml.XMLAPIServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>XFireServlet</servlet-name>
     <url-pattern>/servlet/XFireServlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>XMLAPIServlet</servlet-name>
+    <url-pattern>/xml/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

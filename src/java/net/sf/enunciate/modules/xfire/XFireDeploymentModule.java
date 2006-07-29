@@ -22,7 +22,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws IOException {
     Enunciate enunciate = getEnunciate();
     File webinf = enunciate.getWebInf();
-    File config = new File(new File(new File(webinf, "conf"), "spring"), "xfire-spring.xml");
+    File config = new File(new File(new File(webinf, "conf"), "spring"), "xfire-servlet.xml");
     File xfireConfigDir = new File(enunciate.getPreprocessDir(), "xfire");
 
     //copy the web.xml file to WEB-INF.

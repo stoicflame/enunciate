@@ -19,6 +19,7 @@ public class EnunciateTask extends MatchingTask {
   private final Enunciate proxy = new Enunciate();
   private File basedir;
   private Path classpath;
+  private Path warlib;
 
   /**
    * Executes the enunciate task.
@@ -104,6 +105,15 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * The war file to create.
+   *
+   * @param warFile The war file to create.
+   */
+  public void setWarFile(File warFile) {
+    proxy.setWarFile(warFile);
+  }
+
+  /**
    * The directory for the preprocessed files.
    *
    * @param preprocessDir The directory for the preprocessed files.
@@ -163,6 +173,50 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setClasspathRef(Reference ref) {
     createClasspath().setRefid(ref);
+  }
+
+  /**
+   * The war libraries to use to enunciate.
+   *
+   * @param warlib The war libraries to use to enunciate.
+   */
+  public void setWarlib(Path warlib) {
+    if (this.warlib == null) {
+      this.warlib = warlib;
+    }
+    else {
+      this.warlib.append(warlib);
+    }
+  }
+
+  /**
+   * The war libraries to use to enunciate.
+   *
+   * @return The war libraries to use to enunciate.
+   */
+  public Path getWarlib() {
+    return warlib;
+  }
+
+  /**
+   * Adds a path to the warlib.
+   *
+   * @return The path.
+   */
+  public Path createWarlib() {
+    if (warlib == null) {
+      warlib = new Path(getProject());
+    }
+    return warlib.createPath();
+  }
+
+  /**
+   * Adds a reference to a warlib defined elsewhere.
+   *
+   * @param ref a reference to a warlib.
+   */
+  public void setWarlibRef(Reference ref) {
+    createWarlib().setRefid(ref);
   }
 
 

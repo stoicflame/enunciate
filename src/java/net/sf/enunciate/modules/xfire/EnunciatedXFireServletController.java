@@ -1,12 +1,16 @@
 package net.sf.enunciate.modules.xfire;
 
+import net.sf.enunciate.modules.xml.XMLAPILookup;
 import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.transport.http.XFireServletController;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
 
 /**
  * Xfire servlet controller the redirects to the generated documentation and WSDL.
@@ -14,6 +18,8 @@ import java.io.IOException;
  * @author Ryan Heaton
  */
 public class EnunciatedXFireServletController extends XFireServletController {
+
+  private final XMLAPILookup lookup = new XMLAPILookup();
 
   public EnunciatedXFireServletController(XFire xfire) {
     super(xfire);
@@ -51,7 +57,22 @@ public class EnunciatedXFireServletController extends XFireServletController {
    */
   @Override
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
-    //todo: write out the generated WSDL.
-    super.generateWSDL(response, service);
+    //todo: take care of the XFire erroneously passing the wrong service name if it's an endpoint implementation?
+
+    Reader wsdl = lookup.lookupWsdl(service);
+    if (wsdl != null) {
+      response.setContentType("text/xml");
+      BufferedReader reader = new BufferedReader(wsdl);
+      PrintWriter writer = response.getWriter();
+      String line = reader.readLine();
+      while (line != null) {
+        writer.println(line);
+      }
+      reader.close();
+      writer.close();
+    }
+    else {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
   }
 }

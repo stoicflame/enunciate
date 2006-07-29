@@ -16,6 +16,8 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Main enunciate entry point.
@@ -54,10 +56,12 @@ public class Enunciate {
   private boolean debug = false;
 
   private File config;
+  private File preprocessDir;
   private File destDir;
   private File warBuildDir;
-  private File preprocessDir;
+  private File warFile;
   private String classpath;
+  private String warLibs;
   private List<DeploymentModule> deploymentModules;
   private Target target = Target.PACKAGE;
 
@@ -113,12 +117,41 @@ public class Enunciate {
         setWarBuildDir(warbuilddir);
       }
 
+      File webinfClasses = new File(getWebInf(), "classes");
+      File webinfLib = new File(getWebInf(), "lib");
+
       //copy the compiled classes to WEB-INF/classes.
-      copyDir(getDestDir(), new File(getWebInf(), "classes"));
+      copyDir(getDestDir(), webinfClasses);
+
+      String warLibs = getWarLibs();
+      if (warLibs == null) {
+        warLibs = getClasspath();
+      }
+
+      if (warLibs != null) {
+        String[] pathEntries = warLibs.split(File.pathSeparator);
+        for (String pathEntry : pathEntries) {
+          File file = new File(pathEntry);
+          if (file.exists()) {
+            if (file.isDirectory()) {
+              if (isVerbose()) {
+                System.out.println("Adding the contents of " + file.getAbsolutePath() + " to WEB-INF/classes.");
+              }
+              copyDir(file, webinfClasses);
+            }
+            else {
+              if (isVerbose()) {
+                System.out.println("Including " + file.getName() + " in WEB-INF/lib.");
+              }
+              copyFile(file, file.getParentFile(), webinfLib);
+            }
+          }
+        }
+      }
 
       //todo: copy any additional files as resources (specified in the config);
 
-      //todo: copy the necessary jars (specified in the config)?
+      //todo: copy any additional jars (specified in the config)?
 
       //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
@@ -128,15 +161,37 @@ public class Enunciate {
     }
 
     if (success && (getTarget().ordinal() >= Target.PACKAGE.ordinal())) {
-      File warbuilddir = getWarBuildDir();
-      if (warbuilddir == null) {
-        warbuilddir = File.createTempFile("enunciate", "");
-        warbuilddir.delete();
-        warbuilddir.mkdirs();
-        setWarBuildDir(warbuilddir);
+      File warBuildDir = getWarBuildDir();
+      if (warBuildDir == null) {
+        throw new IOException("No war build directory has been specified.");
       }
 
-      //todo: package up the war.
+      if (!warBuildDir.exists()) {
+        throw new IOException("Directory doesn't exist: " + warBuildDir.getAbsolutePath());
+      }
+
+      if (!warBuildDir.isDirectory()) {
+        throw new IOException(warBuildDir.getAbsolutePath() + " is not a directory.");
+      }
+
+      if (warBuildDir.list().length == 0) {
+        throw new IOException(warBuildDir.getAbsolutePath() + " is an empty directory.");
+      }
+
+      File warFile = getWarFile();
+      if (warFile == null) {
+        throw new IOException("A war file must be specified.");
+      }
+
+      if (!warFile.getParentFile().exists()) {
+        warFile.getParentFile().mkdirs();
+      }
+
+      if (isVerbose()) {
+        System.out.println("Creating " + warFile.getAbsolutePath());
+      }
+
+      zip(warBuildDir, warFile);
 
       for (DeploymentModule deploymentModule : getDeploymentModules()) {
         deploymentModule.step(Target.PACKAGE);
@@ -301,6 +356,59 @@ public class Enunciate {
   }
 
   /**
+   * zip up a directory to a specified zip file.
+   *
+   * @param dir    The directory to zip up.
+   * @param toFile The file to zip to.
+   */
+  public void zip(File dir, File toFile) throws IOException {
+    ArrayList<File> files = new ArrayList<File>();
+    buildFileList(dir, files);
+
+    byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
+    URI baseURI = dir.toURI();
+    ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
+    for (File file : files) {
+      ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
+
+      if (isDebug()) {
+        System.out.println("Adding entry " + entry.getName());
+      }
+
+      zipout.putNextEntry(entry);
+
+      FileInputStream in = new FileInputStream(file);
+      int len;
+      while ((len = in.read(buffer)) > 0) {
+        zipout.write(buffer, 0, len);
+      }
+
+      // Complete the entry
+      zipout.closeEntry();
+      in.close();
+    }
+
+    zipout.close();
+  }
+
+  /**
+   * Adds all files in a specified directory to a list.
+   *
+   * @param dir  The directory.
+   * @param list The list.
+   */
+  protected void buildFileList(File dir, List<File> list) {
+    for (File file : dir.listFiles()) {
+      if (file.isDirectory()) {
+        buildFileList(file, list);
+      }
+      else {
+        list.add(file);
+      }
+    }
+  }
+
+  /**
    * Whether to be verbose.
    *
    * @return Whether to be verbose.
@@ -391,6 +499,24 @@ public class Enunciate {
   }
 
   /**
+   * The war file to create.
+   *
+   * @return The war file to create.
+   */
+  public File getWarFile() {
+    return warFile;
+  }
+
+  /**
+   * The war file to create.
+   *
+   * @param warFile The war file to create.
+   */
+  public void setWarFile(File warFile) {
+    this.warFile = warFile;
+  }
+
+  /**
    * The preprocessor directory (-s).
    *
    * @return The preprocessor directory (-s).
@@ -424,6 +550,24 @@ public class Enunciate {
    */
   public void setClasspath(String classpath) {
     this.classpath = classpath;
+  }
+
+  /**
+   * The libraries to include in the war, in classpath form.  Defaults to the classpath.
+   *
+   * @return The libraries to include in the war, in classpath form.  Defaults to the classpath.
+   */
+  public String getWarLibs() {
+    return warLibs;
+  }
+
+  /**
+   * The libraries to include in the war, in classpath form.  Defaults to the classpath.
+   *
+   * @param warLibs The libraries to include in the war, in classpath form.  Defaults to the classpath.
+   */
+  public void setWarLibs(String warLibs) {
+    this.warLibs = warLibs;
   }
 
   /**

@@ -13,7 +13,9 @@ import java.util.*;
  * @author Ryan Heaton
  */
 @WebService (
-  endpointInterface = "net.sf.enunciate.samples.petclinic.services.VetService"
+  endpointInterface = "net.sf.enunciate.samples.petclinic.services.VetService",
+  //todo: fix or enforce having to do this for xfire.
+  serviceName = "VetService"
 )
 public class VetServiceImpl implements VetService {
 

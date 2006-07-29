@@ -159,6 +159,7 @@
     <property name="example.dir" value="src/samples/${example}"/>
     <property name="example.gen.dir" value="${gen.dir}/examples/${example}"/>
     <property name="example.build.dir" value="target/examples/${example}/classes"/>
+    <property name="war.file" value="target/examples/${example}.war"/>
 
     <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
       <classpath>
@@ -169,22 +170,24 @@
 
     <mkdir dir="${example.gen.dir}"/>
     <mkdir dir="${example.build.dir}"/>
-    <mkdir dir="${wars.dir}"/>
+    <mkdir dir="${wars.dir}/${example}"/>
 
     <enunciate verbose="true" target="${enunciate.target}"
                basedir="${example.dir}"
                preprocessdir="${example.gen.dir}"
                destdir="${example.build.dir}"
-               warbuilddir="${wars.dir}">
+               warbuilddir="${wars.dir}/${example}"
+               warFile="${war.file}">
       <include name="**/*.java"/>
       <classpath>
-        <path refid="run.classpath"/>
+        <path refid="build.classpath"/>
         <pathelement location="target/${final.name}.jar"/>
       </classpath>
     </enunciate>
   </target>
 
-  <target name="deploy-example-api" depends="init">
+  <target name="deploy-example-api" depends="init"
+          description="deploys the enunciated app to the user-defined deploy directory, cleaning what's already there.">
     <fail unless="deploy.dir">
       A deploy directory must be specified with the "deploy.dir" property.
       Do you have it specified in ${user.home}/.enunciate/build.properties file?
@@ -193,45 +196,14 @@
     <!--the name of the example to deploy.-->
     <property name="example" value="basic"/>
 
-    <property name="example.dir" value="src/samples/${example}"/>
-    <property name="example.build.dir" value="target/examples/${example}/classes"/>
-
-    <mkdir dir="${wars.dir}"/>
-    <mkdir dir="${example.build.dir}"/>
-
-    <javac destdir="${example.build.dir}" deprecation="true" debug="true" optimize="false" excludes="**/package.html">
-      <src>
-        <pathelement location="${example.dir}"/>
-      </src>
-      <classpath refid="build.classpath"/>
-    </javac>
-
-    <copy todir="${example.build.dir}">
-      <fileset dir="${example.dir}">
-        <include name="**/*.xsd"/>
-        <include name="**/*.xml"/>
-        <include name="**/*.jelly"/>
-        <include name="**/*.fmt"/>
-      </fileset>
-    </copy>
-
-    <delete dir="${example.build.dir}/WEB-INF" failonerror="false"/>
     <delete file="${deploy.dir}/${example}.war" failonerror="false"/>
     <delete dir="${deploy.dir}/${example}" failonerror="false"/>
 
-    <war destfile="${deploy.dir}/${example}.war" webxml="${example.dir}/WEB-INF/web.xml">
-      <webinf dir="${example.dir}/WEB-INF">
-        <exclude name="web.xml"/>
-      </webinf>
-      <classes dir="${example.build.dir}"/>
-      <lib dir="${lib.dir}">
-        <include name="*.jar"/>
-      </lib>
-      <lib dir="${lib.dir}/xfire">
-        <include name="*.jar"/>
-      </lib>
-    </war>
-
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="package"/>
+      <param name="example" value="${example}"/>
+      <param name="war.file" value="${deploy.dir}/${example}.war"/>
+    </antcall>
   </target>
 
 </project>
