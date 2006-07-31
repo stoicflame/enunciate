@@ -481,7 +481,17 @@ public class DefaultValidator implements Validator {
     if (element.isWrapped()) {
       XmlElementWrapper wrapper = element.getAnnotation(XmlElementWrapper.class);
 
-      if ((!"##default".equals(wrapper.namespace())) && (!element.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
+      String namespace = wrapper.namespace();
+      String typeNamespace = element.getTypeDefinition().getTargetNamespace();
+      //use the empty string for comparison in the case of the empty namespace.
+      if (namespace == null) {
+        namespace = "";
+      }
+      if (typeNamespace == null) {
+        typeNamespace = "";
+      }
+
+      if ((!"##default".equals(namespace)) && (!typeNamespace.equals(namespace))) {
         result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
           "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
       }
@@ -520,7 +530,17 @@ public class DefaultValidator implements Validator {
     if (elementRef.isWrapped()) {
       XmlElementWrapper wrapper = elementRef.getAnnotation(XmlElementWrapper.class);
 
-      if ((!"##default".equals(wrapper.namespace())) && (!elementRef.getTypeDefinition().getTargetNamespace().equals(wrapper.namespace()))) {
+      String namespace = wrapper.namespace();
+      String typeNamespace = elementRef.getTypeDefinition().getTargetNamespace();
+      //use the empty string for comparison in the case of the empty namespace.
+      if (namespace == null) {
+        namespace = "";
+      }
+      if (typeNamespace == null) {
+        typeNamespace = "";
+      }
+
+      if ((!"##default".equals(namespace)) && (!typeNamespace.equals(namespace))) {
         result.addError(elementRef.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
           "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
       }

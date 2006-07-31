@@ -15,7 +15,9 @@
   [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
   [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
-  xmlns:${prefix(referencedNamespace?default(""))}="${referencedNamespace}"
+    [#if referencedNamespace?exists && !("http://www.w3.org/2001/XMLSchema" = referencedNamespace)]
+  xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
+    [/#if]
   [/#list]
   xmlns:xs="http://www.w3.org/2001/XMLSchema">
   [#if schema.doc?exists]

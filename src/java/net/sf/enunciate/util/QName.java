@@ -10,9 +10,10 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class QName extends javax.xml.namespace.QName {
+public class QName {
 
-  public static final String EMPTY_PREFIX = "<empty-prefix>";
+  private String namespaceURI;
+  private String localPart;
 
   /**
    * A qname of the given namespace and localpart.  Prefix will be looked up.
@@ -21,18 +22,35 @@ public class QName extends javax.xml.namespace.QName {
    * @param localPart    The local part.
    */
   public QName(String namespaceURI, String localPart) {
-    super(namespaceURI, localPart, lookupPrefix(namespaceURI));
+    this.namespaceURI = namespaceURI;
+    this.localPart = localPart;
   }
 
   /**
-   * A qname of the given namespace, localpart, and prefix.
+   * The namespace URI, null if the default namespace.
    *
-   * @param namespaceURI The namespace.
-   * @param localPart    The local part.
-   * @param prefix       The prefix.
+   * @return The namespace URI.
    */
-  public QName(String namespaceURI, String localPart, String prefix) {
-    super(namespaceURI, localPart, prefix);
+  public String getNamespaceURI() {
+    return this.namespaceURI;
+  }
+
+  /**
+   * The local part.
+   *
+   * @return The local part.
+   */
+  public String getLocalPart() {
+    return this.localPart;
+  }
+
+  /**
+   * The prefix, or null if the default.
+   *
+   * @return The prefix, or null if the default.
+   */
+  public String getPrefix() {
+    return lookupPrefix(getNamespaceURI());
   }
 
   /**
@@ -43,7 +61,7 @@ public class QName extends javax.xml.namespace.QName {
    */
   protected static String lookupPrefix(String namespace) {
     if (namespace == null) {
-      return EMPTY_PREFIX;
+      return null;
     }
 
     return getNamespacesToPrefixes().get(namespace);
@@ -70,7 +88,7 @@ public class QName extends javax.xml.namespace.QName {
   @Override
   public String toString() {
     String string = getLocalPart();
-    if (getPrefix() != EMPTY_PREFIX) {
+    if (getPrefix() != null) {
       string = getPrefix() + ":" + string;
     }
     return string;

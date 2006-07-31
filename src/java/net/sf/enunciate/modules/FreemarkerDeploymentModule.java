@@ -38,6 +38,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    */
   public void processTemplate() throws IOException, TemplateException {
     Configuration configuration = getConfiguration();
+    configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(getTemplateURL().toString());
     FreemarkerModel model = FreemarkerModel.get();
     if (model == null) {

@@ -39,8 +39,7 @@ public class XMLAPIServlet extends HttpServlet {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
       }
       else {
-        //todo: figure out why firefox can't parse this as text/xml (character encoding?)
-        response.setContentType("text/plain");
+        response.setContentType("text/xml");
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(xmlResource));
         PrintWriter writer = response.getWriter();

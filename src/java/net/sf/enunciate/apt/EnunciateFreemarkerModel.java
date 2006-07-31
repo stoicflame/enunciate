@@ -44,6 +44,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
 
+    setVariable("knownNamespaces", new ArrayList<String>(this.namespacesToPrefixes.keySet()));
     setVariable("ns2prefix", this.namespacesToPrefixes);
     setVariable("ns2schema", this.namespacesToSchemas);
     setVariable("ns2wsdl", this.namespacesToWsdls);

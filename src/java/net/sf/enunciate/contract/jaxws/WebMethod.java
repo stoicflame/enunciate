@@ -14,8 +14,8 @@ import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * A method invoked on a web service.
@@ -144,7 +144,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    * @return A set of the reference namespace for this method.
    */
   public Set<String> getReferencedNamespaces() {
-    TreeSet<String> namespaces = new TreeSet<String>();
+    HashSet<String> namespaces = new HashSet<String>();
+
     Collection<WebMessage> messages = getMessages();
     for (WebMessage message : messages) {
       for (WebMessagePart part : message.getParts()) {

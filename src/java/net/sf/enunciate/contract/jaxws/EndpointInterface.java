@@ -167,7 +167,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
    * @return The set of namespace URIs that this web service references.
    */
   public Set<String> getReferencedNamespaces() {
-    TreeSet<String> namespaces = new TreeSet<String>();
+    HashSet<String> namespaces = new HashSet<String>();
     namespaces.add(getTargetNamespace());
     Collection<WebMethod> webMethods = getWebMethods();
     for (WebMethod webMethod : webMethods) {

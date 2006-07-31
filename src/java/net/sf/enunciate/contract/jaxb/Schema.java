@@ -39,7 +39,7 @@ public class Schema extends DecoratedPackageDeclaration {
    * @return The namespace of this package.
    */
   public String getNamespace() {
-    String namespace = "";
+    String namespace = null;
 
     if (xmlSchema != null) {
       namespace = xmlSchema.namespace();

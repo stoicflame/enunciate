@@ -95,7 +95,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
             System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
                                              declaration.getQualifiedName(),
                                              typeDef.getClass().getSimpleName(),
-                                             typeDef.getTargetNamespace(),
+                                             typeDef.getTargetNamespace() == null ? "" : typeDef.getTargetNamespace(),
                                              typeDef.getName()));
           }
 

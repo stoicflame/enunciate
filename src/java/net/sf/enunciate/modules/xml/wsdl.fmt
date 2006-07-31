@@ -12,9 +12,12 @@ Template library for WSDL.
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
 [#t]
+<?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
-   xmlns:${prefix(importedNamespace?default(""))}="${importedNamespace}"
+      [#if importedNamespace?exists && !knownNamespaces?seq_contains(importedNamespace)]
+   xmlns:${prefix(importedNamespace)}="${importedNamespace}"
+      [/#if]
     [/#list]
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"

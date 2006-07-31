@@ -92,7 +92,7 @@ public class WsdlInfo {
       throw new IllegalStateException("WSDL for " + getTargetNamespace() + " has no endpoint interfaces!");
     }
 
-    TreeSet<String> importedNamespaces = new TreeSet<String>();
+    HashSet<String> importedNamespaces = new HashSet<String>();
     for (EndpointInterface endpointInterface : endpointInterfaces) {
       importedNamespaces.addAll(endpointInterface.getReferencedNamespaces());
     }
