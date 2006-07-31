@@ -34,6 +34,10 @@ public class EnunciateTask extends MatchingTask {
       proxy.setClasspath(classpath.toString());
     }
 
+    if (warlib != null) {
+      proxy.setWarLibs(warlib.toString());
+    }
+
     DirectoryScanner scanner = getDirectoryScanner(basedir);
     scanner.scan();
     String[] files = scanner.getIncludedFiles();

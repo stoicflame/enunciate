@@ -25,6 +25,16 @@
     <pathelement path="${conf.dir}"/>
   </path>
 
+  <path id="enunciate.classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+      <exclude name="**/servlet-api*.jar"/>
+      <exclude name="**/testng*.jar"/>
+    </fileset>
+    <pathelement location="${java.home}/../lib/tools.jar"/>
+    <pathelement location="target/${final.name}.jar"/>
+  </path>
+
   <target name="init" description="initializes some properties">
     <mkdir dir="${lib.dir}"/>
 
@@ -163,8 +173,7 @@
 
     <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
       <classpath>
-        <path refid="run.classpath"/>
-        <pathelement location="target/${final.name}.jar"/>
+        <path refid="enunciate.classpath"/>
       </classpath>
     </taskdef>
 
@@ -180,8 +189,7 @@
                warFile="${war.file}">
       <include name="**/*.java"/>
       <classpath>
-        <path refid="build.classpath"/>
-        <pathelement location="target/${final.name}.jar"/>
+        <path refid="enunciate.classpath"/>
       </classpath>
     </enunciate>
   </target>

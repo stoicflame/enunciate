@@ -5,13 +5,10 @@ import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.xfire.XFireDeploymentModule;
 import net.sf.enunciate.modules.xml.XMLDeploymentModule;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,7 +136,7 @@ public class Enunciate {
               }
               copyDir(file, webinfClasses);
             }
-            else {
+            else if (!excludeLibrary(file)) {
               if (isVerbose()) {
                 System.out.println("Including " + file.getName() + " in WEB-INF/lib.");
               }
@@ -203,6 +200,11 @@ public class Enunciate {
     }
   }
 
+  /**
+   * Get the target webinf directory.
+   *
+   * @return The target webinf directory.
+   */
   public File getWebInf() {
     return new File(getWarBuildDir(), "WEB-INF");
   }
@@ -333,6 +335,10 @@ public class Enunciate {
       to.getParentFile().mkdirs();
     }
 
+    if (isDebug()) {
+      System.out.println("Copying " + from + " to " + to);
+    }
+
     FileChannel dstChannel = new FileOutputStream(to, false).getChannel();
     dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
     srcChannel.close();
@@ -346,12 +352,20 @@ public class Enunciate {
    * @param to       The file to copy to.
    */
   public void copyResource(String resource, File to) throws IOException {
-    URL resourceURL = getClass().getResource(resource);
-    try {
-      copyFile(new File(resourceURL.toURI()), to);
+    InputStream stream = getClass().getResourceAsStream(resource);
+    if (stream == null) {
+      throw new IOException("Request to copy a resource that was not found: " + resource);
     }
-    catch (URISyntaxException e) {
-      throw new IOException(e.getMessage());
+
+    if (isDebug()) {
+      System.out.println("Copying resource " + resource + " to " + to);
+    }
+
+    FileOutputStream out = new FileOutputStream(to);
+    byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+    int len;
+    while ((len = stream.read(buffer)) > 0) {
+      out.write(buffer, 0, len);
     }
   }
 
@@ -406,6 +420,40 @@ public class Enunciate {
         list.add(file);
       }
     }
+  }
+
+  /**
+   * Whether to exclude a file from copying to the WEB-INF/lib directory.
+   *
+   * @param file The file to exclude.
+   * @return Whether to exclude a file from copying to the lib directory.
+   */
+  protected boolean excludeLibrary(File file) throws IOException {
+    if (getWarLibs() != null) {
+      //if the war libraries were explicitly declared, don't exclude anything.
+      return false;
+    }
+
+    //instantiate a loader with this library only in its path...
+    URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
+    if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude tools.jar.
+      return true;
+    }
+    else if (loader.findResource(net.sf.jelly.apt.Context.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude apt-jelly-core.jar
+      return true;
+    }
+    else if (loader.findResource(net.sf.jelly.apt.freemarker.FreemarkerModel.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude apt-jelly-freemarker.jar
+      return true;
+    }
+    else if (loader.findResource(freemarker.template.Configuration.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude freemarker.jar
+      return true;
+    }
+
+    return false;
   }
 
   /**
