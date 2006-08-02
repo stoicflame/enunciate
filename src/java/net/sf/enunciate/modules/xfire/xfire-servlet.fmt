@@ -29,8 +29,10 @@
 
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
         <entry key="/soap/${endpointInterface.serviceName}">
+          [#--todo: support to be able to add xfire in/out handlers?--]
           <bean parent="endpoint">
             <property name="serviceBean">
+              [#--todo: support to be able to configure spring interceptors for the impl bean?--]
               <bean class="${impl.qualifiedName}"/>
             </property>
           </bean>
@@ -53,6 +55,8 @@
   [/@forEachWsdl]
       </map>
     </property>
+
+    [#--todo: support to configure request/response hander chain?--]
   </bean>
 
   <!-- define the xml api handler and its aliases. -->
