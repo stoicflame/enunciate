@@ -2,27 +2,27 @@ package net.sf.enunciate.modules.xfire;
 
 import net.sf.enunciate.modules.xml.XMLAPILookup;
 import org.codehaus.xfire.XFire;
-import org.codehaus.xfire.transport.http.XFireServletController;
+import org.codehaus.xfire.spring.remoting.XFireServletControllerAdapter;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
+import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.InputStream;
 
 /**
  * Xfire servlet controller the redirects to the generated documentation and WSDL.
  *
  * @author Ryan Heaton
  */
-public class EnunciatedXFireServletController extends XFireServletController {
+public class EnunciatedXFireServletController extends XFireServletControllerAdapter {
 
-  private final XMLAPILookup lookup = new XMLAPILookup();
+  private static final XMLAPILookup XML_API_LOOKUP = XMLAPILookup.load(EnunciatedXFireServletController.class.getResourceAsStream("/xml-api.lookup"));
 
-  public EnunciatedXFireServletController(XFire xfire) {
-    super(xfire);
+  public EnunciatedXFireServletController(XFire xfire, QName serviceName) {
+    super(xfire, serviceName);
   }
 
   /**
@@ -57,19 +57,20 @@ public class EnunciatedXFireServletController extends XFireServletController {
    */
   @Override
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
-    //todo: take care of the XFire erroneously passing the wrong service name if it's an endpoint implementation?
+    //todo: redirect instead of this....
 
-    Reader wsdl = lookup.lookupWsdl(service);
+    String artifact = XML_API_LOOKUP.getArtifactForService(service);
+    InputStream wsdl = artifact == null ? null : getClass().getResourceAsStream("/" + artifact);
     if (wsdl != null) {
       response.setContentType("text/xml");
-      BufferedReader reader = new BufferedReader(wsdl);
-      PrintWriter writer = response.getWriter();
-      String line = reader.readLine();
-      while (line != null) {
-        writer.println(line);
+      ServletOutputStream out = response.getOutputStream();
+      byte[] buffer = new byte[1024 * 2];
+      int len;
+      while ((len = wsdl.read(buffer)) > 0) {
+        out.write(buffer, 0, len);
       }
-      reader.close();
-      writer.close();
+      wsdl.close();
+      out.close();
     }
     else {
       response.sendError(HttpServletResponse.SC_NOT_FOUND);

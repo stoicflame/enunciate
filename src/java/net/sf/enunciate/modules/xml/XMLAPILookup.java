@@ -1,59 +1,68 @@
 package net.sf.enunciate.modules.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Properties;
+import java.io.*;
+import java.util.HashMap;
 
 /**
  * Class used for looking up the XML API.
  *
  * @author Ryan Heaton
  */
-public class XMLAPILookup {
+public class XMLAPILookup implements Serializable {
 
-  private final Properties lookup;
+  private final HashMap<String, String> ns2artifact;
+  private final HashMap<String, String> service2artifact;
 
-  public XMLAPILookup() {
-    this.lookup = new Properties();
+  XMLAPILookup(HashMap<String, String> ns2artifact, HashMap<String, String> service2artifact) {
+    this.ns2artifact = ns2artifact;
+    this.service2artifact = service2artifact;
+  }
+
+  /**
+   * Load the lookup from the specified stream.
+   *
+   * @param in The stream from which to load the lookup.
+   * @return the lookup, if any was found.
+   */
+  public static XMLAPILookup load(InputStream in) {
     try {
-      InputStream stream = getClass().getResourceAsStream("/xml-api.properties");
-      if (stream != null) {
-        this.lookup.load(stream);
-      }
+      return (XMLAPILookup) new ObjectInputStream(in).readObject();
     }
-    catch (IOException e) {
-      //fall through.
+    catch (Exception e) {
+      return new XMLAPILookup(new HashMap<String, String>(), new HashMap<String, String>());
     }
   }
 
   /**
-   * Lookup the artifact by the specified namespace.
+   * Store the lookup to the specified stream.
+   *
+   * @param out The stream to store to.
+   */
+  public void store(OutputStream out) throws IOException {
+    ObjectOutputStream oout = new ObjectOutputStream(out);
+    oout.writeObject(this);
+    oout.close();
+  }
+
+  /**
+   * Get the artifact for the specified service.
+   *
+   * @param service The service.
+   * @return The artifact for the service.
+   */
+  public String getArtifactForService(String service) {
+    return service2artifact.get(service);
+  }
+
+  /**
+   * Get the artifact for the specified namespace.
    *
    * @param namespace The namespace.
-   * @return The artifact.
+   * @return The artifact for the namespace.
    */
-  public Reader lookup(String namespace) {
-    String artifact = (String) lookup.get(namespace);
-    if (artifact != null) {
-      InputStream stream = getClass().getResourceAsStream(artifact);
-      if (stream != null) {
-        return new InputStreamReader(stream);
-      }
-    }
-
-    return null;
+  public String getArtifactForNamespace(String namespace) {
+    return ns2artifact.get(namespace);
   }
 
-  /**
-   * Look up the WSDL for the specified service.
-   *
-   * @param service The name of the service.
-   * @return The WSDL for the specified service.
-   */
-  public Reader lookupWsdl(String service) {
-    //the properties are looked up by service name, too.
-    return lookup(service);
-  }
+
 }

@@ -16,23 +16,3 @@
     [@libSchema.processSchema schema=schema/]
   [/@file]
 [/@forEachSchema]
-
-[#--then generate the lookup.--]
-[@file name="xml-api.properties" package="xml"]
-# wsdls
-  [@forEachWsdl]
-"${wsdl.targetNamespace?j_string?replace(":","\\:")?replace("=","\\=")}"="${wsdl.file?j_string?replace(":","\\:")?replace("=","\\=")}"
-    [@forEachEndpointInterface]
-"${endpointInterface.portTypeName?j_string?replace(":","\\:")?replace("=","\\=")}"="${wsdl.file?j_string?replace(":","\\:")?replace("=","\\=")}"
-    [/@forEachEndpointInterface]
-  [/@forEachWsdl]
-
-# schemas
-  [@forEachSchema]
-    [#if !schema.emptyNamespace]
-"${schema.namespace?j_string?replace(":","\\:")?replace("=","\\=")}"="${schema.file?j_string?replace(":","\\:")?replace("=","\\=")}"
-    [#else]
-""="${schema.file?j_string?replace(":","\\:")?replace("=","\\=")}"
-    [/#if]
-  [/@forEachSchema]
-[/@file]

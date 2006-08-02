@@ -2,7 +2,9 @@
 
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/conf/spring/xfire-servlet.xml</param-value>
+    <param-value>
+      classpath:org/codehaus/xfire/spring/xfire.xml
+    </param-value>
   </context-param>
 
   <listener>
@@ -10,28 +12,13 @@
   </listener>
 
   <servlet>
-    <servlet-name>XFireServlet</servlet-name>
-    <servlet-class>net.sf.enunciate.modules.xfire.EnunciatedXFireSpringServlet</servlet-class>
-  </servlet>
-
-  <servlet>
-    <servlet-name>XMLAPIServlet</servlet-name>
-    <servlet-class>net.sf.enunciate.modules.xml.XMLAPIServlet</servlet-class>
+    <servlet-name>xfire</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>XFireServlet</servlet-name>
-    <url-pattern>/servlet/XFireServlet/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>XMLAPIServlet</servlet-name>
-    <url-pattern>/xml/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>XFireServlet</servlet-name>
-    <url-pattern>/services/*</url-pattern>
+    <servlet-name>xfire</servlet-name>
+    <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
 </web-app>

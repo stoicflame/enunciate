@@ -33,16 +33,16 @@ public class EndpointImplementation extends DecoratedClassDeclaration {
    *
    * @return The binding type for this endpoint implementation.
    */
-  public String getBindingType() {
+  public BindingType getBindingType() {
     javax.xml.ws.BindingType bindingType = getAnnotation(javax.xml.ws.BindingType.class);
 
     if (bindingType != null) {
       if ((bindingType.value() != null) && (!"".equals(bindingType.value()))) {
-        return bindingType.value();
+        return BindingType.fromNamespace(bindingType.value());
       }
     }
 
-    return null;
+    return BindingType.SOAP_1_1;
   }
 
 }

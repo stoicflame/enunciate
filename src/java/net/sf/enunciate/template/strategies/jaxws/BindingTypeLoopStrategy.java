@@ -37,10 +37,7 @@ public class BindingTypeLoopStrategy extends EnunciateTemplateLoopStrategy<Bindi
     Collection<BindingType> bindingTypes = new ArrayList<BindingType>();
     Collection<EndpointImplementation> impls = endpointInterface.getEndpointImplementations();
     for (EndpointImplementation implementation : impls) {
-      String bindingType = implementation.getBindingType();
-      if (bindingType != null) {
-        bindingTypes.add(BindingType.fromNamespace(bindingType));
-      }
+      bindingTypes.add(implementation.getBindingType());
     }
 
     if (bindingTypes.isEmpty()) {

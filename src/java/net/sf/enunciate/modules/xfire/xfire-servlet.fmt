@@ -3,38 +3,72 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-  <bean id="webAnnotations" class="org.codehaus.xfire.annotations.jsr181.Jsr181WebAnnotations"/>
 
-  <bean id="handlerMapping" class="org.codehaus.xfire.spring.remoting.Jsr181HandlerMapping">
-    <property name="typeMappingRegistry">
-      <bean class="org.codehaus.xfire.jaxb2.JaxbTypeRegistry"/>
+  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    [#--
+    todo: set a (configurable) list of interceptors?
+    <property name="interceptors">
     </property>
-    <property name="xfire">
-      <ref bean="xfire"/>
-    </property>
-    <property name="webAnnotations">
-      <ref bean="webAnnotations"/>
-    </property>
-  </bean>
+    --]
+    <property name="urlMap">
+      <map>
 
+        <!-- all wsdl files will be handled by the wsdl handler -->
+        <entry key="*.wsdl">
+          <ref bean="wsdlHandler"/>
+        </entry>
+
+        <!-- all schema files will be handled by the schema handler -->
+        <entry key="*.xsd">
+          <ref bean="schemaHandler"/>
+        </entry>
   [@forEachWsdl]
     [@forEachEndpointInterface]
       [#list endpointInterface.endpointImplementations as impl]
-  <bean class="${impl.qualifiedName}"/>
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+
+        <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
+        <entry key="/soap/${endpointInterface.serviceName}">
+          <bean parent="endpoint">
+            <property name="serviceBean">
+              <bean class="${impl.qualifiedName}"/>
+            </property>
+          </bean>
+        </entry>
+        [#elseif impl.bindingType.http]
+
+        <!-- mapping for the HTTP (restful) endpoint for ${endpointInterface.serviceName} -->
+        <!-- [#--todo: restful endpoint handler?--]
+        <entry key="/rest/${endpointInterface.serviceName}">
+          <bean parent="endpoint">
+            <property name="serviceClass">
+              <value>${impl.qualifiedName}</value>
+            </property>
+          </bean>
+        </entry>
+        -->
+        [/#if]
       [/#list]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
-
-  <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-    <property name="urlMap">
-      <map>
-        <entry key="/">
-          <ref bean="handlerMapping"/>
-        </entry>
       </map>
     </property>
   </bean>
 
-  <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
+  <!-- define the xml api handler and its aliases. -->
+  <bean id="xmlApiHandler" class="net.sf.enunciate.modules.xml.XMLAPIController"/>
+  <alias alias="wsdlHandler" name="xmlApiHandler"/>
+  <alias alias="schemaHandler" name="xmlApiHandler"/>
+
+  <!-- define the parent for all service endpoints -->
+  <bean id="endpoint" abstract="true" class="net.sf.enunciate.modules.xfire.EnunciatedXFireExporter">
+    <property name="serviceFactory">
+      <bean class="net.sf.enunciate.modules.xfire.EnunciatedAnnotationServiceFactory"/>
+    </property>
+    <property name="xfire">
+      <ref bean="xfire"/>
+    </property>
+  </bean>
+
 </beans>
 [/@file]
