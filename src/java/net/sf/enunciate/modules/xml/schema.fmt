@@ -10,8 +10,9 @@
 --]
 [#macro processSchema schema]
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema version="1.0"
-  [#if !schema.emptyNamespace]targetNamespace="${schema.namespace}"[/#if][#t]
+[#-- assign the prefix variable for the schema namespace --]
+[#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
+<${xs}:schema version="1.0" targetNamespace="${schema.namespace?default("")}"
   [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
   [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
@@ -19,26 +20,26 @@
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
     [/#if]
   [/#list]
-  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
   [#if schema.doc?exists]
-  <xs:annotation>
-    <xs:documentation>
+  <${xs}:annotation>
+    <${xs}:documentation>
      ${schema.doc?trim}
-    </xs:documentation>
-  </xs:annotation>
+    </${xs}:documentation>
+  </${xs}:annotation>
   [/#if]
 [#t]
   [#list schema.importedSchemas as schema]
-  <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+  <${xs}:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
 
   [#list schema.globalElements as globalElement]
     [#if globalElement.typeDefinition.anonymous]
-  <xs:element name="${globalElement.name}">
+  <${xs}:element name="${globalElement.name}">
     [@processTypeDef typeDef=globalElement.typeDefinition/]
-  </xs:elment>
+  </${xs}:element>
     [#else]
-  <xs:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
+  <${xs}:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
     [/#if]
   [/#list]
 [#t]
@@ -48,7 +49,7 @@
     [/#if]
   [/#list]
 [#t]
-</xs:schema>
+</${xs}:schema>
 [/#macro]
 
 [#--
@@ -59,158 +60,158 @@
 [#macro processTypeDef typeDef]
   [#--simple type definition--]
   [#if typeDef.simple]
-<xs:simpleType name="${typeDef.name}">
+<${xs}:simpleType name="${typeDef.name}">
     [#if typeDef.docComment?exists]
-  <xs:annotation>
-    <xs:documentation>
+  <${xs}:annotation>
+    <${xs}:documentation>
       ${typeDef.javaDoc?trim}
-    </xs:documentation>
-  </xs:annotation>
+    </${xs}:documentation>
+  </${xs}:annotation>
     [/#if]
     [#if typeDef.value.xmlList]
-  <xs:list itemType="${typeDef.baseType.qname}"/>
+  <${xs}:list itemType="${typeDef.baseType.qname}"/>
     [#else]
-  <xs:restriction base="${typeDef.baseType.qname}"/>
+  <${xs}:restriction base="${typeDef.baseType.qname}"/>
     [/#if]
-</xs:simpleType>
+</${xs}:simpleType>
 
   [#--enum type definition--]
   [#elseif typeDef.enum]
-<xs:simpleType name="${typeDef.name}">
+<${xs}:simpleType name="${typeDef.name}">
     [#if typeDef.docComment?exists]
-  <xs:annotation>
-    <xs:documentation>
+  <${xs}:annotation>
+    <${xs}:documentation>
       ${typeDef.javaDoc?trim}
-    </xs:documentation>
-  </xs:annotation>
+    </${xs}:documentation>
+  </${xs}:annotation>
     [/#if]
-  <xs:restriction base="${typeDef.baseType.qname}">
+  <${xs}:restriction base="${typeDef.baseType.qname}">
     [#list typeDef.enumValues as enumValue]
-    <xs:enumeration value="${enumValue}"/> [#--todo: add the java doc comments for these enum values.--]
+    <${xs}:enumeration value="${enumValue}"/> [#--todo: add the java doc comments for these enum values.--]
     [/#list]
-  </xs:restriction>
-</xs:simpleType>
+  </${xs}:restriction>
+</${xs}:simpleType>
 
   [#--complex type definition--]
   [#elseif typeDef.complex]
-<xs:complexType name="${typeDef.name}"[#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
+<${xs}:complexType name="${typeDef.name}"[#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
     [#if typeDef.docComment?exists]
-  <xs:annotation>
-    <xs:documentation>
+  <${xs}:annotation>
+    <${xs}:documentation>
       ${typeDef.javaDoc?trim}
-    </xs:documentation>
-  </xs:annotation>
+    </${xs}:documentation>
+  </${xs}:annotation>
     [/#if]
     [#--complex type with complex content.--]
     [#if typeDef.contentType.complex]
       [#--if it's not implied, we need to declare the extension--]
       [#if !typeDef.contentType.implied]
-  <xs:complexContent>
-    <xs:extension base="${typeDef.baseType.qname}">
+  <${xs}:complexContent>
+    <${xs}:extension base="${typeDef.baseType.qname}">
       [/#if]
       [#if !typeDef.contentType.empty]
-      <xs:${typeDef.compositorName}>
+      <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
           [#if element.wrapped]
-        <xs:element name="${typeDef.wrapperName}">
+        <${xs}:element name="${typeDef.wrapperName}">
             [#if element.docComment?exists]
-          <xs:annotation>
-            <xs:documentation>
+          <${xs}:annotation>
+            <${xs}:documentation>
               ${element.javaDoc?trim}
-            </xs:documentation>
-          </xs:annotation>
+            </${xs}:documentation>
+          </${xs}:annotation>
             [/#if]
-          <xs:complexType>
-            <xs:sequence>
+          <${xs}:complexType>
+            <${xs}:sequence>
           [/#if]
           [#if element.choices?size > 1]
-              <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <${xs}:choice minOccurs="0" maxOccurs="unbounded">
             [#list element.choices as elementChoice]
               [#if elementChoice.ref?exists]
-                <xs:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
+                <${xs}:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
               [#elseif elementChoice.baseType.anonymous]
-                <xs:element name="${elementChoice.name}">
+                <${xs}:element name="${elementChoice.name}">
                   [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
-                </xs:elment>
+                </${xs}:elment>
               [#else]
-                <xs:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
+                <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
               [/#if]
             [/#list]
-              </xs:choice>
+              </${xs}:choice>
           [#else]
             [#if element.ref?exists]
-              <xs:element name="${element.name}" ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
               [#if element.docComment?exists]
-              <xs:annotation>
-                <xs:documentation>
+              <${xs}:annotation>
+                <${xs}:documentation>
                   ${element.javaDoc?trim}
-                </xs:documentation>
-              </xs:annotation>
+                </${xs}:documentation>
+              </${xs}:annotation>
               [/#if]
-              </xs:element>
+              </${xs}:element>
             [#elseif element.baseType.anonymous]
-              <xs:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
               [#if element.docComment?exists]
-                <xs:annotation>
-                  <xs:documentation>
+                <${xs}:annotation>
+                  <${xs}:documentation>
                     ${element.javaDoc?trim}
-                  </xs:documentation>
-                </xs:annotation>
+                  </${xs}:documentation>
+                </${xs}:annotation>
               [/#if]
                 [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
-              </xs:elment>
+              </${xs}:elment>
             [#else]
-              <xs:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
               [#if element.docComment?exists]
-                <xs:annotation>
-                  <xs:documentation>
+                <${xs}:annotation>
+                  <${xs}:documentation>
                     ${element.javaDoc?trim}
-                  </xs:documentation>
-                </xs:annotation>
+                  </${xs}:documentation>
+                </${xs}:annotation>
               [/#if]
-              </xs:element>
+              </${xs}:element>
             [/#if]
           [/#if]
           [#if element.wrapped]
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
+            </${xs}:sequence>
+          </${xs}:complexType>
+        </${xs}:element>
           [/#if]
         [/#list]
-      </xs:${typeDef.compositorName}>
+      </${xs}:${typeDef.compositorName}>
       [/#if]
 [#t]
     [#--complex type with simple content--]
     [#elseif typeDef.contentType.simple]
-  <xs:simpleContent>
-    <xs:extension base="${typeDef.value.baseType.qname}">
+  <${xs}:simpleContent>
+    <${xs}:extension base="${typeDef.value.baseType.qname}">
     [/#if]
 [#t]
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
       [#if attribute.ref?exists]
-      <xs:attribute required="${attribute.required}" ref="${attribute.ref}">
+      <${xs}:attribute required="${attribute.required}" ref="${attribute.ref}">
         [#if attribute.docComment?exists]
-        <xs:annotation>
-          <xs:documentation>
+        <${xs}:annotation>
+          <${xs}:documentation>
             ${attribute.javaDoc?trim}
-          </xs:documentation>
-        </xs:annotation>
+          </${xs}:documentation>
+        </${xs}:annotation>
         [/#if]
-      </xs:attribute>
+      </${xs}:attribute>
       [#else]
-      <xs:attribute required="${attribute.required}" type="${attribute.baseTye.qname}"/>
+      <${xs}:attribute required="${attribute.required}" type="${attribute.baseTye.qname}"/>
       [/#if]
     [/#list]
 [#t]
     [#if typeDef.contentType.simple]
-    </xs:extension>
-  </xs:simpleContent>
+    </${xs}:extension>
+  </${xs}:simpleContent>
     [#elseif !typeDef.contentType.implied]
-    </xs:extension>
-  </xs:complexContent>
+    </${xs}:extension>
+  </${xs}:complexContent>
     [/#if]
-</xs:complexType>
+</${xs}:complexType>
 
   [#else]
     [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]

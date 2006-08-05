@@ -37,10 +37,6 @@ public class WsdlLoopStrategy extends EnunciateTemplateLoopStrategy<WsdlInfo> {
       getModel().setVariable(var, wsdlInfo);
     }
 
-    if (isVerbose()) {
-      System.out.println("Current wsdl target namespace: " + wsdlInfo.getTargetNamespace());
-    }
-
     this.currentWsdl = wsdlInfo;
   }
 

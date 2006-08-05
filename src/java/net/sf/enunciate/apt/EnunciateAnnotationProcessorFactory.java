@@ -2,6 +2,7 @@ package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
+import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.jelly.apt.ProcessorFactory;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory;
@@ -38,7 +39,11 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
   private final EnunciateAnnotationProcessor processor;
 
   public EnunciateAnnotationProcessorFactory(List<DeploymentModule> modules) {
-    this.processor = new EnunciateAnnotationProcessor(modules);
+    this(modules, null);
+  }
+
+  public EnunciateAnnotationProcessorFactory(List<DeploymentModule> modules, EnunciateConfiguration config) {
+    this.processor = new EnunciateAnnotationProcessor(modules, config);
   }
 
   //Inherited.

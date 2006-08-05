@@ -86,8 +86,8 @@ public class EnunciateTask extends MatchingTask {
    *
    * @param config The enunciate config file.
    */
-  public void setConfig(File config) {
-    proxy.setConfig(config);
+  public void setConfigFile(File config) {
+    proxy.setConfigFile(config);
   }
 
   /**

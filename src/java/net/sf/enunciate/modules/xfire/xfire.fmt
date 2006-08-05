@@ -1,0 +1,23 @@
+[#ftl strip_text=true]
+
+[#import "xfire-clients.fmt" as libXFireClients/]
+
+[@file name="xfire-servlet.xml" package="xfire"]
+  [#include "xfire-servlet.fmt" parse=true/]
+[/@file]
+
+[@forEachWsdl]
+  [@forEachEndpointInterface]
+    [@file name=(endpointInterface.simpleName + ".java")  package=("xfire." + clientPackageFor(endpointInterface.package.qualifiedName))]
+      [@libXFireClients.processEndpointInterface endpointInterface=endpointInterface/]
+    [/@file]
+  [/@forEachEndpointInterface]
+[/@forEachWsdl]
+
+[@forEachSchema]
+  [#list schema.typeDefinitions as typeDefinition]
+    [@file name=(typeDefinition.simpleName + ".java")  package=("xfire." + clientPackageFor(typeDefinition.package.qualifiedName))]
+      [@libXFireClients.processType type=typeDefinition/]
+    [/@file]
+  [/#list]
+[/@forEachSchema]

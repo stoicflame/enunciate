@@ -108,7 +108,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The name of this web service.
    */
   public String getElementName() {
-    String name = getSimpleName() + "Bean";
+    String name = getSimpleName();
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();

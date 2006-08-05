@@ -15,7 +15,7 @@ import java.net.URL;
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   protected URL getTemplateURL() {
-    return XFireDeploymentModule.class.getResource("xfire-servlet.fmt");
+    return XFireDeploymentModule.class.getResource("xfire.fmt");
   }
 
   @Override

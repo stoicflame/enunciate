@@ -36,10 +36,6 @@ public class SchemaLoopStrategy extends EnunciateTemplateLoopStrategy<SchemaInfo
       getModel().setVariable(var, schemaInfo);
     }
 
-    if (isVerbose()) {
-      System.out.println("Current schema target namespace: " + schemaInfo.getNamespace());
-    }
-
     this.currentSchema = schemaInfo;
   }
 

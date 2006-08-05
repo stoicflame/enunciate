@@ -5,6 +5,7 @@ import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
+import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.*;
@@ -39,10 +40,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
   private final List<DeploymentModule> modules;
   private boolean processedSuccessfully = false;
+  private final EnunciateConfiguration config;
 
-  public EnunciateAnnotationProcessor(List<DeploymentModule> modules) {
+  public EnunciateAnnotationProcessor(List<DeploymentModule> modules, EnunciateConfiguration config) {
     super(null);
     this.modules = modules;
+    this.config = config;
+  }
+
+  public EnunciateAnnotationProcessor(List<DeploymentModule> modules) {
+    this(modules, null);
   }
 
   @Override
@@ -73,8 +80,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
-    model.put("prefix", new PrefixMethod());
-    model.put("qname", new QNameMethod());
 
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
@@ -113,8 +118,19 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    //todo: read the validator type from the config.
+    //at this point, we've set up all the defaults.  Now read the config for overrides.
+
+    model.put("prefix", new PrefixMethod());
+    model.put("qname", new QNameMethod());
+    model.put("clientPackageFor", new ClientPackageForMethod(this.config == null ? null : this.config.getClientPackageConversions()));
+    model.put("clientClassnameFor", new ClientClassnameForMethod(this.config == null ? null : this.config.getClientPackageConversions()));
+
     Validator validator = new DefaultValidator();
+    if ((this.config != null) && (this.config.getValidator() != null)) {
+      //override the validator if necessary.
+      validator = this.config.getValidator();
+    }
+
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {

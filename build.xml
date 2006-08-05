@@ -183,6 +183,7 @@
 
     <enunciate verbose="true" target="${enunciate.target}"
                basedir="${example.dir}"
+               configFile="${example.dir}/enunciate.xml"
                preprocessdir="${example.gen.dir}"
                destdir="${example.build.dir}"
                warbuilddir="${wars.dir}/${example}"

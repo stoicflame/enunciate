@@ -1,7 +1,5 @@
 [#ftl]
-[@file name="xfire-servlet.xml" package="xfire"]
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-
 <beans>
 
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
@@ -12,17 +10,11 @@
     --]
     <property name="urlMap">
       <map>
+  [@forEachWsdl]
 
-        <!-- all wsdl files will be handled by the wsdl handler -->
-        <entry key="*.wsdl">
+        <entry key="${wsdl.file}">
           <ref bean="wsdlHandler"/>
         </entry>
-
-        <!-- all schema files will be handled by the schema handler -->
-        <entry key="*.xsd">
-          <ref bean="schemaHandler"/>
-        </entry>
-  [@forEachWsdl]
     [@forEachEndpointInterface]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
@@ -53,6 +45,14 @@
       [/#list]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
+
+        <!-- all schema files will be handled by the schema handler -->
+  [@forEachSchema]
+
+        <entry key="${schema.file}">
+          <ref bean="schemaHandler"/>
+        </entry>
+  [/@forEachSchema]
       </map>
     </property>
 
@@ -75,4 +75,3 @@
   </bean>
 
 </beans>
-[/@file]

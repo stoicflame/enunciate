@@ -11,20 +11,26 @@ Template library for WSDL.
 [#macro processWsdl wsdl]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
+[#-- assign the prefix variable for the "wsdl" namespace --]
+[#assign wsdl=prefix("http://schemas.xmlsoap.org/wsdl/")]
+[#-- assign the prefix variable for the "http" namespace --]
+[#assign http=prefix("http://schemas.xmlsoap.org/wsdl/http/")]
+[#-- assign the prefix variable for the "mime" namespace --]
+[#assign mime=prefix("http://schemas.xmlsoap.org/wsdl/mime/")]
+[#-- assign the prefix variable for the "soap" namespace --]
+[#assign soap=prefix("http://schemas.xmlsoap.org/wsdl/soap/")]
+[#-- assign the prefix variable for the "soapenc" namespace --]
+[#assign soapenc=prefix("http://schemas.xmlsoap.org/soap/encoding/")]
+[#-- assign the prefix variable for the schema namespace --]
+[#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#t]
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
-      [#if importedNamespace?exists && !knownNamespaces?seq_contains(importedNamespace)]
-   xmlns:${prefix(importedNamespace)}="${importedNamespace}"
+      [#if importedNamespace?exists]
+   xmlns:${prefix(importedNamespace)}="${importedNamespace}"[#if !importedNamespace_has_next]>[/#if]
       [/#if]
     [/#list]
-   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-   xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-   xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
-   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-   xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
-   xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <types>
     [@processSchema wsdl=wsdl/]
@@ -56,9 +62,9 @@ Template library for WSDL.
   @param wsdl The WSDL to output.  (Instance of net.sf.enunciate.config.WsdlInfo)
 --]
 [#macro processSchema wsdl]
-  <xs:schema targetNamespace="${wsdl.targetNamespace}">
+  <${xs}:schema targetNamespace="${wsdl.targetNamespace}">
   [#list wsdl.importedSchemas as schema]
-    <xs:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+    <${xs}:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
 
   [#--output the schema elements--]
@@ -66,50 +72,50 @@ Template library for WSDL.
     [#list webMessage.parts as part]
       [#if part.implicitSchemaElement]
         [#if part.typeQName?exists]
-    <xs:element name="${part.elementName}" type="${part.typeQName}">
+    <${xs}:element name="${part.elementName}" type="${part.typeQName}">
           [#if part.elementDocs?exists]
-      <xs:annotation>
-        <xs:documentation>
+      <${xs}:annotation>
+        <${xs}:documentation>
           ${part.elementDocs?trim}
-        </xs:documentation>
-      </xs:annotation>
+        </${xs}:documentation>
+      </${xs}:annotation>
           [/#if]
-    </xs:element>
+    </${xs}:element>
 
         [#else]
           [#assign childElements=part.childElements]
-    <xs:element name="${part.elementName}">
+    <${xs}:element name="${part.elementName}">
           [#if part.elementDocs?exists]
-      <xs:annotation>
-        <xs:documentation>
+      <${xs}:annotation>
+        <${xs}:documentation>
           ${part.elementDocs?trim}
-        </xs:documentation>
-      </xs:annotation>
+        </${xs}:documentation>
+      </${xs}:annotation>
           [/#if]
           [#if childElements?size > 0]
-      <xs:complexType>
-        <xs:sequence>
+      <${xs}:complexType>
+        <${xs}:sequence>
             [#list childElements as childElement]
-          <xs:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+          <${xs}:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
               [#if childElement.elementDocs?exists]
-            <xs:annotation>
-              <xs:documentation>
+            <${xs}:annotation>
+              <${xs}:documentation>
                 ${childElement.elementDocs?trim}
-              </xs:documentation>
-            </xs:annotation>
+              </${xs}:documentation>
+            </${xs}:annotation>
               [/#if]
-          </xs:element>
+          </${xs}:element>
             [/#list]
-        </xs:sequence>
-      </xs:complexType>
+        </${xs}:sequence>
+      </${xs}:complexType>
           [/#if]
-    </xs:element>
+    </${xs}:element>
 
         [/#if]
       [/#if]
     [/#list]
   [/@forEachWebMessage]
-  </xs:schema>
+  </${xs}:schema>
 [/#macro]
 
 [#--
@@ -120,16 +126,16 @@ Template library for WSDL.
 [#macro processMessage webMessage]
   <message name="${webMessage.messageName}">
       [#if webMessage.messageDocs?exists]
-    <wsdl:documentation>
+    <documentation>
       ${webMessage.messageDocs?trim}
-    </wsdl:documentation>
+    </documentation>
       [/#if]
       [#list webMessage.parts as part]
     <part name="${part.partName}" element="${part.elementQName}">
         [#if part.partDocs?exists]
-      <wsdl:documentation>
+      <documentation>
         ${part.partDocs?trim}
-      </wsdl:documentation>
+      </documentation>
         [/#if]
     </part>
       [/#list]
@@ -144,9 +150,9 @@ Template library for WSDL.
 [#macro processPortType endpointInterface]
   <portType name="${endpointInterface.portTypeName}">
       [#if endpointInterface.docComment?exists]
-    <wsdl:documentation>
+    <documentation>
       ${endpointInterface.javaDoc?trim}
-    </wsdl:documentation>
+    </documentation>
       [/#if]
       [@forEachWebMethod]
         [@processOperation webMethod=webMethod/]
@@ -162,9 +168,9 @@ Template library for WSDL.
 [#macro processOperation webMethod]
   <operation name="${webMethod.operationName}">
       [#if webMethod.docComment?exists]
-    <wsdl:documentation>
+    <documentation>
       ${webMethod.javaDoc?trim}
-    </wsdl:documentation>
+    </documentation>
       [/#if]
       [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
     <input message="${tns}:${input.messageName}"/>
@@ -173,7 +179,7 @@ Template library for WSDL.
     <output message="${tns}:${output.messageName}"/>
       [/@forEachWebMessage]
       [@forEachThrownWebFault var="fault"]
-    <fault message="${tns}:${fault.partName}"/>
+    <fault name="${fault.partName}" message="${tns}:${fault.messageName}"/>
       [/@forEachThrownWebFault]
   </operation>
 [/#macro]
@@ -204,34 +210,34 @@ Template library for WSDL.
 --]
 [#macro processSOAPBinding endpointInterface]
   <binding name="${endpointInterface.simpleName}SOAPBinding" type="${tns}:${endpointInterface.portTypeName}">
-    <wsdl:documentation>
+    <documentation>
       SOAP Binding for ${endpointInterface.portTypeName}
-    </wsdl:documentation>
-    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
+    </documentation>
+    <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
       [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
-      <soap:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
+      <${soap}:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
       <input>
         [@forEachWebMessage var="message" includeFaults=false includeOutput=false]
           [#if message.header]
-        <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+        <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
         [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <soap:body use="literal"/>
+        <${soap}:body use="literal"/>
       </input>
       <output>
         [@forEachWebMessage var="message" includeFaults=false includeInput=false]
           [#if message.header]
-        <soap:header message="${tns}:${message.messageName}" part="${message.partName}"/>
+        <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
         [/@forEachWebMessage]
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
-        <soap:body use="literal"/>
+        <${soap}:body use="literal"/>
       </output>
         [@forEachThrownWebFault]
       <fault>
-        <soap:fault name="${webFault.messageName}" use="literal"/>
+        <${soap}:fault name="${webFault.messageName}" use="literal"/>
       </fault>
         [/@forEachThrownWebFault]
     </operation>
@@ -246,18 +252,18 @@ Template library for WSDL.
 --]
 [#macro processHTTPBinding endpointInterface]
   <binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
-    <wsdl:documentation>
+    <documentation>
       HTTP Binding for ${endpointInterface.portTypeName}
-    </wsdl:documentation>
-    <http:binding verb="POST"/>
+    </documentation>
+    <${http}:binding verb="POST"/>
       [@forEachWebMethod]
     <operation name="${webMethod.operationName}">
-      <http:operation location="TBD"/>
+      <${http}:operation location="TBD"/>
       <input>
-        <http:urlEncoded/>
+        <${http}:urlEncoded/>
       </input>
       <output>
-        <http:urlEncoded/>
+        <${http}:urlEncoded/>
       </output>
     </operation>
       [/@forEachWebMethod]
@@ -288,7 +294,7 @@ Template library for WSDL.
 --]
 [#macro processSOAPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
-      <soap:address location="TBD"/>
+      <${soap}:address location="TBD"/>
     </port>
 [/#macro]
 
@@ -299,6 +305,6 @@ Template library for WSDL.
 --]
 [#macro processHTTPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}HTTPPort" binding="${tns}:${endpointInterface.simpleName}HTTPBinding">
-      <http:address location="TBD"/>
+      <${http}:address location="TBD"/>
     </port>
 [/#macro]

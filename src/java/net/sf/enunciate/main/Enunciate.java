@@ -1,9 +1,11 @@
 package net.sf.enunciate.main;
 
 import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
+import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.xfire.XFireDeploymentModule;
 import net.sf.enunciate.modules.xml.XMLDeploymentModule;
+import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URI;
@@ -52,7 +54,7 @@ public class Enunciate {
   private boolean verbose = false;
   private boolean debug = false;
 
-  private File config;
+  private File configFile;
   private File preprocessDir;
   private File destDir;
   private File warBuildDir;
@@ -60,6 +62,7 @@ public class Enunciate {
   private String classpath;
   private String warLibs;
   private List<DeploymentModule> deploymentModules;
+  private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
 
   public static void main(String[] args) {
@@ -83,6 +86,10 @@ public class Enunciate {
    * @param sourceFiles The source files to enunciate.
    */
   public void execute(String[] sourceFiles) throws IOException {
+    if (this.config == null) {
+      this.config = getConfig();
+    }
+
     for (DeploymentModule deploymentModule : getDeploymentModules()) {
       deploymentModule.init(this);
     }
@@ -201,6 +208,24 @@ public class Enunciate {
   }
 
   /**
+   * Reads the enunciate configuration from the specified file, if any.
+   *
+   * @return The configuration, or null if none is specified.
+   */
+  protected EnunciateConfiguration getConfig() throws IOException {
+    File configFile = getConfigFile();
+    if (configFile != null) {
+      try {
+        return EnunciateConfiguration.readFrom(new FileInputStream(configFile));
+      }
+      catch (SAXException e) {
+        throw new IOException("Error parsing enunciate configuration file " + configFile + ": " + e.getMessage());
+      }
+    }
+    return null;
+  }
+
+  /**
    * Get the target webinf directory.
    *
    * @return The target webinf directory.
@@ -245,7 +270,7 @@ public class Enunciate {
       }
     }
 
-    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(getDeploymentModules());
+    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(getDeploymentModules(), this.config);
     int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
     return apf.isProcessedSuccessfully() && (procCode == 0);
   }
@@ -497,17 +522,17 @@ public class Enunciate {
    *
    * @return The enunciate config file.
    */
-  public File getConfig() {
-    return config;
+  public File getConfigFile() {
+    return configFile;
   }
 
   /**
    * The enunciate config file.
    *
-   * @param config The enunciate config file.
+   * @param configFile The enunciate config file.
    */
-  public void setConfig(File config) {
-    this.config = config;
+  public void setConfigFile(File configFile) {
+    this.configFile = configFile;
   }
 
   /**
