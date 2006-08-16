@@ -6,6 +6,7 @@
   [#include "xfire-servlet.fmt" parse=true/]
 [/@file]
 
+[#--todo: jdk15 package, too. (all it would take is adjustment to the ClientPackageFor, ClientClassnameFor methods.)--]
 [@forEachWsdl]
   [@forEachEndpointInterface]
     [@file name=(endpointInterface.simpleName + ".java")  package=("xfire.jdk13." + clientPackageFor(endpointInterface))]
