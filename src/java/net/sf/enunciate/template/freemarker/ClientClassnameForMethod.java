@@ -1,5 +1,8 @@
 package net.sf.enunciate.template.freemarker;
 
+import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+
 import java.util.LinkedHashMap;
 
 /**
@@ -11,6 +14,16 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   public ClientClassnameForMethod(LinkedHashMap<String, String> conversions) {
     super(conversions);
+  }
+
+  @Override
+  protected String convert(TypeDeclaration declaration) {
+    return convert(declaration.getQualifiedName());
+  }
+
+  @Override
+  protected String convert(PackageDeclaration packageDeclaration) {
+    throw new UnsupportedOperationException("packages don't have a client classname.");
   }
 
   protected String convert(String from) {

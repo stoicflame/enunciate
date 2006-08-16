@@ -2,21 +2,27 @@
 
 [#import "xfire-clients.fmt" as libXFireClients/]
 
-[@file name="xfire-servlet.xml" package="xfire"]
+[@file name="xfire-servlet.xml" package="xfire.xml"]
   [#include "xfire-servlet.fmt" parse=true/]
 [/@file]
 
 [@forEachWsdl]
   [@forEachEndpointInterface]
-    [@file name=(endpointInterface.simpleName + ".java")  package=("xfire." + clientPackageFor(endpointInterface.package.qualifiedName))]
+    [@file name=(endpointInterface.simpleName + ".java")  package=("xfire.jdk13." + clientPackageFor(endpointInterface))]
       [@libXFireClients.processEndpointInterface endpointInterface=endpointInterface/]
     [/@file]
   [/@forEachEndpointInterface]
+
+  [@forEachWebFault]
+    [@file name=(webFault.simpleName + ".java")  package=("xfire.jdk13." + clientPackageFor(webFault))]
+      [@libXFireClients.processFault fault=webFault/]
+    [/@file]
+  [/@forEachWebFault]
 [/@forEachWsdl]
 
 [@forEachSchema]
   [#list schema.typeDefinitions as typeDefinition]
-    [@file name=(typeDefinition.simpleName + ".java")  package=("xfire." + clientPackageFor(typeDefinition.package.qualifiedName))]
+    [@file name=(typeDefinition.simpleName + ".java")  package=("xfire.jdk13." + clientPackageFor(typeDefinition))]
       [@libXFireClients.processType type=typeDefinition/]
     [/@file]
   [/#list]

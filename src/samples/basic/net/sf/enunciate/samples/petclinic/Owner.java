@@ -4,13 +4,8 @@
  */
 package net.sf.enunciate.samples.petclinic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.*;
 
 /**
  * A pet owner.
@@ -41,7 +36,18 @@ public class Owner extends Person {
    * @return The pets of this owner.
    */
   public List<Pet> getPets() {
-    return Collections.unmodifiableList((List<Pet>)new ArrayList<Pet>(getPetsInternal()));
+    return Collections.unmodifiableList((List<Pet>) new ArrayList<Pet>(getPetsInternal()));
+  }
+
+  /**
+   * The pets of this owner.
+   *
+   * @param pets The pets of this owner.
+   */
+  public void setPets(List<Pet> pets) {
+    for (Pet pet : pets) {
+      addPet(pet);
+    }
   }
 
   /**
@@ -67,7 +73,7 @@ public class Owner extends Person {
   /**
    * Get the pet with the given name, or <code>null</code> if none found for this Owner.
    *
-   * @param name The name of the pet.
+   * @param name      The name of the pet.
    * @param ignoreNew Whether to ignore new pets.
    * @return The pet with the given name.
    */
