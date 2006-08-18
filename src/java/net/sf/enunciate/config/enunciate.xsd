@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" targetNamespace="http://enunciate.sf.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="enunciate">
+
+    <xs:annotation>
+      <xs:documentation>
+        The root "enunciate" element for the configuration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+
+  </xs:element>
+
+  <xs:complexType name="validator">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to define a custom validator to use to validate the web service declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="namespaces">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of namespace declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="namespace">
+    <xs:annotation>
+      <xs:documentation>
+        A namespace declaration. The id is the prefix that will be used as needed.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="id" use="required"/>
+    <xs:attribute name="uri" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="modules">
+    <xs:annotation>
+      <xs:documentation>
+        Set of modules to use to enunciate the web API.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="xml" type="xml-module" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="xfire" type="xfire-module" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="custom" type="custom-module" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="module" abstract="true">
+    <xs:annotation>
+      <xs:documentation>
+        Base definition for a module.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="disabled" type="xs:boolean" default="false"/>
+  </xs:complexType>
+
+  <xs:complexType name="xml-module">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration for the xml enunciate module.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="module">
+        <xs:sequence>
+          <xs:element name="schemas" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="schema" type="schema" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="schema">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration for an xml-schema artifact.
+      </xs:documentation>
+    </xs:annotation>
+
+    <!--todo: define this schema element.-->
+    <xs:sequence>
+      <xs:any/>
+    </xs:sequence>
+    <xs:anyAttribute/>
+  </xs:complexType>
+
+  <xs:complexType name="xfire-module">
+    <xs:annotation>
+      <xs:documentation>
+        Configuration for the xfire enunciate module.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="module">
+        <xs:sequence>
+          <xs:element name="client-package-conversions" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>
+                The set of client package conversions.
+              </xs:documentation>
+            </xs:annotation>
+
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" type="conversion" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="conversion">
+    <xs:annotation>
+      <xs:documentation>
+        A basic string conversion.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="to" use="required"/>
+    <xs:attribute name="from" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="custom-module">
+    <xs:annotation>
+      <xs:documentation>
+        A custom enunciate module. The "class" attribute must be the fqn of the custom module
+        that implements net.sf.enunciate.modules.DeploymentModule.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:any/>
+    </xs:sequence>
+    <xs:attribute name="class" use="required"/>
+    <xs:anyAttribute/>
+  </xs:complexType>
+
+</xs:schema>

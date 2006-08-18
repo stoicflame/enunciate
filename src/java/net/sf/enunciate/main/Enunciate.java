@@ -3,8 +3,6 @@ package net.sf.enunciate.main;
 import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.modules.DeploymentModule;
-import net.sf.enunciate.modules.xfire.XFireDeploymentModule;
-import net.sf.enunciate.modules.xml.XMLDeploymentModule;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -61,7 +59,6 @@ public class Enunciate {
   private File warFile;
   private String classpath;
   private String warLibs;
-  private List<DeploymentModule> deploymentModules;
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
 
@@ -69,15 +66,6 @@ public class Enunciate {
     Enunciate enunciate = new Enunciate();
     //todo: compile the args, set the variables, then:
     //enunciate.execute();
-  }
-
-  /**
-   * Constructs an enunciate mechanism with the default modules.
-   */
-  public Enunciate() {
-    this.deploymentModules = new ArrayList<DeploymentModule>();
-    this.deploymentModules.add(new XMLDeploymentModule());
-    this.deploymentModules.add(new XFireDeploymentModule());
   }
 
   /**
@@ -90,7 +78,9 @@ public class Enunciate {
       this.config = getConfig();
     }
 
-    for (DeploymentModule deploymentModule : getDeploymentModules()) {
+    List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
+
+    for (DeploymentModule deploymentModule : deploymentModules) {
       deploymentModule.init(this);
     }
 
@@ -107,7 +97,7 @@ public class Enunciate {
 
       success = invokeJavac(sourceFiles);
 
-      for (DeploymentModule deploymentModule : getDeploymentModules()) {
+      for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.COMPILE);
       }
     }
@@ -159,7 +149,7 @@ public class Enunciate {
 
       //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
-      for (DeploymentModule deploymentModule : getDeploymentModules()) {
+      for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.BUILD);
       }
     }
@@ -197,12 +187,12 @@ public class Enunciate {
 
       zip(warBuildDir, warFile);
 
-      for (DeploymentModule deploymentModule : getDeploymentModules()) {
+      for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.PACKAGE);
       }
     }
 
-    for (DeploymentModule deploymentModule : getDeploymentModules()) {
+    for (DeploymentModule deploymentModule : deploymentModules) {
       deploymentModule.close();
     }
   }
@@ -270,7 +260,7 @@ public class Enunciate {
       }
     }
 
-    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(getDeploymentModules(), this.config);
+    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this.config);
     int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
     return apf.isProcessedSuccessfully() && (procCode == 0);
   }
@@ -661,21 +651,4 @@ public class Enunciate {
     this.target = target;
   }
 
-  /**
-   * The list of deployment modules to use to enunciate.
-   *
-   * @return The list of deployment modules to use to enunciate.
-   */
-  public List<DeploymentModule> getDeploymentModules() {
-    return deploymentModules;
-  }
-
-  /**
-   * The list of deployment modules to use to enunciate.
-   *
-   * @param deploymentModules The list of deployment modules to use to enunciate.
-   */
-  public void setDeploymentModules(List<DeploymentModule> deploymentModules) {
-    this.deploymentModules = deploymentModules;
-  }
 }

@@ -1,4 +1,4 @@
-package net.sf.enunciate.config;
+package net.sf.enunciate.modules.xfire.config;
 
 /**
  * Configuration specifying the conversion of client-side package names.

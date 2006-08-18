@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules;
 
 import net.sf.enunciate.main.Enunciate;
+import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
 
@@ -30,5 +31,12 @@ public interface DeploymentModule {
    * Close this enunciate module.
    */
   void close();
+
+  /**
+   * The configuration rules for this deployment module, or null if none.
+   *
+   * @return The configuration rules for this deployment module.
+   */
+  RuleSet getConfigurationRules();
 
 }

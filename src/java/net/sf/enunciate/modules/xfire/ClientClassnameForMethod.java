@@ -1,4 +1,4 @@
-package net.sf.enunciate.template.freemarker;
+package net.sf.enunciate.modules.xfire;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;

@@ -8,7 +8,10 @@ import freemarker.template.TemplateModelException;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.validation.*;
+import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.validation.ValidationMessage;
+import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
@@ -26,7 +29,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Root annotation processor for enunciate.  Initializes the model and signals the modules to generate.
@@ -38,18 +40,21 @@ import java.util.List;
  */
 public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
-  private final List<DeploymentModule> modules;
   private boolean processedSuccessfully = false;
   private final EnunciateConfiguration config;
 
-  public EnunciateAnnotationProcessor(List<DeploymentModule> modules, EnunciateConfiguration config) {
-    super(null);
-    this.modules = modules;
-    this.config = config;
+  public EnunciateAnnotationProcessor() {
+    this(new EnunciateConfiguration());
   }
 
-  public EnunciateAnnotationProcessor(List<DeploymentModule> modules) {
-    this(modules, null);
+  public EnunciateAnnotationProcessor(EnunciateConfiguration config) {
+    super(null);
+
+    if (config == null) {
+      config = new EnunciateConfiguration();
+    }
+
+    this.config = config;
   }
 
   @Override
@@ -57,7 +62,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     try {
       getRootModel();
 
-      for (DeploymentModule module : modules) {
+      for (DeploymentModule module : this.config.getEnabledModules()) {
         if (module instanceof FreemarkerDeploymentModule) {
           //if it's a freemarker deployment module, we can handle the possible TemplateException.
           ((FreemarkerDeploymentModule) module).processTemplate();
@@ -122,15 +127,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     model.put("prefix", new PrefixMethod());
     model.put("qname", new QNameMethod());
-    model.put("clientPackageFor", new ClientPackageForMethod(this.config == null ? null : this.config.getClientPackageConversions()));
-    model.put("clientClassnameFor", new ClientClassnameForMethod(this.config == null ? null : this.config.getClientPackageConversions()));
 
-    Validator validator = new DefaultValidator();
-    if ((this.config != null) && (this.config.getValidator() != null)) {
-      //override the validator if necessary.
-      validator = this.config.getValidator();
-    }
-
+    Validator validator = this.config.getValidator();
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {

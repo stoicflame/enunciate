@@ -40,12 +40,22 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(getTemplateURL().toString());
+    template.process(getModel(), new OutputStreamWriter(System.out));
+  }
+
+  /**
+   * Gets the model for processing.
+   *
+   * @return The model for processing.
+   */
+  protected FreemarkerModel getModel() throws IOException {
     FreemarkerModel model = FreemarkerModel.get();
+
     if (model == null) {
       throw new IOException("A model must be established.");
     }
 
-    template.process(model, new OutputStreamWriter(System.out));
+    return model;
   }
 
   /**

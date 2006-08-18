@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules;
 
 import net.sf.enunciate.main.Enunciate;
+import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
 
@@ -12,6 +13,25 @@ import java.io.IOException;
 public class BasicDeploymentModule implements DeploymentModule {
 
   protected Enunciate enunciate;
+  private boolean disabled;
+
+  /**
+   * Whether this deployment module has been disabled.
+   *
+   * @return Whether this deployment module has been disabled.
+   */
+  public boolean isDisabled() {
+    return disabled;
+  }
+
+  /**
+   * Disable (or enable) this deployment module.
+   *
+   * @param disabled true to disable, false to enable.
+   */
+  public void setDisabled(boolean disabled) {
+    this.disabled = disabled;
+  }
 
   /**
    * Sets the enunciate mechanism.
@@ -81,6 +101,15 @@ public class BasicDeploymentModule implements DeploymentModule {
    * Default implementation is a no-op.
    */
   public void close() {
+  }
+
+  /**
+   * Default implementation returns null.
+   *
+   * @return null.
+   */
+  public RuleSet getConfigurationRules() {
+    return null;
   }
 
 }
