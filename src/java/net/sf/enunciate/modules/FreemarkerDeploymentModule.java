@@ -4,6 +4,7 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
   @Override
   protected final void doGenerate() throws IOException {
     try {
-      processTemplate();
+      doFreemarkerGenerate();
     }
     catch (TemplateException e) {
       throw new IOException(e.getMessage());
@@ -34,13 +35,21 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
   }
 
   /**
-   * Processes the template.  Assumes that the model is already established.
+   * Generate using Freemarker.  Same as {@link #doGenerate} but can throw a TemplateException.
    */
-  public void processTemplate() throws IOException, TemplateException {
+  public abstract void doFreemarkerGenerate() throws IOException, TemplateException;
+
+  /**
+   * Processes the specified template with the given model.
+   *
+   * @param templateURL The template URL.
+   * @param model       The root model.
+   */
+  protected void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
-    Template template = configuration.getTemplate(getTemplateURL().toString());
-    template.process(getModel(), new OutputStreamWriter(System.out));
+    Template template = configuration.getTemplate(templateURL.toString());
+    template.process(model, new OutputStreamWriter(System.out));
   }
 
   /**
@@ -48,8 +57,8 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    *
    * @return The model for processing.
    */
-  protected FreemarkerModel getModel() throws IOException {
-    FreemarkerModel model = FreemarkerModel.get();
+  protected EnunciateFreemarkerModel getModel() throws IOException {
+    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
 
     if (model == null) {
       throw new IOException("A model must be established.");
@@ -87,13 +96,5 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
       }
     };
   }
-
-  /**
-   * The URL to the template.
-   *
-   * @return The URL to the template.
-   */
-  protected abstract URL getTemplateURL();
-
 
 }

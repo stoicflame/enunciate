@@ -1,10 +1,11 @@
 package net.sf.enunciate.modules.xfire;
 
+import freemarker.template.TemplateException;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.File;
@@ -27,19 +28,34 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     this.configurationRules = new XFireRuleSet();
   }
 
-  @Override
-  protected FreemarkerModel getModel() throws IOException {
-    FreemarkerModel model = super.getModel();
-    model.put("clientPackageFor", new ClientPackageForMethod(getClientPackageConversions()));
-    model.put("clientClassnameFor", new ClientClassnameForMethod(getClientPackageConversions()));
-    return model;
+  /**
+   * @return The URL to "xfire-clients.fmt"
+   */
+  protected URL getClientTemplateURL() {
+    return XFireDeploymentModule.class.getResource("xfire-clients.fmt");
   }
 
   /**
-   * @return The URL to "xfire.fmt"
+   * @return The URL to "xfire-servlet.fmt"
    */
-  protected URL getTemplateURL() {
-    return XFireDeploymentModule.class.getResource("xfire.fmt");
+  protected URL getXFireServletTemplateURL() {
+    return XFireDeploymentModule.class.getResource("xfire-servlet.fmt");
+  }
+
+  @Override
+  public void doFreemarkerGenerate() throws IOException, TemplateException {
+    EnunciateFreemarkerModel model = getModel();
+
+    //first generate the xfire-servlet.xml
+    processTemplate(getXFireServletTemplateURL(), model);
+
+    //generate the JDK 1.3 client code.
+    LinkedHashMap<String, String> conversions = getClientPackageConversions();
+    model.put("clientPackageFor", new ClientPackageForMethod(conversions));
+    model.put("clientClassnameFor", new ClientClassnameForMethod(conversions));
+    processTemplate(getClientTemplateURL(), model);
+
+    //todo: generate the JDK 1.5 client code.
   }
 
   @Override

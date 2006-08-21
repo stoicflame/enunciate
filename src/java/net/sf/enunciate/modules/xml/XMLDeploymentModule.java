@@ -7,7 +7,6 @@ import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,15 +24,20 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
   private XMLAPILookup lookup;
 
+  /**
+   * The URL to "xml.fmt".
+   *
+   * @return The URL to "xml.fmt".
+   */
   protected URL getTemplateURL() {
     return XMLDeploymentModule.class.getResource("xml.fmt");
   }
 
   @Override
-  public void processTemplate() throws IOException, TemplateException {
-    super.processTemplate();
+  public void doFreemarkerGenerate() throws IOException, TemplateException {
+    EnunciateFreemarkerModel model = getModel();
 
-    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+    processTemplate(getTemplateURL(), model);
 
     HashMap<String, String> ns2artifact = new HashMap<String, String>();
     HashMap<String, String> service2artifact = new HashMap<String, String>();

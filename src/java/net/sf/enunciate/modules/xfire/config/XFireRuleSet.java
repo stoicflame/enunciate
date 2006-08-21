@@ -15,6 +15,12 @@ public class XFireRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/xfire/client-package-conversions/convert", ClientPackageConversion.class);
     digester.addSetProperties("enunciate/modules/xfire/client-package-conversions/convert");
     digester.addSetNext("enunciate/modules/xfire/client-package-conversions/convert", "addClientPackageConversion");
+
+    //todo: add rules for configuration of invocation handlers?
+
+    //todo: add rules for configuration of xfire in/out handlers?
+
+    //todo: add rules for configuration of spring interceptors for the service bean?
   }
 
   @Override

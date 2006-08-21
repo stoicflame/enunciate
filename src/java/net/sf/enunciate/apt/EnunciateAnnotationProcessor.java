@@ -65,7 +65,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       for (DeploymentModule module : this.config.getEnabledModules()) {
         if (module instanceof FreemarkerDeploymentModule) {
           //if it's a freemarker deployment module, we can handle the possible TemplateException.
-          ((FreemarkerDeploymentModule) module).processTemplate();
+          ((FreemarkerDeploymentModule) module).doFreemarkerGenerate();
         }
         else {
           module.step(Enunciate.Target.GENERATE);
