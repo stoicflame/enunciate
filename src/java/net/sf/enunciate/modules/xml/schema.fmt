@@ -86,7 +86,7 @@
   </${xs}:annotation>
     [/#if]
   <${xs}:restriction base="${typeDef.baseType.qname}">
-    [#list typeDef.enumValues as enumValue]
+    [#list typeDef.enumValues?values as enumValue]
     <${xs}:enumeration value="${enumValue}"/> [#--todo: add the java doc comments for these enum values.--]
     [/#list]
   </${xs}:restriction>

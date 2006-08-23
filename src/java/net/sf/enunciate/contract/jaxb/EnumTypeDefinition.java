@@ -14,7 +14,8 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * An enum type definition.
@@ -48,11 +49,12 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   }
 
   /**
-   * The enum constant values.
+   * The map of constant declarations to their enum constant values.
    *
-   * @return The enum constant values.
+   * @return The map of constant declarations to their enum constant values.
    */
-  public Set<String> getEnumValues() {
+  public Map<EnumConstantDeclaration, String> getEnumValues() {
+    Map<EnumConstantDeclaration, String> valueMap = new LinkedHashMap<EnumConstantDeclaration, String>();
     Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (EnumConstantDeclaration enumConstant : enumConstants) {
@@ -65,9 +67,11 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       if (!enumValues.add(value)) {
         throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
       }
+
+      valueMap.put(enumConstant, value);
     }
 
-    return enumValues;
+    return valueMap;
   }
 
   @Override

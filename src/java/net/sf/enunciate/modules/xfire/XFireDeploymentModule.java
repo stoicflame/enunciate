@@ -53,6 +53,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     LinkedHashMap<String, String> conversions = getClientPackageConversions();
     model.put("clientPackageFor", new ClientPackageForMethod(conversions));
     model.put("clientClassnameFor", new ClientClassnameForMethod(conversions));
+
     processTemplate(getClientTemplateURL(), model);
 
     //todo: generate the JDK 1.5 client code.
