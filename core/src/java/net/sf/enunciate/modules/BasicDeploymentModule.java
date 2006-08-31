@@ -30,13 +30,6 @@ public class BasicDeploymentModule implements DeploymentModule {
   }
 
   /**
-   * The order of the basic deployment module is undefined.
-   */
-  public int compareTo(DeploymentModule module) {
-    return BasicDeploymentModule.class.hashCode() - module.getClass().hashCode();
-  }
-
-  /**
    * Whether this deployment module has been disabled.
    *
    * @return Whether this deployment module has been disabled.
@@ -131,6 +124,13 @@ public class BasicDeploymentModule implements DeploymentModule {
    */
   public RuleSet getConfigurationRules() {
     return null;
+  }
+
+  /**
+   * @return 0
+   */
+  public int getOrder() {
+    return 0;
   }
 
 }

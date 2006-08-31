@@ -61,7 +61,7 @@
   </bean>
 
   <!-- define the xml api handler and its aliases. -->
-  <bean id="xmlApiHandler" class="net.sf.enunciate.modules.xml.XMLAPIController"/>
+  <bean id="xmlApiHandler" class="net.sf.enunciate.modules.xfire.XMLAPIController"/>
   <alias alias="wsdlHandler" name="xmlApiHandler"/>
   <alias alias="schemaHandler" name="xmlApiHandler"/>
 

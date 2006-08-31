@@ -26,7 +26,8 @@ public class EnunciateConfiguration {
   private final SortedSet<DeploymentModule> modules;
 
   public EnunciateConfiguration() {
-    this.modules = new TreeSet<DeploymentModule>();
+    this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
+
     Iterator discoveredModules = Service.providers(DeploymentModule.class);
     while (discoveredModules.hasNext()) {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();

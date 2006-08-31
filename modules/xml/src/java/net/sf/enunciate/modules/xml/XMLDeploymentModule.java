@@ -13,6 +13,7 @@ import net.sf.enunciate.modules.xml.config.WsdlConfig;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,12 +136,22 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     XMLAPILookup lookup = new XMLAPILookup(ns2artifact, service2artifact);
+
     getEnunciate().setProperty(XMLAPILookup.class.getName(), lookup);
+    getEnunciate().setProperty("xml.dir", new File(enunciate.getPreprocessDir(), "xml"));
 
   }
 
   @Override
   public RuleSet getConfigurationRules() {
     return this.rules;
+  }
+
+  /**
+   * @return 1
+   */
+  @Override
+  public int getOrder() {
+    return 1;
   }
 }

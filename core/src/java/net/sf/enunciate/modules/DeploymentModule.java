@@ -11,7 +11,7 @@ import java.io.IOException;
  *
  * @author Ryan Heaton
  */
-public interface DeploymentModule extends Comparable<DeploymentModule> {
+public interface DeploymentModule {
 
   /**
    * The name of the deployment module.  Along with the {@link #getNamespace(), namespace} identifies
@@ -56,12 +56,10 @@ public interface DeploymentModule extends Comparable<DeploymentModule> {
   RuleSet getConfigurationRules();
 
   /**
-   * The comparison of deployment modules determines their invocation order.
+   * The order of execution for the deployment module.
    *
-   * @param module The module to compare to.
-   * @return a negative integer, zero, or a positive integer as this object
-   *         comes before, is equal to, or comes after another deployment module.
+   * @return The order of execution for the deployment module.
    */
-  int compareTo(DeploymentModule module);
+  int getOrder();
 
 }

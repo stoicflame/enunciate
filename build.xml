@@ -15,6 +15,10 @@
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
 
+  <!--patterns for specifying jars to include on the classpath.-->
+  <property name="jar.pattern" value="*-${enunciate.version}.jar"/>
+  <property name="tools.jar.pattern" value="*-tools-${enunciate.version}.jar"/>
+
   <path id="core.libs">
     <fileset dir="${lib.dir}/core">
       <include name="*.jar"/>

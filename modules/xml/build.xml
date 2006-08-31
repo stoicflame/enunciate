@@ -7,7 +7,7 @@
   <path id="build.classpath">
     <path refid="core.libs"/>
     <fileset dir="${core.basedir}/target">
-      <include name="*.jar"/>
+      <include name="${jar.pattern}"/>
     </fileset>
   </path>
 

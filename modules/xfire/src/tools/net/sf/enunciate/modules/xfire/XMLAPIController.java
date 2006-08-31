@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xml;
+package net.sf.enunciate.modules.xfire;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
