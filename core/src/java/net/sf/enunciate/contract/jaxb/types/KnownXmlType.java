@@ -1,6 +1,6 @@
 package net.sf.enunciate.contract.jaxb.types;
 
-import net.sf.enunciate.util.QName;
+import javax.xml.namespace.QName;
 
 /**
  * Set of known xml types.

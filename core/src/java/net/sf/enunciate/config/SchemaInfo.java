@@ -2,9 +2,9 @@ package net.sf.enunciate.config;
 
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.*;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
+import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
@@ -15,13 +15,13 @@ import java.util.*;
 public class SchemaInfo {
 
   private String namespace;
-  private boolean generate;
   private String file;
   private String location;
   private String elementFormDefault;
   private String attributeFormDefault;
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
+  private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   /**
    * Whether this is the schema for the empty namespace.
@@ -48,24 +48,6 @@ public class SchemaInfo {
    */
   public void setNamespace(String namespace) {
     this.namespace = namespace;
-  }
-
-  /**
-   * Whether or not to generate this schema.
-   *
-   * @return Whether or not to generate this schema.
-   */
-  public boolean isGenerate() {
-    return generate;
-  }
-
-  /**
-   * Whether or not to generate this schema.
-   *
-   * @param generate Whether or not to generate this schema.
-   */
-  public void setGenerate(boolean generate) {
-    this.generate = generate;
   }
 
   /**
@@ -156,6 +138,26 @@ public class SchemaInfo {
    */
   public void setAttributeFormDefault(String attributeFormDefault) {
     this.attributeFormDefault = attributeFormDefault;
+  }
+
+  /**
+   * Set a property value.
+   *
+   * @param property The property.
+   * @param value    The value.
+   */
+  public void setProperty(String property, Object value) {
+    this.properties.put(property, value);
+  }
+
+  /**
+   * Get a property value.
+   *
+   * @param property The property whose value to retrieve.
+   * @return The property value.
+   */
+  public Object getProperty(String property) {
+    return this.properties.get(property);
   }
 
   /**

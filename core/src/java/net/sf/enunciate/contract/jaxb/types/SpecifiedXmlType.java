@@ -1,8 +1,7 @@
 package net.sf.enunciate.contract.jaxb.types;
 
-import net.sf.enunciate.util.QName;
-
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.namespace.QName;
 
 /**
  * An xml type that has been specified.

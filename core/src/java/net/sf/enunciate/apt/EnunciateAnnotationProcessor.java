@@ -123,11 +123,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    //at this point, we've set up all the defaults.  Now read the config for overrides.
-
-    model.put("prefix", new PrefixMethod());
-    model.put("qname", new QNameMethod());
-
     Validator validator = this.config.getValidator();
     ValidationResult validationResult = validate(model, validator);
 

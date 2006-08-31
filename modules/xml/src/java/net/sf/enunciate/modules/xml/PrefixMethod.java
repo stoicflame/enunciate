@@ -1,4 +1,4 @@
-package net.sf.enunciate.template.freemarker;
+package net.sf.enunciate.modules.xml;
 
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;

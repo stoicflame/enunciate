@@ -8,10 +8,10 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.namespace.QName;
 import java.util.*;
 
 /**

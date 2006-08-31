@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -61,6 +62,7 @@ public class Enunciate {
   private String warLibs;
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
+  private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   public static void main(String[] args) {
     Enunciate enunciate = new Enunciate();
@@ -649,6 +651,26 @@ public class Enunciate {
    */
   public void setTarget(Target target) {
     this.target = target;
+  }
+
+  /**
+   * Set a property value.
+   *
+   * @param property The property.
+   * @param value    The value.
+   */
+  public void setProperty(String property, Object value) {
+    this.properties.put(property, value);
+  }
+
+  /**
+   * Get a property value.
+   *
+   * @param property The property whose value to retrieve.
+   * @return The property value.
+   */
+  public Object getProperty(String property) {
+    return this.properties.get(property);
   }
 
 }

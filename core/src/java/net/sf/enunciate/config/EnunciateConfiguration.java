@@ -4,17 +4,16 @@ import net.sf.enunciate.contract.validation.DefaultValidator;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.modules.DeploymentModule;
-import net.sf.enunciate.modules.xfire.XFireDeploymentModule;
-import net.sf.enunciate.modules.xml.XMLDeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import sun.misc.Service;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Base configuration object for enunciate.
@@ -24,16 +23,15 @@ import java.util.List;
 public class EnunciateConfiguration {
 
   private Validator validator = new DefaultValidator();
-  private final List<DeploymentModule> modules;
-  private final XMLDeploymentModule xmlModule;
-  private final XFireDeploymentModule xfireModule;
+  private final SortedSet<DeploymentModule> modules;
 
   public EnunciateConfiguration() {
-    this.modules = new ArrayList<DeploymentModule>();
-    this.xmlModule = new XMLDeploymentModule();
-    this.xfireModule = new XFireDeploymentModule();
-    this.modules.add(xmlModule);
-    this.modules.add(xfireModule);
+    this.modules = new TreeSet<DeploymentModule>();
+    Iterator discoveredModules = Service.providers(DeploymentModule.class);
+    while (discoveredModules.hasNext()) {
+      DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
+      this.modules.add(discoveredModule);
+    }
   }
 
   /**
@@ -55,29 +53,11 @@ public class EnunciateConfiguration {
   }
 
   /**
-   * The xml deployment module.
-   *
-   * @return The xml deployment module.
-   */
-  public XMLDeploymentModule getXMLModule() {
-    return xmlModule;
-  }
-
-  /**
-   * The xfire deployment module.
-   *
-   * @return The xfire deployment module.
-   */
-  public XFireDeploymentModule getXFireModule() {
-    return xfireModule;
-  }
-
-  /**
    * The list of all deployment modules specified in the configuration.
    *
    * @return The list of all deployment modules specified in the configuration.
    */
-  public List<DeploymentModule> getAllModules() {
+  public SortedSet<DeploymentModule> getAllModules() {
     return modules;
   }
 
@@ -136,12 +116,8 @@ public class EnunciateConfiguration {
     //todo: add the rules for the namespaces elements.
 
     //set up the xml module.
-    digester.addRule("enunciate/modules/xml", new PushModuleRule(config.getXMLModule()));
-    digester.addSetProperties("enunciate/modules/xml");
-
-    //set up the xfire module.
-    digester.addRule("enunciate/modules/xfire", new PushModuleRule(config.getXFireModule()));
-    digester.addSetProperties("enunciate/modules/xfire");
+    digester.addRule("enunciate/modules/*", new PushModuleRule(config.getAllModules()));
+    digester.addSetProperties("enunciate/modules/*");
 
     //set up all custom modules.
     digester.addObjectCreate("enunciate/modules/custom", "class", BasicDeploymentModule.class);
@@ -156,15 +132,27 @@ public class EnunciateConfiguration {
    */
   private static class PushModuleRule extends Rule {
 
-    private final DeploymentModule module;
+    private final Set<DeploymentModule> modules;
 
-    public PushModuleRule(DeploymentModule module) {
-      this.module = module;
+    public PushModuleRule(Set<DeploymentModule> modules) {
+      this.modules = modules;
     }
 
     @Override
-    public void begin(String string, String string1, Attributes attributes) throws Exception {
-      getDigester().push(this.module);
+    public void begin(String namespace, String name, Attributes attributes) throws Exception {
+      DeploymentModule found = null;
+      for (DeploymentModule module : modules) {
+        if ((name.equals(module.getName())) && (namespace.equals(module.getNamespace()))) {
+          found = module;
+          break;
+        }
+      }
+
+      if (found == null) {
+        throw new IllegalStateException("Configuration found for unknown module: " + new QName(namespace, name));
+      }
+
+      getDigester().push(found);
     }
 
     @Override

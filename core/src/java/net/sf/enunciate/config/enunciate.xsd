@@ -62,96 +62,9 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="xml" type="xml-module" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="xfire" type="xfire-module" minOccurs="0" maxOccurs="1"/>
       <xs:element name="custom" type="custom-module" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="module" abstract="true">
-    <xs:annotation>
-      <xs:documentation>
-        Base definition for a module.
-      </xs:documentation>
-    </xs:annotation>
-
-    <xs:attribute name="disabled" type="xs:boolean" default="false"/>
-  </xs:complexType>
-
-  <xs:complexType name="xml-module">
-    <xs:annotation>
-      <xs:documentation>
-        Configuration for the xml enunciate module.
-      </xs:documentation>
-    </xs:annotation>
-
-    <xs:complexContent>
-      <xs:extension base="module">
-        <xs:sequence>
-          <xs:element name="schemas" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="schema" type="schema" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="schema">
-    <xs:annotation>
-      <xs:documentation>
-        Configuration for an xml-schema artifact.
-      </xs:documentation>
-    </xs:annotation>
-
-    <!--todo: define this schema element.-->
-    <xs:sequence>
-      <xs:any/>
-    </xs:sequence>
-    <xs:anyAttribute/>
-  </xs:complexType>
-
-  <xs:complexType name="xfire-module">
-    <xs:annotation>
-      <xs:documentation>
-        Configuration for the xfire enunciate module.
-      </xs:documentation>
-    </xs:annotation>
-
-    <xs:complexContent>
-      <xs:extension base="module">
-        <xs:sequence>
-          <xs:element name="client-package-conversions" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>
-                The set of client package conversions.
-              </xs:documentation>
-            </xs:annotation>
-
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="convert" type="conversion" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-
-  </xs:complexType>
-
-  <xs:complexType name="conversion">
-    <xs:annotation>
-      <xs:documentation>
-        A basic string conversion.
-      </xs:documentation>
-    </xs:annotation>
-
-    <xs:attribute name="to" use="required"/>
-    <xs:attribute name="from" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="custom-module">

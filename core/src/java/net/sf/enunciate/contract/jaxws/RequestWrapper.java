@@ -1,7 +1,6 @@
 package net.sf.enunciate.contract.jaxws;
 
-import net.sf.enunciate.util.QName;
-
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

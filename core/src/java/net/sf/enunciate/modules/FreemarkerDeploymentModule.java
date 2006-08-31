@@ -49,6 +49,16 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(templateURL.toString());
+    processTemplate(template, model);
+  }
+
+  /**
+   * Processes the specified template with the given model.
+   *
+   * @param template The template.
+   * @param model    The root model.
+   */
+  protected void processTemplate(Template template, Object model) throws TemplateException, IOException {
     template.process(model, new OutputStreamWriter(System.out));
   }
 

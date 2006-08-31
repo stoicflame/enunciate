@@ -1,6 +1,6 @@
 package net.sf.enunciate.contract.jaxws;
 
-import net.sf.enunciate.util.QName;
+import javax.xml.namespace.QName;
 
 /**
  * An implicit child element.

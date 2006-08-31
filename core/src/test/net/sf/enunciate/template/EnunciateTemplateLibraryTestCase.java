@@ -59,18 +59,6 @@ public abstract class EnunciateTemplateLibraryTestCase extends EnunciateContract
     loader.putTemplate("this", sourceWriter.toString());
     loader.putTemplate(library, getLibrarySource(library));
 
-    PrefixMethod prefixMethod = new PrefixMethod() {
-      @Override
-      protected String lookupPrefix(String namespace) {
-        if (namespace == null) {
-          return "null";
-        }
-
-        return "ns" + String.valueOf(namespace.hashCode());
-      }
-    };
-
-    model.put("prefix", prefixMethod);
     for (String arg : args.keySet()) {
       model.put(arg, args.get(arg));
     }

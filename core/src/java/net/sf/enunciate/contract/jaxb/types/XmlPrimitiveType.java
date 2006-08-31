@@ -1,8 +1,9 @@
 package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.PrimitiveType;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.type.DecoratedPrimitiveType;
+
+import javax.xml.namespace.QName;
 
 /**
  * @author Ryan Heaton

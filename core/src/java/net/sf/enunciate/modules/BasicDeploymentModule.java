@@ -16,6 +16,27 @@ public class BasicDeploymentModule implements DeploymentModule {
   private boolean disabled;
 
   /**
+   * @return "basic"
+   */
+  public String getName() {
+    return "basic";
+  }
+
+  /**
+   * @return null
+   */
+  public String getNamespace() {
+    return null;
+  }
+
+  /**
+   * The order of the basic deployment module is undefined.
+   */
+  public int compareTo(DeploymentModule module) {
+    return BasicDeploymentModule.class.hashCode() - module.getClass().hashCode();
+  }
+
+  /**
    * Whether this deployment module has been disabled.
    *
    * @return Whether this deployment module has been disabled.

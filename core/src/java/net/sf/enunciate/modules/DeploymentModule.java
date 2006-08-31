@@ -11,7 +11,23 @@ import java.io.IOException;
  *
  * @author Ryan Heaton
  */
-public interface DeploymentModule {
+public interface DeploymentModule extends Comparable<DeploymentModule> {
+
+  /**
+   * The name of the deployment module.  Along with the {@link #getNamespace(), namespace} identifies
+   * its section in the enunciate configuration.
+   *
+   * @return The name of the deployment module.
+   */
+  String getName();
+
+  /**
+   * The namespace for this deployment module.  Along with the {@link #getName(), name} identifies
+   * its section in the enunciate configuration.
+   *
+   * @return The namespace for this module.
+   */
+  String getNamespace();
 
   /**
    * Initialize this deployment module with the specified enunciate mechanism.
@@ -38,5 +54,14 @@ public interface DeploymentModule {
    * @return The configuration rules for this deployment module.
    */
   RuleSet getConfigurationRules();
+
+  /**
+   * The comparison of deployment modules determines their invocation order.
+   *
+   * @param module The module to compare to.
+   * @return a negative integer, zero, or a positive integer as this object
+   *         comes before, is equal to, or comes after another deployment module.
+   */
+  int compareTo(DeploymentModule module);
 
 }

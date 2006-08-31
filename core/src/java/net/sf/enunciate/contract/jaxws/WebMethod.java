@@ -7,11 +7,11 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
 import net.sf.enunciate.contract.validation.ValidationException;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

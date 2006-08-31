@@ -4,9 +4,10 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
+import javax.xml.namespace.QName;
 
 /**
  * Decorator for an xml class type.

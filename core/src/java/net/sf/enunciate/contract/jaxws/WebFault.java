@@ -12,7 +12,6 @@ import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
-import net.sf.enunciate.util.QName;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
@@ -20,6 +19,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
