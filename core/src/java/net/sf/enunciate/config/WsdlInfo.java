@@ -15,8 +15,7 @@ public class WsdlInfo {
 
   private String targetNamespace;
   private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
-  private boolean generate;
-  private String file;
+  private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   /**
    * The target namespace.
@@ -46,39 +45,23 @@ public class WsdlInfo {
   }
 
   /**
-   * Whether or not to generate this wsdl.
+   * Set a property value.
    *
-   * @return Whether or not to generate this wsdl.
+   * @param property The property.
+   * @param value    The value.
    */
-  public boolean isGenerate() {
-    return generate;
+  public void setProperty(String property, Object value) {
+    this.properties.put(property, value);
   }
 
   /**
-   * Whether or not to generate this wsdl.
+   * Get a property value.
    *
-   * @param generate Whether or not to generate this wsdl.
+   * @param property The property whose value to retrieve.
+   * @return The property value.
    */
-  public void setGenerate(boolean generate) {
-    this.generate = generate;
-  }
-
-  /**
-   * The file to which to write this wsdl.
-   *
-   * @return The file to which to write this wsdl.
-   */
-  public String getFile() {
-    return file;
-  }
-
-  /**
-   * The file to which to write this wsdl.
-   *
-   * @param file The file to which to write this wsdl.
-   */
-  public void setFile(String file) {
-    this.file = file;
+  public Object getProperty(String property) {
+    return this.properties.get(property);
   }
 
   /**

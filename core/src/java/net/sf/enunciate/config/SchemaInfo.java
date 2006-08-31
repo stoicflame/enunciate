@@ -15,8 +15,6 @@ import java.util.*;
 public class SchemaInfo {
 
   private String namespace;
-  private String file;
-  private String location;
   private String elementFormDefault;
   private String attributeFormDefault;
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
@@ -48,42 +46,6 @@ public class SchemaInfo {
    */
   public void setNamespace(String namespace) {
     this.namespace = namespace;
-  }
-
-  /**
-   * The file to which to write this schema.
-   *
-   * @return The file to which to write this schema.
-   */
-  public String getFile() {
-    return file;
-  }
-
-  /**
-   * The file to which to write this schema.
-   *
-   * @param file The file to which to write this schema.
-   */
-  public void setFile(String file) {
-    this.file = file;
-  }
-
-  /**
-   * The schema location.
-   *
-   * @return The schema location.
-   */
-  public String getLocation() {
-    return location;
-  }
-
-  /**
-   * The schema location.
-   *
-   * @param location The schema location.
-   */
-  public void setLocation(String location) {
-    this.location = location;
   }
 
   /**

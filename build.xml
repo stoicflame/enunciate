@@ -69,13 +69,17 @@
     <available property="tools.tests.exists" file="src/tools-tests"/>
   </target>
 
-  <target name="compile" description="compile the code, tools and main." depends="init, compile-main, compile-tools"/>
+  <target name="compile" description="compile the code, tools and main." depends="init, compile-tools, compile-main"/>
 
-  <target name="compile-main" description="compile the main code" depends="init">
-    <mkdir dir="${build.dir}"/>
-    <javac destdir="${build.dir}" debug="true">
+  <target name="compile-tools" description="compile the tools code" depends="init" if="tools.exists">
+    <!--default compiler for the tools is 1.5-->
+    <property name="tools.compiler" value="javac1.5"/>
+
+    <mkdir dir="${tools.build.dir}"/>
+
+    <javac destdir="${tools.build.dir}" debug="true" compiler="${tools.compiler}">
       <src>
-        <pathelement location="src/java"/>
+        <pathelement location="src/tools"/>
       </src>
       <classpath refid="build.classpath"/>
     </javac>
@@ -91,17 +95,16 @@
 
   </target>
 
-  <target name="compile-tools" description="compile the tools code" depends="init" if="tools.exists">
-    <!--default compiler for the tools is 1.5-->
-    <property name="tools.compiler" value="javac1.5"/>
-
-    <mkdir dir="${tools.build.dir}"/>
-
-    <javac destdir="${tools.build.dir}" debug="true" compiler="${tools.compiler}">
+  <target name="compile-main" description="compile the main code" depends="compile-tools">
+    <mkdir dir="${build.dir}"/>
+    <javac destdir="${build.dir}" debug="true">
       <src>
-        <pathelement location="src/tools"/>
+        <pathelement location="src/java"/>
       </src>
-      <classpath refid="build.classpath"/>
+      <classpath>
+        <path refid="build.classpath"/>
+        <pathelement location="${tools.build.dir}"/>
+      </classpath>
     </javac>
 
     <copy todir="${build.dir}">

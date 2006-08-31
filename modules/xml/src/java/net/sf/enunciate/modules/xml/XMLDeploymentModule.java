@@ -9,6 +9,7 @@ import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xml.config.SchemaConfig;
 import net.sf.enunciate.modules.xml.config.XMLRuleSet;
+import net.sf.enunciate.modules.xml.config.WsdlConfig;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
+  private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
 
   /**
    * The URL to "xml.fmt".
@@ -53,6 +55,15 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     this.schemaConfigs.add(config);
   }
 
+  /**
+   * Add a custom wsdl configuration.
+   *
+   * @param config The configuration to add.
+   */
+  public void addWsdlConfig(WsdlConfig config) {
+    this.wsdlConfigs.add(config);
+  }
+
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
@@ -68,7 +79,13 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       schemaInfo.setProperty("location", file);
     }
 
-    for (SchemaConfig customConfig : schemaConfigs) {
+    for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
+      //make sure each wsdl has a "file" property.
+      String file = ns2prefix.get(wsdlInfo.getTargetNamespace()) + ".xsd";
+      wsdlInfo.setProperty("file", file);
+    }
+
+    for (SchemaConfig customConfig : this.schemaConfigs) {
       SchemaInfo schemaInfo = ns2schema.get(customConfig.getNamespace());
 
       if (schemaInfo != null) {
@@ -90,13 +107,23 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
+    for (WsdlConfig customConfig : this.wsdlConfigs) {
+      WsdlInfo wsdlInfo = ns2wsdl.get(customConfig.getNamespace());
+
+      if (wsdlInfo != null) {
+        if (customConfig.getFile() != null) {
+          wsdlInfo.setProperty("file", customConfig.getFile());
+        }
+      }
+    }
+
     model.put("prefix", new PrefixMethod());
     processTemplate(getTemplateURL(), model);
 
     HashMap<String, String> ns2artifact = new HashMap<String, String>();
     HashMap<String, String> service2artifact = new HashMap<String, String>();
     for (WsdlInfo wsdl : ns2wsdl.values()) {
-      String file = wsdl.getFile();
+      String file = (String) wsdl.getProperty("file");
       ns2artifact.put(wsdl.getTargetNamespace(), file);
       for (EndpointInterface endpointInterface : wsdl.getEndpointInterfaces()) {
         service2artifact.put(endpointInterface.getServiceName(), file);

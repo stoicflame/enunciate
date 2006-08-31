@@ -137,14 +137,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   public void add(EndpointInterface ei) {
     String namespace = ei.getTargetNamespace();
 
-    String prefix = addNamespace(namespace);
+    addNamespace(namespace);
 
     WsdlInfo wsdlInfo = namespacesToWsdls.get(namespace);
     if (wsdlInfo == null) {
       wsdlInfo = new WsdlInfo();
       namespacesToWsdls.put(namespace, wsdlInfo);
       wsdlInfo.setTargetNamespace(namespace);
-      wsdlInfo.setFile(prefix + ".wsdl");
 
       //todo: configure the schema info.
       //wsdlInfo.setSchemaInfo();
@@ -167,7 +166,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
     String namespace = typeDef.getTargetNamespace();
-    String prefix = addNamespace(namespace);
+    addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
@@ -180,8 +179,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
       }
       schemaInfo.setNamespace(namespace);
-      schemaInfo.setFile(prefix + ".xsd");
-      schemaInfo.setLocation(prefix + ".xsd");
     }
     schemaInfo.getTypeDefinitions().add(typeDef);
 
@@ -201,7 +198,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
     String namespace = rootElement.getTargetNamespace();
-    String prefix = addNamespace(namespace);
+    addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
@@ -214,8 +211,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
       }
       schemaInfo.setNamespace(namespace);
-      schemaInfo.setFile(prefix + ".xsd");
-      schemaInfo.setLocation(prefix + ".xsd");
     }
     schemaInfo.getGlobalElements().add(rootElement);
 
