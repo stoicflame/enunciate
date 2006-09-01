@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;

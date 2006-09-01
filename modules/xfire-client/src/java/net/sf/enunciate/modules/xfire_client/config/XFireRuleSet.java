@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire.config;
+package net.sf.enunciate.modules.xfire_client.config;
 
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;

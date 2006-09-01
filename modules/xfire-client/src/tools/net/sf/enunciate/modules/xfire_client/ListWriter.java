@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import org.codehaus.xfire.aegis.AbstractMessageWriter;
 import org.codehaus.xfire.aegis.MessageWriter;

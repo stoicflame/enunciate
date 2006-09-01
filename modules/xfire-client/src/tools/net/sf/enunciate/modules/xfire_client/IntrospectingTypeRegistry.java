@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
 import org.codehaus.xfire.aegis.type.TypeCreator;
@@ -14,7 +14,6 @@ public class IntrospectingTypeRegistry extends DefaultTypeMappingRegistry {
     super(true);
   }
 
-  @Override
   protected TypeCreator createTypeCreator() {
     return new IntrospectingTypeCreator(super.createTypeCreator());
   }

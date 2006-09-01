@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import net.sf.enunciate.samples.petclinic.PetType;
 import org.codehaus.xfire.MessageContext;

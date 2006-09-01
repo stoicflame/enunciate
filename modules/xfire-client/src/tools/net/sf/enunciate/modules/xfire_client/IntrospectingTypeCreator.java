@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +25,7 @@ import java.util.WeakHashMap;
 public class IntrospectingTypeCreator implements TypeCreator {
 
   private static final Log LOG = LogFactory.getLog(IntrospectingTypeCreator.class);
-  private static final Map<Class, Type> INTROSPECTED_TYPES = Collections.synchronizedMap(new WeakHashMap<Class, Type>());
+  private static final Map INTROSPECTED_TYPES = Collections.synchronizedMap(new WeakHashMap());
 
   private final TypeCreator defaultDelegate;
 
@@ -115,11 +115,11 @@ public class IntrospectingTypeCreator implements TypeCreator {
    */
   protected Type introspectForType(Class clazz) {
     if (INTROSPECTED_TYPES.containsKey(clazz)) {
-      return INTROSPECTED_TYPES.get(clazz);
+      return (Type) INTROSPECTED_TYPES.get(clazz);
     }
 
     try {
-      Class<?> typeClass = Class.forName(clazz.getName() + "XFireType");
+      Class typeClass = Class.forName(clazz.getName() + "XFireType");
 
       if (!Type.class.isAssignableFrom(typeClass)) {
         LOG.error(clazz.getName() + "XFireType isn't an instanceof " + Type.class.getName());

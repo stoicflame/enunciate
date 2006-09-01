@@ -1,11 +1,11 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
 import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
-import net.sf.enunciate.modules.xfire.config.ClientPackageConversion;
-import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
+import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
+import net.sf.enunciate.modules.xfire_client.config.XFireRuleSet;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.File;

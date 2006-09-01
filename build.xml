@@ -77,11 +77,11 @@
 
   <target name="compile-tools" description="compile the tools code" depends="init" if="tools.exists">
     <!--default compiler for the tools is 1.5-->
-    <property name="tools.compiler" value="javac1.5"/>
+    <property name="tools.compiler" value="1.5"/>
 
     <mkdir dir="${tools.build.dir}"/>
 
-    <javac destdir="${tools.build.dir}" debug="true" compiler="${tools.compiler}">
+    <javac destdir="${tools.build.dir}" debug="true" source="${tools.compiler}">
       <src>
         <pathelement location="src/tools"/>
       </src>
