@@ -2,16 +2,24 @@ package net.sf.enunciate.modules.xfire_client;
 
 import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.config.SchemaInfo;
+import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebFault;
+import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.config.XFireRuleSet;
+import net.sf.enunciate.util.ClassDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedHashMap;
+import java.util.TreeSet;
 
 /**
  * Deployment module for XFire.
@@ -29,10 +37,13 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "xfire-clients.fmt"
+   * Get a template URL for the template of the given name.
+   *
+   * @param template The specified template.
+   * @return The URL to the specified template.
    */
-  protected URL getClientTemplateURL() {
-    return XFireClientDeploymentModule.class.getResource("xfire-clients.fmt");
+  protected URL getTemplateURL(String template) {
+    return XFireClientDeploymentModule.class.getResource(template);
   }
 
   @Override
@@ -41,10 +52,50 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //generate the JDK 1.3 client code.
     LinkedHashMap<String, String> conversions = getClientPackageConversions();
-    model.put("clientPackageFor", new ClientPackageForMethod(conversions));
-    model.put("clientClassnameFor", new ClientClassnameForMethod(conversions));
+    model.put("packageFor", new ClientPackageForMethod(conversions));
+    model.put("classnameFor", new ClientClassnameForMethod(conversions));
 
-    processTemplate(getClientTemplateURL(), model);
+    URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
+    URL faultTemplate = getTemplateURL("client-web-fault.fmt");
+    URL enumTypeTemplate = getTemplateURL("client-enum-type.fmt");
+    URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
+    URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
+    URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
+    URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
+    URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
+
+    //process the endpoint interfaces and gather the list of web faults...
+    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        //first process the templates for the endpoint interfaces.
+        model.put("endpointInterface", ei);
+
+        processTemplate(eiTemplate, model);
+
+        for (WebMethod webMethod : ei.getWebMethods()) {
+          allFaults.addAll(webMethod.getWebFaults());
+        }
+      }
+    }
+
+    //process the gathered web faults.
+    for (WebFault webFault : allFaults) {
+      model.put("fault", webFault);
+      processTemplate(faultTemplate, webFault);
+    }
+
+    //process each type for client-side stubs.
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        model.put("type", typeDefinition);
+        URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+        processTemplate(template, model);
+
+        template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
+        processTemplate(template, model);
+      }
+    }
 
     //todo: generate the JDK 1.5 client code.
   }

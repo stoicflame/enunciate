@@ -1,10 +1,16 @@
 package net.sf.enunciate.modules.xfire_client;
 
+import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.AbstractMessageWriter;
 import org.codehaus.xfire.aegis.MessageWriter;
+import org.codehaus.xfire.aegis.type.Type;
+import org.codehaus.xfire.aegis.type.TypeMapping;
+import org.codehaus.xfire.fault.XFireFault;
 
 import javax.xml.namespace.QName;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -19,6 +25,132 @@ import java.util.Iterator;
 public class ListWriter extends AbstractMessageWriter {
 
   private final ArrayList items = new ArrayList();
+
+  /**
+   * Construct a list writer for a collection of items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(Collection items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this(items.toArray(), typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(Object[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of boolean items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(boolean[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of byte items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(byte[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of char items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(char[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of double items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(double[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of float items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(float[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of int items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(int[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of long items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(long[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct a list writer for an array of short items.
+   *
+   * @param items       The items.
+   * @param typeMapping The type mapping, used to lookup the type for the components.
+   * @param context     The context.
+   */
+  public ListWriter(short[] items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    this((Object) items, typeMapping, context);
+  }
+
+  /**
+   * Construct the list writer with the specified array.
+   *
+   * @param array       The array.
+   * @param typeMapping The type mapping.
+   * @param context     The context.
+   * @throws IllegalArgumentException if the object isn't an array.
+   */
+  private ListWriter(Object array, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    for (int i = 0; i < Array.getLength(array); i++) {
+      Object item = Array.get(array, i);
+      Type componentType = typeMapping.getType(item.getClass());
+      componentType.writeObject(item, this, context);
+    }
+  }
 
   /**
    * Adds the string form of the specified value to the list.
@@ -66,56 +198,56 @@ public class ListWriter extends AbstractMessageWriter {
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getAttributeWriter(String name) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getAttributeWriter(String name, String namespace) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getAttributeWriter(QName qname) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getElementWriter(String name) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getElementWriter(String name, String namespace) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException Because a list is a simple type.
    */
   public MessageWriter getElementWriter(QName qname) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException
    */
   public String getPrefixForNamespace(String namespace) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException
    */
   public String getPrefixForNamespace(String namespace, String hint) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -124,5 +256,8 @@ public class ListWriter extends AbstractMessageWriter {
   public void close() {
   }
 
+  public String toString() {
+    return getValue();
+  }
 
 }

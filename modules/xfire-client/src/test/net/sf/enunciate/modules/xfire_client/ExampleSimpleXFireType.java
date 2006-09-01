@@ -5,6 +5,7 @@ import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.MessageReader;
 import org.codehaus.xfire.aegis.MessageWriter;
 import org.codehaus.xfire.aegis.type.Type;
+import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.fault.XFireFault;
 
 /**
@@ -45,7 +46,8 @@ public class ExampleSimpleXFireType extends Type {
 
     //if it's an XmlList:
     int[] values = new int[10];
-    Type componentType = getTypeMapping().getType(Integer.class);
+    TypeMapping typeMapping = getTypeMapping();
+    Type componentType = typeMapping.getType(Integer.class);
     ListWriter listWriter = new ListWriter();
     for (int i = 0; i < values.length; i++) {
       Integer item = new Integer(values[i]);
@@ -55,5 +57,6 @@ public class ExampleSimpleXFireType extends Type {
 
     //but if nillable, write nill.
     writer.writeValue(String.valueOf(value));
+    writer.writeXsiNil();
   }
 }
