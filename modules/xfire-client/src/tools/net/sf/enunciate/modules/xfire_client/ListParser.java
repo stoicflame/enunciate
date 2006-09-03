@@ -9,8 +9,8 @@ import org.codehaus.xfire.fault.XFireFault;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 /**
  * Parses an xml list from a value.
@@ -69,14 +69,25 @@ public class ListParser extends AbstractMessageReader {
     }
 
     if (Collection.class.isAssignableFrom(listType)) {
-      try {
-        Collection collection = (Collection) listType.newInstance();
-        collection.addAll(Arrays.asList((Object[]) array));
-        this.list = collection;
+      Collection collection;
+      if ((listType.isInterface()) || (Modifier.isAbstract(listType.getModifiers()))) {
+        if (Set.class.isAssignableFrom(listType)) {
+          collection = new TreeSet();
+        }
+        else {
+          collection = new ArrayList();
+        }
       }
-      catch (Exception e) {
-        throw new IllegalArgumentException("Unable to create an instance of " + listType.getName() + ".", e);
+      else {
+        try {
+          collection = (Collection) listType.newInstance();
+        }
+        catch (Exception e) {
+          throw new IllegalArgumentException("Unable to create an instance of " + listType.getName() + ".", e);
+        }
       }
+      collection.addAll(Arrays.asList((Object[]) array));
+      this.list = collection;
     }
     else {
       this.list = array;
