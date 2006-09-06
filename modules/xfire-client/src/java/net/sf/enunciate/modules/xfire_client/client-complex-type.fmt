@@ -13,9 +13,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   [#list type.attributes as attribute]
   private ${classnameFor(attribute.accessorType)} ${attribute.simpleName};
   [/#list]
-  [#list type.elements as element]
+  [#if type.value?exists]
+  private ${classnameFor(type.value.accessorType)} ${type.value.simpleName};
+  [#else]
+    [#list type.elements as element]
   private ${classnameFor(element.accessorType)} ${element.simpleName};
-  [/#list]
+    [/#list]
+  [/#if]
   [#list type.attributes as attribute]
 
   /**
@@ -32,7 +36,23 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     this.${attribute.simpleName} = ${attribute.simpleName};
   }
   [/#list]
-  [#list type.elements as element]
+  [#if type.value?exists]
+
+  /**
+   * ${type.value.javaDoc.return?default(type.value.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public ${classnameFor(type.value.accessorType)} get${type.value.simpleName?cap_first}() {
+    return this.${type.value.simpleName};
+  }
+
+  /**
+   * ${type.value.javaDoc.return?default(type.value.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public void set${type.value.simpleName?cap_first}(${classnameFor(type.value.accessorType)} ${type.value.simpleName}) {
+    this.${type.value.simpleName} = ${type.value.simpleName};
+  }
+  [#else]
+    [#list type.elements as element]
 
   /**
    * ${element.javaDoc.return?default(element.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
@@ -47,7 +67,8 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void set${element.simpleName?cap_first}(${classnameFor(element.accessorType)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};
   }
-  [/#list]
+    [/#list]
+  [/#if]
 
 }
 [/@file]

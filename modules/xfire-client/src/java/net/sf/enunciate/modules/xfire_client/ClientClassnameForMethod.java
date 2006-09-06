@@ -2,6 +2,8 @@ package net.sf.enunciate.modules.xfire_client;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.TypeMirror;
 
 import java.util.LinkedHashMap;
 
@@ -14,6 +16,17 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   public ClientClassnameForMethod(LinkedHashMap<String, String> conversions) {
     super(conversions);
+  }
+
+  @Override
+  protected String convert(TypeMirror typeMirror) {
+    boolean isArray = typeMirror instanceof ArrayType;
+    String conversion = super.convert(typeMirror);
+    if (isArray) {
+      conversion += "[]";
+    }
+    return conversion;
+
   }
 
   @Override

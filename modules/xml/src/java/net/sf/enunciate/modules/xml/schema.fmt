@@ -158,7 +158,7 @@
                   </${xs}:documentation>
                 </${xs}:annotation>
               [/#if]
-                [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
+                [@processTypeDef typeDef=element.baseType.typeDefinition/]
               </${xs}:elment>
             [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">

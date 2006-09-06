@@ -157,6 +157,10 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    * @return Whether the accessor type is a collection type.
    */
   public boolean isCollectionType() {
+    if (isXmlList()) {
+      return false;
+    }
+
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
     return accessorType.isArray() || accessorType.isCollection();
   }

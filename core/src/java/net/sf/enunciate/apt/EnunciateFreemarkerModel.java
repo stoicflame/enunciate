@@ -84,6 +84,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put(Integer.class.getName(), KnownXmlType.INT);
     knownTypes.put(Long.class.getName(), KnownXmlType.LONG);
     knownTypes.put(Short.class.getName(), KnownXmlType.SHORT);
+    knownTypes.put(Boolean.TYPE.getName(), KnownXmlType.BOOLEAN);
+    knownTypes.put(Byte.TYPE.getName(), KnownXmlType.BYTE);
+    knownTypes.put(Double.TYPE.getName(), KnownXmlType.DOUBLE);
+    knownTypes.put(Float.TYPE.getName(), KnownXmlType.FLOAT);
+    knownTypes.put(Integer.TYPE.getName(), KnownXmlType.INT);
+    knownTypes.put(Long.TYPE.getName(), KnownXmlType.LONG);
+    knownTypes.put(Short.TYPE.getName(), KnownXmlType.SHORT);
     knownTypes.put(String.class.getName(), KnownXmlType.STRING);
     knownTypes.put(java.math.BigInteger.class.getName(), KnownXmlType.INTEGER);
     knownTypes.put(java.math.BigDecimal.class.getName(), KnownXmlType.DECIMAL);

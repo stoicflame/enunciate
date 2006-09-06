@@ -69,9 +69,26 @@ public class ListParser extends AbstractMessageReader {
     }
 
     if (Collection.class.isAssignableFrom(listType)) {
+      Collection collection = newCollectionInstance(listType);
+      collection.addAll(Arrays.asList((Object[]) array));
+      this.list = collection;
+    }
+    else {
+      this.list = array;
+    }
+  }
+
+  /**
+   * Create a new instance of something of the specified collection type.
+   *
+   * @param collectionType The collection type.
+   * @return the new instance.
+   */
+  public static Collection newCollectionInstance(Class collectionType) {
+    if (Collection.class.isAssignableFrom(collectionType)) {
       Collection collection;
-      if ((listType.isInterface()) || (Modifier.isAbstract(listType.getModifiers()))) {
-        if (Set.class.isAssignableFrom(listType)) {
+      if ((collectionType.isInterface()) || (Modifier.isAbstract(collectionType.getModifiers()))) {
+        if (Set.class.isAssignableFrom(collectionType)) {
           collection = new TreeSet();
         }
         else {
@@ -80,17 +97,16 @@ public class ListParser extends AbstractMessageReader {
       }
       else {
         try {
-          collection = (Collection) listType.newInstance();
+          collection = (Collection) collectionType.newInstance();
         }
         catch (Exception e) {
-          throw new IllegalArgumentException("Unable to create an instance of " + listType.getName() + ".", e);
+          throw new IllegalArgumentException("Unable to create an instance of " + collectionType.getName() + ".", e);
         }
       }
-      collection.addAll(Arrays.asList((Object[]) array));
-      this.list = collection;
+      return collection;
     }
     else {
-      this.list = array;
+      throw new IllegalArgumentException("Invalid list type: " + collectionType.getName());
     }
   }
 

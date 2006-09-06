@@ -33,21 +33,19 @@ public class ${type.simpleName}XFireType extends Type {
 
     [#if type.value.xmlList]
       [#if type.value.accessorType.collection]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value.accessorType)}.class, ${classnameFor(type.value.collectionItemType)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${type.value.accessorType.declaration.qualifiedName}.class, ${classnameFor(type.value.collectionItemType)}.class, getTypeMapping(), context);
       [#else]
     ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value.accessorType)}.class, getTypeMapping(), context);
       [/#if]
-    instance.set${type.value.simpleName?cap_first}((${classnameFor(type.value.accessorType)}) listParser.getList());
-    [#else]
-      [#if type.value.accessorType.primitive]
+    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) listParser.getList();
+    [#elseif type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
     ${type.value.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
-      [#else]
+    [#else]
     Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
     ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
-      [/#if]
-    instance.set${type.value.simpleName?cap_first}(value);
     [/#if]
+    instance.set${type.value.simpleName?cap_first}(value);
 
     return instance;
   }
@@ -68,7 +66,7 @@ public class ${type.simpleName}XFireType extends Type {
     ${classnameFor(type.value.accessorType)} value = instance.get${type.value.simpleName?cap_first}();
     if (value != null) {
       [#if type.value.xmlList]
-      ListWriter listWriter = new ListWriter(, getTypeMapping(), context);
+      ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
       [/#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);

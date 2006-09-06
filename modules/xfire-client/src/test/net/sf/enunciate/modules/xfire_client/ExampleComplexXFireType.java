@@ -32,8 +32,12 @@ public class ExampleComplexXFireType extends Type {
     }
 
     // Read child elements
+    MessageReader wrapperReader = null;
     while (reader.hasMoreElementReaders()) {
+      MessageReader elementReader = ((wrapperReader != null) && (wrapperReader.hasMoreElementReaders())) ? wrapperReader.getNextElementReader() : reader.getNextElementReader();
+
       setProperty(person, reader.getNextElementReader(), context);
+
     }
 
     //OR just read the value.
@@ -86,6 +90,7 @@ public class ExampleComplexXFireType extends Type {
     property = person.getLastName();
     type = getTypeMapping().getType(String.class);
     MessageWriter elementWriter = writer.getElementWriter("lastname", "http://net.sf.enunciate/samples/petclinic/owners");
+    elementWriter.writeXsiNil();
     type.writeObject(property, elementWriter, context);
 
     //OR value.

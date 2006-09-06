@@ -34,7 +34,7 @@ public class ListWriter extends AbstractMessageWriter {
    * @param context     The context.
    */
   public ListWriter(Collection items, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    this(items.toArray(), typeMapping, context);
+    this(items == null ? (Object) null : items.toArray(), typeMapping, context);
   }
 
   /**
@@ -145,10 +145,12 @@ public class ListWriter extends AbstractMessageWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   private ListWriter(Object array, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    for (int i = 0; i < Array.getLength(array); i++) {
-      Object item = Array.get(array, i);
-      Type componentType = typeMapping.getType(item.getClass());
-      componentType.writeObject(item, this, context);
+    if (array != null) {
+      for (int i = 0; i < Array.getLength(array); i++) {
+        Object item = Array.get(array, i);
+        Type componentType = typeMapping.getType(item.getClass());
+        componentType.writeObject(item, this, context);
+      }
     }
   }
 
@@ -179,9 +181,13 @@ public class ListWriter extends AbstractMessageWriter {
   /**
    * Get the current list value.
    *
-   * @return the current list value.
+   * @return the current list value, or null if no items have been added.
    */
   public String getValue() {
+    if (items.size() == 0) {
+      return null;
+    }
+
     StringBuffer buffer = new StringBuffer();
     Iterator it = items.iterator();
     while (it.hasNext()) {
@@ -254,10 +260,6 @@ public class ListWriter extends AbstractMessageWriter {
    * No-op
    */
   public void close() {
-  }
-
-  public String toString() {
-    return getValue();
   }
 
 }

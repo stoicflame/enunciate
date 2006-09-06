@@ -2,7 +2,9 @@ package net.sf.enunciate.modules.xfire_client;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -43,24 +45,42 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    if ((unwrapped instanceof DeclaredType) || (unwrapped instanceof TypeDeclaration)) {
-      TypeDeclaration declaration;
-      if (unwrapped instanceof DeclaredType) {
-        declaration = ((DeclaredType) unwrapped).getDeclaration();
-      }
-      else {
-        declaration = (TypeDeclaration) unwrapped;
-      }
 
-      return convert(declaration);
+    String conversion;
+    if (unwrapped instanceof TypeMirror) {
+      conversion = convert((TypeMirror) unwrapped);
+    }
+    else if (unwrapped instanceof TypeDeclaration) {
+      conversion = convert((TypeDeclaration) unwrapped);
     }
     else if (unwrapped instanceof PackageDeclaration) {
-      return convert((PackageDeclaration) unwrapped);
+      conversion = convert((PackageDeclaration) unwrapped);
     }
     else {
-      return convert(String.valueOf(unwrapped));
+      conversion = convert(String.valueOf(unwrapped));
     }
 
+    return conversion;
+  }
+
+  /**
+   * Returns the client-side package value for the given type.
+   *
+   * @param typeMirror The type.
+   * @return The client-side package value for the type.
+   */
+  protected String convert(TypeMirror typeMirror) {
+    String conversion;
+    if (typeMirror instanceof DeclaredType) {
+      conversion = convert(((DeclaredType) typeMirror).getDeclaration());
+    }
+    else if (typeMirror instanceof ArrayType) {
+      conversion = convert(((ArrayType) typeMirror).getComponentType());
+    }
+    else {
+      conversion = String.valueOf(typeMirror);
+    }
+    return conversion;
   }
 
   /**

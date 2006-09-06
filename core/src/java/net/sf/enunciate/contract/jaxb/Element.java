@@ -1,7 +1,9 @@
 package net.sf.enunciate.contract.jaxb;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
@@ -10,6 +12,8 @@ import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -50,6 +54,14 @@ public class Element extends Accessor {
     this.choices = new ArrayList<Element>();
     if (xmlElements != null) {
       for (XmlElement element : xmlElements.value()) {
+        Class clazz = element.type();
+        if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
+          throw new ValidationException(getPosition(), "An element choice must have its type specified.");
+        }
+        else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
+          throw new ValidationException(getPosition(), "An element choice must not be a collection or an array.");
+        }
+
         this.choices.add(new Element((MemberDeclaration) getDelegate(), getTypeDefinition(), element));
       }
     }
@@ -104,6 +116,7 @@ public class Element extends Accessor {
     QName ref = super.getRef();
 
     if (ref == null) {
+      //check to see if this is an implied ref as per the spec.
       XmlTypeMirror baseType = getBaseType();
       if (baseType.isAnonymous()) {
         TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
@@ -115,6 +128,71 @@ public class Element extends Accessor {
     }
 
     return ref;
+  }
+
+  /**
+   * The type of an element accessor can be specified by an annotation.
+   *
+   * @return The accessor type.
+   */
+  @Override
+  public TypeMirror getAccessorType() {
+    if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
+      Class clazz = xmlElement.type();
+      return getAccessorType(clazz);
+    }
+
+    return super.getAccessorType();
+  }
+
+  /**
+   * Get the accessor type for the specified class.
+   *
+   * @param clazz The class.
+   * @return The accessor type.
+   */
+  protected TypeMirror getAccessorType(Class clazz) {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    TypeMirror undecorated;
+    if (clazz.isPrimitive()) {
+      if (Boolean.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BOOLEAN);
+      }
+      else if (Byte.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BYTE);
+      }
+      else if (Character.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.CHAR);
+      }
+      else if (Double.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.DOUBLE);
+      }
+      else if (Float.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.FLOAT);
+      }
+      else if (Integer.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.INT);
+      }
+      else if (Long.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.LONG);
+      }
+      else if (Short.TYPE == clazz) {
+        undecorated = env.getTypeUtils().getPrimitiveType(PrimitiveType.Kind.SHORT);
+      }
+      else {
+        throw new IllegalArgumentException("Unknown primitive type: " + clazz.getName());
+      }
+    }
+    else if (clazz.isArray()) {
+      undecorated = env.getTypeUtils().getArrayType(getAccessorType(clazz.getComponentType()));
+    }
+    else {
+      TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
+      //todo: worry about the formal type parameters?
+      undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
+    }
+
+    return TypeMirrorDecorator.decorate(undecorated);
   }
 
   /**

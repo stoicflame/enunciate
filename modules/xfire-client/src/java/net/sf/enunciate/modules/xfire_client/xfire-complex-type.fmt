@@ -13,6 +13,7 @@ import org.codehaus.xfire.fault.XFireFault;
 
 import net.sf.enunciate.modules.xfire_client.ListWriter;
 import net.sf.enunciate.modules.xfire_client.ListParser;
+import net.sf.enunciate.modules.xfire_client.ElementsWriter;
 
 import javax.xml.namespace.QName;
 
@@ -50,7 +51,7 @@ public class ${type.simpleName}XFireType extends Type {
         [#else]
           [#if attribute.accessorType.primitive]
         Type type = getTypeMapping().getType([@primitiveWrapper type=attribute.accessorType/].class);
-        ${attribute.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=attribute.accessorType/]) type.readObject(attributeReader, context))[/@unwrapIfPrimitive];
+        ${attribute.accessorType} value = [@unwrapIfPrimitive type=attribute.accessorType](([@primitiveWrapper type=attribute.accessorType/]) type.readObject(attributeReader, context))[/@unwrapIfPrimitive];
           [#else]
         Type type = getTypeMapping().getType(${classnameFor(attribute.accessorType)}.class);
         ${classnameFor(attribute.accessorType)} value = (${classnameFor(attribute.accessorType)}) type.readObject(attributeReader, context);
@@ -74,7 +75,7 @@ public class ${type.simpleName}XFireType extends Type {
       [#else]
         [#if type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
-    ${type.value.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
+    ${type.value.accessorType} value = [@unwrapIfPrimitive type=type.value.accessorType](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
         [#else]
     Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
     ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
@@ -83,29 +84,55 @@ public class ${type.simpleName}XFireType extends Type {
       [/#if]
     [#elseif type.elements?size > 0]
     // Read child elements
+    MessageReader wrapperReader = null;
     while (reader.hasMoreElementReaders()) {
-      MessageReader elementReader = reader.getNextElementReader();
+      MessageReader elementReader = ((wrapperReader != null) && (wrapperReader.hasMoreElementReaders())) ? wrapperReader.getNextElementReader() : reader.getNextElementReader();
       QName name = elementReader.getName();
-      [#list type.elements as element]
-      [#if !element_first]else [/#if]if ("${element.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.name}".equals(name.getLocalPart()))) {
-        [#if element.xmlList]
-          [#if element.accessorType.collection]
-        ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(element.accessorType)}.class, ${classnameFor(element.collectionItemType)}.class, getTypeMapping(), context);
-          [#else]
+
+      [#list type.elements as item]
+        [#list item.choices as element]
+      [#if !(element_first && item_first)]else [/#if]if ("${element.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.name}".equals(name.getLocalPart()))) {
+          [#if element.xmlList]
+            [#if element.accessorType.collection]
+        ListParser listParser = new ListParser(elementReader.getValue(), ${element.accessorType.declaration.qualifiedName}.class, ${classnameFor(element.collectionItemType)}.class, getTypeMapping(), context);
+            [#else]
         ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(element.accessorType)}.class, getTypeMapping(), context);
-          [/#if]
-        instance.set${element.simpleName?cap_first}((${classnameFor(element.accessorType)}) listParser.getList());
-        [#else]
-          [#if element.accessorType.primitive]
+            [/#if]
+        ${classnameFor(element.accessorType)} value = (${classnameFor(element.accessorType)}) listParser.getList();
+          [#elseif element.accessorType.primitive]
         Type type = getTypeMapping().getType([@primitiveWrapper type=element.accessorType/].class);
-        ${element.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=element.accessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
+        ${element.accessorType} value = [@unwrapIfPrimitive  type=element.accessorType](([@primitiveWrapper type=element.accessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
           [#else]
         Type type = getTypeMapping().getType(${classnameFor(element.accessorType)}.class);
         ${classnameFor(element.accessorType)} value = (${classnameFor(element.accessorType)}) type.readObject(elementReader, context);
           [/#if]
+          [#if item.collectionType]
+            [#if item.accessorType.collection]
+        if (instance.get${element.simpleName?cap_first}() == null) {
+          instance.set${element.simpleName?cap_first}((${item.accessorType.declaration.qualifiedName}) ListParser.newCollectionInstance(${item.accessorType.declaration.qualifiedName}.class));
+        }
+        instance.get${element.simpleName?cap_first}().add(value);
+            [#else]
+        java.util.ArrayList elementList;
+        if (instance.get${element.simpleName?cap_first}() == null) {
+          elementList = new java.util.ArrayList();
+        }
+        else {
+          elementList = new java.util.ArrayList(java.util.Arrays.asList(instance.get${element.simpleName?cap_first}()));
+        }
+        elementList.add(value);
+        instance.set${element.simpleName?cap_first}((${classnameFor(item.accessorType)}) elementList.toArray(new ${classnameFor(item.accessorType.componentType)}[elementList.size()]));
+            [/#if]
+          [/#else]
         instance.set${element.simpleName?cap_first}(value);
-        [/#if]
+          [/#if]
       }
+        [/#list]
+        [#if item.wrapped]
+      else if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
+        wrapperReader = elementReader;
+      }
+        [/#if]
       [/#list]
     }
     [/#if]
@@ -123,24 +150,97 @@ public class ${type.simpleName}XFireType extends Type {
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
     ${classname} instance = (${classname}) object;
 
-    [#if type.value.accessorType.primitive]
+    Object property;
+    ListWriter listWriter;
+
+    [#if type.attributes?size > 0]
+    // write the attributes.
+      [#list type.attributes as attribute]
+        [#if attribute.xmlList]
+    listWriter = new ListWriter(instance.get${attribute.simpleName?cap_first}(), getTypeMapping(), context);
+    property = listWriter.getValue();
+        [#else]
+    property = [@wrapIfPrimitive type=attribute.accessorType]instance.get${attribute.simpleName?cap_first}()[/@wrapIfPrimitive];
+        [/#if]
+    if (property != null) {
+      Type type = getTypeMapping().getType(property.getClass());
+      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace}");
+      type.writeObject(property, attributeWriter, context);
+    }
+        [#if attribute.required]
+    else {
+      throw new NullPointerException("Required property ${attribute.simpleName} on ${classname} was not set.");
+    }
+        [/#if]
+
+      [/#list]
+    [/#if]
+
+    [#if type.value?exists]
+    //write the value.
+      [#if type.value.accessorType.primitive]
     writer.writeValue(String.valueOf(instance.get${type.value.simpleName?cap_first}()));
-    [#else]
+      [#else]
     ${classnameFor(type.value.accessorType)} value = instance.get${type.value.simpleName?cap_first}();
     if (value != null) {
-      [#if type.value.xmlList]
-      ListWriter listWriter = new ListWriter(, getTypeMapping(), context);
+        [#if type.value.xmlList]
+      ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
-      [/#else]
+        [/#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
       type.writeObject(value, writer, context);
-      [/#if]
+        [/#if]
     }
-      [#if type.value.nillable?default(false)]
+      [/#if]
+    [#elseif type.elements?size > 0]
+    //write the elements.
+      [#list type.elements as element]
+        [#if element.xmlList || !element.collectionType]
+          [#if element.xmlList]
+    listWriter = new ListWriter(instance.get${element.simpleName?cap_first}(), getTypeMapping(), context);
+    property = listWriter.getValue();
+          [#else]
+    property = [@wrapIfPrimitive type=attribute.accessorType]instance.get${attribute.simpleName?cap_first}()[/@wrapIfPrimitive];
+          [/#if]
+    if (property != null) {
+      Type type = getTypeMapping().getType(property.getClass());
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+      type.writeObject(property, elementWriter, context);
+    }
+          [#if element.required]
     else {
-      writer.writeXsiNil();
+            [#if element.nillable]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+      elementWriter.writeXsiNil();
+            [#else]
+      throw new NullPointerException("Required property ${element.simpleName} on ${classname} was not set.");
+            [/#else]
     }
-      [/#if]
+          [/#if]
+        [#else]
+          [#if element.wrapped]
+            [#if element.wrapperNillable]
+    if (instance.get${element.simpleName?cap_first}() == null) {
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace}");
+      subwriter.writeXsiNil();
+    }
+    else {
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace}");
+      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace}", "${element.name}"), subwriter, getTypeMapping(), context);
+    }
+            [#else]
+    if (instance.get${element.simpleName?cap_first}() != null) {
+      subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace}");
+      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace}", "${element.name}"), subwriter, getTypeMapping(), context);
+    }
+            [/#if]
+          [#else]
+    ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace}", "${element.name}"), writer, getTypeMapping(), context);
+          [/#if]
+        [/#if]
+
+      [/#list]
+
     [/#if]
 
   }
