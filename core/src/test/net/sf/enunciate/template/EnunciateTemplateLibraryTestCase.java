@@ -6,7 +6,6 @@ import freemarker.template.*;
 import net.sf.enunciate.apt.EnunciateAnnotationProcessor;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.EnunciateContractTestCase;
-import net.sf.enunciate.template.freemarker.PrefixMethod;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
@@ -113,7 +112,7 @@ public abstract class EnunciateTemplateLibraryTestCase extends EnunciateContract
    *
    * @return The transforms to use for the model.
    */
-  protected Collection<FreemarkerTransform> getTransforms() {
+  protected Collection<FreemarkerTransform> getTransforms() throws IOException {
     return new EnunciateAnnotationProcessor().getTransforms();
   }
 

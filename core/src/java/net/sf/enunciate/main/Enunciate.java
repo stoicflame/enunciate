@@ -1,5 +1,6 @@
 package net.sf.enunciate.main;
 
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.modules.DeploymentModule;
@@ -7,8 +8,6 @@ import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,12 +39,12 @@ public class Enunciate {
     COMPILE,
 
     /**
-     * Compile and build the war structure.
+     * Compile and build the structure.
      */
     BUILD,
 
     /**
-     * Build and package the war.
+     * Build and package.
      */
     PACKAGE
   }
@@ -54,140 +53,88 @@ public class Enunciate {
   private boolean debug = false;
 
   private File configFile;
-  private File preprocessDir;
-  private File destDir;
-  private File warBuildDir;
-  private File warFile;
+  private File generateDir;
+  private File compileDir;
+  private File buildDir;
+  private File packageDir;
   private String classpath;
-  private String warLibs;
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
+  private final String[] sourceFiles;
 
   public static void main(String[] args) {
-    Enunciate enunciate = new Enunciate();
     //todo: compile the args, set the variables, then:
+    //Enunciate enunciate = new Enunciate();
     //enunciate.execute();
   }
 
   /**
-   * Enunciate the specified source files.
+   * Construct an enunciate mechanism on the specified source files.
    *
-   * @param sourceFiles The source files to enunciate.
+   * @param sourceFiles The source files.
    */
-  public void execute(String[] sourceFiles) throws IOException {
+  public Enunciate(String[] sourceFiles) {
+    this.sourceFiles = sourceFiles;
+  }
+
+  /**
+   * Execute the mechanism.
+   */
+  public void execute() throws EnunciateException, IOException {
     if (this.config == null) {
       this.config = getConfig();
     }
 
-    List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
+    final List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
+    int target = getTarget().ordinal();
 
     for (DeploymentModule deploymentModule : deploymentModules) {
       deploymentModule.init(this);
     }
 
-    boolean success = invokeApt(sourceFiles);
+    if (target >= Target.GENERATE.ordinal()) {
+      File genDir = getGenerateDir();
+      if (genDir == null) {
+        genDir = File.createTempFile("enunciate", "");
+        genDir.delete();
+        genDir.mkdirs();
+        setGenerateDir(genDir);
+      }
 
-    if (success && (getTarget().ordinal() >= Target.COMPILE.ordinal())) {
-      File destdir = getDestDir();
+      invokeApt(getSourceFiles());
+    }
+
+    if (target >= Target.COMPILE.ordinal()) {
+      File destdir = getCompileDir();
       if (destdir == null) {
         destdir = File.createTempFile("enunciate", "");
         destdir.delete();
         destdir.mkdirs();
-        setDestDir(destdir);
+        setCompileDir(destdir);
       }
-
-      success = invokeJavac(sourceFiles);
 
       for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.COMPILE);
       }
     }
 
-    if (success && (getTarget().ordinal() >= Target.BUILD.ordinal())) {
-      File warbuilddir = getWarBuildDir();
-      if (warbuilddir == null) {
-        warbuilddir = File.createTempFile("enunciate", "");
-        warbuilddir.delete();
-        warbuilddir.mkdirs();
-        setWarBuildDir(warbuilddir);
+    if (target >= Target.BUILD.ordinal()) {
+      File buildDir = getBuildDir();
+      if (buildDir == null) {
+        buildDir = File.createTempFile("enunciate", "");
+        buildDir.delete();
+        buildDir.mkdirs();
+        setBuildDir(buildDir);
       }
-
-      File webinfClasses = new File(getWebInf(), "classes");
-      File webinfLib = new File(getWebInf(), "lib");
-
-      //copy the compiled classes to WEB-INF/classes.
-      copyDir(getDestDir(), webinfClasses);
-
-      String warLibs = getWarLibs();
-      if (warLibs == null) {
-        warLibs = getClasspath();
-      }
-
-      if (warLibs != null) {
-        String[] pathEntries = warLibs.split(File.pathSeparator);
-        for (String pathEntry : pathEntries) {
-          File file = new File(pathEntry);
-          if (file.exists()) {
-            if (file.isDirectory()) {
-              if (isVerbose()) {
-                System.out.println("Adding the contents of " + file.getAbsolutePath() + " to WEB-INF/classes.");
-              }
-              copyDir(file, webinfClasses);
-            }
-            else if (!excludeLibrary(file)) {
-              if (isVerbose()) {
-                System.out.println("Including " + file.getName() + " in WEB-INF/lib.");
-              }
-              copyFile(file, file.getParentFile(), webinfLib);
-            }
-          }
-        }
-      }
-
-      //todo: copy any additional files as resources (specified in the config);
-
-      //todo: copy any additional jars (specified in the config)?
-
-      //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
       for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.BUILD);
       }
     }
 
-    if (success && (getTarget().ordinal() >= Target.PACKAGE.ordinal())) {
-      File warBuildDir = getWarBuildDir();
-      if (warBuildDir == null) {
-        throw new IOException("No war build directory has been specified.");
-      }
+    if (target >= Target.PACKAGE.ordinal()) {
 
-      if (!warBuildDir.exists()) {
-        throw new IOException("Directory doesn't exist: " + warBuildDir.getAbsolutePath());
-      }
-
-      if (!warBuildDir.isDirectory()) {
-        throw new IOException(warBuildDir.getAbsolutePath() + " is not a directory.");
-      }
-
-      if (warBuildDir.list().length == 0) {
-        throw new IOException(warBuildDir.getAbsolutePath() + " is an empty directory.");
-      }
-
-      File warFile = getWarFile();
-      if (warFile == null) {
-        throw new IOException("A war file must be specified.");
-      }
-
-      if (!warFile.getParentFile().exists()) {
-        warFile.getParentFile().mkdirs();
-      }
-
-      if (isVerbose()) {
-        System.out.println("Creating " + warFile.getAbsolutePath());
-      }
-
-      zip(warBuildDir, warFile);
 
       for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.PACKAGE);
@@ -200,13 +147,22 @@ public class Enunciate {
   }
 
   /**
+   * Get the source files for this enunciate mechanism.
+   *
+   * @return The source files.
+   */
+  public String[] getSourceFiles() {
+    return this.sourceFiles;
+  }
+
+  /**
    * Reads the enunciate configuration from the specified file, if any.
    *
    * @return The configuration, or null if none is specified.
    */
   protected EnunciateConfiguration getConfig() throws IOException {
     File configFile = getConfigFile();
-    if (configFile != null) {
+    if ((configFile != null) && (configFile.exists())) {
       try {
         return EnunciateConfiguration.readFrom(new FileInputStream(configFile));
       }
@@ -214,25 +170,17 @@ public class Enunciate {
         throw new IOException("Error parsing enunciate configuration file " + configFile + ": " + e.getMessage());
       }
     }
-    return null;
-  }
 
-  /**
-   * Get the target webinf directory.
-   *
-   * @return The target webinf directory.
-   */
-  public File getWebInf() {
-    return new File(getWarBuildDir(), "WEB-INF");
+    //no or invalid config file, just return the default.
+    return EnunciateConfiguration.DEFAULT;
   }
 
   /**
    * Invokes APT on the specified source files.
    *
    * @param sourceFiles The source files.
-   * @return Whether the invocation was successful.
    */
-  protected boolean invokeApt(String[] sourceFiles) throws IOException {
+  protected void invokeApt(String[] sourceFiles) throws IOException, EnunciateException {
     ArrayList<String> args = new ArrayList<String>();
     String classpath = getClasspath();
     if (classpath == null) {
@@ -248,9 +196,9 @@ public class Enunciate {
 
     args.add("-nocompile");
 
-    if (getPreprocessDir() != null) {
+    if (getGenerateDir() != null) {
       args.add("-s");
-      args.add(getPreprocessDir().getAbsolutePath());
+      args.add(getGenerateDir().getAbsolutePath());
     }
 
     args.addAll(Arrays.asList(sourceFiles));
@@ -263,22 +211,50 @@ public class Enunciate {
     }
 
     EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this.config);
-    int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
-    return apf.isProcessedSuccessfully() && (procCode == 0);
+    com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    apf.throwAnyErrors();
+  }
+
+  /**
+   * Invokes javac on the specified source files. The classpath will be the classpath for this enunciate mechanism,
+   * if specified, otherwise the system classpath.
+   *
+   * @param compileDir  The compile directory.
+   * @param sourceFiles The source files.
+   * @throws EnunciateException if the compile fails.
+   */
+  public void invokeJavac(File compileDir, String[] sourceFiles) throws EnunciateException {
+    String classpath = getClasspath();
+    if (classpath == null) {
+      classpath = System.getProperty("java.class.path");
+    }
+
+    invokeJavac(classpath, compileDir, sourceFiles);
   }
 
   /**
    * Invokes javac on the specified source files.
    *
+   * @param classpath   The classpath.
+   * @param compileDir  The compile directory.
    * @param sourceFiles The source files.
-   * @return Whether the invocation was successful.
+   * @throws EnunciateException if the compile fails.
    */
-  protected boolean invokeJavac(String[] sourceFiles) throws IOException {
-    ArrayList<String> args = new ArrayList<String>();
-    String classpath = getClasspath();
-    if (classpath == null) {
-      classpath = System.getProperty("java.class.path");
-    }
+  public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {
+    invokeJavac(classpath, compileDir, new ArrayList<String>(), sourceFiles);
+  }
+
+  /**
+   * Invokes javac on the specified source files.
+   *
+   * @param classpath      The classpath.
+   * @param compileDir     The compile directory.
+   * @param additionalArgs Any additional arguments to the compiler.
+   * @param sourceFiles    The source files.
+   * @throws EnunciateException if the compile fails.
+   */
+  public void invokeJavac(String classpath, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
+    List<String> args = new ArrayList<String>();
 
     args.add("-cp");
     args.add(classpath);
@@ -288,8 +264,8 @@ public class Enunciate {
     }
 
     args.add("-d");
-    args.add(getDestDir().getAbsolutePath());
-
+    args.add(compileDir.getAbsolutePath());
+    args.addAll(additionalArgs);
     args.addAll(Arrays.asList(sourceFiles));
 
     if (isDebug()) {
@@ -300,7 +276,9 @@ public class Enunciate {
     }
 
     int procCode = com.sun.tools.javac.Main.compile(args.toArray(new String[args.size()]));
-    return (procCode == 0);
+    if (procCode != 0) {
+      throw new EnunciateException("compile failed.");
+    }
   }
 
   /**
@@ -393,6 +371,10 @@ public class Enunciate {
    * @param toFile The file to zip to.
    */
   public void zip(File dir, File toFile) throws IOException {
+    if (!toFile.getParentFile().exists()) {
+      toFile.getParentFile().mkdirs();
+    }
+
     ArrayList<File> files = new ArrayList<File>();
     buildFileList(dir, files);
 
@@ -437,40 +419,6 @@ public class Enunciate {
         list.add(file);
       }
     }
-  }
-
-  /**
-   * Whether to exclude a file from copying to the WEB-INF/lib directory.
-   *
-   * @param file The file to exclude.
-   * @return Whether to exclude a file from copying to the lib directory.
-   */
-  protected boolean excludeLibrary(File file) throws IOException {
-    if (getWarLibs() != null) {
-      //if the war libraries were explicitly declared, don't exclude anything.
-      return false;
-    }
-
-    //instantiate a loader with this library only in its path...
-    URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
-    if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
-      //exclude tools.jar.
-      return true;
-    }
-    else if (loader.findResource(net.sf.jelly.apt.Context.class.getName().replace('.', '/').concat(".class")) != null) {
-      //exclude apt-jelly-core.jar
-      return true;
-    }
-    else if (loader.findResource(net.sf.jelly.apt.freemarker.FreemarkerModel.class.getName().replace('.', '/').concat(".class")) != null) {
-      //exclude apt-jelly-freemarker.jar
-      return true;
-    }
-    else if (loader.findResource(freemarker.template.Configuration.class.getName().replace('.', '/').concat(".class")) != null) {
-      //exclude freemarker.jar
-      return true;
-    }
-
-    return false;
   }
 
   /**
@@ -532,17 +480,17 @@ public class Enunciate {
    *
    * @return The destination directory for the compiled classes.
    */
-  public File getDestDir() {
-    return destDir;
+  public File getCompileDir() {
+    return compileDir;
   }
 
   /**
    * The destination directory for the compiled classes.
    *
-   * @param destDir The destination directory for the compiled classes.
+   * @param compileDir The destination directory for the compiled classes.
    */
-  public void setDestDir(File destDir) {
-    this.destDir = destDir;
+  public void setCompileDir(File compileDir) {
+    this.compileDir = compileDir;
   }
 
   /**
@@ -550,35 +498,35 @@ public class Enunciate {
    *
    * @return The directory to use to build the war.
    */
-  public File getWarBuildDir() {
-    return warBuildDir;
+  public File getBuildDir() {
+    return buildDir;
   }
 
   /**
    * The directory to use to build the war.
    *
-   * @param warBuildDir The directory to use to build the war.
+   * @param buildDir The directory to use to build the war.
    */
-  public void setWarBuildDir(File warBuildDir) {
-    this.warBuildDir = warBuildDir;
+  public void setBuildDir(File buildDir) {
+    this.buildDir = buildDir;
   }
 
   /**
-   * The war file to create.
+   * The package directory.
    *
-   * @return The war file to create.
+   * @return The package directory.
    */
-  public File getWarFile() {
-    return warFile;
+  public File getPackageDir() {
+    return packageDir;
   }
 
   /**
-   * The war file to create.
+   * The package directory.
    *
-   * @param warFile The war file to create.
+   * @param packageDir The package directory.
    */
-  public void setWarFile(File warFile) {
-    this.warFile = warFile;
+  public void setPackageDir(File packageDir) {
+    this.packageDir = packageDir;
   }
 
   /**
@@ -586,17 +534,17 @@ public class Enunciate {
    *
    * @return The preprocessor directory (-s).
    */
-  public File getPreprocessDir() {
-    return preprocessDir;
+  public File getGenerateDir() {
+    return generateDir;
   }
 
   /**
    * The preprocessor directory (-s).
    *
-   * @param preprocessDir The preprocessor directory (-s).
+   * @param generateDir The preprocessor directory (-s).
    */
-  public void setPreprocessDir(File preprocessDir) {
-    this.preprocessDir = preprocessDir;
+  public void setGenerateDir(File generateDir) {
+    this.generateDir = generateDir;
   }
 
   /**
@@ -615,24 +563,6 @@ public class Enunciate {
    */
   public void setClasspath(String classpath) {
     this.classpath = classpath;
-  }
-
-  /**
-   * The libraries to include in the war, in classpath form.  Defaults to the classpath.
-   *
-   * @return The libraries to include in the war, in classpath form.  Defaults to the classpath.
-   */
-  public String getWarLibs() {
-    return warLibs;
-  }
-
-  /**
-   * The libraries to include in the war, in classpath form.  Defaults to the classpath.
-   *
-   * @param warLibs The libraries to include in the war, in classpath form.  Defaults to the classpath.
-   */
-  public void setWarLibs(String warLibs) {
-    this.warLibs = warLibs;
   }
 
   /**

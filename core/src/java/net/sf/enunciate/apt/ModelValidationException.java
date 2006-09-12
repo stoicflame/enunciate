@@ -8,4 +8,9 @@ import freemarker.template.TemplateModelException;
  * @author Ryan Heaton
  */
 public class ModelValidationException extends TemplateModelException {
+
+  public ModelValidationException() {
+    super("There were validation errors");
+  }
+
 }

@@ -2,10 +2,12 @@ package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.jelly.apt.ProcessorFactory;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,8 +70,11 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
     return null;
   }
 
-  public boolean isProcessedSuccessfully() {
-    return processor.isProcessedSuccessfully();
+  /**
+   * Throws any errors that occurred during processing.
+   */
+  public void throwAnyErrors() throws EnunciateException, IOException {
+    processor.throwAnyErrors();
   }
 
 }

@@ -4,6 +4,7 @@ import freemarker.cache.URLTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
@@ -25,19 +26,19 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * {@link net.sf.enunciate.apt.EnunciateAnnotationProcessor}).
    */
   @Override
-  protected final void doGenerate() throws IOException {
+  protected final void doGenerate() throws EnunciateException, IOException {
     try {
       doFreemarkerGenerate();
     }
     catch (TemplateException e) {
-      throw new IOException(e.getMessage());
+      throw new EnunciateException(e);
     }
   }
 
   /**
    * Generate using Freemarker.  Same as {@link #doGenerate} but can throw a TemplateException.
    */
-  public abstract void doFreemarkerGenerate() throws IOException, TemplateException;
+  public abstract void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException;
 
   /**
    * Processes the specified template with the given model.

@@ -1,5 +1,6 @@
 package net.sf.enunciate.modules;
 
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
@@ -52,7 +53,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    *
    * @param enunciate The enunciate mechanism.
    */
-  public void init(Enunciate enunciate) {
+  public void init(Enunciate enunciate) throws EnunciateException {
     this.enunciate = enunciate;
   }
 
@@ -70,7 +71,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    *
    * @param target The step.
    */
-  public void step(Enunciate.Target target) throws IOException {
+  public void step(Enunciate.Target target) throws EnunciateException, IOException {
     switch (target) {
       case GENERATE:
         doGenerate();
@@ -90,31 +91,31 @@ public class BasicDeploymentModule implements DeploymentModule {
   /**
    * Default implementation is a no-op.
    */
-  protected void doGenerate() throws IOException {
+  protected void doGenerate() throws EnunciateException, IOException {
   }
 
   /**
    * Default implementation is a no-op.
    */
-  protected void doBuild() throws IOException {
+  protected void doBuild() throws EnunciateException, IOException {
   }
 
   /**
    * Default implementation is a no-op.
    */
-  protected void doCompile() throws IOException {
+  protected void doCompile() throws EnunciateException, IOException {
   }
 
   /**
    * Default implementation is a no-op.
    */
-  protected void doPackage() throws IOException {
+  protected void doPackage() throws EnunciateException, IOException {
   }
 
   /**
    * Default implementation is a no-op.
    */
-  public void close() {
+  public void close() throws EnunciateException {
   }
 
   /**

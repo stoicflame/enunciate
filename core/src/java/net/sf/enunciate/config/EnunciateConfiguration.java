@@ -22,17 +22,26 @@ import java.util.*;
  */
 public class EnunciateConfiguration {
 
+  public static final EnunciateConfiguration DEFAULT = new EnunciateConfiguration(new DeploymentModule[]{});
+
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
 
   public EnunciateConfiguration() {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
 
+    System.out.println("discovering services...");
     Iterator discoveredModules = Service.providers(DeploymentModule.class);
     while (discoveredModules.hasNext()) {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
+      System.out.println("discovered module: " + discoveredModule.getName());
       this.modules.add(discoveredModule);
     }
+  }
+
+  private EnunciateConfiguration(DeploymentModule[] modules) {
+    this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
+    this.modules.addAll(Arrays.asList(modules));
   }
 
   /**

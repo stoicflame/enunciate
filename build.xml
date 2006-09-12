@@ -271,58 +271,44 @@
     <!--the name of the example to deploy.-->
     <property name="example" value="basic"/>
     <property name="example.dir" value="${enunciate.basedir}/src/samples/${example}"/>
-    <property name="example.gen.dir" value="${gen.dir}/examples/${example}"/>
-    <property name="example.build.dir" value="target/examples/${example}/classes"/>
-    <property name="war.file" value="target/examples/${example}.war"/>
+    <property name="example.gen.dir" value="target/examples/${example}/gen"/>
+    <property name="example.compile.dir" value="target/examples/${example}/classes"/>
+    <property name="example.build.dir" value="target/examples/${example}/build"/>
+    <property name="example.package.dir" value="target/examples/${example}/package"/>
+
+    <path id="enunciate.classpath">
+      <path refid="build.classpath"/>
+      <fileset dir="target">
+        <include name="${jar.pattern}"/>
+      </fileset>
+      <pathelement location="${conf.dir}"/>
+    </path>
+
+    <pathconvert refid="enunciate.classpath" property="enunciate.classpath.value" pathsep=":" dirsep="/"/>
+
+    <echo>
+      ${enunciate.classpath.value}
+    </echo>
 
     <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
-      <classpath>
-        <path refid="build.classpath"/>
-        <pathelement location="${build.dir}"/>
-        <pathelement location="${conf.dir}"/>
-      </classpath>
+      <classpath refid="enunciate.classpath"/>
     </taskdef>
 
     <mkdir dir="${example.gen.dir}"/>
+    <mkdir dir="${example.compile.dir}"/>
     <mkdir dir="${example.build.dir}"/>
-    <mkdir dir="${wars.dir}/${example}"/>
+    <mkdir dir="${example.package.dir}"/>
 
     <enunciate verbose="true" target="${enunciate.target}"
                basedir="${example.dir}"
                configFile="${example.dir}/enunciate.xml"
-               preprocessdir="${example.gen.dir}"
-               destdir="${example.build.dir}"
-               warbuilddir="${wars.dir}/${example}"
-               warFile="${war.file}">
+               generateDir="${example.gen.dir}"
+               compileDir="${example.compile.dir}"
+               buildDir="${example.build.dir}"
+               packageDir="${example.package.dir}">
       <include name="**/*.java"/>
-      <classpath>
-        <classpath>
-          <path refid="build.classpath"/>
-          <pathelement location="${build.dir}"/>
-          <pathelement location="${conf.dir}"/>
-        </classpath>
-      </classpath>
+      <classpath refid="enunciate.classpath"/>
     </enunciate>
-  </target>
-
-  <target name="deploy-example-api" depends="init"
-          description="deploys the enunciated app to the user-defined deploy directory, cleaning what's already there.">
-    <fail unless="deploy.dir">
-      A deploy directory must be specified with the "deploy.dir" property.
-      Do you have it specified in ${user.home}/.enunciate/build.properties file?
-    </fail>
-
-    <!--the name of the example to deploy.-->
-    <property name="example" value="basic"/>
-
-    <delete file="${deploy.dir}/${example}.war" failonerror="false"/>
-    <delete dir="${deploy.dir}/${example}" failonerror="false"/>
-
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="package"/>
-      <param name="example" value="${example}"/>
-      <param name="war.file" value="${deploy.dir}/${example}.war"/>
-    </antcall>
   </target>
 
 </project>

@@ -8,14 +8,12 @@ import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.WebFault;
 import net.sf.enunciate.contract.jaxws.WebMethod;
-import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
-import net.sf.enunciate.modules.xfire_client.config.XFireRuleSet;
+import net.sf.enunciate.modules.xfire_client.config.XFireClientRuleSet;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedHashMap;
@@ -29,11 +27,27 @@ import java.util.TreeSet;
 public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   private final LinkedHashMap<String, String> clientPackageConversions;
-  private final XFireRuleSet configurationRules;
+  private final XFireClientRuleSet configurationRules;
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new LinkedHashMap<String, String>();
-    this.configurationRules = new XFireRuleSet();
+    this.configurationRules = new XFireClientRuleSet();
+  }
+
+  /**
+   * @return "xfire-client"
+   */
+  @Override
+  public String getName() {
+    return "xfire-client";
+  }
+
+  /**
+   * @return "http://enunciate.sf.net"
+   */
+  @Override
+  public String getNamespace() {
+    return "http://enunciate.sf.net";
   }
 
   /**
@@ -98,19 +112,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     //todo: generate the JDK 1.5 client code.
-  }
-
-  @Override
-  protected void doBuild() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File webinf = enunciate.getWebInf();
-    File xfireConfigDir = new File(new File(enunciate.getPreprocessDir(), "xfire"), "xml");
-
-    //copy the web.xml file to WEB-INF.
-    enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
-
-    //copy the xfire config file from the xfire configuration directory to the WEB-INF directory.
-    enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
   }
 
   /**

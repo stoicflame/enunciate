@@ -5,6 +5,7 @@ import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
@@ -14,7 +15,6 @@ import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.DeploymentModule;
-import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.template.freemarker.*;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -40,7 +40,8 @@ import java.util.Collection;
  */
 public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
-  private boolean processedSuccessfully = false;
+  private EnunciateException ee = null;
+  private IOException ioe = null;
   private final EnunciateConfiguration config;
 
   public EnunciateAnnotationProcessor() {
@@ -51,7 +52,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     super(null);
 
     if (config == null) {
-      config = new EnunciateConfiguration();
+      throw new NullPointerException("A configuration must be specified.");
     }
 
     this.config = config;
@@ -63,21 +64,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       getRootModel();
 
       for (DeploymentModule module : this.config.getEnabledModules()) {
-        if (module instanceof FreemarkerDeploymentModule) {
-          //if it's a freemarker deployment module, we can handle the possible TemplateException.
-          ((FreemarkerDeploymentModule) module).doFreemarkerGenerate();
-        }
-        else {
-          module.step(Enunciate.Target.GENERATE);
-        }
+        module.step(Enunciate.Target.GENERATE);
       }
-
-      processedSuccessfully = true;
     }
     catch (TemplateException e) {
       process(e);
     }
     catch (IOException e) {
+      process(e);
+    }
+    catch (EnunciateException e) {
       process(e);
     }
   }
@@ -335,31 +331,34 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   //Inherited.
   @Override
   protected void process(TemplateException e) {
-    Messager messager = Context.getCurrentEnvironment().getMessager();
-    if (e instanceof ModelValidationException) {
-      messager.printError("There were validation errors.");
-    }
-    else {
+    if (!(e instanceof ModelValidationException)) {
+      Messager messager = Context.getCurrentEnvironment().getMessager();
       StringWriter stackTrace = new StringWriter();
       e.printStackTrace(new PrintWriter(stackTrace));
       messager.printError(stackTrace.toString());
     }
+
+    this.ee = new EnunciateException(e);
   }
 
-  //Inherited.
-  @Override
+  protected void process(EnunciateException e) {
+    this.ee = e;
+  }
+
   protected void process(IOException e) {
-    Messager messager = Context.getCurrentEnvironment().getMessager();
-    messager.printError(e.getMessage());
+    this.ioe = e;
   }
 
   /**
-   * Whether this processor has been processed successfully.
-   *
-   * @return Whether this processor has been processed successfully.
+   * Throws any errors that occurred during processing.
    */
-  public boolean isProcessedSuccessfully() {
-    return processedSuccessfully;
+  public void throwAnyErrors() throws EnunciateException, IOException {
+    if (this.ee != null) {
+      throw this.ee;
+    }
+    else if (this.ioe != null) {
+      throw this.ioe;
+    }
   }
 
 }

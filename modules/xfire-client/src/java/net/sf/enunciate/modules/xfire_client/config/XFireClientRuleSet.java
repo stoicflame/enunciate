@@ -4,11 +4,11 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 
 /**
- * Rules for the configuration of the XFire module.
+ * Rules for the configuration of the XFire client module.
  *
  * @author Ryan Heaton
  */
-public class XFireRuleSet extends RuleSetBase {
+public class XFireClientRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
     //allow client package conversions to be configured.
@@ -20,7 +20,6 @@ public class XFireRuleSet extends RuleSetBase {
 
     //todo: add rules for configuration of xfire in/out handlers?
 
-    //todo: add rules for configuration of spring interceptors for the service bean?
   }
 
   @Override

@@ -8,12 +8,12 @@ import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xml.config.SchemaConfig;
-import net.sf.enunciate.modules.xml.config.XMLRuleSet;
 import net.sf.enunciate.modules.xml.config.WsdlConfig;
+import net.sf.enunciate.modules.xml.config.XMLRuleSet;
 import org.apache.commons.digester.RuleSet;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +30,22 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
   private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
+
+  /**
+   * @return "xml"
+   */
+  @Override
+  public String getName() {
+    return "xml";
+  }
+
+  /**
+   * @return "http://enunciate.sf.net"
+   */
+  @Override
+  public String getNamespace() {
+    return "http://enunciate.sf.net";
+  }
 
   /**
    * The URL to "xml.fmt".
@@ -138,8 +154,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     XMLAPILookup lookup = new XMLAPILookup(ns2artifact, service2artifact);
 
     getEnunciate().setProperty(XMLAPILookup.class.getName(), lookup);
-    getEnunciate().setProperty("xml.dir", new File(enunciate.getPreprocessDir(), "xml"));
-
+    getEnunciate().setProperty("xml.dir", new File(enunciate.getGenerateDir(), "xml"));
   }
 
   @Override

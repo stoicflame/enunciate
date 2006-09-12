@@ -1,5 +1,6 @@
 package net.sf.enunciate.modules;
 
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
@@ -34,19 +35,19 @@ public interface DeploymentModule {
    *
    * @param enunciate The enunciate mechanism.
    */
-  void init(Enunciate enunciate);
+  void init(Enunciate enunciate) throws EnunciateException;
 
   /**
    * Step to the next enunciate target.
    *
    * @param target The enunciate target to step to.
    */
-  void step(Enunciate.Target target) throws IOException;
+  void step(Enunciate.Target target) throws EnunciateException, IOException;
 
   /**
    * Close this enunciate module.
    */
-  void close();
+  void close() throws EnunciateException;
 
   /**
    * The configuration rules for this deployment module, or null if none.

@@ -1,5 +1,6 @@
 package net.sf.enunciate.main;
 
+import net.sf.enunciate.EnunciateException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.taskdefs.MatchingTask;
@@ -16,10 +17,16 @@ import java.io.IOException;
  */
 public class EnunciateTask extends MatchingTask {
 
-  private final Enunciate proxy = new Enunciate();
+  private boolean verbose = false;
+  private boolean debug = false;
+  private File configFile;
   private File basedir;
   private Path classpath;
-  private Path warlib;
+  private File generateDir;
+  private File compileDir;
+  private File buildDir;
+  private File packageDir;
+  private Enunciate.Target target;
 
   /**
    * Executes the enunciate task.
@@ -28,14 +35,6 @@ public class EnunciateTask extends MatchingTask {
   public void execute() throws BuildException {
     if (basedir == null) {
       throw new BuildException("A base directory must be specified.");
-    }
-
-    if (classpath != null) {
-      proxy.setClasspath(classpath.toString());
-    }
-
-    if (warlib != null) {
-      proxy.setWarLibs(warlib.toString());
     }
 
     DirectoryScanner scanner = getDirectoryScanner(basedir);
@@ -47,9 +46,44 @@ public class EnunciateTask extends MatchingTask {
     }
 
     try {
-      proxy.execute(files);
+      Enunciate proxy = new Enunciate(files);
+
+      if (classpath != null) {
+        proxy.setClasspath(classpath.toString());
+      }
+
+      if (this.configFile != null) {
+        proxy.setConfigFile(this.configFile);
+      }
+
+      if (this.generateDir != null) {
+        proxy.setGenerateDir(this.generateDir);
+      }
+
+      if (this.compileDir != null) {
+        proxy.setCompileDir(this.compileDir);
+      }
+
+      if (this.buildDir != null) {
+        proxy.setBuildDir(this.buildDir);
+      }
+
+      if (this.packageDir != null) {
+        proxy.setPackageDir(this.packageDir);
+      }
+
+      if (this.target != null) {
+        proxy.setTarget(this.target);
+      }
+
+      proxy.setVerbose(verbose);
+      proxy.setDebug(debug);
+      proxy.execute();
     }
     catch (IOException e) {
+      throw new BuildException(e);
+    }
+    catch (EnunciateException e) {
       throw new BuildException(e);
     }
   }
@@ -64,12 +98,48 @@ public class EnunciateTask extends MatchingTask {
   }
 
   /**
+   * The generate directory.
+   *
+   * @param generateDir The generate directory.
+   */
+  public void setGenerateDir(File generateDir) {
+    this.generateDir = generateDir;
+  }
+
+  /**
+   * The compile directory.
+   *
+   * @param compileDir The compile directory.
+   */
+  public void setCompileDir(File compileDir) {
+    this.compileDir = compileDir;
+  }
+
+  /**
+   * The build directory.
+   *
+   * @param buildDir The build directory.
+   */
+  public void setBuildDir(File buildDir) {
+    this.buildDir = buildDir;
+  }
+
+  /**
+   * The package directory.
+   *
+   * @param packageDir The package directory.
+   */
+  public void setPackageDir(File packageDir) {
+    this.packageDir = packageDir;
+  }
+
+  /**
    * Whether to be verbose.
    *
    * @param verbose Whether to be verbose.
    */
   public void setVerbose(boolean verbose) {
-    proxy.setVerbose(verbose);
+    this.verbose = verbose;
   }
 
   /**
@@ -78,7 +148,7 @@ public class EnunciateTask extends MatchingTask {
    * @param debug Whether to print debugging information.
    */
   public void setDebug(boolean debug) {
-    proxy.setDebug(debug);
+    this.debug = debug;
   }
 
   /**
@@ -87,43 +157,7 @@ public class EnunciateTask extends MatchingTask {
    * @param config The enunciate config file.
    */
   public void setConfigFile(File config) {
-    proxy.setConfigFile(config);
-  }
-
-  /**
-   * The directory for the compiled classes.
-   *
-   * @param destDir The directory for the compiled classes.
-   */
-  public void setDestDir(File destDir) {
-    proxy.setDestDir(destDir);
-  }
-
-  /**
-   * The directory to use to build the war.
-   *
-   * @param warBuildDir The directory to use to build the war.
-   */
-  public void setWarBuildDir(File warBuildDir) {
-    proxy.setWarBuildDir(warBuildDir);
-  }
-
-  /**
-   * The war file to create.
-   *
-   * @param warFile The war file to create.
-   */
-  public void setWarFile(File warFile) {
-    proxy.setWarFile(warFile);
-  }
-
-  /**
-   * The directory for the preprocessed files.
-   *
-   * @param preprocessDir The directory for the preprocessed files.
-   */
-  public void setPreprocessDir(File preprocessDir) {
-    proxy.setPreprocessDir(preprocessDir);
+    this.configFile = config;
   }
 
   /**
@@ -132,7 +166,7 @@ public class EnunciateTask extends MatchingTask {
    * @param target The target.
    */
   public void setTarget(String target) {
-    proxy.setTarget(Enunciate.Target.valueOf(target.toUpperCase()));
+    this.target = Enunciate.Target.valueOf(target.toUpperCase());
   }
 
   /**
@@ -178,50 +212,5 @@ public class EnunciateTask extends MatchingTask {
   public void setClasspathRef(Reference ref) {
     createClasspath().setRefid(ref);
   }
-
-  /**
-   * The war libraries to use to enunciate.
-   *
-   * @param warlib The war libraries to use to enunciate.
-   */
-  public void setWarlib(Path warlib) {
-    if (this.warlib == null) {
-      this.warlib = warlib;
-    }
-    else {
-      this.warlib.append(warlib);
-    }
-  }
-
-  /**
-   * The war libraries to use to enunciate.
-   *
-   * @return The war libraries to use to enunciate.
-   */
-  public Path getWarlib() {
-    return warlib;
-  }
-
-  /**
-   * Adds a path to the warlib.
-   *
-   * @return The path.
-   */
-  public Path createWarlib() {
-    if (warlib == null) {
-      warlib = new Path(getProject());
-    }
-    return warlib.createPath();
-  }
-
-  /**
-   * Adds a reference to a warlib defined elsewhere.
-   *
-   * @param ref a reference to a warlib.
-   */
-  public void setWarlibRef(Reference ref) {
-    createWarlib().setRefid(ref);
-  }
-
 
 }
