@@ -201,6 +201,10 @@ public class SchemaInfo {
    * @return The schema info.
    */
   protected SchemaInfo lookupSchema(String namespace) {
+    if ("".equals(namespace)) {
+      namespace = null;
+    }
+
     return getNamespacesToSchemas().get(namespace);
   }
 

@@ -28,6 +28,10 @@ public class SchemaConfig {
    * @param namespace The target namespace.
    */
   public void setNamespace(String namespace) {
+    if ("".equals(namespace)) {
+      namespace = null;
+    }
+
     this.namespace = namespace;
   }
 

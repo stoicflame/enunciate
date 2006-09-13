@@ -2,6 +2,7 @@ package net.sf.enunciate.template;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.TemplateException;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import org.testng.annotations.Test;
@@ -26,7 +27,7 @@ public class WsdlLibraryTestCase extends EnunciateTemplateLibraryTestCase {
    * @param args       The args.
    * @return The output.
    */
-  public String invokeLibWsdlMethod(String methodName, HashMap<String, Object> args) throws IOException, TemplateException {
+  public String invokeLibWsdlMethod(String methodName, HashMap<String, Object> args) throws IOException, TemplateException, EnunciateException {
     return invokeLibraryMethod("wsdl.fmt", methodName, args);
   }
 
@@ -36,7 +37,7 @@ public class WsdlLibraryTestCase extends EnunciateTemplateLibraryTestCase {
    * @param wsdl The wsdl to output.
    * @return The output.
    */
-  public String processWsdl(WsdlInfo wsdl) throws IOException, TemplateException {
+  public String processWsdl(WsdlInfo wsdl) throws IOException, TemplateException, EnunciateException {
     HashMap<String, Object> args = new HashMap<String, Object>();
     args.put("wsdl", wsdl);
 
@@ -44,7 +45,7 @@ public class WsdlLibraryTestCase extends EnunciateTemplateLibraryTestCase {
   }
 
   @Test
-  public void testProcessWsdl() throws IOException, TemplateException {
+  public void testProcessWsdl() throws IOException, TemplateException, EnunciateException {
     WsdlInfo wsdl = new WsdlInfo() {
       @Override
       public Set<String> getImportedNamespaces() {

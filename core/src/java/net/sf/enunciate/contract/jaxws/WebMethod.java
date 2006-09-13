@@ -149,7 +149,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     Collection<WebMessage> messages = getMessages();
     for (WebMessage message : messages) {
       for (WebMessagePart part : message.getParts()) {
-        namespaces.add(part.getElementQName().getNamespaceURI(/**/));
+        namespaces.add(part.getElementQName().getNamespaceURI());
         if (part instanceof ImplicitSchemaElement) {
           ImplicitSchemaElement implicitElement = (ImplicitSchemaElement) part;
 

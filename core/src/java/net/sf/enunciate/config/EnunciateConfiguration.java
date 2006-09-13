@@ -7,10 +7,11 @@ import net.sf.enunciate.modules.DeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.xml.sax.Attributes;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import sun.misc.Service;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class EnunciateConfiguration {
+public class EnunciateConfiguration implements ErrorHandler {
 
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
@@ -123,14 +124,12 @@ public class EnunciateConfiguration {
    * @param in The stream.
    */
   public void load(InputStream in) throws IOException, SAXException {
-    Digester digester = new EnunciateDigester();
-
+    Digester digester = new Digester();
+    digester.setErrorHandler(this);
     digester.setValidating(true);
     digester.setSchema(EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
-
     digester.setNamespaceAware(true);
     digester.setRuleNamespaceURI("http://enunciate.sf.net");
-
     digester.push(this);
 
     //allow a validator to be configured.
@@ -139,43 +138,71 @@ public class EnunciateConfiguration {
 
     //todo: add the rules for the namespaces elements.
 
-    //set up the xml module.
-    digester.addRule("enunciate/modules/*", new PushModuleRule());
-    digester.addSetProperties("enunciate/modules/*");
-
-    //set up all custom modules.
+    //set up explicit custom module configuration.
     digester.addObjectCreate("enunciate/modules/custom", "class", BasicDeploymentModule.class);
     digester.addSetProperties("enunciate/modules/custom");
     digester.addSetNext("enunciate/modules/custom", "addModule");
+
+    //set up the module configuration.
+    for (DeploymentModule module : getAllModules()) {
+      digester.setRuleNamespaceURI(module.getNamespace());
+      String pattern = String.format("enunciate/modules/%s", module.getName());
+      digester.addRule(pattern, new PushModuleRule(module));
+      digester.addSetProperties(pattern);
+      digester.addRuleSet(module.getConfigurationRules());
+    }
+
     digester.parse(in);
+  }
+
+  /**
+   * Handle a warning.
+   *
+   * @param warning The warning.
+   */
+  public void warning(SAXParseException warning) throws SAXException {
+    System.err.println(warning.getMessage());
+  }
+
+  /**
+   * Handle an error.
+   *
+   * @param error The error.
+   */
+  public void error(SAXParseException error) throws SAXException {
+    throw error;
+  }
+
+  /**
+   * Handle a fatal.
+   *
+   * @param fatal The fatal.
+   */
+  public void fatalError(SAXParseException fatal) throws SAXException {
+    throw fatal;
   }
 
   /**
    * Rule to push a specific deployment module onto the digester stack.
    */
-  private class PushModuleRule extends Rule {
+  private static class PushModuleRule extends Rule {
+
+    private final DeploymentModule module;
+
+    public PushModuleRule(DeploymentModule module) {
+      this.module = module;
+    }
 
     @Override
     public void begin(String namespace, String name, Attributes attributes) throws Exception {
-      DeploymentModule found = null;
-      for (DeploymentModule module : getAllModules()) {
-        if ((name.equals(module.getName())) && (namespace.equals(module.getNamespace()))) {
-          found = module;
-          break;
-        }
-      }
-
-      if (found == null) {
-        throw new IllegalStateException("Configuration found for unknown module: " + new QName(namespace, name));
-      }
-
-      getDigester().push(found);
+      getDigester().push(module);
     }
 
     @Override
-    public void end(String string, String string1) throws Exception {
+    public void end(String namespace, String name) throws Exception {
       getDigester().pop();
     }
+
   }
 
 }

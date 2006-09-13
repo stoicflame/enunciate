@@ -3,6 +3,7 @@ package net.sf.enunciate.template;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.*;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateAnnotationProcessor;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.EnunciateContractTestCase;
@@ -28,7 +29,7 @@ public abstract class EnunciateTemplateLibraryTestCase extends EnunciateContract
    * @param args       The arguments to the method.
    * @return The output of invoking the method.
    */
-  public String invokeLibraryMethod(String library, String methodName, HashMap<String, Object> args) throws IOException, TemplateException {
+  public String invokeLibraryMethod(String library, String methodName, HashMap<String, Object> args) throws IOException, TemplateException, EnunciateException {
     Configuration configuration = new Configuration();
     StringTemplateLoader loader = new StringTemplateLoader();
     configuration.setTemplateLoader(loader);
@@ -112,7 +113,7 @@ public abstract class EnunciateTemplateLibraryTestCase extends EnunciateContract
    *
    * @return The transforms to use for the model.
    */
-  protected Collection<FreemarkerTransform> getTransforms() throws IOException {
+  protected Collection<FreemarkerTransform> getTransforms() throws IOException, EnunciateException {
     return new EnunciateAnnotationProcessor().getTransforms();
   }
 

@@ -27,10 +27,11 @@ Template library for WSDL.
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="${wsdl.targetNamespace}"
     [#list wsdl.importedNamespaces as importedNamespace]
-      [#if importedNamespace?exists]
-   xmlns:${prefix(importedNamespace)}="${importedNamespace}"[#if !importedNamespace_has_next]>[/#if]
+      [#if importedNamespace?exists && importedNamespace?length > 0]
+   xmlns:${prefix(importedNamespace)}="${importedNamespace}"
       [/#if]
     [/#list]
+   >
 
   <types>
     [@processSchema wsdl=wsdl/]

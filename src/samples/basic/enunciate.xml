@@ -7,9 +7,11 @@
   </namespaces>
   <modules>
     <xml>
-      <schemas>
-        <schema namespaceRef="pets" generate="true" file="pet.xsd" location="http://net.sf.enunciate/samples/schemas/pet.xsd"/>
-      </schemas>
+      <schema namespace="" file="store-types.xsd"/>
+      <schema namespace="http://net.sf.enunciate/samples/petclinic/owners" file="owners.xsd"/>
+      <schema namespace="http://net.sf.enunciate/samples/petclinic/pets" file="pets.xsd"/>
+      <schema namespace="http://net.sf.enunciate/samples/petclinic/vets" file="vets.xsd"/>
+      <wsdl namespace="http://net.sf.enunciate/samples/petclinic" file="petclinic.wsdl"/>
     </xml>
     <xfire-client>
       <client-package-conversions>

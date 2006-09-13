@@ -11,7 +11,7 @@ public class EnunciateTestProcessorFactory extends EnunciateAnnotationProcessorF
 
   private final URL api;
 
-  public EnunciateTestProcessorFactory(URL template) {
+  public EnunciateTestProcessorFactory(URL template) throws EnunciateException {
     super(null);
     this.api = template;
     round = 0; //reset the round.

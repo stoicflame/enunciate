@@ -1,8 +1,12 @@
 package net.sf.enunciate.modules.xml;
 
+import freemarker.ext.beans.StringModel;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import net.sf.enunciate.config.SchemaInfo;
+import net.sf.enunciate.config.WsdlInfo;
+import net.sf.jelly.apt.decorations.JavaDoc;
 
 import javax.xml.namespace.QName;
 
@@ -16,10 +20,19 @@ public class XMLAPIObjectWrapper extends DefaultObjectWrapper {
   @Override
   public TemplateModel wrap(Object obj) throws TemplateModelException {
     if (obj instanceof QName) {
-      final QName qname = (QName) obj;
-      return new QNameModel(qname, this);
+      return new QNameModel((QName) obj, this);
     }
-
-    return super.wrap(obj);
+    else if (obj instanceof SchemaInfo) {
+      return new SchemaInfoModel((SchemaInfo) obj, this);
+    }
+    else if (obj instanceof WsdlInfo) {
+      return new WsdlInfoModel((WsdlInfo) obj, this);
+    }
+    else if (obj instanceof JavaDoc) {
+      return new StringModel(obj, this);
+    }
+    else {
+      return super.wrap(obj);
+    }
   }
 }

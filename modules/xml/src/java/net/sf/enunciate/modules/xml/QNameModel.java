@@ -37,7 +37,7 @@ public class QNameModel extends StringModel {
    * @return The namespace prefix.
    */
   protected static String lookupPrefix(String namespace) {
-    if (namespace == null) {
+    if ((namespace == null) || ("".equals(namespace))) {
       return null;
     }
 

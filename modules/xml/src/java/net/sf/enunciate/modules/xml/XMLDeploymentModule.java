@@ -1,6 +1,5 @@
 package net.sf.enunciate.modules.xml;
 
-import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
@@ -56,13 +55,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     return XMLDeploymentModule.class.getResource("xml.fmt");
   }
 
-  @Override
-  protected Configuration getConfiguration() {
-    Configuration configuration = super.getConfiguration();
-    configuration.setObjectWrapper(this.xmlWrapper);
-    return configuration;
-  }
-
   /**
    * Add a custom schema configuration.
    *
@@ -84,6 +76,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
+    model.setObjectWrapper(xmlWrapper);
 
     Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
     Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
@@ -98,7 +91,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
       //make sure each wsdl has a "file" property.
-      String file = ns2prefix.get(wsdlInfo.getTargetNamespace()) + ".xsd";
+      String file = ns2prefix.get(wsdlInfo.getTargetNamespace()) + ".wsdl";
       wsdlInfo.setProperty("file", file);
     }
 
@@ -116,6 +109,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
         if (customConfig.getFile() != null) {
           schemaInfo.setProperty("file", customConfig.getFile());
+          schemaInfo.setProperty("location", customConfig.getFile());
         }
 
         if (customConfig.getLocation() != null) {

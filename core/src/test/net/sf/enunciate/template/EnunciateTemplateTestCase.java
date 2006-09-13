@@ -1,7 +1,9 @@
 package net.sf.enunciate.template;
 
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.EnunciateTestProcessorFactory;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.*;
 import java.net.URL;
@@ -27,10 +29,10 @@ public abstract class EnunciateTemplateTestCase {
    *
    * @param relativeResource The relative resource.
    */
-  public void runTemplate(String relativeResource) {
+  public void runTemplate(String relativeResource) throws EnunciateException {
     URL resource = getClass().getResource(relativeResource);
     if (resource == null) {
-      throw new IllegalStateException(String.format("Cannot load resource: %s",relativeResource));
+      throw new IllegalStateException(String.format("Cannot load resource: %s", relativeResource));
     }
     runTemplate(resource);
   }
@@ -40,7 +42,7 @@ public abstract class EnunciateTemplateTestCase {
    *
    * @param url The url.
    */
-  public void runTemplate(URL url) {
+  public void runTemplate(URL url) throws EnunciateException {
     ArrayList<String> sourceFiles = getAllJavaFiles(getSampleSourceSubdirectoryName());
     runTemplate(url, sourceFiles);
   }
@@ -48,10 +50,10 @@ public abstract class EnunciateTemplateTestCase {
   /**
    * Run the template at the specified url on all java files in the specified subdirectory.
    *
-   * @param url The url.
+   * @param url    The url.
    * @param subdir The subdirectory.
    */
-  public void runTemplate(URL url, String subdir) {
+  public void runTemplate(URL url, String subdir) throws EnunciateException {
     ArrayList<String> sourceFiles = getAllJavaFiles(subdir);
     runTemplate(url, sourceFiles);
   }
@@ -71,10 +73,10 @@ public abstract class EnunciateTemplateTestCase {
   /**
    * Run the template at the specified url on the specified files.
    *
-   * @param url The url of the template.
+   * @param url   The url of the template.
    * @param files The list of absolute file names of the source files.
    */
-  public void runTemplate(URL url, Collection<String> files) {
+  public void runTemplate(URL url, Collection<String> files) throws EnunciateException {
     ArrayList<String> aptOpts = getAptOptions();
     aptOpts.addAll(files);
 

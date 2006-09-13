@@ -9,6 +9,7 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import org.xml.sax.SAXException;
 import sun.misc.Service;
 
 import java.io.File;
@@ -77,7 +78,8 @@ public class EnunciateTask extends MatchingTask {
       proxy.setConfig(config);
 
       if (this.configFile != null) {
-        proxy.setConfigFile(this.configFile);
+        getProject().log("Loading config " + this.configFile);
+        config.load(this.configFile);
       }
 
       if (this.generateDir != null) {
@@ -108,6 +110,9 @@ public class EnunciateTask extends MatchingTask {
       throw new BuildException(e);
     }
     catch (EnunciateException e) {
+      throw new BuildException(e);
+    }
+    catch (SAXException e) {
       throw new BuildException(e);
     }
   }
