@@ -11,6 +11,8 @@ import org.xml.sax.SAXException;
 import sun.misc.Service;
 
 import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -22,26 +24,31 @@ import java.util.*;
  */
 public class EnunciateConfiguration {
 
-  public static final EnunciateConfiguration DEFAULT = new EnunciateConfiguration(new DeploymentModule[]{});
-
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
 
+  /**
+   * Create a new enunciate configuration.  The module list will be constructed
+   * using Sun's discovery mechanism.
+   */
   public EnunciateConfiguration() {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
 
-    System.out.println("discovering services...");
     Iterator discoveredModules = Service.providers(DeploymentModule.class);
     while (discoveredModules.hasNext()) {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
-      System.out.println("discovered module: " + discoveredModule.getName());
       this.modules.add(discoveredModule);
     }
   }
 
-  private EnunciateConfiguration(DeploymentModule[] modules) {
+  /**
+   * Construct an enunciate configuration with the specified set of modules.
+   *
+   * @param modules The modules.
+   */
+  public EnunciateConfiguration(Collection<DeploymentModule> modules) {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
-    this.modules.addAll(Arrays.asList(modules));
+    this.modules.addAll(modules);
   }
 
   /**
@@ -102,12 +109,20 @@ public class EnunciateConfiguration {
   }
 
   /**
-   * Reads a configuration from an input stream.
+   * Loads the configuration specified by the given config file.
    *
-   * @param in The input stream to read from.
-   * @return The configuration.
+   * @param file The file.
    */
-  public static EnunciateConfiguration readFrom(InputStream in) throws IOException, SAXException {
+  public void load(File file) throws IOException, SAXException {
+    load(new FileInputStream(file));
+  }
+
+  /**
+   * Loads the configuration specified by the given stream.
+   *
+   * @param in The stream.
+   */
+  public void load(InputStream in) throws IOException, SAXException {
     Digester digester = new EnunciateDigester();
 
     digester.setValidating(true);
@@ -116,8 +131,7 @@ public class EnunciateConfiguration {
     digester.setNamespaceAware(true);
     digester.setRuleNamespaceURI("http://enunciate.sf.net");
 
-    EnunciateConfiguration config = new EnunciateConfiguration();
-    digester.push(config);
+    digester.push(this);
 
     //allow a validator to be configured.
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
@@ -126,32 +140,25 @@ public class EnunciateConfiguration {
     //todo: add the rules for the namespaces elements.
 
     //set up the xml module.
-    digester.addRule("enunciate/modules/*", new PushModuleRule(config.getAllModules()));
+    digester.addRule("enunciate/modules/*", new PushModuleRule());
     digester.addSetProperties("enunciate/modules/*");
 
     //set up all custom modules.
     digester.addObjectCreate("enunciate/modules/custom", "class", BasicDeploymentModule.class);
     digester.addSetProperties("enunciate/modules/custom");
     digester.addSetNext("enunciate/modules/custom", "addModule");
-
-    return (EnunciateConfiguration) digester.parse(in);
+    digester.parse(in);
   }
 
   /**
    * Rule to push a specific deployment module onto the digester stack.
    */
-  private static class PushModuleRule extends Rule {
-
-    private final Set<DeploymentModule> modules;
-
-    public PushModuleRule(Set<DeploymentModule> modules) {
-      this.modules = modules;
-    }
+  private class PushModuleRule extends Rule {
 
     @Override
     public void begin(String namespace, String name, Attributes attributes) throws Exception {
       DeploymentModule found = null;
-      for (DeploymentModule module : modules) {
+      for (DeploymentModule module : getAllModules()) {
         if ((name.equals(module.getName())) && (namespace.equals(module.getNamespace()))) {
           found = module;
           break;

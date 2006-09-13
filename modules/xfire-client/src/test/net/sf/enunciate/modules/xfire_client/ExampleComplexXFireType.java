@@ -87,11 +87,13 @@ public class ExampleComplexXFireType extends Type {
     }
 
     //elements.
+/*
     property = person.getLastName();
     type = getTypeMapping().getType(String.class);
     MessageWriter elementWriter = writer.getElementWriter("lastname", "http://net.sf.enunciate/samples/petclinic/owners");
     elementWriter.writeXsiNil();
     type.writeObject(property, elementWriter, context);
+*/
 
     //OR value.
     property = person.getCity();

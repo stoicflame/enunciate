@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema version="1.0" targetNamespace="http://enunciate.sf.net" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0"
+           targetNamespace="http://enunciate.sf.net"
+           xmlns:enunciate="http://enunciate.sf.net"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified">
 
   <xs:element name="enunciate">
 
@@ -11,9 +15,9 @@
 
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="validator" type="enunciate:validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="namespaces" type="enunciate:namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="modules" type="enunciate:modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
     </xs:complexType>
 
@@ -39,7 +43,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="namespace" type="enunciate:namespace" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -62,8 +66,8 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="custom" type="custom-module" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:any minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
   </xs:complexType>
 

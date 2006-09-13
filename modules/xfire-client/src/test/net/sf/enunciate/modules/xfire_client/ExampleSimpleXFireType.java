@@ -48,7 +48,7 @@ public class ExampleSimpleXFireType extends Type {
     int[] values = new int[10];
     TypeMapping typeMapping = getTypeMapping();
     Type componentType = typeMapping.getType(Integer.class);
-    ListWriter listWriter = new ListWriter();
+    ListWriter listWriter = new ListWriter((Object[]) null, null, null);
     for (int i = 0; i < values.length; i++) {
       Integer item = new Integer(values[i]);
       componentType.writeObject(item, listWriter, context);

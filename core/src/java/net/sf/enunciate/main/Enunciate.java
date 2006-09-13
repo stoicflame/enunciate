@@ -83,7 +83,7 @@ public class Enunciate {
    */
   public void execute() throws EnunciateException, IOException {
     if (this.config == null) {
-      this.config = getConfig();
+      this.config = loadConfig();
     }
 
     final List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
@@ -160,19 +160,19 @@ public class Enunciate {
    *
    * @return The configuration, or null if none is specified.
    */
-  protected EnunciateConfiguration getConfig() throws IOException {
+  protected EnunciateConfiguration loadConfig() throws IOException {
+    EnunciateConfiguration config = new EnunciateConfiguration();
     File configFile = getConfigFile();
     if ((configFile != null) && (configFile.exists())) {
       try {
-        return EnunciateConfiguration.readFrom(new FileInputStream(configFile));
+        config.load(configFile);
       }
       catch (SAXException e) {
         throw new IOException("Error parsing enunciate configuration file " + configFile + ": " + e.getMessage());
       }
     }
 
-    //no or invalid config file, just return the default.
-    return EnunciateConfiguration.DEFAULT;
+    return config;
   }
 
   /**
@@ -601,6 +601,15 @@ public class Enunciate {
    */
   public Object getProperty(String property) {
     return this.properties.get(property);
+  }
+
+  /**
+   * Set the configuration for the mechanism.
+   *
+   * @param config The configuration.
+   */
+  public void setConfig(EnunciateConfiguration config) {
+    this.config = config;
   }
 
 }

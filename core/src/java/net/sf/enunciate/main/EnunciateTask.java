@@ -1,14 +1,20 @@
 package net.sf.enunciate.main;
 
 import net.sf.enunciate.EnunciateException;
+import net.sf.enunciate.config.EnunciateConfiguration;
+import net.sf.enunciate.modules.DeploymentModule;
+import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import sun.misc.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Ant task for enunciate.
@@ -47,10 +53,28 @@ public class EnunciateTask extends MatchingTask {
 
     try {
       Enunciate proxy = new Enunciate(files);
+      EnunciateConfiguration config;
 
       if (classpath != null) {
         proxy.setClasspath(classpath.toString());
+
+        //if the classpath is set, we need to load the modules using Ant's classloader, or it won't work.  Not totally sure why, though....
+        AntClassLoader loader = new AntClassLoader(Enunciate.class.getClassLoader(), getProject(), this.classpath, true);
+        ArrayList<DeploymentModule> modules = new ArrayList<DeploymentModule>();
+        Iterator discoveredModules = Service.providers(DeploymentModule.class, loader);
+        getProject().log("Loading modules from the specified classpath....");
+        while (discoveredModules.hasNext()) {
+          DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
+          getProject().log("Discovered module " + discoveredModule.getName());
+          modules.add(discoveredModule);
+        }
+        config = new EnunciateConfiguration(modules);
       }
+      else {
+        config = new EnunciateConfiguration();
+      }
+
+      proxy.setConfig(config);
 
       if (this.configFile != null) {
         proxy.setConfigFile(this.configFile);

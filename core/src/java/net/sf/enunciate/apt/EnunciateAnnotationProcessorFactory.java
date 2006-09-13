@@ -42,11 +42,7 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
 
   private final EnunciateAnnotationProcessor processor;
 
-  public EnunciateAnnotationProcessorFactory() {
-    this(null);
-  }
-
-  public EnunciateAnnotationProcessorFactory(EnunciateConfiguration config) {
+  public EnunciateAnnotationProcessorFactory(EnunciateConfiguration config) throws EnunciateException {
     this.processor = new EnunciateAnnotationProcessor(config);
   }
 

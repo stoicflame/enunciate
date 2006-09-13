@@ -3,6 +3,8 @@ package net.sf.enunciate.config;
 import net.sf.enunciate.modules.DeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSet;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * An enunciate digester adds rules when a deployment module is pushed onto the stack.
@@ -33,6 +35,16 @@ public class EnunciateDigester extends Digester {
     }
 
     super.push(string, object);
+  }
+
+  @Override
+  public void fatalError(SAXParseException spe) throws SAXException {
+    throw spe;
+  }
+
+  @Override
+  public void error(SAXParseException spe) throws SAXException {
+    throw spe;
   }
 
 

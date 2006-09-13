@@ -19,6 +19,12 @@
   <property name="jar.pattern" value="*-${enunciate.version}.jar"/>
   <property name="tools.jar.pattern" value="*-tools-${enunciate.version}.jar"/>
 
+  <path id="base.libs">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
   <path id="core.libs">
     <fileset dir="${lib.dir}/core">
       <include name="*.jar"/>

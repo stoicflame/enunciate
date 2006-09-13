@@ -44,15 +44,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private IOException ioe = null;
   private final EnunciateConfiguration config;
 
-  public EnunciateAnnotationProcessor() {
+  public EnunciateAnnotationProcessor() throws EnunciateException {
     this(new EnunciateConfiguration());
   }
 
-  public EnunciateAnnotationProcessor(EnunciateConfiguration config) {
+  public EnunciateAnnotationProcessor(EnunciateConfiguration config) throws EnunciateException {
     super(null);
 
     if (config == null) {
-      throw new NullPointerException("A configuration must be specified.");
+      throw new EnunciateException("A configuration must be specified.");
     }
 
     this.config = config;
