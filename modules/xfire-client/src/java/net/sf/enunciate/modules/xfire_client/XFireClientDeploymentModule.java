@@ -96,7 +96,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
       model.put("fault", webFault);
-      processTemplate(faultTemplate, webFault);
+      processTemplate(faultTemplate, model);
     }
 
     //process each type for client-side stubs.

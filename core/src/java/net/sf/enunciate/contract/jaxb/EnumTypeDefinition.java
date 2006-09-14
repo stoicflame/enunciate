@@ -53,8 +53,8 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The map of constant declarations to their enum constant values.
    */
-  public Map<EnumConstantDeclaration, String> getEnumValues() {
-    Map<EnumConstantDeclaration, String> valueMap = new LinkedHashMap<EnumConstantDeclaration, String>();
+  public Map<String, String> getEnumValues() {
+    Map<String, String> valueMap = new LinkedHashMap<String, String>();
     Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (EnumConstantDeclaration enumConstant : enumConstants) {
@@ -68,7 +68,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
       }
 
-      valueMap.put(enumConstant, value);
+      valueMap.put(enumConstant.getSimpleName(), value);
     }
 
     return valueMap;

@@ -70,6 +70,15 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
   }
 
   /**
+   * The bare (i.e. unwrapped) type of the accessor.
+   *
+   * @return The bare type of the accessor.
+   */
+  public TypeMirror getBareAccessorType() {
+    return isCollectionType() ? getCollectionItemType() : getAccessorType();
+  }
+
+  /**
    * The base xml type of the accessor. The base type is either:
    * <p/>
    * <ol>

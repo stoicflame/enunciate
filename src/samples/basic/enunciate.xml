@@ -14,10 +14,10 @@
       <wsdl namespace="http://net.sf.enunciate/samples/petclinic" file="petclinic.wsdl"/>
     </xml>
     <xfire-client>
-      <client-package-conversions>
+      <package-conversions>
         <convert from="net.sf.enunciate.samples.petclinic" to="net.sf.enunciate.samples.petclinic.client"/>
         <convert from="net.sf.enunciate.samples.petclinic.services" to="net.sf.enunciate.samples.petclinic.client.services"/>
-      </client-package-conversions>
+      </package-conversions>
     </xfire-client>
   </modules>
 </enunciate>

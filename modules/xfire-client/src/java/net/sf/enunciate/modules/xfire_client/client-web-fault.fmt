@@ -14,7 +14,7 @@ public class ${fault.simpleName} extends Exception {
 
   private ${classnameFor(faultBean)} faultInfo;
 
-  public ${fault.simpleName}(String message, ${classnameFor(faultBean)} faultInfo)) {
+  public ${fault.simpleName}(String message, ${classnameFor(faultBean)} faultInfo) {
     super(message);
 
     this.faultInfo = faultInfo;
@@ -31,7 +31,7 @@ public class ${fault.simpleName} extends Exception {
   }
   [#else]
 
-  public ${fault.simpleName}(String message)) {
+  public ${fault.simpleName}(String message) {
     super(message);
   }
 
