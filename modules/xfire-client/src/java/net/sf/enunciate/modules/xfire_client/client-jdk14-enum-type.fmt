@@ -8,14 +8,14 @@ package ${packageFor(type)};
 /**
  * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public enum ${type.simpleName} {
+public final class ${type.simpleName} {
   [#assign enumValueMap=type.enumValues/]
   [#list type.delegate.enumConstants as constant]
 
   /**
    * ${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${constant.simpleName}("${enumValueMap[constant.simpleName]}")[#if constant_has_next],[#else];[/#if]
+  public static final ${type.simpleName} ${constant.simpleName} = new ${type.simpleName}("${enumValueMap[constant.simpleName]}");
   [/#list]
 
   private final String value;

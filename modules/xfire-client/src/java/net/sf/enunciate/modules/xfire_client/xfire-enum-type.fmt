@@ -46,16 +46,7 @@ public class ${type.simpleName}XFireType extends Type {
    * @param context The context.
    */
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
-    switch ((${classname}) object) {
-    [#assign enumValueMap=type.enumValues/]
-    [#list enumValueMap?keys as enumConstant]
-      case ${enumConstant}:
-        writer.writeValue("${enumValueMap[enumConstant]}");
-        return;
-    [/#list]
-    }
-
-    throw new IllegalArgumentException("No constant value known for ${type.simpleName}." + object);
+    writer.writeValue(String.valueOf(object));
   }
 }
 [/@file]

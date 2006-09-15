@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<enunciate xmlns="http://enunciate.sf.net">
+<enunciate xmlns="http://enunciate.sf.net" label="basic">
   <namespaces>
     <namespace id="pets" uri="http://net.sf.enunciate/samples/petclinic/pets"/>
     <namespace id="owners" uri="http://net.sf.enunciate/samples/petclinic/owners"/>

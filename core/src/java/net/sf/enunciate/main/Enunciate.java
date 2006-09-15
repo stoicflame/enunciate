@@ -144,6 +144,8 @@ public class Enunciate {
     for (DeploymentModule deploymentModule : deploymentModules) {
       deploymentModule.close();
     }
+
+    //todo: now export the artifacts as specified on the command line. 
   }
 
   /**
@@ -275,6 +277,7 @@ public class Enunciate {
       }
     }
 
+    compileDir.mkdirs();
     int procCode = com.sun.tools.javac.Main.compile(args.toArray(new String[args.size()]));
     if (procCode != 0) {
       throw new EnunciateException("compile failed.");
@@ -601,6 +604,13 @@ public class Enunciate {
    */
   public Object getProperty(String property) {
     return this.properties.get(property);
+  }
+
+  /**
+   * @return The configuration.
+   */
+  public EnunciateConfiguration getConfig() {
+    return config;
   }
 
   /**

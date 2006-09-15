@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules.xfire_client;
 
 import freemarker.template.TemplateException;
+import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
@@ -8,16 +9,18 @@ import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.WebFault;
 import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.config.XFireClientRuleSet;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.LinkedHashMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Deployment module for XFire.
@@ -26,6 +29,7 @@ import java.util.TreeSet;
  */
 public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
+  private String jarName = null;
   private final LinkedHashMap<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
 
@@ -50,16 +54,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     return "http://enunciate.sf.net";
   }
 
-  /**
-   * Get a template URL for the template of the given name.
-   *
-   * @param template The specified template.
-   * @return The URL to the specified template.
-   */
-  protected URL getTemplateURL(String template) {
-    return XFireClientDeploymentModule.class.getResource(template);
-  }
-
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
@@ -71,7 +65,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
     URL faultTemplate = getTemplateURL("client-web-fault.fmt");
-    URL enumTypeTemplate = getTemplateURL("client-enum-type.fmt");
+    URL enumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
     URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
     URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
     URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
@@ -114,6 +108,108 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     //todo: generate the JDK 1.5 client code.
   }
 
+  @Override
+  protected void doCompile() throws EnunciateException, IOException {
+    Enunciate enunciate = getEnunciate();
+    Collection<String> typeFiles = getJavaFiles(getXFireTypesDir());
+    Collection<String> jdk14Files = getJavaFiles(getJdk14Dir());
+    jdk14Files.addAll(typeFiles);
+
+    enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4"), jdk14Files.toArray(new String[jdk14Files.size()]));
+  }
+
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    Enunciate enunciate = getEnunciate();
+    String jarName = getJarName();
+
+    if (jarName == null) {
+      String label = "enunciate";
+      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+        label = enunciate.getConfig().getLabel();
+      }
+
+      jarName = label + "-client.jar";
+    }
+
+    File jdk14Jar = new File(getBuildDir(), jarName);
+    enunciate.zip(getJdk14CompileDir(), jdk14Jar);
+    enunciate.setProperty("client.jdk14.jar", jdk14Jar);
+  }
+
+  /**
+   * Get a template URL for the template of the given name.
+   *
+   * @param template The specified template.
+   * @return The URL to the specified template.
+   */
+  protected URL getTemplateURL(String template) {
+    return XFireClientDeploymentModule.class.getResource(template);
+  }
+
+  /**
+   * The directory for compiling.
+   *
+   * @return The directory for compiling.
+   */
+  protected File getCompileDir() {
+    return new File(getEnunciate().getCompileDir(), "xfire-client");
+  }
+
+  /**
+   * The directory for building.
+   *
+   * @return The directory for building.
+   */
+  protected File getBuildDir() {
+    return new File(getEnunciate().getBuildDir(), "xfire-client");
+  }
+
+  /**
+   * The directory for compiling the jdk 14 compatible classes.
+   *
+   * @return The directory for compiling the jdk 14 compatible classes.
+   */
+  protected File getJdk14CompileDir() {
+    return new File(getCompileDir(), "jdk14");
+  }
+
+  /**
+   * The directory for the jdk14 client files.
+   *
+   * @return The directory for the jdk14 client files.
+   */
+  protected File getJdk14Dir() {
+    return new File(new File(getEnunciate().getGenerateDir(), "xfireclient"), "jdk14");
+  }
+
+  /**
+   * The directory for the jdk14 client files.
+   *
+   * @return The directory for the jdk14 client files.
+   */
+  protected File getXFireTypesDir() {
+    return new File(new File(getEnunciate().getGenerateDir(), "xfireclient"), "types");
+  }
+
+  /**
+   * The name of the jar.
+   *
+   * @return The name of the jar.
+   */
+  public String getJarName() {
+    return jarName;
+  }
+
+  /**
+   * The name of the jar.
+   *
+   * @param jarName The name of the jar.
+   */
+  public void setJarName(String jarName) {
+    this.jarName = jarName;
+  }
+
   /**
    * An XFire configuration rule set.
    *
@@ -152,5 +248,51 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     this.clientPackageConversions.put(from, to);
   }
+
+  /**
+   * Finds all java files in the specified base directory.
+   *
+   * @param basedir The base directory.
+   * @return The collection of java files.
+   */
+  protected Collection<String> getJavaFiles(File basedir) {
+    ArrayList<String> files = new ArrayList<String>();
+    findJavaFiles(basedir, files);
+    return files;
+  }
+
+  /**
+   * Recursively finds all the java files in the specified directory and adds them all to the given collection.
+   *
+   * @param dir       The directory.
+   * @param filenames The collection.
+   */
+  private void findJavaFiles(File dir, Collection<String> filenames) {
+    File[] javaFiles = dir.listFiles(JAVA_FILTER);
+    if (javaFiles != null) {
+      for (File javaFile : javaFiles) {
+        filenames.add(javaFile.getAbsolutePath());
+      }
+    }
+
+    File[] dirs = dir.listFiles(DIR_FILTER);
+    if (dirs != null) {
+      for (File dir1 : dirs) {
+        findJavaFiles(dir1, filenames);
+      }
+    }
+  }
+
+  private static FileFilter JAVA_FILTER = new FileFilter() {
+    public boolean accept(File pathname) {
+      return pathname.getName().endsWith(".java");
+    }
+  };
+
+  private static FileFilter DIR_FILTER = new FileFilter() {
+    public boolean accept(File pathname) {
+      return pathname.isDirectory();
+    }
+  };
 
 }

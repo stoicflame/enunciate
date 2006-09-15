@@ -25,6 +25,7 @@ import java.util.*;
  */
 public class EnunciateConfiguration implements ErrorHandler {
 
+  private String label = "enunciate";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
 
@@ -50,6 +51,24 @@ public class EnunciateConfiguration implements ErrorHandler {
   public EnunciateConfiguration(Collection<DeploymentModule> modules) {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
     this.modules.addAll(modules);
+  }
+
+  /**
+   * The label for this enunciate project.
+   *
+   * @return The label for this enunciate project.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label for this enunciate project.
+   *
+   * @param label The label for this enunciate project.
+   */
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   /**
@@ -131,6 +150,9 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.setNamespaceAware(true);
     digester.setRuleNamespaceURI("http://enunciate.sf.net");
     digester.push(this);
+
+    //set any root-level attributes
+    digester.addSetProperties("enunciate");
 
     //allow a validator to be configured.
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
