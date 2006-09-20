@@ -237,6 +237,42 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     return style;
   }
 
+  /**
+   * The SOAP binding use of this web method.
+   *
+   * @return The SOAP binding use of this web method.
+   */
+  public SOAPBinding.Use getSoapUse() {
+    SOAPBinding.Use use = SOAPBinding.Use.LITERAL;
+    SOAPBinding bindingInfo = getAnnotation(SOAPBinding.class);
+
+    if (bindingInfo != null) {
+      use = bindingInfo.use();
+    }
+
+    if (use != SOAPBinding.Use.LITERAL) {
+      throw new ValidationException(getPosition(), use.toString().toLowerCase() + "-use web methods are not supported by enunciate");
+    }
+
+    return use;
+  }
+
+  /**
+   * The SOAP parameter style of this web method.
+   *
+   * @return The SOAP parameter style of this web method.
+   */
+  public SOAPBinding.ParameterStyle getSoapParameterStyle() {
+    SOAPBinding.ParameterStyle style = SOAPBinding.ParameterStyle.WRAPPED;
+    SOAPBinding bindingInfo = getAnnotation(SOAPBinding.class);
+
+    if (bindingInfo != null) {
+      style = bindingInfo.parameterStyle();
+    }
+
+    return style;
+  }
+
   // Inherited.
   public boolean isClass() {
     return (getDelegate() instanceof ClassDeclaration);

@@ -262,7 +262,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    * @return The SOAP binding use of this web method.
    */
   public SOAPBinding.Use getSoapUse() {
-    SOAPBinding.Use use = SOAPBinding.Use.LITERAL;
+    SOAPBinding.Use use = getDeclaringEndpointInterface().getSoapUse();
     SOAPBinding bindingInfo = getAnnotation(SOAPBinding.class);
 
     if (bindingInfo != null) {
@@ -282,7 +282,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    * @return The SOAP parameter style of this web method.
    */
   public SOAPBinding.ParameterStyle getSoapParameterStyle() {
-    SOAPBinding.ParameterStyle style = SOAPBinding.ParameterStyle.WRAPPED;
+    SOAPBinding.ParameterStyle style = getDeclaringEndpointInterface().getSoapParameterStyle();
     SOAPBinding bindingInfo = getAnnotation(SOAPBinding.class);
 
     if (bindingInfo != null) {

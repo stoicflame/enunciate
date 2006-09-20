@@ -200,7 +200,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     }
         [/#list]
         [#if item.wrapped]
-    else if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
+    else if ("${type.targetNamespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
       this.wrapperReader = elementReader;
     }
         [/#if]
@@ -290,16 +290,16 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if element.wrapped]
             [#if element.wrapperNillable]
     if (instance.get${element.simpleName?cap_first}() == null) {
-      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       subwriter.writeXsiNil();
     }
     else {
-      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
     }
             [#else]
     if (instance.get${element.simpleName?cap_first}() != null) {
-      subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace}");
+      subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
     }
             [/#if]
@@ -309,6 +309,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
       [/#list]
     [/#if]
+  }
+
+  public Class getTypeClass() {
+    return ${classname}.class;
+  }
+
+  public QName getSchemaType() {
+    return new QName("${type.targetNamespace?default("")}", "${type.name}");
   }
 }
 [/@file]

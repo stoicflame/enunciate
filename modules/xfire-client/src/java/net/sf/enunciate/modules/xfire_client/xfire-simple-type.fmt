@@ -14,6 +14,8 @@ import org.codehaus.xfire.fault.XFireFault;
 import net.sf.enunciate.modules.xfire_client.ListWriter;
 import net.sf.enunciate.modules.xfire_client.ListParser;
 
+import javax.xml.namespace.QName;
+
 /**
  * Logic for reading and writing an instance of ${classname} to an xml stream.
  *
@@ -75,6 +77,14 @@ public class ${type.simpleName}XFireType extends Type {
     }
     [/#if]
 
+  }
+
+  public Class getTypeClass() {
+    return ${classname}.class;
+  }
+
+  public QName getSchemaType() {
+    return new QName("${type.targetNamespace?default("")}", "${type.name}");
   }
 }
 [/@file]

@@ -6,19 +6,18 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
-import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.jaxws.WebFault;
-import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.config.XFireClientRuleSet;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
+import org.codehaus.xfire.annotations.*;
+import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
+import javax.jws.soap.SOAPBinding;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -30,12 +29,17 @@ import java.util.*;
 public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   private String jarName = null;
+  private String defaultHost = "localhost";
+  private int defaultPort = 80;
+  private String defaultContext = "/";
   private final LinkedHashMap<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
+  private final UUID uuid;
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new LinkedHashMap<String, String>();
     this.configurationRules = new XFireClientRuleSet();
+    this.uuid = UUID.randomUUID();
   }
 
   /**
@@ -61,9 +65,20 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     //generate the JDK 1.3 client code.
     LinkedHashMap<String, String> conversions = getClientPackageConversions();
     model.put("packageFor", new ClientPackageForMethod(conversions));
-    model.put("classnameFor", new ClientClassnameForMethod(conversions));
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+    model.put("classnameFor", classnameFor);
+    String uuid = this.uuid.toString();
+    model.put("uuid", uuid);
+    model.put("defaultHost", getDefaultHost());
+    String defaultContext = getDefaultContext();
+    if (!defaultContext.startsWith("/")) {
+      defaultContext = "/" + defaultContext;
+    }
+    model.put("defaultContext", defaultContext);
+    model.put("defaultPort", getDefaultPort());
 
     URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
+    URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
     URL faultTemplate = getTemplateURL("client-web-fault.fmt");
     URL enumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
     URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
@@ -73,6 +88,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
+    ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
     TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -80,12 +96,16 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         model.put("endpointInterface", ei);
 
         processTemplate(eiTemplate, model);
+        processTemplate(soapImplTemplate, model);
+        addExplicitAnnotations(annotations, ei, classnameFor);
 
         for (WebMethod webMethod : ei.getWebMethods()) {
           allFaults.addAll(webMethod.getWebFaults());
+          addExplicitAnnotations(annotations, webMethod, classnameFor);
         }
       }
     }
+    enunciate.setProperty("client.annotations", annotations);
 
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
@@ -93,6 +113,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       processTemplate(faultTemplate, model);
     }
 
+    List<String> typeList = new ArrayList<String>();
     //process each type for client-side stubs.
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -102,20 +123,107 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
         template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
         processTemplate(template, model);
+
+        typeList.add(classnameFor.convert(typeDefinition));
       }
     }
+    enunciate.setProperty("client.type.list", typeList);
 
     //todo: generate the JDK 1.5 client code.
+  }
+
+  protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, EndpointInterface ei, ClientClassnameForMethod conversion) {
+    String clazz = conversion.convert(ei);
+
+    WebServiceAnnotation wsAnnotation = new WebServiceAnnotation();
+    wsAnnotation.setName(ei.getPortTypeName());
+    wsAnnotation.setPortName(ei.getSimpleName() + "SOAPPort");
+    wsAnnotation.setServiceName(ei.getServiceName());
+    wsAnnotation.setTargetNamespace(ei.getTargetNamespace());
+    annotations.put(clazz, wsAnnotation);
+
+    SOAPBindingAnnotation sbAnnotation = new SOAPBindingAnnotation();
+    sbAnnotation.setStyle(ei.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? SOAPBindingAnnotation.STYLE_DOCUMENT : SOAPBindingAnnotation.STYLE_RPC);
+    sbAnnotation.setParameterStyle(ei.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE ? SOAPBindingAnnotation.PARAMETER_STYLE_BARE : SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED);
+    sbAnnotation.setUse(ei.getSoapUse() == SOAPBinding.Use.ENCODED ? SOAPBindingAnnotation.USE_ENCODED : SOAPBindingAnnotation.USE_LITERAL);
+    annotations.put(clazz, sbAnnotation);
+
+    HandlerChainAnnotation hcAnnotation = null; //todo: support this?
+
+  }
+
+  protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, WebMethod webMethod, ClientClassnameForMethod conversion) {
+    String classname = conversion.convert(webMethod.getDeclaringEndpointInterface());
+    String methodName = webMethod.getSimpleName();
+
+    WebMethodAnnotation wmAnnotation = new WebMethodAnnotation();
+    wmAnnotation.setOperationName(webMethod.getOperationName());
+    wmAnnotation.setAction(webMethod.getAction());
+    annotations.put(classname, methodName, wmAnnotation);
+
+    WebResult webResult = webMethod.getWebResult();
+    WebResultAnnotation wrAnnotation = new WebResultAnnotation();
+//    todo: handle the case that the web result is a header
+//    wrAnnotation.setHeader(webResult.);
+    wrAnnotation.setName(webResult.getName());
+    wrAnnotation.setPartName(webResult.getPartName());
+    wrAnnotation.setTargetNamespace(webResult.getTargetNamespace());
+
+    annotations.put(classname, methodName, wrAnnotation);
+    if (webMethod.isOneWay()) {
+      annotations.addOneWayMethod(classname, methodName);
+    }
+
+    int i = 0;
+    for (WebParam webParam : webMethod.getWebParameters()) {
+      WebParamAnnotation wpAnnotation = new WebParamAnnotation();
+      wpAnnotation.setHeader(webParam.isHeader());
+      wpAnnotation.setMode(webParam.getMode() == javax.jws.WebParam.Mode.INOUT ? WebParamAnnotation.MODE_INOUT : webParam.getMode() == javax.jws.WebParam.Mode.OUT ? WebParamAnnotation.MODE_OUT : WebParamAnnotation.MODE_IN);
+      wpAnnotation.setName(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getLocalPart() : webParam.getPartName());
+      wpAnnotation.setTargetNamespace(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getNamespaceURI() : webMethod.getDeclaringEndpointInterface().getTargetNamespace());
+      wpAnnotation.setPartName(webParam.getPartName());
+      annotations.put(classname, methodName, i, wpAnnotation);
+      i++;
+    }
   }
 
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
-    Collection<String> typeFiles = getJavaFiles(getXFireTypesDir());
+    File typesDir = getXFireTypesDir();
+    Collection<String> typeFiles = getJavaFiles(typesDir);
     Collection<String> jdk14Files = getJavaFiles(getJdk14Dir());
     jdk14Files.addAll(typeFiles);
 
     enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4"), jdk14Files.toArray(new String[jdk14Files.size()]));
+    List<String> typeList = (List<String>) enunciate.getProperty("client.type.list");
+    if (typeList == null) {
+      throw new EnunciateException("The client type list wasn't generated.");
+    }
+    PrintWriter writer = new PrintWriter(new File(getJdk14CompileDir(), uuid.toString() + ".types"));
+    for (String type : typeList) {
+      writer.println(type);
+    }
+    writer.close();
+
+    ExplicitWebAnnotations annotations = (ExplicitWebAnnotations) enunciate.getProperty("client.annotations");
+    if (annotations == null) {
+      throw new EnunciateException("The client annotations weren't generated.");
+    }
+
+    FileOutputStream fos = new FileOutputStream(new File(getJdk14CompileDir(), uuid.toString() + ".annotations"));
+    try {
+      annotations.writeTo(fos);
+    }
+    catch (Exception e) {
+      throw new EnunciateException(e);
+    }
+    finally {
+      fos.close();
+    }
+
+    //todo: compile the jdk 1.5 client classes.
+
   }
 
   @Override
@@ -208,6 +316,55 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setJarName(String jarName) {
     this.jarName = jarName;
+  }
+
+  /**
+   * The default host to which to point the client.
+   *
+   * @return The default host to which to point the client.
+   */
+  public String getDefaultHost() {
+    return defaultHost;
+  }
+
+  /**
+   * The default host to which to point the client.
+   *
+   * @param defaultHost The default host to which to point the client.
+   */
+  public void setDefaultHost(String defaultHost) {
+    this.defaultHost = defaultHost;
+  }
+
+  /**
+   * The default port to which to point the client.
+   *
+   * @return The default port to which to point the client.
+   */
+  public int getDefaultPort() {
+    return defaultPort;
+  }
+
+  /**
+   * The default port to which to point the client.
+   *
+   * @param defaultPort The default port to which to point the client.
+   */
+  public void setDefaultPort(int defaultPort) {
+    this.defaultPort = defaultPort;
+  }
+
+  /**
+   * The default port to which to point the client.
+   *
+   * @return The default port to which to point the client.
+   */
+  public String getDefaultContext() {
+    return defaultContext;
+  }
+
+  public void setDefaultContext(String defaultContext) {
+    this.defaultContext = defaultContext;
   }
 
   /**

@@ -11,6 +11,8 @@ import org.codehaus.xfire.aegis.MessageWriter;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.fault.XFireFault;
 
+import javax.xml.namespace.QName;
+
 /**
  * Reads and writes an instance of ${classname} to/from an XML stream.
  *
@@ -47,6 +49,14 @@ public class ${type.simpleName}XFireType extends Type {
    */
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
     writer.writeValue(String.valueOf(object));
+  }
+
+  public Class getTypeClass() {
+    return ${classname}.class;
+  }
+
+  public QName getSchemaType() {
+    return new QName("${type.targetNamespace?default("")}", "${type.name}");
   }
 }
 [/@file]
