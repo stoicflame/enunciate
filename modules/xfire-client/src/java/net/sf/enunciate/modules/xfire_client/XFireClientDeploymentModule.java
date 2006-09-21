@@ -9,11 +9,12 @@ import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
+import net.sf.enunciate.modules.xfire_client.annotations.*;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.config.XFireClientRuleSet;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
-import org.codehaus.xfire.annotations.*;
+import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import javax.jws.soap.SOAPBinding;
@@ -34,12 +35,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   private String defaultContext = "/";
   private final LinkedHashMap<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
-  private final UUID uuid;
+  private String uuid;
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new LinkedHashMap<String, String>();
     this.configurationRules = new XFireClientRuleSet();
-    this.uuid = UUID.randomUUID();
+    this.uuid = String.valueOf(System.currentTimeMillis());
   }
 
   /**
@@ -67,7 +68,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.put("packageFor", new ClientPackageForMethod(conversions));
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
     model.put("classnameFor", classnameFor);
-    String uuid = this.uuid.toString();
+    String uuid = this.uuid;
     model.put("uuid", uuid);
     model.put("defaultHost", getDefaultHost());
     String defaultContext = getDefaultContext();
@@ -135,20 +136,20 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, EndpointInterface ei, ClientClassnameForMethod conversion) {
     String clazz = conversion.convert(ei);
 
-    WebServiceAnnotation wsAnnotation = new WebServiceAnnotation();
+    SerializableWebServiceAnnotation wsAnnotation = new SerializableWebServiceAnnotation();
     wsAnnotation.setName(ei.getPortTypeName());
     wsAnnotation.setPortName(ei.getSimpleName() + "SOAPPort");
     wsAnnotation.setServiceName(ei.getServiceName());
     wsAnnotation.setTargetNamespace(ei.getTargetNamespace());
-    annotations.put(clazz, wsAnnotation);
+    annotations.class2WebService.put(clazz, wsAnnotation);
 
-    SOAPBindingAnnotation sbAnnotation = new SOAPBindingAnnotation();
+    SerializableSOAPBindingAnnotation sbAnnotation = new SerializableSOAPBindingAnnotation();
     sbAnnotation.setStyle(ei.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? SOAPBindingAnnotation.STYLE_DOCUMENT : SOAPBindingAnnotation.STYLE_RPC);
     sbAnnotation.setParameterStyle(ei.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE ? SOAPBindingAnnotation.PARAMETER_STYLE_BARE : SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED);
     sbAnnotation.setUse(ei.getSoapUse() == SOAPBinding.Use.ENCODED ? SOAPBindingAnnotation.USE_ENCODED : SOAPBindingAnnotation.USE_LITERAL);
-    annotations.put(clazz, sbAnnotation);
+    annotations.class2SOAPBinding.put(clazz, sbAnnotation);
 
-    HandlerChainAnnotation hcAnnotation = null; //todo: support this?
+    SerializableHandlerChainAnnotation hcAnnotation = null; //todo: support this?
 
   }
 
@@ -156,33 +157,33 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     String classname = conversion.convert(webMethod.getDeclaringEndpointInterface());
     String methodName = webMethod.getSimpleName();
 
-    WebMethodAnnotation wmAnnotation = new WebMethodAnnotation();
+    SerializableWebMethodAnnotation wmAnnotation = new SerializableWebMethodAnnotation();
     wmAnnotation.setOperationName(webMethod.getOperationName());
     wmAnnotation.setAction(webMethod.getAction());
-    annotations.put(classname, methodName, wmAnnotation);
+    annotations.method2WebMethod.put(String.format("%s.%s", classname, methodName), wmAnnotation);
 
     WebResult webResult = webMethod.getWebResult();
-    WebResultAnnotation wrAnnotation = new WebResultAnnotation();
+    SerializableWebResultAnnotation wrAnnotation = new SerializableWebResultAnnotation();
 //    todo: handle the case that the web result is a header
 //    wrAnnotation.setHeader(webResult.);
     wrAnnotation.setName(webResult.getName());
     wrAnnotation.setPartName(webResult.getPartName());
     wrAnnotation.setTargetNamespace(webResult.getTargetNamespace());
 
-    annotations.put(classname, methodName, wrAnnotation);
+    annotations.method2WebResult.put(String.format("%s.%s", classname, methodName), wrAnnotation);
     if (webMethod.isOneWay()) {
-      annotations.addOneWayMethod(classname, methodName);
+      annotations.oneWayMethods.add(String.format("%s.%s", classname, methodName));
     }
 
     int i = 0;
     for (WebParam webParam : webMethod.getWebParameters()) {
-      WebParamAnnotation wpAnnotation = new WebParamAnnotation();
+      SerializableWebParamAnnotation wpAnnotation = new SerializableWebParamAnnotation();
       wpAnnotation.setHeader(webParam.isHeader());
       wpAnnotation.setMode(webParam.getMode() == javax.jws.WebParam.Mode.INOUT ? WebParamAnnotation.MODE_INOUT : webParam.getMode() == javax.jws.WebParam.Mode.OUT ? WebParamAnnotation.MODE_OUT : WebParamAnnotation.MODE_IN);
       wpAnnotation.setName(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getLocalPart() : webParam.getPartName());
       wpAnnotation.setTargetNamespace(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getNamespaceURI() : webMethod.getDeclaringEndpointInterface().getTargetNamespace());
       wpAnnotation.setPartName(webParam.getPartName());
-      annotations.put(classname, methodName, i, wpAnnotation);
+      annotations.method2WebParam.put(String.format("%s.%s.%s", classname, methodName, i), wpAnnotation);
       i++;
     }
   }
@@ -200,7 +201,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     if (typeList == null) {
       throw new EnunciateException("The client type list wasn't generated.");
     }
-    PrintWriter writer = new PrintWriter(new File(getJdk14CompileDir(), uuid.toString() + ".types"));
+    PrintWriter writer = new PrintWriter(new File(getJdk14CompileDir(), uuid + ".types"));
     for (String type : typeList) {
       writer.println(type);
     }
@@ -211,7 +212,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("The client annotations weren't generated.");
     }
 
-    FileOutputStream fos = new FileOutputStream(new File(getJdk14CompileDir(), uuid.toString() + ".annotations"));
+    FileOutputStream fos = new FileOutputStream(new File(getJdk14CompileDir(), uuid + ".annotations"));
     try {
       annotations.writeTo(fos);
     }
@@ -355,16 +356,46 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The default port to which to point the client.
+   * The default context to which to point the client.
    *
-   * @return The default port to which to point the client.
+   * @return The default context to which to point the client.
    */
   public String getDefaultContext() {
     return defaultContext;
   }
 
+  /**
+   * The default context to which to point the client.
+   *
+   * @param defaultContext The default context to which to point the client.
+   */
   public void setDefaultContext(String defaultContext) {
+    if (defaultContext == null) {
+      defaultContext = "/";
+    }
+    else if (!defaultContext.startsWith("/")) {
+      defaultContext = "/" + defaultContext;
+    }
+
     this.defaultContext = defaultContext;
+  }
+
+  /**
+   * A unique id to associate with this build of the xfire client.
+   *
+   * @return A unique id to associate with this build of the xfire client.
+   */
+  public String getUuid() {
+    return uuid;
+  }
+
+  /**
+   * A unique id to associate with this build of the xfire client.
+   *
+   * @param uuid A unique id to associate with this build of the xfire client.
+   */
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   /**

@@ -13,7 +13,7 @@
       <schema namespace="http://net.sf.enunciate/samples/petclinic/vets" file="vets.xsd"/>
       <wsdl namespace="http://net.sf.enunciate/samples/petclinic" file="petclinic.wsdl"/>
     </xml>
-    <xfire-client>
+    <xfire-client uuid="basic.example">
       <package-conversions>
         <convert from="net.sf.enunciate.samples.petclinic" to="net.sf.enunciate.samples.petclinic.client"/>
         <convert from="net.sf.enunciate.samples.petclinic.services" to="net.sf.enunciate.samples.petclinic.client.services"/>
