@@ -1,9 +1,10 @@
 package net.sf.enunciate.modules.xfire;
 
+import org.codehaus.xfire.XFireFactory;
 import org.codehaus.xfire.annotations.AnnotationException;
 import org.codehaus.xfire.annotations.WebAnnotations;
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
-import org.codehaus.xfire.jaxb2.JaxbServiceFactory;
+import org.codehaus.xfire.jaxws.JAXWSServiceFactory;
 import org.codehaus.xfire.transport.TransportManager;
 
 /**
@@ -12,9 +13,10 @@ import org.codehaus.xfire.transport.TransportManager;
  *
  * @author Ryan Heaton
  */
-public class EnunciatedAnnotationServiceFactory extends JaxbServiceFactory {
+public class EnunciatedAnnotationServiceFactory extends JAXWSServiceFactory {
 
   public EnunciatedAnnotationServiceFactory() {
+    this(XFireFactory.newInstance().getXFire().getTransportManager());
   }
 
   public EnunciatedAnnotationServiceFactory(final TransportManager transportManager) {
@@ -23,6 +25,7 @@ public class EnunciatedAnnotationServiceFactory extends JaxbServiceFactory {
 
   @Override
   protected String createServiceName(Class clazz, WebServiceAnnotation annotation, String current) {
+    //todo: see if they fixed this...
     WebAnnotations webAnnotations = getAnnotations();
     Class endpointInterface = clazz;
     String eiValue = annotation.getEndpointInterface();
