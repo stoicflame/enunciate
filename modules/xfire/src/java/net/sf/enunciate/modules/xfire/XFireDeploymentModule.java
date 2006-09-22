@@ -6,7 +6,10 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
+import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
 import net.sf.enunciate.modules.xml.XMLAPILookup;
+import net.sf.enunciate.modules.xml.XMLAPIObjectWrapper;
+import org.apache.commons.digester.RuleSet;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +26,7 @@ import java.util.List;
  */
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
+  private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private WarConfig warConfig;
 
   /**
@@ -51,6 +55,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
+    model.setObjectWrapper(xmlWrapper);
 
     //generate the xfire-servlet.xml
     processTemplate(getXFireServletTemplateURL(), model);
@@ -231,7 +236,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    * @return Whether to exclude a file from copying to the lib directory.
    */
   protected boolean excludeLibrary(File file) throws IOException {
-    if (!getWarLibs().isEmpty()) {
+    List<String> warLibs = getWarLibs();
+    if ((warLibs != null) && (!warLibs.isEmpty())) {
       //if the war libraries were explicitly declared, don't exclude anything.
       return false;
     }
@@ -254,6 +260,18 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       //exclude freemarker.jar
       return true;
     }
+    else if (loader.findResource(Enunciate.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude enunciate-core.jar
+      return true;
+    }
+    else if (loader.findResource(net.sf.enunciate.modules.xml.XMLDeploymentModule.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude enunciate-xml.jar
+      return true;
+    }
+    else if (loader.findResource(XFireDeploymentModule.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude enunciate-xfire.jar
+      return true;
+    }
 
     return false;
   }
@@ -264,6 +282,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public int getOrder() {
     return 10;
+  }
+
+  @Override
+  public RuleSet getConfigurationRules() {
+    return new XFireRuleSet();
   }
 
 }

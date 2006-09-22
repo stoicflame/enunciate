@@ -31,7 +31,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   private String jarName = null;
   private String defaultHost = "localhost";
-  private int defaultPort = 80;
+  private int defaultPort = 8080;
   private String defaultContext = "/";
   private final LinkedHashMap<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
@@ -71,11 +71,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     String uuid = this.uuid;
     model.put("uuid", uuid);
     model.put("defaultHost", getDefaultHost());
-    String defaultContext = getDefaultContext();
-    if (!defaultContext.startsWith("/")) {
-      defaultContext = "/" + defaultContext;
-    }
-    model.put("defaultContext", defaultContext);
+    model.put("defaultContext", getDefaultContext());
     model.put("defaultPort", getDefaultPort());
 
     URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
@@ -373,8 +369,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     if (defaultContext == null) {
       defaultContext = "/";
     }
-    else if (!defaultContext.startsWith("/")) {
-      defaultContext = "/" + defaultContext;
+    else {
+      if (!defaultContext.startsWith("/")) {
+        defaultContext = "/" + defaultContext;
+      }
+
+      if (!defaultContext.endsWith("/")) {
+        defaultContext = defaultContext + "/";
+      }
     }
 
     this.defaultContext = defaultContext;

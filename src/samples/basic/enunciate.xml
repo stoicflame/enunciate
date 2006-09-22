@@ -19,5 +19,8 @@
         <convert from="net.sf.enunciate.samples.petclinic.services" to="net.sf.enunciate.samples.petclinic.client.services"/>
       </package-conversions>
     </xfire-client>
+    <xfire>
+      <war name="basic.war"/>
+    </xfire>
   </modules>
 </enunciate>

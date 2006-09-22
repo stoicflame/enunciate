@@ -6,7 +6,9 @@ package ${packageFor(endpointInterface) + ".impl"};
 
 import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 import net.sf.enunciate.modules.xfire_client.ExplicitWebAnnotations;
+import net.sf.enunciate.modules.xfire_client.IntrospectingTypeRegistry;
 import org.codehaus.xfire.XFireFactory;
+import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.client.XFireProxyFactory;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.service.Service;
@@ -23,7 +25,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   private final ${endpointInterface.simpleName} proxy;
 
   public ${endpointInterface.simpleName}Impl() {
-    this("http://${defaultHost}:${defaultPort}${defaultContext}/soap/${endpointInterface.serviceName}");
+    this("http://${defaultHost}:${defaultPort}${defaultContext}soap/${endpointInterface.serviceName}");
   }
 
   public ${endpointInterface.simpleName}Impl(String endpoint) {
@@ -31,7 +33,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
 
     try {
       ExplicitWebAnnotations annotations = ExplicitWebAnnotations.readFrom(getClass().getResourceAsStream("/${uuid}.annotations"));
-      AnnotationServiceFactory factory = new AnnotationServiceFactory(annotations, XFireFactory.newInstance().getXFire().getTransportManager());
+      AnnotationServiceFactory factory = new AnnotationServiceFactory(annotations, XFireFactory.newInstance().getXFire().getTransportManager(), new AegisBindingProvider(new IntrospectingTypeRegistry("${uuid}")));
       service = factory.create(${endpointInterface.simpleName}.class);
     }
     catch (Exception e) {

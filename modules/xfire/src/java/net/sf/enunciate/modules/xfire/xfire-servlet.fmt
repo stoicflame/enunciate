@@ -9,6 +9,11 @@
     <property name="interceptors">
     </property>
     --]
+    [#--
+    todo: set a default handler to redirect to the user documentation?
+    <property name="defaultHandler">
+    </property>
+    --]
     <property name="urlMap">
       <map>
   [@forEachWsdl]
@@ -68,12 +73,14 @@
   <!-- define the parent for all service endpoints -->
   <bean id="endpoint" abstract="true" class="net.sf.enunciate.modules.xfire.EnunciatedXFireExporter">
     <property name="serviceFactory">
-      <bean class="net.sf.enunciate.modules.xfire.EnunciatedAnnotationServiceFactory"/>
+      <ref bean="enunciatedServiceFactory"/>
     </property>
     <property name="xfire">
       <ref bean="xfire"/>
     </property>
   </bean>
+
+  <bean id="enunciatedServiceFactory" class="net.sf.enunciate.modules.xfire.EnunciatedAnnotationServiceFactory"/>
 
 </beans>
 [/@file]

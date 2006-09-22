@@ -14,7 +14,7 @@ public class XFireRuleSet extends RuleSetBase {
     //allow the war file to be created.
     digester.addObjectCreate("enunciate/modules/xfire/war", WarConfig.class);
     digester.addSetProperties("enunciate/modules/xfire/war");
-    digester.addSetNext("enunciate/modules/xfire/war/lib", "setWarCofnig");
+    digester.addSetNext("enunciate/modules/xfire/war", "setWarConfig");
 
     digester.addObjectCreate("enunciate/modules/xfire/war/lib", WarLib.class);
     digester.addSetProperties("enunciate/modules/xfire/war/lib");

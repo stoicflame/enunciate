@@ -3,7 +3,8 @@
            targetNamespace="http://enunciate.sf.net"
            xmlns:enunciate="http://enunciate.sf.net"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified">
+           elementFormDefault="qualified"
+           attributeFormDefault="qualified">
 
   <xs:element name="enunciate">
 

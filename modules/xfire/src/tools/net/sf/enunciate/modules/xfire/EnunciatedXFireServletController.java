@@ -73,7 +73,7 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
       out.close();
     }
     else {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+      super.generateWSDL(response, service);
     }
   }
 }

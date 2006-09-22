@@ -1,10 +1,9 @@
 package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.annotations.AnnotationException;
-import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
-import org.codehaus.xfire.service.binding.BindingProvider;
+import org.codehaus.xfire.jaxb2.JaxbServiceFactory;
 import org.codehaus.xfire.transport.TransportManager;
 
 /**
@@ -13,21 +12,13 @@ import org.codehaus.xfire.transport.TransportManager;
  *
  * @author Ryan Heaton
  */
-public class EnunciatedAnnotationServiceFactory extends AnnotationServiceFactory {
+public class EnunciatedAnnotationServiceFactory extends JaxbServiceFactory {
 
   public EnunciatedAnnotationServiceFactory() {
   }
 
   public EnunciatedAnnotationServiceFactory(final TransportManager transportManager) {
     super(transportManager);
-  }
-
-  public EnunciatedAnnotationServiceFactory(WebAnnotations webAnnotations, final TransportManager transportManager) {
-    super(webAnnotations, transportManager);
-  }
-
-  public EnunciatedAnnotationServiceFactory(WebAnnotations webAnnotations, final TransportManager transportManager, final BindingProvider provider) {
-    super(webAnnotations, transportManager, provider);
   }
 
   @Override

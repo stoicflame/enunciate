@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="enunciate" basedir=".">
-
-  <import file="../../build.xml"/>
+<project default="jar" name="xfire" basedir=".">
 
   <path id="build.classpath">
     <path refid="base.libs"/>
@@ -14,13 +12,35 @@
     </fileset>
 
     <fileset dir="${modules.xml.basedir}/target">
-      <include name="${tools.jar.pattern}"/>
+      <include name="*.jar"/>
     </fileset>
   </path>
+
+  <import file="../../build.xml"/>
 
   <target name="compile-main" depends="base.compile-main">
     <mkdir dir="${build.dir}/META-INF/services"/>
     <echo message="net.sf.enunciate.modules.xfire.XFireDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+  </target>
+
+  <target name="deploy-example-api" depends="init, package-example-api">
+    <fail unless="deploy.dir" message="A deploy directory must be specified. Try adding it to ${user.home}/.enunciate/build.properties"/>
+
+    <property name="example" value="basic"/>
+    <property name="example.package.dir" value="target/examples/${example}/package/xfire"/>
+
+    <copy todir="${deploy.dir}" overwrite="true">
+      <fileset dir="${example.package.dir}" id="wars.set">
+        <include name="*.war"/>
+      </fileset>
+    </copy>
+
+    <delete>
+      <fileset dir="${deploy.dir}">
+        <include name="${example}"/>
+      </fileset>
+    </delete>
+
   </target>
 
 </project>
