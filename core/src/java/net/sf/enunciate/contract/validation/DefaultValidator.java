@@ -281,18 +281,7 @@ public class DefaultValidator implements Validator {
   }
 
   public ValidationResult validateWebFault(WebFault webFault) {
-    ValidationResult result = new ValidationResult();
-
-    WebMethod webMethod = webFault.getWebMethod();
-    javax.xml.ws.WebFault annotation = webFault.getAnnotation(javax.xml.ws.WebFault.class);
-    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
-    if ((annotation != null) && (!"".equals(annotation.targetNamespace()) && (!targetNamespace.equals(annotation.targetNamespace())))) {
-      result.addError(webFault.getPosition(), "Enunciate doesn't allow methods to throw a web fault with a target namespace that is " +
-        "declared different from the target namespace of its endpoint interface (throw in " + webMethod.getPosition() +
-        ").  Either throw a different exception or remove the targetNamespace element declaration from the @WebFault parameter.");
-    }
-
-    return result;
+    return new ValidationResult();
   }
 
   // Inherited.

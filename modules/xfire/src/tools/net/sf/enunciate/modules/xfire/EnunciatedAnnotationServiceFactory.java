@@ -25,7 +25,6 @@ public class EnunciatedAnnotationServiceFactory extends JAXWSServiceFactory {
 
   @Override
   protected String createServiceName(Class clazz, WebServiceAnnotation annotation, String current) {
-    //todo: see if they fixed this...
     WebAnnotations webAnnotations = getAnnotations();
     Class endpointInterface = clazz;
     String eiValue = annotation.getEndpointInterface();

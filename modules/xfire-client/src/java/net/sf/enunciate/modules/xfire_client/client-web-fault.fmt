@@ -9,35 +9,39 @@ package ${packageFor(fault)};
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 public class ${fault.simpleName} extends Exception {
-  [#if fault.explicitFaultBean?exists]
+  [#if !fault.implicitSchemaElement]
     [#assign faultBean=fault.explicitFaultBean/]
 
   private ${classnameFor(faultBean)} faultInfo;
 
-  public ${fault.simpleName}(String message, ${classnameFor(faultBean)} faultInfo) {
-    super(message);
-
-    this.faultInfo = faultInfo;
-  }
-
-  public ${fault.simpleName}(String message, ${classnameFor(faultBean)} faultInfo), Throwable cause) {
-    super(message, cause);
-
+  public ${fault.simpleName}(${classnameFor(faultBean)} faultInfo) {
     this.faultInfo = faultInfo;
   }
 
   public ${classnameFor(faultBean)} getFaultInfo() {
     return this.faultInfo;
   }
+
   [#else]
+    [#list fault.childElements as childElement]
+      [#assign element=childElement.property/]
 
-  public ${fault.simpleName}(String message) {
-    super(message);
+  private ${classnameFor(element.propertyType)} ${element.simpleName};
+
+  /**
+   * ${element.javaDoc.return?default(element.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public ${classnameFor(element.propertyType)} get${element.simpleName?cap_first}() {
+    return this.${element.simpleName};
   }
 
-  public ${fault.simpleName}(String message, Throwable cause) {
-    super(message, cause);
+  /**
+   * ${element.javaDoc.return?default(element.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public void set${element.simpleName?cap_first}(${classnameFor(element.propertyType)} ${element.simpleName}) {
+    this.${element.simpleName} = ${element.simpleName};
   }
+    [/#list]
   [/#if]
 
 }

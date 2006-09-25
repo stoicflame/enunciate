@@ -3,6 +3,7 @@ package net.sf.enunciate.contract.jaxws;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.ConstructorDeclaration;
+import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
@@ -32,14 +33,12 @@ import java.util.Collection;
 public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement {
 
   private final javax.xml.ws.WebFault annotation;
-  private final WebMethod webMethod;
   private final ClassDeclaration explicitFaultBean;
 
-  protected WebFault(ClassDeclaration delegate, WebMethod webMethod) {
+  protected WebFault(ClassDeclaration delegate) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
-    this.webMethod = webMethod;
 
     ClassDeclaration explicitFaultBean = null;
     Collection<PropertyDeclaration> properties = getProperties();
@@ -73,15 +72,6 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     this.explicitFaultBean = explicitFaultBean;
-  }
-
-  /**
-   * The web method throwing this web fault.
-   *
-   * @return The web method throwing this web fault.
-   */
-  public WebMethod getWebMethod() {
-    return webMethod;
   }
 
   /**
@@ -205,8 +195,52 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       return new QName(explicitFaultBean.getTargetNamespace(), explicitFaultBean.getName());
     }
     else {
-      return new QName(webMethod.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+      return new QName(getTargetNamespace(), getElementName());
     }
+  }
+
+  /**
+   * Gets the target namespace of this web service.
+   *
+   * @return the target namespace of this web service.
+   */
+  public String getTargetNamespace() {
+    String targetNamespace = null;
+
+    if (annotation != null) {
+      targetNamespace = annotation.targetNamespace();
+    }
+
+    if ((targetNamespace == null) || ("".equals(targetNamespace))) {
+      targetNamespace = calculateNamespaceURI();
+    }
+
+    return targetNamespace;
+  }
+
+
+  /**
+   * Calculates a namespace URI for a given package.  Default implementation uses the algorithm defined in
+   * section 3.2 of the jax-ws spec.
+   *
+   * @return The calculated namespace uri.
+   */
+  protected String calculateNamespaceURI() {
+    PackageDeclaration pkg = getPackage();
+    if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
+      throw new ValidationException(getPosition(), "A web service in no package must specify a target namespace.");
+    }
+
+    String[] tokens = pkg.getQualifiedName().split("\\.");
+    String uri = "http://";
+    for (int i = tokens.length - 1; i >= 0; i--) {
+      uri += tokens[i];
+      if (i != 0) {
+        uri += ".";
+      }
+    }
+    uri += "/";
+    return uri;
   }
 
   /**
@@ -249,9 +283,13 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
       try {
         DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
+        if ((propertyType.isCollection()) || (propertyType.isArray())) {
+          throw new ValidationException(property.getPosition(), "Sorry, enunciate doesn't support collections or lists as fault properties yet.  Shouldn't be too hard to do, though...");
+        }
+
         XmlTypeMirror xmlType = model.getXmlType(propertyType);
         if (xmlType.isAnonymous()) {
-          throw new ValidationException(webMethod.getPosition(), "Return value must not be an anonymous type.");
+          throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
         }
         int minOccurs = propertyType.isPrimitive() ? 1 : 0;
         String maxOccurs = propertyType.isArray() || propertyType.isCollection() ? "unbounded" : "1";
@@ -320,7 +358,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     return true;
   }
 
-  private static class FaultBeanChildElement implements ImplicitChildElement {
+  public static class FaultBeanChildElement implements ImplicitChildElement {
 
     private final PropertyDeclaration property;
     private final XmlTypeMirror xmlType;
@@ -332,6 +370,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       this.xmlType = xmlType;
       this.minOccurs = minOccurs;
       this.maxOccurs = maxOccurs;
+    }
+
+    public PropertyDeclaration getProperty() {
+      return property;
     }
 
     public String getElementName() {

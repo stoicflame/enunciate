@@ -83,6 +83,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
     URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
+    URL xfireFaultTemplate = getTemplateURL("xfire-fault-type.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
     ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
@@ -104,13 +105,16 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
     enunciate.setProperty("client.annotations", annotations);
 
+    List<String> typeList = new ArrayList<String>();
+
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
+      processTemplate(xfireFaultTemplate, model);
+      typeList.add(classnameFor.convert(webFault));
     }
 
-    List<String> typeList = new ArrayList<String>();
     //process each type for client-side stubs.
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -123,6 +127,9 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
         typeList.add(classnameFor.convert(typeDefinition));
       }
+
+      //todo: the jdk1.4 client code needs to also generate the third-party classes that are referenced by these classes
+      //todo: or the jdk1.4 generation needs to just fail.
     }
     enunciate.setProperty("client.type.list", typeList);
 

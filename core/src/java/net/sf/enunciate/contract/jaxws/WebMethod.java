@@ -59,7 +59,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
         throw new ValidationException(getPosition(), "Unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault((ClassDeclaration) declaration, this));
+      webFaults.add(new WebFault((ClassDeclaration) declaration));
     }
     this.webFaults = webFaults;
 
