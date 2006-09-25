@@ -293,6 +293,17 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   }
 
   /**
+   * Determine whether this web method is doc/lit wrapped.
+   *
+   * @return Whether this web method is doc/lit wrapped.
+   */
+  public boolean isDocLitWrapped() {
+    return getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT &&
+      getSoapUse() == SOAPBinding.Use.LITERAL &&
+      getSoapParameterStyle() == SOAPBinding.ParameterStyle.WRAPPED;
+  }
+
+  /**
    * Web methods must be unique by name.  (JSR 181: 3.1.1)
    *
    * @param webMethod The web method to compare this to.

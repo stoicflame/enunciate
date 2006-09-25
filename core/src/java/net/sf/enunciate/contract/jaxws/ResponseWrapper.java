@@ -54,6 +54,22 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
+   * The local namespace of the output.
+   *
+   * @return The local namespace of the output.
+   */
+  public String getElementNamespace() {
+    String namespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+
+    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
+      namespace = annotation.targetNamespace();
+    }
+
+    return namespace;
+  }
+
+  /**
    * Documentation explaining this is a response wrapper for its method.
    *
    * @return Documentation explaining this is a response wrapper for its method.
@@ -73,7 +89,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    * @return The qname of the response element.
    */
   public QName getElementQName() {
-    return new QName(webMethod.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    return new QName(getElementNamespace(), getElementName());
   }
 
   /**

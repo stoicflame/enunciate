@@ -46,6 +46,17 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
     return name;
   }
 
+  public String getElementNamespace() {
+    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+
+    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    if ((annotation != null) && (annotation.localName() != null) && (!"".equals(annotation.targetNamespace()))) {
+      targetNamespace = annotation.targetNamespace();
+    }
+
+    return targetNamespace;
+  }
+
   /**
    * Documentation explaining this is a request wrapper for its method.
    *
@@ -73,7 +84,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    * @return The qname of the element for this request wrapper.
    */
   public QName getElementQName() {
-    return new QName(webMethod.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    return new QName(getElementNamespace(), getElementName());
   }
 
   /**
