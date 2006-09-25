@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules;
 
 import net.sf.enunciate.EnunciateException;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
@@ -27,6 +28,13 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return null
    */
   public String getNamespace() {
+    return null;
+  }
+
+  /**
+   * @return null
+   */
+  public Validator getValidator() {
     return null;
   }
 

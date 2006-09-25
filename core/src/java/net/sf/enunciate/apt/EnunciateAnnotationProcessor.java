@@ -9,10 +9,7 @@ import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.validation.ValidationException;
-import net.sf.enunciate.contract.validation.ValidationMessage;
-import net.sf.enunciate.contract.validation.ValidationResult;
-import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.contract.validation.*;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.template.freemarker.*;
@@ -119,7 +116,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    Validator validator = this.config.getValidator();
+    ValidatorChain validator = new ValidatorChain();
+    validator.addValidator(this.config.getValidator());
+    for (DeploymentModule module : this.config.getEnabledModules()) {
+      Validator moduleValidator = module.getValidator();
+      if (moduleValidator != null) {
+        validator.addValidator(validator);
+      }
+    }
+
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {

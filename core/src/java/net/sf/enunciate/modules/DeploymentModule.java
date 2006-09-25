@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules;
 
 import net.sf.enunciate.EnunciateException;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
@@ -29,6 +30,13 @@ public interface DeploymentModule {
    * @return The namespace for this module.
    */
   String getNamespace();
+
+  /**
+   * Get the validator for this module, or null if none.
+   *
+   * @return The validator.
+   */
+  Validator getValidator();
 
   /**
    * Initialize this deployment module with the specified enunciate mechanism.
