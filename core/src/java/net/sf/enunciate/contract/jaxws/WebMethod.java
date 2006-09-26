@@ -69,6 +69,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     if (bindingStyle == SOAPBinding.Style.DOCUMENT) {
       SOAPBinding.ParameterStyle parameterStyle = getSoapParameterStyle();
       Collection<WebParam> webParams = getWebParameters();
+
       for (WebParam webParam : webParams) {
         switch (parameterStyle) {
           //add all the headers, and if it's BARE, add the (should be only one) parameter bare (not wrapped).
@@ -84,14 +85,12 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
       if (parameterStyle == SOAPBinding.ParameterStyle.WRAPPED) {
         messages.add(new RequestWrapper(this));
-        if (!isOneWay()) {
-          messages.add(new ResponseWrapper(this));
-        }
       }
 
       if (!isOneWay()) {
-        //add all the faults.
+        //add all the faults and response message if not one way.
         messages.addAll(getWebFaults());
+        messages.add(parameterStyle == SOAPBinding.ParameterStyle.WRAPPED ? new ResponseWrapper(this) : getWebResult());
       }
     }
     else {
@@ -237,11 +236,6 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     if (bindingInfo != null) {
       style = bindingInfo.style();
-    }
-
-    if (style != SOAPBinding.Style.DOCUMENT) {
-      //todo: support rpc-style web services.
-      throw new ValidationException(getPosition(), "Sorry, " + style + "-style web methods aren't supported yet.");
     }
 
     return style;

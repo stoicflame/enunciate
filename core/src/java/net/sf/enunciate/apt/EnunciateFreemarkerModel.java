@@ -151,12 +151,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       wsdlInfo = new WsdlInfo();
       namespacesToWsdls.put(namespace, wsdlInfo);
       wsdlInfo.setTargetNamespace(namespace);
-
-      //todo: configure the schema info.
-      //wsdlInfo.setSchemaInfo();
-
-      //todo: configure whether to generate.
-      //wsdlInfo.setGenerate();
     }
 
     wsdlInfo.getEndpointInterfaces().add(ei);

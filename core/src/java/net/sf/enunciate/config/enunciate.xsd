@@ -66,11 +66,10 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:sequence>
-      <!--this can't be enforced by the schema, but an element like this is recognized:-->
-      <!-- xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/ -->
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/>
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
-    </xs:sequence>
+    </xs:choice>
   </xs:complexType>
 
   <xs:complexType name="custom-module">

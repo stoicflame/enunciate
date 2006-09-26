@@ -42,7 +42,7 @@ public class DefaultValidator implements Validator {
       result.addError(delegate.getPosition(), "Not an endpoint interface: no WebService annotation");
     }
     else {
-      if ((ei.getPackage() == null) && (ei.getTargetNamespace() == null)) {
+      if (((ei.getPackage() == null) || ("".equals(ei.getPackage().getQualifiedName()))) && (ei.getTargetNamespace() == null)) {
         result.addError(delegate.getPosition(), "An endpoint interface in no package must specify a target namespace.");
       }
 
@@ -64,11 +64,10 @@ public class DefaultValidator implements Validator {
       if (!uniquelyNamedWebMethods.add(webMethod)) {
         result.addError(webMethod.getPosition(), "Web methods must have unique operation names.  Use annotations to disambiguate.");
       }
-    }
 
-    for (WebMethod webMethod : ei.getWebMethods()) {
       result.aggregate(validateWebMethod(webMethod));
     }
+
     for (EndpointImplementation implementation : ei.getEndpointImplementations()) {
       result.aggregate(validateEndpointImplementation(implementation));
     }
@@ -185,12 +184,15 @@ public class DefaultValidator implements Validator {
     }
 
     result.aggregate(validateWebResult(webMethod.getWebResult()));
+
     for (WebParam webParam : webMethod.getWebParameters()) {
       result.aggregate(validateWebParam(webParam));
     }
+
     for (WebFault webFault : webMethod.getWebFaults()) {
       result.aggregate(validateWebFault(webFault));
     }
+
     for (WebMessage webMessage : webMethod.getMessages()) {
       if (webMessage instanceof RequestWrapper) {
         result.aggregate(validateRequestWrapper((RequestWrapper) webMessage));
@@ -210,15 +212,6 @@ public class DefaultValidator implements Validator {
       result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a request wrapper.");
     }
 
-    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
-    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-      if (!webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(annotation.targetNamespace())) {
-        result.addError(webMethod.getPosition(), "Enunciate doesn't allow declaring a target namespace for a request wrapper that is different " +
-          "from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root element from " +
-          "another namespace for the parameter.");
-      }
-    }
-
     return result;
   }
 
@@ -233,17 +226,6 @@ public class DefaultValidator implements Validator {
       result.addError(webMethod.getPosition(), "A one-way method cannot have a response wrapper.");
     }
 
-
-    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
-    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-      String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
-      if (!targetNamespace.equals(annotation.targetNamespace())) {
-        result.addError(webMethod.getPosition(), "Enunciate doesn't allow declaring a target namespace for a response wrapper that is " +
-          "different from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root " +
-          "element from another namespace for the return value.");
-      }
-    }
-
     return result;
   }
 
@@ -254,30 +236,11 @@ public class DefaultValidator implements Validator {
       result.addError(webParam.getPosition(), "Enunciate currently doesn't support in/out parameters.  Maybe someday...");
     }
 
-    javax.jws.WebParam annotation = webParam.getAnnotation(javax.jws.WebParam.class);
-    if ((annotation != null) && (!"".equals(annotation.targetNamespace()))) {
-      String targetNamespace = webParam.getWebMethod().getDeclaringEndpointInterface().getTargetNamespace();
-      if (!annotation.targetNamespace().equals(targetNamespace)) {
-        result.addError(webParam.getPosition(), "Enunciate doesn't allow declaring a target namespace for a web parameter that is different from the " +
-          "target namespace of the endpoint interface.  If you really want to, declare the parameter style BARE and use an xml root element from another " +
-          "namespace for the parameter.");
-      }
-    }
-
     return result;
   }
 
   public ValidationResult validateWebResult(WebResult webResult) {
-    ValidationResult result = new ValidationResult();
-    WebMethod webMethod = webResult.getWebMethod();
-    String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
-    if (!targetNamespace.equals(webResult.getTargetNamespace())) {
-      result.addError(webMethod.getPosition(), "Enunciate doesn't allow methods to return a web result with a target namespace that is " +
-        "declared different from the target namespace of its endpoint interface.  If you really want to, declare the parameter style BARE and use " +
-        "an xml root element from another namespace for the return value.");
-    }
-
-    return result;
+    return new ValidationResult();
   }
 
   public ValidationResult validateWebFault(WebFault webFault) {
@@ -297,6 +260,8 @@ public class DefaultValidator implements Validator {
         result.addError(complexType.getPosition(), "A complex type cannot subclass another complex type (" + superType.getQualifiedName() +
           ") that has an xml value.");
       }
+
+      //we don't have to recurse into the superclasses because we will have already validated (or will validate them) later.
     }
 
     if (complexType.getValue() != null) {
@@ -324,10 +289,10 @@ public class DefaultValidator implements Validator {
         + " is a complex type.");
     }
 
-
     return result;
   }
 
+  // Inherited.
   public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
     return validateSimpleType(enumType);
   }
@@ -347,7 +312,7 @@ public class DefaultValidator implements Validator {
     XmlType xmlType = typeDef.getAnnotation(XmlType.class);
 
     boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition));
-    if (xmlType != null) {
+    if (needsNoArgConstructor && (xmlType != null)) {
       if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
         result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
       }
@@ -395,12 +360,30 @@ public class DefaultValidator implements Validator {
       }
     }
 
+    for (Attribute attribute : typeDef.getAttributes()) {
+      result.aggregate(validateAttribute(attribute));
+    }
+
     if (typeDef.getValue() != null) {
       result.aggregate(validateValue(typeDef.getValue()));
 
       if (!typeDef.getElements().isEmpty()) {
-        result.addError(typeDef.getValue().getPosition(), "A type definition cannot have both an xml value and a child element.");
+        result.addError(typeDef.getValue().getPosition(), "A type definition cannot have both an xml value and child element(s).");
       }
+    }
+    else {
+      for (Element element : typeDef.getElements()) {
+        if (element instanceof ElementRef) {
+          result.aggregate(validateElementRef((ElementRef) element));
+        }
+        else {
+          result.aggregate(validateElement(element));
+        }
+      }
+    }
+
+    if (typeDef.getXmlID() != null) {
+      validateXmlID(typeDef.getXmlID());
     }
 
     return result;
@@ -450,7 +433,7 @@ public class DefaultValidator implements Validator {
       result.addError(attribute.getPosition(), "No base type specified.");
     }
     else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      result.addError(attribute.getPosition(), "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+      result.addError(attribute.getPosition(), "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
 
@@ -465,25 +448,6 @@ public class DefaultValidator implements Validator {
       (xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
       result.addError(element.getPosition(),
                       "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
-    }
-
-    if (element.isWrapped()) {
-      XmlElementWrapper wrapper = element.getAnnotation(XmlElementWrapper.class);
-
-      String namespace = wrapper.namespace();
-      String typeNamespace = element.getTypeDefinition().getTargetNamespace();
-      //use the empty string for comparison in the case of the empty namespace.
-      if (namespace == null) {
-        namespace = "";
-      }
-      if (typeNamespace == null) {
-        typeNamespace = "";
-      }
-
-      if ((!"##default".equals(namespace)) && (!typeNamespace.equals(namespace))) {
-        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
-          "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
-      }
     }
 
     return result;
@@ -516,25 +480,6 @@ public class DefaultValidator implements Validator {
       result.addError(elementRef.getPosition(), "The xml element ref cannot be annotated also with XmlElement or XmlElements.");
     }
 
-    if (elementRef.isWrapped()) {
-      XmlElementWrapper wrapper = elementRef.getAnnotation(XmlElementWrapper.class);
-
-      String namespace = wrapper.namespace();
-      String typeNamespace = elementRef.getTypeDefinition().getTargetNamespace();
-      //use the empty string for comparison in the case of the empty namespace.
-      if (namespace == null) {
-        namespace = "";
-      }
-      if (typeNamespace == null) {
-        typeNamespace = "";
-      }
-
-      if ((!"##default".equals(namespace)) && (!typeNamespace.equals(namespace))) {
-        result.addError(elementRef.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
-          "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
-      }
-    }
-
     return result;
   }
 
@@ -552,7 +497,7 @@ public class DefaultValidator implements Validator {
         Map<String, AnnotationMirror> setterAnnotations = setter.getAnnotations();
         for (String annotation : getterAnnotations.keySet()) {
           if ((annotation.startsWith(XmlElement.class.getPackage().getName())) && (setterAnnotations.containsKey(annotation))) {
-            result.addError(setter.getPosition(), "'" + annotation + "' is duplicated between the getter and setter.");
+            result.addError(setter.getPosition(), "'" + annotation + "' is on both the getter and setter.");
           }
         }
       }

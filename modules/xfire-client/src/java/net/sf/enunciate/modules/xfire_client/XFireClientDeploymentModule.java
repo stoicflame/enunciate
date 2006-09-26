@@ -7,6 +7,7 @@ import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.*;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.annotations.*;
@@ -72,7 +73,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.put("uuid", uuid);
     model.put("defaultHost", getDefaultHost());
     model.put("defaultContext", getDefaultContext());
-    model.put("defaultPort", getDefaultPort());
+    model.put("defaultPort", String.valueOf(getDefaultPort()));
 
     URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
     URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
@@ -167,8 +168,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     WebResult webResult = webMethod.getWebResult();
     SerializableWebResultAnnotation wrAnnotation = new SerializableWebResultAnnotation();
-//    todo: handle the case that the web result is a header
-//    wrAnnotation.setHeader(webResult.);
+    wrAnnotation.setHeader(webResult.isHeader());
     wrAnnotation.setName(webResult.getName());
     wrAnnotation.setPartName(webResult.getPartName());
     wrAnnotation.setTargetNamespace(webResult.getTargetNamespace());
@@ -415,6 +415,16 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public RuleSet getConfigurationRules() {
     return this.configurationRules;
+  }
+
+  /**
+   * An xfire-client validator.
+   *
+   * @return An xfire-client validator.
+   */
+  @Override
+  public Validator getValidator() {
+    return new XFireClientValidator();
   }
 
   /**

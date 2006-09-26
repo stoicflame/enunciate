@@ -24,7 +24,7 @@ import java.util.Collection;
 /**
  * @author Ryan Heaton
  */
-public class WebParam extends DecoratedParameterDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement, ImplicitChildElement {
+public class WebParam extends DecoratedParameterDeclaration implements WebMessage, WebMessagePart, ImplicitChildElement {
 
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
@@ -149,16 +149,6 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
   public boolean isImplicitSchemaElement() {
     TypeMirror parameterType = getType();
     return !((parameterType instanceof DeclaredType) && (((DeclaredType) parameterType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
-  }
-
-  /**
-   * A web param never has any child elements.  It is either a BARE root element with a non-anonymous type, or a child
-   * element of a request/response wrapper.
-   *
-   * @return null.
-   */
-  public Collection<ImplicitChildElement> getChildElements() {
-    return null;
   }
 
   /**

@@ -6,6 +6,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxws.WebResult;
 import net.sf.jelly.apt.decorations.JavaDoc;
 
 import javax.xml.namespace.QName;
@@ -30,6 +31,9 @@ public class XMLAPIObjectWrapper extends DefaultObjectWrapper {
     }
     else if (obj instanceof JavaDoc) {
       return new StringModel(obj, this);
+    }
+    else if (obj instanceof WebResult) {
+
     }
     else {
       return super.wrap(obj);

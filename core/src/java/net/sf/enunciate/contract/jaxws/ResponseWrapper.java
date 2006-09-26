@@ -1,12 +1,5 @@
 package net.sf.enunciate.contract.jaxws;
 
-import net.sf.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
-import net.sf.enunciate.contract.validation.ValidationException;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,21 +109,9 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   public Collection<ImplicitChildElement> getChildElements() {
     Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
 
-    EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-    try {
-      DecoratedTypeMirror returnType = (DecoratedTypeMirror) webMethod.getReturnType();
-      if (!returnType.isVoid()) {
-        XmlTypeMirror xmlType = model.getXmlType(returnType);
-        if (xmlType.isAnonymous()) {
-          throw new ValidationException(webMethod.getPosition(), "Return value must not be an anonymous type.");
-        }
-        int minOccurs = returnType.isPrimitive() ? 1 : 0;
-        String maxOccurs = returnType.isArray() || returnType.isCollection() ? "unbounded" : "1";
-        childElements.add(new ReturnChildElement(webMethod.getWebResult(), xmlType, minOccurs, maxOccurs));
-      }
-    }
-    catch (XmlTypeException e) {
-      throw new ValidationException(webMethod.getPosition(), e.getMessage());
+    WebResult webResult = webMethod.getWebResult();
+    if (!webResult.isHeader()) {
+      childElements.add(webResult);
     }
 
     for (WebParam webParam : webMethod.getWebParameters()) {
@@ -216,42 +197,6 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    */
   public String getPartName() {
     return webMethod.getSimpleName() + "Response";
-  }
-
-  private static class ReturnChildElement implements ImplicitChildElement {
-
-    private final WebResult result;
-    private final XmlTypeMirror xmlType;
-    private final int minOccurs;
-    private final String maxOccurs;
-
-    public ReturnChildElement(WebResult result, XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
-      this.result = result;
-      this.xmlType = xmlType;
-      this.minOccurs = minOccurs;
-      this.maxOccurs = maxOccurs;
-    }
-
-    public String getElementName() {
-      return result.getName();
-    }
-
-    public String getElementDocs() {
-      return result.getDocComment();
-    }
-
-    public QName getTypeQName() {
-      return xmlType.getQname();
-    }
-
-    public int getMinOccurs() {
-      return minOccurs;
-    }
-
-    public String getMaxOccurs() {
-      return maxOccurs;
-    }
-
   }
 
 }

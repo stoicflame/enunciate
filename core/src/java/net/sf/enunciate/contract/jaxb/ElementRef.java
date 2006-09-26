@@ -165,7 +165,7 @@ public class ElementRef extends Element {
       return xmlElementRef.name();
     }
     else {
-      //todo: do some null checking, validation checking? verify it's a declared type, very XmlRootElement exists?
+      //todo: do some null checking, validation checking? verify it's a declared type, verify XmlRootElement exists?
       TypeDeclaration declaration = ((DeclaredType) baseType).getDeclaration();
       XmlRootElement rootElement = declaration.getAnnotation(XmlRootElement.class);
 
@@ -191,7 +191,7 @@ public class ElementRef extends Element {
       return xmlElementRef.namespace();
     }
     else {
-      //todo: do some null checking, validation checking? verify it's a declared type, very XmlRootElement exists?
+      //todo: do some null checking, validation checking? verify it's a declared type, verify XmlRootElement exists?
       TypeDeclaration declaration = ((DeclaredType) baseType).getDeclaration();
       XmlRootElement rootElement = declaration.getAnnotation(XmlRootElement.class);
 

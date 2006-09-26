@@ -60,7 +60,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
         while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
           for (MethodDeclaration method : declaration.getMethods()) {
             if (isWebMethod(method)) {
-              //todo: care about overridden methods?
+              //todo: if this method is overridden, don't add it.
               webMethods.add(new WebMethod(method, this));
             }
           }

@@ -116,6 +116,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
+    //todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
+
     ValidatorChain validator = new ValidatorChain();
     validator.addValidator(this.config.getValidator());
     for (DeploymentModule module : this.config.getEnabledModules()) {
@@ -140,21 +142,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
       throw new ModelValidationException();
     }
-
-/*
-    todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
-    todo: read the config file into the prefixMap and schemaMap (but don't overwrite the constant namespaces!)
-    todo: read the config file for element/attribute form default
-    String configFile = env.getOptions().get(EnunciateAnnotationProcessorFactory.CONFIG_OPTION);
-    if (configFile != null) {
-      try {
-        FileInputStream stream = new FileInputStream(configFile);
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-*/
 
     return model;
   }

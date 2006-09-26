@@ -5,6 +5,7 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xml.config.SchemaConfig;
 import net.sf.enunciate.modules.xml.config.WsdlConfig;
@@ -154,6 +155,11 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public RuleSet getConfigurationRules() {
     return this.rules;
+  }
+
+  @Override
+  public Validator getValidator() {
+    return new XMLValidator();
   }
 
   /**

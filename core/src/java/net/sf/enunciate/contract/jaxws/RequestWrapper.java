@@ -145,7 +145,6 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    * @return this.
    */
   public Collection<WebMessagePart> getParts() {
-    //todo: support rpc encoding.
     return new ArrayList<WebMessagePart>(Arrays.asList(this));
   }
 
