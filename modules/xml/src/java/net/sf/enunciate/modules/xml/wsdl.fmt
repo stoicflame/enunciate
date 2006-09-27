@@ -132,7 +132,6 @@ Template library for WSDL.
     </documentation>
       [/#if]
       [#list webMessage.parts as part]
-    [#--todo: support rpc use (set type instead of element)--]
     [#--todo: support encoded style? nah...--]
     <part name="${part.partName}" ${part.particleType?lower_case}="${part.particleQName}">
         [#if part.partDocs?exists]

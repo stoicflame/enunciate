@@ -126,6 +126,10 @@ public class DefaultValidator implements Validator {
       result.addError(webMethod.getPosition(), "A method marked as excluded cannot be a web method.");
     }
 
+    if (webMethod.getSoapUse() == SOAPBinding.Use.ENCODED) {
+      result.addError(webMethod.getPosition(), "Enunciate doesn't support ENCODED-use web methods.");
+    }
+
     int inParams = 0;
     int outParams = 0;
     final boolean oneway = webMethod.isOneWay();

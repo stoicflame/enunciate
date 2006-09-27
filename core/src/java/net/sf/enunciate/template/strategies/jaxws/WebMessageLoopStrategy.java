@@ -61,7 +61,6 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
               continue;
             }
 
-            //todo: account for duplicate web message names since enunciate groups all endpoint interfaces of the same namespace into a single wsdl.
             messages.add(webMessage);
           }
         }

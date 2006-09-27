@@ -3,6 +3,7 @@ package net.sf.enunciate.modules.xfire;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
@@ -287,6 +288,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public RuleSet getConfigurationRules() {
     return new XFireRuleSet();
+  }
+
+  @Override
+  public Validator getValidator() {
+    return new XFireValidator();
   }
 
 }
