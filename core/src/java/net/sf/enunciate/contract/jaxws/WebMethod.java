@@ -68,9 +68,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     if (bindingStyle == SOAPBinding.Style.DOCUMENT) {
       SOAPBinding.ParameterStyle parameterStyle = getSoapParameterStyle();
-      Collection<WebParam> webParams = getWebParameters();
 
-      for (WebParam webParam : webParams) {
+      for (WebParam webParam : webParameters) {
         switch (parameterStyle) {
           //add all the headers, and if it's BARE, add the (should be only one) parameter bare (not wrapped).
           case WRAPPED:
@@ -89,13 +88,14 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
       if (!isOneWay()) {
         //add all the faults and response message if not one way.
-        messages.addAll(getWebFaults());
-        messages.add(parameterStyle == SOAPBinding.ParameterStyle.WRAPPED ? new ResponseWrapper(this) : getWebResult());
+        messages.addAll(webFaults);
+        messages.add(parameterStyle == SOAPBinding.ParameterStyle.WRAPPED ? new ResponseWrapper(this) : webResult);
       }
     }
     else {
-      //todo: support rpc-style operations.
-      throw new ValidationException(getPosition(), "Sorry, " + bindingStyle + "-style methods aren't supported yet.");
+      messages.add(new RPCInputMessage(this));
+      messages.add(new RPCOutputMessage(this));
+      messages.addAll(webFaults);
     }
 
     this.messages = messages;
@@ -148,7 +148,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     Collection<WebMessage> messages = getMessages();
     for (WebMessage message : messages) {
       for (WebMessagePart part : message.getParts()) {
-        namespaces.add(part.getElementQName().getNamespaceURI());
+        namespaces.add(part.getParticleQName().getNamespaceURI());
         if (part instanceof ImplicitSchemaElement) {
           ImplicitSchemaElement implicitElement = (ImplicitSchemaElement) part;
 
@@ -166,24 +166,6 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
       }
     }
     return namespaces;
-  }
-
-  /**
-   * The message name of this web method.
-   *
-   * @return The message name of this web method.
-   */
-  public String getMessageName() {
-    return getSimpleName();
-  }
-
-  /**
-   * The message name of the response of this web method.
-   *
-   * @return The message name of the response of this web method.
-   */
-  public String getResponseMessageName() {
-    return getSimpleName() + "Response";
   }
 
   /**

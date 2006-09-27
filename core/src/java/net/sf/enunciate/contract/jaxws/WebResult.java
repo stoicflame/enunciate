@@ -123,7 +123,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
    * @return The message name in the case of a document/bare service.
    */
   public String getMessageName() {
-    return method.getResponseMessageName();
+    return method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "Response";
   }
 
   /**
@@ -173,11 +173,20 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
   }
 
   /**
+   * If the web method style is RPC, the particle type is TYPE.  Otherwise, it's ELEMENT.
+   *
+   * @return The particle type.
+   */
+  public ParticleType getParticleType() {
+    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? ParticleType.TYPE : ParticleType.ELEMENT;
+  }
+
+  /**
    * The qname of the element for this web result as a part.
    *
    * @return The qname of the element for this web result as a part.
    */
-  public QName getElementQName() {
+  public QName getParticleQName() {
     TypeMirror returnType = getDelegate();
     if (returnType instanceof DeclaredType) {
       TypeDeclaration returnTypeDeclaration = ((DeclaredType) returnType).getDeclaration();
@@ -197,13 +206,18 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
   }
 
   /**
-   * This web result defines an implicit schema element if it is NOT of a class type that is an xml root element.
+   * This web result defines an implicit schema element if it is of DOCUMENT binding style and it is
+   * NOT of a class type that is an xml root element.
    *
    * @return Whether this web result is an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    TypeMirror returnType = getDelegate();
-    return !((returnType instanceof DeclaredType) && (((DeclaredType) returnType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
+    if (method.getSoapBindingStyle() != SOAPBinding.Style.RPC) {
+      TypeMirror returnType = getDelegate();
+      return !((returnType instanceof DeclaredType) && (((DeclaredType) returnType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
+    }
+
+    return false;
   }
 
   // Inherited.

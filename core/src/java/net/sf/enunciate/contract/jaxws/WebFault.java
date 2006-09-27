@@ -80,7 +80,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The message name of this fault.
    */
   public String getMessageName() {
-    return getElementName();
+    return getSimpleName();
   }
 
   /**
@@ -185,11 +185,18 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
+   * @return {@link ParticleType#ELEMENT}
+   */
+  public ParticleType getParticleType() {
+    return ParticleType.ELEMENT;
+  }
+
+  /**
    * The qname reference to the fault info.
    *
    * @return The qname reference to the fault info.
    */
-  public QName getElementQName() {
+  public QName getParticleQName() {
     RootElementDeclaration explicitFaultBean = getExplicitFaultBean();
     if (explicitFaultBean != null) {
       return new QName(explicitFaultBean.getTargetNamespace(), explicitFaultBean.getName());

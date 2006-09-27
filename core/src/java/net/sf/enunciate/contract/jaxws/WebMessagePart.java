@@ -9,6 +9,11 @@ import javax.xml.namespace.QName;
  */
 public interface WebMessagePart {
 
+  public enum ParticleType {
+    ELEMENT,
+    TYPE
+  }
+
   /**
    * The part name.
    *
@@ -24,11 +29,18 @@ public interface WebMessagePart {
   String getPartDocs();
 
   /**
-   * The qname of the element for this part.
+   * The particle type for this part.
    *
-   * @return The qname of the element for this part.
+   * @return The particle type for this part.
    */
-  QName getElementQName();
+  ParticleType getParticleType();
+
+  /**
+   * The qname of the schema particle (element or type) for this part.
+   *
+   * @return The qname of the schema particle (element or type) for this part.
+   */
+  QName getParticleQName();
 
   /**
    * Whether this web message part defines an implicit schema element.

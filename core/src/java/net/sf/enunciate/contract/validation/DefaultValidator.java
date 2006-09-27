@@ -4,7 +4,6 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.VoidType;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
@@ -19,7 +18,6 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Holder;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
@@ -128,123 +126,54 @@ public class DefaultValidator implements Validator {
       result.addError(webMethod.getPosition(), "A method marked as excluded cannot be a web method.");
     }
 
-    if (webMethod.isOneWay()) {
-      if (!(webMethod.getReturnType() instanceof VoidType)) {
-        result.addError(webMethod.getPosition(), "A method cannot be one-way if it doesn't return void.");
-      }
+    int inParams = 0;
+    int outParams = 0;
+    final boolean oneway = webMethod.isOneWay();
+    final SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
 
-      if (webMethod.getThrownTypes().size() > 0) {
-        result.addError(webMethod.getPosition(), "A method cannot be one-way if it throws any exceptions.");
-      }
-    }
-
-    SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
-    if (parameterStyle == SOAPBinding.ParameterStyle.BARE) {
-      //make sure the conditions of a BARE web method are met according to the spec, section 3.6.2.2
-      if (webMethod.getSoapBindingStyle() != SOAPBinding.Style.DOCUMENT) {
-        result.addError(webMethod.getPosition(), String.format("%s: a %s-style web method cannot have a parameter style of %s",
-                                                               webMethod.getPosition(), webMethod.getSoapBindingStyle(), parameterStyle));
-      }
-
-      int inParams = 0;
-      int outParams = 0;
-      for (WebParam webParam : webMethod.getWebParameters()) {
-        DecoratedTypeMirror paramType = ((DecoratedTypeMirror) webParam.getType());
-        if (paramType.isArray()) {
-          result.addError(webMethod.getPosition(), "A BARE web method must not have an array as a parameter.");
-        }
-
-        if (!webParam.isHeader()) {
-          javax.jws.WebParam.Mode mode = webParam.getMode();
-
-          if ((mode == javax.jws.WebParam.Mode.IN) || (mode == javax.jws.WebParam.Mode.INOUT)) {
-            inParams++;
-          }
-
-          if ((mode == javax.jws.WebParam.Mode.OUT) || (mode == javax.jws.WebParam.Mode.INOUT)) {
-            outParams++;
-          }
-        }
-      }
-
-      if (inParams > 1) {
-        result.addError(webMethod.getPosition(), "A BARE web method must have at most 1 in or in/out non-header parameter.");
-      }
-
-      if (webMethod.getReturnType() instanceof VoidType) {
-        if (outParams > 1) {
-          result.addError(webMethod.getPosition(), "A BARE web method that returns void must have at most 1 out or in/out non-header parameter.");
-        }
-      }
-      else {
-        if (outParams > 0) {
-          result.addError(webMethod.getPosition(), "A BARE web method that doesn't return void must have no out or in/out parameters.");
-        }
-      }
-    }
-
-    result.aggregate(validateWebResult(webMethod.getWebResult()));
-
-    for (WebParam webParam : webMethod.getWebParameters()) {
-      result.aggregate(validateWebParam(webParam));
-    }
-
-    for (WebFault webFault : webMethod.getWebFaults()) {
-      result.aggregate(validateWebFault(webFault));
+    if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (webMethod.getSoapBindingStyle() != SOAPBinding.Style.DOCUMENT)) {
+      result.addError(webMethod.getPosition(), "A BARE web method must have a DOCUMENT binding style.");
     }
 
     for (WebMessage webMessage : webMethod.getMessages()) {
-      if (webMessage instanceof RequestWrapper) {
-        result.aggregate(validateRequestWrapper((RequestWrapper) webMessage));
+      if (oneway && webMessage.isOutput()) {
+        result.addError(webMethod.getPosition(), "A one-way method cannot have any 'out' messages (i.e. non-void return values, thrown exceptions, " +
+          "out parameters, or in/out parameters).");
       }
-      if (webMessage instanceof ResponseWrapper) {
-        result.aggregate(validateResponseWrapper((ResponseWrapper) webMessage));
+
+      if (!webMessage.isHeader()) {
+        inParams = webMessage.isInput() ? inParams + 1 : inParams;
+        outParams = webMessage.isOutput() ? outParams + 1 : outParams;
+      }
+
+      if (parameterStyle == SOAPBinding.ParameterStyle.BARE) {
+        if (webMessage instanceof WebParam) {
+          DecoratedTypeMirror paramType = (DecoratedTypeMirror) ((WebParam) webMessage).getType();
+          if (paramType.isArray()) {
+            result.addError(webMethod.getPosition(), "A BARE web method must not have an array as a parameter.");
+          }
+        }
+        else if (webMessage instanceof RequestWrapper) {
+          //todo: throw a runtime exception?  This is a problem with the engine, not the user.
+          result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a request wrapper.");
+        }
+        else if (webMessage instanceof ResponseWrapper) {
+          //todo: throw a runtime exception?  This is a problem with the engine, not the user.
+          result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a response wrapper.");
+        }
+
+        if (inParams > 1) {
+          result.addError(webMethod.getPosition(), "A BARE web method must not have more than one 'in' parameter.");
+        }
+
+        if (outParams > 1) {
+          result.addError(webMethod.getPosition(), "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
+            "thrown exceptions, out parameters, or in/out parameters).");
+        }
       }
     }
 
     return result;
-  }
-
-  public ValidationResult validateRequestWrapper(RequestWrapper requestWrapper) {
-    ValidationResult result = new ValidationResult();
-    WebMethod webMethod = requestWrapper.getWebMethod();
-    if (webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
-      result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a request wrapper.");
-    }
-
-    return result;
-  }
-
-  public ValidationResult validateResponseWrapper(ResponseWrapper responseWrapper) {
-    ValidationResult result = new ValidationResult();
-    WebMethod webMethod = responseWrapper.getWebMethod();
-    if (webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
-      result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a response wrapper.");
-    }
-
-    if (webMethod.isOneWay()) {
-      result.addError(webMethod.getPosition(), "A one-way method cannot have a response wrapper.");
-    }
-
-    return result;
-  }
-
-  public ValidationResult validateWebParam(WebParam webParam) {
-    ValidationResult result = new ValidationResult();
-    DecoratedTypeMirror parameterType = (DecoratedTypeMirror) webParam.getType();
-    if (parameterType.isInstanceOf(Holder.class.getName())) {
-      result.addError(webParam.getPosition(), "Enunciate currently doesn't support in/out parameters.  Maybe someday...");
-    }
-
-    return result;
-  }
-
-  public ValidationResult validateWebResult(WebResult webResult) {
-    return new ValidationResult();
-  }
-
-  public ValidationResult validateWebFault(WebFault webFault) {
-    return new ValidationResult();
   }
 
   // Inherited.

@@ -77,11 +77,18 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
+   * @return {@link ParticleType#ELEMENT}
+   */
+  public ParticleType getParticleType() {
+    return ParticleType.ELEMENT;
+  }
+
+  /**
    * The qname of the response element.
    *
    * @return The qname of the response element.
    */
-  public QName getElementQName() {
+  public QName getParticleQName() {
     return new QName(getElementNamespace(), getElementName());
   }
 
@@ -166,7 +173,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    * @return The simple name of the method appended with "Response".
    */
   public String getMessageName() {
-    return webMethod.getSimpleName() + "Response";
+    return webMethod.getDeclaringEndpointInterface().getSimpleName() + "." + webMethod.getSimpleName() + "Response";
   }
 
   /**

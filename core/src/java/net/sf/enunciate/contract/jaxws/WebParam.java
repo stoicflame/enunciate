@@ -88,7 +88,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @return The message name of the message for this parameter.
    */
   public String getMessageName() {
-    return method.getMessageName();
+    return method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName();
   }
 
   /**
@@ -118,11 +118,20 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
   }
 
   /**
+   * If the web method style is RPC, the particle type is TYPE.  Otherwise, it's ELEMENT.
+   *
+   * @return The particle type.
+   */
+  public ParticleType getParticleType() {
+    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? ParticleType.TYPE : ParticleType.ELEMENT;
+  }
+
+  /**
    * The qname of the element for this part.
    *
    * @return The qname of the element for this part.
    */
-  public QName getElementQName() {
+  public QName getParticleQName() {
     TypeMirror parameterType = getType();
     if (parameterType instanceof DeclaredType) {
       TypeDeclaration parameterTypeDeclaration = ((DeclaredType) parameterType).getDeclaration();
@@ -142,13 +151,18 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
   }
 
   /**
-   * This web parameter defines an implicit schema element if it is NOT of a class type that is an xml root element.
+   * This web parameter defines an implicit schema element if it is DOCUMENT binding style and it
+   * is NOT of a class type that is an xml root element.
    *
    * @return Whether this web parameter is an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    TypeMirror parameterType = getType();
-    return !((parameterType instanceof DeclaredType) && (((DeclaredType) parameterType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
+    if (method.getSoapBindingStyle() != SOAPBinding.Style.RPC) {
+      TypeMirror parameterType = getType();
+      return !((parameterType instanceof DeclaredType) && (((DeclaredType) parameterType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
+    }
+
+    return false;
   }
 
   /**
