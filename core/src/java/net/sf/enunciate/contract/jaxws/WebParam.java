@@ -17,6 +17,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -241,7 +242,8 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @return Whether this is an input message depends on its mode.
    */
   public boolean isInput() {
-    return (getMode() == javax.jws.WebParam.Mode.IN) || (getMode() == javax.jws.WebParam.Mode.INOUT);
+    return (getMode() == javax.jws.WebParam.Mode.IN) ||
+      ((getMode() == javax.jws.WebParam.Mode.INOUT) && (isHolder()));
   }
 
   /**
@@ -250,7 +252,17 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @return Whether this is an output message depends on its mode.
    */
   public boolean isOutput() {
-    return (getMode() == javax.jws.WebParam.Mode.OUT) || (getMode() == javax.jws.WebParam.Mode.INOUT);
+    return (getMode() == javax.jws.WebParam.Mode.OUT) ||
+      ((getMode() == javax.jws.WebParam.Mode.INOUT) && (isHolder()));
+  }
+
+  /**
+   * Whether the parameter type is a holder.
+   *
+   * @return Whether the parameter type is a holder.
+   */
+  public boolean isHolder() {
+    return ((DecoratedTypeMirror) getType()).isInstanceOf(Holder.class.getName());
   }
 
   /**
