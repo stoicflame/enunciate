@@ -57,7 +57,12 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
       conversion = convert((PackageDeclaration) unwrapped);
     }
     else {
-      conversion = convert(String.valueOf(unwrapped));
+      if (unwrapped != null) {
+        throw new TemplateModelException("Unable to package-convert an instance of " + unwrapped.getClass());
+      }
+      else {
+        return null;
+      }
     }
 
     return conversion;
@@ -106,17 +111,17 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
   /**
    * Converts the possible package to the specified client-side package, if any conversions are specified.
    *
-   * @param from The package fqn to convert.
+   * @param packageFqn The package to convert.
    * @return The converted package, or the original if no conversions were specified for this value.
    */
-  protected String convert(String from) {
-    //todo: support for regular expressions?
+  protected String convert(String packageFqn) {
+    //todo: support for regular expressions or wildcards?
     for (String pkg : this.conversions.keySet()) {
-      if (from.equals(pkg)) {
+      if (packageFqn.equals(pkg)) {
         return conversions.get(pkg);
       }
     }
-    return from;
+    return packageFqn;
   }
 
 }

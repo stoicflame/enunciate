@@ -64,19 +64,20 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
 
-    //generate the JDK 1.3 client code.
+    //generate the JDK 1.4 client code.
     LinkedHashMap<String, String> conversions = getClientPackageConversions();
     model.put("packageFor", new ClientPackageForMethod(conversions));
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, false);
     model.put("classnameFor", classnameFor);
     String uuid = this.uuid;
     model.put("uuid", uuid);
     model.put("defaultHost", getDefaultHost());
     model.put("defaultContext", getDefaultContext());
     model.put("defaultPort", String.valueOf(getDefaultPort()));
+    model.put("jdkid", "jdk14");
 
-    URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
-    URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
+    URL eiTemplate = getTemplateURL("client-jdk14-endpoint-interface.fmt");
+    URL soapImplTemplate = getTemplateURL("client-soap-jdk14-endpoint-impl.fmt");
     URL faultTemplate = getTemplateURL("client-web-fault.fmt");
     URL enumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
     URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
