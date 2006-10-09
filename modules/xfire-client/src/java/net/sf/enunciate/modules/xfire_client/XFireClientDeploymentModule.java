@@ -74,18 +74,18 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.put("defaultHost", getDefaultHost());
     model.put("defaultContext", getDefaultContext());
     model.put("defaultPort", String.valueOf(getDefaultPort()));
-    model.put("jdkid", "jdk14");
 
-    URL eiTemplate = getTemplateURL("client-jdk14-endpoint-interface.fmt");
-    URL soapImplTemplate = getTemplateURL("client-soap-jdk14-endpoint-impl.fmt");
-    URL faultTemplate = getTemplateURL("client-web-fault.fmt");
-    URL enumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
-    URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
-    URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
     URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
     URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
     URL xfireFaultTemplate = getTemplateURL("xfire-fault-type.fmt");
+
+    URL eiTemplate = getTemplateURL("jdk14/client-endpoint-interface.fmt");
+    URL soapImplTemplate = getTemplateURL("jdk14/client-soap-endpoint-impl.fmt");
+    URL faultTemplate = getTemplateURL("jdk14/client-web-fault.fmt");
+    URL enumTypeTemplate = getTemplateURL("jdk14/client-enum-type.fmt");
+    URL simpleTypeTemplate = getTemplateURL("jdk14/client-simple-type.fmt");
+    URL complexTypeTemplate = getTemplateURL("jdk14/client-complex-type.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
     ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
