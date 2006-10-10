@@ -7,6 +7,7 @@ import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
@@ -144,7 +145,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   public String getImplicitFaultBeanQualifiedName() {
     String faultBean = getPackage().getQualifiedName() + ".jaxws." + getSimpleName() + "Bean";
 
-    if (annotation != null) {
+    if ((annotation != null) && (annotation.faultBean() != null) && (!"".equals(annotation.faultBean()))) {
       faultBean = annotation.faultBean();
     }
 
@@ -405,6 +406,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     public String getMaxOccurs() {
       return maxOccurs;
+    }
+
+    public TypeMirror getType() {
+      return getProperty().getPropertyType();
     }
 
   }

@@ -40,7 +40,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     javax.jws.WebResult annotation = method.getAnnotation(javax.jws.WebResult.class);
 
     String name = "return";
-    if (annotation != null) {
+    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
     }
     this.name = name;
@@ -263,8 +263,16 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
   }
 
   public String getElementDocs() {
-    return getDocComment();
+    return ((DecoratedTypeMirror) delegate).getDocComment();
   }
 
+  /**
+   * Used when treating this as a parameter.
+   *
+   * @return The delegate.
+   */
+  public TypeMirror getType() {
+    return getDelegate();
+  }
 
 }

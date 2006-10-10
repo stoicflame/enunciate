@@ -6,6 +6,7 @@ import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.modules.DeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
+import org.apache.commons.digester.RuleSet;
 import org.xml.sax.Attributes;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -171,7 +172,10 @@ public class EnunciateConfiguration implements ErrorHandler {
       String pattern = String.format("enunciate/modules/%s", module.getName());
       digester.addRule(pattern, new PushModuleRule(module));
       digester.addSetProperties(pattern);
-      digester.addRuleSet(module.getConfigurationRules());
+      RuleSet configRules = module.getConfigurationRules();
+      if (configRules != null) {
+        digester.addRuleSet(configRules);
+      }
     }
 
     digester.parse(in);

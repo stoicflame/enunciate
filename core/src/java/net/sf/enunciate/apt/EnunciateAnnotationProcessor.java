@@ -123,7 +123,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     for (DeploymentModule module : this.config.getEnabledModules()) {
       Validator moduleValidator = module.getValidator();
       if (moduleValidator != null) {
-        validator.addValidator(validator);
+        validator.addValidator(moduleValidator);
       }
     }
 

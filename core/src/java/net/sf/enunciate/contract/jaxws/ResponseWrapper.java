@@ -1,5 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
+import com.sun.mirror.type.VoidType;
+
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +30,24 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    */
   public WebMethod getWebMethod() {
     return webMethod;
+  }
+
+  /**
+   * The name of the JAXWS response bean.
+   *
+   * @return The name of the JAXWS response bean.
+   */
+  public String getResponseBeanName() {
+    String capitalizedName = this.webMethod.getSimpleName();
+    capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
+    String responseBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName + "Response";
+
+    javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
+    if ((annotation != null) && (annotation.className() != null) && (!"".equals(annotation.className()))) {
+      responseBeanName = annotation.className();
+    }
+
+    return responseBeanName;
   }
 
   /**
@@ -116,9 +136,11 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   public Collection<ImplicitChildElement> getChildElements() {
     Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
 
-    WebResult webResult = webMethod.getWebResult();
-    if (!webResult.isHeader()) {
-      childElements.add(webResult);
+    if (!(webMethod.getReturnType() instanceof VoidType)) {
+      WebResult webResult = webMethod.getWebResult();
+      if (!webResult.isHeader()) {
+        childElements.add(webResult);
+      }
     }
 
     for (WebParam webParam : webMethod.getWebParameters()) {

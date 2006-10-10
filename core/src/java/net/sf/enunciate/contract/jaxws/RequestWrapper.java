@@ -31,6 +31,24 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   }
 
   /**
+   * The name of the JAXWS request bean.
+   *
+   * @return The name of the JAXWS request bean.
+   */
+  public String getRequestBeanName() {
+    String capitalizedName = this.webMethod.getSimpleName();
+    capitalizedName = Character.toString(capitalizedName.charAt(0)).toUpperCase() + capitalizedName.substring(1);
+    String requestBeanName = this.webMethod.getDeclaringEndpointInterface().getPackage().getQualifiedName() + ".jaxws." + capitalizedName;
+
+    javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
+    if ((annotation != null) && (annotation.className() != null) && (!"".equals(annotation.className()))) {
+      requestBeanName = annotation.className();
+    }
+
+    return requestBeanName;
+  }
+
+  /**
    * The local name of the element.
    *
    * @return The local name of the element.

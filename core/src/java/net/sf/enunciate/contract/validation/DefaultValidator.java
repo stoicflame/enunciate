@@ -132,10 +132,11 @@ public class DefaultValidator implements Validator {
 
     int inParams = 0;
     int outParams = 0;
-    final boolean oneway = webMethod.isOneWay();
-    final SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
+    boolean oneway = webMethod.isOneWay();
+    SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
+    SOAPBinding.Style soapBindingStyle = webMethod.getSoapBindingStyle();
 
-    if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (webMethod.getSoapBindingStyle() != SOAPBinding.Style.DOCUMENT)) {
+    if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (soapBindingStyle != SOAPBinding.Style.DOCUMENT)) {
       result.addError(webMethod.getPosition(), "A BARE web method must have a DOCUMENT binding style.");
     }
 
@@ -175,6 +176,20 @@ public class DefaultValidator implements Validator {
             "thrown exceptions, out parameters, or in/out parameters).");
         }
       }
+      else if (soapBindingStyle == SOAPBinding.Style.RPC) {
+        Collection<WebMessagePart> parts = webMessage.getParts();
+        for (WebMessagePart part : parts) {
+          if (part instanceof WebParam) {
+            WebParam webParam = (WebParam) part;
+            DecoratedTypeMirror paramType = (DecoratedTypeMirror) webParam.getType();
+            if (paramType.isInstanceOf(Collection.class.getName())) {
+              result.addWarning(webParam.getPosition(), "An instance of java.util.Collection as an RPC-style web message part may " +
+                "not be (de)serialized as you expect.");
+            }
+          }
+        }
+      }
+
     }
 
     return result;
