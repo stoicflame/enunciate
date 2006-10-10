@@ -150,6 +150,27 @@ public class DefaultValidator implements Validator {
         inParams = webMessage.isInput() ? inParams + 1 : inParams;
         outParams = webMessage.isOutput() ? outParams + 1 : outParams;
       }
+      else {
+        //if it's a header, it's either a web result or a web param.
+        if (webMessage instanceof WebResult) {
+          DecoratedTypeMirror type = (DecoratedTypeMirror) ((WebResult) webMessage).getType();
+
+          if (type.isInstanceOf(Collection.class.getName())) {
+            result.addWarning(webMethod.getPosition(), "The header return value that is an instance of java.util.Collection may not (de)serialize " +
+              "correctly.  The spec is unclear as to how this should be handled.");
+          }
+        }
+        else {
+          WebParam webParam = (WebParam) webMessage;
+          DecoratedTypeMirror type = (DecoratedTypeMirror) webParam.getType();
+
+          if (type.isInstanceOf(Collection.class.getName())) {
+            result.addWarning(webParam.getPosition(), "The header parameter that is an instance of java.util.Collection may not (de)serialize correctly.  " +
+              "The spec is unclear as to how this should be handled.");
+          }
+        }
+
+      }
 
       if (parameterStyle == SOAPBinding.ParameterStyle.BARE) {
         if (webMessage instanceof WebParam) {
@@ -184,7 +205,7 @@ public class DefaultValidator implements Validator {
             DecoratedTypeMirror paramType = (DecoratedTypeMirror) webParam.getType();
             if (paramType.isInstanceOf(Collection.class.getName())) {
               result.addWarning(webParam.getPosition(), "An instance of java.util.Collection as an RPC-style web message part may " +
-                "not be (de)serialized as you expect.");
+                "not be (de)serialized as you expect.  The spec is unclear as to how this should be handled.");
             }
           }
         }

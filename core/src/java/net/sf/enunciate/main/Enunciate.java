@@ -9,10 +9,7 @@ import org.xml.sax.SAXException;
 import java.io.*;
 import java.net.URI;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -178,16 +175,60 @@ public class Enunciate {
   }
 
   /**
+   * Finds all java files in the specified base directory.
+   *
+   * @param basedir The base directory.
+   * @return The collection of java files.
+   */
+  public Collection<String> getJavaFiles(File basedir) {
+    ArrayList<String> files = new ArrayList<String>();
+    findJavaFiles(basedir, files);
+    return files;
+  }
+
+  /**
+   * Recursively finds all the java files in the specified directory and adds them all to the given collection.
+   *
+   * @param dir       The directory.
+   * @param filenames The collection.
+   */
+  private void findJavaFiles(File dir, Collection<String> filenames) {
+    File[] javaFiles = dir.listFiles(JAVA_FILTER);
+    if (javaFiles != null) {
+      for (File javaFile : javaFiles) {
+        filenames.add(javaFile.getAbsolutePath());
+      }
+    }
+
+    File[] dirs = dir.listFiles(DIR_FILTER);
+    if (dirs != null) {
+      for (File subdir : dirs) {
+        findJavaFiles(subdir, filenames);
+      }
+    }
+  }
+
+  /**
+   * The default classpath to use for javac and apt.
+   *
+   * @return The default classpath to use for javac and apt.
+   */
+  public String getDefaultClasspath() {
+    String classpath = getClasspath();
+    if (classpath == null) {
+      classpath = System.getProperty("java.class.path");
+    }
+    return classpath;
+  }
+
+  /**
    * Invokes APT on the specified source files.
    *
    * @param sourceFiles The source files.
    */
   protected void invokeApt(String[] sourceFiles) throws IOException, EnunciateException {
     ArrayList<String> args = new ArrayList<String>();
-    String classpath = getClasspath();
-    if (classpath == null) {
-      classpath = System.getProperty("java.class.path");
-    }
+    String classpath = getDefaultClasspath();
 
     args.add("-cp");
     args.add(classpath);
@@ -226,10 +267,7 @@ public class Enunciate {
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(File compileDir, String[] sourceFiles) throws EnunciateException {
-    String classpath = getClasspath();
-    if (classpath == null) {
-      classpath = System.getProperty("java.class.path");
-    }
+    String classpath = getDefaultClasspath();
 
     invokeJavac(classpath, compileDir, sourceFiles);
   }
@@ -621,5 +659,23 @@ public class Enunciate {
   public void setConfig(EnunciateConfiguration config) {
     this.config = config;
   }
+
+  /**
+   * A file filter for java files.
+   */
+  private static FileFilter JAVA_FILTER = new FileFilter() {
+    public boolean accept(File file) {
+      return file.getName().endsWith(".java");
+    }
+  };
+
+  /**
+   * A file filter for directories.
+   */
+  private static FileFilter DIR_FILTER = new FileFilter() {
+    public boolean accept(File file) {
+      return file.isDirectory();
+    }
+  };
 
 }

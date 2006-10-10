@@ -44,7 +44,12 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
    */
   public static ExplicitWebAnnotations readFrom(InputStream in) throws IOException, ClassNotFoundException {
     ObjectInputStream oin = new ObjectInputStream(in);
-    return (ExplicitWebAnnotations) oin.readObject();
+    try {
+      return (ExplicitWebAnnotations) oin.readObject();
+    }
+    finally {
+      oin.close();
+    }
   }
 
   /**

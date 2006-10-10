@@ -1,0 +1,5 @@
+The following were noticed inconsistencies in the JAXB specification:
+
+-What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?
+-Are header elements required to be root elements?
+-property order isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?

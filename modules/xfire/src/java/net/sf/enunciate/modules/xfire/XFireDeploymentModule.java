@@ -1,8 +1,12 @@
 package net.sf.enunciate.modules.xfire;
 
+import com.sun.mirror.declaration.ParameterDeclaration;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
@@ -15,9 +19,12 @@ import org.apache.commons.digester.RuleSet;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -29,6 +36,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private WarConfig warConfig;
+  private String uuid;
+
+  public XFireDeploymentModule() {
+    this.uuid = String.valueOf(System.currentTimeMillis());
+  }
 
   /**
    * @return "xfire"
@@ -59,13 +71,56 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     model.setObjectWrapper(xmlWrapper);
 
     //generate the xfire-servlet.xml
+    model.put("uuid", this.uuid);
     processTemplate(getXFireServletTemplateURL(), model);
+
+    HashMap<String, String[]> parameterNames = new HashMap<String, String[]>();
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        for (WebMethod webMethod : ei.getWebMethods()) {
+          Collection<ParameterDeclaration> paramList = webMethod.getParameters();
+          ParameterDeclaration[] parameters = paramList.toArray(new ParameterDeclaration[paramList.size()]);
+          String[] paramNames = new String[parameters.length];
+          for (int i = 0; i < parameters.length; i++) {
+            ParameterDeclaration declaration = parameters[i];
+            paramNames[i] = declaration.getSimpleName();
+          }
+
+          parameterNames.put(ei.getQualifiedName() + "." + webMethod.getSimpleName(), paramNames);
+        }
+      }
+    }
+
+    Enunciate enunciate = getEnunciate();
+    File propertyNamesFile = new File(new File(enunciate.getGenerateDir(), "xfire"), this.uuid + ".property.names");
+    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(propertyNamesFile));
+    oos.writeObject(parameterNames);
+    oos.flush();
+    oos.close();
+
+    enunciate.setProperty("property.names.file", propertyNamesFile);
   }
 
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
     enunciate.invokeJavac(getCompileDir(), enunciate.getSourceFiles());
+
+    File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
+    if (jaxwsSources == null) {
+      throw new EnunciateException("Required dependency on the JAXWS module was not found.  The generated request/response/fault beans are required.");
+    }
+
+    Collection<String> jaxwsSourceFiles = enunciate.getJavaFiles(jaxwsSources);
+    StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
+    jaxwsClasspath.append(File.pathSeparator).append(getCompileDir().getAbsolutePath());
+    enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+
+    File propertyNamesFile = (File) enunciate.getProperty("property.names.file");
+    if (propertyNamesFile == null) {
+      throw new EnunciateException("No generated property names file was found.");
+    }
+    enunciate.copyFile(propertyNamesFile, propertyNamesFile.getParentFile(), getCompileDir());
   }
 
   @Override
@@ -275,6 +330,24 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
+  }
+
+  /**
+   * A unique id to associate with this build of the xfire module.
+   *
+   * @return A unique id to associate with this build of the xfire module.
+   */
+  public String getUuid() {
+    return uuid;
+  }
+
+  /**
+   * A unique id to associate with this build of the xfire module.
+   *
+   * @param uuid A unique id to associate with this build of the xfire module.
+   */
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   /**

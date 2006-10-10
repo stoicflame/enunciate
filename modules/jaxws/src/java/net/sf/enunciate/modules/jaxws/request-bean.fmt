@@ -15,6 +15,11 @@ package ${beanPackage};
   name = "${message.elementName}",
   namespace = "${message.elementNamespace}"
 )
+@javax.xml.bind.annotation.XmlType (
+  name = "${message.elementName}",
+  namespace = "${message.elementNamespace}",
+  propOrder = { [#list message.childElements as childElement]"${childElement.elementName}"[#if childElement_has_next], [/#if][/#list] }
+)
 public class ${simpleBeanName} {
 
   [#list message.childElements as childElement]

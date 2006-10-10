@@ -196,8 +196,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
     File typesDir = getXFireTypesDir();
-    Collection<String> typeFiles = getJavaFiles(typesDir);
-    Collection<String> jdk14Files = getJavaFiles(getJdk14Dir());
+    Collection<String> typeFiles = enunciate.getJavaFiles(typesDir);
+    Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14Dir());
     jdk14Files.addAll(typeFiles);
 
     enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4"), jdk14Files.toArray(new String[jdk14Files.size()]));
@@ -456,51 +456,5 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     this.clientPackageConversions.put(from, to);
   }
-
-  /**
-   * Finds all java files in the specified base directory.
-   *
-   * @param basedir The base directory.
-   * @return The collection of java files.
-   */
-  protected Collection<String> getJavaFiles(File basedir) {
-    ArrayList<String> files = new ArrayList<String>();
-    findJavaFiles(basedir, files);
-    return files;
-  }
-
-  /**
-   * Recursively finds all the java files in the specified directory and adds them all to the given collection.
-   *
-   * @param dir       The directory.
-   * @param filenames The collection.
-   */
-  private void findJavaFiles(File dir, Collection<String> filenames) {
-    File[] javaFiles = dir.listFiles(JAVA_FILTER);
-    if (javaFiles != null) {
-      for (File javaFile : javaFiles) {
-        filenames.add(javaFile.getAbsolutePath());
-      }
-    }
-
-    File[] dirs = dir.listFiles(DIR_FILTER);
-    if (dirs != null) {
-      for (File dir1 : dirs) {
-        findJavaFiles(dir1, filenames);
-      }
-    }
-  }
-
-  private static FileFilter JAVA_FILTER = new FileFilter() {
-    public boolean accept(File pathname) {
-      return pathname.getName().endsWith(".java");
-    }
-  };
-
-  private static FileFilter DIR_FILTER = new FileFilter() {
-    public boolean accept(File pathname) {
-      return pathname.isDirectory();
-    }
-  };
 
 }

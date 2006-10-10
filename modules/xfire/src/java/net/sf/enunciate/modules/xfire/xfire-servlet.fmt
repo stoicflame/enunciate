@@ -26,6 +26,7 @@
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
+        [#--todo: what about eis with the same name, different namespace?--]
         <entry key="/soap/${endpointInterface.serviceName}">
           [#--todo: support to be able to add xfire in/out handlers?--]
           <bean parent="endpoint">
@@ -80,7 +81,7 @@
     </property>
   </bean>
 
-  <bean id="enunciatedServiceFactory" class="net.sf.enunciate.modules.xfire.EnunciatedAnnotationServiceFactory"/>
+  <bean id="enunciatedServiceFactory" class="net.sf.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
 
 </beans>
 [/@file]

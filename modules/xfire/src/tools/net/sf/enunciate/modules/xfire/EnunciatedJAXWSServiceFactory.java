@@ -1,11 +1,17 @@
 package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.XFireFactory;
+import org.codehaus.xfire.XFireRuntimeException;
+import org.codehaus.xfire.fault.XFireFault;
+import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.annotations.AnnotationException;
 import org.codehaus.xfire.annotations.WebAnnotations;
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
+import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.jaxws.JAXWSServiceFactory;
-import org.codehaus.xfire.transport.TransportManager;
+import org.codehaus.xfire.service.OperationInfo;
+import org.codehaus.xfire.service.Service;
+import org.codehaus.xfire.soap.AbstractSoapBinding;
 
 /**
  * Annotation service factory that adjusts for XFire noncompliance to the spec that makes the correct
@@ -13,14 +19,11 @@ import org.codehaus.xfire.transport.TransportManager;
  *
  * @author Ryan Heaton
  */
-public class EnunciatedAnnotationServiceFactory extends JAXWSServiceFactory {
+public class EnunciatedJAXWSServiceFactory extends JAXWSServiceFactory {
 
-  public EnunciatedAnnotationServiceFactory() {
-    this(XFireFactory.newInstance().getXFire().getTransportManager());
-  }
-
-  public EnunciatedAnnotationServiceFactory(final TransportManager transportManager) {
-    super(transportManager);
+  public EnunciatedJAXWSServiceFactory(String typeSetId) {
+    super(XFireFactory.newInstance().getXFire().getTransportManager());
+    ((AegisBindingProvider) getBindingProvider()).setTypeMappingRegistry(new EnunciatedJAXWSTypeRegistry(typeSetId));
   }
 
   @Override
@@ -54,6 +57,30 @@ public class EnunciatedAnnotationServiceFactory extends JAXWSServiceFactory {
     }
 
     return makeServiceNameFromClassName(endpointInterface) + "Service";
+  }
+
+  /**
+   * The serializer for a SOAP message.
+   *
+   * @param binding The binding.
+   * @return The default serializer for the binding.
+   */
+  protected MessageSerializer getSerializer(AbstractSoapBinding binding) {
+    return new EnunciatedJAXWSMessageBinding();
+  }
+
+  /**
+   * Sets up the correct serializer for an SOAP-bound operation
+   */
+  public void createBindingOperation(Service service, AbstractSoapBinding binding, OperationInfo op) {
+    super.createBindingOperation(service, binding, op);
+
+    try {
+      binding.setSerializer(new EnunciatedJAXWSOperationBinding(op));
+    }
+    catch (XFireFault e) {
+      throw new XFireRuntimeException("Error setting the serializer on the operation binding.", e);
+    }
   }
 
 }

@@ -26,7 +26,10 @@ public class XMLAPILookup implements Serializable {
    */
   public static XMLAPILookup load(InputStream in) {
     try {
-      return (XMLAPILookup) new ObjectInputStream(in).readObject();
+      ObjectInputStream oin = new ObjectInputStream(in);
+      XMLAPILookup lookup = (XMLAPILookup) oin.readObject();
+      oin.close();
+      return lookup;
     }
     catch (Exception e) {
       return new XMLAPILookup(new HashMap<String, String>(), new HashMap<String, String>());

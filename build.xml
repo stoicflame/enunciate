@@ -12,6 +12,7 @@
   <!--global references to other modules-->
   <property name="core.basedir" value="${enunciate.basedir}/core"/>
   <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
+  <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
 
