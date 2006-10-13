@@ -19,7 +19,10 @@ import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import javax.jws.soap.SOAPBinding;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.*;
 
@@ -69,6 +72,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.put("packageFor", new ClientPackageForMethod(conversions));
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, false);
     model.put("classnameFor", classnameFor);
+    model.put("componentTypeFor", new ComponentTypeForMethod(conversions, false));
+
     String uuid = this.uuid;
     model.put("uuid", uuid);
     model.put("defaultHost", getDefaultHost());
@@ -86,10 +91,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL enumTypeTemplate = getTemplateURL("jdk14/client-enum-type.fmt");
     URL simpleTypeTemplate = getTemplateURL("jdk14/client-simple-type.fmt");
     URL complexTypeTemplate = getTemplateURL("jdk14/client-complex-type.fmt");
+    URL faultBeanTemplate = getTemplateURL("jdk14/client-fault-bean.fmt");
+    URL requestBeanTemplate = getTemplateURL("jdk14/client-request-bean.fmt");
+    URL responseBeanTemplate = getTemplateURL("jdk14/client-response-bean.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
     ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
     TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    List<String> typeList = new ArrayList<String>();
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
         //first process the templates for the endpoint interfaces.
@@ -100,14 +109,29 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         addExplicitAnnotations(annotations, ei, classnameFor);
 
         for (WebMethod webMethod : ei.getWebMethods()) {
-          allFaults.addAll(webMethod.getWebFaults());
+          for (WebMessage webMessage : webMethod.getMessages()) {
+            if (webMessage instanceof RequestWrapper) {
+              model.put("message", webMessage);
+              processTemplate(requestBeanTemplate, model);
+              typeList.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+            }
+            else if (webMessage instanceof ResponseWrapper) {
+              model.put("message", webMessage);
+              processTemplate(responseBeanTemplate, model);
+              typeList.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
+            }
+            else if ((webMessage instanceof WebFault) && ((WebFault) webMessage).isImplicitSchemaElement() && allFaults.add((WebFault) webMessage)) {
+              model.put("message", webMessage);
+              processTemplate(faultBeanTemplate, model);
+              typeList.add(getBeanName(classnameFor, ((WebFault) webMessage).getImplicitFaultBeanQualifiedName()));
+            }
+          }
+
           addExplicitAnnotations(annotations, webMethod, classnameFor);
         }
       }
     }
     enunciate.setProperty("client.annotations", annotations);
-
-    List<String> typeList = new ArrayList<String>();
 
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
@@ -161,11 +185,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, WebMethod webMethod, ClientClassnameForMethod conversion) {
     String classname = conversion.convert(webMethod.getDeclaringEndpointInterface());
     String methodName = webMethod.getSimpleName();
+    String methodKey = String.format("%s.%s", classname, methodName);
 
     SerializableWebMethodAnnotation wmAnnotation = new SerializableWebMethodAnnotation();
     wmAnnotation.setOperationName(webMethod.getOperationName());
     wmAnnotation.setAction(webMethod.getAction());
-    annotations.method2WebMethod.put(String.format("%s.%s", classname, methodName), wmAnnotation);
+    annotations.method2WebMethod.put(methodKey, wmAnnotation);
 
     WebResult webResult = webMethod.getWebResult();
     SerializableWebResultAnnotation wrAnnotation = new SerializableWebResultAnnotation();
@@ -174,9 +199,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     wrAnnotation.setPartName(webResult.getPartName());
     wrAnnotation.setTargetNamespace(webResult.getTargetNamespace());
 
-    annotations.method2WebResult.put(String.format("%s.%s", classname, methodName), wrAnnotation);
+    annotations.method2WebResult.put(methodKey, wrAnnotation);
     if (webMethod.isOneWay()) {
-      annotations.oneWayMethods.add(String.format("%s.%s", classname, methodName));
+      annotations.oneWayMethods.add(methodKey);
+    }
+
+    for (WebMessage webMessage : webMethod.getMessages()) {
+      if (webMessage instanceof RequestWrapper) {
+        RequestWrapper requestWrapper = (RequestWrapper) webMessage;
+        RequestWrapperAnnotation annotation = new RequestWrapperAnnotation(requestWrapper.getElementName(), requestWrapper.getElementNamespace(), getBeanName(conversion, requestWrapper.getRequestBeanName()));
+        annotations.method2RequestWrapper.put(methodKey, annotation);
+      }
+      else if (webMessage instanceof ResponseWrapper) {
+        ResponseWrapper responseWrapper = (ResponseWrapper) webMessage;
+        ResponseWrapperAnnotation annotation = new ResponseWrapperAnnotation(responseWrapper.getElementName(), responseWrapper.getElementNamespace(), getBeanName(conversion, responseWrapper.getResponseBeanName()));
+        annotations.method2ResponseWrapper.put(methodKey, annotation);
+      }
     }
 
     int i = 0;
@@ -187,9 +225,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       wpAnnotation.setName(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getLocalPart() : webParam.getPartName());
       wpAnnotation.setTargetNamespace(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getNamespaceURI() : webMethod.getDeclaringEndpointInterface().getTargetNamespace());
       wpAnnotation.setPartName(webParam.getPartName());
-      annotations.method2WebParam.put(String.format("%s.%s.%s", classname, methodName, i), wpAnnotation);
+      annotations.method2WebParam.put(String.format("%s.%s", methodKey, i), wpAnnotation);
       i++;
     }
+  }
+
+  /**
+   * Get the bean name for a specified string.
+   *
+   * @param conversion The conversion to use.
+   * @param preconvert The pre-converted fqn.
+   * @return The converted fqn.
+   */
+  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
+    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.') - 1));
+    String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
+    return pckg + "." + simpleName;
   }
 
   @Override

@@ -1,5 +1,7 @@
-package net.sf.enunciate.modules.xfire;
+package net.sf.enunciate.modules.xfire_client;
 
+import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
@@ -13,10 +15,7 @@ import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.util.ClassLoaderUtils;
 
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -31,12 +30,14 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
+public class EnunciatedClientOperationBinding implements MessageSerializer {
 
   private final WrapperBeanInfo requestInfo;
   private final WrapperBeanInfo responseInfo;
+  private final ExplicitWebAnnotations annotations;
 
-  public EnunciatedJAXWSOperationBinding(OperationInfo op) throws XFireFault {
+  public EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, OperationInfo op) throws XFireFault {
+    this.annotations = annotations;
     this.requestInfo = getRequestInfo(op);
     this.responseInfo = getOutputProperties(op);
   }
@@ -53,7 +54,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     Package pckg = ei.getPackage();
 
     String requestWrapperClassName;
-    RequestWrapper requestWrapperInfo = method.getAnnotation(RequestWrapper.class);
+    RequestWrapperAnnotation requestWrapperInfo = this.annotations.getRequestWrapperAnnotation(method);
     if ((requestWrapperInfo != null) && (requestWrapperInfo.className() != null) && (requestWrapperInfo.className().length() > 0)) {
       requestWrapperClassName = requestWrapperInfo.className();
     }
@@ -93,7 +94,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     Package pckg = ei.getPackage();
 
     String responseWrapperClassName;
-    ResponseWrapper responseWrapperInfo = method.getAnnotation(ResponseWrapper.class);
+    ResponseWrapperAnnotation responseWrapperInfo = annotations.getResponseWrapperAnnotation(method);
     if ((responseWrapperInfo != null) && (responseWrapperInfo.className() != null) && (responseWrapperInfo.className().length() > 0)) {
       responseWrapperClassName = responseWrapperInfo.className();
     }
@@ -128,28 +129,27 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
    * @return The ordered property descriptors.
    */
   protected PropertyDescriptor[] loadOrderedProperties(Class wrapperClass) throws XFireFault {
-    XmlType typeInfo = (XmlType) wrapperClass.getAnnotation(XmlType.class);
-    if ((typeInfo == null) || (typeInfo.propOrder() == null) || ((typeInfo.propOrder().length == 1) && "".equals(typeInfo.propOrder()[0]))) {
+    String[] propOrder = annotations.getPropertyOrder(wrapperClass);
+    if (propOrder == null) {
       throw new XFireFault("Unable use use " + wrapperClass.getName() + " as a wrapper class: no propOrder specified.", XFireFault.RECEIVER);
     }
 
-    String[] propOrder = typeInfo.propOrder();
-    BeanInfo beanInfo;
+    BeanInfo responseBeanInfo;
     try {
-      beanInfo = Introspector.getBeanInfo(wrapperClass);
+      responseBeanInfo = Introspector.getBeanInfo(wrapperClass);
     }
     catch (IntrospectionException e) {
       throw new XFireFault("Unable to introspect " + wrapperClass.getName(), e, XFireFault.RECEIVER);
     }
 
-    PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
-    PropertyDescriptor[] props = new PropertyDescriptor[propOrder.length];
+    PropertyDescriptor[] pds = responseBeanInfo.getPropertyDescriptors();
+    PropertyDescriptor[] outputProperties = new PropertyDescriptor[propOrder.length];
     RESPONSE_PROPERTY_LOOP :
     for (int i = 0; i < propOrder.length; i++) {
       String property = propOrder[i];
       for (PropertyDescriptor descriptor : pds) {
         if (descriptor.getName().equals(property)) {
-          props[i] = descriptor;
+          outputProperties[i] = descriptor;
           continue RESPONSE_PROPERTY_LOOP;
         }
       }
@@ -157,7 +157,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
       throw new XFireFault("Unknown property " + property + " on wrapper " + wrapperClass.getName(), XFireFault.RECEIVER);
     }
 
-    return props;
+    return outputProperties;
   }
 
   public void readMessage(InMessage message, MessageContext context) throws XFireFault {

@@ -1,5 +1,7 @@
 package net.sf.enunciate.modules.xfire_client;
 
+import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.xfire.annotations.*;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
@@ -19,9 +21,12 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
   protected HashMap class2WebService = new HashMap();
   protected HashMap class2SOAPBinding = new HashMap();
   protected HashMap class2HandlerChain = new HashMap();
+  protected HashMap class2PropertyOrder = new HashMap();
   protected HashMap method2WebMethod = new HashMap();
   protected HashMap method2WebResult = new HashMap();
   protected HashMap method2WebParam = new HashMap();
+  protected HashMap method2RequestWrapper = new HashMap();
+  protected HashMap method2ResponseWrapper = new HashMap();
   protected HashSet oneWayMethods = new HashSet();
 
   /**
@@ -148,9 +153,20 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
     return (HandlerChainAnnotation) class2HandlerChain.get(createKey(clazz));
   }
 
+  // Inherited.
   public Map getServiceProperties(Class clazz) {
     return null;
   }
 
+  public RequestWrapperAnnotation getRequestWrapperAnnotation(Method method) {
+    return (RequestWrapperAnnotation) method2RequestWrapper.get(createKey(method));
+  }
 
+  public ResponseWrapperAnnotation getResponseWrapperAnnotation(Method method) {
+    return (ResponseWrapperAnnotation) method2ResponseWrapper.get(createKey(method));
+  }
+
+  public String[] getPropertyOrder(Class clazz) {
+    return (String[]) class2PropertyOrder.get(createKey(clazz));
+  }
 }

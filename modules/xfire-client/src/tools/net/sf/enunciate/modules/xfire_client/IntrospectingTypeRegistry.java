@@ -39,9 +39,9 @@ public class IntrospectingTypeRegistry extends DefaultTypeMappingRegistry {
     }
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(typesList));
+    TypeCreator typeCreator = createTypeCreator();
     try {
       String typeValue = reader.readLine();
-      TypeCreator typeCreator = createTypeCreator();
       while (typeValue != null) {
         try {
           Class typeClass = Class.forName(typeValue);

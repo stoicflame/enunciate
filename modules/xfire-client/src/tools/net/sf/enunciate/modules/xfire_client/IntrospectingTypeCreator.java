@@ -96,7 +96,14 @@ public class IntrospectingTypeCreator implements TypeCreator {
    * @return The type.
    */
   public Type createType(Class clazz) {
-    Type type = introspectForType(clazz);
+    Type type;
+    if (GeneratedWrapperBean.class.isAssignableFrom(clazz)) {
+
+    }
+    else {
+      type = introspectForType(clazz);
+    }
+
     return type != null ? type : this.defaultDelegate.createType(clazz);
   }
 

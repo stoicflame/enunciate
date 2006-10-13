@@ -15,18 +15,24 @@ public class EnunciatedJAXWSTypeRegistry extends JAXWSTypeRegistry {
   private final HashMap<String, String[]> parameterNames;
 
   public EnunciatedJAXWSTypeRegistry(String typeSetId) {
-    InputStream paramNamesStream = getClass().getResourceAsStream("/" + typeSetId + ".message.part.names");
-    if (paramNamesStream == null) {
-      throw new IllegalArgumentException("Unkown type set id: " + typeSetId);
-    }
+    if (typeSetId != null) {
+      InputStream paramNamesStream = getClass().getResourceAsStream("/" + typeSetId + ".property.names");
+      if (paramNamesStream == null) {
+        throw new IllegalArgumentException("Unkown type set id: " + typeSetId);
+      }
 
-    try {
-      ObjectInputStream ois = new ObjectInputStream(paramNamesStream);
-      this.parameterNames = (HashMap<String, String[]>) ois.readObject();
-      ois.close();
+      try {
+        ObjectInputStream ois = new ObjectInputStream(paramNamesStream);
+        this.parameterNames = (HashMap<String, String[]>) ois.readObject();
+        ois.close();
+      }
+      catch (Exception e) {
+        throw new IllegalArgumentException("Unable to read parameter names for type set " + typeSetId, e);
+      }
     }
-    catch (Exception e) {
-      throw new IllegalArgumentException("Unable to read parameter names for type set " + typeSetId, e);
+    else {
+      //no parameter names specified, use the default.
+      this.parameterNames = new HashMap<String, String[]>();
     }
   }
 

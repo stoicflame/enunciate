@@ -73,8 +73,9 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    *
    * @param typeMirror The type.
    * @return The client-side package value for the type.
+   * @throws TemplateModelException If the type mirror cannot be converted for some reason.
    */
-  protected String convert(TypeMirror typeMirror) {
+  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
     String conversion;
     if (typeMirror instanceof DeclaredType) {
       conversion = convert(((DeclaredType) typeMirror).getDeclaration());

@@ -81,7 +81,11 @@
     </property>
   </bean>
 
-  <bean id="enunciatedServiceFactory" class="net.sf.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
+  <bean id="enunciatedServiceFactory" class="net.sf.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory">
+    <constructor-arg>
+      <value>${uuid}</value>
+    </constructor-arg>
+  </bean>
 
 </beans>
 [/@file]

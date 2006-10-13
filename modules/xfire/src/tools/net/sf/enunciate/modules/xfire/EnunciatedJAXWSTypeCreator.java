@@ -3,15 +3,15 @@ package net.sf.enunciate.modules.xfire;
 import org.codehaus.xfire.aegis.type.DefaultTypeCreator;
 import org.codehaus.xfire.aegis.type.Type;
 
-import javax.xml.namespace.QName;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
 /**
@@ -33,7 +33,7 @@ public class EnunciatedJAXWSTypeCreator extends DefaultTypeCreator {
    * parameters, too.  It won't be needed for the default doc/lit wrapped case as it uses JAXB 2.0 to
    * (de)serialize the request/response beans.
    *
-   * @param method The method.
+   * @param method         The method.
    * @param parameterIndex The index of the part.
    * @return The element name for a web message part.
    */
@@ -86,31 +86,29 @@ public class EnunciatedJAXWSTypeCreator extends DefaultTypeCreator {
       //enunciate will use the parameter names before the jax-ws specified "argN".
       String methodName = endpointInterface.getName() + "." + method.getName();
       String[] parameterNames = this.parameterNames.get(methodName);
-      if (parameterNames == null) {
-        throw new IllegalArgumentException("Unknown web message " + methodName);
-      }
+      if (parameterNames != null) {
+        try {
+          name = parameterNames[parameterIndex];
+        }
+        catch (IndexOutOfBoundsException e) {
+          throw new IllegalArgumentException("Unknown parameter for method " + methodName + ": " + parameterIndex);
+        }
 
-      try {
-        name = parameterNames[parameterIndex];
-      }
-      catch (IndexOutOfBoundsException e) {
-        throw new IllegalArgumentException("Unknown parameter for method " + methodName + ": " + parameterIndex);
-      }
+        //finally, consult the @WebParam annotation as needed.
+        Annotation[] annotations = method.getParameterAnnotations()[parameterIndex];
+        for (Annotation annotation : annotations) {
+          if (annotation instanceof WebParam) {
+            WebParam webParam = (WebParam) annotation;
+            if ((webParam.partName() != null) && (!"".equals(webParam.partName()))) {
+              name = webParam.partName();
+            }
+            else if ((webParam.name() != null) && (!"".equals(webParam.name()))) {
+              name = webParam.name();
+            }
 
-      //finally, consult the @WebParam annotation as needed.
-      Annotation[] annotations = method.getParameterAnnotations()[parameterIndex];
-      for (Annotation annotation : annotations) {
-        if (annotation instanceof WebParam) {
-          WebParam webParam = (WebParam) annotation;
-          if ((webParam.partName() != null) && (!"".equals(webParam.partName()))) {
-            name = webParam.partName();
-          }
-          else if ((webParam.name() != null) && (!"".equals(webParam.name()))) {
-            name = webParam.name();
-          }
-
-          if ((webParam.targetNamespace() != null) && (!"".equals(webParam.targetNamespace()))) {
-            namespace = webParam.targetNamespace();
+            if ((webParam.targetNamespace() != null) && (!"".equals(webParam.targetNamespace()))) {
+              namespace = webParam.targetNamespace();
+            }
           }
         }
       }
@@ -145,12 +143,7 @@ public class EnunciatedJAXWSTypeCreator extends DefaultTypeCreator {
 
   public Type createType(Method m, int index) {
     java.lang.reflect.Type type = index < 0 ? m.getGenericReturnType() : m.getGenericParameterTypes()[index];
-    try {
-      return new JAXWSType(type);
-    }
-    catch (IllegalJAXWSTypeException e) {
-      throw new RuntimeException(e);
-    }
+    return new JAXWSType(type);
   }
 
   public Type createType(PropertyDescriptor pd) {
@@ -162,12 +155,23 @@ public class EnunciatedJAXWSTypeCreator extends DefaultTypeCreator {
   }
 
   public Type createType(Class clazz) {
-    try {
-      return new JAXWSType(clazz);
+    if (Throwable.class.isAssignableFrom(clazz)) {
+      //if it's a throwable, we're going to assume that it's a web fault.
+      if (EnunciatedJAXWSWebFaultHandler.conformsToJAXWSFaultPattern((Class<? extends Throwable>) clazz)) {
+        try {
+          clazz = clazz.getMethod("getFaultInfo").getReturnType();
+        }
+        catch (NoSuchMethodException e) {
+          //fall through. doesn't conform to the pattern.
+          clazz = EnunciatedJAXWSWebFaultHandler.getFaultBeanClass((Class<? extends Throwable>) clazz);
+        }
+      }
+      else {
+        clazz = EnunciatedJAXWSWebFaultHandler.getFaultBeanClass((Class<? extends Throwable>) clazz);
+      }
     }
-    catch (IllegalJAXWSTypeException e) {
-      throw new RuntimeException(e);
-    }
+
+    return new JAXWSType(clazz);
   }
 
 }

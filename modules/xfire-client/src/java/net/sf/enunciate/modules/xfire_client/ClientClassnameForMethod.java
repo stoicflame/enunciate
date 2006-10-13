@@ -5,6 +5,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import freemarker.template.TemplateModelException;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,7 +31,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   }
 
   @Override
-  protected String convert(TypeMirror typeMirror) {
+  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
     boolean isArray = typeMirror instanceof ArrayType;
     String conversion = super.convert(typeMirror);
 
