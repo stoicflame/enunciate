@@ -1,6 +1,6 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import freemarker.template.TemplateException;
+import freemarker.template.*;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
@@ -14,6 +14,8 @@ import net.sf.enunciate.modules.xfire_client.annotations.*;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.config.XFireClientRuleSet;
 import net.sf.enunciate.util.ClassDeclarationComparator;
+import net.sf.jelly.apt.decorations.JavaDoc;
+import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -37,12 +39,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   private String defaultHost = "localhost";
   private int defaultPort = 8080;
   private String defaultContext = "/";
-  private final LinkedHashMap<String, String> clientPackageConversions;
+  private final Map<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
   private String uuid;
 
   public XFireClientDeploymentModule() {
-    this.clientPackageConversions = new LinkedHashMap<String, String>();
+    this.clientPackageConversions = new HashMap<String, String>();
     this.configurationRules = new XFireClientRuleSet();
     this.uuid = String.valueOf(System.currentTimeMillis());
   }
@@ -68,7 +70,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
 
     //generate the JDK 1.4 client code.
-    LinkedHashMap<String, String> conversions = getClientPackageConversions();
+    Map<String, String> conversions = getClientPackageConversions();
     model.put("packageFor", new ClientPackageForMethod(conversions));
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, false);
     model.put("classnameFor", classnameFor);
@@ -83,7 +85,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
     URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
-    URL xfireFaultTemplate = getTemplateURL("xfire-fault-type.fmt");
 
     URL eiTemplate = getTemplateURL("jdk14/client-endpoint-interface.fmt");
     URL soapImplTemplate = getTemplateURL("jdk14/client-soap-endpoint-impl.fmt");
@@ -120,10 +121,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
               processTemplate(responseBeanTemplate, model);
               typeList.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
             }
-            else if ((webMessage instanceof WebFault) && ((WebFault) webMessage).isImplicitSchemaElement() && allFaults.add((WebFault) webMessage)) {
-              model.put("message", webMessage);
-              processTemplate(faultBeanTemplate, model);
-              typeList.add(getBeanName(classnameFor, ((WebFault) webMessage).getImplicitFaultBeanQualifiedName()));
+            else if (webMessage instanceof WebFault) {
+              allFaults.add((WebFault) webMessage);
             }
           }
 
@@ -135,10 +134,20 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
+      String faultClass = classnameFor.convert(webFault);
+      boolean implicit = webFault.isImplicitSchemaElement();
+      String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
-      processTemplate(xfireFaultTemplate, model);
-      typeList.add(classnameFor.convert(webFault));
+      typeList.add(faultClass);
+
+      if (implicit) {
+        processTemplate(faultBeanTemplate, model);
+        typeList.add(faultBean);
+      }
+
+      annotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(webFault.getElementName(), webFault.getTargetNamespace(), faultBean, implicit));
     }
 
     //process each type for client-side stubs.
@@ -479,12 +488,26 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     return new XFireClientValidator();
   }
 
+  @Override
+  protected ObjectWrapper getObjectWrapper() {
+    return new DefaultObjectWrapper() {
+      @Override
+      public TemplateModel wrap(Object obj) throws TemplateModelException {
+        if (obj instanceof JavaDoc) {
+          return new FreemarkerJavaDoc((JavaDoc) obj);
+        }
+
+        return super.wrap(obj);
+      }
+    };
+  }
+
   /**
    * The client package conversions.
    *
    * @return The client package conversions.
    */
-  public LinkedHashMap<String, String> getClientPackageConversions() {
+  public Map<String, String> getClientPackageConversions() {
     return clientPackageConversions;
   }
 

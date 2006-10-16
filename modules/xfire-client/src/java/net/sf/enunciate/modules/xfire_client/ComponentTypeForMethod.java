@@ -8,6 +8,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
@@ -16,11 +17,11 @@ import java.util.LinkedHashMap;
  */
 public class ComponentTypeForMethod extends ClientClassnameForMethod {
 
-  public ComponentTypeForMethod(LinkedHashMap<String, String> conversions) {
+  public ComponentTypeForMethod(Map<String, String> conversions) {
     super(conversions);
   }
 
-  public ComponentTypeForMethod(LinkedHashMap<String, String> conversions, boolean jdk15) {
+  public ComponentTypeForMethod(Map<String, String> conversions, boolean jdk15) {
     super(conversions, jdk15);
   }
 

@@ -2,6 +2,7 @@ package net.sf.enunciate.modules.xfire;
 
 import com.sun.mirror.declaration.ParameterDeclaration;
 import freemarker.template.TemplateException;
+import freemarker.template.ObjectWrapper;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.WsdlInfo;
@@ -68,7 +69,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
-    model.setObjectWrapper(xmlWrapper);
 
     //generate the xfire-servlet.xml
     model.put("uuid", this.uuid);
@@ -356,6 +356,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public int getOrder() {
     return 10;
+  }
+
+  @Override
+  protected ObjectWrapper getObjectWrapper() {
+    return xmlWrapper;
   }
 
   @Override

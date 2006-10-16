@@ -15,6 +15,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * An XFire type for a generated wrapper bean.
@@ -61,7 +62,7 @@ public class GeneratedWrapperBeanType extends Type {
           Object item = getTypeMapping().getType(propertyType.getComponentType()).readObject(elementReader, context);
           try {
             Method addTo = getAddToMethod(pd.getName());
-            addTo.invoke(instance, item);
+            addTo.invoke(instance, new Object[] {item});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to add to property " + pd.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -72,7 +73,7 @@ public class GeneratedWrapperBeanType extends Type {
             Method addTo = getAddToMethod(pd.getName());
             Class componentType = addTo.getParameterTypes()[0];
             Object item = getTypeMapping().getType(componentType).readObject(elementReader, context);
-            addTo.invoke(instance, item);
+            addTo.invoke(instance, new Object[] {item});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to add to property " + pd.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -82,7 +83,7 @@ public class GeneratedWrapperBeanType extends Type {
           Object value = getTypeMapping().getType(propertyType).readObject(elementReader, context);
 
           try {
-            pd.getWriteMethod().invoke(instance, value);
+            pd.getWriteMethod().invoke(instance, new Object[] {value});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to invoke " + pd.getWriteMethod() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -103,7 +104,8 @@ public class GeneratedWrapperBeanType extends Type {
   protected Method getAddToMethod(String propertyName) throws NoSuchMethodException {
     propertyName = Character.toString(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1);
     Method[] methods = beanClass.getMethods();
-    for (Method method : methods) {
+    for (int i = 0; i < methods.length; i++) {
+      Method method = methods[i];
       if (("addTo" + propertyName).equals(method.getName())) {
         return method;
       }
@@ -119,7 +121,8 @@ public class GeneratedWrapperBeanType extends Type {
    * @return The found property.
    */
   protected PropertyDescriptor findProperty(String name) {
-    for (PropertyDescriptor property : beanProperties) {
+    for (int i = 0; i < beanProperties.length; i++) {
+      PropertyDescriptor property = beanProperties[i];
       if (property.getName().equals(name)) {
         return property;
       }
@@ -132,11 +135,12 @@ public class GeneratedWrapperBeanType extends Type {
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
     QName wrapperQName = ((GeneratedWrapperBean) object).getWrapperQName();
     MessageWriter elementWriter = writer.getElementWriter(wrapperQName);
-    for (PropertyDescriptor property : beanProperties) {
+    for (int n = 0; n < beanProperties.length; n++) {
+      PropertyDescriptor property = beanProperties[n];
       Method getter = property.getReadMethod();
       Object propertyValue;
       try {
-        propertyValue = getter.invoke(object);
+        propertyValue = getter.invoke(object, null);
       }
       catch (Exception e) {
         throw new XFireFault("Unable to invoke " + getter.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -162,7 +166,10 @@ public class GeneratedWrapperBeanType extends Type {
             throw new XFireFault("Unable to map property " + property.getName() + " for the wrapper bean: unknown component type." + beanClass.getName(), e, XFireFault.RECEIVER);
           }
           Type type = getTypeMapping().getType(componentType);
-          for (Object item : (Collection) object) {
+
+          Iterator it = ((Collection) object).iterator();
+          while (it.hasNext()) {
+            Object item = it.next();
             type.writeObject(item, elementWriter.getElementWriter(wrapperQName.getNamespaceURI(), property.getName()), context);
           }
         }

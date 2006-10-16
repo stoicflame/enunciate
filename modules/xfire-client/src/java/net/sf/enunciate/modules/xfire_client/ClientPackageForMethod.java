@@ -10,8 +10,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Gets the qualified package name for a package or type.
@@ -25,11 +24,22 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
   /**
    * @param conversions The conversions.
    */
-  public ClientPackageForMethod(LinkedHashMap<String, String> conversions) {
+  public ClientPackageForMethod(Map<String, String> conversions) {
     if (conversions == null) {
       conversions = new LinkedHashMap<String, String>();
     }
-    this.conversions = conversions;
+
+    this.conversions = new LinkedHashMap<String, String>();
+    TreeSet<String> keys = new TreeSet<String>(new Comparator<String>() {
+      public int compare(String package1, String package2) {
+        return package2.length() - package1.length();
+      }
+    });
+    keys.addAll(conversions.keySet());
+
+    for (String key : keys) {
+      this.conversions.put(key, conversions.get(key));
+    }
   }
 
   /**
@@ -57,12 +67,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
       conversion = convert((PackageDeclaration) unwrapped);
     }
     else {
-      if (unwrapped != null) {
-        throw new TemplateModelException("Unable to package-convert an instance of " + unwrapped.getClass());
-      }
-      else {
-        return null;
-      }
+      conversion = convert(String.valueOf(unwrapped));
     }
 
     return conversion;
@@ -118,8 +123,9 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
   protected String convert(String packageFqn) {
     //todo: support for regular expressions or wildcards?
     for (String pkg : this.conversions.keySet()) {
-      if (packageFqn.equals(pkg)) {
-        return conversions.get(pkg);
+      if (packageFqn.startsWith(pkg)) {
+        String conversion = conversions.get(pkg);
+        return conversion + packageFqn.substring(pkg.length());
       }
     }
     return packageFqn;

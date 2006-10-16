@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules.xml;
 
 import freemarker.template.TemplateException;
+import freemarker.template.ObjectWrapper;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
@@ -77,7 +78,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
-    model.setObjectWrapper(xmlWrapper);
 
     Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
     Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
@@ -150,6 +150,11 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     getEnunciate().setProperty(XMLAPILookup.class.getName(), lookup);
     getEnunciate().setProperty("xml.dir", new File(enunciate.getGenerateDir(), "xml"));
+  }
+
+  @Override
+  protected ObjectWrapper getObjectWrapper() {
+    return xmlWrapper;
   }
 
   @Override

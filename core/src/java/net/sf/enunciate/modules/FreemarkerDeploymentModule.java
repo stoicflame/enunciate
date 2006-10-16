@@ -1,9 +1,7 @@
 package net.sf.enunciate.modules;
 
 import freemarker.cache.URLTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import freemarker.template.*;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -75,7 +73,17 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
       throw new IOException("A model must be established.");
     }
 
+    model.setObjectWrapper(getObjectWrapper());
     return model;
+  }
+
+  /**
+   * The object wrapper to use for the model.
+   *
+   * @return The object wrapper to use for the model.
+   */
+  protected ObjectWrapper getObjectWrapper() {
+    return new DefaultObjectWrapper();
   }
 
   /**

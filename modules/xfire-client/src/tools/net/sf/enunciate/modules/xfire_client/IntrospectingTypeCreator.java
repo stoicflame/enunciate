@@ -98,7 +98,7 @@ public class IntrospectingTypeCreator implements TypeCreator {
   public Type createType(Class clazz) {
     Type type;
     if (GeneratedWrapperBean.class.isAssignableFrom(clazz)) {
-
+      type = new GeneratedWrapperBeanType(clazz);
     }
     else {
       type = introspectForType(clazz);

@@ -9,7 +9,7 @@ import freemarker.template.TemplateModelException;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
@@ -20,11 +20,11 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   private final boolean jdk15;
 
-  public ClientClassnameForMethod(LinkedHashMap<String, String> conversions) {
+  public ClientClassnameForMethod(Map<String, String> conversions) {
     this(conversions, true);
   }
 
-  public ClientClassnameForMethod(LinkedHashMap<String, String> conversions, boolean jdk15) {
+  public ClientClassnameForMethod(Map<String, String> conversions, boolean jdk15) {
     super(conversions);
 
     this.jdk15 = jdk15;
@@ -71,7 +71,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
       convertedPackage = super.convert(pckg.getQualifiedName());
     }
 
-    return convertedPackage + declaration.getSimpleName();
+    return convertedPackage + "." + declaration.getSimpleName();
   }
 
   @Override

@@ -2,6 +2,7 @@ package net.sf.enunciate.modules.xfire_client;
 
 import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
 import org.codehaus.xfire.annotations.*;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
@@ -28,6 +29,7 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
   protected HashMap method2RequestWrapper = new HashMap();
   protected HashMap method2ResponseWrapper = new HashMap();
   protected HashSet oneWayMethods = new HashSet();
+  protected HashMap fault2WebFault = new HashMap();
 
   /**
    * Writes these annotations to the specified output stream.
@@ -164,6 +166,10 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
 
   public ResponseWrapperAnnotation getResponseWrapperAnnotation(Method method) {
     return (ResponseWrapperAnnotation) method2ResponseWrapper.get(createKey(method));
+  }
+
+  public WebFaultAnnotation getWebFaultAnnotation(Class fault) {
+    return (WebFaultAnnotation) fault2WebFault.get(createKey(fault));
   }
 
   public String[] getPropertyOrder(Class clazz) {

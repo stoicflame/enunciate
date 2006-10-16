@@ -59,7 +59,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       requestWrapperClassName = requestWrapperInfo.className();
     }
     else {
-      StringBuilder builder = new StringBuilder(pckg == null ? "" : pckg.getName());
+      StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
       if (builder.length() > 0) {
         builder.append(".");
       }
@@ -99,7 +99,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       responseWrapperClassName = responseWrapperInfo.className();
     }
     else {
-      StringBuilder builder = new StringBuilder(pckg == null ? "" : pckg.getName());
+      StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
       if (builder.length() > 0) {
         builder.append(".");
       }
@@ -147,7 +147,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
     RESPONSE_PROPERTY_LOOP :
     for (int i = 0; i < propOrder.length; i++) {
       String property = propOrder[i];
-      for (PropertyDescriptor descriptor : pds) {
+      for (int j = 0; j < pds.length; j++) {
+        PropertyDescriptor descriptor = pds[j];
         if (descriptor.getName().equals(property)) {
           outputProperties[i] = descriptor;
           continue RESPONSE_PROPERTY_LOOP;
@@ -166,10 +167,12 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
     Type type = provider.getType(service, wrapperClass);
     Object wrapper = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
-    List<Object> parameters = new ArrayList<Object>();
-    for (PropertyDescriptor descriptor : this.requestInfo.getProperties()) {
+    List parameters = new ArrayList();
+    PropertyDescriptor[] pds = this.requestInfo.getProperties();
+    for (int i = 0; i < pds.length; i++) {
+      PropertyDescriptor descriptor = pds[i];
       try {
-        parameters.add(descriptor.getReadMethod().invoke(wrapper));
+        parameters.add(descriptor.getReadMethod().invoke(wrapper, null));
       }
       catch (IllegalAccessException e) {
         throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
@@ -202,7 +205,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
     for (int i = 0; i < properties.length; i++) {
       PropertyDescriptor descriptor = properties[i];
       try {
-        descriptor.getWriteMethod().invoke(wrapper, params[i]);
+        descriptor.getWriteMethod().invoke(wrapper, new Object[] {params[i]});
       }
       catch (IllegalAccessException e) {
         throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);

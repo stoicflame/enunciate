@@ -16,7 +16,6 @@
     <xfire-client uuid="basic.example">
       <package-conversions>
         <convert from="net.sf.enunciate.samples.petclinic" to="net.sf.enunciate.samples.petclinic.client"/>
-        <convert from="net.sf.enunciate.samples.petclinic.services" to="net.sf.enunciate.samples.petclinic.client.services"/>
       </package-conversions>
     </xfire-client>
     <xfire uuid="basic.example">
