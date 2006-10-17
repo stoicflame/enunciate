@@ -177,6 +177,7 @@ public class ElementsWriter {
         Type componentType = typeMapping.getType(item.getClass());
         MessageWriter elementWriter = parentWriter.getElementWriter(elementName);
         componentType.writeObject(item, elementWriter, context);
+        elementWriter.close();
       }
     }
   }

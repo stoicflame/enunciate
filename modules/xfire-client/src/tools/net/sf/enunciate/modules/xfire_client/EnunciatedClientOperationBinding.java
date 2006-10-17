@@ -39,7 +39,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   public EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, OperationInfo op) throws XFireFault {
     this.annotations = annotations;
     this.requestInfo = getRequestInfo(op);
-    this.responseInfo = getOutputProperties(op);
+    this.responseInfo = getResponseInfo(op);
   }
 
   /**
@@ -88,7 +88,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
    * @param op The operation.
    * @return The output properties.
    */
-  protected WrapperBeanInfo getOutputProperties(OperationInfo op) throws XFireFault {
+  protected WrapperBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
     Method method = op.getMethod();
     Class ei = method.getDeclaringClass();
     Package pckg = ei.getPackage();
@@ -136,7 +136,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     BeanInfo responseBeanInfo;
     try {
-      responseBeanInfo = Introspector.getBeanInfo(wrapperClass);
+      responseBeanInfo = Introspector.getBeanInfo(wrapperClass, Object.class);
     }
     catch (IntrospectionException e) {
       throw new XFireFault("Unable to introspect " + wrapperClass.getName(), e, XFireFault.RECEIVER);
@@ -162,13 +162,14 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   public void readMessage(InMessage message, MessageContext context) throws XFireFault {
-    Class wrapperClass = this.requestInfo.getWrapperClass();
+    WrapperBeanInfo wrapperBeanInfo = this.responseInfo;
+    Class wrapperClass = wrapperBeanInfo.getWrapperClass();
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
     Type type = provider.getType(service, wrapperClass);
     Object wrapper = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
     List parameters = new ArrayList();
-    PropertyDescriptor[] pds = this.requestInfo.getProperties();
+    PropertyDescriptor[] pds = wrapperBeanInfo.getProperties();
     for (int i = 0; i < pds.length; i++) {
       PropertyDescriptor descriptor = pds[i];
       try {
@@ -186,7 +187,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   public void writeMessage(OutMessage message, XMLStreamWriter writer, MessageContext context) throws XFireFault {
-    Class wrapperClass = this.responseInfo.getWrapperClass();
+    WrapperBeanInfo wrapperBeanClass = this.requestInfo;
+    Class wrapperClass = wrapperBeanClass.getWrapperClass();
     Object wrapper;
     try {
       wrapper = wrapperClass.newInstance();
@@ -196,7 +198,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
     }
 
     Object[] params = (Object[]) message.getBody();
-    PropertyDescriptor[] properties = this.responseInfo.getProperties();
+    PropertyDescriptor[] properties = wrapperBeanClass.getProperties();
     if (properties.length != params.length) {
       throw new XFireFault("There are " + params.length + " parameters to the out message but only "
         + properties.length + " properties on " + wrapperClass.getName(), XFireFault.RECEIVER);

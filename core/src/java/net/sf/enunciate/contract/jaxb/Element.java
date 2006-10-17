@@ -16,10 +16,7 @@ import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,7 +94,11 @@ public class Element extends Accessor {
 
   // Inherited.
   public String getNamespace() {
-    String namespace = getTypeDefinition().getTargetNamespace();
+    String namespace = "";
+
+    if (getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
+      namespace = getTypeDefinition().getTargetNamespace();
+    }
 
     if ((xmlElement != null) && (!"##default".equals(xmlElement.namespace()))) {
       namespace = xmlElement.namespace();

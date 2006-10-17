@@ -3,6 +3,7 @@ package net.sf.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.MemberDeclaration;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlNsForm;
 
 /**
  * An accessor that is marshalled in xml to an xml attribute.

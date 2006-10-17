@@ -29,6 +29,18 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
     this("http://${defaultHost}:${defaultPort}${defaultContext}soap/${endpointInterface.serviceName}");
   }
 
+  /**
+   * Construct a ${endpointInterface.simpleName} with a specified host, port, and context.  If any is null,
+   * defaults will be supplied.
+   *
+   * @param host The host (default: "${defaultHost}")
+   * @param port The port (default: ${defaultPort})
+   * @param context The context (default: "${defaultContext}soap/${endpointInterface.serviceName}")
+   */
+  public ${endpointInterface.simpleName}Impl(String host, Integer port, String context) {
+    this("http://" + ((host == null) ? "${defaultHost}" : host) + ":" + ((port == null) ? new Integer(${defaultPort}) : port) + ((context == null) ? "${defaultContext}soap/${endpointInterface.serviceName}" : context));
+  }
+
   public ${endpointInterface.simpleName}Impl(String endpoint) {
     XFire xFire = XFireFactory.newInstance().getXFire();
     TransportManager transportManager = xFire.getTransportManager();

@@ -1,25 +1,23 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import org.codehaus.xfire.XFireFactory;
+import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
 import org.codehaus.xfire.XFireRuntimeException;
-import org.codehaus.xfire.transport.TransportManager;
-import org.codehaus.xfire.util.ClassLoaderUtils;
-import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.fault.XFireFault;
+import org.codehaus.xfire.service.FaultInfo;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
-import org.codehaus.xfire.service.FaultInfo;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
+import org.codehaus.xfire.transport.TransportManager;
+import org.codehaus.xfire.util.ClassLoaderUtils;
 
 import javax.xml.namespace.QName;
 import java.io.IOException;
-
-import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
-import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
-import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
+import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
@@ -32,11 +30,17 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
     super(
       ExplicitWebAnnotations.readFrom(ExplicitJAXWSAnnotationServiceFactory.class.getResourceAsStream("/" + typeSetId + ".annotations")),
       transportManager,
-      new AegisBindingProvider(new IntrospectingTypeRegistry(typeSetId))
+      new EnunciatedClientBindingProvider(new IntrospectingTypeRegistry(typeSetId))
     );
 
     //irritating that we have to read the file twice, but we have to make sure the super get the right annotations, too...
     this.annotations = ExplicitWebAnnotations.readFrom(ExplicitJAXWSAnnotationServiceFactory.class.getResourceAsStream("/" + typeSetId + ".annotations"));
+  }
+
+  public Service create(Class clazz) {
+    HashMap properties = new HashMap();
+    properties.put(ALLOW_INTERFACE, Boolean.TRUE);
+    return super.create(clazz, properties);
   }
 
   protected WebAnnotations getAnnotations() {

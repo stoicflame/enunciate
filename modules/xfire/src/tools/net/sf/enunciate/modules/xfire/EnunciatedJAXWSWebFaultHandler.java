@@ -59,7 +59,7 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
     Class faultBeanClass = getFaultBeanClass(faultClass);
 
     try {
-      BeanInfo beanInfo = Introspector.getBeanInfo(faultBeanClass);
+      BeanInfo beanInfo = Introspector.getBeanInfo(faultBeanClass, Object.class);
       Object faultBean = faultBeanClass.newInstance();
       for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
         if ((property.getWriteMethod() != null) && (property.getReadMethod() != null)) {

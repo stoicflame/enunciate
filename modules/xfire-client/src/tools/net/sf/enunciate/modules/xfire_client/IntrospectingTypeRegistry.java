@@ -43,27 +43,27 @@ public class IntrospectingTypeRegistry extends DefaultTypeMappingRegistry {
     try {
       String typeValue = reader.readLine();
       while (typeValue != null) {
+        Type type;
         try {
           Class typeClass = Class.forName(typeValue);
-          Type type = typeCreator.createType(typeClass);
-          knownTypes.add(type);
+          type = typeCreator.createType(typeClass);
         }
         catch (Exception e) {
-          LOG.error("Problem creating type for known type " + typeValue + ".", e);
+          throw new IllegalStateException("Problem creating type for known type " + typeValue + ".", e);
         }
+
+        if (type == null) {
+          throw new IllegalStateException("Unable to find type for " + typeValue + ".");
+        }
+
+        knownTypes.add(type);
+        typeValue = reader.readLine();
       }
     }
     catch (IOException e) {
       LOG.error("Error reading type list.  Only the XFire defaults will be registered!", e);
     }
-  }
 
-  protected TypeCreator createTypeCreator() {
-    return new IntrospectingTypeCreator(super.createTypeCreator());
-  }
-
-  public TypeMapping createDefaultMappings() {
-    TypeMapping defaultMappings = super.createDefaultMappings();
     for (int i = 0; i < getRegisteredEncodingStyleURIs().length; i++) {
       String uri = getRegisteredEncodingStyleURIs()[i];
       TypeMapping typeMapping = getTypeMapping(uri);
@@ -73,7 +73,10 @@ public class IntrospectingTypeRegistry extends DefaultTypeMappingRegistry {
         typeMapping.register(type);
       }
     }
-    return defaultMappings;
+  }
+
+  protected TypeCreator createTypeCreator() {
+    return new IntrospectingTypeCreator(super.createTypeCreator());
   }
 
 }

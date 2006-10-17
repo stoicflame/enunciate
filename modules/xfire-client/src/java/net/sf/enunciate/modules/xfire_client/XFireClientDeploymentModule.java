@@ -140,7 +140,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
-      typeList.add(faultClass);
 
       if (implicit) {
         processTemplate(faultBeanTemplate, model);
@@ -216,13 +215,31 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     for (WebMessage webMessage : webMethod.getMessages()) {
       if (webMessage instanceof RequestWrapper) {
         RequestWrapper requestWrapper = (RequestWrapper) webMessage;
-        RequestWrapperAnnotation annotation = new RequestWrapperAnnotation(requestWrapper.getElementName(), requestWrapper.getElementNamespace(), getBeanName(conversion, requestWrapper.getRequestBeanName()));
+        String beanName = getBeanName(conversion, requestWrapper.getRequestBeanName());
+        RequestWrapperAnnotation annotation = new RequestWrapperAnnotation(requestWrapper.getElementName(), requestWrapper.getElementNamespace(), beanName);
         annotations.method2RequestWrapper.put(methodKey, annotation);
+        Collection<ImplicitChildElement> childElements = requestWrapper.getChildElements();
+        String[] propertyOrder = new String[childElements.size()];
+        int i = 0;
+        for (ImplicitChildElement childElement : childElements) {
+          propertyOrder[i] = childElement.getElementName();
+          i++;
+        }
+        annotations.class2PropertyOrder.put(beanName, propertyOrder);
       }
       else if (webMessage instanceof ResponseWrapper) {
         ResponseWrapper responseWrapper = (ResponseWrapper) webMessage;
-        ResponseWrapperAnnotation annotation = new ResponseWrapperAnnotation(responseWrapper.getElementName(), responseWrapper.getElementNamespace(), getBeanName(conversion, responseWrapper.getResponseBeanName()));
+        String beanName = getBeanName(conversion, responseWrapper.getResponseBeanName());
+        ResponseWrapperAnnotation annotation = new ResponseWrapperAnnotation(responseWrapper.getElementName(), responseWrapper.getElementNamespace(), beanName);
         annotations.method2ResponseWrapper.put(methodKey, annotation);
+        Collection<ImplicitChildElement> childElements = responseWrapper.getChildElements();
+        String[] propertyOrder = new String[childElements.size()];
+        int i = 0;
+        for (ImplicitChildElement childElement : childElements) {
+          propertyOrder[i] = childElement.getElementName();
+          i++;
+        }
+        annotations.class2PropertyOrder.put(beanName, propertyOrder);
       }
     }
 
@@ -247,7 +264,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @return The converted fqn.
    */
   protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
-    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.') - 1));
+    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
     String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
     return pckg + "." + simpleName;
   }

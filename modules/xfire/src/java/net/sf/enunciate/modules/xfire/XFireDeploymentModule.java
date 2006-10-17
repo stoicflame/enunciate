@@ -23,10 +23,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Deployment module for XFire.
@@ -38,6 +35,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private WarConfig warConfig;
   private String uuid;
+  private boolean compileDebugInfo = true;
 
   public XFireDeploymentModule() {
     this.uuid = String.valueOf(System.currentTimeMillis());
@@ -103,8 +101,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected void doCompile() throws EnunciateException, IOException {
+    ArrayList<String> javacAdditionalArgs = new ArrayList<String>();
+    if (compileDebugInfo) {
+      javacAdditionalArgs.add("-g");
+    }
+
     Enunciate enunciate = getEnunciate();
-    enunciate.invokeJavac(getCompileDir(), enunciate.getSourceFiles());
+    enunciate.invokeJavac(enunciate.getDefaultClasspath(), getCompileDir(), javacAdditionalArgs, enunciate.getSourceFiles());
 
     File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
     if (jaxwsSources == null) {
@@ -114,7 +117,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     Collection<String> jaxwsSourceFiles = enunciate.getJavaFiles(jaxwsSources);
     StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
     jaxwsClasspath.append(File.pathSeparator).append(getCompileDir().getAbsolutePath());
-    enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+    enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
 
     File propertyNamesFile = (File) enunciate.getProperty("property.names.file");
     if (propertyNamesFile == null) {
@@ -348,6 +351,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  /**
+   * Configure whether to compile with debug info (default: true).
+   *
+   * @param compileDebugInfo Whether to compile with debug info (default: true).
+   */
+  public void setCompileDebugInfo(boolean compileDebugInfo) {
+    this.compileDebugInfo = compileDebugInfo;
   }
 
   /**

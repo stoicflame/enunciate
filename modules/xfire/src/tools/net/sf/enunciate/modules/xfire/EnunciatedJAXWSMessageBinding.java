@@ -33,6 +33,7 @@ public class EnunciatedJAXWSMessageBinding implements MessageSerializer {
       throw new XFireFault("Unknown method: " + dr.getLocalName(), XFireFault.SENDER);
     }
 
+    context.getExchange().setOperation(op);
     new EnunciatedJAXWSOperationBinding(op).readMessage(message, context);
   }
 

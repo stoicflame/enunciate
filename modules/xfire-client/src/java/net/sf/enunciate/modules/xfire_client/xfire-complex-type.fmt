@@ -235,6 +235,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       Type type = getTypeMapping().getType(property.getClass());
       MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace}");
       type.writeObject(property, attributeWriter, context);
+      attributeWriter.close();
     }
         [#if attribute.required]
     else {
@@ -275,12 +276,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       Type type = getTypeMapping().getType(property.getClass());
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
       type.writeObject(property, elementWriter, context);
+      elementWriter.close();
     }
           [#if element.required]
     else {
             [#if element.nillable]
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
       elementWriter.writeXsiNil();
+      elementWriter.close();
             [#else]
       throw new NullPointerException("Required property ${element.simpleName} on ${classname} was not set.");
             [/#if]
@@ -292,15 +295,18 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     if (instance.get${element.simpleName?cap_first}() == null) {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       subwriter.writeXsiNil();
+      subwriter.close();
     }
     else {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      subwriter.close();
     }
             [#else]
     if (instance.get${element.simpleName?cap_first}() != null) {
       subwriter = writer.getElementWriter("${element.wrapperName}", "${type.targetNamespace?default("")}");
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      subwriter.close();
     }
             [/#if]
           [#else]

@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * An XFire type for a generated wrapper bean.
@@ -29,16 +30,25 @@ public class GeneratedWrapperBeanType extends Type {
 
   public GeneratedWrapperBeanType(Class beanType) {
     this.beanClass = beanType;
+    setTypeClass(beanType);
 
-    BeanInfo beanInfo;
     try {
-      beanInfo = Introspector.getBeanInfo(beanType);
+      GeneratedWrapperBean emptyInstance = (GeneratedWrapperBean) this.beanClass.newInstance();
+      setSchemaType(emptyInstance.getWrapperQName());
+      ArrayList beanProperties = new ArrayList();
+      PropertyDescriptor[] propertyDescriptors = Introspector.getBeanInfo(beanType, Object.class).getPropertyDescriptors();
+      for (int i = 0; i < propertyDescriptors.length; i++) {
+        PropertyDescriptor pd = propertyDescriptors[i];
+        if ((pd.getReadMethod() != null) && (pd.getWriteMethod() != null)) {
+          beanProperties.add(pd);
+        }
+      }
+      this.beanProperties = (PropertyDescriptor[]) beanProperties.toArray(new PropertyDescriptor[beanProperties.size()]);
     }
-    catch (IntrospectionException e) {
-      throw new XFireRuntimeException("Error introspecting " + beanType.getName(), e);
+    catch (Exception e) {
+      throw new XFireRuntimeException("Error getting info for wrapper bean " + beanType.getName(), e);
     }
 
-    beanProperties = beanInfo.getPropertyDescriptors();
   }
 
   // Inherited.
@@ -148,17 +158,19 @@ public class GeneratedWrapperBeanType extends Type {
 
       if (propertyValue != null) {
         Class propertyType = getter.getReturnType();
+        QName propertyQName = new QName(wrapperQName.getNamespaceURI(), property.getName());
+        MessageWriter propertyWriter = elementWriter.getElementWriter(propertyQName);
         if (propertyType.isArray()) {
           Class componentType = propertyType.getComponentType();
           Type type = getTypeMapping().getType(componentType);
           int length = Array.getLength(propertyValue);
           for (int i = 0; i < length; i++) {
             Object item = Array.get(propertyValue, i);
-            type.writeObject(item, elementWriter.getElementWriter(wrapperQName.getNamespaceURI(), property.getName()), context);
+            type.writeObject(item, propertyWriter, context);
           }
         }
         else if (Collection.class.isAssignableFrom(propertyType)) {
-          Class componentType = null;
+          Class componentType;
           try {
             componentType = getAddToMethod(property.getName()).getParameterTypes()[0];
           }
@@ -170,15 +182,17 @@ public class GeneratedWrapperBeanType extends Type {
           Iterator it = ((Collection) object).iterator();
           while (it.hasNext()) {
             Object item = it.next();
-            type.writeObject(item, elementWriter.getElementWriter(wrapperQName.getNamespaceURI(), property.getName()), context);
+            type.writeObject(item, propertyWriter, context);
           }
         }
         else {
           Type type = getTypeMapping().getType(propertyType);
-          type.writeObject(propertyValue, elementWriter.getElementWriter(wrapperQName.getNamespaceURI(), property.getName()), context);
+          type.writeObject(propertyValue, propertyWriter, context);
         }
+        propertyWriter.close();
       }
     }
+    elementWriter.close();
   }
 
 }

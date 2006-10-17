@@ -136,7 +136,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     String[] propOrder = typeInfo.propOrder();
     BeanInfo beanInfo;
     try {
-      beanInfo = Introspector.getBeanInfo(wrapperClass);
+      beanInfo = Introspector.getBeanInfo(wrapperClass, Object.class);
     }
     catch (IntrospectionException e) {
       throw new XFireFault("Unable to introspect " + wrapperClass.getName(), e, XFireFault.RECEIVER);
