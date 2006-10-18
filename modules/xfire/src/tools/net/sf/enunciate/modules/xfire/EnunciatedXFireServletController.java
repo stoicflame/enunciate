@@ -1,16 +1,13 @@
 package net.sf.enunciate.modules.xfire;
 
-import net.sf.enunciate.modules.xml.XMLAPILookup;
 import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.spring.remoting.XFireServletControllerAdapter;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Xfire servlet controller the redirects to the generated documentation and WSDL.
@@ -19,10 +16,11 @@ import java.io.InputStream;
  */
 public class EnunciatedXFireServletController extends XFireServletControllerAdapter {
 
-  private static final XMLAPILookup XML_API_LOOKUP = XMLAPILookup.load(EnunciatedXFireServletController.class.getResourceAsStream("/xml-api.lookup"));
+  private final XMLAPILookup xmlLookup;
 
   public EnunciatedXFireServletController(XFire xfire, QName serviceName) {
     super(xfire, serviceName);
+    xmlLookup = XMLAPILookup.load(EnunciatedXFireServletController.class.getResourceAsStream("/xml.lookup"));
   }
 
   /**
@@ -57,23 +55,7 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
    */
   @Override
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
-    //todo: redirect instead of this....
-
-    String artifact = XML_API_LOOKUP.getArtifactForService(service);
-    InputStream wsdl = artifact == null ? null : getClass().getResourceAsStream("/" + artifact);
-    if (wsdl != null) {
-      response.setContentType("text/xml");
-      ServletOutputStream out = response.getOutputStream();
-      byte[] buffer = new byte[1024 * 2];
-      int len;
-      while ((len = wsdl.read(buffer)) > 0) {
-        out.write(buffer, 0, len);
-      }
-      wsdl.close();
-      out.close();
-    }
-    else {
-      super.generateWSDL(response, service);
-    }
+    String artifact = xmlLookup.getArtifactForService(service);
+    response.sendRedirect("/" + artifact);
   }
 }

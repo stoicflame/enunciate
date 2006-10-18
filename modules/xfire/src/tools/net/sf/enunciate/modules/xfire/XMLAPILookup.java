@@ -1,4 +1,4 @@
-package net.sf.enunciate.modules.xml;
+package net.sf.enunciate.modules.xfire;
 
 import java.io.*;
 import java.util.HashMap;

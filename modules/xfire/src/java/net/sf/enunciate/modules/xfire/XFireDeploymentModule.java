@@ -2,7 +2,6 @@ package net.sf.enunciate.modules.xfire;
 
 import com.sun.mirror.declaration.ParameterDeclaration;
 import freemarker.template.TemplateException;
-import freemarker.template.ObjectWrapper;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.WsdlInfo;
@@ -13,8 +12,6 @@ import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
-import net.sf.enunciate.modules.xml.XMLAPILookup;
-import net.sf.enunciate.modules.xml.XMLAPIObjectWrapper;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.File;
@@ -32,7 +29,6 @@ import java.util.*;
  */
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
-  private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private WarConfig warConfig;
   private String uuid;
   private boolean compileDebugInfo = true;
@@ -176,22 +172,53 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     File xfireConfigDir = new File(new File(enunciate.getGenerateDir(), "xfire"), "xml");
     enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 
-    File xmlDir = (File) enunciate.getProperty("xml.dir");
-    if (xmlDir != null) {
-      //if the xml deployment module has been run, copy all generated xml files to the WEB-INF/classes directory.
-      enunciate.copyDir(xmlDir, webinfClasses);
-    }
-
-    XMLAPILookup lookup = (XMLAPILookup) enunciate.getProperty(XMLAPILookup.class.getName());
-    if (lookup != null) {
-      //store the lookup, if it exists.
-      FileOutputStream out = new FileOutputStream(new File(webinfClasses, "xml-api.lookup"));
-      lookup.store(out);
-      out.close();
+    HashSet<File> xmlArtifacts = new HashSet<File>();
+    HashMap<String, String> ns2XmlResource = new HashMap<String, String>();
+    HashMap<String, File> ns2artifact = (HashMap<String, File>) enunciate.getProperty("xml.ns2artifact");
+    if (ns2artifact != null) {
+      for (String ns : ns2artifact.keySet()) {
+        File artifact = ns2artifact.get(ns);
+        String resourceName = getXmlResourceName(artifact);
+        ns2XmlResource.put(ns, resourceName);
+        xmlArtifacts.add(artifact);
+      }
     }
     else {
-      System.err.println("ERROR: No lookup was generated!  The contoller used to serve up the WSDLs and schemas will not function!");
+      System.err.println("WARNING: No XML artifacts for the namespaces of the project were found.  WSDL publication will be disabled.");
     }
+
+    HashMap<String, File> service2artifact = (HashMap<String, File>) enunciate.getProperty("xml.service2artifact");
+    HashMap<String, String> service2XmlResource = new HashMap<String, String>();
+    if (service2artifact != null) {
+      for (String service : service2artifact.keySet()) {
+        File artifact = service2artifact.get(service);
+        String resourceName = getXmlResourceName(artifact);
+        service2XmlResource.put(service, resourceName);
+        xmlArtifacts.add(artifact);
+      }
+    }
+    else {
+      System.err.println("WARNING: No XML artifacts for the services of the project were found.  WSDL publication will be disabled.");
+    }
+
+    for (File artifact : xmlArtifacts) {
+      String resourceName = getXmlResourceName(artifact);
+      enunciate.copyFile(artifact, new File(webinfClasses, resourceName));
+    }
+
+    XMLAPILookup lookup = new XMLAPILookup(ns2XmlResource, service2XmlResource);
+    lookup.store(new FileOutputStream(new File(webinfClasses, "xml.lookup")));
+  }
+
+  /**
+   * Get the name of the resource for the specified xml artifact.
+   *
+   * @param artifact The artifact.
+   * @return The resource name.
+   */
+  protected String getXmlResourceName(File artifact) {
+    //todo: generate a unique id in case artifacts of the name name are put in different directories?
+    return artifact.getName();
   }
 
   @Override
@@ -323,7 +350,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       //exclude enunciate-core.jar
       return true;
     }
-    else if (loader.findResource(net.sf.enunciate.modules.xml.XMLDeploymentModule.class.getName().replace('.', '/').concat(".class")) != null) {
+    else if (loader.findResource("net/sf/enunciate/modules/xml/XMLDeploymentModule.class") != null) {
       //exclude enunciate-xml.jar
       return true;
     }
@@ -368,11 +395,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public int getOrder() {
     return 10;
-  }
-
-  @Override
-  protected ObjectWrapper getObjectWrapper() {
-    return xmlWrapper;
   }
 
   @Override

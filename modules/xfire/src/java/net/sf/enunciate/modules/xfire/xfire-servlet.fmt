@@ -18,7 +18,7 @@
       <map>
   [@forEachWsdl]
 
-        <entry key="${wsdl.file}">
+        <entry key="${wsdl.properties['file']}">
           <ref bean="wsdlHandler"/>
         </entry>
     [@forEachEndpointInterface]
@@ -56,7 +56,7 @@
         <!-- all schema files will be handled by the schema handler -->
   [@forEachSchema]
 
-        <entry key="${schema.file}">
+        <entry key="${schema.properties['file']}">
           <ref bean="schemaHandler"/>
         </entry>
   [/@forEachSchema]

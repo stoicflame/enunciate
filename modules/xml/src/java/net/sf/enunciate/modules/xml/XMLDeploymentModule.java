@@ -132,24 +132,24 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.put("prefix", new PrefixMethod());
     processTemplate(getTemplateURL(), model);
 
-    HashMap<String, String> ns2artifact = new HashMap<String, String>();
-    HashMap<String, String> service2artifact = new HashMap<String, String>();
+    File artifactDir = new File(enunciate.getGenerateDir(), "xml");
+
+    HashMap<String, File> ns2artifact = new HashMap<String, File>();
+    HashMap<String, File> service2artifact = new HashMap<String, File>();
     for (WsdlInfo wsdl : ns2wsdl.values()) {
       String file = (String) wsdl.getProperty("file");
-      ns2artifact.put(wsdl.getTargetNamespace(), file);
+      ns2artifact.put(wsdl.getTargetNamespace(), new File(artifactDir, file));
       for (EndpointInterface endpointInterface : wsdl.getEndpointInterfaces()) {
-        service2artifact.put(endpointInterface.getServiceName(), file);
+        service2artifact.put(endpointInterface.getServiceName(), new File(artifactDir, file));
       }
     }
 
     for (SchemaInfo schemaInfo : ns2schema.values()) {
-      service2artifact.put(schemaInfo.getNamespace(), (String) schemaInfo.getProperty("file"));
+      service2artifact.put(schemaInfo.getNamespace(), new File(artifactDir, (String) schemaInfo.getProperty("file")));
     }
 
-    XMLAPILookup lookup = new XMLAPILookup(ns2artifact, service2artifact);
-
-    getEnunciate().setProperty(XMLAPILookup.class.getName(), lookup);
-    getEnunciate().setProperty("xml.dir", new File(enunciate.getGenerateDir(), "xml"));
+    getEnunciate().setProperty("xml.ns2artifact", ns2artifact);
+    getEnunciate().setProperty("xml.service2artifact", service2artifact);
   }
 
   @Override
