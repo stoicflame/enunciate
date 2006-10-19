@@ -1,4 +1,0 @@
-[#ftl]
-[#import libraryName as lib/]
-[#assign invokeMethod=methodSouce?interpret/]
-[@invokeMethod/]

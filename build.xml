@@ -33,8 +33,26 @@
     <pathelement location="${java.home}/../lib/tools.jar"/>
   </path>
 
+  <path id="test.libs">
+    <fileset dir="${lib.dir}/test">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
   <path id="xfire.libs">
     <fileset dir="${lib.dir}/xfire">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="xfire.server.libs">
+    <fileset dir="${lib.dir}/xfire-server">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="xfire.client.libs">
+    <fileset dir="${lib.dir}/xfire-server">
       <include name="*.jar"/>
     </fileset>
   </path>
@@ -70,14 +88,11 @@
 
     <path id="test.classpath">
       <path refid="build.classpath"/>
+      <path refid="test.libs"/>
       <pathelement location="${conf.dir}"/>
-      <fileset dir="${lib.dir}/test">
-        <include name="*.jar"/>
-      </fileset>
     </path>
 
     <available property="tools.exists" file="src/tools"/>
-    <available property="tools.tests.exists" file="src/tools-tests"/>
   </target>
 
   <target name="compile" description="compile the code, tools and main." depends="init, compile-tools, compile-main"/>
@@ -139,61 +154,11 @@
     <jar jarfile="target/enunciate-${module.name}-tools-${enunciate.version}.jar" basedir="${tools.build.dir}"/>
   </target>
 
-  <target name="test" description="run the test cases" if="test.failure" depends="compile, test-main, test-tools">
+  <target name="test" description="run the test cases" if="test.failure" depends="compile, -internal-test">
     <fail message="There were test failures."/>
   </target>
 
-  <target name="compile-tests" depends="compile-main-tests, compile-tools-tests"/>
-
-  <target name="test-main" depends="compile-main-tests">
-    <!--
-        <mkdir dir="${test.report.dir}"/>
-        <junit dir="./" failureproperty="test.failure" printSummary="yes" fork="false" haltonerror="true">
-          <sysproperty key="basedir" value="."/>
-          <formatter type="xml"/>
-          <formatter usefile="false" type="plain"/>
-          <classpath>
-            <fileset dir="${lib.dir}">
-              <include name="*.jar"/>
-            </fileset>
-            <pathelement path="${test.build.dir}"/>
-            <pathelement path="${build.dir}"/>
-          </classpath>
-
-          <batchtest todir="${test.report.dir}">
-            <fileset dir="src/test">
-              <include name="**/Test*"/>
-            </fileset>
-          </batchtest>
-        </junit>
-    -->
-  </target>
-
-  <target name="test-tools" depends="compile-tools-tests" if="tools.tests.exists">
-    <!--
-        <mkdir dir="${test.report.dir}"/>
-        <junit dir="./" failureproperty="test.failure" printSummary="yes" fork="false" haltonerror="true">
-          <sysproperty key="basedir" value="."/>
-          <formatter type="xml"/>
-          <formatter usefile="false" type="plain"/>
-          <classpath>
-            <fileset dir="${lib.dir}">
-              <include name="*.jar"/>
-            </fileset>
-            <pathelement path="${test.build.dir}"/>
-            <pathelement path="${build.dir}"/>
-          </classpath>
-
-          <batchtest todir="${test.report.dir}">
-            <fileset dir="src/test">
-              <include name="**/Test*"/>
-            </fileset>
-          </batchtest>
-        </junit>
-    -->
-  </target>
-
-  <target name="compile-main-tests" depends="compile-main">
+  <target name="compile-tests">
     <mkdir dir="${test.build.dir}"/>
     <javac destdir="${test.build.dir}" debug="true">
       <src>
@@ -211,22 +176,15 @@
     </copy>
   </target>
 
-  <target name="compile-tools-tests" depends="compile-tools" if="tools.tests.exists">
-    <mkdir dir="${tools.test.build.dir}"/>
-    <javac destdir="${tools.test.build.dir}" debug="true">
-      <src>
-        <pathelement location="src/tools-test"/>
-      </src>
-      <classpath refid="test.classpath"/>
-      <classpath location="${tools.build.dir}"/>
-    </javac>
-
-    <copy todir="${test.build.dir}">
-      <fileset dir="src/test">
-        <include name="**/*.xml"/>
-        <include name="**/*.fmt"/>
-      </fileset>
-    </copy>
+  <target name="-internal-test" depends="compile-tests">
+    1. Gather the list of test classes to run.
+    2. Run any tests that are NOT specified as depending on any sample source.
+    3. For each sample source base, use the test deployment module to:
+        a. Run the "generate" tests.
+        b. Run the "compile" tests.
+        c. Run the "build" tests.
+        d. Run the "package" tests.
+    4. gather and compile all results into a single report.
   </target>
 
   <target name="clean" description="clean up">

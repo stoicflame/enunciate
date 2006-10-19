@@ -6,13 +6,10 @@
     <path refid="base.libs"/>
     <path refid="core.libs"/>
     <path refid="xfire.libs"/>
+    <path refid="xfire.server.libs"/>
 
     <fileset dir="${core.basedir}/target">
       <include name="${jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.xml.basedir}/target">
-      <include name="*.jar"/>
     </fileset>
 
     <fileset dir="${modules.jaxws.basedir}/target">

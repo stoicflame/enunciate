@@ -5,16 +5,13 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import org.testng.annotations.Test;
+import junit.framework.TestCase;
 
 /**
  * @author Ryan Heaton
  */
-public class TestFreemarkerWrapping {
+public class TestFreemarkerWrapping extends TestCase {
 
-  @Test
   public void testWrapEnums() throws Exception {
     APTJellyObjectWrapper wrapper = new APTJellyObjectWrapper();
     TemplateModel wrapped = wrapper.wrap(KnownXmlType.STRING);

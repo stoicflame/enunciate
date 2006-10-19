@@ -4,31 +4,55 @@ import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.EnunciateTestCase;
+import static net.sf.enunciate.EnunciateTestUtil.*;
 import net.sf.jelly.apt.ProcessorFactory;
-import static org.testng.Assert.assertNotNull;
-import org.testng.IHookCallBack;
-import org.testng.IHookable;
+import net.sf.jelly.apt.Context;
 
 import java.net.URL;
 import java.util.*;
+import java.io.File;
+
+import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import junit.framework.TestResult;
 
 /**
  * Base test case for contract.
+ * <p/>
+ * <i>NOTE: This class is NOT thread-safe!</i>
  *
  * @author Ryan Heaton
  */
-public abstract class EnunciateContractTestCase extends EnunciateTestCase implements IHookable {
+public abstract class EnunciateContractTestCase extends TestCase {
 
-  private IHookCallBack callback;
-  protected AnnotationProcessorEnvironment env;
+  private static boolean IN_APT = false;
 
-  public void run(IHookCallBack callback) {
-    this.callback = callback;
-    invokeAPT(new APFInternal(), getAptOptions(), getAllJavaFiles(getSubDirName()));
+  @Override
+  public final void runBare() throws Throwable {
+    if (!IN_APT) {
+      final EnunciateContractTestCase testCase = this;
+      APFInternal processorFactory = new APFInternal() {
+        protected void processInternal() throws Throwable {
+          testCase.setUp();
+          try {
+            testCase.runTest();
+          }
+          finally {
+            testCase.tearDown();
+          }
+        }
+      };
+
+      invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getContractTestDir()));
+      processorFactory.throwPossibleThrowable();
+    }
+    else {
+      super.runBare();
+    }
   }
 
-  protected ArrayList<String> getAptOptions() {
+  protected static ArrayList<String> getAptOptions() {
     ArrayList<String> aptOpts = new ArrayList<String>();
     aptOpts.add("-cp");
     aptOpts.add(System.getProperty("java.class.path"));
@@ -36,8 +60,12 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase implem
     return aptOpts;
   }
 
-  protected String getSubDirName() {
-    return "contract";
+  private static File getContractTestDir() {
+    String subdir = System.getProperty("enunciate.modules.core.samples");
+    if (subdir == null) {
+      throw new RuntimeException("A 'enunciate.modules.core.samples' property must be defined.");
+    }
+    return new File(subdir);
   }
 
   /**
@@ -47,12 +75,46 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase implem
    * @return The declaration.
    */
   protected TypeDeclaration getDeclaration(String fqn) {
-    TypeDeclaration declaration = this.env.getTypeDeclaration(fqn);
-    assertNotNull(declaration, "No source def found: " + fqn);
+    TypeDeclaration declaration = Context.getCurrentEnvironment().getTypeDeclaration(fqn);
+    assertNotNull("No source def found: " + fqn, declaration);
     return declaration;
   }
 
-  private class APFInternal extends ProcessorFactory implements AnnotationProcessor {
+  /**
+   * Utility method for creating a test suite for the specified class.
+   *
+   * @param clazz The class for which to create a test suite.
+   * @return The test suite.
+   */
+  public static Test createSuite(Class<? extends EnunciateContractTestCase> clazz) {
+    final TestSuite testSuite = new TestSuite(clazz);
+    return new Test() {
+      public int countTestCases() {
+        return testSuite.countTestCases();
+      }
+
+      public void run(final TestResult result) {
+        if (!IN_APT) {
+          APFInternal processorFactory = new APFInternal() {
+            protected void processInternal() {
+              testSuite.run(result);
+            }
+          };
+
+          invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getContractTestDir()));
+        }
+        else {
+          testSuite.run(result);
+        }
+      }
+    };
+
+  }
+
+  protected static abstract class APFInternal extends ProcessorFactory implements AnnotationProcessor {
+
+    private Throwable throwable = null;
+
     @Override
     public Collection<String> supportedOptions() {
       return Collections.emptyList();
@@ -65,7 +127,6 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase implem
 
     @Override
     public AnnotationProcessor getProcessorFor(Set<AnnotationTypeDeclaration> set, AnnotationProcessorEnvironment ape) {
-      env = ape;
       return super.getProcessorFor(set, ape);
     }
 
@@ -79,10 +140,23 @@ public abstract class EnunciateContractTestCase extends EnunciateTestCase implem
     }
 
     public void process() {
-      assertNotNull(callback, "Uninitialized callback.");
-      assertNotNull(env, "Uninitialized environment.");
-      callback.runTestMethod();
+      try {
+        EnunciateContractTestCase.IN_APT = true;
+        processInternal();
+        EnunciateContractTestCase.IN_APT = false;
+      }
+      catch (Throwable throwable) {
+        this.throwable = throwable;
+      }
     }
+
+    public void throwPossibleThrowable() throws Throwable {
+      if (this.throwable != null) {
+        throw this.throwable;
+      }
+    }
+
+    protected abstract void processInternal() throws Throwable;
 
   }
 

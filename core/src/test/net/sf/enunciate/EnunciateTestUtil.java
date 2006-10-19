@@ -17,8 +17,6 @@
 package net.sf.enunciate;
 
 import com.sun.mirror.apt.AnnotationProcessorFactory;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -27,17 +25,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static junit.framework.Assert.*;
+
 /**
+ * Utility methods for enunciate test cases.
+ *
  * @author Ryan Heaton
  */
-public abstract class EnunciateTestCase {
+public class EnunciateTestUtil {
 
   /**
    * Creates a temporary output directory.
    *
    * @return A temporary output directory.
    */
-  protected File createOutputDir() throws IOException {
+  public static File createOutputDir() throws IOException {
     File outputDir = File.createTempFile("enunciatetest", "");
     outputDir.delete();
     outputDir.mkdirs();
@@ -50,9 +52,19 @@ public abstract class EnunciateTestCase {
    * @param subdir The subdir.
    * @return The list of all java files in the specified subdir.
    */
-  protected List<String> getAllJavaFiles(String subdir) {
+  public static List<String> getAllJavaFiles(String subdir) {
+    return getAllJavaFiles(getSourceFileDirectory(subdir));
+  }
+
+  /**
+   * Get a list of all java files in the specified directory.
+   *
+   * @param subdir The subdir.
+   * @return The list of all java files in the specified directory.
+   */
+  public static List<String> getAllJavaFiles(File subdir) {
     ArrayList<String> sourceFiles = new ArrayList<String>();
-    findJavaFiles(getSourceFileDirectory(subdir), sourceFiles);
+    findJavaFiles(subdir, sourceFiles);
     return sourceFiles;
   }
 
@@ -63,7 +75,7 @@ public abstract class EnunciateTestCase {
    * @param aptOptions  The options.
    * @param sourceFiles The source files.
    */
-  protected void invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
+  public static void invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
     ArrayList<String> args = new ArrayList<String>();
     if (aptOptions != null) {
       args.addAll(aptOptions);
@@ -76,7 +88,7 @@ public abstract class EnunciateTestCase {
     args.addAll(sourceFiles);
 
     int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
-    assertTrue(procCode == 0, "APT failed.");
+    assertTrue("APT failed.", procCode == 0);
   }
 
   /**
@@ -84,7 +96,7 @@ public abstract class EnunciateTestCase {
    *
    * @return The source file directory.
    */
-  protected File getSourceFileDirectory(String subdir) {
+  public static File getSourceFileDirectory(String subdir) {
     String srcDirPath = System.getProperty("enunciate.sample.src.dir");
     if (srcDirPath == null) {
       fail("The base directory for the sample source code must be specified in the 'enunciate.sample.src.dir' property.");
@@ -99,7 +111,7 @@ public abstract class EnunciateTestCase {
    * @param dir       The directory.
    * @param filenames The collection.
    */
-  private void findJavaFiles(File dir, Collection<String> filenames) {
+  private static void findJavaFiles(File dir, Collection<String> filenames) {
     File[] javaFiles = dir.listFiles(JAVA_FILTER);
     for (File javaFile : javaFiles) {
       filenames.add(javaFile.getAbsolutePath());

@@ -7,46 +7,43 @@ import net.sf.enunciate.contract.EnunciateContractTestCase;
 import net.sf.enunciate.contract.jaxws.EndpointImplementation;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.WebMethod;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import org.testng.annotations.Test;
 
 import java.util.Collection;
+
+import junit.framework.Test;
 
 /**
  * @author Ryan Heaton
  */
 public class TestDefaultValidator extends EnunciateContractTestCase {
 
-  @Test
   public void testEndpointInterfaceValidity() throws Exception {
     DefaultValidator validator = new DefaultValidator();
 
     //test validation of JSR 181, secion 3.3
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
     EndpointInterface ei = new EndpointInterface(declaration);
-    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "A class not annotated with @WebService shouldn't be a valid endpoint interface (jsr 181: 3.3).");
+    assertTrue("A class not annotated with @WebService shouldn't be a valid endpoint interface (jsr 181: 3.3).", validator.validateEndpointInterface(ei).hasErrors());
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.InvalidEIReference");
     ei = new EndpointInterface(declaration);
-    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint implementation with an ei reference to another class shouldn't be valid.");
+    assertTrue("An endpoint implementation with an ei reference to another class shouldn't be valid.", validator.validateEndpointInterface(ei).hasErrors());
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.UnknownEIReference");
     ei = new EndpointInterface(declaration);
-    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint implementation with an ei reference to something unknown shouldn't be valid.");
+    assertTrue("An endpoint implementation with an ei reference to something unknown shouldn't be valid.", validator.validateEndpointInterface(ei).hasErrors());
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.InterfaceSpecifiedAsImplementation");
     //if an interface is specified as an implementation, it's still an endpoint interface, just not a valid one.
     ei = new EndpointInterface(declaration);
-    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An interface declaration shouldn't be allowed to specify another endpoint interface (jsr 181: 3.3).");
+    assertTrue("An interface declaration shouldn't be allowed to specify another endpoint interface (jsr 181: 3.3).", validator.validateEndpointInterface(ei).hasErrors());
 
     declaration = getDeclaration("net.sf.enunciate.samples.services.WebServiceWithoutUniqueMethodNames");
     //an unknown ei reference is correct, but not valid.
     ei = new EndpointInterface(declaration);
-    assertTrue(validator.validateEndpointInterface(ei).hasErrors(), "An endpoint without unique web method names shouldn't be valid.");
+    assertTrue("An endpoint without unique web method names shouldn't be valid.", validator.validateEndpointInterface(ei).hasErrors());
   }
 
-  @Test
   public void testEndpointImplementationValidity() throws Exception {
     DefaultValidator validator = new DefaultValidator();
 
@@ -55,12 +52,12 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
     ClassDeclaration declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.NotAWebService");
     EndpointImplementation impl = new EndpointImplementation(declaration, ei) {
     };
-    assertTrue(validator.validateEndpointImplementation(impl).hasErrors(), "A class not annotated with @WebService shouldn't be seen as an endpoint implementation.");
+    assertTrue("A class not annotated with @WebService shouldn't be seen as an endpoint implementation.", validator.validateEndpointImplementation(impl).hasErrors());
 
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.InvalidEIReference");
     impl = new EndpointImplementation(declaration, ei) {
     };
-    assertTrue(validator.validateEndpointImplementation(impl).hasErrors(), "A class referencing an ei should be required to implement it.");
+    assertTrue("A class referencing an ei should be required to implement it.", validator.validateEndpointImplementation(impl).hasErrors());
 
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebServiceImpl");
     impl = new EndpointImplementation(declaration, ei) {
@@ -68,7 +65,6 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
     assertFalse(validator.validateEndpointImplementation(impl).hasErrors());
   }
 
-  @Test
   public void testWebMethodValidity() throws Exception {
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples")) {
       @Override
@@ -128,17 +124,21 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
     }
 
     DefaultValidator validator = new DefaultValidator();
-    assertTrue(validator.validateWebMethod(privateMethod).hasErrors(), "A private method shouldn't be a web method.");
-    assertTrue(validator.validateWebMethod(protectedMethod).hasErrors(), "A protected method shouldn't be a web method.");
-    assertTrue(validator.validateWebMethod(excludedMethod).hasErrors(), "An excluded method shouldn't be a web method.");
-    assertTrue(validator.validateWebMethod(nonVoidOneWayMethod).hasErrors(), "A one-way non-void web method shouldn't be valid.");
-    assertTrue(validator.validateWebMethod(exceptionThrowingOneWayMethod).hasErrors(), "An exception-throwing one-way method shouldn't be valid.");
+    assertTrue("A private method shouldn't be a web method.", validator.validateWebMethod(privateMethod).hasErrors());
+    assertTrue("A protected method shouldn't be a web method.", validator.validateWebMethod(protectedMethod).hasErrors());
+    assertTrue("An excluded method shouldn't be a web method.", validator.validateWebMethod(excludedMethod).hasErrors());
+    assertTrue("A one-way non-void web method shouldn't be valid.", validator.validateWebMethod(nonVoidOneWayMethod).hasErrors());
+    assertTrue("An exception-throwing one-way method shouldn't be valid.", validator.validateWebMethod(exceptionThrowingOneWayMethod).hasErrors());
     //todo: support rpc methods
     //assertTrue(validator.validate(rpcBareMethod).hasErrors(), "An rpc/bare method shouldn't be valid.");
-    assertTrue(validator.validateWebMethod(docBare2ParamMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 params.");
-    assertTrue(validator.validateWebMethod(docBare2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
-    assertFalse(validator.validateWebMethod(docBareWithHeadersMethod).hasErrors(), "A doc/bare method should be allowed to have headers.");
-    assertFalse(validator.validateWebMethod(docBareVoidMethod).hasErrors(), "A doc/bare void method should be valid.");
-    assertTrue(validator.validateWebMethod(docBareVoid2OutputMethod).hasErrors(), "A doc/bare method shouldn't be valid if it has 2 outputs.");
+    assertTrue("A doc/bare method shouldn't be valid if it has 2 params.", validator.validateWebMethod(docBare2ParamMethod).hasErrors());
+    assertTrue("A doc/bare method shouldn't be valid if it has 2 outputs.", validator.validateWebMethod(docBare2OutputMethod).hasErrors());
+    assertFalse("A doc/bare method should be allowed to have headers.", validator.validateWebMethod(docBareWithHeadersMethod).hasErrors());
+    assertFalse("A doc/bare void method should be valid.", validator.validateWebMethod(docBareVoidMethod).hasErrors());
+    assertTrue("A doc/bare method shouldn't be valid if it has 2 outputs.", validator.validateWebMethod(docBareVoid2OutputMethod).hasErrors());
+  }
+
+  public static Test suite() {
+    return createSuite(TestDefaultValidator.class);
   }
 }
