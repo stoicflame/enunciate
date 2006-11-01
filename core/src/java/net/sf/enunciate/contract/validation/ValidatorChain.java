@@ -19,7 +19,6 @@ public class ValidatorChain implements Validator {
   private final ArrayList<Validator> validators = new ArrayList<Validator>();
 
   public ValidatorChain() {
-    validators.add(new DefaultValidator());
   }
 
   /**

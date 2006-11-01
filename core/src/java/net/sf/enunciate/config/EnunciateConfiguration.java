@@ -29,6 +29,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String label = "enunciate";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
+  private final Map<String, String> namespaces = new HashMap<String, String>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -88,6 +89,25 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setValidator(Validator validator) {
     this.validator = validator;
+  }
+
+  /**
+   * Configures a namespace for the specified prefix.
+   *
+   * @param namespace The namespace.
+   * @param prefix The prefix.
+   */
+  public void putNamespace(String namespace, String prefix) {
+    this.namespaces.put(namespace, prefix);
+  }
+
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @return The map of namespaces to prefixes.
+   */
+  public Map<String, String> getNamespacesToPrefixes() {
+    return this.namespaces;
   }
 
   /**
@@ -157,9 +177,12 @@ public class EnunciateConfiguration implements ErrorHandler {
 
     //allow a validator to be configured.
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
-    digester.addSetNext("enunciate/validator", "validator");
+    digester.addSetNext("enunciate/validator", "setValidator");
 
-    //todo: add the rules for the namespaces elements.
+    //allow for namespace prefixes to be specified in the config file.
+    digester.addCallMethod("enunciate/namespaces/namespace", "putNamespace", 2);
+    digester.addCallParam("enunciate/namespaces/namespace", 0, "uri");
+    digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
 
     //set up explicit custom module configuration.
     digester.addObjectCreate("enunciate/modules/custom", "class", BasicDeploymentModule.class);

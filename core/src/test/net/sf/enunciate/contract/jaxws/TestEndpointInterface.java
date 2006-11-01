@@ -1,7 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.contract.EnunciateContractTestCase;
+import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.contract.validation.ValidationException;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ import junit.framework.Test;
  *
  * @author Ryan Heaton
  */
-public class TestEndpointInterface extends EnunciateContractTestCase {
+public class TestEndpointInterface extends InAPTTestCase {
 
   public void testTargetNamespace() throws Exception {
     TypeDeclaration declaration = getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService");

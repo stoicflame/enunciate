@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<enunciate xmlns="http://enunciate.sf.net" label="TestEnunciateConfiguration">
+  <some-invalid-element/>
+  <validator class="net.sf.enunciate.config.MockValidator"/>
+  <namespaces>
+    <namespace id="pre1" uri="urn:net.sf.enunciate.config.TestEnunciateConfiguration.pre1"/>
+    <namespace id="pre2" uri="urn:net.sf.enunciate.config.TestEnunciateConfiguration.pre2"/>
+    <namespace id="pre3" uri="urn:net.sf.enunciate.config.TestEnunciateConfiguration.pre3"/>
+  </namespaces>
+</enunciate>

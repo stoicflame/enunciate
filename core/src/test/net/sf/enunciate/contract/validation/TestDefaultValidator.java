@@ -3,7 +3,7 @@ package net.sf.enunciate.contract.validation;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import net.sf.enunciate.contract.EnunciateContractTestCase;
+import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.contract.jaxws.EndpointImplementation;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.jaxws.WebMethod;
@@ -15,7 +15,7 @@ import junit.framework.Test;
 /**
  * @author Ryan Heaton
  */
-public class TestDefaultValidator extends EnunciateContractTestCase {
+public class TestDefaultValidator extends InAPTTestCase {
 
   public void testEndpointInterfaceValidity() throws Exception {
     DefaultValidator validator = new DefaultValidator();
@@ -78,8 +78,7 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
     WebMethod excludedMethod = null;
     WebMethod nonVoidOneWayMethod = null;
     WebMethod exceptionThrowingOneWayMethod = null;
-    //todo: support rpc methods
-    //WebMethod rpcBareMethod = null;
+    WebMethod rpcBareMethod = null;
     WebMethod docBare2ParamMethod = null;
     WebMethod docBare2OutputMethod = null;
     WebMethod docBareWithHeadersMethod = null;
@@ -102,10 +101,9 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
       if ("exceptionThrowingOneWayMethod".equals(webMethod.getSimpleName())) {
         exceptionThrowingOneWayMethod = webMethod;
       }
-      //todo: support rpc methods
-      //if ("rpcBareMethod".equals(webMethod.getSimpleName())) {
-      //  rpcBareMethod = webMethod;
-      //}
+      if ("rpcBareMethod".equals(webMethod.getSimpleName())) {
+        rpcBareMethod = webMethod;
+      }
       if ("docBare2ParamMethod".equals(webMethod.getSimpleName())) {
         docBare2ParamMethod = webMethod;
       }
@@ -129,8 +127,7 @@ public class TestDefaultValidator extends EnunciateContractTestCase {
     assertTrue("An excluded method shouldn't be a web method.", validator.validateWebMethod(excludedMethod).hasErrors());
     assertTrue("A one-way non-void web method shouldn't be valid.", validator.validateWebMethod(nonVoidOneWayMethod).hasErrors());
     assertTrue("An exception-throwing one-way method shouldn't be valid.", validator.validateWebMethod(exceptionThrowingOneWayMethod).hasErrors());
-    //todo: support rpc methods
-    //assertTrue(validator.validate(rpcBareMethod).hasErrors(), "An rpc/bare method shouldn't be valid.");
+    assertTrue("An rpc/bare method shouldn't be valid.", validator.validateWebMethod(rpcBareMethod).hasErrors());
     assertTrue("A doc/bare method shouldn't be valid if it has 2 params.", validator.validateWebMethod(docBare2ParamMethod).hasErrors());
     assertTrue("A doc/bare method shouldn't be valid if it has 2 outputs.", validator.validateWebMethod(docBare2OutputMethod).hasErrors());
     assertFalse("A doc/bare method should be allowed to have headers.", validator.validateWebMethod(docBareWithHeadersMethod).hasErrors());

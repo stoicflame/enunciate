@@ -1,4 +1,4 @@
-package net.sf.enunciate.contract;
+package net.sf.enunciate;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
@@ -18,20 +18,27 @@ import junit.framework.TestSuite;
 import junit.framework.TestResult;
 
 /**
- * Base test case for contract.
+ * A test case that invokes itself within APT.
  * <p/>
  * <i>NOTE: This class is NOT thread-safe!</i>
  *
  * @author Ryan Heaton
  */
-public abstract class EnunciateContractTestCase extends TestCase {
+public abstract class InAPTTestCase extends TestCase {
 
   private static boolean IN_APT = false;
 
+  /**
+   * Runs itself within APT.
+   */
   @Override
   public final void runBare() throws Throwable {
-    if (!IN_APT) {
-      final EnunciateContractTestCase testCase = this;
+    boolean wrapInAPT = !IN_APT;
+
+    wrapInAPT &= getClass().getMethod(getName()).getAnnotation(OutsideAPTOkay.class) == null;
+
+    if (wrapInAPT) {
+      final InAPTTestCase testCase = this;
       APFInternal processorFactory = new APFInternal() {
         protected void processInternal() throws Throwable {
           testCase.setUp();
@@ -86,7 +93,7 @@ public abstract class EnunciateContractTestCase extends TestCase {
    * @param clazz The class for which to create a test suite.
    * @return The test suite.
    */
-  public static Test createSuite(Class<? extends EnunciateContractTestCase> clazz) {
+  public static Test createSuite(Class<? extends InAPTTestCase> clazz) {
     final TestSuite testSuite = new TestSuite(clazz);
     return new Test() {
       public int countTestCases() {
@@ -141,9 +148,9 @@ public abstract class EnunciateContractTestCase extends TestCase {
 
     public void process() {
       try {
-        EnunciateContractTestCase.IN_APT = true;
+        InAPTTestCase.IN_APT = true;
         processInternal();
-        EnunciateContractTestCase.IN_APT = false;
+        InAPTTestCase.IN_APT = false;
       }
       catch (Throwable throwable) {
         this.throwable = throwable;

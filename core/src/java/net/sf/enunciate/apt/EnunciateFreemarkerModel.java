@@ -3,6 +3,7 @@ package net.sf.enunciate.apt;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
@@ -29,11 +30,11 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
   private static final Comparator<ClassDeclaration> CLASS_COMPARATOR = new ClassDeclarationComparator();
 
-  private int prefixIndex = 0;
-  private final Map<String, String> namespacesToPrefixes;
-  private final Map<String, SchemaInfo> namespacesToSchemas;
-  private final Map<String, WsdlInfo> namespacesToWsdls;
-  private final Map<String, XmlTypeMirror> knownTypes;
+  int prefixIndex = 0;
+  final Map<String, String> namespacesToPrefixes;
+  final Map<String, SchemaInfo> namespacesToSchemas;
+  final Map<String, WsdlInfo> namespacesToWsdls;
+  final Map<String, XmlTypeMirror> knownTypes;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
@@ -265,8 +266,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           return knownTypes.get(declaration.getQualifiedName());
         }
         else {
-          //not known, check the specified types.
-          Map<String, XmlTypeMirror> specifiedTypes = new Schema(declaration.getPackage()).getSpecifiedTypes();
+          //not known, check the specified types for the package.
+          Map<String, XmlTypeMirror> specifiedTypes = getSpecifiedTypes(declaration.getPackage());
           if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
             return specifiedTypes.get(declaration.getQualifiedName());
           }
@@ -274,7 +275,27 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       }
     }
 
+    return createXmlType(type);
+  }
+
+  /**
+   * Creates an xml type from a type mirror.
+   *
+   * @param type The type to use to create the xml type.
+   * @return The created xml type.
+   */
+  protected XmlTypeMirror createXmlType(TypeMirror type) throws XmlTypeException {
     return XmlTypeDecorator.decorate(type);
+  }
+
+  /**
+   * Gets the specified types for a given package.
+   *
+   * @param pckg The package.
+   * @return The specified types for the package.
+   */
+  protected Map<String, XmlTypeMirror> getSpecifiedTypes(PackageDeclaration pckg) {
+    return new Schema(pckg).getSpecifiedTypes();
   }
 
   /**
@@ -296,7 +317,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
-   * Find the type definition for a class given the class's declaration, or null if the class is xml transient.
+   * Find the type definition for a class given the class's declaration, or null if the class hasn't been added to the model.
    *
    * @param declaration The declaration.
    * @return The type definition.
@@ -314,7 +335,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Find the root element declaration for the specified class.
    *
    * @param declaration The class declaration
-   * @return The root element declaration.
+   * @return The root element declaration, or null if the declaration hasn't been added to the model.
    */
   public RootElementDeclaration findRootElementDeclaration(ClassDeclaration declaration) {
     int index = Collections.binarySearch(this.rootElements, declaration, CLASS_COMPARATOR);

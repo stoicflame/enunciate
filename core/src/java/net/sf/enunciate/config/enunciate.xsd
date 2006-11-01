@@ -3,8 +3,7 @@
            targetNamespace="http://enunciate.sf.net"
            xmlns:enunciate="http://enunciate.sf.net"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified"
-           attributeFormDefault="qualified">
+           elementFormDefault="qualified">
 
   <xs:element name="enunciate">
 
@@ -20,6 +19,7 @@
         <xs:element name="namespaces" type="enunciate:namespaces" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="enunciate:modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
+      <xs:attribute name="label"/>
     </xs:complexType>
 
   </xs:element>
@@ -66,10 +66,11 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <!--The element 'custom' is recognized as defined below, but uncommenting below would cause ambiguity with schema validation.-->
+      <!-- xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/ -->
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
-    </xs:choice>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="custom-module">
@@ -81,7 +82,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:any/>
+      <xs:any minOccurs="0" maxOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="class" use="required"/>
     <xs:anyAttribute/>

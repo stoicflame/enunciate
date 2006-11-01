@@ -59,12 +59,12 @@ public class EnunciateTestUtil {
   /**
    * Get a list of all java files in the specified directory.
    *
-   * @param subdir The subdir.
+   * @param dir The directory in which to scan for java files.
    * @return The list of all java files in the specified directory.
    */
-  public static List<String> getAllJavaFiles(File subdir) {
+  public static List<String> getAllJavaFiles(File dir) {
     ArrayList<String> sourceFiles = new ArrayList<String>();
-    findJavaFiles(subdir, sourceFiles);
+    findJavaFiles(dir, sourceFiles);
     return sourceFiles;
   }
 
@@ -87,12 +87,12 @@ public class EnunciateTestUtil {
 
     args.addAll(sourceFiles);
 
-    int procCode = com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
-    assertTrue("APT failed.", procCode == 0);
+    com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
   }
 
   /**
-   * Get the source file directory given the specified subdirectory name relative to the base directory.
+   * Get the source file directory given the specified subdirectory name relative to
+   * the base directory, specified by the system property 'enunciate.sample.src.dir'.
    *
    * @return The source file directory.
    */

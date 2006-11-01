@@ -1,6 +1,6 @@
 package net.sf.enunciate.contract.jaxws;
 
-import net.sf.enunciate.contract.EnunciateContractTestCase;
+import net.sf.enunciate.InAPTTestCase;
 
 import java.util.Collection;
 
@@ -9,7 +9,7 @@ import junit.framework.Test;
 /**
  * @author Ryan Heaton
  */
-public class TestWebMethod extends EnunciateContractTestCase {
+public class TestWebMethod extends InAPTTestCase {
 
   public void testName() throws Exception {
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples"));

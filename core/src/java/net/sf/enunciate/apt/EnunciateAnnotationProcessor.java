@@ -75,6 +75,13 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
   }
 
+  /**
+   * Getting the root model pulls all endpoint interfaces and schema types out of the source
+   * base, adds the classes specified to be included, and adds them to the model, then validates
+   * the model.
+   *
+   * @return The root model.
+   */
   @Override
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
@@ -116,8 +123,27 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
+    //override any namespace prefix mappings as specified in the config.
+    for (String ns : this.config.getNamespacesToPrefixes().keySet()) {
+      model.getNamespacesToPrefixes().put(ns, this.config.getNamespacesToPrefixes().get(ns));
+    }
+
     //todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
 
+    validate(model);
+
+    return model;
+  }
+
+  /**
+   * Validate the model. This action uses the validator specified in the config as well as any
+   * module-specific validators.  Errors and warnings are printed using the APT messager.
+   *
+   * @param model The model to validate.
+   * @throws ModelValidationException If any validation errors are encountered.
+   */
+  protected void validate(EnunciateFreemarkerModel model) throws ModelValidationException {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     ValidatorChain validator = new ValidatorChain();
     validator.addValidator(this.config.getValidator());
     for (DeploymentModule module : this.config.getEnabledModules()) {
@@ -142,8 +168,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
       throw new ModelValidationException();
     }
-
-    return model;
   }
 
   //Inherited.
