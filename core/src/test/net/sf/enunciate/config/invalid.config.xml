@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<enunciate xmlns="http://enunciate.sf.net" label="TestEnunciateConfiguration">
+<enunciate label="TestEnunciateConfiguration">
   <some-invalid-element/>
   <validator class="net.sf.enunciate.config.MockValidator"/>
   <namespaces>

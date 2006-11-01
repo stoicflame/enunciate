@@ -8,15 +8,12 @@ import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.util.ClassDeclarationComparator;
-import net.sf.enunciate.EnunciateException;
-import net.sf.enunciate.main.Enunciate;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.Collection;
 
 /**
  * Deployment module for the XML schemas and WSDL.
@@ -31,14 +28,6 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public String getName() {
     return "jaxws";
-  }
-
-  /**
-   * @return "http://enunciate.sf.net"
-   */
-  @Override
-  public String getNamespace() {
-    return "http://enunciate.sf.net";
   }
 
   @Override

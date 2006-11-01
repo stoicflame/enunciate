@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema version="1.0"
-           targetNamespace="http://enunciate.sf.net"
-           xmlns:enunciate="http://enunciate.sf.net"
-           xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified">
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
 
   <xs:element name="enunciate">
 
@@ -15,9 +11,9 @@
 
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="validator" type="enunciate:validator" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="namespaces" type="enunciate:namespaces" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="modules" type="enunciate:modules" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute name="label"/>
     </xs:complexType>
@@ -44,7 +40,7 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="namespace" type="enunciate:namespace" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="namespace" type="namespace" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -67,25 +63,8 @@
     </xs:annotation>
 
     <xs:sequence minOccurs="0" maxOccurs="unbounded">
-      <!--The element 'custom' is recognized as defined below, but uncommenting below would cause ambiguity with schema validation.-->
-      <!-- xs:element name="custom" type="enunciate:custom-module" minOccurs="0" maxOccurs="unbounded"/ -->
       <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="custom-module">
-    <xs:annotation>
-      <xs:documentation>
-        A custom enunciate module. The "class" attribute must be the fqn of the custom module
-        that implements net.sf.enunciate.modules.DeploymentModule.
-      </xs:documentation>
-    </xs:annotation>
-
-    <xs:sequence>
-      <xs:any minOccurs="0" maxOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="class" use="required"/>
-    <xs:anyAttribute/>
   </xs:complexType>
 
 </xs:schema>

@@ -1,13 +1,13 @@
 package net.sf.enunciate;
 
-import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.modules.BasicDeploymentModule;
 
 import java.io.IOException;
 
 /**
  * This deployment module is used to run the tests that depend on the sample source code.
- * 
+ *
  * @author Ryan Heaton
  */
 public class EnunciateTestDeploymentModule extends BasicDeploymentModule {
@@ -15,11 +15,6 @@ public class EnunciateTestDeploymentModule extends BasicDeploymentModule {
   @Override
   public String getName() {
     return "enunciate-test";
-  }
-
-  @Override
-  public String getNamespace() {
-    return "http://enunciate.sf.net";
   }
 
   @Override

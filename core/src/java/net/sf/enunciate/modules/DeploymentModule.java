@@ -16,20 +16,11 @@ import java.io.IOException;
 public interface DeploymentModule {
 
   /**
-   * The name of the deployment module.  Along with the {@link #getNamespace(), namespace} identifies
-   * its section in the enunciate configuration.
+   * The name of the deployment module.  Identifies its section in the enunciate configuration.
    *
    * @return The name of the deployment module.
    */
   String getName();
-
-  /**
-   * The namespace for this deployment module.  Along with the {@link #getName(), name} identifies
-   * its section in the enunciate configuration.
-   *
-   * @return The namespace for this module.
-   */
-  String getNamespace();
 
   /**
    * Get the validator for this module, or null if none.
@@ -71,4 +62,12 @@ public interface DeploymentModule {
    */
   int getOrder();
 
+  /**
+   * Whether this deployment module has been disabled, e.g. in the config file.  Since the
+   * discovery mechanism is used to discover the modules on the classpath, it may be necessary
+   * to be able to disable a module.
+   *
+   * @return Whether this deployment module has been disabled.
+   */
+  boolean isDisabled();
 }

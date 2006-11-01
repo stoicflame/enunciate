@@ -1,21 +1,19 @@
-do schema generation (jaxb)
-put in wsdl/schema documentation from javadocs
-generate client code
-  Java 5
-  Java 1.3+
+Modules:
+  HTML Docs
+  REST
   .NET
-  C++
-support an enunciate.xml config file:
+  C/C++
+  AJAX/Javascript
+  Axis 2
+  Mule (ESB)
+  WS-*
+  SMTP Transport
+  Jabber/IM Transport
+  Messaging
+Config options:
   soap endpoint addresses
-  namespace2prefix map
-  namespace2schema file map
-  namespace2wsdl file map
-  package-mapping
-  option to not inline request/response wrappers into the wsdl.
-  schema docs?
-support a deployment mechanism
-  generate the RESTful endpoint mechanism as needed
-support rpc-style web services
-support XmlTypeAdapter
-support in/out, out parameters
-tests, tests, tests!!!!!
+  Option to not inline request/response wrappers into the wsdl.
+Additional Features:
+  XFire: support RPC/Literal
+  @XmlTypeAdapter Support
+  Support IN/OUT, OUT parameters

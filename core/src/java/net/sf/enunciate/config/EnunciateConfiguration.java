@@ -2,7 +2,6 @@ package net.sf.enunciate.config;
 
 import net.sf.enunciate.contract.validation.DefaultValidator;
 import net.sf.enunciate.contract.validation.Validator;
-import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.modules.DeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
@@ -95,7 +94,7 @@ public class EnunciateConfiguration implements ErrorHandler {
    * Configures a namespace for the specified prefix.
    *
    * @param namespace The namespace.
-   * @param prefix The prefix.
+   * @param prefix    The prefix.
    */
   public void putNamespace(String namespace, String prefix) {
     this.namespaces.put(namespace, prefix);
@@ -137,13 +136,9 @@ public class EnunciateConfiguration implements ErrorHandler {
     ArrayList<DeploymentModule> enabledModules = new ArrayList<DeploymentModule>();
 
     for (DeploymentModule module : getAllModules()) {
-      if (module instanceof BasicDeploymentModule) {
-        if (((BasicDeploymentModule) module).isDisabled()) {
-          continue;
-        }
+      if (!module.isDisabled()) {
+        enabledModules.add(module);
       }
-
-      enabledModules.add(module);
     }
 
     return enabledModules;
@@ -164,12 +159,10 @@ public class EnunciateConfiguration implements ErrorHandler {
    * @param in The stream.
    */
   public void load(InputStream in) throws IOException, SAXException {
-    Digester digester = new Digester();
+    Digester digester = createDigester();
     digester.setErrorHandler(this);
     digester.setValidating(true);
     digester.setSchema(EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
-    digester.setNamespaceAware(true);
-    digester.setRuleNamespaceURI("http://enunciate.sf.net");
     digester.push(this);
 
     //set any root-level attributes
@@ -184,14 +177,8 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/namespaces/namespace", 0, "uri");
     digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
 
-    //set up explicit custom module configuration.
-    digester.addObjectCreate("enunciate/modules/custom", "class", BasicDeploymentModule.class);
-    digester.addSetProperties("enunciate/modules/custom");
-    digester.addSetNext("enunciate/modules/custom", "addModule");
-
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {
-      digester.setRuleNamespaceURI(module.getNamespace());
       String pattern = String.format("enunciate/modules/%s", module.getName());
       digester.addRule(pattern, new PushModuleRule(module));
       digester.addSetProperties(pattern);
@@ -202,6 +189,15 @@ public class EnunciateConfiguration implements ErrorHandler {
     }
 
     digester.parse(in);
+  }
+
+  /**
+   * Create the digester.
+   *
+   * @return The digester that was created.
+   */
+  protected Digester createDigester() {
+    return new Digester();
   }
 
   /**

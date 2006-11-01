@@ -57,14 +57,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     return "xfire-client";
   }
 
-  /**
-   * @return "http://enunciate.sf.net"
-   */
-  @Override
-  public String getNamespace() {
-    return "http://enunciate.sf.net";
-  }
-
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();

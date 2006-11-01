@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<enunciate>
+  <modules>
+    <module1 attribute="attribute1">
+      <element name="element1">value1</element>
+      <element name="element2">value2</element>
+      <element name="element3">value3</element>
+    </module1>
+    <module2 attribute="attribute2">
+      <element name="element4">value4</element>
+      <element name="element5">value5</element>
+      <element name="element6">value6</element>
+    </module2>
+  </modules>
+</enunciate>

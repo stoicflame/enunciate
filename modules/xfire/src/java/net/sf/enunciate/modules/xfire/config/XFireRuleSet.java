@@ -27,8 +27,4 @@ public class XFireRuleSet extends RuleSetBase {
     //todo: add rules for configuration of spring interceptors for the service bean?
   }
 
-  @Override
-  public String getNamespaceURI() {
-    return "http://enunciate.sf.net";
-  }
 }

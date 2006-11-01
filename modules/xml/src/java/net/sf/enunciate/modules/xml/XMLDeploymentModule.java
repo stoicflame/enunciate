@@ -1,7 +1,7 @@
 package net.sf.enunciate.modules.xml;
 
-import freemarker.template.TemplateException;
 import freemarker.template.ObjectWrapper;
+import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
@@ -38,14 +38,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public String getName() {
     return "xml";
-  }
-
-  /**
-   * @return "http://enunciate.sf.net"
-   */
-  @Override
-  public String getNamespace() {
-    return "http://enunciate.sf.net";
   }
 
   /**

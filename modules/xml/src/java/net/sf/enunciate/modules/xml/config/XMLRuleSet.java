@@ -23,8 +23,4 @@ public class XMLRuleSet extends RuleSetBase {
     digester.addSetNext("enunciate/modules/xml/wsdl", "addWsdlConfig");
   }
 
-  @Override
-  public String getNamespaceURI() {
-    return "http://enunciate.sf.net";
-  }
 }

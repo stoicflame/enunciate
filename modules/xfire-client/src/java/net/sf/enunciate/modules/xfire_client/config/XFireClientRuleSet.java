@@ -21,9 +21,4 @@ public class XFireClientRuleSet extends RuleSetBase {
     //todo: add rules for configuration of xfire in/out handlers?
 
   }
-
-  @Override
-  public String getNamespaceURI() {
-    return "http://enunciate.sf.net";
-  }
 }

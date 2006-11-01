@@ -46,14 +46,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return "http://enunciate.sf.net"
-   */
-  @Override
-  public String getNamespace() {
-    return "http://enunciate.sf.net";
-  }
-
-  /**
    * @return The URL to "xfire-servlet.fmt"
    */
   protected URL getXFireServletTemplateURL() {

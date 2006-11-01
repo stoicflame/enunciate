@@ -21,14 +21,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return "basic"
    */
   public String getName() {
-    return "basic";
-  }
-
-  /**
-   * @return null
-   */
-  public String getNamespace() {
-    return null;
+    return getClass().getSimpleName();
   }
 
   /**
@@ -38,11 +31,7 @@ public class BasicDeploymentModule implements DeploymentModule {
     return null;
   }
 
-  /**
-   * Whether this deployment module has been disabled.
-   *
-   * @return Whether this deployment module has been disabled.
-   */
+  // Inherited.
   public boolean isDisabled() {
     return disabled;
   }

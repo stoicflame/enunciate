@@ -1,27 +1,26 @@
 package net.sf.enunciate.apt;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.OutsideAPTOkay;
+import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.BaseValidator;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
-import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.modules.DeploymentModule;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Collection;
 import java.util.ArrayList;
-
-import junit.framework.Test;
-import junit.framework.AssertionFailedError;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.ClassDeclaration;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -63,7 +62,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     config.putNamespace("urn:test", "test");
     config.putNamespace("http://enunciate.sf.net/samples/contract", "tContract");
 
-    final boolean[] validated = new boolean[] {false};
+    final boolean[] validated = new boolean[]{false};
     EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(config) {
       @Override
       protected void validate(EnunciateFreemarkerModel model) {
@@ -139,7 +138,6 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     });
 
     config.addModule(new BasicDeploymentModule() {
-      @Override
       public String getName() {
         return "basic2";
       }

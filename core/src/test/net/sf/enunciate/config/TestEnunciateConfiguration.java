@@ -34,9 +34,23 @@ public class TestEnunciateConfiguration extends TestCase {
     }
 
     //validate the "module" element processing...
-    
-
-    //validate the explicit "custom-module" processing...
+    ArrayList<DeploymentModule> list = new ArrayList<DeploymentModule>();
+    DeploymentModuleOne module1 = new DeploymentModuleOne();
+    DeploymentModuleTwo module2 = new DeploymentModuleTwo();
+    list.add(module1);
+    list.add(module2);
+    config = new EnunciateConfiguration(list);
+    config.load(getClass().getResourceAsStream("module.config.xml"));
+    assertEquals("attribute1", module1.getAttribute());
+    assertEquals(3, module1.elementMap.size());
+    assertEquals("value1", module1.elementMap.get("element1"));
+    assertEquals("value2", module1.elementMap.get("element2"));
+    assertEquals("value3", module1.elementMap.get("element3"));
+    assertEquals("attribute2", module2.getAttribute());
+    assertEquals(3, module2.elementMap.size());
+    assertEquals("value4", module2.elementMap.get("element4"));
+    assertEquals("value5", module2.elementMap.get("element5"));
+    assertEquals("value6", module2.elementMap.get("element6"));
 
   }
 
