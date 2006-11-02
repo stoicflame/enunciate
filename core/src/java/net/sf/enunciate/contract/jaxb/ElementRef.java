@@ -5,6 +5,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
@@ -126,19 +127,30 @@ public class ElementRef extends Element {
   protected RootElementDeclaration loadRef() {
     TypeDeclaration declaration = null;
     String elementDeclaration;
-    RootElementDeclaration refElement;
-    if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
-      declaration = getEnv().getTypeDeclaration(xmlElementRef.type().getName());
-      elementDeclaration = xmlElementRef.type().getName();
+    try {
+      if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
+        Class typeClass = xmlElementRef.type();
+        elementDeclaration = typeClass.getName();
+        declaration = getEnv().getTypeDeclaration(typeClass.getName());
+      }
+      else {
+        TypeMirror accessorType = isCollectionType() ? getCollectionItemType() : getAccessorType();
+        elementDeclaration = accessorType.toString();
+        if (accessorType instanceof DeclaredType) {
+          declaration = ((DeclaredType) accessorType).getDeclaration();
+        }
+      }
     }
-    else {
-      TypeMirror accessorType = isCollectionType() ? getCollectionItemType() : getAccessorType();
-      elementDeclaration = accessorType.toString();
-      if (accessorType instanceof DeclaredType) {
-        declaration = ((DeclaredType) accessorType).getDeclaration();
+    catch (MirroredTypeException e) {
+      //This exception implies the ref is within the source base.
+      TypeMirror typeMirror = e.getTypeMirror();
+      elementDeclaration = typeMirror.toString();
+      if (typeMirror instanceof DeclaredType) {
+        declaration = ((DeclaredType) typeMirror).getDeclaration();
       }
     }
 
+    RootElementDeclaration refElement;
     if ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(XmlRootElement.class) != null)) {
       ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
       refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));

@@ -1,7 +1,7 @@
 package net.sf.enunciate.samples.anotherschema;
 
-import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton
@@ -21,7 +21,9 @@ public class SimpleTypeComplexContentBean {
     this.property1 = property1;
   }
 
-  @XmlAttribute
+  @XmlAttribute (
+    namespace = "urn:SimpleTypeComplexContentBean.Property2"
+  )
   public String getProperty2() {
     return property2;
   }
@@ -30,7 +32,9 @@ public class SimpleTypeComplexContentBean {
     this.property2 = property2;
   }
 
-  @XmlAttribute
+  @XmlAttribute (
+    namespace = "urn:SimpleTypeComplexContentBean.Property3"
+  )
   public boolean isProperty3() {
     return property3;
   }

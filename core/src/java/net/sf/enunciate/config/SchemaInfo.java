@@ -183,9 +183,6 @@ public class SchemaInfo {
         schemas.add(schema);
       }
       else {
-        // if it's not a schema we know about, we're going to leave the schemaLocation empty, giving no hints as
-        // to where to find the definitions of referenced components.  Not illegal according to XML-Schema, but
-        // probably not a good idea.
         SchemaInfo schemaInfo = new SchemaInfo();
         schemaInfo.setNamespace(ns);
         schemas.add(schemaInfo);

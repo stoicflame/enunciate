@@ -77,9 +77,12 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     for (SchemaInfo schemaInfo : ns2schema.values()) {
       //make sure each schema has a "file" and a "location" property.
-      String file = ns2prefix.get(schemaInfo.getNamespace()) + ".xsd";
-      schemaInfo.setProperty("file", file);
-      schemaInfo.setProperty("location", file);
+      String prefix = ns2prefix.get(schemaInfo.getNamespace());
+      if (prefix != null) {
+        String file = prefix + ".xsd";
+        schemaInfo.setProperty("file", file);
+        schemaInfo.setProperty("location", file);
+      }
     }
 
     for (WsdlInfo wsdlInfo : ns2wsdl.values()) {

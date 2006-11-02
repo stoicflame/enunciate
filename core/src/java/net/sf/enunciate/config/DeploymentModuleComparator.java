@@ -12,7 +12,7 @@ import java.util.Comparator;
 public class DeploymentModuleComparator implements Comparator<DeploymentModule> {
 
   /**
-   * Compares modules by order, then by namespace, then by name.
+   * Compares modules by order, then by name.
    *
    * @param module1 The first module.
    * @param module2 The second module.

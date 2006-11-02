@@ -3,12 +3,14 @@ package net.sf.enunciate.contract.validation;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.InterfaceType;
+import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.*;
+import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -18,7 +20,6 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeSet;
@@ -286,20 +287,37 @@ public class DefaultValidator implements Validator {
         result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
       }
 
-      Class factoryClass = xmlType.factoryClass();
+      String factoryClassFqn = null;
+      try {
+        Class factoryClass = xmlType.factoryClass();
+        if (factoryClass != XmlType.DEFAULT.class) {
+          factoryClassFqn = factoryClass.getName();
+        }
+      }
+      catch (MirroredTypeException e) {
+        TypeMirror typeMirror = e.getTypeMirror();
+        if (!(typeMirror instanceof DeclaredType)) {
+          result.addError(typeDef.getPosition(), "Unrecognized type : " + typeMirror);
+        }
+        factoryClassFqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
+      }
+
       String factoryMethod = xmlType.factoryMethod();
 
-      if ((factoryClass != XmlType.DEFAULT.class) || (!"".equals(factoryMethod))) {
+      if ((factoryClassFqn != null) || (!"".equals(factoryMethod))) {
         needsNoArgConstructor = false;
-        try {
-          Method method = factoryClass.getMethod(factoryMethod);
-          if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
-            //todo: is this really a requirement?
-            result.addError(typeDef.getPosition(), "'" + factoryMethod + "' must be a static, no-arg method on '" + factoryClass.getName() + "'.");
+        TypeDeclaration factoryDeclaration = Context.getCurrentEnvironment().getTypeDeclaration(factoryClassFqn);
+        Collection<? extends MethodDeclaration> methods = factoryDeclaration.getMethods();
+        boolean methodFound = false;
+        for (MethodDeclaration method : methods) {
+          if ((method.getSimpleName().equals(factoryMethod)) && (method.getParameters().size() == 0) && (method.getModifiers().contains(Modifier.STATIC))) {
+            methodFound = true;
+            break;
           }
         }
-        catch (NoSuchMethodException e) {
-          result.addError(typeDef.getPosition(), "Unknown factory method '" + factoryMethod + "' on class '" + factoryClass.getName() + "'.");
+
+        if (!methodFound) {
+          result.addError(typeDef.getPosition(), "A static, parameterless factory method named " + factoryMethod + " was not found on " + factoryClassFqn);
         }
       }
       else if (typeDef.getAnnotation(XmlJavaTypeAdapter.class) != null) {
@@ -377,16 +395,26 @@ public class DefaultValidator implements Validator {
 
     XmlSchemaType schemaType = schema.getAnnotation(XmlSchemaType.class);
     if (schemaType != null) {
-      if (schemaType.type() == XmlSchemaType.DEFAULT.class) {
-        result.addError(schema.getPosition(), "A type must be specified at the package-level for @XmlSchemaType.");
+      try {
+        if (schemaType.type() == XmlSchemaType.DEFAULT.class) {
+          result.addError(schema.getPosition(), "A type must be specified at the package-level for @XmlSchemaType.");
+        }
+      }
+      catch (MirroredTypeException e) {
+        //fall through.  Implies the type was set.
       }
     }
 
     XmlSchemaTypes schemaTypes = schema.getAnnotation(XmlSchemaTypes.class);
     if (schemaTypes != null) {
       for (XmlSchemaType xmlSchemaType : schemaTypes.value()) {
-        if (xmlSchemaType.type() == XmlSchemaType.DEFAULT.class) {
-          result.addError(schema.getPosition(), "A type must be specified at the package-level for all types of @XmlSchemaTypes.");
+        try {
+          if (xmlSchemaType.type() == XmlSchemaType.DEFAULT.class) {
+            result.addError(schema.getPosition(), "A type must be specified at the package-level for all types of @XmlSchemaTypes.");
+          }
+        }
+        catch (MirroredTypeException e) {
+          //fall through.  Implies the type was set.
         }
       }
     }

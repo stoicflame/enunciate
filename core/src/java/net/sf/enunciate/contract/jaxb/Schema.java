@@ -1,6 +1,9 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.MirroredTypeException;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxb.types.SpecifiedXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
@@ -130,11 +133,23 @@ public class Schema extends DecoratedPackageDeclaration {
       }
 
       for (XmlSchemaType specifiedType : allSpecifiedTypes) {
-        if (specifiedType.type() == XmlSchemaType.DEFAULT.class) {
-          throw new ValidationException(getPosition(), "A type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+        String typeFqn;
+        try {
+          Class specifiedClass = specifiedType.type();
+          if (specifiedClass == XmlSchemaType.DEFAULT.class) {
+            throw new ValidationException(getPosition(), "A type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+          }
+          typeFqn = specifiedClass.getName();
+        }
+        catch (MirroredTypeException e) {
+          TypeMirror typeMirror = e.getTypeMirror();
+          if (!(typeMirror instanceof DeclaredType)) {
+            throw new ValidationException(getPosition(), "Unrecognized type : " + typeMirror);
+          }
+          typeFqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
         }
 
-        types.put(specifiedType.type().getName(), new SpecifiedXmlType(specifiedType));
+        types.put(typeFqn, new SpecifiedXmlType(specifiedType));
       }
     }
 

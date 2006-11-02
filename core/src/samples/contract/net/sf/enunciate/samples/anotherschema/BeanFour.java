@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Ryan Heaton
  */
-@XmlRootElement
+@XmlRootElement (
+  namespace = "urn:BeanFour"
+)
 public class BeanFour {
 
   private int property1;

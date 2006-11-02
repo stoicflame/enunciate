@@ -2,8 +2,8 @@ package net.sf.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
@@ -226,6 +226,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Add a namespace.
    *
    * @param namespace The namespace to add.
+   * @return The prefix for the namespace.
    */
   public String addNamespace(String namespace) {
     String prefix = namespacesToPrefixes.get(namespace);

@@ -1,5 +1,6 @@
 package net.sf.enunciate.samples.anotherschema;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -12,6 +13,9 @@ public class BeanThree {
   private String property2;
   private boolean property3;
 
+  @XmlElement (
+    namespace = "urn:schema.BeanThree.property1"
+  )
   public int getProperty1() {
     return property1;
   }

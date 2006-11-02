@@ -5,6 +5,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
@@ -51,12 +52,19 @@ public class Element extends Accessor {
     this.choices = new ArrayList<Element>();
     if (xmlElements != null) {
       for (XmlElement element : xmlElements.value()) {
-        Class clazz = element.type();
-        if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
-          throw new ValidationException(getPosition(), "An element choice must have its type specified.");
+        try {
+          Class clazz = element.type();
+          if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
+            throw new ValidationException(getPosition(), "An element choice must have its type specified.");
+          }
+          else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
+            throw new ValidationException(getPosition(), "An element choice must not be a collection or an array.");
+          }
         }
-        else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
-          throw new ValidationException(getPosition(), "An element choice must not be a collection or an array.");
+        catch (MirroredTypeException e) {
+          // Fall through.
+          // If the mirrored type exception is thrown, we couldn't load the class.  This probably
+          // implies that the type is valid and it's in the source base.
         }
 
         this.choices.add(new Element((MemberDeclaration) getDelegate(), getTypeDefinition(), element));
@@ -138,9 +146,15 @@ public class Element extends Accessor {
    */
   @Override
   public TypeMirror getAccessorType() {
-    if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
-      Class clazz = xmlElement.type();
-      return getAccessorType(clazz);
+    try {
+      if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
+        Class clazz = xmlElement.type();
+        return getAccessorType(clazz);
+      }
+    }
+    catch (MirroredTypeException e) {
+      // The mirrored type exception implies that the specified type is within the source base.
+      return TypeMirrorDecorator.decorate(e.getTypeMirror());
     }
 
     return super.getAccessorType();
@@ -203,9 +217,23 @@ public class Element extends Accessor {
    */
   @Override
   public XmlTypeMirror getBaseType() {
-    if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
+    if (xmlElement != null) {
+      Class typeClass = null;
+      TypeMirror typeMirror = null;
       try {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(xmlElement.type());
+        typeClass = xmlElement.type();
+      }
+      catch (MirroredTypeException e) {
+        typeMirror = e.getTypeMirror();
+      }
+
+      try {
+        if (typeClass == null) {
+          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(typeMirror);
+        }
+        else if (typeClass != XmlElement.DEFAULT.class) {
+          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(typeClass);
+        }
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());

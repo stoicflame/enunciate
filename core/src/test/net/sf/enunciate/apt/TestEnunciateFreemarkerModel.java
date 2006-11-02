@@ -1,27 +1,24 @@
 package net.sf.enunciate.apt;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 import junit.framework.Test;
 import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.OutsideAPTOkay;
-import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.config.SchemaInfo;
-import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
-import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.jelly.apt.Context;
 
+import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.DeclaredType;
-
-import javax.xml.namespace.QName;
 
 /**
  * @author Ryan Heaton
@@ -334,20 +331,11 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    * Getting the xml type for a specified type.
    */
   public void testGetXmlType() throws Exception {
-    final XmlTypeMirror specifiedXmlType = new MockXmlType();
     final XmlTypeMirror mockXmlType = new MockXmlType();
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel() {
       @Override
       protected XmlTypeMirror createXmlType(TypeMirror type) {
         return mockXmlType;
-      }
-
-      @Override
-      protected Map<String, XmlTypeMirror> getSpecifiedTypes(PackageDeclaration pckg) {
-        //todo: ask the JAXB people about the problem in specifying the actual class in @XmlSchemaType and @XmlSchemaTypes
-        HashMap<String, XmlTypeMirror> specifiedTypes = new HashMap<String, XmlTypeMirror>();
-        specifiedTypes.put("net.sf.enunciate.samples.anotherschema.BeanFour", specifiedXmlType);
-        return specifiedTypes;
       }
     };
 
@@ -357,7 +345,9 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertSame(stringXmlType, model.getXmlType(String.class));
 
     DeclaredType beanFourType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("net.sf.enunciate.samples.anotherschema.BeanFour"));
-    assertSame("The xml type for bean four should have been specified at the package-level.", specifiedXmlType, model.getXmlType(beanFourType));
+    XmlTypeMirror beanFourXmlType = model.getXmlType(beanFourType);
+    assertEquals("The xml type for bean four should have been specified at the package-level.", "specified-bean-four", beanFourXmlType.getName());
+    assertEquals("The xml type for bean four should have been specified at the package-level.", "http://net.sf.enunciate/core/samples/beanfour", beanFourXmlType.getNamespace());
 
     DeclaredType beanThreeType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("net.sf.enunciate.samples.anotherschema.BeanThree"));
     assertSame("The xml type for bean three should have been created.", mockXmlType, model.getXmlType(beanThreeType));
