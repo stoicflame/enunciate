@@ -2,9 +2,11 @@ package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
+import com.sun.mirror.type.MirroredTypeException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.validation.ValidationResult;
 import net.sf.enunciate.contract.validation.Validator;
@@ -35,21 +37,28 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   // Inherited.
   @Override
   public XmlTypeMirror getBaseType() {
-    Class enumClass = java.lang.String.class;
+    XmlTypeMirror typeMirror = KnownXmlType.STRING;
+
     if (xmlEnum != null) {
-      enumClass = xmlEnum.value();
+      try {
+        try {
+          Class enumClass = xmlEnum.value();
+          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(enumClass);
+        }
+        catch (MirroredTypeException e) {
+          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(e.getTypeMirror());
+        }
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(getPosition(), e.getMessage());
+      }
     }
 
-    try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(enumClass);
-    }
-    catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
-    }
+    return typeMirror;
   }
 
   /**
-   * The map of constant declarations to their enum constant values.
+   * The map of constant declarations (simple names) to their enum constant values.
    *
    * @return The map of constant declarations to their enum constant values.
    */

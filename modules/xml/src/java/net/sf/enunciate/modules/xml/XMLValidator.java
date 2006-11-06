@@ -80,7 +80,7 @@ public class XMLValidator extends BaseValidator {
         XmlElementWrapper wrapper = element.getAnnotation(XmlElementWrapper.class);
 
         String namespace = wrapper.namespace();
-        String typeNamespace = element.getTypeDefinition().getTargetNamespace();
+        String typeNamespace = element.getTypeDefinition().getNamespace();
         //use the empty string for comparison in the case of the empty namespace.
         if (namespace == null) {
           namespace = "";

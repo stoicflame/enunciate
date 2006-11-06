@@ -84,7 +84,7 @@ public class ${type.simpleName}XFireType extends Type {
   }
 
   public QName getSchemaType() {
-    return new QName("${type.targetNamespace?default("")}", "${type.name}");
+    return new QName("${type.namespace?default("")}", "${type.name}");
   }
 }
 [/@file]

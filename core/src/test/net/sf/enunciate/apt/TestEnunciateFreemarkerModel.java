@@ -225,7 +225,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     int nsCount = model.getNamespacesToPrefixes().size();
     ComplexTypeDefinition typeDef1 = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("net.sf.enunciate.samples.schema.BeanOne"));
-    String targetNamespace = typeDef1.getTargetNamespace();
+    String targetNamespace = typeDef1.getNamespace();
     assertNull(model.findTypeDefinition(typeDef1));
     model.add(typeDef1);
     SchemaInfo schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);
@@ -240,7 +240,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertEquals("There should have been one and only one new namespace added", nsCount, model.getNamespacesToPrefixes().size());
 
     ComplexTypeDefinition typeDef2 = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("net.sf.enunciate.samples.anotherschema.BeanOne"));
-    targetNamespace = typeDef2.getTargetNamespace();
+    targetNamespace = typeDef2.getNamespace();
     assertNull(model.findTypeDefinition(typeDef2));
     model.add(typeDef2);
     schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);
@@ -254,7 +254,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertEquals("There should have been three new namespaces added, as specified in the package info for the schema.", nsCount, model.getNamespacesToPrefixes().size());
 
     ComplexTypeDefinition typeDef3 = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("net.sf.enunciate.samples.anotherschema.BeanTwo"));
-    targetNamespace = typeDef3.getTargetNamespace();
+    targetNamespace = typeDef3.getNamespace();
     assertNull(model.findTypeDefinition(typeDef3));
     model.add(typeDef3);
     schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);
@@ -278,7 +278,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     ClassDeclaration declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.schema.BeanThree");
     TypeDefinition typeDef1 = new ComplexTypeDefinition(declaration);
     RootElementDeclaration element1 = new RootElementDeclaration(declaration, typeDef1);
-    String targetNamespace = element1.getTargetNamespace();
+    String targetNamespace = element1.getNamespace();
     assertNull(model.findRootElementDeclaration(element1));
     model.add(element1);
     SchemaInfo schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);
@@ -295,7 +295,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.anotherschema.BeanThree");
     ComplexTypeDefinition typeDef2 = new ComplexTypeDefinition(declaration);
     RootElementDeclaration element2 = new RootElementDeclaration(declaration, typeDef2);
-    targetNamespace = element2.getTargetNamespace();
+    targetNamespace = element2.getNamespace();
     assertNull(model.findRootElementDeclaration(element2));
     model.add(element2);
     schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);
@@ -311,7 +311,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     declaration = (ClassDeclaration) getDeclaration("net.sf.enunciate.samples.anotherschema.BeanFour");
     ComplexTypeDefinition typeDef3 = new ComplexTypeDefinition(declaration);
     RootElementDeclaration element3 = new RootElementDeclaration(declaration, typeDef3);
-    targetNamespace = element3.getTargetNamespace();
+    targetNamespace = element3.getNamespace();
     assertNull(model.findRootElementDeclaration(element3));
     model.add(element3);
     schemaInfo = model.getNamespacesToSchemas().get(targetNamespace);

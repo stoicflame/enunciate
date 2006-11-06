@@ -37,6 +37,10 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
   public Accessor(MemberDeclaration delegate, TypeDefinition typeDef) {
     super(delegate);
 
+    if ((!(delegate instanceof FieldDeclaration)) && (!(delegate instanceof PropertyDeclaration))) {
+      throw new IllegalArgumentException("Only a field or a property can be a JAXB accessor.");
+    }
+
     this.typeDefinition = typeDef;
   }
 
@@ -82,8 +86,9 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    * The base xml type of the accessor. The base type is either:
    * <p/>
    * <ol>
-   * <li>The accessor type.</li>
-   * <li>The component type of the accessor type if the accessor type is a collection type.</li>
+   *   <li>The xml type of the accessor type.</li>
+   *   <li>The xml type of the component type of the accessor type if the accessor
+   *       type is a collection type.</li>
    * </ol>
    *
    * @return The base type.
@@ -110,9 +115,8 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
       return KnownXmlType.SWAREF;
     }
 
-    TypeMirror baseType = getAccessorType();
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(baseType);
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getAccessorType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());
@@ -126,18 +130,6 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    * @return The qname for the referenced element, if exists.
    */
   public QName getRef() {
-    String namespace = getNamespace();
-    String typeNamespace = getTypeDefinition().getTargetNamespace();
-
-    if (namespace == null) {
-      if (typeNamespace != null) {
-        return new QName(namespace, getName());
-      }
-    }
-    else if (!namespace.equals(typeNamespace)) {
-      return new QName(namespace, getName());
-    }
-
     return null;
   }
 

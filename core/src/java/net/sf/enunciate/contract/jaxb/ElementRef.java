@@ -9,10 +9,12 @@ import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.enunciate.contract.jaxb.types.XmlClassType;
+import net.sf.enunciate.contract.jaxb.types.ExplicitXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.JAXBElement;
@@ -32,10 +34,10 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final RootElementDeclaration ref;
+  private final XmlTypeMirror ref;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
-    super(delegate, typedef);
+    super(delegate, typedef, null);
 
     XmlElementRef xmlElementRef = getAnnotation(XmlElementRef.class);
     XmlElementRefs xmlElementRefs = getAnnotation(XmlElementRefs.class);
@@ -53,40 +55,57 @@ public class ElementRef extends Element {
 
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();
-    XmlTypeMirror baseType = getBaseType();
     if (xmlElementRefs != null) {
       for (XmlElementRef elementRef : xmlElementRefs.value()) {
         this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), elementRef));
       }
+
+      this.ref = null;
+    }
+    else if (((DecoratedTypeMirror) getBareAccessorType()).isInstanceOf(JAXBElement.class.getName())) {
+      //this is either a single-valued JAXBElement, or a parametric collection of them...
+      //todo: throw an exception if this is referencing a non-global element for this namespace?
+      this.choices.add(this);
+      this.ref = new ExplicitXmlType(xmlElementRef.name(), xmlElementRef.namespace());
     }
     else if (isCollectionType()) {
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
-      //todo: what if it's a parameteric collection type of JAXBElements?
-      if (baseType instanceof TypeMirror) {
-        TypeMirror typeMirror = (TypeMirror) baseType;
-        AnnotationProcessorEnvironment env = getEnv();
-        Types typeUtils = env.getTypeUtils();
+      TypeMirror typeMirror = getBareAccessorType();
+      if (typeMirror instanceof DeclaredType) {
+        String fqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
         EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-        for (TypeDeclaration type : env.getTypeDeclarations()) {
-          XmlRootElement xmlRootElement = type.getAnnotation(XmlRootElement.class);
-          DeclaredType declaredType = typeUtils.getDeclaredType(type);
-
-          if ((xmlRootElement != null) && (typeUtils.isSubtype(declaredType, typeMirror)) && (declaredType.getDeclaration() instanceof ClassDeclaration)) {
-            RootElementDeclaration ref = model.findRootElementDeclaration((ClassDeclaration) declaredType.getDeclaration());
-            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), ref));
+        for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
+          if (isInstanceOf(rootElement, fqn)) {
+            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
           }
         }
       }
 
       if (this.choices.isEmpty()) {
-        throw new ValidationException(getPosition(), String.format("No known root element subtypes of {%s}%s.", baseType.getNamespace(), baseType.getName()));
+        throw new ValidationException(getPosition(), String.format("No known root element subtypes of %s", typeMirror));
       }
+
+      this.ref = null;
     }
     else {
       this.choices.add(this);
+      this.ref = loadRef();
     }
+  }
 
-    this.ref = loadRef();
+  /**
+   * Determines whether the class declaration is an instance of the declared type of the given fully-qualified name.
+   *
+   * @param classDeclaration The class declaration.
+   * @param fqn The FQN.
+   * @return Whether the class declaration is an instance of the declared type of the given fully-qualified name.
+   */
+  protected boolean isInstanceOf(ClassDeclaration classDeclaration, String fqn) {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Types utils = env.getTypeUtils();
+    DeclaredType declaredType = utils.getDeclaredType(env.getTypeDeclaration(classDeclaration.getQualifiedName()));
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType);
+    return decorated.isInstanceOf(fqn);
   }
 
   /**
@@ -116,7 +135,7 @@ public class ElementRef extends Element {
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.ref = ref;
+    this.ref = new ExplicitXmlType(ref.getName(), ref.getNamespace());
   }
 
   /**
@@ -124,7 +143,7 @@ public class ElementRef extends Element {
    *
    * @return the referenced root element declaration.
    */
-  protected RootElementDeclaration loadRef() {
+  protected XmlTypeMirror loadRef() {
     TypeDeclaration declaration = null;
     String elementDeclaration;
     try {
@@ -134,7 +153,7 @@ public class ElementRef extends Element {
         declaration = getEnv().getTypeDeclaration(typeClass.getName());
       }
       else {
-        TypeMirror accessorType = isCollectionType() ? getCollectionItemType() : getAccessorType();
+        TypeMirror accessorType = getAccessorType();
         elementDeclaration = accessorType.toString();
         if (accessorType instanceof DeclaredType) {
           declaration = ((DeclaredType) accessorType).getDeclaration();
@@ -159,7 +178,7 @@ public class ElementRef extends Element {
       throw new ValidationException(getPosition(), elementDeclaration + " is not a root element declaration.");
     }
 
-    return refElement;
+    return new ExplicitXmlType(refElement.getName(), refElement.getNamespace());
   }
 
   /**
@@ -170,59 +189,53 @@ public class ElementRef extends Element {
    */
   @Override
   public String getName() {
-    XmlTypeMirror baseType = getBaseType();
-    if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).isInstanceOf(JAXBElement.class.getName()))) {
-      //todo: do some null checking?  What if XmlElementRefs is specified?
-      //todo: what if this is referencing a non-global element for this namespace?
-      return xmlElementRef.name();
+    if (this.ref == null) {
+      throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
-    else {
-      //todo: do some null checking, validation checking? verify it's a declared type, verify XmlRootElement exists?
-      TypeDeclaration declaration = ((DeclaredType) baseType).getDeclaration();
-      XmlRootElement rootElement = declaration.getAnnotation(XmlRootElement.class);
 
-      if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
-        return rootElement.name();
-      }
-
-      return declaration.getSimpleName();
-    }
+    return this.ref.getName();
   }
 
   /**
-   * The namespace of an element ref is the name of the element it references, unless the type is a JAXBElement, in which
+   * The namespace of an element ref is the namespace of the element it references, unless the type is a JAXBElement, in which
    * case the namespace is specified.
    *
    * @return The namespace of the element ref.
    */
   @Override
   public String getNamespace() {
-    XmlTypeMirror baseType = getBaseType();
-    if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).isInstanceOf(JAXBElement.class.getName()))) {
-      //todo: do some null checking?  What if XmlElementRefs is specified?
-      return xmlElementRef.namespace();
+    if (this.ref == null) {
+      throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
-    else {
-      //todo: do some null checking, validation checking? verify it's a declared type, verify XmlRootElement exists?
-      TypeDeclaration declaration = ((DeclaredType) baseType).getDeclaration();
-      XmlRootElement rootElement = declaration.getAnnotation(XmlRootElement.class);
 
-      if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
-        return rootElement.namespace();
-      }
-      else {
-        return new Schema(declaration.getPackage()).getNamespace();
-      }
-    }
+    return this.ref.getNamespace();
   }
 
   @Override
   public QName getRef() {
-    return new QName(this.ref.getTargetNamespace(), this.ref.getName());
+    if (this.ref == null) {
+      throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
+    }
+
+    return new QName(this.ref.getNamespace(), this.ref.getName());
+  }
+
+
+  /**
+   * There is no base type for an element ref.
+   *
+   * @throws UnsupportedOperationException Because there is no such things as a base type for an element ref.
+   *
+   */
+  @Override
+  public XmlTypeMirror getBaseType() {
+    throw new UnsupportedOperationException("There is no base type for an element ref.");
   }
 
   /**
-   * @return An element ref is not nillable.
+   * An element ref is not nillable.
+   *
+   * @return false
    */
   @Override
   public boolean isNillable() {
@@ -230,17 +243,19 @@ public class ElementRef extends Element {
   }
 
   /**
-   * @return An element ref is required if there is only one choice.
+   * An element ref is not required.
+   *
+   * @return false.
    */
   @Override
   public boolean isRequired() {
-    return getChoices().size() <= 1;
+    return false;
   }
 
   /**
-   * The min occurs of this element.
+   * The min occurs of an element ref is 0
    *
-   * @return The min occurs of this element.
+   * @return 0
    */
   @Override
   public int getMinOccurs() {

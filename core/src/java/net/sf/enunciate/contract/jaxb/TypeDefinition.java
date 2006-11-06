@@ -68,7 +68,6 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
           added = elementRef;
         }
         else if (isUnsupported(accessor)) {
-          //todo: support xml-mixed?
           throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
         }
         else {
@@ -135,6 +134,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return Whether a declaration is an mixed.
    */
   protected boolean isUnsupported(MemberDeclaration declaration) {
+    //todo: support xml-mixed?
     return (declaration.getAnnotation(XmlMixed.class) != null)
       || (declaration.getAnnotation(XmlAnyElement.class) != null)
       || (declaration.getAnnotation(XmlAnyAttribute.class) != null);
@@ -164,7 +164,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The namespace of the xml type element.
    */
-  public String getTargetNamespace() {
+  public String getNamespace() {
     String namespace = getPackage().getNamespace();
 
     if ((xmlType != null) && (!"##default".equals(xmlType.namespace()))) {
@@ -180,7 +180,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return The qname of this type definition.
    */
   public QName getQname() {
-    return new QName(getTargetNamespace(), getName());
+    return new QName(getNamespace(), getName());
   }
 
   /**

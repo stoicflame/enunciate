@@ -167,7 +167,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     Schema schema = typeDef.getSchema();
     this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
-    String namespace = typeDef.getTargetNamespace();
+    String namespace = typeDef.getNamespace();
     addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
@@ -199,7 +199,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     Schema schema = rootElement.getSchema();
     this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
 
-    String namespace = rootElement.getTargetNamespace();
+    String namespace = rootElement.getNamespace();
     addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
@@ -260,23 +260,39 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   public XmlTypeMirror getXmlType(TypeMirror type) throws XmlTypeException {
     //first make sure it's a known type.
     if (type instanceof DeclaredType) {
-      TypeDeclaration declaration = ((DeclaredType) type).getDeclaration();
-      if (declaration != null) {
-        if (knownTypes.containsKey(declaration.getQualifiedName())) {
-          //first check the known types.
-          return knownTypes.get(declaration.getQualifiedName());
-        }
-        else {
-          //not known, check the specified types for the package.
-          Map<String, XmlTypeMirror> specifiedTypes = getSpecifiedTypes(declaration.getPackage());
-          if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
-            return specifiedTypes.get(declaration.getQualifiedName());
-          }
-        }
+      XmlTypeMirror knownOrSpecifiedType = getKnownOrSpecifiedType(((DeclaredType) type));
+      if (knownOrSpecifiedType != null) {
+        return knownOrSpecifiedType;
       }
     }
 
     return createXmlType(type);
+  }
+
+  /**
+   * Gets the known or specified type for the given declared type.
+   *
+   * @param declaredType The declared type.
+   * @return The known or specified type for the given declared type, or null if the declared type is not known or specified.
+   */
+  public XmlTypeMirror getKnownOrSpecifiedType(DeclaredType declaredType) {
+    XmlTypeMirror knownOrSpecifiedType = null;
+    TypeDeclaration declaration = declaredType.getDeclaration();
+    if (declaration != null) {
+      if (knownTypes.containsKey(declaration.getQualifiedName())) {
+        //first check the known types.
+        knownOrSpecifiedType = knownTypes.get(declaration.getQualifiedName());
+      }
+      else {
+        //not known, check the specified types for the package.
+        Map<String, XmlTypeMirror> specifiedTypes = getSpecifiedTypes(declaration.getPackage());
+        if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
+          knownOrSpecifiedType = specifiedTypes.get(declaration.getQualifiedName());
+        }
+      }
+    }
+    
+    return knownOrSpecifiedType;
   }
 
   /**
@@ -346,4 +362,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     return null;
   }
 
+  /**
+   * The list of root element declarations found in the model.
+   *
+   * @return The list of root element declarations found in the model.
+   */
+  public List<RootElementDeclaration> getRootElementDeclarations() {
+    return rootElements;
+  }
 }

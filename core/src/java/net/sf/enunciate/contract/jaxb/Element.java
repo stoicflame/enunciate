@@ -82,7 +82,7 @@ public class Element extends Accessor {
    * @param typedef    The type definition.
    * @param xmlElement The specific element annotation.
    */
-  private Element(MemberDeclaration delegate, TypeDefinition typedef, XmlElement xmlElement) {
+  protected Element(MemberDeclaration delegate, TypeDefinition typedef, XmlElement xmlElement) {
     super(delegate, typedef);
     this.xmlElement = xmlElement;
     this.choices = new ArrayList<Element>();
@@ -102,10 +102,10 @@ public class Element extends Accessor {
 
   // Inherited.
   public String getNamespace() {
-    String namespace = "";
+    String namespace = null;
 
     if (getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
-      namespace = getTypeDefinition().getTargetNamespace();
+      namespace = getTypeDefinition().getNamespace();
     }
 
     if ((xmlElement != null) && (!"##default".equals(xmlElement.namespace()))) {
@@ -122,17 +122,15 @@ public class Element extends Accessor {
    * @return The qname for the referenced element, if exists.
    */
   public QName getRef() {
-    QName ref = super.getRef();
+    QName ref = null;
 
-    if (ref == null) {
-      //check to see if this is an implied ref as per the spec.
-      XmlTypeMirror baseType = getBaseType();
-      if (baseType.isAnonymous()) {
-        TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
-        if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
-          RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
-          ref = new QName(rootElement.getTargetNamespace(), rootElement.getName());
-        }
+    //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
+    XmlTypeMirror baseType = getBaseType();
+    if (baseType.isAnonymous()) {
+      TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
+      if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
+        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
+        ref = new QName(rootElement.getNamespace(), rootElement.getName());
       }
     }
 
@@ -349,6 +347,22 @@ public class Element extends Accessor {
     }
 
     return name;
+  }
+
+  /**
+   * The namespace of the wrapper element.
+   *
+   * @return The namespace of the wrapper element.
+   */
+  public String getWrapperNamespace() {
+    String namespace = getTypeDefinition().getNamespace();
+
+    XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
+    if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.namespace()))) {
+      namespace = xmlElementWrapper.namespace();
+    }
+
+    return namespace;
   }
 
   /**

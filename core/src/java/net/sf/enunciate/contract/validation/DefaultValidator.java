@@ -97,6 +97,8 @@ public class DefaultValidator implements Validator {
   /**
    * Whether declaration1 is assignable to declaration2.
    *
+   * @param declaration1 the first declaration.
+   * @param declaration2 the second declaration.
    * @return Whether declaration1 is assignable to declaration2.
    */
   protected boolean isAssignable(TypeDeclaration declaration1, InterfaceDeclaration declaration2) {
@@ -271,6 +273,7 @@ public class DefaultValidator implements Validator {
    * Validation logic common to all type definitions.
    *
    * @param typeDef The type definition to validate.
+   * @return The validation result.
    */
   public ValidationResult validateTypeDefinition(TypeDefinition typeDef) {
     ValidationResult result = validatePackage(typeDef.getSchema());
@@ -447,6 +450,38 @@ public class DefaultValidator implements Validator {
                       "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
     }
 
+    QName ref = element.getRef();
+    if (ref != null) {
+      String elementNamespace = element.getNamespace();
+      elementNamespace = elementNamespace == null ? "" : elementNamespace;
+      String typeNamespace = element.getTypeDefinition().getNamespace();
+      typeNamespace = typeNamespace == null ? "" : typeNamespace;
+      if (!elementNamespace.equals(typeNamespace)) {
+        String message = "Enunciate doesn't support elements of different namespaces than their type definitions.  The namespace ["
+          + elementNamespace + "] of element [" + element.getName() + "] has a different namespace than [" + typeNamespace + "] of definition [" +
+          element.getTypeDefinition().getName() + "].  You'll need to make this element an element ref.";
+
+        if ("".equals(elementNamespace)) {
+          message += " It could also be that you intended for elements to have the same namespace as their type definitions by default.  Unfortunately, the " +
+            "JAXB spec says that in order to do that, you have to explicitly state the elementFormDefault to be 'qualified' with an @XmlSchema annotation at " +
+            "the package-level.";
+        }
+
+        result.addError(element.getPosition(), message);
+      }
+
+    }
+
+    if (element.isWrapped()) {
+      String wrapperNamespace = element.getWrapperNamespace();
+      wrapperNamespace = wrapperNamespace == null ? "" : wrapperNamespace;
+      String typeNamespace = element.getTypeDefinition().getNamespace();
+      typeNamespace = typeNamespace == null ? "" : typeNamespace;
+      if (!wrapperNamespace.equals(typeNamespace)) {
+        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions.  The spec is unclear as ");
+      }
+    }
+    
     return result;
   }
 

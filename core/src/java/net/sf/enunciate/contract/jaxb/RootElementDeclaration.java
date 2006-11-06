@@ -53,7 +53,7 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
    *
    * @return The namespace of the xml element.
    */
-  public String getTargetNamespace() {
+  public String getNamespace() {
     String namespace = getPackage().getNamespace();
 
     if ((rootElement != null) && (!"##default".equals(rootElement.namespace()))) {

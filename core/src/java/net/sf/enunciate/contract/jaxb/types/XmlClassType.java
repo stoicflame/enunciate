@@ -1,11 +1,6 @@
 package net.sf.enunciate.contract.jaxb.types;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.ClassType;
-import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
-import net.sf.jelly.apt.decorations.type.DecoratedClassType;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
 
@@ -14,20 +9,13 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
+public class XmlClassType implements XmlTypeMirror {
 
   private final TypeDefinition typeDef;
 
-  public XmlClassType(ClassType delegate) throws XmlTypeException {
-    super(delegate);
-    ClassDeclaration classDeclaration = delegate.getDeclaration();
-    if (classDeclaration == null) {
-      throw new XmlTypeException("Unknown type definition: " + delegate);
-    }
-
-    TypeDefinition typeDef = ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration);
+  public XmlClassType(TypeDefinition typeDef) {
     if (typeDef == null) {
-      throw new XmlTypeException("Unknown xml type for " + classDeclaration.getQualifiedName());
+      throw new IllegalArgumentException("A type definition must be supplied.");
     }
 
     this.typeDef = typeDef;
@@ -39,11 +27,7 @@ public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
    * @return The name of a class type depends on its type definition.
    */
   public String getName() {
-    if (this.typeDef != null) {
-      return this.typeDef.getName();
-    }
-
-    return null;
+    return this.typeDef.getName();
   }
 
   /**
@@ -52,11 +36,7 @@ public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
    * @return The namespace of a class type depends on its type definition.
    */
   public String getNamespace() {
-    if (this.typeDef != null) {
-      return this.typeDef.getTargetNamespace();
-    }
-
-    return null;
+    return this.typeDef.getNamespace();
   }
 
   /**
@@ -74,11 +54,7 @@ public class XmlClassType extends DecoratedClassType implements XmlTypeMirror {
    * @return Whether this class type is anonymous.
    */
   public boolean isAnonymous() {
-    if (this.typeDef != null) {
-      return this.typeDef.isAnonymous();
-    }
-
-    return false;
+    return this.typeDef.isAnonymous();
   }
 
   /**

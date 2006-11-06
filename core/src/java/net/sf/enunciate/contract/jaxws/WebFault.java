@@ -200,7 +200,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   public QName getParticleQName() {
     RootElementDeclaration explicitFaultBean = getExplicitFaultBean();
     if (explicitFaultBean != null) {
-      return new QName(explicitFaultBean.getTargetNamespace(), explicitFaultBean.getName());
+      return new QName(explicitFaultBean.getNamespace(), explicitFaultBean.getName());
     }
     else {
       return new QName(getTargetNamespace(), getElementName());

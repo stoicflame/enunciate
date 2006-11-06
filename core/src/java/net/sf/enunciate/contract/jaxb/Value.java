@@ -28,7 +28,7 @@ public class Value extends Accessor {
    * @return The target namespace of the value.
    */
   public String getNamespace() {
-    return getTypeDefinition().getTargetNamespace();
+    return getTypeDefinition().getNamespace();
   }
 
 }

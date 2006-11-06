@@ -158,8 +158,8 @@ public class SchemaInfo {
     }
 
     for (RootElementDeclaration rootElement : getGlobalElements()) {
-      referencedNamspaces.add(rootElement.getTargetNamespace());
-      referencedNamspaces.add(rootElement.getTypeDefinition().getTargetNamespace());
+      referencedNamspaces.add(rootElement.getNamespace());
+      referencedNamspaces.add(rootElement.getTypeDefinition().getNamespace());
     }
 
     //remove the obvious referenced namespace.

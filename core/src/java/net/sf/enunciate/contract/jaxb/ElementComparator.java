@@ -28,8 +28,8 @@ public class ElementComparator implements Comparator<Element> {
 
   // Inherited.
   public int compare(Element accessor1, Element accessor2) {
-    String propertyName1 = accessor1.getName();
-    String propertyName2 = accessor2.getName();
+    String propertyName1 = accessor1.getSimpleName();
+    String propertyName2 = accessor2.getSimpleName();
 
     if (this.propOrder != null) {
       //apply the specified property order

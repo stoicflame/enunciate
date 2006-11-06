@@ -4,6 +4,11 @@ import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.type.DecoratedClassType;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
+import net.sf.enunciate.contract.jaxb.TypeDefinition;
+import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 
 import java.util.Collection;
 
@@ -63,17 +68,30 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitClassType(ClassType classType) {
-    try {
-      XmlClassType xmlClassType = new XmlClassType(classType);
-      if (xmlClassType.isCollection()) {
-        visitCollectionType(classType);
+    DecoratedClassType type = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
+    if (type.isCollection()) {
+      visitCollectionType(type);
+    }
+    else {
+      EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+      XmlTypeMirror knownOrSpecifiedType = model.getKnownOrSpecifiedType(classType);
+      if (knownOrSpecifiedType != null) {
+        this.decoratedTypeMirror = knownOrSpecifiedType;
       }
       else {
-        this.decoratedTypeMirror = xmlClassType;
+        TypeDefinition typeDefinition = null;
+        if (classType.getDeclaration() != null) {
+          typeDefinition = model.findTypeDefinition(classType.getDeclaration());
+        }
+
+        if (typeDefinition != null) {
+          this.decoratedTypeMirror = new XmlClassType(typeDefinition);
+        }
+        else {
+          this.decoratedTypeMirror = null;
+          this.errorMessage = "Unknown xml type for class: " + classType; 
+        }
       }
-    }
-    catch (XmlTypeException e) {
-      this.errorMessage = e.getMessage();
     }
   }
 
@@ -90,12 +108,7 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitEnumType(EnumType enumType) {
-    try {
-      this.decoratedTypeMirror = new XmlEnumType(enumType);
-    }
-    catch (XmlTypeException e) {
-      this.errorMessage = e.getMessage();
-    }
+    visitClassType(enumType);
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {

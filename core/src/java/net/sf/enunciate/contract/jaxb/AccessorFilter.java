@@ -28,6 +28,15 @@ public class AccessorFilter {
   }
 
   /**
+   * The access type for this filter.
+   * 
+   * @return The access type for this filter.
+   */
+  public XmlAccessType getAccessType() {
+    return accessType;
+  }
+
+  /**
    * Whether to accept the given member declaration as an accessor.
    *
    * @param declaration The declaration to filter.
@@ -36,10 +45,6 @@ public class AccessorFilter {
   public boolean accept(MemberDeclaration declaration) {
     if (isXmlTransient(declaration)) {
       return false;
-    }
-
-    if (explicitlyDeclaredAccessor(declaration)) {
-      return true;
     }
 
     if (declaration instanceof PropertyDeclaration) {
@@ -67,7 +72,7 @@ public class AccessorFilter {
         return false;
       }
 
-      return ((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD));
+      return (((accessType != XmlAccessType.NONE) && (accessType != XmlAccessType.FIELD)) || (explicitlyDeclaredAccessor(declaration)));
     }
     else if (declaration instanceof FieldDeclaration) {
       if (declaration.getModifiers().contains(Modifier.STATIC) || declaration.getModifiers().contains(Modifier.TRANSIENT)) {
@@ -75,13 +80,14 @@ public class AccessorFilter {
       }
 
       if ((accessType == XmlAccessType.NONE) || (accessType == XmlAccessType.PROPERTY)) {
-        return false;
+        return explicitlyDeclaredAccessor(declaration);
       }
 
       if (accessType == XmlAccessType.PUBLIC_MEMBER) {
-        return declaration.getModifiers().contains(Modifier.PUBLIC);
+        return (declaration.getModifiers().contains(Modifier.PUBLIC) || (explicitlyDeclaredAccessor(declaration)));
       }
 
+      //the accessType is FIELD.  Include it.
       return true;
     }
 
