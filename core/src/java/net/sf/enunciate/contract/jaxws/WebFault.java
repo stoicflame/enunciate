@@ -1,10 +1,7 @@
 package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.ConstructorDeclaration;
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
@@ -25,6 +22,7 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A fault that is declared potentially thrown in some web service call.
@@ -34,14 +32,14 @@ import java.util.Collection;
 public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement {
 
   private final javax.xml.ws.WebFault annotation;
-  private final ClassDeclaration explicitFaultBean;
+  private final RootElementDeclaration explicitFaultBean;
 
   protected WebFault(ClassDeclaration delegate) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
 
-    ClassDeclaration explicitFaultBean = null;
+    RootElementDeclaration explicitFaultBean = null;
     Collection<PropertyDeclaration> properties = getProperties();
     PropertyDeclaration faultInfoProperty = null;
     for (PropertyDeclaration propertyDeclaration : properties) {
@@ -62,13 +60,22 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       boolean messageAndThrowableConstructorFound = false;
       Collection<ConstructorDeclaration> constructors = getConstructors();
       for (ConstructorDeclaration constructor : constructors) {
-        ParameterDeclaration[] parameters = constructor.getParameters().toArray(new ParameterDeclaration[0]);
-        messageConstructorFound |= (parameters.length == 2 && stringType.equals(parameters[0].getType()) && faultInfoType.equals(parameters[1].getType()));
-        messageAndThrowableConstructorFound |= (parameters.length == 3 && stringType.equals(parameters[0].getType()) && faultInfoType.equals(parameters[1].getType()) && throwableType.equals(parameters[2].getType()));
+        if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
+          ParameterDeclaration[] parameters = constructor.getParameters().toArray(new ParameterDeclaration[0]);
+          messageConstructorFound |= (parameters.length == 2 && parameters[0].getType().equals(stringType) && parameters[1].getType().equals(faultInfoType));
+          messageAndThrowableConstructorFound |= (parameters.length == 3 && parameters[0].getType().equals(stringType) && parameters[1].getType().equals(faultInfoType) && parameters[2].getType().equals(throwableType));
+        }
       }
 
       if (messageConstructorFound && messageAndThrowableConstructorFound) {
-        explicitFaultBean = faultInfoType.getDeclaration();
+        ClassDeclaration explicitFaultClass = faultInfoType.getDeclaration();
+        if (explicitFaultClass.getAnnotation(XmlRootElement.class) != null) {
+          explicitFaultBean = new RootElementDeclaration(explicitFaultClass, null);
+        }
+        else {
+          throw new ValidationException(getPosition(), "The faultInfo bean for a web fault must be a root element.  " + explicitFaultClass.getQualifiedName()
+            + " must be annotated with @XmlRootElement.");
+        }
       }
     }
 
@@ -94,15 +101,19 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
-   * The name of this web service.
+   * The element name of the implicit web fault bean, or null if this isn't an implicit web fault.
    *
-   * @return The name of this web service.
+   * @return The element name of the implicit web fault, or null.
    */
   public String getElementName() {
-    String name = getSimpleName();
+    String name = null;
+    
+    if (isImplicitSchemaElement()) {
+      name = getSimpleName();
 
-    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
-      name = annotation.name();
+      if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
+        name = annotation.name();
+      }
     }
 
     return name;
@@ -138,15 +149,20 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
-   * The qualified name of the implicit fault bean of this web fault.
+   * The qualified name of the implicit fault bean of this web fault, or null if this web fault
+   * does not define an implicit faul bean.
    *
    * @return The qualified name of the implicit fault bean of this web fault.
    */
   public String getImplicitFaultBeanQualifiedName() {
-    String faultBean = getPackage().getQualifiedName() + ".jaxws." + getSimpleName() + "Bean";
+    String faultBean = null;
 
-    if ((annotation != null) && (annotation.faultBean() != null) && (!"".equals(annotation.faultBean()))) {
-      faultBean = annotation.faultBean();
+    if (isImplicitSchemaElement()) {
+      faultBean = getPackage().getQualifiedName() + ".jaxws." + getSimpleName() + "Bean";
+
+      if ((annotation != null) && (annotation.faultBean() != null) && (!"".equals(annotation.faultBean()))) {
+        faultBean = annotation.faultBean();
+      }
     }
 
     return faultBean;
@@ -164,25 +180,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The explicit fault bean of this web fault, if exists, or null otherwise.
    */
   public RootElementDeclaration getExplicitFaultBean() {
-    if (this.explicitFaultBean != null) {
-      EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-      RootElementDeclaration rootElement = model.findRootElementDeclaration(this.explicitFaultBean);
-      if (rootElement == null) {
-        String message;
-        if (this.explicitFaultBean.getAnnotation(XmlRootElement.class) != null) {
-          message = "The fault info bean " + this.explicitFaultBean.getQualifiedName() + " is not a known root element.  Please add it to the list of known classes.";
-        }
-        else {
-          message = "The fault info bean " + this.explicitFaultBean.getQualifiedName() + " is not a root element.";
-        }
-
-        throw new ValidationException(getPosition(), message);
-      }
-
-      return rootElement;
-    }
-
-    return null;
+    return this.explicitFaultBean;
   }
 
   /**
@@ -198,9 +196,8 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The qname reference to the fault info.
    */
   public QName getParticleQName() {
-    RootElementDeclaration explicitFaultBean = getExplicitFaultBean();
-    if (explicitFaultBean != null) {
-      return new QName(explicitFaultBean.getNamespace(), explicitFaultBean.getName());
+    if (this.explicitFaultBean != null) {
+      return new QName(this.explicitFaultBean.getNamespace(), this.explicitFaultBean.getName());
     }
     else {
       return new QName(getTargetNamespace(), getElementName());
@@ -208,19 +205,22 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
-   * Gets the target namespace of this web service.
+   * Gets the target namespace of the implicit fault bean, or null if this web fault defines
+   * an explicit fault info bean.
    *
-   * @return the target namespace of this web service.
+   * @return the target namespace of the implicit fault bean, or null.
    */
   public String getTargetNamespace() {
     String targetNamespace = null;
 
-    if (annotation != null) {
-      targetNamespace = annotation.targetNamespace();
-    }
+    if (this.explicitFaultBean == null) {
+      if (annotation != null) {
+        targetNamespace = annotation.targetNamespace();
+      }
 
-    if ((targetNamespace == null) || ("".equals(targetNamespace))) {
-      targetNamespace = calculateNamespaceURI();
+      if ((targetNamespace == null) || ("".equals(targetNamespace))) {
+        targetNamespace = calculateNamespaceURI();
+      }
     }
 
     return targetNamespace;
@@ -277,7 +277,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    */
   public Collection<ImplicitChildElement> getChildElements() {
     if (!isImplicitSchemaElement()) {
-      return null;
+      return Collections.emptyList();
     }
 
     Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
@@ -291,10 +291,6 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
       try {
         DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
-        if ((propertyType.isCollection()) || (propertyType.isArray())) {
-          throw new ValidationException(property.getPosition(), "Sorry, enunciate doesn't support collections or lists as fault properties yet.  Shouldn't be too hard to do, though...");
-        }
-
         XmlTypeMirror xmlType = model.getXmlType(propertyType);
         if (xmlType.isAnonymous()) {
           throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
@@ -315,6 +311,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   /**
    * Gets all properties, including properties from the superclass.
    *
+   * @param declaration The declaration from which to get all properties.
    * @return All properties.
    */
   protected Collection<PropertyDeclaration> getAllProperties(DecoratedClassDeclaration declaration) {
@@ -330,7 +327,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
-   * There's only one part to a doc/lit request wrapper.
+   * There's only one part to a web fault.
    *
    * @return this.
    */

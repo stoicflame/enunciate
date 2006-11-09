@@ -250,10 +250,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
       use = bindingInfo.use();
     }
 
-    if (use != SOAPBinding.Use.LITERAL) {
-      throw new ValidationException(getPosition(), use.toString().toLowerCase() + "-use web methods are not supported by enunciate");
-    }
-
     return use;
   }
 

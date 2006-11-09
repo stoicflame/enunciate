@@ -1,5 +1,9 @@
 package net.sf.enunciate.samples.services;
 
+import net.sf.enunciate.samples.schema.BeanOne;
+import net.sf.enunciate.samples.schema.BeanTwo;
+import net.sf.enunciate.samples.schema.BeanThree;
+
 import javax.jws.Oneway;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -9,7 +13,9 @@ import javax.jws.soap.SOAPBinding;
 /**
  * @author Ryan Heaton
  */
-@WebService
+@WebService (
+  targetNamespace = "urn:web-method-examples"
+)
 public class WebMethodExamples {
 
   private Boolean privateMethod() {
@@ -87,6 +93,14 @@ public class WebMethodExamples {
     style = SOAPBinding.Style.DOCUMENT,
     parameterStyle = SOAPBinding.ParameterStyle.BARE
   )
+  public BeanOne docLitBareMethod(BeanTwo beanTwo, @WebParam(header=true) boolean bool) throws ExplicitFaultBean, ImplicitWebFault {
+    return null;
+  }
+
+  @SOAPBinding (
+    style = SOAPBinding.Style.DOCUMENT,
+    parameterStyle = SOAPBinding.ParameterStyle.BARE
+  )
   public void docBareVoid2OutputMethod(
     @WebParam ( mode = WebParam.Mode.INOUT )
     Boolean bool1,
@@ -95,9 +109,24 @@ public class WebMethodExamples {
   }
 
   @WebMethod (
-    operationName = "special-operation-name"
+    operationName = "special-operation-name",
+    action = "urn:specialNameMethod",
+    exclude = false
   )
   public void specialNameMethod() {
 
   }
+
+  public BeanThree docLitWrappedMethod(boolean b, int i, @WebParam(header = true) short s, @WebParam( mode = WebParam.Mode.INOUT ) char c) throws ExplicitFaultBean, ImplicitWebFault {
+    return null;
+  }
+
+  @SOAPBinding (
+    style = SOAPBinding.Style.RPC
+  )
+  public BeanThree rpcLitWrappedMethod(boolean b, int i, @WebParam(header = true) short s, @WebParam( mode = WebParam.Mode.INOUT ) char c) throws ExplicitFaultBean, ImplicitWebFault {
+    return null;
+  }
+
+
 }

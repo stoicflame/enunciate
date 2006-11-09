@@ -191,14 +191,8 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     if (returnType instanceof DeclaredType) {
       TypeDeclaration returnTypeDeclaration = ((DeclaredType) returnType).getDeclaration();
       if ((returnTypeDeclaration instanceof ClassDeclaration) && (returnTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
-        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-        RootElementDeclaration rootElement = model.findRootElementDeclaration((ClassDeclaration) returnTypeDeclaration);
-        if (rootElement == null) {
-          throw new ValidationException(method.getPosition(), returnTypeDeclaration.getQualifiedName() +
-            " is not a known root element.  Please add it to the list of known classes.");
-        }
-
-        return new QName(rootElement.getQualifiedName(), rootElement.getName());
+        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) returnTypeDeclaration, null);
+        return new QName(rootElement.getNamespace(), rootElement.getName());
       }
     }
 

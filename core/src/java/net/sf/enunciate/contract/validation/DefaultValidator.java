@@ -71,6 +71,10 @@ public class DefaultValidator implements Validator {
       result.aggregate(validateEndpointImplementation(implementation));
     }
 
+    if (ei.getSoapUse() == SOAPBinding.Use.ENCODED) {
+      result.addError(ei.getPosition(), "Enunciate does not support encoded-use web services are not supported.");
+    }
+
     return result;
   }
 
@@ -213,7 +217,6 @@ public class DefaultValidator implements Validator {
           }
         }
       }
-
     }
 
     return result;

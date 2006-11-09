@@ -2,7 +2,9 @@ package net.sf.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.enunciate.InAPTTestCase;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,6 +67,24 @@ public class TestEndpointInterface extends InAPTTestCase {
 
     assertEquals("The port type name of the web service should be customized by the annotation (JSR 181: 3.4)", "annotated-web-service", annotated.getPortTypeName());
     assertEquals("The port type name of the web service should be the simple name if not annotated (JSR 181: 3.4)", "NoNamespaceWebService", notAnnotated.getPortTypeName());
+  }
+
+  /**
+   * tests the list of endpoint implementations for this ei.
+   */
+  public void testEndpointImplementations() throws Exception {
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
+
+    EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.NoNamespaceWebService"));
+    Collection<EndpointImplementation> impls = ei.getEndpointImplementations();
+    assertEquals(3, impls.size());
+    for (EndpointImplementation impl : impls) {
+      String fqn = impl.getQualifiedName();
+      assertTrue(fqn, "net.sf.enunciate.samples.services.NoNamespaceWebServiceImpl2".equals(fqn)
+        || "net.sf.enunciate.samples.services.NoNamespaceWebServiceImpl".equals(fqn)
+        || "net.sf.enunciate.samples.services.InvalidEIReference".equals(fqn));
+    }
   }
 
   public static Test suite() {

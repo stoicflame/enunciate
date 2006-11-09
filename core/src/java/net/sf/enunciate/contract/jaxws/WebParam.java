@@ -137,14 +137,8 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
     if (parameterType instanceof DeclaredType) {
       TypeDeclaration parameterTypeDeclaration = ((DeclaredType) parameterType).getDeclaration();
       if ((parameterTypeDeclaration instanceof ClassDeclaration) && (parameterTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
-        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-        RootElementDeclaration rootElement = model.findRootElementDeclaration((ClassDeclaration) parameterTypeDeclaration);
-        if (rootElement == null) {
-          throw new ValidationException(getPosition(), parameterTypeDeclaration.getQualifiedName() +
-            " is not a known root element.  Please add it to the list of known classes.");
-        }
-
-        return new QName(rootElement.getQualifiedName(), rootElement.getName());
+        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) parameterTypeDeclaration, null);
+        return new QName(rootElement.getNamespace(), rootElement.getName());
       }
     }
 
@@ -279,7 +273,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @throws UnsupportedOperationException if this web param isn't complex.
    */
   public Collection<WebMessagePart> getParts() {
-    if (!isBare()) {
+    if (!isBare() && !isHeader()) {
       throw new UnsupportedOperationException("Web param doesn't represent a complex method input/output.");
     }
 

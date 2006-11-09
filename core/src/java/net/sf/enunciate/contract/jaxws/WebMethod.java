@@ -6,6 +6,7 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
+import com.sun.mirror.type.VoidType;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
@@ -66,30 +67,33 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     Collection<WebMessage> messages = new ArrayList<WebMessage>();
     SOAPBinding.Style bindingStyle = getSoapBindingStyle();
 
+    //first add all the headers.
+    for (WebParam webParam : webParameters) {
+      if (webParam.isHeader()) {
+        messages.add(webParam);
+      }
+    }
+
     if (bindingStyle == SOAPBinding.Style.DOCUMENT) {
       SOAPBinding.ParameterStyle parameterStyle = getSoapParameterStyle();
-
-      for (WebParam webParam : webParameters) {
-        switch (parameterStyle) {
-          //add all the headers, and if it's BARE, add the (should be only one) parameter bare (not wrapped).
-          case WRAPPED:
-            if (!webParam.isHeader()) {
-              break;
-            }
-          case BARE:
-            messages.add(webParam);
-            break;
-        }
-      }
-
       if (parameterStyle == SOAPBinding.ParameterStyle.WRAPPED) {
         messages.add(new RequestWrapper(this));
-      }
-
-      if (!isOneWay()) {
-        //add all the faults and response message if not one way.
+        if (!isOneWay()) {
+          messages.add(new ResponseWrapper(this));
+        }
         messages.addAll(webFaults);
-        messages.add(parameterStyle == SOAPBinding.ParameterStyle.WRAPPED ? new ResponseWrapper(this) : webResult);
+      }
+      else {
+        for (WebParam webParam : webParameters) {
+          if (!webParam.isHeader()) {
+            messages.add(webParam);
+          }
+        }
+        if ((!isOneWay()) && (!(getReturnType() instanceof VoidType))) {
+          messages.add(webResult);
+        }
+
+        messages.addAll(webFaults);
       }
     }
     else {
@@ -165,6 +169,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
         }
       }
     }
+    
     return namespaces;
   }
 
@@ -243,10 +248,6 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     if (bindingInfo != null) {
       use = bindingInfo.use();
-    }
-
-    if (use != SOAPBinding.Use.LITERAL) {
-      throw new ValidationException(getPosition(), use.toString().toLowerCase() + "-use web methods are not supported by enunciate");
     }
 
     return use;
