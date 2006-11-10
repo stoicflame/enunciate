@@ -11,6 +11,8 @@ import javax.xml.namespace.QName;
 import java.util.Map;
 import java.util.HashMap;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -67,5 +69,9 @@ public class TestEnumTypeDefinition extends InAPTTestCase {
     }
     assertTrue(bean3Values.isEmpty());
 
+  }
+
+  public static Test suite() {
+    return createSuite(TestEnumTypeDefinition.class);
   }
 }

@@ -6,6 +6,8 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -43,5 +45,9 @@ public class TestAttribute extends InAPTTestCase {
       assertEquals("Wrong ref for attribute " + attribute.getSimpleName(), attributeRefs.get(attribute.getSimpleName()), attribute.getRef());
       assertEquals("Wrong required for attribute " + attribute.getSimpleName(), attributeRequireds.get(attribute.getSimpleName()).booleanValue(), attribute.isRequired());
     }
+  }
+
+  public static Test suite() {
+    return createSuite(TestAttribute.class);
   }
 }

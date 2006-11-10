@@ -123,7 +123,13 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
    * @return The message name in the case of a document/bare service.
    */
   public String getMessageName() {
-    return method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "Response";
+    String messageName = null;
+
+    if (isBare()) {
+      messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "Response";
+    }
+    
+    return messageName;
   }
 
   /**
@@ -182,18 +188,25 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
   }
 
   /**
-   * The qname of the element for this web result as a part.
+   * The qname of the particle for this web result.  If the {@link #getParticleType() particle type} is
+   * TYPE then it's the qname of the xml type.  Otherwise, if the parameter type is an xml root element,
+   * the qname of the root xml element is returned.  Otherwise, it's the qname of the implicit schema
+   * element.
    *
-   * @return The qname of the element for this web result as a part.
+   * @return The qname of the particle for this web result as a part.
    */
   public QName getParticleQName() {
     TypeMirror returnType = getDelegate();
     if (returnType instanceof DeclaredType) {
       TypeDeclaration returnTypeDeclaration = ((DeclaredType) returnType).getDeclaration();
-      if ((returnTypeDeclaration instanceof ClassDeclaration) && (returnTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
+      if ((method.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT) && (returnTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
         RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) returnTypeDeclaration, null);
         return new QName(rootElement.getNamespace(), rootElement.getName());
       }
+    }
+
+    if (method.getSoapBindingStyle() == SOAPBinding.Style.RPC) {
+      return getTypeQName();
     }
 
     return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
@@ -216,7 +229,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
 
   // Inherited.
   public Collection<WebMessagePart> getParts() {
-    if (!isBare()) {
+    if (!isBare() && !isHeader()) {
       throw new UnsupportedOperationException("Web result doesn't represent a complex method input/output.");
     }
 
@@ -244,18 +257,38 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     }
   }
 
+  /**
+   * The min occurs of a web result is 1.
+   *
+   * @return 1
+   */
   public int getMinOccurs() {
-    return isPrimitive() ? 1 : 0;
+    return 1;
   }
 
+  /**
+   * The max occurs of the web result.
+   *
+   * @return The max occurs.
+   */
   public String getMaxOccurs() {
     return isArray() || isCollection() ? "unbounded" : "1";
   }
 
+  /**
+   * The element name.
+   *
+   * @return The element name.
+   */
   public String getElementName() {
     return getName();
   }
 
+  /**
+   * The element docs.
+   *
+   * @return The element docs.
+   */
   public String getElementDocs() {
     return ((DecoratedTypeMirror) delegate).getDocComment();
   }

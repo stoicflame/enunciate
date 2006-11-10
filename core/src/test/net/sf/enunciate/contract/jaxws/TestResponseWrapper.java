@@ -5,6 +5,8 @@ import net.sf.enunciate.InAPTTestCase;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -95,5 +97,9 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(ei.getSimpleName() + ".withInOutResponse", wrapper.getMessageName());
     assertEquals("withInOutResponse", wrapper.getPartName());
 
+  }
+
+  public static Test suite() {
+    return createSuite(TestResponseWrapper.class);
   }
 }

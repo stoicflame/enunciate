@@ -76,7 +76,10 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
 
       @Override
       protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
-        return "net.sf.enunciate.samples.schema".equals(declaration.getPackage().getQualifiedName());
+        boolean potentialSchemaType = "net.sf.enunciate.samples.schema".equals(declaration.getPackage().getQualifiedName());
+        String simpleName = declaration.getSimpleName();
+        potentialSchemaType &= (simpleName.equals("BeanOne") || simpleName.equals("BeanTwo") || simpleName.equals("BeanThree"));
+        return potentialSchemaType;
       }
 
       @Override

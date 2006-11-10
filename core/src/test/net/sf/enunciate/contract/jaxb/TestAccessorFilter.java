@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.FieldDeclaration;
+import junit.framework.Test;
 
 /**
  * @author Ryan Heaton
@@ -171,5 +172,9 @@ public class TestAccessorFilter extends InAPTTestCase {
         fail("Property " + member.getSimpleName() + " should" + (should ? "" : "n't") + " have been accepted with accessor type " + filter.getAccessType());
       }
     }
+  }
+
+  public static Test suite() {
+    return createSuite(TestAccessorFilter.class);
   }
 }

@@ -13,7 +13,7 @@ public class EndpointImplementation extends DecoratedClassDeclaration {
 
   private final EndpointInterface endpointInterface;
 
-  protected EndpointImplementation(ClassDeclaration delegate, EndpointInterface endpointInterface) {
+  public EndpointImplementation(ClassDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
 
     this.endpointInterface = endpointInterface;

@@ -62,7 +62,11 @@ public abstract class InAPTTestCase extends TestCase {
   protected static ArrayList<String> getAptOptions() {
     ArrayList<String> aptOpts = new ArrayList<String>();
     aptOpts.add("-cp");
-    aptOpts.add(System.getProperty("java.class.path"));
+    String classpath = System.getProperty("apt.test.class.path");
+    if (classpath == null) {
+      classpath = System.getProperty("java.class.path");
+    }
+    aptOpts.add(classpath);
     aptOpts.add("-nocompile");
     return aptOpts;
   }

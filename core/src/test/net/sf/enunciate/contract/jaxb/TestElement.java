@@ -16,6 +16,8 @@ import net.sf.jelly.apt.Context;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -259,4 +261,7 @@ public class TestElement extends InAPTTestCase {
     return prop;
   }
 
+  public static Test suite() {
+    return createSuite(TestElement.class);
+  }
 }

@@ -10,6 +10,8 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -106,4 +108,7 @@ public class TestAccessor extends InAPTTestCase {
     }
   }
 
+  public static Test suite() {
+    return createSuite(TestAccessor.class);
+  }
 }

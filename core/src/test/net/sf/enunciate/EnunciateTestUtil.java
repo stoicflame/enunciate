@@ -75,7 +75,7 @@ public class EnunciateTestUtil {
    * @param aptOptions  The options.
    * @param sourceFiles The source files.
    */
-  public static void invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
+  public static int invokeAPT(AnnotationProcessorFactory apf, List<String> aptOptions, List<String> sourceFiles) {
     ArrayList<String> args = new ArrayList<String>();
     if (aptOptions != null) {
       args.addAll(aptOptions);
@@ -87,7 +87,7 @@ public class EnunciateTestUtil {
 
     args.addAll(sourceFiles);
 
-    com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    return com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
   }
 
   /**

@@ -6,12 +6,13 @@ import net.sf.enunciate.modules.DeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.apache.commons.digester.RuleSet;
-import org.xml.sax.Attributes;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.apache.commons.digester.parser.GenericParser;
+import org.xml.sax.*;
 import sun.misc.Service;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -196,8 +197,23 @@ public class EnunciateConfiguration implements ErrorHandler {
    *
    * @return The digester that was created.
    */
-  protected Digester createDigester() {
-    return new Digester();
+  protected Digester createDigester() throws SAXException {
+    try {
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setNamespaceAware(false);
+      factory.setValidating(true);
+
+      Properties properties = new Properties();
+      properties.put("SAXParserFactory", factory);
+      properties.put("schemaLocation", EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
+      properties.put("schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+      
+      SAXParser parser = GenericParser.newSAXParser(properties);
+      return new Digester(parser);
+    }
+    catch (ParserConfigurationException e) {
+      throw new SAXException(e);
+    }
   }
 
   /**

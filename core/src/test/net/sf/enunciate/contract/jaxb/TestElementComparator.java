@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -50,4 +52,7 @@ public class TestElementComparator extends InAPTTestCase {
 
   }
 
+  public static Test suite() {
+    return createSuite(TestElementComparator.class);
+  }
 }

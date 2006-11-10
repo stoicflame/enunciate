@@ -13,6 +13,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import javax.xml.bind.annotation.XmlAccessType;
 import java.util.Collection;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -94,5 +96,9 @@ public class TestTypeDefinition extends InAPTTestCase {
       }
     }
     return field;
+  }
+
+  public static Test suite() {
+    return createSuite(TestTypeDefinition.class);
   }
 }

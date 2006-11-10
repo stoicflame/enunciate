@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Arrays;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -132,7 +134,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals(new QName(null, "BeanThree"), webFault.getParticleQName());
     assertNull("The type of a web fault is always implicit.", webFault.getTypeQName());
     assertFalse(webFault.isImplicitSchemaElement());
-    assertNull(webFault.getChildElements());
+    assertTrue(webFault.getChildElements().isEmpty());
     Collection<WebMessagePart> parts = webFault.getParts();
     assertEquals(1, parts.size());
     assertSame(webFault, parts.iterator().next());
@@ -170,5 +172,9 @@ public class TestWebFault extends InAPTTestCase {
     WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("net.sf.enunciate.samples.services.AlmostExplicitFaultBeanThree"));
     assertNull("A web fault without both PUBLIC constructors shouldn't have an explicit fault bean.",
                webFault.getExplicitFaultBean());
+  }
+
+  public static Test suite() {
+    return createSuite(TestWebFault.class);
   }
 }

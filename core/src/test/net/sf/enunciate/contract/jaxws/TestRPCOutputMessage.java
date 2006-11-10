@@ -5,6 +5,8 @@ import net.sf.enunciate.InAPTTestCase;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -75,5 +77,9 @@ public class TestRPCOutputMessage extends InAPTTestCase {
     assertTrue(parts.contains(paramIt.next()));
     assertTrue(parts.contains(withInOut.getWebResult()));
 
+  }
+
+  public static Test suite() {
+    return createSuite(TestRPCOutputMessage.class);
   }
 }

@@ -86,8 +86,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
 
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
+    Collection<TypeDeclaration> typeDeclarations = getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
       if (isEndpointInterface(declaration)) {
         EndpointInterface endpointInterface = new EndpointInterface(declaration);
@@ -133,6 +132,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     validate(model);
 
     return model;
+  }
+
+  /**
+   * Get the type declarations to consider for the root model.
+   *
+   * @return The list of type declarations to consider for the root model.
+   */
+  protected Collection<TypeDeclaration> getTypeDeclarations() {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    return env.getTypeDeclarations();
   }
 
   /**

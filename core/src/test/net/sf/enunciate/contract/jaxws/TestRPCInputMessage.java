@@ -5,6 +5,8 @@ import net.sf.enunciate.InAPTTestCase;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -81,5 +83,9 @@ public class TestRPCInputMessage extends InAPTTestCase {
     assertTrue(parts.contains(paramIt.next()));
     assertTrue(parts.contains(paramIt.next()));
 
+  }
+
+  public static Test suite() {
+    return createSuite(TestRPCInputMessage.class);
   }
 }

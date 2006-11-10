@@ -1,21 +1,21 @@
 package net.sf.enunciate.contract.validation;
 
 import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.InterfaceType;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.*;
+import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.contract.jaxws.WebParam;
+import net.sf.enunciate.contract.jaxws.WebResult;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
-import javax.jws.WebService;
+import javax.jws.*;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -72,7 +72,7 @@ public class DefaultValidator implements Validator {
     }
 
     if (ei.getSoapUse() == SOAPBinding.Use.ENCODED) {
-      result.addError(ei.getPosition(), "Enunciate does not support encoded-use web services are not supported.");
+      result.addError(ei.getPosition(), "Enunciate does not support encoded-use web services.");
     }
 
     return result;
@@ -91,7 +91,7 @@ public class DefaultValidator implements Validator {
       result.addError(delegate.getPosition(), "An enum cannot be an endpoint implementation.");
     }
 
-    if (!isAssignable((TypeDeclaration) delegate, (InterfaceDeclaration) impl.getEndpointInterface().getDelegate())) {
+    if (!isAssignable((TypeDeclaration) delegate, (TypeDeclaration) impl.getEndpointInterface().getDelegate())) {
       result.addError(delegate.getPosition(), "Class does not implement its endpoint interface!");
     }
 
@@ -105,7 +105,7 @@ public class DefaultValidator implements Validator {
    * @param declaration2 the second declaration.
    * @return Whether declaration1 is assignable to declaration2.
    */
-  protected boolean isAssignable(TypeDeclaration declaration1, InterfaceDeclaration declaration2) {
+  protected boolean isAssignable(TypeDeclaration declaration1, TypeDeclaration declaration2) {
     String iffqn = declaration2.getQualifiedName();
     if (declaration1.getQualifiedName().equals(iffqn)) {
       return true;
@@ -143,8 +143,18 @@ public class DefaultValidator implements Validator {
     SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
     SOAPBinding.Style soapBindingStyle = webMethod.getSoapBindingStyle();
 
+    if (oneway && (!(webMethod.getReturnType() instanceof VoidType))) {
+      result.addError(webMethod.getPosition(), "A one-way method must have a void return type.");
+    }
+
     if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (soapBindingStyle != SOAPBinding.Style.DOCUMENT)) {
       result.addError(webMethod.getPosition(), "A BARE web method must have a DOCUMENT binding style.");
+    }
+
+    for (WebParam webParam : webMethod.getWebParameters()) {
+      if ((webParam.getMode() == javax.jws.WebParam.Mode.INOUT) && (!webParam.isHolder())) {
+        result.addError(webParam.getPosition(), "An INOUT parameter must have a type of javax.xml.ws.Holder");
+      }
     }
 
     for (WebMessage webMessage : webMethod.getMessages()) {
@@ -162,8 +172,9 @@ public class DefaultValidator implements Validator {
         if (webMessage instanceof WebResult) {
           DecoratedTypeMirror type = (DecoratedTypeMirror) ((WebResult) webMessage).getType();
 
-          if (type.isInstanceOf(Collection.class.getName())) {
-            result.addWarning(webMethod.getPosition(), "The header return value that is an instance of java.util.Collection may not (de)serialize " +
+          if ((type.isCollection()) || (type.isArray())) {
+            String description = type.isCollection() ? "an instance of java.util.Collection" : "an array";
+            result.addWarning(webMethod.getPosition(), "The header return value that is " + description + " may not (de)serialize " +
               "correctly.  The spec is unclear as to how this should be handled.");
           }
         }
@@ -171,12 +182,12 @@ public class DefaultValidator implements Validator {
           WebParam webParam = (WebParam) webMessage;
           DecoratedTypeMirror type = (DecoratedTypeMirror) webParam.getType();
 
-          if (type.isInstanceOf(Collection.class.getName())) {
-            result.addWarning(webParam.getPosition(), "The header parameter that is an instance of java.util.Collection may not (de)serialize correctly.  " +
+          if (type.isCollection() || (type.isArray())) {
+            String description = type.isCollection() ? "an instance of java.util.Collection" : "an array";
+            result.addWarning(webParam.getPosition(), "The header parameter that is " + description + " may not (de)serialize correctly.  " +
               "The spec is unclear as to how this should be handled.");
           }
         }
-
       }
 
       if (parameterStyle == SOAPBinding.ParameterStyle.BARE) {
@@ -210,8 +221,9 @@ public class DefaultValidator implements Validator {
           if (part instanceof WebParam) {
             WebParam webParam = (WebParam) part;
             DecoratedTypeMirror paramType = (DecoratedTypeMirror) webParam.getType();
-            if (paramType.isInstanceOf(Collection.class.getName())) {
-              result.addWarning(webParam.getPosition(), "An instance of java.util.Collection as an RPC-style web message part may " +
+            if (paramType.isCollection() || paramType.isArray()) {
+              String description = paramType.isCollection() ? "An instance of java.util.Collection" : "An array";
+              result.addWarning(webParam.getPosition(), description + " as an RPC-style web message part may " +
                 "not be (de)serialized as you expect.  The spec is unclear as to how this should be handled.");
             }
           }
@@ -244,6 +256,7 @@ public class DefaultValidator implements Validator {
         result.addError(complexType.getPosition(), "A type definition cannot have both an xml value and elements.");
       }
       else if (complexType.getAttributes().isEmpty()) {
+        //todo: throw a runtime exception? This is really a problem with the engine, not the user code.
         result.addError(complexType.getPosition(), "Should be a simple type, not a complex type.");
       }
     }
@@ -287,12 +300,12 @@ public class DefaultValidator implements Validator {
 
     XmlType xmlType = typeDef.getAnnotation(XmlType.class);
 
+    if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
+      result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
+    }
+
     boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition));
     if (needsNoArgConstructor && (xmlType != null)) {
-      if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
-        result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
-      }
-
       String factoryClassFqn = null;
       try {
         Class factoryClass = xmlType.factoryClass();
@@ -303,7 +316,7 @@ public class DefaultValidator implements Validator {
       catch (MirroredTypeException e) {
         TypeMirror typeMirror = e.getTypeMirror();
         if (!(typeMirror instanceof DeclaredType)) {
-          result.addError(typeDef.getPosition(), "Unrecognized type : " + typeMirror);
+          result.addError(typeDef.getPosition(), "Unsupported factory class: " + typeMirror);
         }
         factoryClassFqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
       }
@@ -454,7 +467,7 @@ public class DefaultValidator implements Validator {
     }
 
     QName ref = element.getRef();
-    if (ref != null) {
+    if (ref == null) {
       String elementNamespace = element.getNamespace();
       elementNamespace = elementNamespace == null ? "" : elementNamespace;
       String typeNamespace = element.getTypeDefinition().getNamespace();
@@ -472,7 +485,6 @@ public class DefaultValidator implements Validator {
 
         result.addError(element.getPosition(), message);
       }
-
     }
 
     if (element.isWrapped()) {
@@ -481,7 +493,7 @@ public class DefaultValidator implements Validator {
       String typeNamespace = element.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
       if (!wrapperNamespace.equals(typeNamespace)) {
-        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions.  The spec is unclear as ");
+        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions. ");
       }
     }
     
@@ -505,11 +517,6 @@ public class DefaultValidator implements Validator {
 
   public ValidationResult validateElementRef(ElementRef elementRef) {
     ValidationResult result = validateAccessor(elementRef);
-
-    if (elementRef.getChoices().isEmpty()) {
-      XmlTypeMirror baseType = elementRef.getBaseType();
-      result.addError(elementRef.getPosition(), "No root elements found for " + new QName(baseType.getNamespace(), baseType.getName()).toString() + ".");
-    }
 
     if ((elementRef.getAnnotation(XmlElement.class) != null) || (elementRef.getAnnotation(XmlElements.class) != null)) {
       result.addError(elementRef.getPosition(), "The xml element ref cannot be annotated also with XmlElement or XmlElements.");

@@ -10,6 +10,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.*;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -93,4 +95,7 @@ public class TestSchemaInfo extends InAPTTestCase {
     assertEquals("urn:ns5", importedSchemas.get(0).getNamespace());
   }
 
+  public static Test suite() {
+    return createSuite(TestSchemaInfo.class);
+  }
 }

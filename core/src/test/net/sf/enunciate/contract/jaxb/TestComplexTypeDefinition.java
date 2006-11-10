@@ -10,6 +10,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -51,5 +53,9 @@ public class TestComplexTypeDefinition extends InAPTTestCase {
       }
     };
     assertEquals(ContentType.EMPTY, emptyContentType.getContentType());
+  }
+
+  public static Test suite() {
+    return createSuite(TestComplexTypeDefinition.class);
   }
 }

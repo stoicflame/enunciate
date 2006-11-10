@@ -4,11 +4,10 @@ import net.sf.enunciate.samples.schema.BeanOne;
 import net.sf.enunciate.samples.schema.BeanTwo;
 import net.sf.enunciate.samples.schema.BeanThree;
 
-import javax.jws.Oneway;
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
+import javax.jws.*;
 import javax.jws.soap.SOAPBinding;
+import javax.xml.ws.Holder;
+import java.util.Collection;
 
 /**
  * @author Ryan Heaton
@@ -33,6 +32,14 @@ public class WebMethodExamples {
     return Boolean.TRUE;
   }
 
+  @WebMethod
+  @SOAPBinding (
+    use = SOAPBinding.Use.ENCODED
+  )
+  public Boolean encodedMethod() {
+    return Boolean.TRUE;
+  }
+
   @Oneway
   public Boolean nonVoidOneWayMethod() {
     return Boolean.TRUE;
@@ -46,12 +53,30 @@ public class WebMethodExamples {
   public void runtimeExceptionThrowingOneWayMethod() throws RuntimeException {
   }
 
+  public int headerCollectionParam(@WebParam(header = true) Collection<Integer> headerCollection) {
+    return 0;
+  }
+
+  @WebResult (
+    header = true
+  )
+  public Collection<Double> headerCollectionReturn(int param) {
+    return null;
+  }
+
   @SOAPBinding (
     style = SOAPBinding.Style.RPC,
     parameterStyle = SOAPBinding.ParameterStyle.BARE
   )
   public Boolean rpcBareMethod() {
     return Boolean.TRUE;
+  }
+
+  @SOAPBinding (
+    style = SOAPBinding.Style.RPC
+  )
+  public float rpcCollectionParam(int[] param) {
+    return 0;
   }
 
   @SOAPBinding (
@@ -68,7 +93,7 @@ public class WebMethodExamples {
   )
   public Boolean docBare2OutputMethod(
     @WebParam ( mode = WebParam.Mode.INOUT )
-    Boolean bool1, Boolean bool2) {
+    Holder<Boolean> bool1, Boolean bool2) {
     return Boolean.TRUE;
   }
 
@@ -103,9 +128,13 @@ public class WebMethodExamples {
   )
   public void docBareVoid2OutputMethod(
     @WebParam ( mode = WebParam.Mode.INOUT )
-    Boolean bool1,
+    Holder<Boolean> bool1,
     @WebParam ( mode = WebParam.Mode.INOUT )
-    Boolean bool2) {
+    Holder<Boolean> bool2) {
+  }
+
+  public void invalidInOutParameter ( @WebParam (mode = WebParam.Mode.INOUT) java.awt.Image hi) {
+
   }
 
   @WebMethod (
@@ -117,14 +146,22 @@ public class WebMethodExamples {
 
   }
 
-  public BeanThree docLitWrappedMethod(boolean b, int i, @WebParam(header = true) short s, @WebParam( mode = WebParam.Mode.INOUT ) char c) throws ExplicitFaultBean, ImplicitWebFault {
+  @WebResult (
+    name = "doc-lit-wrapped-return",
+    targetNamespace = "urn:docLitWrapped",
+    header = true,
+    partName = "doc-lit-wrapped-part"
+  )
+  public BeanThree docLitWrappedMethod(@WebParam(name = "hah", partName="hoo") boolean b, int i, @WebParam(header = true) short s,
+                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws ExplicitFaultBean, ImplicitWebFault {
     return null;
   }
 
   @SOAPBinding (
     style = SOAPBinding.Style.RPC
   )
-  public BeanThree rpcLitWrappedMethod(boolean b, int i, @WebParam(header = true) short s, @WebParam( mode = WebParam.Mode.INOUT ) char c) throws ExplicitFaultBean, ImplicitWebFault {
+  public BeanThree rpcLitWrappedMethod(@WebParam(name = "hah", partName="hoo") boolean b, int i, @WebParam(header = true) short s,
+                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws ExplicitFaultBean, ImplicitWebFault {
     return null;
   }
 

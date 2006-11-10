@@ -93,9 +93,7 @@ public class Enunciate {
     if (target >= Target.GENERATE.ordinal()) {
       File genDir = getGenerateDir();
       if (genDir == null) {
-        genDir = File.createTempFile("enunciate", "");
-        genDir.delete();
-        genDir.mkdirs();
+        genDir = createTempDir();
         setGenerateDir(genDir);
       }
 
@@ -105,9 +103,7 @@ public class Enunciate {
     if (target >= Target.COMPILE.ordinal()) {
       File destdir = getCompileDir();
       if (destdir == null) {
-        destdir = File.createTempFile("enunciate", "");
-        destdir.delete();
-        destdir.mkdirs();
+        destdir = createTempDir();
         setCompileDir(destdir);
       }
 
@@ -119,9 +115,7 @@ public class Enunciate {
     if (target >= Target.BUILD.ordinal()) {
       File buildDir = getBuildDir();
       if (buildDir == null) {
-        buildDir = File.createTempFile("enunciate", "");
-        buildDir.delete();
-        buildDir.mkdirs();
+        buildDir = createTempDir();
         setBuildDir(buildDir);
       }
 
@@ -131,7 +125,11 @@ public class Enunciate {
     }
 
     if (target >= Target.PACKAGE.ordinal()) {
-
+      File packageDir = getPackageDir();
+      if (packageDir == null) {
+        packageDir = createTempDir();
+        setPackageDir(packageDir);
+      }
 
       for (DeploymentModule deploymentModule : deploymentModules) {
         deploymentModule.step(Target.PACKAGE);
@@ -143,6 +141,14 @@ public class Enunciate {
     }
 
     //todo: now export the artifacts as specified on the command line. 
+  }
+
+  protected File createTempDir() throws IOException {
+    File genDir;
+    genDir = File.createTempFile("enunciate", "");
+    genDir.delete();
+    genDir.mkdirs();
+    return genDir;
   }
 
   /**

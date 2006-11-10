@@ -20,6 +20,8 @@ import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.beanutils.DynaBean;
+
 /**
  * @author Ryan Heaton
  */
@@ -321,7 +323,8 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertEquals(targetNamespace, schemaInfo.getNamespace());
     assertEquals("qualified", schemaInfo.getElementFormDefault());
     assertEquals("qualified", schemaInfo.getAttributeFormDefault());
-    assertEquals("There should have no new namespaces added.", nsCount, model.getNamespacesToPrefixes().size());
+    nsCount += 1;
+    assertEquals("There should have been 1 new namespace added.", nsCount, model.getNamespacesToPrefixes().size());
 
     assertEquals(3, model.rootElements.size());
     assertEquals(0, model.typeDefinitions.size());
@@ -352,7 +355,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     DeclaredType beanThreeType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("net.sf.enunciate.samples.anotherschema.BeanThree"));
     assertSame("The xml type for bean three should have been created.", mockXmlType, model.getXmlType(beanThreeType));
 
-    assertSame("The xml type for an actual class should have been created.", mockXmlType, model.getXmlType(getClass()));
+    assertSame("The xml type for an actual class should have been created.", mockXmlType, model.getXmlType(DynaBean.class));
   }
 
   private static class MockXmlType implements XmlTypeMirror {

@@ -9,4 +9,21 @@
     <path refid="core.libs"/>
   </path>
 
+  <property name="enunciate.modules.core.samples" value="${basedir}/src/samples/contract"/>
+
+  <target name="-init">
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
+      <path>
+        <path refid="build.classpath"/>
+      </path>
+    </pathconvert>
+
+    <propertyset id="test.sysprops">
+      <propertyref name="enunciate.modules.core.samples"/>
+      <propertyref name="apt.test.class.path"/>
+    </propertyset>
+  </target>
+
+  <target name="init" depends="base.init, -init"/>
+
 </project>

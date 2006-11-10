@@ -88,7 +88,7 @@ public class TestWebMethod extends InAPTTestCase {
     assertNotNull(docLitWrappedMethod.getWebResult());
     assertEquals(4, docLitWrappedMethod.getWebParameters().size());
     assertEquals(2, docLitWrappedMethod.getWebFaults().size());
-    assertEquals("There should be 5 web messages: 1 for in, 1 for out, 2 for faults, 1 for header.", 5, docLitWrappedMethod.getMessages().size());
+    assertEquals("There should be 5 web messages: 1 for in, 1 for out, 2 for faults, 2 for header.", 6, docLitWrappedMethod.getMessages().size());
     referencedNamespaces = docLitWrappedMethod.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
     assertTrue(referencedNamespaces.remove("http://services.samples.enunciate.sf.net/"));
@@ -128,7 +128,7 @@ public class TestWebMethod extends InAPTTestCase {
     assertEquals(2, rpcLitWrappedMethod.getWebFaults().size());
     assertEquals("There should be 5 web messages: 1 for in, 1 for out, 2 for faults, 1 for header.", 5, rpcLitWrappedMethod.getMessages().size());
     referencedNamespaces = rpcLitWrappedMethod.getReferencedNamespaces();
-    assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
+    assertFalse("The rpc method doesn't reference the namespace for the type declaration.", referencedNamespaces.contains("urn:web-method-examples"));
     assertTrue(referencedNamespaces.remove("http://services.samples.enunciate.sf.net/"));
     assertTrue(referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema"));
     assertTrue(referencedNamespaces.remove("")); //empty namespace for the explicit fault bean

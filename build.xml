@@ -89,8 +89,12 @@
     <path id="test.classpath">
       <path refid="build.classpath"/>
       <path refid="test.libs"/>
+      <pathelement location="${build.dir}"/>
+      <pathelement location="${test.build.dir}"/>
       <pathelement location="${conf.dir}"/>
     </path>
+
+    <propertyset id="test.sysprops"/>
 
     <available property="tools.exists" file="src/tools"/>
   </target>
@@ -154,8 +158,29 @@
     <jar jarfile="target/enunciate-${module.name}-tools-${enunciate.version}.jar" basedir="${tools.build.dir}"/>
   </target>
 
-  <target name="test" description="run the test cases" if="test.failure" depends="compile, -internal-test">
-    <fail message="There were test failures."/>
+  <target name="test" description="run the test cases" depends="compile, compile-tests">
+    <mkdir dir="${test.report.dir}"/>
+    <junit tempdir="target" printsummary="true" failureproperty="tests.failed" haltonerror="false" haltonfailure="false">
+      <classpath refid="test.classpath"/>
+      <syspropertyset refid="test.sysprops"/>
+      <formatter usefile="false" type="plain"/>
+      <formatter type="xml"/>
+
+      <batchtest todir="${test.report.dir}">
+        <fileset dir="src/test">
+          <include name="**/Test*"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${test.report.dir}">
+      <fileset dir="${test.report.dir}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${test.report.dir}/html"/>
+    </junitreport>
+
+    <fail if="tests.failed">There were test failures.</fail>
   </target>
 
   <target name="compile-tests">
@@ -174,17 +199,6 @@
         <include name="**/*.fmt"/>
       </fileset>
     </copy>
-  </target>
-
-  <target name="-internal-test" depends="compile-tests">
-    1. Gather the list of test classes to run.
-    2. Run any tests that are NOT specified as depending on any sample source.
-    3. For each sample source base, use the test deployment module to:
-        a. Run the "generate" tests.
-        b. Run the "compile" tests.
-        c. Run the "build" tests.
-        d. Run the "package" tests.
-    4. gather and compile all results into a single report.
   </target>
 
   <target name="clean" description="clean up">

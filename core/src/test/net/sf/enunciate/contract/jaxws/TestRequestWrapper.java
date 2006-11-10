@@ -6,6 +6,8 @@ import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -99,5 +101,9 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertSame(withHeaderWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".withHeader", withHeaderWrapper.getMessageName());
     assertEquals("withHeader", withHeaderWrapper.getPartName());
+  }
+
+  public static Test suite() {
+    return createSuite(TestRequestWrapper.class);
   }
 }

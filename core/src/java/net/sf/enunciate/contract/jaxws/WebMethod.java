@@ -74,6 +74,10 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
       }
     }
 
+    if (webResult.isHeader()) {
+      messages.add(webResult);
+    }
+
     if (bindingStyle == SOAPBinding.Style.DOCUMENT) {
       SOAPBinding.ParameterStyle parameterStyle = getSoapParameterStyle();
       if (parameterStyle == SOAPBinding.ParameterStyle.WRAPPED) {

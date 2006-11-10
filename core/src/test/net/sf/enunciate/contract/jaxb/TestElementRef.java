@@ -9,6 +9,8 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -286,4 +288,7 @@ public class TestElementRef extends TestElement {
     }
   }
 
+  public static Test suite() {
+    return createSuite(TestElementRef.class);
+  }
 }

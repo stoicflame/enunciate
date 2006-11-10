@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 /**
  * @author Ryan Heaton
  */
@@ -91,5 +93,9 @@ public class TestWsdlInfo extends InAPTTestCase {
     assertTrue(importedSchemas.remove(schema3));
     assertTrue(importedSchemas.remove(schema4));
     assertTrue(importedSchemas.isEmpty());
+  }
+
+  public static Test suite() {
+    return createSuite(TestWsdlInfo.class);
   }
 }
