@@ -17,7 +17,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   /**
    * @param webMethod The web method to wrap.
    */
-  protected RequestWrapper(WebMethod webMethod) {
+  public RequestWrapper(WebMethod webMethod) {
     this.webMethod = webMethod;
   }
 

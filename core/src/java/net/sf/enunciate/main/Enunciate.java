@@ -143,7 +143,7 @@ public class Enunciate {
     //todo: now export the artifacts as specified on the command line. 
   }
 
-  protected File createTempDir() throws IOException {
+  public File createTempDir() throws IOException {
     File genDir;
     genDir = File.createTempFile("enunciate", "");
     genDir.delete();

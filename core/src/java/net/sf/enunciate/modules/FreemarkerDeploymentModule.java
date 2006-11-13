@@ -44,7 +44,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * @param templateURL The template URL.
    * @param model       The root model.
    */
-  protected void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
+  public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(templateURL.toString());
@@ -57,7 +57,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * @param template The template.
    * @param model    The root model.
    */
-  protected void processTemplate(Template template, Object model) throws TemplateException, IOException {
+  public void processTemplate(Template template, Object model) throws TemplateException, IOException {
     template.process(model, new OutputStreamWriter(System.out));
   }
 
@@ -66,7 +66,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    *
    * @return The model for processing.
    */
-  protected EnunciateFreemarkerModel getModel() throws IOException {
+  public EnunciateFreemarkerModel getModel() throws IOException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
 
     if (model == null) {

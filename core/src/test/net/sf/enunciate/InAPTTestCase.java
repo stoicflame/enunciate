@@ -51,7 +51,7 @@ public abstract class InAPTTestCase extends TestCase {
         }
       };
 
-      invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getContractTestDir()));
+      invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getSamplesDir()));
       processorFactory.throwPossibleThrowable();
     }
     else {
@@ -59,22 +59,27 @@ public abstract class InAPTTestCase extends TestCase {
     }
   }
 
-  protected static ArrayList<String> getAptOptions() {
+  public static ArrayList<String> getAptOptions() {
     ArrayList<String> aptOpts = new ArrayList<String>();
     aptOpts.add("-cp");
-    String classpath = System.getProperty("apt.test.class.path");
-    if (classpath == null) {
-      classpath = System.getProperty("java.class.path");
-    }
+    String classpath = getInAPTClasspath();
     aptOpts.add(classpath);
     aptOpts.add("-nocompile");
     return aptOpts;
   }
 
-  private static File getContractTestDir() {
-    String subdir = System.getProperty("enunciate.modules.core.samples");
+  public static String getInAPTClasspath() {
+    String classpath = System.getProperty("apt.test.class.path");
+    if (classpath == null) {
+      classpath = System.getProperty("java.class.path");
+    }
+    return classpath;
+  }
+
+  protected static File getSamplesDir() {
+    String subdir = System.getProperty("in.apt.src.test.dir");
     if (subdir == null) {
-      throw new RuntimeException("A 'enunciate.modules.core.samples' property must be defined.");
+      throw new RuntimeException("A 'in.apt.src.test.dir' property must be defined.");
     }
     return new File(subdir);
   }
@@ -112,7 +117,7 @@ public abstract class InAPTTestCase extends TestCase {
             }
           };
 
-          invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getContractTestDir()));
+          invokeAPT(processorFactory, getAptOptions(), getAllJavaFiles(getSamplesDir()));
         }
         else {
           testSuite.run(result);

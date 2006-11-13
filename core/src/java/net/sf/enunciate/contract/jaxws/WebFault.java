@@ -34,7 +34,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   private final javax.xml.ws.WebFault annotation;
   private final RootElementDeclaration explicitFaultBean;
 
-  protected WebFault(ClassDeclaration delegate) {
+  public WebFault(ClassDeclaration delegate) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);

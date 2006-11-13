@@ -19,7 +19,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   /**
    * @param webMethod The web method to wrap.
    */
-  protected ResponseWrapper(WebMethod webMethod) {
+  public ResponseWrapper(WebMethod webMethod) {
     this.webMethod = webMethod;
   }
 

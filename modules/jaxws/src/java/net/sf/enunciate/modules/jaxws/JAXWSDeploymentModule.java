@@ -33,8 +33,6 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
-    model.setObjectWrapper(new DefaultObjectWrapper());
-
     Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
     URL requestBeanTemplate = JAXWSDeploymentModule.class.getResource("request-bean.fmt");
