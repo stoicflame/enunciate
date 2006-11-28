@@ -1,12 +1,11 @@
 package net.sf.enunciate.modules.xml;
 
+import net.sf.enunciate.contract.jaxb.Attribute;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.Element;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.BaseValidator;
 import net.sf.enunciate.contract.validation.ValidationResult;
-
-import javax.xml.bind.annotation.XmlElementWrapper;
 
 /**
  * Validator for the xml module.
@@ -75,24 +74,44 @@ public class XMLValidator extends BaseValidator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = super.validateComplexType(complexType);
 
-    for (Element element : complexType.getElements()) {
-      if (element.isWrapped()) {
-        XmlElementWrapper wrapper = element.getAnnotation(XmlElementWrapper.class);
+    String typeNamespace = complexType.getNamespace();
+    typeNamespace = typeNamespace == null ? "" : typeNamespace;
 
-        String namespace = wrapper.namespace();
-        String typeNamespace = element.getTypeDefinition().getNamespace();
-        //use the empty string for comparison in the case of the empty namespace.
-        if (namespace == null) {
-          namespace = "";
+    for (Element element : complexType.getElements()) {
+      if (element.getRef() == null) {
+        String elementNamespace = element.getNamespace();
+        elementNamespace = elementNamespace == null ? "" : elementNamespace;
+
+        if (!elementNamespace.equals(typeNamespace)) {
+          String message = "Enunciate doesn't support elements of different namespaces than their type definitions.  The namespace ["
+            + elementNamespace + "] of element [" + element.getName() + "] has a different namespace than [" + typeNamespace + "] of definition [" +
+            element.getTypeDefinition().getName() + "].  You'll need to make this element an element ref.";
+
+          if ("".equals(elementNamespace)) {
+            message += " It could also be that you intended for elements to have the same namespace as their type definitions by default.  Unfortunately, the " +
+              "JAXB spec says that in order to do that, you have to explicitly state the elementFormDefault to be 'qualified' with an @XmlSchema annotation at " +
+              "the package-level.";
+          }
+
+          result.addError(element.getPosition(), message);
         }
-        if (typeNamespace == null) {
-          typeNamespace = "";
-        }
+      }
+
+      if (element.isWrapped()) {
+        String namespace = element.getWrapperNamespace();
+        namespace = namespace == null ? "" : namespace;
 
         if ((!"##default".equals(namespace)) && (!typeNamespace.equals(namespace))) {
           result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of a different namespace than their containing type definition.  " +
             "The spec is unclear as to why this should be allowed because you could just use an @XmlElement annotation to accomplish the same thing with more clarity.");
         }
+      }
+    }
+
+    for (Attribute attribute : complexType.getAttributes()) {
+      if (attribute.getRef() != null) {
+        result.addError(attribute.getPosition(), "Enunciate doesn't support attribute refs.  The namespace of the attribute must match the namespace of the " +
+          "containing complex type definition.");
       }
     }
 

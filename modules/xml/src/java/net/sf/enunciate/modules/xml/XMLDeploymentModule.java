@@ -13,6 +13,15 @@ import net.sf.enunciate.modules.xml.config.WsdlConfig;
 import net.sf.enunciate.modules.xml.config.XMLRuleSet;
 import org.apache.commons.digester.RuleSet;
 
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.SAXParser;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,6 +36,7 @@ import java.util.Map;
  */
 public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
+  private boolean prettyPrint = true;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
@@ -87,8 +97,11 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
       //make sure each wsdl has a "file" property.
-      String file = ns2prefix.get(wsdlInfo.getTargetNamespace()) + ".wsdl";
-      wsdlInfo.setProperty("file", file);
+      String prefix = ns2prefix.get(wsdlInfo.getTargetNamespace());
+      if (prefix != null) {
+        String file = prefix + ".wsdl";
+        wsdlInfo.setProperty("file", file);
+      }
     }
 
     for (SchemaConfig customConfig : this.schemaConfigs) {
@@ -129,22 +142,62 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     File artifactDir = new File(enunciate.getGenerateDir(), "xml");
 
-    HashMap<String, File> ns2artifact = new HashMap<String, File>();
+    HashMap<String, File> ns2wsdlArtifact = new HashMap<String, File>();
     HashMap<String, File> service2artifact = new HashMap<String, File>();
     for (WsdlInfo wsdl : ns2wsdl.values()) {
       String file = (String) wsdl.getProperty("file");
-      ns2artifact.put(wsdl.getTargetNamespace(), new File(artifactDir, file));
+      File wsdlFile = new File(artifactDir, file);
+      ns2wsdlArtifact.put(wsdl.getTargetNamespace(), wsdlFile);
       for (EndpointInterface endpointInterface : wsdl.getEndpointInterfaces()) {
-        service2artifact.put(endpointInterface.getServiceName(), new File(artifactDir, file));
+        service2artifact.put(endpointInterface.getServiceName(), wsdlFile);
+      }
+
+      if (prettyPrint) {
+        prettyPrint(wsdlFile);
       }
     }
 
+    HashMap<String, File> ns2schemaArtifact = new HashMap<String, File>();
     for (SchemaInfo schemaInfo : ns2schema.values()) {
-      service2artifact.put(schemaInfo.getNamespace(), new File(artifactDir, (String) schemaInfo.getProperty("file")));
+      File schemaFile = new File(artifactDir, (String) schemaInfo.getProperty("file"));
+      ns2schemaArtifact.put(schemaInfo.getNamespace(), schemaFile);
+      if (prettyPrint) {
+        prettyPrint(schemaFile);
+      }
     }
 
-    getEnunciate().setProperty("xml.ns2artifact", ns2artifact);
-    getEnunciate().setProperty("xml.service2artifact", service2artifact);
+    getEnunciate().setProperty("xml.ns2schema", ns2schemaArtifact);
+    getEnunciate().setProperty("xml.ns2wsdl", ns2wsdlArtifact);
+    getEnunciate().setProperty("xml.service2wsdl", service2artifact);
+  }
+
+  /**
+   * Pretty-prints the specified xml file.
+   *
+   * @param file The file to pretty-print.
+   */
+  protected void prettyPrint(File file) {
+    try {
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      factory.setNamespaceAware(false);
+      SAXParser parser = factory.newSAXParser();
+      File prettyFile = File.createTempFile("enunciate", file.getName());
+      parser.parse(file, new PrettyPrinter(prettyFile));
+
+      if (file.delete()) {
+        enunciate.copyFile(prettyFile, file);
+      }
+      else {
+        System.err.println("Unable to delete " + file.getAbsolutePath() + ".  Skipping pretty-print transformation....");
+      }
+    }
+    catch (Exception e) {
+      //fall through... skip pretty printing.
+      System.err.println("Unable to pretty-print " + file.getAbsolutePath() + " (" + e.getMessage() + ").  Skipping pretty-print transformation....");
+      if (enunciate.isDebug()) {
+        e.printStackTrace(System.err);
+      }
+    }
   }
 
   @Override
@@ -168,5 +221,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public int getOrder() {
     return 1;
+  }
+
+  /**
+   * Whether to pretty-print the xml.
+   *
+   * @param prettyPrint Whether to pretty-print the xml.
+   */
+  public void setPrettyPrint(boolean prettyPrint) {
+    this.prettyPrint = prettyPrint;
   }
 }

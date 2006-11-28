@@ -33,7 +33,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   private final Collection<WebFault> webFaults;
   private final Collection<WebMessage> messages;
 
-  protected WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
+  public WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.jws.WebMethod.class);

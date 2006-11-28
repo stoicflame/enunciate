@@ -60,7 +60,7 @@
 [#macro processTypeDef typeDef]
   [#--simple type definition--]
   [#if typeDef.simple]
-<${xs}:simpleType name="${typeDef.name}">
+<${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
     [#if typeDef.docComment?exists]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -77,7 +77,7 @@
 
   [#--enum type definition--]
   [#elseif typeDef.enum]
-<${xs}:simpleType name="${typeDef.name}">
+<${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
     [#if typeDef.docComment?exists]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -94,7 +94,7 @@
 
   [#--complex type definition--]
   [#elseif typeDef.complex]
-<${xs}:complexType name="${typeDef.name}"[#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
+<${xs}:complexType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if][#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
     [#if typeDef.docComment?exists]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -159,7 +159,7 @@
                 </${xs}:annotation>
               [/#if]
                 [@processTypeDef typeDef=element.baseType.typeDefinition/]
-              </${xs}:elment>
+              </${xs}:element>
             [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
               [#if element.docComment?exists]
@@ -200,7 +200,15 @@
         [/#if]
       </${xs}:attribute>
       [#else]
-      <${xs}:attribute required="${attribute.required}" type="${attribute.baseTye.qname}"/>
+      <${xs}:attribute name="${attribute.name}" required="${attribute.required?string}" type="${attribute.baseType.qname}">
+        [#if attribute.docComment?exists]
+        <${xs}:annotation>
+          <${xs}:documentation>
+            ${attribute.javaDoc?trim}
+          </${xs}:documentation>
+        </${xs}:annotation>
+        [/#if]
+      </${xs}:attribute>
       [/#if]
     [/#list]
 [#t]

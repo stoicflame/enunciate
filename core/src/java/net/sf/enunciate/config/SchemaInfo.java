@@ -142,10 +142,12 @@ public class SchemaInfo {
 
       for (Element element : typeDefinition.getElements()) {
         referencedNamspaces.add(element.getNamespace());
-        referencedNamspaces.add(element.getBaseType().getNamespace());
         QName ref = element.getRef();
         if (ref != null) {
           referencedNamspaces.add(ref.getNamespaceURI());
+        }
+        else {
+          referencedNamspaces.add(element.getBaseType().getNamespace());
         }
       }
 

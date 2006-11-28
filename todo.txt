@@ -10,6 +10,7 @@ Modules:
   SMTP Transport
   Jabber/IM Transport
   Messaging
+  HTML test form (like .NET)
 Config options:
   soap endpoint addresses
   Option to not inline request/response wrappers into the wsdl.

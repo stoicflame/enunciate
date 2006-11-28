@@ -9,6 +9,8 @@ import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**
+ * Outputs the qname in the form of "prefix:namespace".  The prefix is looked up in the model.
+ *  
  * @author Ryan Heaton
  */
 public class QNameModel extends StringModel {
@@ -36,7 +38,7 @@ public class QNameModel extends StringModel {
    * @param namespace The namespace for which to lookup the prefix.
    * @return The namespace prefix.
    */
-  protected static String lookupPrefix(String namespace) {
+  protected String lookupPrefix(String namespace) {
     if ((namespace == null) || ("".equals(namespace))) {
       return null;
     }

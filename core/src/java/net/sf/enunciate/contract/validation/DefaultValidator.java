@@ -468,23 +468,8 @@ public class DefaultValidator implements Validator {
 
     QName ref = element.getRef();
     if (ref == null) {
-      String elementNamespace = element.getNamespace();
-      elementNamespace = elementNamespace == null ? "" : elementNamespace;
       String typeNamespace = element.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
-      if (!elementNamespace.equals(typeNamespace)) {
-        String message = "Enunciate doesn't support elements of different namespaces than their type definitions.  The namespace ["
-          + elementNamespace + "] of element [" + element.getName() + "] has a different namespace than [" + typeNamespace + "] of definition [" +
-          element.getTypeDefinition().getName() + "].  You'll need to make this element an element ref.";
-
-        if ("".equals(elementNamespace)) {
-          message += " It could also be that you intended for elements to have the same namespace as their type definitions by default.  Unfortunately, the " +
-            "JAXB spec says that in order to do that, you have to explicitly state the elementFormDefault to be 'qualified' with an @XmlSchema annotation at " +
-            "the package-level.";
-        }
-
-        result.addError(element.getPosition(), message);
-      }
     }
 
     if (element.isWrapped()) {
@@ -549,13 +534,47 @@ public class DefaultValidator implements Validator {
     }
 
     if (accessor.getAnnotation(XmlIDREF.class) != null) {
-      XmlTypeMirror baseType = accessor.getBaseType();
-      if ((!(baseType instanceof XmlClassType)) || (((XmlClassType) baseType).getTypeDefinition().getXmlID() == null)) {
+      TypeMirror accessorType = accessor.getBareAccessorType();
+      boolean validIDREF = false;
+      if (accessorType instanceof ClassType) {
+        validIDREF = hasXmlID((ClassType) accessorType);
+      }
+
+      if (!validIDREF) {
         result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
       }
     }
 
     return result;
+  }
+
+  /**
+   * A quick method to see if any fields or methods are annotated with @XmlID.  This method does
+   * NOT determine whether the field or method is a valid accessor before checking for @XmlID. Not
+   * perfect, but probably good enough for now.
+   *
+   * @param classType The class type.
+   * @return Whether any fields of methods are annotated with @XmlID.
+   */
+  protected boolean hasXmlID(ClassType classType) {
+    ClassDeclaration declaration = classType.getDeclaration();
+    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName()))) {
+      return false;
+    }
+
+    for (FieldDeclaration field : declaration.getFields()) {
+      if (field.getAnnotation(XmlID.class) != null) {
+        return true;
+      }
+    }
+
+    for (MethodDeclaration method : declaration.getMethods()) {
+      if (method.getAnnotation(XmlID.class) != null) {
+        return true;
+      }
+    }
+
+    return hasXmlID(classType.getSuperclass());
   }
 
   public ValidationResult validateXmlID(Accessor accessor) {

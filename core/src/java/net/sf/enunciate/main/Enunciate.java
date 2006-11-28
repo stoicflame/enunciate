@@ -76,6 +76,15 @@ public class Enunciate {
   }
 
   /**
+   * Construct an enunciate mechanism on the specified source files.
+   *
+   * @param sourceFiles The source files.
+   */
+  public Enunciate(List<String> sourceFiles) {
+    this.sourceFiles = sourceFiles.toArray(new String[sourceFiles.size()]);
+  }
+
+  /**
    * Execute the mechanism.
    */
   public void execute() throws EnunciateException, IOException {

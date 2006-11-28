@@ -35,8 +35,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.schema = new Schema(delegate.getPackage());
 
     ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder());
-    AccessorFilter filter = new AccessorFilter(getAccessType());
     SortedSet<Element> elementAccessors = new TreeSet<Element>(comparator);
+    AccessorFilter filter = new AccessorFilter(getAccessType());
     Collection<Attribute> attributeAccessors = new ArrayList<Attribute>();
     Value value = null;
 

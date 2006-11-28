@@ -166,6 +166,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     HashSet<File> xmlArtifacts = new HashSet<File>();
     HashMap<String, String> ns2XmlResource = new HashMap<String, String>();
+    the xml module has changed... now there are 3 maps...
     HashMap<String, File> ns2artifact = (HashMap<String, File>) enunciate.getProperty("xml.ns2artifact");
     if (ns2artifact != null) {
       for (String ns : ns2artifact.keySet()) {

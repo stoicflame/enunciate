@@ -296,6 +296,8 @@ Template library for WSDL.
 --]
 [#macro processSOAPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
+      [#--todo: make this address a known token so the server-side code can process it.--]
+      [#--todo: add an option to state this address statically.--]
       <${soap}:address location="TBD"/>
     </port>
 [/#macro]
@@ -307,6 +309,8 @@ Template library for WSDL.
 --]
 [#macro processHTTPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}HTTPPort" binding="${tns}:${endpointInterface.simpleName}HTTPBinding">
+      [#--todo: make this address a known token so the server-side code can process it.--]
+      [#--todo: add an option to state this address statically.--]
       <${http}:address location="TBD"/>
     </port>
 [/#macro]
