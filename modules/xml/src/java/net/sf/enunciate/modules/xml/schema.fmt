@@ -132,7 +132,7 @@
               [#elseif elementChoice.baseType.anonymous]
                 <${xs}:element name="${elementChoice.name}">
                   [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
-                </${xs}:elment>
+                </${xs}:element>
               [#else]
                 <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
               [/#if]
@@ -140,7 +140,7 @@
               </${xs}:choice>
           [#else]
             [#if element.ref?exists]
-              <${xs}:element name="${element.name}" ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
               [#if element.docComment?exists]
               <${xs}:annotation>
                 <${xs}:documentation>
@@ -159,6 +159,19 @@
                 </${xs}:annotation>
               [/#if]
                 [@processTypeDef typeDef=element.baseType.typeDefinition/]
+              </${xs}:element>
+            [#elseif element.xmlList]
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              [#if element.docComment?exists]
+                <${xs}:annotation>
+                  <${xs}:documentation>
+                    ${element.javaDoc?trim}
+                  </${xs}:documentation>
+                </${xs}:annotation>
+              [/#if]
+                <${xs}:simpleType>
+                  <${xs}:list itemType="${element.baseType.qname}"/>
+                </${xs}:simpleType>
               </${xs}:element>
             [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
