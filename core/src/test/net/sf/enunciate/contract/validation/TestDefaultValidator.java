@@ -473,14 +473,6 @@ public class TestDefaultValidator extends InAPTTestCase {
     Element element = new Element(property1, typeDef);
     assertTrue("An typed collection element shouldn't have multiple XmlElements.", validator.validateElement(element).hasErrors());
     assertEquals(1, accessorCounter.getCount());
-
-    PropertyDeclaration property2 = propIt.next();
-    element = new Element(property2, typeDef);
-    assertTrue("A child element should not be valid if it has a different namspace.", validator.validateElement(element).hasErrors());
-
-    PropertyDeclaration property3 = propIt.next();
-    element = new Element(property3, typeDef);
-    assertTrue("An element wrapper should not be allowed to have a different namespace than the type def.", validator.validateElement(element).hasErrors());
   }
 
   /**

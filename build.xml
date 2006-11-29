@@ -8,6 +8,7 @@
   <property name="docs.dir" value="${enunciate.basedir}/docs"/>
   <property name="javadoc.dir" value="${docs.dir}/api"/>
   <property name="enunciate.version" value="1.0-alpha1"/>
+  <property name="enunciate.sample.src.dir" value="${enunciate.basedir}/src/samples"/>
 
   <!--global references to other modules-->
   <property name="core.basedir" value="${enunciate.basedir}/core"/>

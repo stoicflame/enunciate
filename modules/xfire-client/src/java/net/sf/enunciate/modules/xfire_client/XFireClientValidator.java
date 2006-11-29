@@ -9,6 +9,7 @@ import net.sf.enunciate.contract.validation.ValidationResult;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
+import java.util.ArrayList;
 
 /**
  * The validator for the xfire-client module.
@@ -44,20 +45,13 @@ public class XFireClientValidator extends BaseValidator {
   }
 
   public void validateTypeDefinition(TypeDefinition typeDef, ValidationResult result) {
-    for (Attribute attribute : typeDef.getAttributes()) {
-      if ((attribute.getAnnotation(XmlIDREF.class) != null) && (attribute.getAnnotation(XmlList.class) != null)) {
-        result.addError(attribute.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
-      }
-    }
-
-    Value value = typeDef.getValue();
-    if ((value != null) && (value.getAnnotation(XmlIDREF.class) != null) && (value.getAnnotation(XmlList.class) != null)) {
-      result.addError(value.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
-    }
-
-    for (Element element : typeDef.getElements()) {
-      if ((element.getAnnotation(XmlIDREF.class) != null) && (element.getAnnotation(XmlList.class) != null)) {
-        result.addError(element.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
+    ArrayList<Accessor> accessors = new ArrayList<Accessor>();
+    accessors.addAll(typeDef.getAttributes());
+    accessors.add(typeDef.getValue());
+    accessors.addAll(typeDef.getElements());
+    for (Accessor accessor : accessors) {
+      if ((accessor != null) && (accessor.getAnnotation(XmlIDREF.class) != null) && (accessor.getAnnotation(XmlList.class) != null)) {
+        result.addError(accessor.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
       }
     }
   }

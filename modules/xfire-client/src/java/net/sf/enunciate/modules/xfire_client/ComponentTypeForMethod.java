@@ -7,7 +7,6 @@ import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
