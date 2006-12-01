@@ -2,33 +2,30 @@ package net.sf.enunciate.modules.xfire_client.annotations;
 
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
 
-import java.io.*;
-import java.beans.XMLEncoder;
-import java.beans.XMLDecoder;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @author Ryan Heaton
  */
 public class SerializableWebServiceAnnotation extends WebServiceAnnotation implements Serializable {
 
-  private SerializableWebServiceAnnotation temp;
-
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-    XMLEncoder encoder = new XMLEncoder(bytesOut);
-    encoder.writeObject(this);
-    encoder.close();
-    out.writeObject(bytesOut.toByteArray());
+    out.writeObject(getEndpointInterface());
+    out.writeObject(getName());
+    out.writeObject(getPortName());
+    out.writeObject(getServiceName());
+    out.writeObject(getTargetNamespace());
+    out.writeObject(getWsdlLocation());
   }
 
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-    byte[] bytesIn = (byte[]) in.readObject();
-    XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(bytesIn));
-    this.temp = (SerializableWebServiceAnnotation) decoder.readObject();
-    decoder.close();
+    setEndpointInterface((String) in.readObject());
+    setName((String) in.readObject());
+    setPortName((String) in.readObject());
+    setServiceName((String) in.readObject());
+    setTargetNamespace((String) in.readObject());
+    setWsdlLocation((String) in.readObject());
   }
 
-  Object readResolve() throws ObjectStreamException {
-    return temp;
-  }
 }
