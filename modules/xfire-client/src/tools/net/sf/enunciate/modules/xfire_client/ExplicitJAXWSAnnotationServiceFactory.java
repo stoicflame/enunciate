@@ -6,6 +6,8 @@ import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
 import org.codehaus.xfire.XFireRuntimeException;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
+import org.codehaus.xfire.annotations.WebMethodAnnotation;
+import org.codehaus.xfire.annotations.WebServiceAnnotation;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.service.FaultInfo;
@@ -156,11 +158,24 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    * @return The input message name.
    */
   protected QName createInputMessageName(final OperationInfo op) {
+    //get the default (just in case)...
+    QName inputMessageName = super.createInputMessageName(op);
+
+    //start by assuming this is an rpc-style method invocation, in which case the message name will be the
+    //operation name.
+    WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(op.getMethod().getDeclaringClass());
+    WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(op.getMethod());
+    if ((webServiceAnnotation != null) && (webMethodAnnotation != null)) {
+      inputMessageName = new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
+    }
+
+    //But if this is a document-style invocation, there will be a request wrapper annotation, too.
     RequestWrapperAnnotation requestWrapper = annotations.getRequestWrapperAnnotation(op.getMethod());
     if (requestWrapper != null) {
-      return new QName(requestWrapper.targetNamespace(), requestWrapper.localName());
+      inputMessageName = new QName(requestWrapper.targetNamespace(), requestWrapper.localName());
     }
-    return super.createInputMessageName(op);
+
+    return inputMessageName;
   }
 
   /**
@@ -171,10 +186,22 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    * @return The output message name.
    */
   protected QName createOutputMessageName(final OperationInfo op) {
+    //start with the default (just in case)...
+    QName outputMessageName = super.createOutputMessageName(op);
+
+    //start by assuming this is an rpc-style method invocation, in which case the message name will be the
+    //operation name.
+    WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(op.getMethod().getDeclaringClass());
+    WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(op.getMethod());
+    if ((webServiceAnnotation != null) && (webMethodAnnotation != null)) {
+      outputMessageName = new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
+    }
+
+    //But if this is a document-style invocation, there will be a response wrapper annotation.
     ResponseWrapperAnnotation responseWrapper = annotations.getResponseWrapperAnnotation(op.getMethod());
     if (responseWrapper != null) {
-      return new QName(responseWrapper.targetNamespace(), responseWrapper.localName());
+      outputMessageName = new QName(responseWrapper.targetNamespace(), responseWrapper.localName());
     }
-    return super.createOutputMessageName(op);
+    return outputMessageName;
   }
 }

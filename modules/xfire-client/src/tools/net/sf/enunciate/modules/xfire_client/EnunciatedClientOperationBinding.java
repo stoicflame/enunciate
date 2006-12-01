@@ -35,8 +35,8 @@ import java.util.List;
  * <ul>
  *   <li>The operation is document/literal BARE.  In this case, the parameters are JAXB root elements and are used
  *       as the in and out messages</li>
- *   <li>The operation is document/literal WRAPPED.  In this case, the operations have request/response beans as defined by
- *       JAXWS.  However, the added constraint for the request/response beans is that they must be
+ *   <li>The operation is WRAPPED.  In this case, the operations (including the RPC operations) have request/response
+ *       beans as defined by JAXWS.  However, the added constraint for the request/response beans is that they must be
  *       {@link net.sf.enunciate.modules.xfire_client.GeneratedWrapperBean}s so they can be correctly (de)serialized.</li>
  * </ul>
  *

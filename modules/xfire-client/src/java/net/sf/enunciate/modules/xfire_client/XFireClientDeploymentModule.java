@@ -114,6 +114,18 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
               processTemplate(responseBeanTemplate, model);
               typeList.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
             }
+            else if (webMessage instanceof RPCInputMessage) {
+              RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
+              model.put("message", new RPCInputRequestBeanAdapter(rpcInputMessage));
+              processTemplate(responseBeanTemplate, model);
+              typeList.add(getBeanName(classnameFor, rpcInputMessage.getRequestBeanName()));
+            }
+            else if (webMessage instanceof RPCOutputMessage) {
+              RPCOutputMessage outputMessage = ((RPCOutputMessage) webMessage);
+              model.put("message", new RPCOutputResponseBeanAdapter(outputMessage));
+              processTemplate(responseBeanTemplate, model);
+              typeList.add(getBeanName(classnameFor, outputMessage.getResponseBeanName()));
+            }
             else if (webMessage instanceof WebFault) {
               allFaults.add((WebFault) webMessage);
             }
