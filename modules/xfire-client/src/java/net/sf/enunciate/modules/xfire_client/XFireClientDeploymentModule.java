@@ -18,6 +18,7 @@ import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
+import org.codehaus.xfire.annotations.HandlerChainAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import javax.jws.soap.SOAPBinding;
@@ -29,7 +30,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Deployment module for XFire.
+ * Deployment module for the XFire client code.
  *
  * @author Ryan Heaton
  */
@@ -122,7 +123,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
     }
-    enunciate.setProperty("client.annotations", annotations);
 
     //process the gathered web faults.
     for (WebFault webFault : allFaults) {
@@ -153,13 +153,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
         typeList.add(classnameFor.convert(typeDefinition));
       }
-
-      //todo: the jdk1.4 client code needs to also generate the third-party classes that are referenced by these classes
-      //todo: or the jdk1.4 generation needs to just fail.
     }
-    enunciate.setProperty("client.type.list", typeList);
 
     //todo: generate the JDK 1.5 client code.
+
+    enunciate.setProperty("client.annotations", annotations);
+    enunciate.setProperty("client.type.list", typeList);
   }
 
   protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, EndpointInterface ei, ClientClassnameForMethod conversion) {
@@ -178,7 +177,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     sbAnnotation.setUse(ei.getSoapUse() == SOAPBinding.Use.ENCODED ? SOAPBindingAnnotation.USE_ENCODED : SOAPBindingAnnotation.USE_LITERAL);
     annotations.class2SOAPBinding.put(clazz, sbAnnotation);
 
-    SerializableHandlerChainAnnotation hcAnnotation = null; //todo: support this?
+    HandlerChainAnnotation hcAnnotation = null; //todo: support this?
 
   }
 
@@ -240,8 +239,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       SerializableWebParamAnnotation wpAnnotation = new SerializableWebParamAnnotation();
       wpAnnotation.setHeader(webParam.isHeader());
       wpAnnotation.setMode(webParam.getMode() == javax.jws.WebParam.Mode.INOUT ? WebParamAnnotation.MODE_INOUT : webParam.getMode() == javax.jws.WebParam.Mode.OUT ? WebParamAnnotation.MODE_OUT : WebParamAnnotation.MODE_IN);
-      wpAnnotation.setName(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getLocalPart() : webParam.getPartName());
-      wpAnnotation.setTargetNamespace(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? webParam.getTypeQName().getNamespaceURI() : webMethod.getDeclaringEndpointInterface().getTargetNamespace());
+      wpAnnotation.setName(webParam.getElementName());
       wpAnnotation.setPartName(webParam.getPartName());
       annotations.method2WebParam.put(String.format("%s.%s", methodKey, i), wpAnnotation);
       i++;
@@ -270,6 +268,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk14Files.addAll(typeFiles);
 
     enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4"), jdk14Files.toArray(new String[jdk14Files.size()]));
+
     List<String> typeList = (List<String>) enunciate.getProperty("client.type.list");
     if (typeList == null) {
       throw new EnunciateException("The client type list wasn't generated.");

@@ -64,7 +64,7 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
 
   // Inherited.
   public ${classnameFor(webMethod.returnType)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param.type)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if] {
-    [#if !webMethod.returnType.void]return [/#if] proxy.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]); 
+    [#if !webMethod.returnType.void]return [/#if]proxy.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]); 
   }
   [/@forEachWebMethod]
 }

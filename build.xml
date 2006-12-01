@@ -92,6 +92,7 @@
       <path refid="test.libs"/>
       <pathelement location="${build.dir}"/>
       <pathelement location="${test.build.dir}"/>
+      <pathelement location="${tools.build.dir}"/>
       <pathelement location="${conf.dir}"/>
     </path>
 

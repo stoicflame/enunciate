@@ -8,20 +8,19 @@ import org.codehaus.xfire.aegis.type.Type;
 import org.codehaus.xfire.fault.XFireFault;
 
 import javax.xml.namespace.QName;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.ArrayList;
 
 /**
  * An XFire type for a generated wrapper bean.
  *
  * @author Ryan Heaton
+ * @see GeneratedWrapperBean
  */
 public class GeneratedWrapperBeanType extends Type {
 
@@ -144,7 +143,6 @@ public class GeneratedWrapperBeanType extends Type {
   // Inherited.
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
     QName wrapperQName = ((GeneratedWrapperBean) object).getWrapperQName();
-    MessageWriter elementWriter = writer.getElementWriter(wrapperQName);
     for (int n = 0; n < beanProperties.length; n++) {
       PropertyDescriptor property = beanProperties[n];
       Method getter = property.getReadMethod();
@@ -159,14 +157,15 @@ public class GeneratedWrapperBeanType extends Type {
       if (propertyValue != null) {
         Class propertyType = getter.getReturnType();
         QName propertyQName = new QName(wrapperQName.getNamespaceURI(), property.getName());
-        MessageWriter propertyWriter = elementWriter.getElementWriter(propertyQName);
         if (propertyType.isArray()) {
           Class componentType = propertyType.getComponentType();
           Type type = getTypeMapping().getType(componentType);
           int length = Array.getLength(propertyValue);
           for (int i = 0; i < length; i++) {
+            MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
             Object item = Array.get(propertyValue, i);
             type.writeObject(item, propertyWriter, context);
+            propertyWriter.close();
           }
         }
         else if (Collection.class.isAssignableFrom(propertyType)) {
@@ -179,20 +178,23 @@ public class GeneratedWrapperBeanType extends Type {
           }
           Type type = getTypeMapping().getType(componentType);
 
-          Iterator it = ((Collection) object).iterator();
+          Iterator it = ((Collection) propertyValue).iterator();
           while (it.hasNext()) {
             Object item = it.next();
+            MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
             type.writeObject(item, propertyWriter, context);
+            propertyWriter.close();
           }
         }
         else {
+          MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
           Type type = getTypeMapping().getType(propertyType);
           type.writeObject(propertyValue, propertyWriter, context);
+          propertyWriter.close();
         }
-        propertyWriter.close();
       }
     }
-    elementWriter.close();
+    writer.close();
   }
 
 }

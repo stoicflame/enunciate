@@ -14,6 +14,8 @@ import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.util.ClassLoaderUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.beans.BeanInfo;
@@ -27,15 +29,34 @@ import java.util.List;
 
 /**
  * The binding for a JAXWS operation.
+ * <p/>
+ * This operation binding can makes the special assumption that its operations conform to one of the following schemes:
+ *
+ * <ul>
+ *   <li>The operation is document/literal BARE.  In this case, the parameters are JAXB root elements and are used
+ *       as the in and out messages</li>
+ *   <li>The operation is document/literal WRAPPED.  In this case, the operations have request/response beans as defined by
+ *       JAXWS.  However, the added constraint for the request/response beans is that they must be
+ *       {@link net.sf.enunciate.modules.xfire_client.GeneratedWrapperBean}s so they can be correctly (de)serialized.</li>
+ * </ul>
  *
  * @author Ryan Heaton
  */
 public class EnunciatedClientOperationBinding implements MessageSerializer {
 
+  private static final Log LOG = LogFactory.getLog(EnunciatedClientOperationBinding.class);
+
   private final WrapperBeanInfo requestInfo;
   private final WrapperBeanInfo responseInfo;
   private final ExplicitWebAnnotations annotations;
 
+  /**
+   * Construct an operation binding for the specified operation info.  Annotations are needed to
+   * determine how to read and write the operation's message.
+   *
+   * @param annotations The metadata to use for (de)serializing the message.
+   * @param op The operation.
+   */
   public EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, OperationInfo op) throws XFireFault {
     this.annotations = annotations;
     this.requestInfo = getRequestInfo(op);
@@ -43,10 +64,23 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   /**
+   * Construct an operation binding with the specified metadata.
+   *
+   * @param annotations The annotations.
+   * @param requestInfo The request info.
+   * @param responseInfo The response info.
+   */
+  protected EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, WrapperBeanInfo requestInfo, WrapperBeanInfo responseInfo) {
+    this.annotations = annotations;
+    this.requestInfo = requestInfo;
+    this.responseInfo = responseInfo;
+  }
+
+  /**
    * Loads the set of input properties for the specified operation.
    *
    * @param op The operation.
-   * @return The input properties.
+   * @return The input properties, or null if the request info wasn't found.
    */
   protected WrapperBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
     Method method = op.getMethod();
@@ -76,7 +110,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       wrapperClass = ClassLoaderUtils.loadClass(requestWrapperClassName, getClass());
     }
     catch (ClassNotFoundException e) {
-      throw new XFireFault("Unable to load class " + requestWrapperClassName, XFireFault.RECEIVER);
+      LOG.debug("Unabled to find request wrapper class " + requestWrapperClassName + "... Operation " + op.getQName() + " will not be able to send...");
+      return null;
     }
 
     return new WrapperBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
@@ -116,7 +151,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       wrapperClass = ClassLoaderUtils.loadClass(responseWrapperClassName, getClass());
     }
     catch (ClassNotFoundException e) {
-      throw new XFireFault("Unable to load class " + responseWrapperClassName, XFireFault.RECEIVER);
+      LOG.debug("Unabled to find response wrapper class " + responseWrapperClassName + "... Operation " + op.getQName() + " will not be able to recieve...");
+      return null;
     }
 
     return new WrapperBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
@@ -162,6 +198,10 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   public void readMessage(InMessage message, MessageContext context) throws XFireFault {
+    if (this.responseInfo == null) {
+      throw new XFireFault("Message cannot be read: no response info was found.", XFireFault.RECEIVER);
+    }
+
     WrapperBeanInfo wrapperBeanInfo = this.responseInfo;
     Class wrapperClass = wrapperBeanInfo.getWrapperClass();
     Service service = context.getService();
@@ -187,6 +227,10 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   public void writeMessage(OutMessage message, XMLStreamWriter writer, MessageContext context) throws XFireFault {
+    if (this.requestInfo == null) {
+      throw new XFireFault("Message cannot be sent: no request info was found.", XFireFault.RECEIVER);
+    }
+
     WrapperBeanInfo wrapperBeanClass = this.requestInfo;
     Class wrapperClass = wrapperBeanClass.getWrapperClass();
     Object wrapper;

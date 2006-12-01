@@ -50,6 +50,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
           }
         }
         typeArgs.append(">");
+        conversion += typeArgs;
       }
     }
 

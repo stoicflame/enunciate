@@ -6,25 +6,20 @@ package ${packageFor(endpointInterface) + ".impl"};
 
 import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 
-import net.sf.enunciate.modules.xfire_client.EnunciatedClientSoapSerializerHandler;
-import net.sf.enunciate.modules.xfire_client.ExplicitJAXWSAnnotationServiceFactory;
-import org.codehaus.xfire.XFire;
-import org.codehaus.xfire.XFireFactory;
-import org.codehaus.xfire.client.Client;
-import org.codehaus.xfire.client.XFireProxyFactory;
-import org.codehaus.xfire.service.Service;
-import org.codehaus.xfire.transport.TransportManager;
-import org.codehaus.xfire.transport.http.SoapHttpTransport;
+import net.sf.enunciate.modules.xfire_client.EnunciatedSOAPWebServiceImpl;
 
 /**
  * Implementation of the {@link ${endpointInterface.simpleName}}.
  *
  * @author Ryan Heaton
  */
-public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.simpleName} {
+public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServiceImpl implements ${endpointInterface.simpleName} {
 
   private final ${endpointInterface.simpleName} proxy;
 
+  /**
+   * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("http://${defaultHost}:${defaultPort}${defaultContext}soap/${endpointInterface.serviceName}").
+   */
   public ${endpointInterface.simpleName}Impl() {
     this("http://${defaultHost}:${defaultPort}${defaultContext}soap/${endpointInterface.serviceName}");
   }
@@ -41,34 +36,20 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
     this("http://" + ((host == null) ? "${defaultHost}" : host) + ":" + ((port == null) ? new Integer(${defaultPort}) : port) + ((context == null) ? "${defaultContext}soap/${endpointInterface.serviceName}" : context));
   }
 
+  /**
+   * Construct a ${endpointInterface.simpleName} that points to the specified endpoint.
+   *
+   * @param endpoint The endpoint to point to.
+   */
   public ${endpointInterface.simpleName}Impl(String endpoint) {
-    XFire xFire = XFireFactory.newInstance().getXFire();
-    TransportManager transportManager = xFire.getTransportManager();
-
-    Service service;
-    try {
-      ExplicitJAXWSAnnotationServiceFactory factory = new ExplicitJAXWSAnnotationServiceFactory("${uuid}", transportManager);
-      service = factory.create(${endpointInterface.simpleName}.class);
-    }
-    catch (Exception e) {
-      throw new IllegalStateException(e);
-    }
-
-    SoapHttpTransport soapTransport = new SoapHttpTransport();
-    if (!soapTransport.isUriSupported(endpoint)) {
-      throw new IllegalArgumentException("Endpoint " + endpoint + " is not a supported SOAP endpoint.");
-    }
-    soapTransport.addOutHandler(new EnunciatedClientSoapSerializerHandler());
-
-    Client client = new Client(soapTransport, service, endpoint);
-    proxy = (${endpointInterface.simpleName}) new XFireProxyFactory(xFire).create(client);
+    this.proxy = (${endpointInterface.simpleName}) loadProxy(${endpointInterface.simpleName}.class, "${uuid}", endpoint);
   }
 
   [@forEachWebMethod]
 
   // Inherited.
   public ${classnameFor(webMethod.returnType)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param.type)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if] {
-    [#if !webMethod.returnType.void]return [/#if] proxy.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]); 
+    [#if !webMethod.returnType.void]return [/#if]proxy.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]); 
   }
   [/@forEachWebMethod]
 }

@@ -47,7 +47,7 @@ public class ${simpleBeanName} implements net.sf.enunciate.modules.xfire_client.
       System.arraycopy(oldArray, 0, this.${childElement.elementName}, 0, oldArray.length);
     }
 
-    this.${childElement.elementName}[this.${childElement.elementName}.length] = item;
+    this.${childElement.elementName}[this.${childElement.elementName}.length - 1] = item;
   }
     [#elseif childElement.type.collection]
   /**

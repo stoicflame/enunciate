@@ -23,7 +23,8 @@ public class ListParser extends AbstractMessageReader {
   private String value;
 
   /**
-   * Construct a list parser that will parse a space-separated xml list into a list of the specified type.
+   * Construct a list parser that will parse a space-separated xml list into a list of the specified type.  Because a
+   * component type must be known, The listType must be an array in this case.
    *
    * @param value       The space-separated list xml list.
    * @param listType    The type of list.

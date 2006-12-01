@@ -18,7 +18,7 @@ import java.util.Iterator;
  * <p/>
  * Every time a value is written to this ListWriter, it's string form is appended
  * to a whitespace-separated list.  The value of this list can be retrieved from
- * the
+ * the {@link #getValue} method.
  *
  * @author Ryan Heaton
  */

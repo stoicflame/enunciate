@@ -30,6 +30,7 @@
   </target>
 
   <target name="init" depends="base.init, -init"/>
+
   <target name="compile-main" depends="base.compile-main">
     <mkdir dir="${build.dir}/META-INF/services"/>
     <echo message="net.sf.enunciate.modules.xml.XMLDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>

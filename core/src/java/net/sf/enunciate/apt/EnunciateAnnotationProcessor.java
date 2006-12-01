@@ -128,6 +128,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     //todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
+    //todo: read the config file for packages of type declarations that aren't in the source base to preload as xml type definitions (use jaxb.index or ObjectFactory.class)
 
     validate(model);
 

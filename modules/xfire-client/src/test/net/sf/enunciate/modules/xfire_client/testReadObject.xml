@@ -1,0 +1,12 @@
+<bean xmlns="urn:generated-wrapper-bean-example">
+  <simple>1234.5678</simple>
+  <strings>string1</strings>
+  <strings>string2</strings>
+  <strings>string3</strings>
+  <strings>string4</strings>
+  <integers>1000</integers>
+  <integers>200</integers>
+  <integers>9876</integers>
+  <integers>400</integers>
+  <integers>3</integers>
+</bean>

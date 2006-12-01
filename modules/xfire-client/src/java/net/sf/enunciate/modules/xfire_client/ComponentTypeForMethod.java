@@ -3,8 +3,10 @@ package net.sf.enunciate.modules.xfire_client;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import java.util.Collection;
 import java.util.Map;
@@ -29,8 +31,8 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
     if (typeMirror instanceof ArrayType) {
       return super.convert(((ArrayType) typeMirror).getComponentType());
     }
-    else if (typeMirror instanceof DecoratedTypeMirror) {
-      DecoratedTypeMirror decoratedTypeMirror = ((DecoratedTypeMirror) typeMirror);
+    else if (typeMirror instanceof DeclaredType) {
+      DecoratedTypeMirror decoratedTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
       if (decoratedTypeMirror.isCollection()) {
         DeclaredType declaredType = (DeclaredType) typeMirror;
         Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();

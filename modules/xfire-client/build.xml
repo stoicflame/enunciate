@@ -15,7 +15,26 @@
     <fileset dir="${core.basedir}/target">
       <include name="${jar.pattern}"/>
     </fileset>
+    <pathelement location="${core.basedir}/target/test-classes"/>
   </path>
+
+  <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xfire-client"/>
+
+  <target name="-init">
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
+      <path>
+        <path refid="build.classpath"/>
+      </path>
+    </pathconvert>
+
+    <propertyset id="test.sysprops">
+      <propertyref name="in.apt.src.test.dir"/>
+      <propertyref name="enunciate.sample.src.dir"/>
+      <propertyref name="apt.test.class.path"/>
+    </propertyset>
+  </target>
+
+  <target name="init" depends="base.init, -init"/>
 
   <target name="compile-main" depends="base.compile-main">
     <mkdir dir="${build.dir}/META-INF/services"/>
