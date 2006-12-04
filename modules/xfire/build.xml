@@ -17,7 +17,7 @@
     <pathelement location="${core.basedir}/target/test-classes"/>
   </path>
 
-  <property name="in.apt.src.test.dir" value="${basedir}/src/samples"/>
+  <property name="in.apt.src.test.dir" value="${basedir}/src/examples"/>
 
   <target name="-init">
     <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
