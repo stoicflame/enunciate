@@ -17,8 +17,8 @@ import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
-import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.HandlerChainAnnotation;
+import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import javax.jws.soap.SOAPBinding;
@@ -117,7 +117,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
             else if (webMessage instanceof RPCInputMessage) {
               RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
               model.put("message", new RPCInputRequestBeanAdapter(rpcInputMessage));
-              processTemplate(responseBeanTemplate, model);
+              processTemplate(requestBeanTemplate, model);
               typeList.add(getBeanName(classnameFor, rpcInputMessage.getRequestBeanName()));
             }
             else if (webMessage instanceof RPCOutputMessage) {

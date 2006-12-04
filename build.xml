@@ -245,7 +245,7 @@
     </antcall>
   </target>
 
-  <target name="enunciate-example-api" depends="jar" description="enunciate an example api.">
+  <target name="enunciate-example-api" depends="jar-main, jar-tools" description="enunciate an example api.">
     <fail unless="enunciate.target">
       You must specify an enunciate target.
     </fail>
@@ -253,6 +253,7 @@
     <!--the name of the example to deploy.-->
     <property name="example" value="basic"/>
     <property name="example.dir" value="${enunciate.basedir}/src/samples/${example}"/>
+    <property name="example.enunciate.xml" value="${example.dir}/enunciate.xml"/>
     <property name="example.gen.dir" value="target/examples/${example}/gen"/>
     <property name="example.compile.dir" value="target/examples/${example}/classes"/>
     <property name="example.build.dir" value="target/examples/${example}/build"/>
@@ -277,7 +278,7 @@
 
     <enunciate verbose="true" target="${enunciate.target}"
                basedir="${example.dir}"
-               configFile="${example.dir}/enunciate.xml"
+               configFile="${example.enunciate.xml}"
                generateDir="${example.gen.dir}"
                compileDir="${example.compile.dir}"
                buildDir="${example.build.dir}"

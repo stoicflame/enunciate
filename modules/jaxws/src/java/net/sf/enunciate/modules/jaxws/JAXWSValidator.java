@@ -4,10 +4,12 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.BaseValidator;
 import net.sf.enunciate.contract.validation.ValidationResult;
+import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.Context;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Validator for the xml module.
@@ -20,19 +22,23 @@ public class JAXWSValidator extends BaseValidator {
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
     HashSet<String> jaxwsBeans = new HashSet<String>();
-
+    TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new ClassDeclarationComparator());
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
         if (webMessage instanceof RequestWrapper) {
           result.aggregate(validateRequestWrapper((RequestWrapper) webMessage, jaxwsBeans));
         }
         else if (webMessage instanceof ResponseWrapper) {
-          result.aggregate(validateResponseWrapper((ResponseWrapper)webMessage, jaxwsBeans));
+          result.aggregate(validateResponseWrapper((ResponseWrapper) webMessage, jaxwsBeans));
         }
         else if (webMessage instanceof WebFault) {
-          result.aggregate(validateWebFault((WebFault) webMessage, jaxwsBeans));
+          faultSet.add((WebFault) webMessage);
         }
       }
+    }
+
+    for (WebFault webFault : faultSet) {
+      result.aggregate(validateWebFault(webFault, jaxwsBeans));
     }
 
     return result;
@@ -41,7 +47,7 @@ public class JAXWSValidator extends BaseValidator {
   /**
    * Validates a request wrapper.
    *
-   * @param wrapper The wrapper.
+   * @param wrapper        The wrapper.
    * @param alreadyVisited The list of bean names already visited.
    * @return The validation result.
    */
@@ -58,14 +64,14 @@ public class JAXWSValidator extends BaseValidator {
       result.addError(wrapper.getWebMethod().getPosition(), requestBeanName + " is an existing class.  Either move it, or customize the request bean " +
         "class name with the @RequestWrapper annotation.");
     }
-    
+
     return result;
   }
 
   /**
    * Validates a response wrapper.
    *
-   * @param wrapper The wrapper.
+   * @param wrapper        The wrapper.
    * @param alreadyVisited The list of bean names already visited.
    * @return The validation result.
    */
@@ -89,14 +95,14 @@ public class JAXWSValidator extends BaseValidator {
   /**
    * Validates a web fault.
    *
-   * @param webFault The web fault to validate.
+   * @param webFault       The web fault to validate.
    * @param alreadyVisited The bean names that have alrady been visited.
    * @return The validation result.
    */
   public ValidationResult validateWebFault(WebFault webFault, Set<String> alreadyVisited) {
     AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
     ValidationResult result = new ValidationResult();
-    
+
     if (webFault.isImplicitSchemaElement()) {
       String faultBeanFQN = webFault.getImplicitFaultBeanQualifiedName();
       if (!alreadyVisited.add(faultBeanFQN)) {

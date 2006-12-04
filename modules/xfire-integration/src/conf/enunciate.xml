@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<enunciate label="full">
+  <namespaces>
+    <namespace id="data" uri="http://enunciate.sf.net/samples/genealogy/data"/>
+    <namespace id="cite" uri="http://enunciate.sf.net/samples/genealogy/cite"/>
+    <namespace id="full" uri="http://enunciate.sf.net/samples/full"/>
+  </namespaces>
+  <modules>
+    <xfire-client uuid="full.example">
+      <package-conversions>
+        <convert from="net.sf.enunciate.samples.genealogy" to="net.sf.enunciate.samples.genealogy.client"/>
+      </package-conversions>
+    </xfire-client>
+    <xfire uuid="full.example"/>
+  </modules>
+</enunciate>

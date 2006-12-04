@@ -1,10 +1,13 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import net.sf.enunciate.contract.jaxws.*;
+import net.sf.enunciate.contract.jaxws.ImplicitChildElement;
+import net.sf.enunciate.contract.jaxws.ImplicitRootElement;
+import net.sf.enunciate.contract.jaxws.RPCInputMessage;
+import net.sf.enunciate.contract.jaxws.WebMessagePart;
 
 import javax.xml.namespace.QName;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * For all intents and purposes, an RPC/literal input message can be processed (at runtime) as if it is
@@ -52,6 +55,15 @@ public class RPCInputRequestBeanAdapter implements ImplicitRootElement {
    */
   public String getElementName() {
     return this.rpcMessage.getOperationName();
+  }
+
+  /**
+   * The element namespace for the implicit rpc element.
+   *
+   * @return The element namespace for the implicit rpc element.
+   */
+  public String getElementNamespace() {
+    return this.rpcMessage.getTargetNamespace();
   }
 
   /**

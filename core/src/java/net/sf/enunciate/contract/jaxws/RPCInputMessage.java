@@ -31,6 +31,15 @@ public class RPCInputMessage implements WebMessage {
   }
 
   /**
+   * The target namespace of the rpc message.
+   *
+   * @return The target namespace of the rpc message.
+   */
+  public String getTargetNamespace() {
+    return webMethod.getDeclaringEndpointInterface().getTargetNamespace();
+  }
+
+  /**
    * This doesn't have anything to do with the spec, but can be used in case a bean is needed to be
    * generated for an RPC input message.  The bean name will be generated in accordance with the instructions
    * given in the specification that apply to document/literal wrapped request beans.

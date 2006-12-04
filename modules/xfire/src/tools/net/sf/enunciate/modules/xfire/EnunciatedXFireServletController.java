@@ -55,7 +55,7 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
    */
   @Override
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
-    String artifact = xmlLookup.getArtifactForService(service);
+    String artifact = xmlLookup.getWsdlResourceForService(service);
     response.sendRedirect("/" + artifact);
   }
 }

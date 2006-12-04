@@ -1,7 +1,10 @@
 package net.sf.enunciate.modules.xfire_client;
 
+import com.sun.mirror.type.TypeMirror;
 import net.sf.enunciate.contract.jaxws.ImplicitChildElement;
 import net.sf.enunciate.contract.jaxws.WebMessagePart;
+import net.sf.enunciate.contract.jaxws.WebParam;
+import net.sf.enunciate.contract.jaxws.WebResult;
 
 import javax.xml.namespace.QName;
 
@@ -62,5 +65,21 @@ public class RPCPartChildElementAdapter implements ImplicitChildElement {
   public String getElementDocs() {
     return this.rpcPart.getPartDocs();
   }
-  
+
+  /**
+   * The java type of this part.
+   *
+   * @return The java type of this part.
+   */
+  public TypeMirror getType() {
+    if (this.rpcPart instanceof WebParam) {
+      return ((WebParam) this.rpcPart).getType();
+    }
+    else if (this.rpcPart instanceof WebResult) {
+      return ((WebResult) this.rpcPart).getType();
+    }
+    else {
+      return null;
+    }
+  }
 }

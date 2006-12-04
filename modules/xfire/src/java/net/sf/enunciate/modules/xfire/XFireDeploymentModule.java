@@ -78,7 +78,9 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     Enunciate enunciate = getEnunciate();
-    File propertyNamesFile = new File(new File(enunciate.getGenerateDir(), "xfire"), this.uuid + ".property.names");
+    File genDir = new File(enunciate.getGenerateDir(), "xfire");
+    genDir.mkdirs();
+    File propertyNamesFile = new File(genDir, this.uuid + ".property.names");
     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(propertyNamesFile));
     oos.writeObject(parameterNames);
     oos.flush();
@@ -153,11 +155,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: copy any additional files as resources (specified in the config);
 
-    //todo: copy any additional jars (specified in the config)?
-
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
     //copy the web.xml file to WEB-INF.
+    //todo: merge the specified web.xml with another specified in the config?
     enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
 
     //copy the xfire config file from the xfire configuration directory to the WEB-INF directory.
@@ -165,33 +166,46 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 
     HashSet<File> xmlArtifacts = new HashSet<File>();
-    HashMap<String, String> ns2XmlResource = new HashMap<String, String>();
-    the xml module has changed... now there are 3 maps...
-    HashMap<String, File> ns2artifact = (HashMap<String, File>) enunciate.getProperty("xml.ns2artifact");
-    if (ns2artifact != null) {
-      for (String ns : ns2artifact.keySet()) {
-        File artifact = ns2artifact.get(ns);
+    HashMap<String, String> ns2schemaResource = new HashMap<String, String>();
+    HashMap<String, File> ns2schema = (HashMap<String, File>) enunciate.getProperty("xml.ns2schema");
+    if (ns2schema != null) {
+      for (String ns : ns2schema.keySet()) {
+        File artifact = ns2schema.get(ns);
         String resourceName = getXmlResourceName(artifact);
-        ns2XmlResource.put(ns, resourceName);
+        ns2schemaResource.put(ns, resourceName);
         xmlArtifacts.add(artifact);
       }
     }
     else {
-      System.err.println("WARNING: No XML artifacts for the namespaces of the project were found.  WSDL publication will be disabled.");
+      System.err.println("WARNING: No schemas for the namespaces of the project were found.  Schema publication will be disabled.");
     }
 
-    HashMap<String, File> service2artifact = (HashMap<String, File>) enunciate.getProperty("xml.service2artifact");
-    HashMap<String, String> service2XmlResource = new HashMap<String, String>();
-    if (service2artifact != null) {
-      for (String service : service2artifact.keySet()) {
-        File artifact = service2artifact.get(service);
+    HashMap<String, String> ns2wsdlResource = new HashMap<String, String>();
+    HashMap<String, File> ns2wsdl = (HashMap<String, File>) enunciate.getProperty("xml.ns2wsdl");
+    if (ns2wsdl != null) {
+      for (String ns : ns2wsdl.keySet()) {
+        File artifact = ns2wsdl.get(ns);
         String resourceName = getXmlResourceName(artifact);
-        service2XmlResource.put(service, resourceName);
+        ns2wsdlResource.put(ns, resourceName);
         xmlArtifacts.add(artifact);
       }
     }
     else {
-      System.err.println("WARNING: No XML artifacts for the services of the project were found.  WSDL publication will be disabled.");
+      System.err.println("WARNING: No wsdls for the namespaces of the project were found.  WSDL publication will be disabled.");
+    }
+
+    HashMap<String, File> service2wsdl = (HashMap<String, File>) enunciate.getProperty("xml.service2wsdl");
+    HashMap<String, String> service2WsdlResource = new HashMap<String, String>();
+    if (service2wsdl != null) {
+      for (String service : service2wsdl.keySet()) {
+        File wsdl = service2wsdl.get(service);
+        String resourceName = getXmlResourceName(wsdl);
+        service2WsdlResource.put(service, resourceName);
+        xmlArtifacts.add(wsdl);
+      }
+    }
+    else {
+      System.err.println("WARNING: No wsdls for the services of the project were found.  WSDL publication will be disabled.");
     }
 
     for (File artifact : xmlArtifacts) {
@@ -199,7 +213,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       enunciate.copyFile(artifact, new File(webinfClasses, resourceName));
     }
 
-    XMLAPILookup lookup = new XMLAPILookup(ns2XmlResource, service2XmlResource);
+    XMLAPILookup lookup = new XMLAPILookup(ns2wsdlResource, ns2schemaResource, service2WsdlResource);
     lookup.store(new FileOutputStream(new File(webinfClasses, "xml.lookup")));
   }
 

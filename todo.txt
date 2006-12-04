@@ -5,16 +5,15 @@ Modules:
   C/C++
   AJAX/Javascript
   Axis 2
-  Mule (ESB)
+  ESB, ServiceMix
   WS-*
   SMTP Transport
   Jabber/IM Transport
   Messaging
   HTML test form (like .NET)
+  RELAX NG
 Config options:
   soap endpoint addresses
   Option to not inline request/response wrappers into the wsdl.
 Additional Features:
-  XFire: support RPC/Literal
   @XmlTypeAdapter Support
-  Support IN/OUT, OUT parameters

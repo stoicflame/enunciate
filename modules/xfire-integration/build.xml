@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar" name="xfire" basedir=".">
+
+  <path id="build.classpath">
+
+    <path refid="base.libs"/>
+    <path refid="core.libs"/>
+    <path refid="xfire.libs"/>
+    <path refid="xfire.server.libs"/>
+    <path refid="xfire.client.libs"/>
+
+    <fileset dir="${core.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
+    <fileset dir="${modules.jaxws.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
+    <fileset dir="${modules.xml.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
+    <fileset dir="${modules.xfire-client.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
+    <fileset dir="${modules.xfire.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
+  </path>
+
+  <import file="../../build.xml"/>
+
+  <!--no-op because there are no java sources.  this is a test module.-->
+  <target name="compile-main"/>
+  <target name="jar-main"/>
+  <target name="jar-tools"/>
+
+  <target name="enunciate-full-api" depends="init">
+    <antcall target="enunciate-example-api">
+      <param name="example" value="full"/>
+      <param name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
+      <param name="enunciate.target" value="package"/>
+    </antcall>
+  </target>
+
+</project>

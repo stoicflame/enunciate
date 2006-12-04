@@ -10,12 +10,14 @@ import java.util.HashMap;
  */
 public class XMLAPILookup implements Serializable {
 
-  private final HashMap<String, String> ns2artifact;
-  private final HashMap<String, String> service2artifact;
+  private final HashMap<String, String> ns2wsdl;
+  private final HashMap<String, String> ns2schema;
+  private final HashMap<String, String> service2wsdl;
 
-  XMLAPILookup(HashMap<String, String> ns2artifact, HashMap<String, String> service2artifact) {
-    this.ns2artifact = ns2artifact;
-    this.service2artifact = service2artifact;
+  XMLAPILookup(HashMap<String, String> ns2wsdl, HashMap<String, String> ns2schema, HashMap<String, String> service2wsdl) {
+    this.ns2wsdl = ns2wsdl;
+    this.ns2schema = ns2schema;
+    this.service2wsdl = service2wsdl;
   }
 
   /**
@@ -32,7 +34,7 @@ public class XMLAPILookup implements Serializable {
       return lookup;
     }
     catch (Exception e) {
-      return new XMLAPILookup(new HashMap<String, String>(), new HashMap<String, String>());
+      return new XMLAPILookup(new HashMap<String, String>(), new HashMap<String, String>(), new HashMap<String, String>());
     }
   }
 
@@ -53,19 +55,28 @@ public class XMLAPILookup implements Serializable {
    * @param service The service.
    * @return The artifact for the service.
    */
-  public String getArtifactForService(String service) {
-    return service2artifact.get(service);
+  public String getWsdlResourceForService(String service) {
+    return service2wsdl.get(service);
   }
 
   /**
-   * Get the artifact for the specified namespace.
+   * Get the schema resource for the specified namespace.
    *
    * @param namespace The namespace.
-   * @return The artifact for the namespace.
+   * @return The schema resource for the namespace.
    */
-  public String getArtifactForNamespace(String namespace) {
-    return ns2artifact.get(namespace);
+  public String getSchemaResourceForNamespace(String namespace) {
+    return ns2schema.get(namespace);
   }
 
+  /**
+   * Get the wsdl resource for the specified namespace.
+   *
+   * @param namespace The namespace.
+   * @return The wsdl resource for the namespace.
+   */
+  public String getWsdlResourceForNamespace(String namespace) {
+    return ns2wsdl.get(namespace);
+  }
 
 }
