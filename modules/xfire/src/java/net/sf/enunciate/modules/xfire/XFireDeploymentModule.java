@@ -10,6 +10,7 @@ import net.sf.enunciate.contract.jaxws.WebMethod;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
+import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
 import org.apache.commons.digester.RuleSet;
@@ -21,6 +22,10 @@ import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+
+import sun.misc.Service;
+
+import javax.servlet.ServletContext;
 
 /**
  * Deployment module for XFire.
@@ -357,12 +362,12 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       //exclude enunciate-core.jar
       return true;
     }
-    else if (loader.findResource("net/sf/enunciate/modules/xml/XMLDeploymentModule.class") != null) {
-      //exclude enunciate-xml.jar
+    else if (loader.findResource(ServletContext.class.getName().replace('.', '/').concat(".class")) != null) {
+      //exclude the servlet api.
       return true;
     }
-    else if (loader.findResource(XFireDeploymentModule.class.getName().replace('.', '/').concat(".class")) != null) {
-      //exclude enunciate-xfire.jar
+    else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
+      //exclude by default any deployment module libraries.
       return true;
     }
 

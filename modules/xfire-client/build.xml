@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="enunciate" basedir=".">
+<project default="jar" name="xfire-client" basedir=".">
 
   <property name="tools.compiler" value="1.4"/>
 

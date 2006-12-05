@@ -88,7 +88,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if type.attributes?size > 0]
     ${classname} instance = (${classname}) object;
       [#list type.attributes as attribute]
-    [#if !attribute_first]else [/#if]if ("${attribute.namespace?default("")}".equals(name.getNamespaceURI()) && ("${attribute.name}".equals(name.getLocalPart()))) {
+    [#if attribute_index > 0]else [/#if]if ("${attribute.namespace?default("")}".equals(name.getNamespaceURI()) && ("${attribute.name}".equals(name.getLocalPart()))) {
         [#if attribute.xmlList]
           [#if attribute.accessorType.collection]
       ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute.accessorType)}.class, ${classnameFor(attribute.collectionItemType)}.class, getTypeMapping(), context);
@@ -322,7 +322,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   }
 
   public QName getSchemaType() {
-    return new QName("${type.namespace?default("")}", "${type.name}");
+    return new QName("${type.namespace?default("")}", "${type.name?default("")}");
   }
 }
 [/@file]

@@ -65,6 +65,15 @@ public class WsdlInfo {
   }
 
   /**
+   * The properties of the wsdl info.
+   *
+   * @return The properties of the wsdl info.
+   */
+  public HashMap<String, Object> getProperties() {
+    return properties;
+  }
+
+  /**
    * Get the imported namespaces used by this WSDL.
    *
    * @return The imported namespaces used by this WSDL.

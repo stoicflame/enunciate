@@ -123,6 +123,15 @@ public class SchemaInfo {
   }
 
   /**
+   * The properties for the schema.
+   *
+   * @return The properties for the schema.
+   */
+  public HashMap<String, Object> getProperties() {
+    return properties;
+  }
+
+  /**
    * The imported namespace of a specific schema.
    *
    * @return The imported namespace of a specific schema.

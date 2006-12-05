@@ -17,10 +17,11 @@
     <property name="urlMap">
       <map>
   [@forEachWsdl]
-
+    [#if wsdl.properties['file']?exists] [#--The wsdl file might not have been generated.--]
         <entry key="${wsdl.properties['file']}">
           <ref bean="wsdlHandler"/>
         </entry>
+    [/#if]
     [@forEachEndpointInterface]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
@@ -55,10 +56,11 @@
 
         <!-- all schema files will be handled by the schema handler -->
   [@forEachSchema]
-
+    [#if schema.properties['file']?exists]  [#--The schema file might not have been generated.--]
         <entry key="${schema.properties['file']}">
           <ref bean="schemaHandler"/>
         </entry>
+    [/#if]
   [/@forEachSchema]
       </map>
     </property>

@@ -69,6 +69,7 @@
 
   <target name="init" description="initializes and verifies some properties">
     <mkdir dir="${lib.dir}"/>
+    <mkdir dir="target"/>
 
     <property file="${user.home}/.enunciate/build.properties"/>
     <property name="module.name" value="${ant.project.name}"/>
