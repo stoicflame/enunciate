@@ -56,9 +56,9 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
       }
     };
 
-    EnunciatedClientOperationBinding.WrapperBeanInfo info = binding.getRequestInfo(op);
-    assertEquals(getClass(), info.getWrapperClass());
-    assertNull(info.getProperties());
+    EnunciatedClientOperationBinding.OperationBeanInfo info = binding.getRequestInfo(op);
+    assertEquals(getClass(), info.getBeanClass());
+    assertNull(info.getPropertyOrder());
   }
 
   /**
@@ -77,9 +77,9 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
       }
     };
 
-    EnunciatedClientOperationBinding.WrapperBeanInfo info = binding.getRequestInfo(op);
-    assertEquals(DummyMethod.class, info.getWrapperClass());
-    assertNull(info.getProperties());
+    EnunciatedClientOperationBinding.OperationBeanInfo info = binding.getRequestInfo(op);
+    assertEquals(DummyMethod.class, info.getBeanClass());
+    assertNull(info.getPropertyOrder());
   }
 
   /**
@@ -99,9 +99,9 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
       }
     };
 
-    EnunciatedClientOperationBinding.WrapperBeanInfo info = binding.getResponseInfo(op);
-    assertEquals(getClass(), info.getWrapperClass());
-    assertNull(info.getProperties());
+    EnunciatedClientOperationBinding.OperationBeanInfo info = binding.getResponseInfo(op);
+    assertEquals(getClass(), info.getBeanClass());
+    assertNull(info.getPropertyOrder());
   }
 
   /**
@@ -120,9 +120,9 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
       }
     };
 
-    EnunciatedClientOperationBinding.WrapperBeanInfo info = binding.getResponseInfo(op);
-    assertEquals(DummyMethodResponse.class, info.getWrapperClass());
-    assertNull(info.getProperties());
+    EnunciatedClientOperationBinding.OperationBeanInfo info = binding.getResponseInfo(op);
+    assertEquals(DummyMethodResponse.class, info.getBeanClass());
+    assertNull(info.getPropertyOrder());
   }
 
   /**
@@ -171,8 +171,8 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
     messageObject.setOut(4);
 
     ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
-    EnunciatedClientOperationBinding.WrapperBeanInfo wrapperInfo = new EnunciatedClientOperationBinding.WrapperBeanInfo(DummyMethod.class, Introspector.getBeanInfo(DummyMethod.class, Object.class).getPropertyDescriptors());
-    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, null, wrapperInfo);
+    EnunciatedClientOperationBinding.OperationBeanInfo operationInfo = new EnunciatedClientOperationBinding.OperationBeanInfo(DummyMethod.class, Introspector.getBeanInfo(DummyMethod.class, Object.class).getPropertyDescriptors());
+    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, null, operationInfo);
     MessageContext context = new MessageContext();
     Service service = new Service(new ServiceInfo(null, null));
     DefaultTypeMappingRegistry registry = new DefaultTypeMappingRegistry(true);
@@ -214,8 +214,8 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
     });
     //property order will be: and, back, in, of, order, out
 
-    EnunciatedClientOperationBinding.WrapperBeanInfo wrapperInfo = new EnunciatedClientOperationBinding.WrapperBeanInfo(DummyMethod.class, pds);
-    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, wrapperInfo, null);
+    EnunciatedClientOperationBinding.OperationBeanInfo operationInfo = new EnunciatedClientOperationBinding.OperationBeanInfo(DummyMethod.class, pds);
+    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, operationInfo, null);
     OutMessage outMessage = new OutMessage("uri:out");
     outMessage.setBody(new Object[] {new Short((short) 10), new Float(9), new Double(8), Boolean.FALSE, "dummy", new Integer(7)});
     MessageContext context = new MessageContext();

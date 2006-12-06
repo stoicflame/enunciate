@@ -5,6 +5,7 @@ import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.Validator;
@@ -163,7 +164,13 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
         processTemplate(template, model);
 
-        typeList.add(classnameFor.convert(typeDefinition));
+        if (!typeDefinition.isAbstract()) {
+          typeList.add(classnameFor.convert(typeDefinition));
+        }
+      }
+
+      for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
+        addExplicitAnnotations(annotations, rootElementDeclaration, classnameFor);
       }
     }
 
@@ -197,6 +204,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     String classname = conversion.convert(webMethod.getDeclaringEndpointInterface());
     String methodName = webMethod.getSimpleName();
     String methodKey = String.format("%s.%s", classname, methodName);
+
+    SerializableSOAPBindingAnnotation sbAnnotation = new SerializableSOAPBindingAnnotation();
+    sbAnnotation.setStyle(webMethod.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT ? SOAPBindingAnnotation.STYLE_DOCUMENT : SOAPBindingAnnotation.STYLE_RPC);
+    sbAnnotation.setParameterStyle(webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE ? SOAPBindingAnnotation.PARAMETER_STYLE_BARE : SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED);
+    sbAnnotation.setUse(webMethod.getSoapUse() == SOAPBinding.Use.ENCODED ? SOAPBindingAnnotation.USE_ENCODED : SOAPBindingAnnotation.USE_LITERAL);
+    annotations.method2SOAPBinding.put(methodKey, sbAnnotation);
 
     SerializableWebMethodAnnotation wmAnnotation = new SerializableWebMethodAnnotation();
     wmAnnotation.setOperationName(webMethod.getOperationName());
@@ -244,6 +257,30 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         }
         annotations.class2PropertyOrder.put(beanName, propertyOrder);
       }
+      else if (webMessage instanceof RPCInputMessage) {
+        RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
+        String beanName = getBeanName(conversion, rpcInputMessage.getRequestBeanName());
+        Collection<ImplicitChildElement> childElements = new RPCInputRequestBeanAdapter(rpcInputMessage).getChildElements();
+        String[] propertyOrder = new String[childElements.size()];
+        int i = 0;
+        for (ImplicitChildElement childElement : childElements) {
+          propertyOrder[i] = childElement.getElementName();
+          i++;
+        }
+        annotations.class2PropertyOrder.put(beanName, propertyOrder);
+      }
+      else if (webMessage instanceof RPCOutputMessage) {
+        RPCOutputMessage outputMessage = ((RPCOutputMessage) webMessage);
+        String beanName = getBeanName(conversion, outputMessage.getResponseBeanName());
+        Collection<ImplicitChildElement> childElements = new RPCOutputResponseBeanAdapter(outputMessage).getChildElements();
+        String[] propertyOrder = new String[childElements.size()];
+        int i = 0;
+        for (ImplicitChildElement childElement : childElements) {
+          propertyOrder[i] = childElement.getElementName();
+          i++;
+        }
+        annotations.class2PropertyOrder.put(beanName, propertyOrder);
+      }
     }
 
     int i = 0;
@@ -256,6 +293,18 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       annotations.method2WebParam.put(String.format("%s.%s", methodKey, i), wpAnnotation);
       i++;
     }
+  }
+
+  /**
+   * Adds explicit elements for the specified root element.
+   *
+   * @param annotations The annotations to add to.
+   * @param rootElement The root element.
+   * @param conversion The conversion to use.
+   */
+  protected void addExplicitAnnotations(ExplicitWebAnnotations annotations, RootElementDeclaration rootElement, ClientClassnameForMethod conversion) {
+    String classname = conversion.convert(rootElement);
+    annotations.class2XmlRootElement.put(classname, new XmlRootElementAnnotation(rootElement.getNamespace(), rootElement.getName()));
   }
 
   /**

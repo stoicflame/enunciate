@@ -43,12 +43,12 @@ public class TestEnunciatedClientMessageBinding extends TestCase {
       protected EnunciatedClientOperationBinding getOperationBinding(OperationInfo op) throws XFireFault {
         return new EnunciatedClientOperationBinding(null, op) {
           @Override
-          protected WrapperBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
+          protected OperationBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
             return null;
           }
 
           @Override
-          protected WrapperBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
+          protected OperationBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
             return null;
           }
 
@@ -85,12 +85,12 @@ public class TestEnunciatedClientMessageBinding extends TestCase {
       protected EnunciatedClientOperationBinding getOperationBinding(OperationInfo op) throws XFireFault {
         return new EnunciatedClientOperationBinding(null, op) {
           @Override
-          protected WrapperBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
+          protected OperationBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
             return null;
           }
 
           @Override
-          protected WrapperBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
+          protected OperationBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
             return null;
           }
 

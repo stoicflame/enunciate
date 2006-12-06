@@ -3,6 +3,7 @@ package net.sf.enunciate.modules.xfire_client;
 import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.XmlRootElementAnnotation;
 import org.codehaus.xfire.annotations.*;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  */
 public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
 
+  protected HashMap class2XmlRootElement = new HashMap();
   protected HashMap class2WebService = new HashMap();
   protected HashMap class2SOAPBinding = new HashMap();
   protected HashMap class2HandlerChain = new HashMap();
@@ -28,6 +30,7 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
   protected HashMap method2WebParam = new HashMap();
   protected HashMap method2RequestWrapper = new HashMap();
   protected HashMap method2ResponseWrapper = new HashMap();
+  protected HashMap method2SOAPBinding = new HashMap();
   protected HashSet oneWayMethods = new HashSet();
   protected HashMap fault2WebFault = new HashMap();
 
@@ -141,8 +144,18 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
   }
 
   // Inherited.
+  public boolean hasSOAPBindingAnnotation(Method method) {
+    return method2SOAPBinding.containsKey(createKey(method));
+  }
+
+  // Inherited.
   public SOAPBindingAnnotation getSOAPBindingAnnotation(Class clazz) {
     return (SOAPBindingAnnotation) class2SOAPBinding.get(createKey(clazz));
+  }
+
+  // Inherited.
+  public SOAPBindingAnnotation getSOAPBindingAnnotation(Method method) {
+    return (SOAPBindingAnnotation) method2SOAPBinding.get(createKey(method));
   }
 
   // Inherited.
@@ -170,6 +183,10 @@ public class ExplicitWebAnnotations implements WebAnnotations, Serializable {
 
   public WebFaultAnnotation getWebFaultAnnotation(Class fault) {
     return (WebFaultAnnotation) fault2WebFault.get(createKey(fault));
+  }
+
+  public XmlRootElementAnnotation getXmlRootElementAnnotation(Class clazz) {
+    return (XmlRootElementAnnotation) class2XmlRootElement.get(createKey(clazz));
   }
 
   public String[] getPropertyOrder(Class clazz) {

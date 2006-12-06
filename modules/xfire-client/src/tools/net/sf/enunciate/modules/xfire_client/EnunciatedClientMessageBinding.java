@@ -1,24 +1,24 @@
 package net.sf.enunciate.modules.xfire_client;
 
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.exchange.InMessage;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.fault.XFireFault;
-import org.codehaus.xfire.service.OperationInfo;
-import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.service.MessageInfo;
+import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.util.STAXUtils;
 import org.codehaus.xfire.util.stax.DepthXMLStreamReader;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamWriter;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
- * The binding for an enunciated client-side JAXWS soap message.
+ * The binding for an enunciated client-side JAXWS soap message.  The message binding is responsible for
+ * reading/writing the outer element of the message (the first element inside the SOAP envelope) and
+ * delegating the rest of the work to the operation binding.
  *
  * @author Ryan Heaton
  */
@@ -66,7 +66,6 @@ public class EnunciatedClientMessageBinding implements MessageSerializer {
       throw new XFireFault("Incorrect response message name: " + responseElementName, XFireFault.SENDER);
     }
 
-
     getOperationBinding(op).readMessage(message, context);
   }
 
@@ -84,15 +83,10 @@ public class EnunciatedClientMessageBinding implements MessageSerializer {
       throw new XFireFault("No request message was found in the current operation!", XFireFault.RECEIVER);
     }
 
-    QName requestMessageName = inMessage.getName();
-    try {
-      writer.writeStartElement(requestMessageName.getNamespaceURI(), requestMessageName.getLocalPart());
-    }
-    catch (XMLStreamException e) {
-      throw new XFireFault("Unable to write the operation element.", e, XFireFault.RECEIVER);
-    }
-
+    new ElementWriter(writer, inMessage.getName());
     getOperationBinding(op).writeMessage(message, writer, context);
+    //the xfire SoapSerializer makes the strange assumption that the message serializer doesn't close its element...
+    //elementWriter.close();
   }
 
   /**

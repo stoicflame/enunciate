@@ -5,6 +5,7 @@ import net.sf.enunciate.samples.genealogy.cite.Source;
 import net.sf.enunciate.samples.genealogy.services.SourceService;
 
 import javax.jws.WebService;
+import java.net.URI;
 
 /**
  * @author Ryan Heaton
@@ -19,6 +20,14 @@ public class SourceServiceImpl implements SourceService {
   }
 
   public Source getSource(String id) {
+    if ("valid".equals(id)) {
+      Source source = new Source();
+      source.setId("valid");
+      source.setLink(URI.create("uri:some-uri"));
+      source.setTitle("some-title");
+      return source;
+    }
+
     return null;
   }
 

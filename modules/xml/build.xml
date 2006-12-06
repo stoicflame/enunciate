@@ -15,6 +15,9 @@
 
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xml"/>
 
+  <target name="compile-tools"/>
+  <target name="jar-tools"/>
+
   <target name="-init">
     <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
       <path>

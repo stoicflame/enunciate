@@ -1,31 +1,26 @@
 package net.sf.enunciate.modules.xfire;
 
-import com.sun.mirror.declaration.ParameterDeclaration;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
-import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.WsdlInfo;
-import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.main.Enunciate;
-import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.DeploymentModule;
+import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
 import org.apache.commons.digester.RuleSet;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-
 import sun.misc.Service;
 
 import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * Deployment module for XFire.
@@ -35,12 +30,7 @@ import javax.servlet.ServletContext;
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   private WarConfig warConfig;
-  private String uuid;
   private boolean compileDebugInfo = true;
-
-  public XFireDeploymentModule() {
-    this.uuid = String.valueOf(System.currentTimeMillis());
-  }
 
   /**
    * @return "xfire"
@@ -57,41 +47,44 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     return XFireDeploymentModule.class.getResource("xfire-servlet.fmt");
   }
 
+  /**
+   * @return The URL to "rpc-request-bean.fmt"
+   */
+  protected URL getRPCRequestBeanTemplateURL() {
+    return XFireDeploymentModule.class.getResource("rpc-request-bean.fmt");
+  }
+
+  /**
+   * @return The URL to "rpc-response-bean.fmt"
+   */
+  protected URL getRPCResponseBeanTemplateURL() {
+    return XFireDeploymentModule.class.getResource("rpc-response-bean.fmt");
+  }
+
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
 
     //generate the xfire-servlet.xml
-    model.put("uuid", this.uuid);
     processTemplate(getXFireServletTemplateURL(), model);
 
-    HashMap<String, String[]> parameterNames = new HashMap<String, String[]>();
+    //generate the rpc request/response beans.
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
         for (WebMethod webMethod : ei.getWebMethods()) {
-          Collection<ParameterDeclaration> paramList = webMethod.getParameters();
-          ParameterDeclaration[] parameters = paramList.toArray(new ParameterDeclaration[paramList.size()]);
-          String[] paramNames = new String[parameters.length];
-          for (int i = 0; i < parameters.length; i++) {
-            ParameterDeclaration declaration = parameters[i];
-            paramNames[i] = declaration.getSimpleName();
+          for (WebMessage webMessage : webMethod.getMessages()) {
+            if (webMessage instanceof RPCInputMessage) {
+              model.put("message", webMessage);
+              processTemplate(getRPCRequestBeanTemplateURL(), model);
+            }
+            else if (webMessage instanceof RPCOutputMessage) {
+              model.put("message", webMessage);
+              processTemplate(getRPCResponseBeanTemplateURL(), model);
+            }
           }
-
-          parameterNames.put(ei.getQualifiedName() + "." + webMethod.getSimpleName(), paramNames);
         }
       }
     }
-
-    Enunciate enunciate = getEnunciate();
-    File genDir = new File(enunciate.getGenerateDir(), "xfire");
-    genDir.mkdirs();
-    File propertyNamesFile = new File(genDir, this.uuid + ".property.names");
-    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(propertyNamesFile));
-    oos.writeObject(parameterNames);
-    oos.flush();
-    oos.close();
-
-    enunciate.setProperty("property.names.file", propertyNamesFile);
   }
 
   @Override
@@ -109,16 +102,12 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("Required dependency on the JAXWS module was not found.  The generated request/response/fault beans are required.");
     }
 
-    Collection<String> jaxwsSourceFiles = enunciate.getJavaFiles(jaxwsSources);
+    Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
+    //make sure we include all the wrappers generated for the rpc methods, too...
+    jaxwsSourceFiles.addAll(enunciate.getJavaFiles(new File(getGenerateDir(), "jaxws")));
     StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
     jaxwsClasspath.append(File.pathSeparator).append(getCompileDir().getAbsolutePath());
     enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
-
-    File propertyNamesFile = (File) enunciate.getProperty("property.names.file");
-    if (propertyNamesFile == null) {
-      throw new EnunciateException("No generated property names file was found.");
-    }
-    enunciate.copyFile(propertyNamesFile, propertyNamesFile.getParentFile(), getCompileDir());
   }
 
   @Override
@@ -167,7 +156,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
 
     //copy the xfire config file from the xfire configuration directory to the WEB-INF directory.
-    File xfireConfigDir = new File(new File(enunciate.getGenerateDir(), "xfire"), "xml");
+    File xfireConfigDir = new File(getGenerateDir(), "xml");
     enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 
     HashSet<File> xmlArtifacts = new HashSet<File>();
@@ -251,6 +240,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The directory for generating.
+   *
+   * @return The directory for generating.
+   */
+  protected File getGenerateDir() {
+    return new File(getEnunciate().getGenerateDir(), "xfire");
+  }
+
+  /**
    * The directory for compiling.
    *
    * @return The directory for compiling.
@@ -306,6 +304,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public File getWarFile() {
     String filename = "enunciated.war";
+    if (getEnunciate().getConfig().getLabel() != null) {
+      filename = getEnunciate().getConfig().getLabel() + ".war";
+    }
+    
     if (this.warConfig != null) {
       if (this.warConfig.getFile() != null) {
         return new File(this.warConfig.getFile());
@@ -366,30 +368,16 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       //exclude the servlet api.
       return true;
     }
+    else if (loader.findResource("net/sf/enunciate/modules/xfire_client/EnunciatedClientSoapSerializerHandler.class") != null) {
+      //exclude xfire-client-tools
+      return true;
+    }
     else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
       //exclude by default any deployment module libraries.
       return true;
     }
 
     return false;
-  }
-
-  /**
-   * A unique id to associate with this build of the xfire module.
-   *
-   * @return A unique id to associate with this build of the xfire module.
-   */
-  public String getUuid() {
-    return uuid;
-  }
-
-  /**
-   * A unique id to associate with this build of the xfire module.
-   *
-   * @param uuid A unique id to associate with this build of the xfire module.
-   */
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
   }
 
   /**

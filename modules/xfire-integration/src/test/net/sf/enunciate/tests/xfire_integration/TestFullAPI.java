@@ -5,6 +5,13 @@ import org.mortbay.jetty.Server;
 import org.mortbay.util.InetAddrPort;
 
 import java.io.File;
+import java.net.URI;
+
+import net.sf.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
+import net.sf.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
+import net.sf.enunciate.samples.genealogy.client.services.PersonService;
+import net.sf.enunciate.samples.genealogy.client.services.SourceService;
+import net.sf.enunciate.samples.genealogy.client.cite.Source;
 
 /**
  * A very big test of the functionality of the full API deployed with the XFire client and server modules.
@@ -24,9 +31,24 @@ public class TestFullAPI extends TestCase {
    * Tests the full API
    */
   public void testFullAPI() throws Exception {
-    Server server = new Server();
-    server.addListener(new InetAddrPort(7373));
-    server.addWebApplication("full", new File("my-war").toURL().toString());
+//    String warPath = System.getProperty("full.war.path");
+//    assertNotNull("A path to the created war file must be present in the 'full.war.path' property.");
+//    File warFile = new File(warPath);
+//    assertTrue("Non-existant file: " + warFile, warFile.exists());
+//
+//    Server server = new Server();
+//    server.addListener(new InetAddrPort(7373));
+//    server.addWebApplication("full", warFile.toURL().toString());
+//    server.start();
+
+    SourceService sourceService = new SourceServiceImpl("localhost", 7373, "/full/soap/source-service");
+    Source source = sourceService.getSource("valid");
+    assertEquals("valid", source.getId());
+    assertEquals(URI.create("uri:some-uri"), source.getLink());
+    assertEquals("some-title", source.getTitle());
+    assertNull(sourceService.getSource("invalid"));
+
+//    server.stop();
   }
 
 }

@@ -3,6 +3,7 @@ package net.sf.enunciate.modules.xfire_client;
 import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
@@ -31,13 +32,13 @@ import java.util.List;
  * The binding for a JAXWS operation.
  * <p/>
  * This operation binding can makes the special assumption that its operations conform to one of the following schemes:
- *
+ * <p/>
  * <ul>
- *   <li>The operation is document/literal BARE.  In this case, the parameters are JAXB root elements and are used
- *       as the in and out messages</li>
- *   <li>The operation is WRAPPED.  In this case, the operations (including the RPC operations) have request/response
- *       beans as defined by JAXWS.  However, the added constraint for the request/response beans is that they must be
- *       {@link net.sf.enunciate.modules.xfire_client.GeneratedWrapperBean}s so they can be correctly (de)serialized.</li>
+ * <li>The operation is document/literal BARE.  In this case, the parameters are JAXB root elements and are used
+ * as the in and out messages</li>
+ * <li>The operation is WRAPPED.  In this case, the operations (including the RPC operations) have request/response
+ * beans as defined by JAXWS.  However, the added constraint for the request/response beans is that they must be
+ * {@link net.sf.enunciate.modules.xfire_client.GeneratedWrapperBean}s so they can be correctly (de)serialized.</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -46,8 +47,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
   private static final Log LOG = LogFactory.getLog(EnunciatedClientOperationBinding.class);
 
-  private final WrapperBeanInfo requestInfo;
-  private final WrapperBeanInfo responseInfo;
+  private final OperationBeanInfo requestInfo;
+  private final OperationBeanInfo responseInfo;
   private final ExplicitWebAnnotations annotations;
 
   /**
@@ -55,7 +56,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
    * determine how to read and write the operation's message.
    *
    * @param annotations The metadata to use for (de)serializing the message.
-   * @param op The operation.
+   * @param op          The operation.
    */
   public EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, OperationInfo op) throws XFireFault {
     this.annotations = annotations;
@@ -66,11 +67,11 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   /**
    * Construct an operation binding with the specified metadata.
    *
-   * @param annotations The annotations.
-   * @param requestInfo The request info.
+   * @param annotations  The annotations.
+   * @param requestInfo  The request info.
    * @param responseInfo The response info.
    */
-  protected EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, WrapperBeanInfo requestInfo, WrapperBeanInfo responseInfo) {
+  protected EnunciatedClientOperationBinding(ExplicitWebAnnotations annotations, OperationBeanInfo requestInfo, OperationBeanInfo responseInfo) {
     this.annotations = annotations;
     this.requestInfo = requestInfo;
     this.responseInfo = responseInfo;
@@ -82,39 +83,45 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
    * @param op The operation.
    * @return The input properties, or null if the request info wasn't found.
    */
-  protected WrapperBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
+  protected OperationBeanInfo getRequestInfo(OperationInfo op) throws XFireFault {
     Method method = op.getMethod();
     Class ei = method.getDeclaringClass();
     Package pckg = ei.getPackage();
 
-    String requestWrapperClassName;
-    RequestWrapperAnnotation requestWrapperInfo = this.annotations.getRequestWrapperAnnotation(method);
-    if ((requestWrapperInfo != null) && (requestWrapperInfo.className() != null) && (requestWrapperInfo.className().length() > 0)) {
-      requestWrapperClassName = requestWrapperInfo.className();
+    if ((this.annotations.hasSOAPBindingAnnotation(method)) && (this.annotations.getSOAPBindingAnnotation(method).getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE)) {
+      //bare method...
+      return new OperationBeanInfo(method.getParameterTypes()[0], null);
     }
     else {
-      StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
-      if (builder.length() > 0) {
-        builder.append(".");
+      String requestWrapperClassName;
+      RequestWrapperAnnotation requestWrapperInfo = this.annotations.getRequestWrapperAnnotation(method);
+      if ((requestWrapperInfo != null) && (requestWrapperInfo.className() != null) && (requestWrapperInfo.className().length() > 0)) {
+        requestWrapperClassName = requestWrapperInfo.className();
+      }
+      else {
+        StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
+        if (builder.length() > 0) {
+          builder.append(".");
+        }
+
+        builder.append("jaxws.");
+
+        String methodName = method.getName();
+        builder.append(capitalize(methodName));
+        requestWrapperClassName = builder.toString();
       }
 
-      builder.append("jaxws.");
+      Class wrapperClass;
+      try {
+        wrapperClass = ClassLoaderUtils.loadClass(requestWrapperClassName, getClass());
+      }
+      catch (ClassNotFoundException e) {
+        LOG.error("Unabled to find request wrapper class " + requestWrapperClassName + "... Operation " + op.getQName() + " will not be able to send...");
+        return null;
+      }
 
-      String methodName = method.getName();
-      builder.append(capitalize(methodName));
-      requestWrapperClassName = builder.toString();
+      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
     }
-
-    Class wrapperClass;
-    try {
-      wrapperClass = ClassLoaderUtils.loadClass(requestWrapperClassName, getClass());
-    }
-    catch (ClassNotFoundException e) {
-      LOG.debug("Unabled to find request wrapper class " + requestWrapperClassName + "... Operation " + op.getQName() + " will not be able to send...");
-      return null;
-    }
-
-    return new WrapperBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
   }
 
   /**
@@ -123,39 +130,45 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
    * @param op The operation.
    * @return The output properties.
    */
-  protected WrapperBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
+  protected OperationBeanInfo getResponseInfo(OperationInfo op) throws XFireFault {
     Method method = op.getMethod();
     Class ei = method.getDeclaringClass();
     Package pckg = ei.getPackage();
 
-    String responseWrapperClassName;
-    ResponseWrapperAnnotation responseWrapperInfo = annotations.getResponseWrapperAnnotation(method);
-    if ((responseWrapperInfo != null) && (responseWrapperInfo.className() != null) && (responseWrapperInfo.className().length() > 0)) {
-      responseWrapperClassName = responseWrapperInfo.className();
+    if ((this.annotations.hasSOAPBindingAnnotation(method)) && (this.annotations.getSOAPBindingAnnotation(method).getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE)) {
+      //bare method...
+      return new OperationBeanInfo(method.getReturnType(), null);
     }
     else {
-      StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
-      if (builder.length() > 0) {
-        builder.append(".");
+      String responseWrapperClassName;
+      ResponseWrapperAnnotation responseWrapperInfo = annotations.getResponseWrapperAnnotation(method);
+      if ((responseWrapperInfo != null) && (responseWrapperInfo.className() != null) && (responseWrapperInfo.className().length() > 0)) {
+        responseWrapperClassName = responseWrapperInfo.className();
+      }
+      else {
+        StringBuffer builder = new StringBuffer(pckg == null ? "" : pckg.getName());
+        if (builder.length() > 0) {
+          builder.append(".");
+        }
+
+        builder.append("jaxws.");
+
+        String methodName = method.getName();
+        builder.append(capitalize(methodName)).append("Response");
+        responseWrapperClassName = builder.toString();
       }
 
-      builder.append("jaxws.");
+      Class wrapperClass;
+      try {
+        wrapperClass = ClassLoaderUtils.loadClass(responseWrapperClassName, getClass());
+      }
+      catch (ClassNotFoundException e) {
+        LOG.debug("Unabled to find response wrapper class " + responseWrapperClassName + "... Operation " + op.getQName() + " will not be able to recieve...");
+        return null;
+      }
 
-      String methodName = method.getName();
-      builder.append(capitalize(methodName)).append("Response");
-      responseWrapperClassName = builder.toString();
+      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
     }
-
-    Class wrapperClass;
-    try {
-      wrapperClass = ClassLoaderUtils.loadClass(responseWrapperClassName, getClass());
-    }
-    catch (ClassNotFoundException e) {
-      LOG.debug("Unabled to find response wrapper class " + responseWrapperClassName + "... Operation " + op.getQName() + " will not be able to recieve...");
-      return null;
-    }
-
-    return new WrapperBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
   }
 
   /**
@@ -180,7 +193,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     PropertyDescriptor[] pds = responseBeanInfo.getPropertyDescriptors();
     PropertyDescriptor[] outputProperties = new PropertyDescriptor[propOrder.length];
-    RESPONSE_PROPERTY_LOOP :
+    RESPONSE_PROPERTY_LOOP:
     for (int i = 0; i < propOrder.length; i++) {
       String property = propOrder[i];
       for (int j = 0; j < pds.length; j++) {
@@ -202,24 +215,31 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       throw new XFireFault("Message cannot be read: no response info was found.", XFireFault.RECEIVER);
     }
 
-    WrapperBeanInfo wrapperBeanInfo = this.responseInfo;
-    Class wrapperClass = wrapperBeanInfo.getWrapperClass();
+    Class wrapperClass = this.responseInfo.getBeanClass();
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
     Type type = provider.getType(service, wrapperClass);
-    Object wrapper = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
+    Object bean = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
     List parameters = new ArrayList();
-    PropertyDescriptor[] pds = wrapperBeanInfo.getProperties();
-    for (int i = 0; i < pds.length; i++) {
-      PropertyDescriptor descriptor = pds[i];
-      try {
-        parameters.add(descriptor.getReadMethod().invoke(wrapper, null));
-      }
-      catch (IllegalAccessException e) {
-        throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
-      }
-      catch (InvocationTargetException e) {
-        throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+
+    if (this.responseInfo.isBare()) {
+      //if it's bare, the bean doesn't need to be unwrapped.
+      parameters.add(bean);
+    }
+    else {
+      //The operation is not bare, unwrap the bean.
+      PropertyDescriptor[] pds = this.responseInfo.getPropertyOrder();
+      for (int i = 0; i < pds.length; i++) {
+        PropertyDescriptor descriptor = pds[i];
+        try {
+          parameters.add(descriptor.getReadMethod().invoke(bean, null));
+        }
+        catch (IllegalAccessException e) {
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+        }
+        catch (InvocationTargetException e) {
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+        }
       }
     }
 
@@ -231,40 +251,46 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       throw new XFireFault("Message cannot be sent: no request info was found.", XFireFault.RECEIVER);
     }
 
-    WrapperBeanInfo wrapperBeanClass = this.requestInfo;
-    Class wrapperClass = wrapperBeanClass.getWrapperClass();
-    Object wrapper;
-    try {
-      wrapper = wrapperClass.newInstance();
-    }
-    catch (Exception e) {
-      throw new XFireFault("Problem instantiating response wrapper " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
-    }
-
+    Class beanClass = this.requestInfo.getBeanClass();
     Object[] params = (Object[]) message.getBody();
-    PropertyDescriptor[] properties = wrapperBeanClass.getProperties();
-    if (properties.length != params.length) {
-      throw new XFireFault("There are " + params.length + " parameters to the out message but only "
-        + properties.length + " properties on " + wrapperClass.getName(), XFireFault.RECEIVER);
+    Object bean;
+    if (this.requestInfo.isBare()) {
+      //if the operation is bare, we don't need to wrap it up.
+      bean = params[0];
     }
-
-    for (int i = 0; i < properties.length; i++) {
-      PropertyDescriptor descriptor = properties[i];
+    else {
+      //the operation is not bare, we need to wrap it up.
       try {
-        descriptor.getWriteMethod().invoke(wrapper, new Object[] {params[i]});
+        bean = beanClass.newInstance();
       }
-      catch (IllegalAccessException e) {
-        throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+      catch (Exception e) {
+        throw new XFireFault("Problem instantiating response wrapper " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
       }
-      catch (InvocationTargetException e) {
-        throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+
+      PropertyDescriptor[] properties = this.requestInfo.getPropertyOrder();
+      if (properties.length != params.length) {
+        throw new XFireFault("There are " + params.length + " parameters to the out message but only "
+          + properties.length + " properties on " + beanClass.getName(), XFireFault.RECEIVER);
+      }
+
+      for (int i = 0; i < properties.length; i++) {
+        PropertyDescriptor descriptor = properties[i];
+        try {
+          descriptor.getWriteMethod().invoke(bean, new Object[]{params[i]});
+        }
+        catch (IllegalAccessException e) {
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
+        }
+        catch (InvocationTargetException e) {
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
+        }
       }
     }
 
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
-    Type type = provider.getType(service, wrapperClass);
-    type.writeObject(wrapper, new ElementWriter(writer), context);
+    Type type = provider.getType(service, beanClass);
+    type.writeObject(bean, new ElementWriter(writer), context);
   }
 
   /**
@@ -278,34 +304,43 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
   }
 
   /**
-   * A simple bean info for a wrapper class.
+   * A simple bean info for an operation bean class.
    */
-  public static class WrapperBeanInfo {
+  public static class OperationBeanInfo {
 
-    private Class wrapperClass;
-    private PropertyDescriptor[] properties;
+    private final Class beanClass;
+    private final PropertyDescriptor[] propertyOrder;
 
-    public WrapperBeanInfo(Class wrapperClass, PropertyDescriptor[] properties) {
-      this.wrapperClass = wrapperClass;
-      this.properties = properties;
+    public OperationBeanInfo(Class wrapperClass, PropertyDescriptor[] properties) {
+      this.beanClass = wrapperClass;
+      this.propertyOrder = properties;
     }
 
     /**
-     * The wrapper class.
+     * The bean class.
      *
-     * @return The wrapper class.
+     * @return The bean class.
      */
-    public Class getWrapperClass() {
-      return wrapperClass;
+    public Class getBeanClass() {
+      return beanClass;
     }
 
     /**
-     * The ordered list of wrapper properties.
+     * Whether the method is bare.
      *
-     * @return The ordered list of wrapper properties.
+     * @return Whether the method is bare.
      */
-    public PropertyDescriptor[] getProperties() {
-      return properties;
+    public boolean isBare() {
+      return propertyOrder == null;
+    }
+
+    /**
+     * The ordered list of bean properties.
+     *
+     * @return The ordered list of bean properties, or null if the operation is bare.
+     */
+    public PropertyDescriptor[] getPropertyOrder() {
+      return propertyOrder;
     }
 
   }

@@ -30,8 +30,11 @@ public abstract class EnunciatedSOAPWebServiceImpl {
 
     Service service;
     try {
-      ExplicitJAXWSAnnotationServiceFactory factory = new ExplicitJAXWSAnnotationServiceFactory("basic.example", transportManager);
+      ExplicitJAXWSAnnotationServiceFactory factory = new ExplicitJAXWSAnnotationServiceFactory(uuid, transportManager);
       service = factory.create(iface);
+    }
+    catch (RuntimeException e) {
+      throw e;
     }
     catch (Exception e) {
       throw new IllegalStateException(e);

@@ -3,11 +3,13 @@ package net.sf.enunciate.modules.xfire_client;
 import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import net.sf.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
+import net.sf.enunciate.modules.xfire_client.annotations.XmlRootElementAnnotation;
 import org.codehaus.xfire.XFireRuntimeException;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
 import org.codehaus.xfire.annotations.WebMethodAnnotation;
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
+import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.service.FaultInfo;
@@ -20,14 +22,15 @@ import org.codehaus.xfire.util.ClassLoaderUtils;
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.HashMap;
+import java.lang.reflect.Method;
 
 /**
  * The explicit annotation service factory is based on JAXWS metatdata that is explicitly supplied
  * (as opposed to looked-up at runtime).  The metadata is assumed to exist in the form of a resource
  * on the classpath, identified by a typeset id.
  *
- * @see org.codehaus.xfire.jaxws.JAXWSServiceFactory
  * @author Ryan Heaton
+ * @see org.codehaus.xfire.jaxws.JAXWSServiceFactory
  */
 public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFactory {
 
@@ -39,7 +42,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    * "/[typeSetId].annotations".  There should also be a list of types in the form of a resource located at
    * "/[typeSetId].types".
    *
-   * @param typeSetId The typeset id.
+   * @param typeSetId        The typeset id.
    * @param transportManager The transport manager.
    */
   public ExplicitJAXWSAnnotationServiceFactory(String typeSetId, TransportManager transportManager) throws IOException, ClassNotFoundException {
@@ -53,9 +56,9 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
   /**
    * Construct a new explicit annotation service factory.
    *
-   * @param annotations The annotations.
+   * @param annotations      The annotations.
    * @param transportManager The transport manager.
-   * @param bindingProvider The binding provider.
+   * @param bindingProvider  The binding provider.
    */
   protected ExplicitJAXWSAnnotationServiceFactory(ExplicitWebAnnotations annotations, TransportManager transportManager, EnunciatedClientBindingProvider bindingProvider) {
     super(annotations, transportManager, bindingProvider);
@@ -99,7 +102,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    *
    * @param service The service.
    * @param binding The binding.
-   * @param op The operation.
+   * @param op      The operation.
    */
   public void createBindingOperation(Service service, AbstractSoapBinding binding, OperationInfo op) {
     super.createBindingOperation(service, binding, op);
@@ -115,8 +118,8 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
   /**
    * Add a fault to the operation. The fault info is populated with the explicit annotation metadata.
    *
-   * @param service The service.
-   * @param op The operation.
+   * @param service    The service.
+   * @param op         The operation.
    * @param faultClass The fault class.
    * @return The fault info.
    */
@@ -132,7 +135,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
       catch (ClassNotFoundException e) {
         throw new XFireRuntimeException("Unable to load fault bean.", e);
       }
-      
+
       return info;
     }
 
@@ -158,24 +161,45 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    * @return The input message name.
    */
   protected QName createInputMessageName(final OperationInfo op) {
-    //get the default (just in case)...
-    QName inputMessageName = super.createInputMessageName(op);
-
-    //start by assuming this is an rpc-style method invocation, in which case the message name will be the
-    //operation name.
-    WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(op.getMethod().getDeclaringClass());
-    WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(op.getMethod());
-    if ((webServiceAnnotation != null) && (webMethodAnnotation != null)) {
-      inputMessageName = new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
+    Method method = op.getMethod();
+    SOAPBindingAnnotation soapBinding = annotations.getSOAPBindingAnnotation(method);
+    if (soapBinding == null) {
+      throw new XFireRuntimeException("Unable to create the input message name: no SOAP binding metadata about " + method);
     }
 
-    //But if this is a document-style invocation, there will be a request wrapper annotation, too.
-    RequestWrapperAnnotation requestWrapper = annotations.getRequestWrapperAnnotation(op.getMethod());
-    if (requestWrapper != null) {
-      inputMessageName = new QName(requestWrapper.targetNamespace(), requestWrapper.localName());
-    }
+    if (soapBinding.getStyle() == SOAPBindingAnnotation.STYLE_RPC) {
+      WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(method.getDeclaringClass());
+      if (webServiceAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the input message name: no metadata was found about " + method.getDeclaringClass().getName());
+      }
 
-    return inputMessageName;
+      WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(method);
+      if (webMethodAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the input message name: no metadata found for " + method);
+      }
+
+      return new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
+    }
+    else if (soapBinding.getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE) {
+      //document/literal bare
+      XmlRootElementAnnotation rootElementAnnotation = annotations.getXmlRootElementAnnotation(method.getParameterTypes()[0]);
+
+      if (rootElementAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the input message name: no root element metadata about " + method.getParameterTypes()[0].getName());
+      }
+
+      return new QName(rootElementAnnotation.namespace(), rootElementAnnotation.name());
+    }
+    else {
+      //document/literal wrapped.
+      RequestWrapperAnnotation requestWrapper = annotations.getRequestWrapperAnnotation(method);
+
+      if (requestWrapper == null) {
+        throw new XFireRuntimeException("Unable to create the input message name: no request wrapper metadata about " + method);
+      }
+
+      return new QName(requestWrapper.targetNamespace(), requestWrapper.localName());
+    }
   }
 
   /**
@@ -186,22 +210,44 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
    * @return The output message name.
    */
   protected QName createOutputMessageName(final OperationInfo op) {
-    //start with the default (just in case)...
-    QName outputMessageName = super.createOutputMessageName(op);
-
-    //start by assuming this is an rpc-style method invocation, in which case the message name will be the
-    //operation name.
-    WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(op.getMethod().getDeclaringClass());
-    WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(op.getMethod());
-    if ((webServiceAnnotation != null) && (webMethodAnnotation != null)) {
-      outputMessageName = new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
+    Method method = op.getMethod();
+    SOAPBindingAnnotation soapBinding = annotations.getSOAPBindingAnnotation(method);
+    if (soapBinding == null) {
+      throw new XFireRuntimeException("Unable to create the output message name: no SOAP binding metadata about " + method);
     }
 
-    //But if this is a document-style invocation, there will be a response wrapper annotation.
-    ResponseWrapperAnnotation responseWrapper = annotations.getResponseWrapperAnnotation(op.getMethod());
-    if (responseWrapper != null) {
-      outputMessageName = new QName(responseWrapper.targetNamespace(), responseWrapper.localName());
+    if (soapBinding.getStyle() == SOAPBindingAnnotation.STYLE_RPC) {
+      WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(method.getDeclaringClass());
+      if (webServiceAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the output message name: no metadata was found about " + method.getDeclaringClass().getName());
+      }
+
+      WebMethodAnnotation webMethodAnnotation = annotations.getWebMethodAnnotation(method);
+      if (webMethodAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the output message name: no metadata found for " + method);
+      }
+
+      return new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
     }
-    return outputMessageName;
+    else if (soapBinding.getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE) {
+      //document/literal bare
+      XmlRootElementAnnotation rootElementAnnotation = annotations.getXmlRootElementAnnotation(method.getReturnType());
+
+      if (rootElementAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the output message name: no root element metadata about " + method.getReturnType().getName());
+      }
+
+      return new QName(rootElementAnnotation.namespace(), rootElementAnnotation.name());
+    }
+    else {
+      //document/literal wrapped.
+      ResponseWrapperAnnotation responseWrapper = annotations.getResponseWrapperAnnotation(method);
+
+      if (responseWrapper == null) {
+        throw new XFireRuntimeException("Unable to create the output message name: no response wrapper metadata about " + method);
+      }
+
+      return new QName(responseWrapper.targetNamespace(), responseWrapper.localName());
+    }
   }
 }

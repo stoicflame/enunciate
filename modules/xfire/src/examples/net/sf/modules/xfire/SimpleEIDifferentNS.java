@@ -1,6 +1,7 @@
 package net.sf.modules.xfire;
 
 import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
 
 /**
  * @author Ryan Heaton
@@ -11,6 +12,9 @@ import javax.jws.WebService;
 )
 public class SimpleEIDifferentNS {
 
+  @SOAPBinding (
+    style = SOAPBinding.Style.RPC
+  )
   public void doNothing(boolean someParam, double anotherParam) {
 
   }
