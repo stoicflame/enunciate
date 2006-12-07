@@ -22,7 +22,7 @@ import java.util.Map;
  * @see "The JAXB 2.0 Specification"
  * @see <a href="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/structures.html">XML Schema Part 1: Structures Second Edition</a>
  */
-public class Schema extends DecoratedPackageDeclaration {
+public class Schema extends DecoratedPackageDeclaration implements Comparable<Schema> {
 
   private final XmlSchema xmlSchema;
   private final XmlAccessorType xmlAccessorType;
@@ -169,4 +169,15 @@ public class Schema extends DecoratedPackageDeclaration {
 
     return namespacePrefixes;
   }
+
+  /**
+   * Two "schemas" are equal if they decorate the same package.
+   *
+   * @param schema The schema to which to compare this schema.
+   * @return The comparison.
+   */
+  public int compareTo(Schema schema) {
+    return getQualifiedName().compareTo(schema.getQualifiedName());
+  }
+  
 }

@@ -76,8 +76,6 @@ public class TestXMLDeploymentModule extends TestCase {
       }
     };
     SchemaConfig customSchemaConfig = new SchemaConfig();
-    customSchemaConfig.setAttributeFormDefault("unqualified");
-    customSchemaConfig.setAttributeFormDefault("unqualified");
     customSchemaConfig.setFile("custom.xsd");
     customSchemaConfig.setLocation("urn:custom.xsd");
     customSchemaConfig.setNamespace("urn:custom");

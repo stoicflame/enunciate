@@ -19,17 +19,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../lib/xfire-integration/jetty-4.2.27.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../tools/jetty-4.2.27/src" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/target/examples/full/build/xfire-client/full-client.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -37,24 +26,6 @@
           <root url="file://$MODULE_DIR$/target/examples/full/gen/xfireclient/jdk14" />
           <root url="file://$MODULE_DIR$/target/examples/full/gen/xfireclient/types" />
         </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../lib/xfire-integration/jasper-runtime.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../lib/xfire-integration/jasper-compiler.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
       </library>
     </orderEntry>
     <orderEntryProperties />

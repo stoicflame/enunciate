@@ -52,10 +52,6 @@ public class BasicEITwo {
     return false;
   }
 
-  @SOAPBinding (
-    style = SOAPBinding.Style.DOCUMENT,
-    use = SOAPBinding.Use.LITERAL
-  )
   public float floatOp(double d, long l) throws BasicFaultOne {
     return 0;
   }

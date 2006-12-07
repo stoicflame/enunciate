@@ -233,7 +233,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
     if (property != null) {
       Type type = getTypeMapping().getType(property.getClass());
-      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace}");
+      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace?default("")}");
       type.writeObject(property, attributeWriter, context);
       attributeWriter.close();
     }

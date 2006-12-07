@@ -355,7 +355,11 @@ public class Element extends Accessor {
    * @return The namespace of the wrapper element.
    */
   public String getWrapperNamespace() {
-    String namespace = getTypeDefinition().getNamespace();
+    String namespace = null;
+
+    if (getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
+      namespace = getTypeDefinition().getNamespace();
+    }
 
     XmlElementWrapper xmlElementWrapper = getAnnotation(XmlElementWrapper.class);
     if ((xmlElementWrapper != null) && (!"##default".equals(xmlElementWrapper.namespace()))) {

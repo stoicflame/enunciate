@@ -45,7 +45,7 @@ public class TestSchemaInfo extends InAPTTestCase {
     Set<String> referencedNamespaces = schemaInfo.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("http://net.sf.enunciate/core/samples/another"));
     assertTrue(referencedNamespaces.remove("urn:BeanFour"));
-    assertTrue(referencedNamespaces.remove("urn:schema.BeanThree.property1"));
+    assertFalse("The namespace for a local element shouldn't be referenced from a schema.", referencedNamespaces.remove("urn:schema.BeanThree.property1"));
     assertTrue(referencedNamespaces.remove("urn:SimpleTypeComplexContentBean.Property2"));
     assertTrue(referencedNamespaces.remove("urn:SimpleTypeComplexContentBean.Property3"));
     assertEquals(0, referencedNamespaces.size());

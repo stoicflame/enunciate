@@ -1,9 +1,20 @@
-The following were noticed inconsistencies in the JAXB specification:
+The following were noticed inconsistencies in the specifications:
 
--What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?
--Are header elements required to be root elements?
--property order isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
+-jaxws: What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?
+-jaxws: Are header elements required to be root elements?
+-jaxws: property order isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
+
 -jaxb: the @XmlSchemaType and @XmlSchemaTypes annotation at the package-level take a class which might not be compiled or loadable at pre-compile time...
--jaxb: what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?
 -jaxb: what if you have a parametric collection of JAXBElements?  Assumption: The rule that any root elements that subclass it should be choices doesn't apply
        and JAXBElement should not be a valid type() for @XmlElementRef
+-jaxb: what if attributeFormDefault is NOT "qualified", the namespace for the attribute is the default namespace, but the namespace for the type definition is
+       NOT the default namespace?  Assumption: this is NOT a case where it is an attribute ref, as specified in the jaxb spec, 8.9.7.2.
+-jaxb: it is assumed that the namespace for the element wrapper defaults to the empty namespace if elementFormDefault is not qualified, or the namespace of
+       the containing type definition if it is qualified.
+-jaxb: the @XmlSchema annotation: it's scope is unclear: does it apply to all elements and types that belong to its namespace (schema scope) or is its application
+       limited to the classes that are within its package (package scope, in which case the namespace is simply used to supply the default, and the
+       elementFormDefault, attributeFormDefault, and xmlns values *could* apply to a schema of a different namespace).  Assumption: schema-scope, and its
+       an error to have different values of elementFormDefault, attributeFormDefault, and xmlns with two different @XmlSchema annotations that apply to the
+       same schema.
+-jaxb: *why* does @XmlElement.namespace() exist?  If elementFormDefault is qualified, the namespace is the same as the type.  Otherwise, its the default namespace!
+       what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?

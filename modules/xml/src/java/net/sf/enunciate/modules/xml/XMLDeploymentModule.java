@@ -13,15 +13,8 @@ import net.sf.enunciate.modules.xml.config.WsdlConfig;
 import net.sf.enunciate.modules.xml.config.XMLRuleSet;
 import org.apache.commons.digester.RuleSet;
 
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -108,14 +101,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       SchemaInfo schemaInfo = ns2schema.get(customConfig.getNamespace());
 
       if (schemaInfo != null) {
-        if (customConfig.getElementFormDefault() != null) {
-          schemaInfo.setElementFormDefault(customConfig.getElementFormDefault());
-        }
-
-        if (customConfig.getAttributeFormDefault() != null) {
-          schemaInfo.setAttributeFormDefault(customConfig.getAttributeFormDefault());
-        }
-
         if (customConfig.getFile() != null) {
           schemaInfo.setProperty("file", customConfig.getFile());
           schemaInfo.setProperty("location", customConfig.getFile());

@@ -10,8 +10,6 @@ public class SchemaConfig {
   private String namespace;
   private String file;
   private String location;
-  private String elementFormDefault;
-  private String attributeFormDefault;
 
   /**
    * The target namespace.
@@ -69,42 +67,6 @@ public class SchemaConfig {
    */
   public void setLocation(String location) {
     this.location = location;
-  }
-
-  /**
-   * The elementFormDefault for this schema.
-   *
-   * @return The elementFormDefault for this schema.
-   */
-  public String getElementFormDefault() {
-    return elementFormDefault;
-  }
-
-  /**
-   * The elementFormDefault for this schema.
-   *
-   * @param elementFormDefault The elementFormDefault for this schema.
-   */
-  public void setElementFormDefault(String elementFormDefault) {
-    this.elementFormDefault = elementFormDefault;
-  }
-
-  /**
-   * The attributeFormDefault for this schema.
-   *
-   * @return The attributeFormDefault for this schema.
-   */
-  public String getAttributeFormDefault() {
-    return attributeFormDefault;
-  }
-
-  /**
-   * The attributeFormDefault for this schema.
-   *
-   * @param attributeFormDefault The attributeFormDefault for this schema.
-   */
-  public void setAttributeFormDefault(String attributeFormDefault) {
-    this.attributeFormDefault = attributeFormDefault;
   }
 
 }

@@ -3,6 +3,7 @@ package net.sf.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.MemberDeclaration;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.namespace.QName;
 
 /**
@@ -33,7 +34,11 @@ public class Attribute extends Accessor {
 
   // Inherited.
   public String getNamespace() {
-    String namespace = getTypeDefinition().getNamespace();
+    String namespace = null;
+
+    if (getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED) {
+      namespace = getTypeDefinition().getNamespace();
+    }
 
     if ((xmlAttribute != null) && (!"##default".equals(xmlAttribute.namespace()))) {
       namespace = xmlAttribute.namespace();
@@ -53,7 +58,7 @@ public class Attribute extends Accessor {
     String namespace = getNamespace();
     namespace = namespace == null ? "" : namespace;
     String typeNamespace = getTypeDefinition().getNamespace();
-    typeNamespace = typeNamespace == null ? "" : typeNamespace;
+    typeNamespace = (typeNamespace == null || (getTypeDefinition().getSchema().getAttributeFormDefault() != XmlNsForm.QUALIFIED)) ? "" : typeNamespace;
 
     if (!namespace.equals(typeNamespace)) {
       return new QName(namespace, getName());

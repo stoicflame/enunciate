@@ -15,10 +15,9 @@ import java.util.*;
 public class SchemaInfo {
 
   private String namespace;
-  private String elementFormDefault;
-  private String attributeFormDefault;
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
+  private final TreeSet<Schema> packages = new TreeSet<Schema>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
   /**
@@ -67,21 +66,27 @@ public class SchemaInfo {
   }
 
   /**
-   * The elementFormDefault for this schema.
+   * The set of packages that make up this schema info.
    *
-   * @return The elementFormDefault for this schema.
+   * @return The set of packages that make up this schema info.
    */
-  public String getElementFormDefault() {
-    return elementFormDefault;
+  public Set<Schema> getPackages() {
+    return this.packages;
   }
 
   /**
    * The elementFormDefault for this schema.
    *
-   * @param elementFormDefault The elementFormDefault for this schema.
+   * @return The elementFormDefault for this schema.
    */
-  public void setElementFormDefault(String elementFormDefault) {
-    this.elementFormDefault = elementFormDefault;
+  public String getElementFormDefault() {
+    for (Schema pckg : getPackages()) {
+      if (pckg.getElementFormDefault() != null) {
+        return pckg.getElementFormDefault().toString().toLowerCase();
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -90,16 +95,13 @@ public class SchemaInfo {
    * @return The attributeFormDefault for this schema.
    */
   public String getAttributeFormDefault() {
-    return attributeFormDefault;
-  }
+    for (Schema pckg : getPackages()) {
+      if (pckg.getAttributeFormDefault() != null) {
+        return pckg.getAttributeFormDefault().toString().toLowerCase();
+      }
+    }
 
-  /**
-   * The attributeFormDefault for this schema.
-   *
-   * @param attributeFormDefault The attributeFormDefault for this schema.
-   */
-  public void setAttributeFormDefault(String attributeFormDefault) {
-    this.attributeFormDefault = attributeFormDefault;
+    return null;
   }
 
   /**
@@ -137,46 +139,46 @@ public class SchemaInfo {
    * @return The imported namespace of a specific schema.
    */
   public Set<String> getReferencedNamespaces() {
-    Set<String> referencedNamspaces = new HashSet<String>();
+    Set<String> referencedNamespaces = new HashSet<String>();
 
     for (TypeDefinition typeDefinition : getTypeDefinitions()) {
       for (Attribute attribute : typeDefinition.getAttributes()) {
-        referencedNamspaces.add(attribute.getNamespace());
-        referencedNamspaces.add(attribute.getBaseType().getNamespace());
         QName ref = attribute.getRef();
         if (ref != null) {
-          referencedNamspaces.add(ref.getNamespaceURI());
+          referencedNamespaces.add(ref.getNamespaceURI());
+        }
+        else {
+          referencedNamespaces.add(attribute.getBaseType().getNamespace());
         }
       }
 
       for (Element element : typeDefinition.getElements()) {
-        referencedNamspaces.add(element.getNamespace());
         QName ref = element.getRef();
         if (ref != null) {
-          referencedNamspaces.add(ref.getNamespaceURI());
+          referencedNamespaces.add(ref.getNamespaceURI());
         }
         else {
-          referencedNamspaces.add(element.getBaseType().getNamespace());
+          referencedNamespaces.add(element.getBaseType().getNamespace());
         }
       }
 
       Value value = typeDefinition.getValue();
       if (value != null) {
-        referencedNamspaces.add(value.getBaseType().getNamespace());
+        referencedNamespaces.add(value.getBaseType().getNamespace());
       }
 
-      referencedNamspaces.add(typeDefinition.getBaseType().getNamespace());
+      referencedNamespaces.add(typeDefinition.getBaseType().getNamespace());
     }
 
     for (RootElementDeclaration rootElement : getGlobalElements()) {
-      referencedNamspaces.add(rootElement.getNamespace());
-      referencedNamspaces.add(rootElement.getTypeDefinition().getNamespace());
+      referencedNamespaces.add(rootElement.getNamespace());
+      referencedNamespaces.add(rootElement.getTypeDefinition().getNamespace());
     }
 
     //remove the obvious referenced namespace.
-    referencedNamspaces.remove("http://www.w3.org/2001/XMLSchema");
+    referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema");
 
-    return referencedNamspaces;
+    return referencedNamespaces;
   }
 
   /**

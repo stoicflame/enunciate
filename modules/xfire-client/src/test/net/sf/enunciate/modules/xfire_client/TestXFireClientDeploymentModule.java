@@ -8,6 +8,7 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
+import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
@@ -44,6 +45,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     model.add(complexType);
     model.add(simpleType);
     model.add(enumType);
+    model.add(new RootElementDeclaration(complexType, complexType));
     FreemarkerModel.set(model);
 
     final HashMap<URL, Integer> templateLedger = new HashMap<URL, Integer>();
@@ -148,7 +150,29 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals("BasicEITwoSOAPPort", wsInfo.getPortName());
     assertEquals("ei2-service", wsInfo.getServiceName());
 
-    assertEquals(4, annotations.method2RequestWrapper.size());
+    assertEquals(4, annotations.method2SOAPBinding.size());
+    bindingInfo = (SerializableSOAPBindingAnnotation) annotations.method2SOAPBinding.get("net.sf.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate");
+    assertNotNull(bindingInfo);
+    assertEquals(SOAPBindingAnnotation.STYLE_DOCUMENT, bindingInfo.getStyle());
+    assertEquals(SOAPBindingAnnotation.USE_LITERAL, bindingInfo.getUse());
+    assertEquals(SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED, bindingInfo.getParameterStyle());
+    bindingInfo = (SerializableSOAPBindingAnnotation) annotations.method2SOAPBinding.get("net.sf.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithAString");
+    assertNotNull(bindingInfo);
+    assertEquals(SOAPBindingAnnotation.STYLE_DOCUMENT, bindingInfo.getStyle());
+    assertEquals(SOAPBindingAnnotation.USE_LITERAL, bindingInfo.getUse());
+    assertEquals(SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED, bindingInfo.getParameterStyle());
+    bindingInfo = (SerializableSOAPBindingAnnotation) annotations.method2SOAPBinding.get("net.sf.enunciate.samples.xfire_client.BasicEITwo.boolOp");
+    assertNotNull(bindingInfo);
+    assertEquals(SOAPBindingAnnotation.STYLE_DOCUMENT, bindingInfo.getStyle());
+    assertEquals(SOAPBindingAnnotation.USE_LITERAL, bindingInfo.getUse());
+    assertEquals(SOAPBindingAnnotation.PARAMETER_STYLE_WRAPPED, bindingInfo.getParameterStyle());
+    bindingInfo = (SerializableSOAPBindingAnnotation) annotations.method2SOAPBinding.get("net.sf.enunciate.samples.xfire_client.BasicEITwo.floatOp");
+    assertNotNull(bindingInfo);
+    assertEquals(SOAPBindingAnnotation.STYLE_RPC, bindingInfo.getStyle());
+    assertEquals(SOAPBindingAnnotation.USE_LITERAL, bindingInfo.getUse());
+    assertEquals(SOAPBindingAnnotation.PARAMETER_STYLE_BARE, bindingInfo.getParameterStyle());
+
+    assertEquals(3, annotations.method2RequestWrapper.size());
     RequestWrapperAnnotation reqWrapperInfo = (RequestWrapperAnnotation) annotations.method2RequestWrapper.get("net.sf.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate");
     assertNotNull(reqWrapperInfo);
     assertEquals("doSomethingWithADate", reqWrapperInfo.localName());
@@ -161,12 +185,8 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertNotNull(reqWrapperInfo);
     assertEquals("doBoolReq", reqWrapperInfo.localName());
     assertEquals("urn:doBoolReq", reqWrapperInfo.targetNamespace());
-    reqWrapperInfo = (RequestWrapperAnnotation) annotations.method2RequestWrapper.get("net.sf.enunciate.samples.xfire_client.BasicEITwo.floatOp");
-    assertNotNull(reqWrapperInfo);
-    assertEquals("floatOp", reqWrapperInfo.localName());
-    assertEquals("urn:xfire_client", reqWrapperInfo.targetNamespace());
 
-    assertEquals(4, annotations.method2ResponseWrapper.size());
+    assertEquals(3, annotations.method2ResponseWrapper.size());
     ResponseWrapperAnnotation resWrapperInfo = (ResponseWrapperAnnotation) annotations.method2ResponseWrapper.get("net.sf.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate");
     assertNotNull(resWrapperInfo);
     assertEquals("doSomethingWithADateResponse", resWrapperInfo.localName());
@@ -179,10 +199,6 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertNotNull(resWrapperInfo);
     assertEquals("doBoolRes", resWrapperInfo.localName());
     assertEquals("urn:doBoolRes", resWrapperInfo.targetNamespace());
-    resWrapperInfo = (ResponseWrapperAnnotation) annotations.method2ResponseWrapper.get("net.sf.enunciate.samples.xfire_client.BasicEITwo.floatOp");
-    assertNotNull(resWrapperInfo);
-    assertEquals("floatOpResponse", resWrapperInfo.localName());
-    assertEquals("urn:xfire_client", resWrapperInfo.targetNamespace());
 
     assertEquals(4, annotations.method2WebMethod.size());
     SerializableWebMethodAnnotation webMethodInfo = (SerializableWebMethodAnnotation) annotations.method2WebMethod.get("net.sf.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate");
@@ -259,5 +275,11 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals("urn:bf2", webFaultInfo.targetNamespace());
 
     assertEquals(0, annotations.oneWayMethods.size());
+
+    assertEquals(1, annotations.class2XmlRootElement.size());
+    XmlRootElementAnnotation xmlRootElementInfo = (XmlRootElementAnnotation) annotations.class2XmlRootElement.get("net.sf.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageClass");
+    assertNotNull(xmlRootElementInfo);
+    assertEquals("nested-pckg", xmlRootElementInfo.name());
+    assertEquals("urn:nested-pckg", xmlRootElementInfo.namespace());
   }
 }

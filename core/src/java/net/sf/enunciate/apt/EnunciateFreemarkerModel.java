@@ -17,10 +17,12 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
+import javax.xml.bind.annotation.XmlNsForm;
 import java.util.*;
 
 /**
@@ -164,8 +166,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param typeDef The type definition to add to the model.
    */
   public void add(TypeDefinition typeDef) {
-    Schema schema = typeDef.getSchema();
-    this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
+    add(typeDef.getSchema());
 
     String namespace = typeDef.getNamespace();
     addNamespace(namespace);
@@ -173,14 +174,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
-      namespacesToSchemas.put(namespace, schemaInfo);
-      if (schema.getElementFormDefault() != null) {
-        schemaInfo.setElementFormDefault(schema.getElementFormDefault().toString().toLowerCase());
-      }
-      if (schema.getAttributeFormDefault() != null) {
-        schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
-      }
       schemaInfo.setNamespace(namespace);
+      namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getTypeDefinitions().add(typeDef);
 
@@ -196,8 +191,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param rootElement The root element to add.
    */
   public void add(RootElementDeclaration rootElement) {
-    Schema schema = rootElement.getSchema();
-    this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
+    add(rootElement.getSchema());
 
     String namespace = rootElement.getNamespace();
     addNamespace(namespace);
@@ -206,12 +200,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
       namespacesToSchemas.put(namespace, schemaInfo);
-      if (schema.getElementFormDefault() != null) {
-        schemaInfo.setElementFormDefault(schema.getElementFormDefault().toString().toLowerCase());
-      }
-      if (schema.getAttributeFormDefault() != null) {
-        schemaInfo.setAttributeFormDefault(schema.getAttributeFormDefault().toString().toLowerCase());
-      }
       schemaInfo.setNamespace(namespace);
     }
     schemaInfo.getGlobalElements().add(rootElement);
@@ -220,6 +208,41 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (position < 0) {
       this.rootElements.add(-position - 1, rootElement);
     }
+  }
+
+  /**
+   * Adds a schema declaration to the model.
+   *
+   * @param schema The schema declaration to add to the model.
+   */
+  public void add(Schema schema) {
+    String namespace = schema.getNamespace();
+    addNamespace(namespace);
+    this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
+    SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+    if (schemaInfo == null) {
+      schemaInfo = new SchemaInfo();
+      namespacesToSchemas.put(namespace, schemaInfo);
+      schemaInfo.setNamespace(namespace);
+    }
+
+    if (schema.getElementFormDefault() != XmlNsForm.UNSET) {
+      for (Schema pckg : schemaInfo.getPackages()) {
+        if ((pckg.getElementFormDefault() != null) && (schema.getElementFormDefault() != pckg.getElementFormDefault())) {
+          throw new ValidationException(schema.getPosition(), "Inconsistent elementFormDefault declarations: " + pckg.getPosition());
+        }
+      }
+    }
+
+    if (schema.getAttributeFormDefault() != XmlNsForm.UNSET) {
+      for (Schema pckg : schemaInfo.getPackages()) {
+        if ((pckg.getAttributeFormDefault() != null) && (schema.getAttributeFormDefault() != pckg.getAttributeFormDefault())) {
+          throw new ValidationException(schema.getPosition(), "Inconsistent attributeFormDefault declarations: " + pckg.getPosition());
+        }
+      }
+    }
+
+    schemaInfo.getPackages().add(schema);
   }
 
   /**
@@ -291,7 +314,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
       }
     }
-    
+
     return knownOrSpecifiedType;
   }
 

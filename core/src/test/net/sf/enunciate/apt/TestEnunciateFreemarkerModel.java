@@ -321,8 +321,8 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertTrue(model.rootElements.contains(element3));
     assertNotNull(model.findRootElementDeclaration(element3));
     assertEquals(targetNamespace, schemaInfo.getNamespace());
-    assertEquals("qualified", schemaInfo.getElementFormDefault());
-    assertEquals("qualified", schemaInfo.getAttributeFormDefault());
+    assertEquals("There is no @XmlSchema annotation for this new namespace, so the elementFormDefault should be unset.", null, schemaInfo.getElementFormDefault());
+    assertEquals("There is no @XmlSchema annotation for this new namespace, so the attributeFormDefault should be unset.", null, schemaInfo.getAttributeFormDefault());
     nsCount += 1;
     assertEquals("There should have been 1 new namespace added.", nsCount, model.getNamespacesToPrefixes().size());
 
