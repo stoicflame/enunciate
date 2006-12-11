@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="build" name="all" basedir=".">
+
+  <!--global references to other modules-->
+  <dirname file="${ant.file.base}" property="enunciate.basedir"/>
+  <property name="core.basedir" value="${enunciate.basedir}/core"/>
+  <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
+  <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
+  <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
+  <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
+
+  <target name="build">
+    <ant dir="${core.basedir}"/>
+    <ant dir="${modules.xml.basedir}"/>
+    <ant dir="${modules.jaxws.basedir}"/>
+    <ant dir="${modules.xfire-client.basedir}"/>
+    <ant dir="${modules.xfire.basedir}"/>
+  </target>
+
+</project>
