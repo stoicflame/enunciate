@@ -182,6 +182,15 @@ public class ElementRef extends Element {
   }
 
   /**
+   * Whether this is a choice of multiple element refs.
+   *
+   * @return Whether this is a choice of multiple element refs.
+   */
+  public boolean isElementRefs() {
+    return (this.ref == null);
+  }
+
+  /**
    * The name of an element ref is the name of the element it references, unless the type is a JAXBElement, in which
    * case the name is specified.
    *
@@ -189,7 +198,7 @@ public class ElementRef extends Element {
    */
   @Override
   public String getName() {
-    if (this.ref == null) {
+    if (isElementRefs()) {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
@@ -204,7 +213,7 @@ public class ElementRef extends Element {
    */
   @Override
   public String getNamespace() {
-    if (this.ref == null) {
+    if (isElementRefs()) {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
@@ -213,7 +222,7 @@ public class ElementRef extends Element {
 
   @Override
   public QName getRef() {
-    if (this.ref == null) {
+    if (isElementRefs()) {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 

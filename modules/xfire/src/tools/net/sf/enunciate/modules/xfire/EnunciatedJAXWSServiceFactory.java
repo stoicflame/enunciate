@@ -2,7 +2,6 @@ package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.XFireFactory;
 import org.codehaus.xfire.XFireRuntimeException;
-import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.annotations.AnnotationException;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
@@ -21,10 +20,12 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import java.lang.reflect.Method;
+import java.beans.Introspector;
 
 /**
  * The enunciate implementation of the JAXWS service factory.
@@ -173,7 +174,21 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
         throw new XFireRuntimeException("Unable to create the message name for " + method + ": " + bareType.getName() + " is not a root element!");
       }
 
-      return new QName(rootElement.namespace(), rootElement.name());
+      String namespace = rootElement.namespace();
+      if ("##default".equals(namespace)) {
+        namespace = "";
+        Package pckg = bareType.getPackage();
+        if ((pckg != null) && (pckg.isAnnotationPresent(XmlSchema.class))) {
+          namespace = pckg.getAnnotation(XmlSchema.class).namespace();
+        }
+      }
+
+      String name = rootElement.name();
+      if ("##default".equals(name)) {
+        name = Introspector.decapitalize(bareType.getSimpleName());
+      }
+
+      return new QName(namespace, name);
     }
     else {
       //default doc/lit behavior.
@@ -243,7 +258,21 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
         throw new XFireRuntimeException("Unable to create the message name for " + method + ": " + bareType.getName() + " is not a root element!");
       }
 
-      return new QName(rootElement.namespace(), rootElement.name());
+      String namespace = rootElement.namespace();
+      if ("##default".equals(namespace)) {
+        namespace = "";
+        Package pckg = bareType.getPackage();
+        if ((pckg != null) && (pckg.isAnnotationPresent(XmlSchema.class))) {
+          namespace = pckg.getAnnotation(XmlSchema.class).namespace();
+        }
+      }
+
+      String name = rootElement.name();
+      if ("##default".equals(name)) {
+        name = Introspector.decapitalize(bareType.getSimpleName());
+      }
+
+      return new QName(namespace, name);
     }
     else {
       //default doc/lit behavior.

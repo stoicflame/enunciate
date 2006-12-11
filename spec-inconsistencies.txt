@@ -18,3 +18,5 @@ The following were noticed inconsistencies in the specifications:
        same schema.
 -jaxb: *why* does @XmlElement.namespace() exist?  If elementFormDefault is qualified, the namespace is the same as the type.  Otherwise, its the default namespace!
        what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?
+-jaxb: why the contstraint that if it is a parameterized collection, then value.length must be one?  What if it's a parameterized collection of objects that
+       all inherit from collection item type?

@@ -153,8 +153,7 @@ public class Enunciate {
   }
 
   public File createTempDir() throws IOException {
-    File genDir;
-    genDir = File.createTempFile("enunciate", "");
+    File genDir = File.createTempFile("enunciate", "");
     genDir.delete();
     genDir.mkdirs();
     return genDir;

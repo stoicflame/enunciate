@@ -37,7 +37,7 @@
 
   </path>
 
-  <import file="../../build.xml"/>
+  <import file="../../build-module.xml"/>
 
   <!--no-op because there are no java sources.  this is a test module.-->
   <target name="compile-main"/>

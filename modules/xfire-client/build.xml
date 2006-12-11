@@ -4,7 +4,7 @@
 
   <property name="tools.compiler" value="1.4"/>
 
-  <import file="../../build.xml"/>
+  <import file="../../build-module.xml"/>
 
   <path id="build.classpath">
     <path refid="base.libs"/>
@@ -40,6 +40,21 @@
     <mkdir dir="${build.dir}/META-INF/services"/>
     <echo message="net.sf.enunciate.modules.xfire_client.XFireClientDeploymentModule"
           file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+  </target>
+
+  <target name="xfire-client-shapes" depends="compile-main">
+    <path id="enunciate.classpath">
+      <path refid="base.libs"/>
+      <path refid="core.libs"/>
+      <pathelement location="${build.dir}"/>
+    </path>
+
+    <antcall target="enunciate-example-api">
+      <param name="enunciate.target" value="compile"/>
+      <param name="example" value="schema"/>
+      <param name="example.dir" value="${basedir}/src/samples/schema"/>
+      <reference refid="enunciate.classpath"/>
+    </antcall>
   </target>
 
 </project>

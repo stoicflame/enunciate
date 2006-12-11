@@ -289,4 +289,8 @@
     </enunciate>
   </target>
 
+  <target name="build-all-modules">
+    
+  </target>
+
 </project>

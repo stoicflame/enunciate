@@ -10,6 +10,7 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
@@ -35,9 +36,9 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
       DecoratedTypeMirror decoratedTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
       if (decoratedTypeMirror.isCollection()) {
         DeclaredType declaredType = (DeclaredType) typeMirror;
-        Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
-        if (actualTypeArguments.size() > 0) {
-          return super.convert(actualTypeArguments.iterator().next());
+        Iterator<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments().iterator();
+        if (actualTypeArguments.hasNext()) {
+          return super.convert(actualTypeArguments.next());
         }
       }
     }

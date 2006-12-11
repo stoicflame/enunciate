@@ -399,7 +399,7 @@ public class TestFullAPI extends TestCase {
       else if ("PersonService.storePerson".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("person");
-        assertEquals(new QName(DATA_NAMESPACE, "Person"), part.getElementName());
+        assertEquals(new QName(DATA_NAMESPACE, "person"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("PersonService.readPersons".equals(messageName)) {
@@ -417,7 +417,7 @@ public class TestFullAPI extends TestCase {
       else if ("PersonService.storePersonResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("return");
-        assertEquals(new QName(DATA_NAMESPACE, "Person"), part.getElementName());
+        assertEquals(new QName(DATA_NAMESPACE, "person"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("PersonService.readPersonsResponse".equals(messageName)) {
@@ -451,7 +451,7 @@ public class TestFullAPI extends TestCase {
         assertEquals(new QName(W3C_XML_SCHEMA_NS_URI, "string"), part.getTypeName());
         part = message.getPart("infoSet");
         assertNull(part.getElementName());
-        assertEquals(new QName(CITE_NAMESPACE, "InfoSet"), part.getTypeName());
+        assertEquals(new QName(CITE_NAMESPACE, "infoSet"), part.getTypeName());
       }
       else if ("SourceService.getSourceResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
@@ -474,11 +474,11 @@ public class TestFullAPI extends TestCase {
   protected void assertCiteSchemaStructure(XSSchema citeSchema) {
     Map<String, XSElementDecl> rootElements = citeSchema.getElementDecls();
     assertEquals(3, rootElements.size());
-    XSElementDecl contributorElement = rootElements.get("Contributor");
+    XSElementDecl contributorElement = rootElements.get("contributor");
     assertContributorElement(contributorElement);
-    XSElementDecl sourceElement = rootElements.get("Source");
+    XSElementDecl sourceElement = rootElements.get("source");
     assertSourceElement(sourceElement);
-    XSElementDecl repositoryElement = rootElements.get("Repository");
+    XSElementDecl repositoryElement = rootElements.get("repository");
     assertRepositoryElement(repositoryElement);
 
     Map<String, XSSimpleType> simpleTypes = citeSchema.getSimpleTypes();
@@ -489,16 +489,16 @@ public class TestFullAPI extends TestCase {
 
     Map<String, XSComplexType> complexTypes = citeSchema.getComplexTypes();
     assertEquals(4, complexTypes.size());
-    XSComplexType contributorType = complexTypes.get("Contributor");
+    XSComplexType contributorType = complexTypes.get("contributor");
     assertNotNull(contributorType);
     assertContributorType(contributorType);
-    XSComplexType infosetType = complexTypes.get("InfoSet");
+    XSComplexType infosetType = complexTypes.get("infoSet");
     assertNotNull(infosetType);
     assertInfosetType(infosetType);
-    XSComplexType repositoryType = complexTypes.get("Repository");
+    XSComplexType repositoryType = complexTypes.get("repository");
     assertNotNull(repositoryType);
     assertRepositoryType(repositoryType);
-    XSComplexType sourceType = complexTypes.get("Source");
+    XSComplexType sourceType = complexTypes.get("source");
     assertNotNull(sourceType);
     assertSourceType(sourceType);
   }
@@ -511,23 +511,23 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertContributorElement(XSElementDecl contributorElement) {
-    assertEquals("Contributor", contributorElement.getName());
+    assertEquals("contributor", contributorElement.getName());
     XSType personType = contributorElement.getType();
-    assertEquals("Contributor", personType.getName());
+    assertEquals("contributor", personType.getName());
     assertEquals(CITE_NAMESPACE, personType.getTargetNamespace());
   }
 
   protected void assertSourceElement(XSElementDecl sourceElement) {
-    assertEquals("Source", sourceElement.getName());
+    assertEquals("source", sourceElement.getName());
     XSType personType = sourceElement.getType();
-    assertEquals("Source", personType.getName());
+    assertEquals("source", personType.getName());
     assertEquals(CITE_NAMESPACE, personType.getTargetNamespace());
   }
 
   protected void assertRepositoryElement(XSElementDecl repositoryElement) {
-    assertEquals("Repository", repositoryElement.getName());
+    assertEquals("repository", repositoryElement.getName());
     XSType personType = repositoryElement.getType();
-    assertEquals("Repository", personType.getName());
+    assertEquals("repository", personType.getName());
     assertEquals(CITE_NAMESPACE, personType.getTargetNamespace());
   }
 
@@ -539,48 +539,48 @@ public class TestFullAPI extends TestCase {
 
     Map<String, XSSimpleType> simpleTypes = dataSchema.getSimpleTypes();
     assertEquals(3, simpleTypes.size());
-    XSSimpleType eventTypeType = simpleTypes.get("EventType");
+    XSSimpleType eventTypeType = simpleTypes.get("eventType");
     assertNotNull(eventTypeType);
     assertEventTypeType(eventTypeType);
-    XSSimpleType factTypeType = simpleTypes.get("FactType");
+    XSSimpleType factTypeType = simpleTypes.get("factType");
     assertNotNull(factTypeType);
     assertFactTypeType(factTypeType);
-    XSSimpleType genderTypeType = simpleTypes.get("GenderType");
+    XSSimpleType genderTypeType = simpleTypes.get("genderType");
     assertNotNull(genderTypeType);
     assertGenderTypeType(genderTypeType);
 
     Map<String, XSComplexType> complexTypes = dataSchema.getComplexTypes();
     assertEquals(8, complexTypes.size());
-    XSComplexType assertionType = complexTypes.get("Assertion");
+    XSComplexType assertionType = complexTypes.get("assertion");
     assertNotNull(assertionType);
     assertAssertionType(assertionType);
-    XSComplexType occurringAssertionType = complexTypes.get("OccurringAssertion");
+    XSComplexType occurringAssertionType = complexTypes.get("occurringAssertion");
     assertNotNull(occurringAssertionType);
     assertOccurringAssertionType(occurringAssertionType);
-    XSComplexType eventType = complexTypes.get("Event");
+    XSComplexType eventType = complexTypes.get("event");
     assertNotNull(eventType);
     assertEventType(eventType);
-    XSComplexType factType = complexTypes.get("Fact");
+    XSComplexType factType = complexTypes.get("fact");
     assertNotNull(factType);
     assertFactType(factType);
-    XSComplexType genderType = complexTypes.get("Gender");
+    XSComplexType genderType = complexTypes.get("gender");
     assertNotNull(genderType);
     assertGenderType(genderType);
-    XSComplexType nameType = complexTypes.get("Name");
+    XSComplexType nameType = complexTypes.get("name");
     assertNotNull(nameType);
     assertNameType(nameType);
-    XSComplexType relationshipType = complexTypes.get("Relationship");
+    XSComplexType relationshipType = complexTypes.get("relationship");
     assertNotNull(relationshipType);
     assertRelationshipType(relationshipType);
-    XSComplexType personType = complexTypes.get("Person");
+    XSComplexType personType = complexTypes.get("person");
     assertNotNull(personType);
     assertPersonType(personType);
   }
 
   protected void assertEventType(XSComplexType eventType) {
-    assertEquals("Event", eventType.getName());
+    assertEquals("event", eventType.getName());
     assertFalse(eventType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "OccurringAssertion", eventType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "occurringAssertion", eventType.getBaseType());
     assertEquals(EXTENSION, eventType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = eventType.getAttributeUses();
@@ -591,7 +591,7 @@ public class TestFullAPI extends TestCase {
       if ("type".equals(attributeName)) {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
-        assertQNameEquals(DATA_NAMESPACE, "EventType", attributeDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "eventType", attributeDecl.getType());
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -622,7 +622,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertContributorType(XSComplexType contributorType) {
-    assertEquals("Contributor", contributorType.getName());
+    assertEquals("contributor", contributorType.getName());
     assertFalse(contributorType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", contributorType.getBaseType());
     assertEquals(RESTRICTION, contributorType.getDerivationMethod());
@@ -672,7 +672,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertRepositoryType(XSComplexType repositoryType) {
-    assertEquals("Repository", repositoryType.getName());
+    assertEquals("repository", repositoryType.getName());
     assertFalse(repositoryType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", repositoryType.getBaseType());
     assertEquals(RESTRICTION, repositoryType.getDerivationMethod());
@@ -721,7 +721,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertSourceType(XSComplexType sourceType) {
-    assertEquals("Source", sourceType.getName());
+    assertEquals("source", sourceType.getName());
     assertFalse(sourceType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", sourceType.getBaseType());
     assertEquals(RESTRICTION, sourceType.getDerivationMethod());
@@ -766,12 +766,12 @@ public class TestFullAPI extends TestCase {
       else if ("infoSets".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
-        assertQNameEquals(CITE_NAMESPACE, "InfoSet", elementDecl.getType());
+        assertQNameEquals(CITE_NAMESPACE, "infoSet", elementDecl.getType());
       }
-      else if ("Repository".equals(childElementName)) {
+      else if ("repository".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
-        assertSame(sourceType.getOwnerSchema().getElementDecls().get("Repository"), elementDecl);
+        assertSame(sourceType.getOwnerSchema().getElementDecls().get("repository"), elementDecl);
       }
       else {
         fail("Unknown child element: " + childElementName);
@@ -780,7 +780,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertInfosetType(XSComplexType infosetType) {
-    assertEquals("InfoSet", infosetType.getName());
+    assertEquals("infoSet", infosetType.getName());
     assertFalse(infosetType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", infosetType.getBaseType());
     assertEquals(RESTRICTION, infosetType.getDerivationMethod());
@@ -817,10 +817,10 @@ public class TestFullAPI extends TestCase {
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "IDREF", elementDecl.getType());
       }
-      else if ("Contributor".equals(childElementName)) {
+      else if ("contributor".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
-        assertSame(infosetType.getOwnerSchema().getElementDecls().get("Contributor"), elementDecl);
+        assertSame(infosetType.getOwnerSchema().getElementDecls().get("contributor"), elementDecl);
       }
       else if ("source".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
@@ -839,7 +839,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertPersonType(XSComplexType personType) {
-    assertEquals("Person", personType.getName());
+    assertEquals("person", personType.getName());
     assertFalse(personType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", personType.getBaseType());
     assertEquals(RESTRICTION, personType.getDerivationMethod());
@@ -874,27 +874,27 @@ public class TestFullAPI extends TestCase {
       if ("gender".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Gender", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "gender", elementDecl.getType());
       }
       else if ("names".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Name", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else if ("events".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Event", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "event", elementDecl.getType());
       }
       else if ("facts".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Fact", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "fact", elementDecl.getType());
       }
       else if ("relationships".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Relationship", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "relationship", elementDecl.getType());
       }
       else {
         fail("Unknown child element: " + childElementName);
@@ -903,9 +903,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertRelationshipType(XSComplexType relationshipType) {
-    assertEquals("Relationship", relationshipType.getName());
+    assertEquals("relationship", relationshipType.getName());
     assertFalse(relationshipType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "Assertion", relationshipType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "assertion", relationshipType.getBaseType());
     assertEquals(EXTENSION, relationshipType.getDerivationMethod());
     assertEquals(0, relationshipType.getAttributeUses().size());
 
@@ -930,12 +930,12 @@ public class TestFullAPI extends TestCase {
       else if ("sourcePersonName".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Name", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else if ("targetPersonName".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
-        assertQNameEquals(DATA_NAMESPACE, "Name", elementDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else {
         fail("Unknown child element: " + childElementName);
@@ -944,9 +944,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertNameType(XSComplexType nameType) {
-    assertEquals("Name", nameType.getName());
+    assertEquals("name", nameType.getName());
     assertFalse(nameType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "Assertion", nameType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "assertion", nameType.getBaseType());
     assertEquals(EXTENSION, nameType.getDerivationMethod());
     assertEquals(0, nameType.getAttributeUses().size());
 
@@ -974,9 +974,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertGenderType(XSComplexType genderType) {
-    assertEquals("Gender", genderType.getName());
+    assertEquals("gender", genderType.getName());
     assertFalse(genderType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "Assertion", genderType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "assertion", genderType.getBaseType());
     assertEquals(EXTENSION, genderType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = genderType.getAttributeUses();
@@ -987,7 +987,7 @@ public class TestFullAPI extends TestCase {
       if ("type".equals(attributeName)) {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
-        assertQNameEquals(DATA_NAMESPACE, "GenderType", attributeDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "genderType", attributeDecl.getType());
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -999,9 +999,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertFactType(XSComplexType factType) {
-    assertEquals("Fact", factType.getName());
+    assertEquals("fact", factType.getName());
     assertFalse(factType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "OccurringAssertion", factType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "occurringAssertion", factType.getBaseType());
     assertEquals(EXTENSION, factType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = factType.getAttributeUses();
@@ -1012,7 +1012,7 @@ public class TestFullAPI extends TestCase {
       if ("type".equals(attributeName)) {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
-        assertQNameEquals(DATA_NAMESPACE, "FactType", attributeDecl.getType());
+        assertQNameEquals(DATA_NAMESPACE, "factType", attributeDecl.getType());
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -1048,7 +1048,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertAssertionType(XSComplexType assertionType) {
-    assertEquals("Assertion", assertionType.getName());
+    assertEquals("assertion", assertionType.getName());
     assertTrue(assertionType.isAbstract());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", assertionType.getBaseType());
     assertEquals(RESTRICTION, assertionType.getDerivationMethod());
@@ -1097,9 +1097,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertOccurringAssertionType(XSComplexType assertionType) {
-    assertEquals("OccurringAssertion", assertionType.getName());
+    assertEquals("occurringAssertion", assertionType.getName());
     assertTrue(assertionType.isAbstract());
-    assertQNameEquals(DATA_NAMESPACE, "Assertion", assertionType.getBaseType());
+    assertQNameEquals(DATA_NAMESPACE, "assertion", assertionType.getBaseType());
     assertEquals(EXTENSION, assertionType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = assertionType.getAttributeUses();
@@ -1134,7 +1134,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertGenderTypeType(XSSimpleType genderTypeType) {
-    assertEquals("GenderType", genderTypeType.getName());
+    assertEquals("genderType", genderTypeType.getName());
     assertTrue(genderTypeType.isRestriction());
     XSRestrictionSimpleType restriction = genderTypeType.asRestriction();
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", restriction.getSimpleBaseType());
@@ -1150,7 +1150,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertFactTypeType(XSSimpleType factTypeType) {
-    assertEquals("FactType", factTypeType.getName());
+    assertEquals("factType", factTypeType.getName());
     assertTrue(factTypeType.isRestriction());
     XSRestrictionSimpleType restriction = factTypeType.asRestriction();
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", restriction.getSimpleBaseType());
@@ -1166,7 +1166,7 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertEventTypeType(XSSimpleType eventTypeType) {
-    assertEquals("EventType", eventTypeType.getName());
+    assertEquals("eventType", eventTypeType.getName());
     assertTrue(eventTypeType.isRestriction());
     XSRestrictionSimpleType restriction = eventTypeType.asRestriction();
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", restriction.getSimpleBaseType());
@@ -1209,9 +1209,9 @@ public class TestFullAPI extends TestCase {
   }
 
   protected void assertPersonRootElement(XSElementDecl personElement) {
-    assertEquals("Person", personElement.getName());
+    assertEquals("person", personElement.getName());
     XSType personType = personElement.getType();
-    assertEquals("Person", personType.getName());
+    assertEquals("person", personType.getName());
     assertEquals(DATA_NAMESPACE, personType.getTargetNamespace());
   }
 

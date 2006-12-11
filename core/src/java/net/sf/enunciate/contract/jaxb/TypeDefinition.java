@@ -13,6 +13,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.*;
+import java.beans.Introspector;
 
 /**
  * A xml type definition.
@@ -146,7 +147,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return The name of the xml type element.
    */
   public String getName() {
-    String name = getSimpleName();
+    String name = Introspector.decapitalize(getSimpleName());
 
     if ((xmlType != null) && (!"##default".equals(xmlType.name()))) {
       name = xmlType.name();

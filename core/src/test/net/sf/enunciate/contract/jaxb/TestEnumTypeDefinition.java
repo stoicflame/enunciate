@@ -33,7 +33,7 @@ public class TestEnumTypeDefinition extends InAPTTestCase {
     EnumTypeDefinition bean3 = new EnumTypeDefinition((EnumDeclaration) getDeclaration("net.sf.enunciate.samples.anotherschema.EnumBeanThree"));
 
     assertEquals(KnownXmlType.STRING.getQname(), bean1.getBaseType().getQname());
-    assertEquals(new QName("http://net.sf.enunciate/core/samples/another", "SimpleTypeSimpleContentBean"), bean2.getBaseType().getQname());
+    assertEquals(new QName("http://net.sf.enunciate/core/samples/another", "simpleTypeSimpleContentBean"), bean2.getBaseType().getQname());
     assertEquals(KnownXmlType.INT.getQname(), bean3.getBaseType().getQname());
 
     Map<String, String> bean1Values = new HashMap<String, String>();

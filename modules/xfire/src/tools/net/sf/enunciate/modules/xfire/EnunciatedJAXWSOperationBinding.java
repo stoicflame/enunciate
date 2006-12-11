@@ -280,21 +280,23 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
       }
 
       PropertyDescriptor[] properties = this.responseInfo.getPropertyOrder();
-      if (properties.length != params.length) {
-        throw new XFireFault("There are " + params.length + " parameters to the out message but only "
-          + properties.length + " properties on " + beanClass.getName(), XFireFault.RECEIVER);
-      }
+      if (properties.length > 0) { //no properties implies a void method...
+        if (properties.length != params.length) {
+          throw new XFireFault("There are " + params.length + " parameters to the out message but "
+            + properties.length + " properties on " + beanClass.getName(), XFireFault.RECEIVER);
+        }
 
-      for (int i = 0; i < properties.length; i++) {
-        PropertyDescriptor descriptor = properties[i];
-        try {
-          descriptor.getWriteMethod().invoke(bean, params[i]);
-        }
-        catch (IllegalAccessException e) {
-          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
-        }
-        catch (InvocationTargetException e) {
-          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
+        for (int i = 0; i < properties.length; i++) {
+          PropertyDescriptor descriptor = properties[i];
+          try {
+            descriptor.getWriteMethod().invoke(bean, params[i]);
+          }
+          catch (IllegalAccessException e) {
+            throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
+          }
+          catch (InvocationTargetException e) {
+            throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
+          }
         }
       }
     }

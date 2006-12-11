@@ -23,7 +23,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * An accessor for a field or method value into a type.
@@ -178,14 +178,14 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
       return ((ArrayType) accessorType).getComponentType();
     }
     else if (accessorType.isCollection()) {
-      Collection<TypeMirror> itemTypes = ((DeclaredType) accessorType).getActualTypeArguments();
-      if (itemTypes.isEmpty()) {
+      Iterator<TypeMirror> itemTypes = ((DeclaredType) accessorType).getActualTypeArguments().iterator();
+      if (!itemTypes.hasNext()) {
         AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
         Types typeUtils = env.getTypeUtils();
-        return typeUtils.getDeclaredType(env.getTypeDeclaration(java.lang.Object.class.getName()));
+        return TypeMirrorDecorator.decorate(typeUtils.getDeclaredType(env.getTypeDeclaration(java.lang.Object.class.getName())));
       }
       else {
-        return itemTypes.iterator().next();
+        return itemTypes.next();
       }
     }
 

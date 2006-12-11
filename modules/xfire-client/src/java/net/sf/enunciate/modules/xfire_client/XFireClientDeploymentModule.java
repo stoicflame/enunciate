@@ -23,6 +23,7 @@ import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import javax.jws.soap.SOAPBinding;
+import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -158,6 +159,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         model.put("type", typeDefinition);
+        RootElementDeclaration rootElement = model.findRootElementDeclaration(typeDefinition);
+        if (rootElement != null) {
+          model.put("rootElementName", new QName(rootElement.getNamespace(), rootElement.getName()));
+        }
+        else {
+          model.remove("rootElementName");
+        }
+        
         URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
         processTemplate(template, model);
 

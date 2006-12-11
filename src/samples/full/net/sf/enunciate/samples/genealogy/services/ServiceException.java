@@ -12,9 +12,9 @@ public class ServiceException extends Exception {
 
   private String anotherMessage;
 
-  public ServiceException(String message, String id) {
+  public ServiceException(String message, String anotherMessage) {
     super(message);
-    this.anotherMessage = id;
+    this.anotherMessage = anotherMessage;
   }
 
   public String getAnotherMessage() {

@@ -17,6 +17,12 @@ import java.util.Collection;
  */
 public class ElementsWriter {
 
+  /**
+   * Special qname to pass to the elements writer to indicate that the element name should be looked up and used for the
+   * qname of the element.
+   */
+  public static final QName ELEMENT_NAME = new QName("", "");
+
   private ElementsWriter() {
   }
 
@@ -175,7 +181,18 @@ public class ElementsWriter {
       for (int i = 0; i < Array.getLength(array); i++) {
         Object item = Array.get(array, i);
         Type componentType = typeMapping.getType(item.getClass());
-        MessageWriter elementWriter = parentWriter.getElementWriter(elementName);
+
+        QName itemName = elementName;
+        if (ELEMENT_NAME == elementName) {
+          try {
+            itemName = ((RootElementType) componentType).getRootElementName();
+          }
+          catch (ClassCastException e) {
+            throw new XFireFault(item.getClass().getName() + " is not a root element, but it's being serialized as an element ref.", XFireFault.RECEIVER);
+          }
+        }
+
+        MessageWriter elementWriter = parentWriter.getElementWriter(itemName);
         componentType.writeObject(item, elementWriter, context);
         elementWriter.close();
       }

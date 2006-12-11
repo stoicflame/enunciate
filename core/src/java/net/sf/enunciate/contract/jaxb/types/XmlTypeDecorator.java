@@ -2,15 +2,14 @@ package net.sf.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.type.DecoratedClassType;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
-import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedClassType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
-import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * A decorator that decorates the relevant type mirrors as xml type mirrors.
@@ -97,14 +96,15 @@ public class XmlTypeDecorator implements TypeVisitor {
 
   protected void visitCollectionType(DeclaredType classType) {
     //if it's a colleciton type, the xml type is its component type.
-    Collection<TypeMirror> actualTypeArguments = classType.getActualTypeArguments();
-    if (actualTypeArguments.isEmpty()) {
+    Iterator<TypeMirror> actualTypeArguments = classType.getActualTypeArguments().iterator();
+    if (!actualTypeArguments.hasNext()) {
       //no type arguments, java.lang.Object type.
       this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
     }
-
-    TypeMirror componentType = actualTypeArguments.iterator().next();
-    componentType.accept(this);
+    else {
+      TypeMirror componentType = actualTypeArguments.next();
+      componentType.accept(this);
+    }
   }
 
   public void visitEnumType(EnumType enumType) {
@@ -136,12 +136,12 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitTypeVariable(TypeVariable typeVariable) {
-    Collection<ReferenceType> bounds = typeVariable.getDeclaration().getBounds();
-    if (bounds.isEmpty()) {
+    Iterator<ReferenceType> bounds = typeVariable.getDeclaration().getBounds().iterator();
+    if (!bounds.hasNext()) {
       this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
     }
     else {
-      bounds.iterator().next().accept(this);
+      bounds.next().accept(this);
       if (this.errorMessage != null) {
         this.errorMessage = "Problem with the type variable bounds: " + this.errorMessage;
       }
@@ -149,12 +149,12 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitWildcardType(WildcardType wildcardType) {
-    Collection<ReferenceType> upperBounds = wildcardType.getUpperBounds();
-    if (upperBounds.isEmpty()) {
+    Iterator<ReferenceType> upperBounds = wildcardType.getUpperBounds().iterator();
+    if (!upperBounds.hasNext()) {
       this.decoratedTypeMirror = KnownXmlType.ANY_TYPE;
     }
     else {
-      upperBounds.iterator().next().accept(this);
+      upperBounds.next().accept(this);
 
       if (this.errorMessage != null) {
         this.errorMessage = "Problem with wildcard bounds: " + this.errorMessage;

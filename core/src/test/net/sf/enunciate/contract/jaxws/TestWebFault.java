@@ -131,7 +131,7 @@ public class TestWebFault extends InAPTTestCase {
     assertNull(webFault.getTargetNamespace());
     assertEquals("ExplicitFaultBean", webFault.getPartName());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webFault.getParticleType());
-    assertEquals(new QName(null, "BeanThree"), webFault.getParticleQName());
+    assertEquals(new QName(null, "beanThree"), webFault.getParticleQName());
     assertNull("The type of a web fault is always implicit.", webFault.getTypeQName());
     assertFalse(webFault.isImplicitSchemaElement());
     assertTrue(webFault.getChildElements().isEmpty());

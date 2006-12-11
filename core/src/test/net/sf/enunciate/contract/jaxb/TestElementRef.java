@@ -63,7 +63,7 @@ public class TestElementRef extends TestElement {
     ElementRef element = new ElementRef(property, typeDef);
     assertEquals(1, element.getChoices().size());
     assertSame(element, element.getChoices().iterator().next());
-    assertEquals("BeanThree", element.getName());
+    assertEquals("beanThree", element.getName());
     assertNull(element.getNamespace());
     assertNotNull(element.getRef());
     assertEquals(property.getPropertyType(), element.getAccessorType());
@@ -141,7 +141,7 @@ public class TestElementRef extends TestElement {
     ElementRef element = new ElementRef(property, typeDef);
     assertEquals(1, element.getChoices().size());
     ElementRef firstChoice = element.getChoices().iterator().next();
-    assertEquals("BeanThree", firstChoice.getName());
+    assertEquals("beanThree", firstChoice.getName());
     assertEquals("http://net.sf.enunciate/core/samples/another", firstChoice.getNamespace());
 
     assertFalse(element.isNillable());
@@ -267,9 +267,9 @@ public class TestElementRef extends TestElement {
     ElementRef firstChoice = iterator.next();
     ElementRef secondChoice = iterator.next();
 
-    assertEquals("BeanFour", firstChoice.getName());
+    assertEquals("beanFour", firstChoice.getName());
     assertEquals("urn:BeanFour", firstChoice.getNamespace());
-    assertEquals("BeanThree", secondChoice.getName());
+    assertEquals("beanThree", secondChoice.getName());
     assertEquals("http://net.sf.enunciate/core/samples/another", secondChoice.getNamespace());
 
     assertFalse(element.isNillable());

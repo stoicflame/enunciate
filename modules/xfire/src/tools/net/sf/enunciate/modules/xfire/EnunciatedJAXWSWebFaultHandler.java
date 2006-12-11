@@ -2,16 +2,18 @@ package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.XFireRuntimeException;
-import org.codehaus.xfire.aegis.AegisBindingProvider;
-import org.codehaus.xfire.aegis.stax.ElementWriter;
-import org.codehaus.xfire.aegis.type.Type;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.handler.CustomFaultHandler;
+import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
 import org.codehaus.xfire.service.MessagePartInfo;
-import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.util.ClassLoaderUtils;
 import org.codehaus.xfire.util.stax.JDOMStreamWriter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.ws.WebFault;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -25,14 +27,32 @@ import java.lang.reflect.Method;
  */
 public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
 
+  private static final Log LOG = LogFactory.getLog(EnunciatedJAXWSWebFaultHandler.class);
+
+  @Override
+  public void invoke(MessageContext context) throws Exception {
+    XFireFault fault = (XFireFault) context.getExchange().getFaultMessage().getBody();
+    Throwable cause = fault.getCause();
+    if ((cause != null) && (cause.getClass().isAnnotationPresent(WebFault.class))) {
+      handleFault(context, fault, cause, null /*fault info is ignored*/);
+    }
+  }
+
   @Override
   protected void handleFault(MessageContext context, XFireFault fault, Throwable cause, MessagePartInfo faultPart) throws XFireFault {
-    Object faultBean = getFaultBean(fault, faultPart, context);
-    Service service = context.getService();
-    AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
-    Type type = provider.getType(service, faultBean.getClass());
-    JDOMStreamWriter writer = new JDOMStreamWriter(fault.getDetail());
-    type.writeObject(faultBean, new ElementWriter(writer), context);
+    Object faultBean = getFaultBean(cause, faultPart, context);
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(faultBean.getClass());
+      Marshaller marshaller = jaxbContext.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+      marshaller.setAttachmentMarshaller(new AttachmentMarshaller(context));
+      JDOMStreamWriter writer = new JDOMStreamWriter(fault.getDetail());
+      marshaller.marshal(faultBean, writer);
+    }
+    catch (JAXBException e) {
+      LOG.error("Unable to marshal the fault bean of type " + faultBean.getClass().getName() + ".", e);
+      //fall through... let the fault be handled by something else...
+    }
   }
 
   @Override

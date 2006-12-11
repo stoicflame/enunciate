@@ -54,7 +54,7 @@ public class TestWebParam extends InAPTTestCase {
     assertSame(WebMessagePart.ParticleType.ELEMENT, bareParam.getParticleType());
     assertEquals(new QName("urn:web-method-examples", "beanTwo"), bareParam.getParticleQName());
     assertTrue(bareParam.isImplicitSchemaElement());
-    assertEquals(new QName(null, "BeanTwo"), bareParam.getTypeQName());
+    assertEquals(new QName(null, "beanTwo"), bareParam.getTypeQName());
     assertEquals(1, bareParam.getMinOccurs());
     assertEquals("1", bareParam.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, bareParam.getMode());

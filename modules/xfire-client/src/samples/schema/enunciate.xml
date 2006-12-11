@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<enunciate label="shapes">
+  <modules>
+    <xfire-client uuid="shapes">
+      <package-conversions>
+        <convert from="net.sf.enunciate.examples.xfire_client.schema" to="net.sf.enunciate.examples.xfire_client.schema.client"/>
+      </package-conversions>
+    </xfire-client>
+  </modules>
+</enunciate>

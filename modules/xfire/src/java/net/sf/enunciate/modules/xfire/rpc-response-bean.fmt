@@ -11,11 +11,11 @@ package ${beanPackage};
  * Response bean for the ${message.operationName} operation.
  */
 @javax.xml.bind.annotation.XmlRootElement (
-  name = "${message.operationName}",
+  name = "${message.operationName}Response",
   namespace = "${message.targetNamespace}"
 )
 @javax.xml.bind.annotation.XmlType (
-  name = "${message.operationName}",
+  name = "${message.operationName}Response",
   namespace = "${message.targetNamespace}",
   propOrder = { [#list message.parts as part]"${part.partName}"[#if part_has_next], [/#if][/#list] }
 )

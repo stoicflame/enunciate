@@ -4,6 +4,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.beans.Introspector;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
@@ -39,7 +40,7 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
    * @return The name of the xml element declaration.
    */
   public String getName() {
-    String name = getSimpleName();
+    String name = Introspector.decapitalize(getSimpleName());
 
     if ((rootElement != null) && (!"##default".equals(rootElement.name()))) {
       name = rootElement.name();

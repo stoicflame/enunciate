@@ -2,7 +2,7 @@
 
 <project default="jar" name="xfire" basedir=".">
 
-  <import file="../../build.xml"/>
+  <import file="../../build-module.xml"/>
 
   <path id="build.classpath">
     <path refid="base.libs"/>

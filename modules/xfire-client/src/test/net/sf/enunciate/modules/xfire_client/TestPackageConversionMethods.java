@@ -1,15 +1,14 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import net.sf.enunciate.InAPTTestCase;
-
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.Collection;
-
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.FieldDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModelException;
+import net.sf.enunciate.InAPTTestCase;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
