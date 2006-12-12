@@ -5,11 +5,15 @@ import net.sf.enunciate.examples.xfire_client.schema.Triangle;
 import net.sf.enunciate.examples.xfire_client.schema.Circle;
 import net.sf.enunciate.examples.xfire_client.schema.Figure;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class House extends Figure {
 
   private Rectangle base;
@@ -18,6 +22,9 @@ public class House extends Figure {
   private Circle doorKnob;
   private List<Rectangle> windows;
 
+  @XmlElement (
+    required = true
+  )
   public Rectangle getBase() {
     return base;
   }
@@ -26,6 +33,10 @@ public class House extends Figure {
     this.base = base;
   }
 
+  @XmlElement (
+    nillable = true,
+    required = true
+  )
   public Triangle getRoof() {
     return roof;
   }
@@ -50,6 +61,9 @@ public class House extends Figure {
     this.doorKnob = doorKnob;
   }
 
+  @XmlElementWrapper (
+    nillable = true
+  )
   public List<Rectangle> getWindows() {
     return windows;
   }

@@ -533,48 +533,11 @@ public class DefaultValidator implements Validator {
       }
     }
 
-    if (accessor.getAnnotation(XmlIDREF.class) != null) {
-      TypeMirror accessorType = accessor.getBareAccessorType();
-      boolean validIDREF = false;
-      if (accessorType instanceof ClassType) {
-        validIDREF = hasXmlID((ClassType) accessorType);
-      }
-
-      if (!validIDREF) {
-        result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
-      }
+    if ((accessor.isXmlIDREF()) && (accessor.getAccessorForXmlID() == null)) {
+      result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
     }
 
     return result;
-  }
-
-  /**
-   * A quick method to see if any fields or methods are annotated with @XmlID.  This method does
-   * NOT determine whether the field or method is a valid accessor before checking for @XmlID. Not
-   * perfect, but probably good enough for now.
-   *
-   * @param classType The class type.
-   * @return Whether any fields of methods are annotated with @XmlID.
-   */
-  protected boolean hasXmlID(ClassType classType) {
-    ClassDeclaration declaration = classType.getDeclaration();
-    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName()))) {
-      return false;
-    }
-
-    for (FieldDeclaration field : declaration.getFields()) {
-      if (field.getAnnotation(XmlID.class) != null) {
-        return true;
-      }
-    }
-
-    for (MethodDeclaration method : declaration.getMethods()) {
-      if (method.getAnnotation(XmlID.class) != null) {
-        return true;
-      }
-    }
-
-    return hasXmlID(classType.getSuperclass());
   }
 
   public ValidationResult validateXmlID(Accessor accessor) {

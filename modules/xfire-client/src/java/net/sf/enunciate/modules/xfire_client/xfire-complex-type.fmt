@@ -12,9 +12,7 @@ import org.codehaus.xfire.aegis.MessageWriter;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.fault.XFireFault;
 
-import net.sf.enunciate.modules.xfire_client.ListWriter;
-import net.sf.enunciate.modules.xfire_client.ListParser;
-import net.sf.enunciate.modules.xfire_client.ElementsWriter;
+import net.sf.enunciate.modules.xfire_client.*;
 
 import javax.xml.namespace.QName;
 
@@ -23,11 +21,9 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName}XFireType [#if !baseobject]extends ${classnameFor(type.superclass)}XFireType [#else]extends Type [/#if][#if rootElementName?exists] implements net.sf.enunciate.modules.xfire_client.RootElementType [/#if]{
+public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName}XFireType [#if !baseobject]extends ${classnameFor(type.superclass)}XFireType [#else]extends Type [/#if]implements EnunciatedType {
 
   [#if baseobject]
-  protected MessageReader wrapperReader = null;
-
   /**
    * Reads an instance of ${type.simpleName} position in the message reader.
    *
@@ -43,6 +39,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       MessageReader attributeReader = reader.getNextAttributeReader();
       QName name = attributeReader.getName();
       setAttributeProperty(instance, name, attributeReader, context);
+      attributeReader.readToEnd();
     }
 
     // Set the value.
@@ -50,10 +47,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
 
     // Read child elements
     while (reader.hasMoreElementReaders()) {
-      MessageReader elementReader = ((this.wrapperReader != null) && (this.wrapperReader.hasMoreElementReaders())) ? wrapperReader.getNextElementReader() : reader.getNextElementReader();
+      MessageReader elementReader = reader.getNextElementReader();
       QName name = elementReader.getName();
       setElementProperty(instance, name, elementReader, context);
+      elementReader.readToEnd();
     }
+
+    [#--todo: here handle required elements--]
 
     return instance;
   }
@@ -86,7 +86,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     super.setAttributeProperty(object, name, attributeReader, context);
     [/#if]
     [#if type.attributes?size > 0]
-    ${classname} instance = (${classname}) object;
+    final ${classname} instance = (${classname}) object;
       [#list type.attributes as attribute]
     [#if attribute_index > 0]else [/#if]if ("${attribute.namespace?default("")}".equals(name.getNamespaceURI()) && ("${attribute.name}".equals(name.getLocalPart()))) {
         [#if attribute.xmlList]
@@ -100,11 +100,38 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if attribute.accessorType.primitive]
       Type type = getTypeMapping().getType([@primitiveWrapper type=attribute.accessorType/].class);
       ${attribute.accessorType} value = [@unwrapIfPrimitive type=attribute.accessorType](([@primitiveWrapper type=attribute.accessorType/]) type.readObject(attributeReader, context))[/@unwrapIfPrimitive];
+          [#elseif attribute.xmlIDREF]
+      Type type = getTypeMapping().getType(java.lang.String.class);
+      java.lang.String idref = (java.lang.String) type.readObject(attributeReader, context);
+      ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
+      if (integrityHandler == null) {
+        integrityHandler = new ReferentialIntegrityHandler();
+        context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
+      }
+
+      integrityHandler.registerReference(idref, ${classnameFor(attribute.bareAccessorType)}.class, new ReferenceResolutionCallback() {
+        public void handleResolution(Object resolution) {
+
+      ${classnameFor(attribute.bareAccessorType)} value = (${classnameFor(attribute.bareAccessorType)}) resolution;
           [#else]
       Type type = getTypeMapping().getType(${classnameFor(attribute.accessorType)}.class);
       ${classnameFor(attribute.accessorType)} value = (${classnameFor(attribute.accessorType)}) type.readObject(attributeReader, context);
           [/#if]
       instance.set${attribute.simpleName?cap_first}(value);
+        [/#if]
+        [#if attribute.xmlID]
+        
+      ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
+      if (integrityHandler == null) {
+        integrityHandler = new ReferentialIntegrityHandler();
+        context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
+      }
+
+      integrityHandler.registerResolution(java.lang.String.valueOf(value), instance);
+        [#elseif attribute.xmlIDREF]
+
+        }
+      });
         [/#if]
     }
       [/#list]
@@ -159,10 +186,18 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     super.setElementProperty(object, name, elementReader, context);
     [/#if]
     [#if type.elements?size > 0]
-    ${classname} instance = (${classname}) object;
+    final ${classname} instance = (${classname}) object;
       [#list type.elements as item]
+        [#assign virtual_item_index = item_index]
+        [#if item.wrapped]
+    [#if virtual_item_index > 0]else [/#if]if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
+      ElementsReader.readElements(elementReader, context, new WrappedItemCallback() {
+        public void handleChildElement(QName name, MessageReader elementReader, MessageContext context) throws XFireFault {
+
+        [#assign virtual_item_index = 0]
+        [/#if]
         [#list item.choices as element]
-    [#if (element_index + item_index) > 0]else [/#if]if ("${element.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.name}".equals(name.getLocalPart()))) {
+    [#if (element_index + virtual_item_index) > 0]else [/#if]if ("${element.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.name}".equals(name.getLocalPart()))) {
           [#if element.xmlList]
             [#if element.accessorType.collection]
       ListParser listParser = new ListParser(elementReader.getValue(), ${element.accessorType.declaration.qualifiedName}.class, ${classnameFor(element.collectionItemType)}.class, getTypeMapping(), context);
@@ -173,6 +208,19 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#elseif element.bareAccessorType.primitive]
       Type type = getTypeMapping().getType([@primitiveWrapper type=element.bareAccessorType/].class);
       ${element.bareAccessorType} value = [@unwrapIfPrimitive  type=element.bareAccessorType](([@primitiveWrapper type=element.bareAccessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
+          [#elseif element.xmlIDREF]
+      Type type = getTypeMapping().getType(java.lang.String.class);
+      java.lang.String idref = (java.lang.String) type.readObject(elementReader, context);
+      ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
+      if (integrityHandler == null) {
+        integrityHandler = new ReferentialIntegrityHandler();
+        context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
+      }
+
+      integrityHandler.registerReference(idref, ${classnameFor(element.bareAccessorType)}.class, new ReferenceResolutionCallback() {
+        public void handleResolution(Object resolution) {
+
+      ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) resolution;
           [#else]
       Type type = getTypeMapping().getType(${classnameFor(element.bareAccessorType)}.class);
       ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) type.readObject(elementReader, context);
@@ -197,11 +245,26 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#else]
       instance.set${element.simpleName?cap_first}(value);
           [/#if]
+          [#if element.xmlID]
+          
+      ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
+      if (integrityHandler == null) {
+        integrityHandler = new ReferentialIntegrityHandler();
+        context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
+      }
+
+      integrityHandler.registerResolution(java.lang.String.valueOf(value), instance);
+          [#elseif element.xmlIDREF]
+          
+        }
+      });
+          [/#if]
     }
         [/#list]
         [#if item.wrapped]
-    else if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
-      this.wrapperReader = elementReader;
+
+        }
+      });
     }
         [/#if]
       [/#list]
@@ -220,7 +283,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if !baseobject]super.writeObject(object, writer, context);[/#if]
     ${classname} instance = (${classname}) object;
 
-    Object property;
+    Object property;  [#--todo: here set the default value, if specified?--]
     ListWriter listWriter;
     [#if type.attributes?size > 0]
     // write the attributes.
@@ -228,6 +291,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [#if attribute.xmlList]
     listWriter = new ListWriter(instance.get${attribute.simpleName?cap_first}(), getTypeMapping(), context);
     property = listWriter.getValue();
+        [#elseif attribute.xmlIDREF]
+    property = null;
+    if (instance.get${attribute.simpleName?cap_first}() != null) {
+      property = instance.get${attribute.simpleName?cap_first}().get${attribute.accessorForXmlID.simpleName?cap_first}();
+    }
         [#else]
     property = [@wrapIfPrimitive type=attribute.accessorType]instance.get${attribute.simpleName?cap_first}()[/@wrapIfPrimitive];
         [/#if]
@@ -239,7 +307,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     }
         [#if attribute.required]
     else {
-      throw new NullPointerException("Required property ${attribute.simpleName} on ${classname} was not set.");
+      throw new NullPointerException("Required property '${attribute.simpleName}' on ${classname} was not set.");
     }
         [/#if]
 
@@ -269,6 +337,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if element.xmlList]
     listWriter = new ListWriter(instance.get${element.simpleName?cap_first}(), getTypeMapping(), context);
     property = listWriter.getValue();
+          [#elseif element.xmlIDREF]
+    property = null;
+    if (instance.get${element.simpleName?cap_first}() != null) {
+      property = instance.get${element.simpleName?cap_first}().get${element.accessorForXmlID.simpleName?cap_first}();
+    }
           [#else]
     property = [@wrapIfPrimitive type=element.accessorType]instance.get${element.simpleName?cap_first}()[/@wrapIfPrimitive];
           [/#if]
@@ -285,7 +358,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       elementWriter.writeXsiNil();
       elementWriter.close();
             [#else]
-      throw new NullPointerException("Required property ${element.simpleName} on ${classname} was not set.");
+      throw new NullPointerException("Required property '${element.simpleName}' on ${classname} was not set.");
             [/#if]
     }
           [/#if]
@@ -299,18 +372,32 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     }
     else {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+              [#if element.xmlIDREF]
+      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+              [#else]
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+              [/#if]
       subwriter.close();
     }
             [#else]
     if (instance.get${element.simpleName?cap_first}() != null) {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+              [#if element.xmlIDREF]
+      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+              [#else]
       ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+              [/#if]
       subwriter.close();
     }
             [/#if]
           [#else]
-    ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], writer, getTypeMapping(), context);
+    if (instance.get${element.simpleName?cap_first}() != null) {
+            [#if element.xmlIDREF]
+      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], writer, getTypeMapping(), context);
+            [#else]
+      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], writer, getTypeMapping(), context);
+            [/#if]
+    }
           [/#if]
         [/#if]
       [/#list]
@@ -325,9 +412,21 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     return new QName("${type.namespace?default("")}", "${type.name?default("")}");
   }
 
-  [#if rootElementName?exists]
   public QName getRootElementName() {
+  [#if rootElementName?exists]
     return new QName("${rootElementName.namespaceURI}", "${rootElementName.localPart}");
+  [#else]
+    throw new UnsupportedOperationException("${classname} is not a root element, but it's being serialized as one.");
+  [/#if]
+  }
+
+  [#if baseobject || type.xmlID?exists]
+  public void writeXmlID(Object instance, MessageWriter writer) {
+    [#if type.xmlID?exists]
+    writer.writeValue(java.lang.String.valueOf(((${classname}) instance).get${type.xmlID.simpleName?cap_first}()));
+    [#else]
+    throw new UnsupportedOperationException("${classname} does not have an xml id.");
+    [/#if]
   }
   [/#if]
 }

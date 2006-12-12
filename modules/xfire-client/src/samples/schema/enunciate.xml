@@ -3,7 +3,7 @@
   <modules>
     <xfire-client uuid="shapes">
       <package-conversions>
-        <convert from="net.sf.enunciate.examples.xfire_client.schema" to="net.sf.enunciate.examples.xfire_client.schema.client"/>
+        <convert from="net.sf.enunciate.examples.xfire_client.schema" to="shapes"/>
       </package-conversions>
     </xfire-client>
   </modules>

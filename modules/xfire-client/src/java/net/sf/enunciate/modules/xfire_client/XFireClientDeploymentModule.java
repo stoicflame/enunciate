@@ -337,7 +337,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14Dir());
     jdk14Files.addAll(typeFiles);
 
-    enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4"), jdk14Files.toArray(new String[jdk14Files.size()]));
+    enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
 
     List<String> typeList = (List<String>) enunciate.getProperty("client.type.list");
     if (typeList == null) {

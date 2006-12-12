@@ -37,7 +37,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(Collection items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements(items == null ? (Object) null : items.toArray(), elementName, parentWriter, typeMapping, context);
+    writeElements(items == null ? (Object) null : items.toArray(), elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -51,7 +51,35 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(Object[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
+  }
+
+  /**
+   * Write the xml ids of the items in the specified collection as child elements of the specified parent writer.
+   *
+   * @param items        The collection of items.
+   * @param elementName  The qname of the child element.
+   * @param parentWriter The parent writer.
+   * @param typeMapping  The type mapping.
+   * @param context      The context.
+   * @throws IllegalArgumentException if the object isn't an array.
+   */
+  public static void writeXmlIDs(Collection items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    writeElements(items == null ? (Object) null : items.toArray(), elementName, parentWriter, typeMapping, context, true);
+  }
+
+  /**
+   * Write the xml ids of the items in the specified array as child elements of the specified parent writer.
+   *
+   * @param items        The items.
+   * @param elementName  The qname of the child element.
+   * @param parentWriter The parent writer.
+   * @param typeMapping  The type mapping.
+   * @param context      The context.
+   * @throws IllegalArgumentException if the object isn't an array.
+   */
+  public static void writeXmlIDs(Object[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, true);
   }
 
   /**
@@ -65,7 +93,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(boolean[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -79,7 +107,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(byte[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -93,7 +121,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(char[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -107,7 +135,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(double[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -121,7 +149,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(float[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -135,7 +163,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(int[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -149,7 +177,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(long[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -163,7 +191,7 @@ public class ElementsWriter {
    * @throws IllegalArgumentException if the object isn't an array.
    */
   public static void writeElements(short[] items, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    writeElements((Object) items, elementName, parentWriter, typeMapping, context);
+    writeElements((Object) items, elementName, parentWriter, typeMapping, context, false);
   }
 
   /**
@@ -174,9 +202,10 @@ public class ElementsWriter {
    * @param parentWriter The parent writer.
    * @param typeMapping  The type mapping.
    * @param context      The context.
+   * @param writeOnlyXmlID Whether to write only the xml id instead of the entire object.
    * @throws IllegalArgumentException if the object isn't an array.
    */
-  private static void writeElements(Object array, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+  private static void writeElements(Object array, QName elementName, MessageWriter parentWriter, TypeMapping typeMapping, MessageContext context, boolean writeOnlyXmlID) throws XFireFault {
     if (array != null) {
       for (int i = 0; i < Array.getLength(array); i++) {
         Object item = Array.get(array, i);
@@ -185,7 +214,7 @@ public class ElementsWriter {
         QName itemName = elementName;
         if (ELEMENT_NAME == elementName) {
           try {
-            itemName = ((RootElementType) componentType).getRootElementName();
+            itemName = ((EnunciatedType) componentType).getRootElementName();
           }
           catch (ClassCastException e) {
             throw new XFireFault(item.getClass().getName() + " is not a root element, but it's being serialized as an element ref.", XFireFault.RECEIVER);
@@ -193,7 +222,17 @@ public class ElementsWriter {
         }
 
         MessageWriter elementWriter = parentWriter.getElementWriter(itemName);
-        componentType.writeObject(item, elementWriter, context);
+        if (!writeOnlyXmlID) {
+          componentType.writeObject(item, elementWriter, context);
+        }
+        else {
+          try {
+            ((EnunciatedType) componentType).writeXmlID(item, elementWriter);
+          }
+          catch (ClassCastException e) {
+            throw new XFireFault(item.getClass().getName() + " does not have an xml id.", XFireFault.RECEIVER);
+          }
+        }
         elementWriter.close();
       }
     }

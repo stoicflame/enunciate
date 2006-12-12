@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Rectangle extends Shape {
 
   private int width;
-  private int length;
+  private int height;
 
   public int getWidth() {
     return width;
@@ -19,11 +19,11 @@ public class Rectangle extends Shape {
     this.width = width;
   }
 
-  public int getLength() {
-    return length;
+  public int getHeight() {
+    return height;
   }
 
-  public void setLength(int length) {
-    this.length = length;
+  public void setHeight(int height) {
+    this.height = height;
   }
 }

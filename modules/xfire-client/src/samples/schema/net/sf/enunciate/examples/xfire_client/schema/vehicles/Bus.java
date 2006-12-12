@@ -5,11 +5,13 @@ import net.sf.enunciate.examples.xfire_client.schema.Rectangle;
 import net.sf.enunciate.examples.xfire_client.schema.Circle;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
 
 /**
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class Bus extends Figure {
 
   private Rectangle frame;

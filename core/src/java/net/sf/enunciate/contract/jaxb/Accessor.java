@@ -1,10 +1,12 @@
 package net.sf.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
@@ -15,7 +17,9 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -100,13 +104,11 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
       return new SpecifiedXmlType(schemaType);
     }
 
-    XmlID xmlID = getAnnotation(XmlID.class);
-    if (xmlID != null) {
+    if (isXmlID()) {
       return KnownXmlType.ID;
     }
 
-    XmlIDREF xmlIDREF = getAnnotation(XmlIDREF.class);
-    if (xmlIDREF != null) {
+    if (isXmlIDREF()) {
       return KnownXmlType.IDREF;
     }
 
@@ -151,6 +153,24 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     return getAnnotation(XmlList.class) != null;
   }
 
+  /**
+   * Whether this accessor is an XML ID.
+   *
+   * @return Whether this accessor is an XMLID.
+   */
+  public boolean isXmlID() {
+    return getAnnotation(XmlID.class) != null;
+  }
+
+  /**
+   * Whether this accessor is an XML IDREF.
+   *
+   * @return Whether this accessor is an XML IDREF.
+   */
+  public boolean isXmlIDREF() {
+    return getAnnotation(XmlIDREF.class) != null;
+  }
+
 
   /**
    * Whether the accessor type is a collection type.
@@ -190,5 +210,50 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     return null;
+  }
+
+  /**
+   * Returns the accessor for the XML id, or null if none was found or if this isn't an Xml IDREF accessor.
+   *
+   * @return The accessor, or null.
+   */
+  public MemberDeclaration getAccessorForXmlID() {
+    if (isXmlIDREF()) {
+      TypeMirror accessorType = getBareAccessorType();
+      if (accessorType instanceof ClassType) {
+        return getXmlIDAccessor((ClassType) accessorType);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Gets the xml id accessor for the specified class type (recursively through superclasses).
+   *
+   * @param classType The class type.
+   * @return The xml id accessor.
+   */
+  private MemberDeclaration getXmlIDAccessor(ClassType classType) {
+    ClassDeclaration declaration = classType.getDeclaration();
+    if ((declaration == null) || (Object.class.getName().equals(declaration.getQualifiedName()))) {
+      return null;
+    }
+
+    DecoratedClassDeclaration decoratedDeclaration = (DecoratedClassDeclaration) DeclarationDecorator.decorate(declaration);
+
+    for (FieldDeclaration field : decoratedDeclaration.getFields()) {
+      if (field.getAnnotation(XmlID.class) != null) {
+        return field;
+      }
+    }
+
+    for (PropertyDeclaration property : decoratedDeclaration.getProperties()) {
+      if (property.getAnnotation(XmlID.class) != null) {
+        return property;
+      }
+    }
+
+    return getXmlIDAccessor(classType.getSuperclass());
   }
 }
