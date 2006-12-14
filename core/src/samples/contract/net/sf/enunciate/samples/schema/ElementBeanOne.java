@@ -23,6 +23,7 @@ public class ElementBeanOne {
   private int property3;
   private String property4;
   private Object property5;
+  private byte[] property6;
   private ElementBeanOne loopingProperty1;
   private Collection<Object> elementsProperty1;
   private Collection<Date> elementsProperty2;
@@ -78,6 +79,14 @@ public class ElementBeanOne {
 
   public void setProperty5(Object property5) {
     this.property5 = property5;
+  }
+
+  public byte[] getProperty6() {
+    return property6;
+  }
+
+  public void setProperty6(byte[] property6) {
+    this.property6 = property6;
   }
 
   public ElementBeanOne getLoopingProperty1() {

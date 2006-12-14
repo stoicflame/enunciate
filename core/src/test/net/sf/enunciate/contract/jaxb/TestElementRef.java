@@ -66,7 +66,7 @@ public class TestElementRef extends TestElement {
     assertEquals("beanThree", element.getName());
     assertNull(element.getNamespace());
     assertNotNull(element.getRef());
-    assertEquals(property.getPropertyType(), element.getAccessorType());
+    assertEquals("net.sf.enunciate.samples.schema.BeanThree", element.getAccessorType().toString());
 
     assertFalse(element.isNillable());
     assertFalse(element.isRequired());

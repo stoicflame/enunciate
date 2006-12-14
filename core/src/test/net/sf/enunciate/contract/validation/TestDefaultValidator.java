@@ -385,7 +385,7 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(1, packageCounter.getCount());
     assertEquals(0, attributeCounter.getCount());
     assertEquals(0, valueCounter.getCount());
-    assertEquals(11, elementCounter.getCount());
+    assertEquals(12, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
     assertEquals(0, xmlIdCounter.getCount());
 
@@ -398,6 +398,8 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertEquals(0, elementCounter.getCount());
     assertEquals(0, elementRefCounter.getCount());
     assertEquals(1, xmlIdCounter.getCount());
+
+    //todo: test that child elements, wrapper elements, and attributes of the same name aren't allowed. 
   }
 
   /**
@@ -428,6 +430,9 @@ public class TestDefaultValidator extends InAPTTestCase {
     Attribute attribute = new Attribute(typeDef.getProperties().iterator().next(), typeDef);
     assertTrue("An attribute shouldn't not have a complex type definition.", validator.validateAttribute(attribute).hasErrors());
     assertEquals(1, accessorCounter.getCount());
+
+    //todo: test that attributes of a different namespace then their type defs aren't allowed if the form is qualified.
+    //todo: test that attributes NOT of the default namespace aren't allowed if their form is unqualified.
   }
 
   /**
@@ -473,6 +478,10 @@ public class TestDefaultValidator extends InAPTTestCase {
     Element element = new Element(property1, typeDef);
     assertTrue("An typed collection element shouldn't have multiple XmlElements.", validator.validateElement(element).hasErrors());
     assertEquals(1, accessorCounter.getCount());
+
+    //todo: test that elements of a different namespace then their type defs aren't allowed if the form is qualified.
+    //todo: test that elements NOT of the default namespace aren't allowed if their form is unqualified.
+    //todo: test especially that the items of @XmlElements that have no name specified cause this validation error to trigger...
   }
 
   /**

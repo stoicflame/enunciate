@@ -205,6 +205,8 @@ Template library for WSDL.
   [/@forEachBindingType]
 [/#macro]
 
+[#--todo: figure out whether/if I need to process a MIME SOAP binding for attachments?--]
+
 [#--
   The processSOAPBinding macro outputs a soap binding element for a specified endpoint interface.
 

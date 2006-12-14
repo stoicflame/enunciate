@@ -5,10 +5,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
@@ -112,8 +109,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
       return KnownXmlType.IDREF;
     }
 
-    XmlAttachmentRef attachmentRef = getAnnotation(XmlAttachmentRef.class);
-    if (attachmentRef != null) {
+    if (isSwaRef()) {
       return KnownXmlType.SWAREF;
     }
 
@@ -171,6 +167,48 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     return getAnnotation(XmlIDREF.class) != null;
   }
 
+  /**
+   * Whether this accessor consists of binary data.
+   *
+   * @return Whether this accessor consists of binary data.
+   */
+  public boolean isBinaryData() {
+    return isSwaRef() || KnownXmlType.BASE64_BINARY.getQname().equals(getBaseType().getQname());
+  }
+
+  /**
+   * Whether this accessor is a swa ref.
+   *
+   * @return Whether this accessor is a swa ref.
+   */
+  public boolean isSwaRef() {
+    return (getAnnotation(XmlAttachmentRef.class) != null)
+      && (getAccessorType() instanceof DeclaredType)
+      && ("javax.activation.DataHandler".equals(((DeclaredType)getAccessorType()).getDeclaration().getQualifiedName()));
+  }
+
+  /**
+   * Whether this accessor is an MTOM attachment.
+   *
+   * @return Whether this accessor is an MTOM attachment.
+   */
+  public boolean isMTOMAttachment() {
+    return (getAnnotation(XmlInlineBinaryData.class) == null) && (KnownXmlType.BASE64_BINARY.getQname().equals(getBaseType().getQname()));
+  }
+
+  /**
+   * The suggested mime type of the binary data, or null if none.
+   *
+   * @return The suggested mime type of the binary data, or null if none.
+   */
+  public String getMimeType() {
+    XmlMimeType mimeType = getAnnotation(XmlMimeType.class);
+    if (mimeType != null) {
+      return mimeType.value();
+    }
+    
+    return null;
+  }
 
   /**
    * Whether the accessor type is a collection type.
@@ -183,7 +221,13 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
-    return accessorType.isArray() || accessorType.isCollection();
+    if (accessorType.isArray()) {
+      TypeMirror componentType = ((ArrayType) accessorType).getComponentType();
+      //special case for byte[]
+      return !(componentType instanceof PrimitiveType) || !(((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE);
+    }
+
+    return accessorType.isCollection();
   }
 
   /**

@@ -94,6 +94,13 @@ public class TestAccessor extends InAPTTestCase {
     assertTrue(baseTypes.isEmpty());
   }
 
+  /**
+   * tests the methods to determine if an accessor is binary.
+   */
+  public void testBinaryMethods() throws Exception {
+    //todo: implement this test.
+  }
+
   private static final class MockAccessor extends Accessor {
     public MockAccessor(MemberDeclaration delegate, TypeDefinition typeDef) {
       super(delegate, typeDef);

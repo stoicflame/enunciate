@@ -220,6 +220,11 @@ public class ElementRef extends Element {
     return this.ref.getNamespace();
   }
 
+  /**
+   * The ref for this element ref.
+   *
+   * @return The ref.
+   */
   @Override
   public QName getRef() {
     if (isElementRefs()) {
@@ -228,7 +233,6 @@ public class ElementRef extends Element {
 
     return new QName(this.ref.getNamespace(), this.ref.getName());
   }
-
 
   /**
    * There is no base type for an element ref.
@@ -239,6 +243,57 @@ public class ElementRef extends Element {
   @Override
   public XmlTypeMirror getBaseType() {
     throw new UnsupportedOperationException("There is no base type for an element ref.");
+  }
+
+  /**
+   * The type of an element accessor can be specified by an annotation.
+   *
+   * @return The accessor type.
+   */
+  @Override
+  public TypeMirror getAccessorType() {
+    try {
+      if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
+        Class clazz = xmlElementRef.type();
+        return getAccessorType(clazz);
+      }
+    }
+    catch (MirroredTypeException e) {
+      // The mirrored type exception implies that the specified type is within the source base.
+      return TypeMirrorDecorator.decorate(e.getTypeMirror());
+    }
+
+    return super.getAccessorType();
+  }
+
+  /**
+   * An element ref is not binary data.  It may refer to an element that is binary data, though...
+   *
+   * @return false
+   */
+  @Override
+  public boolean isBinaryData() {
+    return false;
+  }
+
+  /**
+   * An element ref is not a swa ref.  In may refer to an element that is a swa ref, though...
+   *
+   * @return false
+   */
+  @Override
+  public boolean isSwaRef() {
+    return false;
+  }
+
+  /**
+   * An element ref is not an MTOM attachment.  It may refer to an element that is an MTOM attachment, though...
+   *
+   * @return false
+   */
+  @Override
+  public boolean isMTOMAttachment() {
+    return false;
   }
 
   /**

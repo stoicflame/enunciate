@@ -39,9 +39,9 @@ public class Canvas {
 
   @XmlElements (
     {
-      @XmlElement ( type = Cat.class ),
-      @XmlElement ( type = House.class ),
-      @XmlElement ( type = Bus.class )
+      @XmlElement ( name="cat", type = Cat.class ),
+      @XmlElement ( name="house", type = House.class ),
+      @XmlElement ( name="bus", type = Bus.class )
     }
   )
   public Collection getFigures() {

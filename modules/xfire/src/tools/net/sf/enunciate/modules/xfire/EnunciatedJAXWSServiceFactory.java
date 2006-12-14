@@ -15,6 +15,7 @@ import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.service.binding.PostInvocationHandler;
 import org.codehaus.xfire.service.binding.ServiceInvocationHandler;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
+import org.codehaus.xfire.soap.SoapConstants;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -26,6 +27,7 @@ import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 import java.lang.reflect.Method;
 import java.beans.Introspector;
+import java.util.Map;
 
 /**
  * The enunciate implementation of the JAXWS service factory.
@@ -41,6 +43,23 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
   public EnunciatedJAXWSServiceFactory() {
     super(new Jsr181WebAnnotations(),
           XFireFactory.newInstance().getXFire().getTransportManager());
+  }
+
+
+  /**
+   * Ensures that any service created has MTOM enabled.
+   * 
+   * @param clazz The class.
+   * @param name The name.
+   * @param namespace The namespace.
+   * @param properties The properties.
+   * @return The service.
+   */
+  @Override
+  public Service create(final Class clazz, String name, String namespace, Map properties) {
+    Service service = super.create(clazz, name, namespace, properties);
+    service.setProperty(SoapConstants.MTOM_ENABLED, Boolean.TRUE.toString());
+    return service;
   }
 
   /**

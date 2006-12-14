@@ -1,33 +1,40 @@
 package net.sf.enunciate.modules.xfire_client.xfire_types;
 
 import junit.framework.TestCase;
-import net.sf.enunciate.examples.xfire_client.schema.Rectangle;
-import net.sf.enunciate.examples.xfire_client.schema.Color;
-import net.sf.enunciate.examples.xfire_client.schema.Circle;
-import net.sf.enunciate.examples.xfire_client.schema.LineStyle;
-import net.sf.enunciate.examples.xfire_client.schema.Triangle;
-import net.sf.enunciate.examples.xfire_client.schema.Label;
-import net.sf.enunciate.examples.xfire_client.schema.Line;
+import net.sf.enunciate.examples.xfire_client.schema.*;
 import net.sf.enunciate.examples.xfire_client.schema.animals.Cat;
+import net.sf.enunciate.examples.xfire_client.schema.draw.Canvas;
 import net.sf.enunciate.examples.xfire_client.schema.structures.House;
 import net.sf.enunciate.examples.xfire_client.schema.vehicles.Bus;
 import net.sf.enunciate.modules.xfire_client.IntrospectingTypeRegistry;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
-import shapes.*;
+import org.codehaus.xfire.exchange.InMessage;
+import org.codehaus.xfire.exchange.MessageExchange;
+import org.codehaus.xfire.exchange.OutMessage;
+import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
+import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
+import shapes.CircleXFireType;
+import shapes.RectangleXFireType;
+import shapes.TriangleXFireType;
 import shapes.animals.CatXFireType;
+import shapes.draw.CanvasXFireType;
 import shapes.structures.HouseXFireType;
 import shapes.vehicles.BusXFireType;
 
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -304,6 +311,8 @@ public class TestXFireTypes extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
+
+    //todo: test an element wrapper around elementRefs
   }
 
   /**
@@ -642,7 +651,194 @@ public class TestXFireTypes extends TestCase {
    * tests the canvas.  This one as XmlElementRefs, XmlElements, and an attachment...
    */
   public void testCanvas() throws Exception {
-    
+    Canvas canvas = new Canvas();
+    Bus bus = new Bus();
+    bus.setId("busId");
+    Rectangle busFrame = new Rectangle();
+    busFrame.setWidth(100);
+    bus.setFrame(busFrame);
+    Cat cat = new Cat();
+    cat.setId("catId");
+    Circle catFace = new Circle();
+    catFace.setRadius(30);
+    cat.setFace(catFace);
+    House house = new House();
+    house.setId("houseId");
+    Rectangle houseBase = new Rectangle();
+    houseBase.setWidth(76);
+    house.setBase(houseBase);
+    canvas.setFigures(Arrays.asList(bus, cat, house));
+    Rectangle rectangle = new Rectangle();
+    rectangle.setHeight(50);
+    rectangle.setId("rectId");
+    Circle circle = new Circle();
+    circle.setRadius(10);
+    circle.setId("circleId");
+    Triangle triangle = new Triangle();
+    triangle.setBase(80);
+    triangle.setId("triId");
+    canvas.setShapes(Arrays.asList(rectangle, circle, triangle));
+    byte[] attachmentBytes = "This is a bunch of random bytes that are to be used as an MTOM attachment.".getBytes();
+    ByteArrayDataSource dataSource = new ByteArrayDataSource(attachmentBytes, "application/octet-stream");
+    dataSource.setName("somename");
+    canvas.setBackgroundImage(new DataHandler(dataSource));
+
+    JAXBContext context = JAXBContext.newInstance(Canvas.class);
+    Marshaller marshaller = context.createMarshaller();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    MessageContext messageContext = new MessageContext();
+    MessageExchange exchange = new MessageExchange(messageContext);
+    InMessage inMessage = new InMessage();
+    exchange.setInMessage(inMessage);
+    OutMessage outMessage = new OutMessage("uri:nothing");
+    exchange.setOutMessage(outMessage);
+    marshaller.setAttachmentMarshaller(new AttachmentMarshaller(messageContext));
+    marshaller.marshal(canvas, out);
+    //set up the attachments that were written
+    inMessage.setAttachments(outMessage.getAttachments());
+
+    CanvasXFireType canvasType = (CanvasXFireType) new IntrospectingTypeRegistry("shapes").getDefaultTypeMapping().getType(shapes.draw.Canvas.class);
+    ElementReader outReader = new ElementReader(new ByteArrayInputStream(out.toByteArray()));
+    shapes.draw.Canvas clientCanvas = (shapes.draw.Canvas) canvasType.readObject(outReader, messageContext);
+    Collection clientShapes = clientCanvas.getShapes();
+    assertEquals(3, clientShapes.size());
+    for (Object clientShape : clientShapes) {
+      if (clientShape instanceof shapes.Circle) {
+        assertEquals("circleId", ((shapes.Circle) clientShape).getId());
+        assertEquals(10, ((shapes.Circle) clientShape).getRadius());
+      }
+      else if (clientShape instanceof shapes.Rectangle) {
+        assertEquals("rectId", ((shapes.Rectangle) clientShape).getId());
+        assertEquals(50, ((shapes.Rectangle) clientShape).getHeight());
+      }
+      else if (clientShape instanceof shapes.Triangle) {
+        assertEquals("triId", ((shapes.Triangle) clientShape).getId());
+        assertEquals(80, ((shapes.Triangle) clientShape).getBase());
+      }
+      else {
+        fail("Unknown shape: " + clientShape);
+      }
+    }
+
+    Collection clientFigures = clientCanvas.getFigures();
+    assertEquals(3, clientFigures.size());
+    for (Object clientFigure : clientFigures) {
+      if (clientFigure instanceof shapes.vehicles.Bus) {
+        shapes.vehicles.Bus clientBus = (shapes.vehicles.Bus) clientFigure;
+        assertEquals("busId", clientBus.getId());
+        shapes.Rectangle clientBusFrame = clientBus.getFrame();
+        assertNotNull(clientBusFrame);
+        assertEquals(100, busFrame.getWidth());
+      }
+      else if (clientFigure instanceof shapes.animals.Cat) {
+        shapes.animals.Cat clientCat = (shapes.animals.Cat) clientFigure;
+        assertEquals("catId", clientCat.getId());
+        shapes.Circle clientCatFace = clientCat.getFace();
+        assertNotNull(clientCatFace);
+        assertEquals(30, clientCatFace.getRadius());
+      }
+      else if (clientFigure instanceof shapes.structures.House) {
+        shapes.structures.House clientHouse = (shapes.structures.House) clientFigure;
+        assertEquals("houseId", clientHouse.getId());
+        shapes.Rectangle clientHouseBase = clientHouse.getBase();
+        assertNotNull(clientHouseBase);
+        assertEquals(76, clientHouseBase.getWidth());
+      }
+      else {
+        fail("Unknown figure: " + clientFigure);
+      }
+    }
+
+    DataHandler backgroundImage = clientCanvas.getBackgroundImage();
+    InputStream attachmentStream = backgroundImage.getInputStream();
+    ByteArrayOutputStream attachmentIn = new ByteArrayOutputStream();
+    int byteIn = attachmentStream.read();
+    while (byteIn > 0) {
+      attachmentIn.write(byteIn);
+      byteIn = attachmentStream.read();
+    }
+
+    assertTrue(Arrays.equals(attachmentBytes, attachmentIn.toByteArray()));
+
+    out = new ByteArrayOutputStream();
+    ElementWriter writer = new ElementWriter(out, canvasType.getRootElementName().getLocalPart(), canvasType.getRootElementName().getNamespaceURI());
+    outMessage.setAttachments(null);
+    inMessage.setAttachments(null); //clear the attachments.
+    canvasType.writeObject(clientCanvas, writer, messageContext);
+    writer.close();
+    writer.getXMLStreamWriter().close();
+
+    inMessage.setAttachments(outMessage.getAttachments());
+    Unmarshaller unmarshaller = context.createUnmarshaller();
+    unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshaller(messageContext));
+    canvas = (Canvas) unmarshaller.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+
+    Collection shapes = canvas.getShapes();
+    assertEquals(3, shapes.size());
+    for (Object Shape : shapes) {
+      if (Shape instanceof Circle) {
+        assertEquals("circleId", ((Circle) Shape).getId());
+        assertEquals(10, ((Circle) Shape).getRadius());
+      }
+      else if (Shape instanceof Rectangle) {
+        assertEquals("rectId", ((Rectangle) Shape).getId());
+        assertEquals(50, ((Rectangle) Shape).getHeight());
+      }
+      else if (Shape instanceof Triangle) {
+        assertEquals("triId", ((Triangle) Shape).getId());
+        assertEquals(80, ((Triangle) Shape).getBase());
+      }
+      else {
+        fail("Unknown shape: " + Shape);
+      }
+    }
+
+    Collection figures = canvas.getFigures();
+    assertEquals(3, figures.size());
+    for (Object Figure : figures) {
+      if (Figure instanceof Bus) {
+        bus = (Bus) Figure;
+        assertEquals("busId", bus.getId());
+        Rectangle BusFrame = bus.getFrame();
+        assertNotNull(BusFrame);
+        assertEquals(100, busFrame.getWidth());
+      }
+      else if (Figure instanceof Cat) {
+        cat = (Cat) Figure;
+        assertEquals("catId", cat.getId());
+        Circle CatFace = cat.getFace();
+        assertNotNull(CatFace);
+        assertEquals(30, CatFace.getRadius());
+      }
+      else if (Figure instanceof House) {
+        house = (House) Figure;
+        assertEquals("houseId", house.getId());
+        Rectangle HouseBase = house.getBase();
+        assertNotNull(HouseBase);
+        assertEquals(76, HouseBase.getWidth());
+      }
+      else {
+        fail("Unknown figure: " + Figure);
+      }
+    }
+
+    backgroundImage = canvas.getBackgroundImage();
+    attachmentStream = backgroundImage.getInputStream();
+    attachmentIn = new ByteArrayOutputStream();
+    byteIn = attachmentStream.read();
+    while (byteIn > 0) {
+      attachmentIn.write(byteIn);
+      byteIn = attachmentStream.read();
+    }
+
+    assertTrue(Arrays.equals(attachmentBytes, attachmentIn.toByteArray()));
+
+    //todo: test element ref to an attachment element
+    //todo: test elements of attachment elements
+    //todo: test element refs of attachment elements.
+    //todo: test MTOM attachement
+    //todo: test base64 attachment
+
   }
 
 }

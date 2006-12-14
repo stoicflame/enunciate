@@ -16,6 +16,7 @@ The following were noticed inconsistencies in the specifications:
        elementFormDefault, attributeFormDefault, and xmlns values *could* apply to a schema of a different namespace).  Assumption: schema-scope, and its
        an error to have different values of elementFormDefault, attributeFormDefault, and xmlns with two different @XmlSchema annotations that apply to the
        same schema.
+-jaxb: *why* allow an item in the value of @XmlElements to *not* have a unique name?  A name is needed in order to deserialize!
 -jaxb: *why* does @XmlElement.namespace() exist?  If elementFormDefault is qualified, the namespace is the same as the type.  Otherwise, its the default namespace!
        what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?
 -jaxb: why the contstraint that if it is a parameterized collection, then value.length must be one?  What if it's a parameterized collection of objects that

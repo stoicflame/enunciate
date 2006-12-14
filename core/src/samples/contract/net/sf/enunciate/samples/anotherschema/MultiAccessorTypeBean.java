@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlAttachmentRef;
+import javax.activation.DataHandler;
 import java.util.Collection;
 
 /**
@@ -14,7 +15,7 @@ public class MultiAccessorTypeBean {
   private String id;
   private MultiAccessorTypeBean sibling;
   private Object specificType;
-  private byte[] attachment;
+  private DataHandler attachment;
   private int simple;
   private Collection<Long> simples;
 
@@ -48,11 +49,11 @@ public class MultiAccessorTypeBean {
   }
 
   @XmlAttachmentRef
-  public byte[] getAttachment() {
+  public DataHandler getAttachment() {
     return attachment;
   }
 
-  public void setAttachment(byte[] attachment) {
+  public void setAttachment(DataHandler attachment) {
     this.attachment = attachment;
   }
 

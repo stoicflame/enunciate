@@ -144,10 +144,10 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
    * Sets the value property on an given instance using the value reader.
    *
    * @param object The instance.
-   * @param valueReader The value reader
+   * @param reader The value reader
    * @param context The context.
    */
-  protected [#if type.value?exists]final [/#if]void setValueProperty(Object object, MessageReader valueReader, MessageContext context) throws XFireFault {
+  protected [#if type.value?exists]final [/#if]void setValueProperty(Object object, MessageReader reader, MessageContext context) throws XFireFault {
     [#if type.value?exists]
     ${classname} instance = (${classname}) object;
     //Read the xml value
@@ -162,6 +162,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [#if type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
     ${type.value.accessorType} value = [@unwrapIfPrimitive type=type.value.accessorType](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
+        [#elseif type.value.binaryData]
+    int mechanism = EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if];
+    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value.accessorType)}.class, mechanism, reader, context);
         [#else]
     Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
     ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
@@ -221,6 +224,8 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         public void handleResolution(Object resolution) {
 
       ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) resolution;
+          [#elseif element.binaryData]
+      ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(element.bareAccessorType)}.class, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], elementReader, context);
           [#else]
       Type type = getTypeMapping().getType(${classnameFor(element.bareAccessorType)}.class);
       ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) type.readObject(elementReader, context);
@@ -324,6 +329,8 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [#if type.value.xmlList]
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
+        [#elseif type.value.binaryData]
+      EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
         [#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
       type.writeObject(value, writer, context);
@@ -348,7 +355,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     if (property != null) {
       Type type = getTypeMapping().getType(property.getClass());
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
+          [#if element.binaryData]
+      EnunciateClientBinaryDataUtil.writeBinaryData((${classnameFor(element.bareAccessorType)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+          [#else]
       type.writeObject(property, elementWriter, context);
+          [/#if]
       elementWriter.close();
     }
           [#if element.required]
@@ -373,9 +384,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     else {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
               [#if element.xmlIDREF]
-      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], subwriter, getTypeMapping(), context);
               [#else]
-      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], subwriter, getTypeMapping(), context);
               [/#if]
       subwriter.close();
     }
@@ -383,9 +394,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     if (instance.get${element.simpleName?cap_first}() != null) {
       MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
               [#if element.xmlIDREF]
-      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      ElementsWriter.writeXmlIDs(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], subwriter, getTypeMapping(), context);
               [#else]
-      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), new QName("${element.namespace?default("")}", "${element.name}"), subwriter, getTypeMapping(), context);
+      ElementsWriter.writeElements(instance.get${element.simpleName?cap_first}(), [#if element.elementRefs?default(false)]ElementsWriter.ELEMENT_NAME[#else]new QName("${element.namespace?default("")}", "${element.name}")[/#if], subwriter, getTypeMapping(), context);
               [/#if]
       subwriter.close();
     }

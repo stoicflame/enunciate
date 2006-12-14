@@ -16,6 +16,7 @@ import org.codehaus.xfire.service.FaultInfo;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
+import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.transport.TransportManager;
 import org.codehaus.xfire.util.ClassLoaderUtils;
 
@@ -66,7 +67,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
   }
 
   /**
-   * The class for which to create a service.  By default, this service factory allows interfaces.
+   * The class for which to create a service.  By default, this service factory allows interfaces and MTOM is enabled.
    *
    * @param clazz The class.
    * @return The service for the specified class.
@@ -74,6 +75,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
   public Service create(Class clazz) {
     HashMap properties = new HashMap();
     properties.put(ALLOW_INTERFACE, Boolean.TRUE);
+    properties.put(SoapConstants.MTOM_ENABLED, Boolean.TRUE.toString());
     return super.create(clazz, properties);
   }
 

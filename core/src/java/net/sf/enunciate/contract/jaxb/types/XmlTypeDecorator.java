@@ -128,7 +128,14 @@ public class XmlTypeDecorator implements TypeVisitor {
   }
 
   public void visitArrayType(ArrayType arrayType) {
-    arrayType.getComponentType().accept(this);
+    //special case for byte[]...
+    TypeMirror componentType = arrayType.getComponentType();
+    if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+      this.decoratedTypeMirror = KnownXmlType.BASE64_BINARY;
+    }
+    else {
+      componentType.accept(this);
+    }
 
     if (this.errorMessage != null) {
       this.errorMessage = "Problem with the array component type: " + this.errorMessage;

@@ -285,7 +285,8 @@ public class Element extends Accessor {
     boolean primitive = (accessorType instanceof PrimitiveType);
     if ((!primitive) && (accessorType instanceof ArrayType)) {
       //we have to check if the component type if its an array type, too.
-      primitive = (((ArrayType) accessorType).getComponentType() instanceof PrimitiveType);
+      TypeMirror componentType = ((ArrayType) accessorType).getComponentType();
+      primitive = (componentType instanceof PrimitiveType) && (((PrimitiveType)componentType).getKind() != PrimitiveType.Kind.BYTE);
     }
 
     return primitive ? 1 : 0;

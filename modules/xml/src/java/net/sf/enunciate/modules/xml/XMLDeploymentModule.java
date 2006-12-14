@@ -30,6 +30,7 @@ import java.util.Map;
 public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean prettyPrint = true;
+  private boolean validateSchemas = true;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
@@ -149,6 +150,10 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       if (prettyPrint) {
         prettyPrint(schemaFile);
       }
+
+      if (validateSchemas) {
+        //todo: write some logic to validate the schemas.
+      }
     }
 
     getEnunciate().setProperty("xml.ns2schema", ns2schemaArtifact);
@@ -215,5 +220,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setPrettyPrint(boolean prettyPrint) {
     this.prettyPrint = prettyPrint;
+  }
+
+  /**
+   * Whether to validate the generated schemas in an attempt to catch possible errors that enunciate might have missed.
+   *
+   * @param validateSchemas Whether to validate the generated schemas in an attempt to catch possible errors that enunciate might have missed.
+   */
+  public void setValidateSchemas(boolean validateSchemas) {
+    this.validateSchemas = validateSchemas;
   }
 }

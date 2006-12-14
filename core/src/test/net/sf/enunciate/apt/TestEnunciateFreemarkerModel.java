@@ -177,6 +177,10 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertNotNull("javax.activation.DataHandler should have a known type.", knownType);
     assertEquals("http://www.w3.org/2001/XMLSchema", knownType.getNamespace());
     assertEquals("base64Binary", knownType.getName());
+    knownType = knownTypes.get(byte[].class.getName());
+    assertNotNull("byte[] should have a known type.", knownType);
+    assertEquals("http://www.w3.org/2001/XMLSchema", knownType.getNamespace());
+    assertEquals("base64Binary", knownType.getName());
   }
 
   /**

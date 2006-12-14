@@ -104,6 +104,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put(javax.xml.datatype.XMLGregorianCalendar.class.getName(), KnownXmlType.ANY_SIMPLE_TYPE);
     knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);
     knownTypes.put(java.lang.Object.class.getName(), KnownXmlType.ANY_TYPE);
+    knownTypes.put(byte[].class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put(java.awt.Image.class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put("javax.activation.DataHandler", KnownXmlType.BASE64_BINARY);
     knownTypes.put(javax.xml.transform.Source.class.getName(), KnownXmlType.BASE64_BINARY);

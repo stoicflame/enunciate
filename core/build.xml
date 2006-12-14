@@ -15,6 +15,7 @@
     <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
       <path>
         <path refid="build.classpath"/>
+        <path refid="test.libs"/>
       </path>
     </pathconvert>
 

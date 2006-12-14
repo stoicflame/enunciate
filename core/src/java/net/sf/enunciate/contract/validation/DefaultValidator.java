@@ -20,9 +20,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Default validator.
@@ -366,7 +364,16 @@ public class DefaultValidator implements Validator {
       }
     }
 
+    HashMap<QName, Attribute> attributeNames = new HashMap<QName, Attribute>();
     for (Attribute attribute : typeDef.getAttributes()) {
+      QName attributeQName = new QName(attribute.getNamespace(), attribute.getName());
+      Attribute sameName = attributeNames.put(attributeQName, attribute);
+      if (sameName != null) {
+        result.addError(attribute.getPosition(), "Attribute has the same name (" + attributeQName + ") as " + sameName.getPosition()
+          + ".  Please use annotations to disambiguate.");
+        //todo: this check should really be global....
+      }
+
       result.aggregate(validateAttribute(attribute));
     }
 
@@ -378,7 +385,41 @@ public class DefaultValidator implements Validator {
       }
     }
     else {
+      HashMap<QName, HashMap<QName, Element>> elementNames = new HashMap<QName, HashMap<QName, Element>>();
       for (Element element : typeDef.getElements()) {
+        for (Element choice : element.getChoices()) {
+          QName wrapperQName = null;
+          if (choice.isWrapped()) {
+            wrapperQName = new QName(choice.getWrapperNamespace(), choice.getWrapperName());
+          }
+
+          HashMap<QName, Element> choiceNames = elementNames.get(wrapperQName);
+          if (choiceNames == null) {
+            choiceNames = new HashMap<QName, Element>();
+            elementNames.put(wrapperQName, choiceNames);
+          }
+
+          //todo: this check should really be global, including supertypes.
+          QName choiceQName = new QName(choice.getNamespace(), choice.getName());
+          Element sameName = choiceNames.put(choiceQName, choice);
+          if (sameName != null) {
+            result.addError(choice.getPosition(), "Element (or element choice) has the same name (" + choiceQName + ") as " + sameName.getPosition()
+              + ".  Please use annotations to disambiguate.");
+          }
+          else if ((wrapperQName == null) && (elementNames.containsKey(choiceQName))) {
+            result.addError(choice.getPosition(), "Element (or element choice) has the same name (" + choiceQName + ") as element wrapper for " +
+              elementNames.get(choiceQName).values().iterator().next().getPosition() + ".  Please use annotations to disambiguate.");
+          }
+          else if ((wrapperQName != null) && (elementNames.containsKey(null) && (elementNames.get(null).containsKey(wrapperQName)))) {
+            result.addError(element.getPosition(), "Wrapper for element has the same name (" + wrapperQName + ") as " +
+              elementNames.get(null).get(wrapperQName).getPosition() + ". Please use annotations to disambiguate.");
+          }
+
+          if (wrapperQName != null) {
+            //todo: is it worth it to validate that wrapper names are unique across different member declarations?
+          }
+        }
+
         if (element instanceof ElementRef) {
           result.aggregate(validateElementRef((ElementRef) element));
         }
@@ -386,6 +427,7 @@ public class DefaultValidator implements Validator {
           result.aggregate(validateElement(element));
         }
       }
+
     }
 
     if (typeDef.getXmlID() != null) {
@@ -452,6 +494,22 @@ public class DefaultValidator implements Validator {
       result.addError(attribute.getPosition(), "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
+    else if (attribute.isBinaryData()) {
+      result.addError(attribute.getPosition(), "Attributes can't have binary data.");
+    }
+
+    boolean qualified = attribute.getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
+    String typeNamespace = attribute.getTypeDefinition().getNamespace();
+    typeNamespace = typeNamespace == null ? "" : typeNamespace;
+    String attributeNamespace = attribute.getNamespace();
+    attributeNamespace = attributeNamespace == null ? "" : attributeNamespace;
+    if ((qualified) && (!attributeNamespace.equals(typeNamespace))) {
+      result.addError(attribute.getPosition(), "Enunciate doesn't support attributes of a different namespace than their containing type definition if " +
+        "their form is qualified.  Use an attribute ref.");
+    }
+    else if ((!qualified) && (!"".equals(attributeNamespace))) {
+      result.addError(attribute.getPosition(), "Enunciate only supports the default namespace on attributes that have an unqualified form.");
+    }
 
     return result;
   }
@@ -466,10 +524,21 @@ public class DefaultValidator implements Validator {
                       "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
     }
 
+    boolean qualified = element.getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
+
     QName ref = element.getRef();
     if (ref == null) {
       String typeNamespace = element.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
+      String elementNamespace = element.getNamespace();
+      elementNamespace = elementNamespace == null ? "" : elementNamespace;
+      if ((qualified) && (!elementNamespace.equals(typeNamespace))) {
+        result.addError(element.getPosition(), "Enunciate doesn't support elements of a different namespace than their containing type definition if " +
+          "their form is qualified.  Use an element ref.");
+      }
+      else if ((!qualified) && (!"".equals(elementNamespace))) {
+        result.addError(element.getPosition(), "Enunciate only supports the default namespace on elements that have an unqualified form.");
+      }
     }
 
     if (element.isWrapped()) {
@@ -477,11 +546,15 @@ public class DefaultValidator implements Validator {
       wrapperNamespace = wrapperNamespace == null ? "" : wrapperNamespace;
       String typeNamespace = element.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
-      if (!wrapperNamespace.equals(typeNamespace)) {
-        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions. ");
+      if ((qualified) && (!wrapperNamespace.equals(typeNamespace))) {
+        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions if their " +
+          "form is qualified.");
+      }
+      else if ((!qualified) && (!"".equals(wrapperNamespace))) {
+        result.addError(element.getPosition(), "Enunciate only supports the default namespace on wrapper elements that have an unqualified form.");
       }
     }
-    
+
     return result;
   }
 

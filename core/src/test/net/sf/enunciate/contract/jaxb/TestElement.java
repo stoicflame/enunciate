@@ -51,6 +51,28 @@ public class TestElement extends InAPTTestCase {
   }
 
   /**
+   * Tests a byte[] accessor
+   */
+  public void testByteArrayProperty() throws Exception {
+    ComplexTypeDefinition typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("net.sf.enunciate.samples.schema.ElementBeanOne"));
+    PropertyDeclaration property = findProperty(typeDef, "property6");
+    Element element = new Element(property, typeDef);
+    assertEquals(1, element.getChoices().size());
+    assertSame(element, element.getChoices().iterator().next());
+    assertEquals("property6", element.getName());
+    assertNull("The namespace should be null because the elementFormDefault is unset.", element.getNamespace());
+    assertNull(element.getRef());
+    assertEquals(property.getPropertyType(), element.getAccessorType());
+    assertEquals(KnownXmlType.BASE64_BINARY, element.getBaseType());
+    assertFalse(element.isNillable());
+    assertFalse(element.isRequired());
+    assertEquals(0, element.getMinOccurs());
+    assertEquals("1", element.getMaxOccurs());
+    assertNull(element.getDefaultValue());
+    assertFalse(element.isWrapped());
+  }
+
+  /**
    * Tests a looping accessor, as per the jaxb spec, section 8.9.1.2
    */
   public void testLoopingProperty() throws Exception {

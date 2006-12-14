@@ -11,6 +11,9 @@ import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
 import java.util.ArrayList;
 
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
+
 /**
  * The validator for the xfire-client module.
  *
@@ -38,8 +41,21 @@ public class XFireClientValidator extends BaseValidator {
     accessors.add(typeDef.getValue());
     accessors.addAll(typeDef.getElements());
     for (Accessor accessor : accessors) {
-      if ((accessor != null) && (accessor.getAnnotation(XmlIDREF.class) != null) && (accessor.getAnnotation(XmlList.class) != null)) {
-        result.addError(accessor.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
+      if (accessor != null) {
+        if ((accessor.getAnnotation(XmlIDREF.class) != null) && (accessor.getAnnotation(XmlList.class) != null)) {
+          result.addError(accessor.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
+        }
+
+        TypeMirror accessorType = accessor.getBareAccessorType();
+        if (accessorType instanceof DeclaredType) {
+          String accessorTypeFQN = ((DeclaredType) accessorType).getDeclaration().getQualifiedName();
+          if (java.awt.Image.class.getName().equals(accessorTypeFQN)) {
+            result.addError(accessor.getPosition(), "xfire-client module doesn't yet support handling java.awt.Image.");
+          }
+          else if (javax.xml.transform.Source.class.getName().equals(accessorTypeFQN)) {
+            result.addError(accessor.getPosition(), "xfire-client module doesn't yet support handling javax.xml.transform.Source.");
+          }
+        }
       }
     }
   }

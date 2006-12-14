@@ -7,7 +7,9 @@ import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 
 /**
- * Validator for the contract classes.
+ * Validator for the contract classes.  A single validator will be assigned to one set of source classes.
+ * This means that a validator may keep state without the fear that the methods will be called more than
+ * once (or less than once, for that matter) per type declaration.
  *
  * @author Ryan Heaton
  */
