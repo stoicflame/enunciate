@@ -35,9 +35,36 @@
       <include name="${tools.jar.pattern}"/>
     </fileset>
 
+    <pathelement location="${basedir}/target/examples/full/classes/xfire-client/jdk14"/>
   </path>
 
   <import file="../../build-module.xml"/>
+
+  <available property="container.test.support.exists" file="${container.test.support.file}"/>
+  <fail unless="container.test.support.exists">
+    No container test support (looked for ${container.test.support.file})
+    
+    Enunciate needs to run tests that run against code deployed in a j2ee container.  Since the type
+    and location of the container needs to be user-defined, these integration tests depend on a
+    user-defined build file (default location is ~/.enunciate/container-test-support.xml).  This build
+    file must define the following properties:
+
+    war.deploy.dir (directory on the filesystem into which to drop the war file)
+
+    and the following targets:
+
+    start-container (start the container)
+    stop-container (stop the container)
+
+    The following properties are optional:
+
+    container.port (port to which the container will be bound, defaults to 8080)
+    init.container.target (if definied, this target will be invoked before calling start-container).
+    container.test.context (the context on which the war will be mounted, defaults to the name of the war)
+    container.test.delay.time (time in seconds to wait between invoking the start-container target and executing the tests, defaults to 5)
+    container.test.delay.target (if defined, instead of just waiting, this target will be invoked after start-container and before executing the tests)
+  </fail>
+  <import file="${container.test.support.file}"/>
 
   <!--no-op because there are no java sources.  this is a test module.-->
   <target name="compile-main"/>
@@ -51,5 +78,54 @@
       <param name="enunciate.target" value="package"/>
     </antcall>
   </target>
+
+  <target name="compile-tests" depends="base.compile-tests">
+    <javac destdir="${test.build.dir}" debug="true">
+      <src>
+        <pathelement location="${enunciate.sample.src.dir}/full"/>
+      </src>
+      <classpath refid="base.libs"/>
+    </javac>
+  </target>
+
+  <target name="init" depends="base.init, -init"/>
+
+  <target name="-init">
+    <antcall target="-init-container-tests"/>
+    <property name="container.port" value="8080"/>
+    <property name="container.test.context" value="full"/>
+    <property name="container.test.delay.time" value="5"/>
+    <property name="container.test.delay.target" value="-delay-container-tests"/>
+
+    <propertyset id="test.sysprops">
+      <propertyref name="container.port"/>
+      <propertyref name="container.test.context"/>
+    </propertyset>
+  </target>
+
+  <target name="test" depends="enunciate-full-api">
+    <parallel>
+      <antcall target="start-container"/>
+      <sequential>
+        <antcall target="${container.test.delay.target}"/>
+        <antcall target="-exec-container-tests">
+          <reference refid="test.sysprops"/>
+        </antcall>
+        <antcall target="stop-container"/>
+      </sequential>
+    </parallel>
+  </target>
+
+  <target name="fail-for-tests" if="tests.failed" depends="stop-container, base.fail-for-tests"/>
+
+  <target name="-delay-container-tests">
+    <sleep seconds="${container.test.delay.time}"/>
+  </target>
+
+  <target name="-init-container-tests" if="init.container.target">
+    <antcall target="${init.container.target}"/>
+  </target>
+
+  <target name="-exec-container-tests" depends="base.test"/>
 
 </project>

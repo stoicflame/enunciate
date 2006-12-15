@@ -45,7 +45,11 @@ public class XmlClassType implements XmlTypeMirror {
    * @return The qname.
    */
   public QName getQname() {
-    return new QName(getNamespace(), getName());
+    String localPart = getName();
+    if (localPart == null) {
+      localPart = "";
+    }
+    return new QName(getNamespace(), localPart);
   }
 
   /**

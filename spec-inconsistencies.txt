@@ -23,3 +23,4 @@ The following were noticed inconsistencies in the specifications:
        a square is encountered?  Is it marshalled as a square or a rectangle and how do you know?  Or should that be an error?
 -jaxb: why the contstraint that if it is a parameterized collection, then value.length must be one?  What if it's a parameterized collection of objects that
        all inherit from collection item type?
+-jaxb: xs:all compositor: what happens when a type definition extends a type definition whose compositor resolves to be xs:all?

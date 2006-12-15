@@ -21,6 +21,9 @@
   <property name="jar.pattern" value="*-${enunciate.version}.jar"/>
   <property name="tools.jar.pattern" value="*-tools-${enunciate.version}.jar"/>
 
+  <!--default file for container test support.-->
+  <property name="container.test.support.file" value="${user.home}/.enunciate/container-test-support.xml"/>
+
   <path id="base.libs">
     <fileset dir="${lib.dir}">
       <include name="*.jar"/>
@@ -53,7 +56,7 @@
   </path>
 
   <path id="xfire.client.libs">
-    <fileset dir="${lib.dir}/xfire-server">
+    <fileset dir="${lib.dir}/xfire-client">
       <include name="*.jar"/>
     </fileset>
   </path>
@@ -184,7 +187,11 @@
       <report format="frames" todir="${test.report.dir}/html"/>
     </junitreport>
 
-    <fail if="tests.failed">There were test failures.</fail>
+    <antcall target="fail-for-tests"/>
+  </target>
+
+  <target name="fail-for-tests" if="tests.failed">
+    <fail>There were test failures.</fail>
   </target>
 
   <target name="compile-tests">

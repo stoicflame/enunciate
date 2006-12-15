@@ -33,8 +33,17 @@ public class TestFullAPI extends TestCase {
    * Tests the full API
    */
   public void testFullAPI() throws Exception {
-    int port = 7373;
-    SourceService sourceService = new SourceServiceImpl("localhost", port, "/full/soap/source-service");
+    if (System.getProperty("container.port") == null) {
+      fail("A container.port property must be provided for this test.");
+    }
+
+    int port = Integer.parseInt(System.getProperty("container.port"));
+    String context = "full";
+    if (System.getProperty("container.test.context") != null) {
+      context = System.getProperty("container.test.context");
+    }
+
+    SourceService sourceService = new SourceServiceImpl("localhost", port, "/" + context + "/soap/source-service");
     Source source = sourceService.getSource("valid");
     assertEquals("valid", source.getId());
     assertEquals(URI.create("uri:some-uri"), source.getLink());
@@ -56,7 +65,7 @@ public class TestFullAPI extends TestCase {
     sourceService.addSource(new Source());
     long end = System.currentTimeMillis();
     long elapsed = (end - begin);
-    assertTrue("Since this is a one-way operation, we expected the operations to take less than 15 seconds.  Took " + elapsed + " ms.", elapsed < 15000);
+    assertTrue("Since this is a one-way operation, we expected the operations to take less than 15 seconds, even though the time it takes on the server to add a source is > 30 seconds per operation.  Took " + elapsed + " ms.", elapsed < 15000);
 
     assertEquals("newid", sourceService.addInfoSet("somesource", new InfoSet()));
     assertEquals("okay", sourceService.addInfoSet("othersource", new InfoSet()));
@@ -69,7 +78,7 @@ public class TestFullAPI extends TestCase {
       assertEquals("anyhow", e.getAnotherMessage());
     }
 
-    PersonService personService = new PersonServiceImpl("localhost", port, "/full/soap/PersonServiceService");
+    PersonService personService = new PersonServiceImpl("localhost", port, "/" + context + "/soap/PersonServiceService");
     ArrayList<String> ids = new ArrayList<String>(Arrays.asList("id1", "id2", "id3", "id4"));
     Collection persons = personService.readPersons(ids);
     for (Object o : persons) {
@@ -92,6 +101,13 @@ public class TestFullAPI extends TestCase {
     Person person = new Person();
     person.setId("new-person");
     assertEquals("new-person", personService.storePerson(person).getId());
+
+    //todo: test SOAP headers.
+    //todo: test attachments.
+    //todo: test attachments as service parameters.
+    //todo: test throwing an explicit web fault (as opposed to just an implicit one).
+
+    //todo: test IN/OUT and OUT parameters when the xfire-client module supports them.
   }
 
 }
