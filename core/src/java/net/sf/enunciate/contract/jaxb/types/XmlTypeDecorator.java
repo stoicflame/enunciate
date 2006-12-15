@@ -135,10 +135,10 @@ public class XmlTypeDecorator implements TypeVisitor {
     }
     else {
       componentType.accept(this);
-    }
-
-    if (this.errorMessage != null) {
-      this.errorMessage = "Problem with the array component type: " + this.errorMessage;
+      
+      if (this.errorMessage != null) {
+        this.errorMessage = "Problem with the array component type: " + this.errorMessage;
+      }
     }
   }
 

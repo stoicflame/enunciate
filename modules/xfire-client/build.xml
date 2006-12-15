@@ -15,7 +15,9 @@
     <fileset dir="${core.basedir}/target">
       <include name="${jar.pattern}"/>
     </fileset>
+
     <pathelement location="${core.basedir}/target/test-classes"/>
+    <pathelement location="${basedir}/target/examples/schema/classes/xfire-client/jdk14"/>
   </path>
 
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xfire-client"/>
@@ -41,6 +43,17 @@
     <echo message="net.sf.enunciate.modules.xfire_client.XFireClientDeploymentModule"
           file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
   </target>
+
+  <target name="compile-tests" depends="base.compile-tests">
+    <javac destdir="${test.build.dir}" debug="true">
+      <src>
+        <pathelement location="src/samples/schema"/>
+      </src>
+      <classpath refid="base.libs"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="shapes, base.test"/>
 
   <target name="shapes" depends="compile-main">
     <path id="enunciate.classpath">

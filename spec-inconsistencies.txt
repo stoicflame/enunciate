@@ -19,5 +19,7 @@ The following were noticed inconsistencies in the specifications:
 -jaxb: *why* allow an item in the value of @XmlElements to *not* have a unique name?  A name is needed in order to deserialize!
 -jaxb: *why* does @XmlElement.namespace() exist?  If elementFormDefault is qualified, the namespace is the same as the type.  Otherwise, its the default namespace!
        what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?
+-jaxb: what if @XmlElements contains two @XmlElement annotations, one of type "Rectangle", the other of type "Square" (Square extends Rectangle).  When marshalling,
+       a square is encountered?  Is it marshalled as a square or a rectangle and how do you know?  Or should that be an error?
 -jaxb: why the contstraint that if it is a parameterized collection, then value.length must be one?  What if it's a parameterized collection of objects that
        all inherit from collection item type?

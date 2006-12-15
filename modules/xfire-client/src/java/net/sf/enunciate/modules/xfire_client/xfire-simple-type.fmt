@@ -11,8 +11,7 @@ import org.codehaus.xfire.aegis.MessageWriter;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.fault.XFireFault;
 
-import net.sf.enunciate.modules.xfire_client.ListWriter;
-import net.sf.enunciate.modules.xfire_client.ListParser;
+import net.sf.enunciate.modules.xfire_client.*;
 
 import javax.xml.namespace.QName;
 
@@ -43,6 +42,9 @@ public class ${type.simpleName}XFireType extends Type {
     [#elseif type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
     ${type.value.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
+    [#elseif type.value.binaryData]
+    int mechanism = EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if];
+    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value.accessorType)}.class, mechanism, reader, context);
     [#else]
     Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
     ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
@@ -70,6 +72,8 @@ public class ${type.simpleName}XFireType extends Type {
       [#if type.value.xmlList]
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
+      [#elseif type.value.binaryData]
+      EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
       [#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
       type.writeObject(value, writer, context);

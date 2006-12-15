@@ -4,10 +4,12 @@ import junit.framework.TestCase;
 import net.sf.enunciate.examples.xfire_client.schema.*;
 import net.sf.enunciate.examples.xfire_client.schema.animals.Cat;
 import net.sf.enunciate.examples.xfire_client.schema.draw.Canvas;
+import net.sf.enunciate.examples.xfire_client.schema.draw.CanvasAttachment;
 import net.sf.enunciate.examples.xfire_client.schema.structures.House;
 import net.sf.enunciate.examples.xfire_client.schema.vehicles.Bus;
 import net.sf.enunciate.modules.xfire_client.IntrospectingTypeRegistry;
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.exchange.InMessage;
@@ -32,10 +34,7 @@ import javax.xml.namespace.QName;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * This is a special test case that depends on the sample schema included in this module.
@@ -678,15 +677,28 @@ public class TestXFireTypes extends TestCase {
     triangle.setBase(80);
     triangle.setId("triId");
     canvas.setShapes(Arrays.asList(rectangle, circle, triangle));
-    byte[] attachmentBytes = "This is a bunch of random bytes that are to be used as an MTOM attachment.".getBytes();
-    ByteArrayDataSource dataSource = new ByteArrayDataSource(attachmentBytes, "application/octet-stream");
+    byte[] swaRefBytes = "This is a bunch of random bytes that are to be used as an SWA ref attachment.".getBytes();
+    byte[] explicitBase64Bytes = "This is some more random bytes that are to be used as a base 64 encoded attachment.".getBytes();
+    byte[] attachment1Bytes = "This is some more random bytes that are to be used as the first MTOM attachment.".getBytes();
+    byte[] attachment2Bytes = "This is some more random bytes that are to be used as the second MTOM attachment.".getBytes();
+    byte[] attachment3Bytes = "This is some more random bytes that are to be used as the third MTOM attachment.".getBytes();
+    CanvasAttachment attachment1 = new CanvasAttachment();
+    attachment1.setValue(attachment1Bytes);
+    CanvasAttachment attachment2 = new CanvasAttachment();
+    attachment2.setValue(attachment2Bytes);
+    CanvasAttachment attachment3 = new CanvasAttachment();
+    attachment3.setValue(attachment3Bytes);
+    ByteArrayDataSource dataSource = new ByteArrayDataSource(swaRefBytes, "application/octet-stream");
     dataSource.setName("somename");
     canvas.setBackgroundImage(new DataHandler(dataSource));
+    canvas.setExplicitBase64Attachment(explicitBase64Bytes);
+    canvas.setOtherAttachments(Arrays.asList(attachment1, attachment2, attachment3));
 
     JAXBContext context = JAXBContext.newInstance(Canvas.class);
     Marshaller marshaller = context.createMarshaller();
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     MessageContext messageContext = new MessageContext();
+    messageContext.setProperty(SoapConstants.MTOM_ENABLED, Boolean.TRUE.toString());
     MessageExchange exchange = new MessageExchange(messageContext);
     InMessage inMessage = new InMessage();
     exchange.setInMessage(inMessage);
@@ -751,14 +763,39 @@ public class TestXFireTypes extends TestCase {
 
     DataHandler backgroundImage = clientCanvas.getBackgroundImage();
     InputStream attachmentStream = backgroundImage.getInputStream();
-    ByteArrayOutputStream attachmentIn = new ByteArrayOutputStream();
+    ByteArrayOutputStream bgImageIn = new ByteArrayOutputStream();
     int byteIn = attachmentStream.read();
     while (byteIn > 0) {
-      attachmentIn.write(byteIn);
+      bgImageIn.write(byteIn);
       byteIn = attachmentStream.read();
     }
+    assertTrue(Arrays.equals(swaRefBytes, bgImageIn.toByteArray()));
 
-    assertTrue(Arrays.equals(attachmentBytes, attachmentIn.toByteArray()));
+    byte[] base64Attachment = clientCanvas.getExplicitBase64Attachment();
+    assertNotNull(base64Attachment);
+    assertTrue(Arrays.equals(explicitBase64Bytes, base64Attachment));
+
+    Collection otherAttachments = clientCanvas.getOtherAttachments();
+    assertEquals(3, otherAttachments.size());
+    Iterator attachmentsIt = otherAttachments.iterator();
+    int attachmentCount = 0;
+    while (attachmentsIt.hasNext()) {
+      shapes.draw.CanvasAttachment otherAttachment = (shapes.draw.CanvasAttachment) attachmentsIt.next();
+      byte[] otherAttachmentBytes = otherAttachment.getValue();
+      if (Arrays.equals(attachment1Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else if (Arrays.equals(attachment2Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else if (Arrays.equals(attachment3Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else {
+        fail("Unknown attachment.");
+      }
+    }
+    assertEquals(3, attachmentCount);
 
     out = new ByteArrayOutputStream();
     ElementWriter writer = new ElementWriter(out, canvasType.getRootElementName().getLocalPart(), canvasType.getRootElementName().getNamespaceURI());
@@ -824,21 +861,43 @@ public class TestXFireTypes extends TestCase {
 
     backgroundImage = canvas.getBackgroundImage();
     attachmentStream = backgroundImage.getInputStream();
-    attachmentIn = new ByteArrayOutputStream();
+    bgImageIn = new ByteArrayOutputStream();
     byteIn = attachmentStream.read();
     while (byteIn > 0) {
-      attachmentIn.write(byteIn);
+      bgImageIn.write(byteIn);
       byteIn = attachmentStream.read();
     }
 
-    assertTrue(Arrays.equals(attachmentBytes, attachmentIn.toByteArray()));
+    assertTrue(Arrays.equals(swaRefBytes, bgImageIn.toByteArray()));
+
+    base64Attachment = canvas.getExplicitBase64Attachment();
+    assertNotNull(base64Attachment);
+    assertTrue(Arrays.equals(explicitBase64Bytes, base64Attachment));
+
+    otherAttachments = canvas.getOtherAttachments();
+    assertEquals(3, otherAttachments.size());
+    attachmentsIt = otherAttachments.iterator();
+    attachmentCount = 0;
+    while (attachmentsIt.hasNext()) {
+      CanvasAttachment otherAttachment = (CanvasAttachment) attachmentsIt.next();
+      byte[] otherAttachmentBytes = otherAttachment.getValue();
+      if (Arrays.equals(attachment1Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else if (Arrays.equals(attachment2Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else if (Arrays.equals(attachment3Bytes, otherAttachmentBytes)) {
+        attachmentCount++;
+      }
+      else {
+        fail("Unknown attachment.");
+      }
+    }
+    assertEquals(3, attachmentCount);
 
     //todo: test element ref to an attachment element
-    //todo: test elements of attachment elements
     //todo: test element refs of attachment elements.
-    //todo: test MTOM attachement
-    //todo: test base64 attachment
-
   }
 
 }

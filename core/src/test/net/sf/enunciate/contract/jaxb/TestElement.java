@@ -10,6 +10,7 @@ import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.Context;
 
@@ -66,10 +67,19 @@ public class TestElement extends InAPTTestCase {
     assertEquals(KnownXmlType.BASE64_BINARY, element.getBaseType());
     assertFalse(element.isNillable());
     assertFalse(element.isRequired());
+    assertTrue(element.isBinaryData());
     assertEquals(0, element.getMinOccurs());
     assertEquals("1", element.getMaxOccurs());
     assertNull(element.getDefaultValue());
     assertFalse(element.isWrapped());
+
+    //now let's pretend its a value...
+    Value value = new Value(property, typeDef);
+    assertEquals(null, value.getName());
+    assertEquals(property.getPropertyType(), value.getAccessorType());
+    assertEquals(KnownXmlType.BASE64_BINARY, value.getBaseType());
+    assertTrue(value.isBinaryData());
+    assertFalse(((DecoratedTypeMirror) value.getAccessorType()).isPrimitive());
   }
 
   /**

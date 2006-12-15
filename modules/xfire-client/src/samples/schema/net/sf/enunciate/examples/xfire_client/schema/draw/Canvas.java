@@ -22,6 +22,9 @@ public class Canvas {
   private int dimensionY;
   private DataHandler backgroundImage;
 
+  private byte[] explicitBase64Attachment;
+  private Collection<CanvasAttachment> otherAttachments;
+
   @XmlElementRefs (
     {
       @XmlElementRef ( type = Circle.class ),
@@ -83,5 +86,28 @@ public class Canvas {
 
   public void setBackgroundImage(DataHandler backgroundImage) {
     this.backgroundImage = backgroundImage;
+  }
+
+  @XmlInlineBinaryData
+  public byte[] getExplicitBase64Attachment() {
+    return explicitBase64Attachment;
+  }
+
+  public void setExplicitBase64Attachment(byte[] explicitBase64Attachment) {
+    this.explicitBase64Attachment = explicitBase64Attachment;
+  }
+
+  @XmlElementWrapper (
+    name = "otherAttachments"
+  )
+  @XmlElement (
+    name = "attachment"
+  )
+  public Collection<CanvasAttachment> getOtherAttachments() {
+    return otherAttachments;
+  }
+
+  public void setOtherAttachments(Collection<CanvasAttachment> otherAttachments) {
+    this.otherAttachments = otherAttachments;
   }
 }

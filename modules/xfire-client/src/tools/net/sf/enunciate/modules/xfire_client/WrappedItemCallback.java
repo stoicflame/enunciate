@@ -10,7 +10,7 @@ import javax.xml.namespace.QName;
  * Interface for encapsulating callback logic for reading child elements of an element wrapper.
  *
  * @author Ryan Heaton
- * @see net.sf.enunciate.modules.xfire_client.ElementsReader
+ * @see net.sf.enunciate.modules.xfire_client.ElementsUtil
  */
 public interface WrappedItemCallback {
 
