@@ -1,12 +1,16 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import org.codehaus.xfire.client.Client;
-import org.codehaus.xfire.client.XFireProxyFactory;
-import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.XFireFactory;
-import org.codehaus.xfire.transport.http.SoapHttpTransport;
+import org.codehaus.xfire.soap.SoapConstants;
+import org.codehaus.xfire.client.Client;
+import org.codehaus.xfire.client.XFireProxyFactory;
+import org.codehaus.xfire.client.XFireProxy;
+import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.transport.TransportManager;
+import org.codehaus.xfire.transport.http.SoapHttpTransport;
+
+import java.lang.reflect.Proxy;
 
 /**
  * A base class for client-side soap web service implementations.
@@ -14,6 +18,23 @@ import org.codehaus.xfire.transport.TransportManager;
  * @author Ryan Heaton
  */
 public abstract class EnunciatedSOAPWebServiceImpl {
+
+  private final Object proxy;
+  private final Client client;
+
+  /**
+   * Construct an enunciated SOAP web service that implements the specified interface.
+   *
+   * @param iface The interface.
+   * @param uuid The UUID of the interface.
+   * @param endpoint The endpoint URL of the SOAP port.
+   */
+  protected EnunciatedSOAPWebServiceImpl(Class iface, String uuid, String endpoint) {
+    this.proxy = loadProxy(iface, uuid, endpoint);
+    XFireProxy xfireProxy = (XFireProxy) Proxy.getInvocationHandler(proxy);
+    this.client = xfireProxy.getClient();
+    setMTOMEnabled(true);
+  }
 
   /**
    * Load an XFire client proxy that implements the specified interface.
@@ -49,5 +70,22 @@ public abstract class EnunciatedSOAPWebServiceImpl {
     Client client = new Client(soapTransport, service, endpoint);
     return new XFireProxyFactory(xFire).create(client);
   }
-  
+
+  /**
+   * The xfire proxy that will handle the web service calls on the client-side.
+   *
+   * @return The xfire proxy that will handle the web service calls on the client-side.
+   */
+  public final Object getProxy() {
+    return proxy;
+  }
+
+  /**
+   * Whether MTOM is enabled.
+   *
+   * @param MTOMEnabled Whether MTOM is enabled.
+   */
+  public final void setMTOMEnabled(boolean MTOMEnabled) {
+    this.client.setProperty(SoapConstants.MTOM_ENABLED, String.valueOf(MTOMEnabled));
+  }
 }

@@ -42,7 +42,8 @@ public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServic
    * @param endpoint The endpoint to point to.
    */
   public ${endpointInterface.simpleName}Impl(String endpoint) {
-    this.proxy = (${endpointInterface.simpleName}) loadProxy(${endpointInterface.simpleName}.class, "${uuid}", endpoint);
+    super(${endpointInterface.simpleName}.class, "${uuid}", endpoint);
+    this.proxy = (${endpointInterface.simpleName}) getProxy();
   }
 
   [@forEachWebMethod]

@@ -19,6 +19,7 @@ import org.codehaus.xfire.soap.SoapConstants;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.jws.WebResult;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchema;
@@ -315,6 +316,56 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
 
       return new QName(namespace, name);
     }
+  }
+
+  /**
+   * Overridden to fix a bug in XFire.
+   *
+   * @param method The method.
+   * @param paramIndex The parameter index.
+   * @return Whether the parameter index is an out param.
+   */
+  @Override
+  protected boolean isOutParam(Method method, int paramIndex) {
+    //xfire 1.2.1 chokes on -1...
+    return paramIndex == -1 || super.isOutParam(method, paramIndex);
+  }
+
+  /**
+   * Overridden to fix a bug in XFire.
+   *
+   * @param method The method.
+   * @param paramIndex The parameter index.
+   * @return Whether the parameter index is an in param.
+   */
+  @Override
+  protected boolean isInParam(Method method, int paramIndex) {
+    //xfire 1.2.1 chokes on -1...
+    return paramIndex != -1 && super.isInParam(method, paramIndex);
+  }
+
+  /**
+   * XFire defaults the name of the return value to "out".  The JAXWS spec says "return"....
+   *
+   * @param service The service.
+   * @param op The operation.
+   * @param method The method.
+   * @param paramNumber The parameter number.
+   * @param doc Whether its doc-style binding.
+   * @return The out parameter name.
+   */
+  @Override
+  protected QName getOutParameterName(final Service service, final OperationInfo op, final Method method, final int paramNumber, final boolean doc) {
+    QName parameterName = super.getOutParameterName(service, op, method, paramNumber, doc);
+
+    if (paramNumber == -1) {
+      WebResult webResult = method.getReturnType().getAnnotation(WebResult.class);
+      if ((webResult == null) || ("".equals(webResult.name()))) {
+        parameterName = new QName(parameterName.getNamespaceURI(), "return");
+      }
+    }
+
+    return parameterName;
   }
 
   /**

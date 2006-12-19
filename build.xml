@@ -3,12 +3,13 @@
 <project default="build" name="all" basedir=".">
 
   <!--global references to other modules-->
-  <dirname file="${ant.file.base}" property="enunciate.basedir"/>
+  <dirname file="${ant.file.all}" property="enunciate.basedir"/>
   <property name="core.basedir" value="${enunciate.basedir}/core"/>
   <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
   <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
+  <property name="modules.xfire-integration.basedir" value="${enunciate.basedir}/modules/xfire-integration"/>
 
   <target name="build">
     <ant dir="${core.basedir}"/>
@@ -16,6 +17,7 @@
     <ant dir="${modules.jaxws.basedir}"/>
     <ant dir="${modules.xfire-client.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
+    <ant dir="${modules.xfire-integration.basedir}"/>
   </target>
 
 </project>

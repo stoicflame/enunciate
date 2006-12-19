@@ -2,8 +2,11 @@ package net.sf.enunciate.samples.genealogy.services.impl;
 
 import net.sf.enunciate.samples.genealogy.cite.InfoSet;
 import net.sf.enunciate.samples.genealogy.cite.Source;
-import net.sf.enunciate.samples.genealogy.services.SourceService;
+import net.sf.enunciate.samples.genealogy.data.Event;
 import net.sf.enunciate.samples.genealogy.services.ServiceException;
+import net.sf.enunciate.samples.genealogy.services.SourceService;
+import net.sf.enunciate.samples.genealogy.services.UnknownSourceBean;
+import net.sf.enunciate.samples.genealogy.services.UnknownSourceException;
 
 import javax.jws.WebService;
 import java.net.URI;
@@ -25,7 +28,7 @@ public class SourceServiceImpl implements SourceService {
     }
   }
 
-  public Source getSource(String id)  throws ServiceException {
+  public Source getSource(String id) throws ServiceException, UnknownSourceException {
     if ("valid".equals(id)) {
       Source source = new Source();
       source.setId("valid");
@@ -35,6 +38,12 @@ public class SourceServiceImpl implements SourceService {
     }
     else if ("throw".equals(id)) {
       throw new ServiceException("some message", "another message");
+    }
+    else if ("unknown".equals(id)) {
+      UnknownSourceBean bean = new UnknownSourceBean();
+      bean.setSourceId("unknown");
+      bean.setErrorCode(888);
+      throw new UnknownSourceException("some message", bean);
     }
 
     return null;
@@ -49,5 +58,21 @@ public class SourceServiceImpl implements SourceService {
     }
 
     return "okay";
+  }
+
+  public String addEvents(String infoSetId, Event[] assertions, String contributorId) throws ServiceException {
+    if ("illegal".equals(contributorId)) {
+      throw new ServiceException("illegal contributor", "illegal");
+    }
+
+    if ("unknown".equals(infoSetId)) {
+      throw new ServiceException("unknown info set", infoSetId);
+    }
+
+    if (assertions.length < 3) {
+      throw new ServiceException("you must add three", "three");
+    }
+
+    return contributorId;
   }
 }

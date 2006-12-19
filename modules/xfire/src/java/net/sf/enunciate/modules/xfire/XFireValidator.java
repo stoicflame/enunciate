@@ -1,6 +1,8 @@
 package net.sf.enunciate.modules.xfire;
 
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.jaxws.WebMethod;
+import net.sf.enunciate.contract.jaxws.WebParam;
 import net.sf.enunciate.contract.validation.BaseValidator;
 import net.sf.enunciate.contract.validation.ValidationResult;
 
@@ -29,6 +31,15 @@ public class XFireValidator extends BaseValidator {
       else {
         result.addError(ei.getPosition(), "Ummm... you already have a service named " + ei.getServiceName() + " at " +
           visited.getPosition() + ".  You need to disambiguate.");
+      }
+    }
+
+    for (WebMethod webMethod : ei.getWebMethods()) {
+      for (WebParam webParam : webMethod.getWebParameters()) {
+        if ((webParam.isHeader()) && ("".equals(webParam.getAnnotation(javax.jws.WebParam.class).name()))) {
+          //todo: lift this constraint by serializing the parameter names to some file you can load for metadata...
+          result.addError(webParam.getPosition(), "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
+        }
       }
     }
 

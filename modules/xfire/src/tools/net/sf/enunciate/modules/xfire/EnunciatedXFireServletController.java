@@ -1,6 +1,8 @@
 package net.sf.enunciate.modules.xfire;
 
 import org.codehaus.xfire.XFire;
+import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.spring.remoting.XFireServletControllerAdapter;
 
 import javax.servlet.ServletException;
@@ -8,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Xfire servlet controller the redirects to the generated documentation and WSDL.
@@ -57,5 +60,19 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
     String artifact = xmlLookup.getWsdlResourceForService(service);
     response.sendRedirect("/" + artifact);
+  }
+
+
+  @Override
+  protected MessageContext createMessageContext(HttpServletRequest request, HttpServletResponse response, String service) {
+    MessageContext context = super.createMessageContext(request, response, service);
+
+    String acceptHeader = request.getHeader("Accept");
+
+    //is "contains" good enough or do I actually need to parse it?
+    boolean mtomEnabled = ((acceptHeader != null) && (acceptHeader.toLowerCase().contains("application/xop+xml")));
+    context.setProperty(SoapConstants.MTOM_ENABLED, String.valueOf(mtomEnabled));
+    
+    return context;
   }
 }

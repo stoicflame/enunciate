@@ -213,7 +213,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   public String getTargetNamespace() {
     String targetNamespace = null;
 
-    if (this.explicitFaultBean == null) {
+    if (isImplicitSchemaElement()) {
       if (annotation != null) {
         targetNamespace = annotation.targetNamespace();
       }

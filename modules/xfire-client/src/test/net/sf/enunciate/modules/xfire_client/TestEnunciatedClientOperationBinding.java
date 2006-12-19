@@ -7,6 +7,7 @@ import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.exchange.InMessage;
 import org.codehaus.xfire.exchange.OutMessage;
+import org.codehaus.xfire.exchange.MessageExchange;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.util.stax.JDOMStreamReader;
 import org.codehaus.xfire.util.stax.JDOMStreamWriter;
@@ -224,6 +225,7 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
     service.setBindingProvider(new AegisBindingProvider(registry));
     service.setProperty(AegisBindingProvider.TYPE_MAPPING_KEY, registry.getDefaultTypeMapping());
     context.setService(service);
+    new MessageExchange(context);
     final Holder<DummyMethod> holder = new Holder<DummyMethod>();
     registry.getDefaultTypeMapping().register(DummyMethod.class, new QName("hi"), new Type() {
       public Object readObject(MessageReader reader, MessageContext context) throws XFireFault {

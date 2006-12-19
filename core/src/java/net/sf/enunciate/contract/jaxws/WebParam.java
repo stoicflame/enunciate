@@ -100,6 +100,9 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
     if (isBare()) {
       messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName();
     }
+    else if (isHeader()) {
+      messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getSimpleName();
+    }
     
     return messageName;
   }

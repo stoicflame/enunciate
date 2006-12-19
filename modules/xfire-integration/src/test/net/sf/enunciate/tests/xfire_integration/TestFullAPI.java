@@ -3,17 +3,21 @@ package net.sf.enunciate.tests.xfire_integration;
 import junit.framework.TestCase;
 import net.sf.enunciate.samples.genealogy.client.cite.Source;
 import net.sf.enunciate.samples.genealogy.client.cite.InfoSet;
-import net.sf.enunciate.samples.genealogy.client.services.SourceService;
-import net.sf.enunciate.samples.genealogy.client.services.ServiceException;
-import net.sf.enunciate.samples.genealogy.client.services.PersonService;
+import net.sf.enunciate.samples.genealogy.client.services.*;
 import net.sf.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import net.sf.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import net.sf.enunciate.samples.genealogy.client.data.Person;
+import net.sf.enunciate.samples.genealogy.client.data.Event;
 
+import javax.mail.util.ByteArrayDataSource;
+import javax.activation.DataHandler;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 /**
  * A very big test of the functionality of the full API deployed with the XFire client and server modules.
@@ -33,11 +37,11 @@ public class TestFullAPI extends TestCase {
    * Tests the full API
    */
   public void testFullAPI() throws Exception {
-    if (System.getProperty("container.port") == null) {
-      fail("A container.port property must be provided for this test.");
+    int port = 8081;
+    if (System.getProperty("container.port") != null) {
+      port = Integer.parseInt(System.getProperty("container.port"));
     }
 
-    int port = Integer.parseInt(System.getProperty("container.port"));
     String context = "full";
     if (System.getProperty("container.test.context") != null) {
       context = System.getProperty("container.test.context");
@@ -59,6 +63,16 @@ public class TestFullAPI extends TestCase {
       assertEquals("another message", e.getAnotherMessage());
     }
 
+    try {
+      sourceService.getSource("unknown");
+      fail("should have thrown the unknown source exception.");
+    }
+    catch (UnknownSourceException e) {
+      UnknownSourceBean bean = e.getFaultInfo();
+      assertEquals("unknown", bean.getSourceId());
+      assertEquals(888, bean.getErrorCode());
+    }
+
     long begin = System.currentTimeMillis();
     sourceService.addSource(new Source());
     sourceService.addSource(new Source());
@@ -76,6 +90,20 @@ public class TestFullAPI extends TestCase {
     catch (ServiceException e) {
       assertEquals("unknown source id", e.getMessage());
       assertEquals("anyhow", e.getAnotherMessage());
+    }
+
+    //test SOAP headers.
+    Event event1 = new Event();
+    Event event2 = new Event();
+    Event event3 = new Event();
+    assertEquals("good", sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "good"));
+
+    try {
+      sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "illegal");
+      fail("should have required a valid contributor id.");
+    }
+    catch (ServiceException e) {
+      //fall through...
     }
 
     PersonService personService = new PersonServiceImpl("localhost", port, "/" + context + "/soap/PersonServiceService");
@@ -102,11 +130,34 @@ public class TestFullAPI extends TestCase {
     person.setId("new-person");
     assertEquals("new-person", personService.storePerson(person).getId());
 
-    //todo: test SOAP headers.
-    //todo: test attachments.
-    //todo: test attachments as service parameters.
-    //todo: test throwing an explicit web fault (as opposed to just an implicit one).
+    byte[] pixBytes = "this is a bunch of bytes that I would like to make sure are serialized correctly so that I can prove out that attachments are working properly".getBytes();
+    person.setPicture(new DataHandler(new ByteArrayDataSource(pixBytes, "image/jpeg")));
 
+    DataHandler returnedPix = personService.storePerson(person).getPicture();
+    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+    InputStream inputStream = returnedPix.getInputStream();
+    int byteIn = inputStream.read();
+    while (byteIn > -1) {
+      bytesOut.write(byteIn);
+      byteIn = inputStream.read();
+    }
+
+    assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
+
+    //now disable MTOM and make sure it works
+    ((PersonServiceImpl) personService).setMTOMEnabled(false);
+    returnedPix = personService.storePerson(person).getPicture();
+    bytesOut = new ByteArrayOutputStream();
+    inputStream = returnedPix.getInputStream();
+    byteIn = inputStream.read();
+    while (byteIn > -1) {
+      bytesOut.write(byteIn);
+      byteIn = inputStream.read();
+    }
+
+    assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
+
+    //todo: test attachments as service parameters.
     //todo: test IN/OUT and OUT parameters when the xfire-client module supports them.
   }
 

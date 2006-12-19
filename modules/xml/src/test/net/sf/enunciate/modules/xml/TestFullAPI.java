@@ -17,10 +17,7 @@ import org.w3c.dom.Element;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
-import javax.wsdl.extensions.soap.SOAPOperation;
-import javax.wsdl.extensions.soap.SOAPBody;
-import javax.wsdl.extensions.soap.SOAPFault;
-import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.wsdl.extensions.soap.*;
 import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
@@ -66,6 +63,7 @@ public class TestFullAPI extends TestCase {
     config.putNamespace(CITE_NAMESPACE, "cite");
     config.putNamespace(DATA_NAMESPACE, "data");
     config.putNamespace(FULL_NAMESPACE, "full");
+    config.putNamespace(null, "default");
     Enunciate enunciate = new Enunciate(getAllJavaFiles("full"));
     enunciate.setConfig(config);
     enunciate.setTarget(Enunciate.Target.GENERATE);
@@ -74,6 +72,8 @@ public class TestFullAPI extends TestCase {
 
     final File dataSchemaFile = new File(enunciate.getGenerateDir(), "xml/data.xsd");
     final File citationSchemaFile = new File(enunciate.getGenerateDir(), "xml/cite.xsd");
+    final File fullSchemaFile = new File(enunciate.getGenerateDir(), "xml/full.xsd");
+    final File defaultSchemaFile = new File(enunciate.getGenerateDir(), "xml/default.xsd");
     File wsdlFile = new File(enunciate.getGenerateDir(), "xml/full.wsdl");
 
     assertTrue(dataSchemaFile.exists());
@@ -91,9 +91,10 @@ public class TestFullAPI extends TestCase {
     assertEquals(new QName(W3C_XML_SCHEMA_NS_URI, "schema"), ee.getElementType());
     Schema schema = (Schema) ee;
     Map imports = schema.getImports();
-    assertEquals(2, imports.size());
+    assertEquals(3, imports.size());
     assertNotNull(imports.get(DATA_NAMESPACE));
     assertNotNull(imports.get(CITE_NAMESPACE));
+    assertNotNull(imports.get(FULL_NAMESPACE));
 
     ByteArrayOutputStream tempSchema = new ByteArrayOutputStream();
     TransformerFactory tFactory = TransformerFactory.newInstance();
@@ -120,6 +121,12 @@ public class TestFullAPI extends TestCase {
         }
         else if ("data.xsd".equals(systemId)) {
           return new InputSource(new FileReader(dataSchemaFile));
+        }
+        else if ("full.xsd".equals(systemId)) {
+          return new InputSource(new FileReader(fullSchemaFile));
+        }
+        else if ("default.xsd".equals(systemId)) {
+          return new InputSource(new FileReader(defaultSchemaFile));
         }
         else {
           throw new SAXException("Unknown entity: " + systemId);
@@ -274,6 +281,31 @@ public class TestFullAPI extends TestCase {
             SOAPFault soapFault = (SOAPFault) bindingFault.getExtensibilityElements().get(0);
             assertEquals("literal", soapFault.getUse());
           }
+          else if ("addEvents".equals(operationName)) {
+            SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
+            assertEquals("", soapOp.getSoapActionURI());
+            assertEquals("document", soapOp.getStyle());
+
+            List inputEls = operation.getBindingInput().getExtensibilityElements();
+            assertEquals(2, inputEls.size());
+            SOAPHeader soapHeader = (SOAPHeader) inputEls.get(0);
+            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.contributorId"), soapHeader.getMessage());
+            assertEquals("contributorId", soapHeader.getPart());
+            SOAPBody soapBody = (SOAPBody) inputEls.get(1);
+
+            assertEquals("literal", soapBody.getUse());
+            List outputEls = operation.getBindingOutput().getExtensibilityElements();
+            assertEquals(2, outputEls.size());
+            soapHeader = (SOAPHeader) outputEls.get(0);
+            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.return"), soapHeader.getMessage());
+            assertEquals("return", soapHeader.getPart());
+            soapBody = (SOAPBody) outputEls.get(1);
+            assertEquals("literal", soapBody.getUse());
+
+            BindingFault bindingFault = (BindingFault) operation.getBindingFaults().values().iterator().next();
+            SOAPFault soapFault = (SOAPFault) bindingFault.getExtensibilityElements().get(0);
+            assertEquals("literal", soapFault.getUse());
+          }
           else if ("addInfoSet".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
@@ -372,6 +404,15 @@ public class TestFullAPI extends TestCase {
             assertNotNull(fault);
             assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "ServiceException")), fault.getMessage());
           }
+          else if ("addEvents".equals(operationName)) {
+            Input input = operation.getInput();
+            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "SourceService.addEvents")), input.getMessage());
+            Output output = operation.getOutput();
+            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "SourceService.addEventsResponse")), output.getMessage());
+            Fault fault = operation.getFault("ServiceException");
+            assertNotNull(fault);
+            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "ServiceException")), fault.getMessage());
+          }
           else {
             fail("Unknown operation on SourceService: " + operationName);
           }
@@ -385,7 +426,7 @@ public class TestFullAPI extends TestCase {
 
   protected void assertDefinitionMessages(Definition definition) {
     Map messages = definition.getMessages();
-    assertEquals(12, messages.size()); //6 request messages, 5 response messages (because there is a one-way method), and 1 exception
+    assertEquals(17, messages.size()); //7 request messages, 6 response messages (because there is a one-way method), 2 header messages, and 2 exceptions
     for (Object m : messages.values()) {
       Message message = (Message) m;
       assertEquals(FULL_NAMESPACE, message.getQName().getNamespaceURI());
@@ -394,6 +435,12 @@ public class TestFullAPI extends TestCase {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("ServiceException");
         assertEquals(new QName(FULL_NAMESPACE, "ServiceException"), part.getElementName());
+        assertNull(part.getTypeName());
+      }
+      else if ("UnknownSourceException".equals(messageName)) {
+        assertEquals(1, message.getParts().size());
+        Part part = message.getPart("UnknownSourceException");
+        assertEquals(new QName(FULL_NAMESPACE, "unknownSourceBean"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("PersonService.storePerson".equals(messageName)) {
@@ -444,6 +491,18 @@ public class TestFullAPI extends TestCase {
         assertEquals(new QName(FULL_NAMESPACE, "getSource"), part.getElementName());
         assertNull(part.getTypeName());
       }
+      else if ("SourceService.addEvents".equals(messageName)) {
+        assertEquals(1, message.getParts().size());
+        Part part = message.getPart("addEvents");
+        assertEquals(new QName(FULL_NAMESPACE, "addEvents"), part.getElementName());
+        assertNull(part.getTypeName());
+      }
+      else if ("SourceService.addEvents.contributorId".equals(messageName)) {
+        assertEquals(1, message.getParts().size());
+        Part part = message.getPart("contributorId");
+        assertEquals(new QName(FULL_NAMESPACE, "contributorId"), part.getElementName());
+        assertNull(part.getTypeName());
+      }
       else if ("SourceService.addInfoSet".equals(messageName)) {
         assertEquals(2, message.getParts().size());
         Part part = message.getPart("sourceId");
@@ -464,6 +523,18 @@ public class TestFullAPI extends TestCase {
         Part part = message.getPart("return");
         assertNull(part.getElementName());
         assertEquals(new QName(W3C_XML_SCHEMA_NS_URI, "string"), part.getTypeName());
+      }
+      else if ("SourceService.addEventsResponse".equals(messageName)) {
+        assertEquals(1, message.getParts().size());
+        Part part = message.getPart("addEventsResponse");
+        assertEquals(new QName(FULL_NAMESPACE, "addEventsResponse"), part.getElementName());
+        assertNull(part.getTypeName());
+      }
+      else if ("SourceService.addEvents.return".equals(messageName)) {
+        assertEquals(1, message.getParts().size());
+        Part part = message.getPart("return");
+        assertEquals(new QName(FULL_NAMESPACE, "return"), part.getElementName());
+        assertNull(part.getTypeName());
       }
       else {
         fail("Unknown web message: " + messageName);
@@ -866,7 +937,7 @@ public class TestFullAPI extends TestCase {
     XSModelGroup modelGroup = particle.getTerm().asModelGroup();
     assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
     XSParticle[] childElements = modelGroup.getChildren();
-    assertEquals(5, childElements.length);
+    assertEquals(6, childElements.length);
     for (XSParticle childElement : childElements) {
       assertTrue(childElement.getTerm().isElementDecl());
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
@@ -895,6 +966,11 @@ public class TestFullAPI extends TestCase {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "relationship", elementDecl.getType());
+      }
+      else if ("picture".equals(childElementName)) {
+        assertEquals(0, childElement.getMinOccurs());
+        assertEquals(1, childElement.getMaxOccurs());
+        assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "base64Binary", elementDecl.getType());
       }
       else {
         fail("Unknown child element: " + childElementName);

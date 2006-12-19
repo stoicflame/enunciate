@@ -128,6 +128,9 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     if (isBare()) {
       messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "Response";
     }
+    else if (isHeader()) {
+      messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getName();
+    }
     
     return messageName;
   }

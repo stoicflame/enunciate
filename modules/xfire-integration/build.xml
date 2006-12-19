@@ -71,7 +71,10 @@
   <target name="jar-main"/>
   <target name="jar-tools"/>
 
-  <target name="enunciate-full-api" depends="init">
+  <!--no-op to preserve our own properties when running the tests.-->
+  <target name="init"/>
+
+  <target name="enunciate-full-api" depends="base.init">
     <antcall target="enunciate-example-api">
       <param name="example" value="full"/>
       <param name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
@@ -88,10 +91,9 @@
     </javac>
   </target>
 
-  <target name="init" depends="base.init, -init"/>
+  <target name="test" depends="enunciate-full-api">
+    <antcall target="-init-container-tests" inheritall="true"/>
 
-  <target name="-init">
-    <antcall target="-init-container-tests"/>
     <property name="container.port" value="8080"/>
     <property name="container.test.context" value="full"/>
     <property name="container.test.delay.time" value="5"/>
@@ -101,19 +103,22 @@
       <propertyref name="container.port"/>
       <propertyref name="container.test.context"/>
     </propertyset>
-  </target>
 
-  <target name="test" depends="enunciate-full-api">
+    <antcall target="deploy-full-api" inheritall="true"/>
     <parallel>
-      <antcall target="start-container"/>
+      <antcall target="start-container" inheritall="true"/>
       <sequential>
-        <antcall target="${container.test.delay.target}"/>
-        <antcall target="-exec-container-tests">
+        <antcall target="${container.test.delay.target}" inheritall="true"/>
+        <antcall target="-exec-container-tests" inheritall="true">
           <reference refid="test.sysprops"/>
         </antcall>
-        <antcall target="stop-container"/>
+        <antcall target="stop-container" inheritall="true"/>
       </sequential>
     </parallel>
+  </target>
+
+  <target name="deploy-full-api">
+    <copy todir="${war.deploy.dir}" file="target/examples/full/package/xfire/full.war"/>
   </target>
 
   <target name="fail-for-tests" if="tests.failed" depends="stop-container, base.fail-for-tests"/>

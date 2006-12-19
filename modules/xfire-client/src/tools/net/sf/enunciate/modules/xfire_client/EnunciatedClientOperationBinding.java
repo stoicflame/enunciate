@@ -4,6 +4,7 @@ import net.sf.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotatio
 import net.sf.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
+import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
@@ -27,6 +28,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * The binding for a JAXWS operation.
@@ -253,6 +256,24 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     Class beanClass = this.requestInfo.getBeanClass();
     Object[] params = (Object[]) message.getBody();
+
+    //strip out all the header parameters...
+    ArrayList filteredParams = new ArrayList();
+    for (int i = 0; i < params.length; i++) {
+      Object param = params[i];
+      OperationInfo operationInfo = context.getExchange().getOperation();
+      if (operationInfo != null) {
+        WebParamAnnotation annotation = annotations.getWebParamAnnotation(operationInfo.getMethod(), i);
+        if ((annotation != null) && (annotation.isHeader())) {
+          //skip the headers....
+          continue;
+        }
+      }
+
+      filteredParams.add(param);
+    }
+    params = filteredParams.toArray();
+
     Object bean;
     if (this.requestInfo.isBare()) {
       //if the operation is bare, we don't need to wrap it up.

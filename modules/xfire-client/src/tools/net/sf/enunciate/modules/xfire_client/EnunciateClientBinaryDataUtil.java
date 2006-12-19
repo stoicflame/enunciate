@@ -1,6 +1,7 @@
 package net.sf.enunciate.modules.xfire_client;
 
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.stax.ElementReader;
@@ -108,6 +109,13 @@ public class EnunciateClientBinaryDataUtil {
     if (!(writer instanceof ElementWriter)) {
       throw new IllegalArgumentException("Binary data can only be written to an element writer...");
     }
+
+    boolean mtomEnabled = Boolean.valueOf(String.valueOf(context.getContextualProperty(SoapConstants.MTOM_ENABLED))).booleanValue();
+    if ((!mtomEnabled) && (mechanism == MTOM)) {
+      //disable MTOM as requested.
+      mechanism = BASE64;
+    }
+
     String namespace = ((ElementWriter) writer).getNamespace();
     Attachments attachments = context.getOutMessage().getAttachments();
     if (attachments == null) {

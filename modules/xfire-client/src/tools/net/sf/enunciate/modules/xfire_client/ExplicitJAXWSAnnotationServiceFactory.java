@@ -12,18 +12,17 @@ import org.codehaus.xfire.annotations.WebServiceAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.fault.XFireFault;
-import org.codehaus.xfire.service.FaultInfo;
-import org.codehaus.xfire.service.OperationInfo;
-import org.codehaus.xfire.service.Service;
+import org.codehaus.xfire.service.*;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
-import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.transport.TransportManager;
+import org.codehaus.xfire.transport.http.AbstractMessageSender;
 import org.codehaus.xfire.util.ClassLoaderUtils;
 
 import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.util.HashMap;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * The explicit annotation service factory is based on JAXWS metatdata that is explicitly supplied
@@ -75,7 +74,7 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
   public Service create(Class clazz) {
     HashMap properties = new HashMap();
     properties.put(ALLOW_INTERFACE, Boolean.TRUE);
-    properties.put(SoapConstants.MTOM_ENABLED, Boolean.TRUE.toString());
+    properties.put(AbstractMessageSender.MESSAGE_SENDER_CLASS_NAME, EnunciatedHttpMessageSender.class.getName());
     return super.create(clazz, properties);
   }
 
@@ -115,6 +114,25 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
     catch (XFireFault e) {
       throw new XFireRuntimeException("Error setting the serializer on the operation binding.", e);
     }
+
+    //now we need to make sure the schema type is set on the headers....
+    EnunciatedClientBindingProvider provider = (EnunciatedClientBindingProvider) getBindingProvider();
+
+    MessagePartContainer inHeaders = binding.getHeaders(op.getInputMessage());
+    Iterator inPartIt = inHeaders.getMessageParts().iterator();
+    while (inPartIt.hasNext()) {
+      MessagePartInfo partInfo = (MessagePartInfo) inPartIt.next();
+      partInfo.setSchemaType(new HeaderType(provider.getType(service, partInfo.getTypeClass())));
+    }
+
+    if (op.hasOutput()) {
+      MessagePartContainer outHeaders = binding.getHeaders(op.getOutputMessage());
+      Iterator outPartIt = outHeaders.getMessageParts().iterator();
+      while (outPartIt.hasNext()) {
+        MessagePartInfo partInfo = (MessagePartInfo) outPartIt.next();
+        partInfo.setSchemaType(new HeaderType(provider.getType(service, partInfo.getTypeClass())));
+      }
+    }
   }
 
   /**
@@ -132,7 +150,10 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
       FaultInfo info = op.addFault(name.getLocalPart());
       info.setExceptionClass(faultClass);
       try {
-        info.addMessagePart(name, ClassLoaderUtils.loadClass(faultInfo.faultBean(), faultClass));
+        Class faultBeanClass = ClassLoaderUtils.loadClass(faultInfo.faultBean(), faultClass);
+        MessagePartInfo faultPartInfo = info.addMessagePart(name, faultBeanClass);
+        EnunciatedClientBindingProvider provider = (EnunciatedClientBindingProvider) getBindingProvider();
+        faultPartInfo.setSchemaType(provider.getType(service, faultBeanClass));
       }
       catch (ClassNotFoundException e) {
         throw new XFireRuntimeException("Unable to load fault bean.", e);
@@ -252,4 +273,5 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
       return new QName(responseWrapper.targetNamespace(), responseWrapper.localName());
     }
   }
+
 }

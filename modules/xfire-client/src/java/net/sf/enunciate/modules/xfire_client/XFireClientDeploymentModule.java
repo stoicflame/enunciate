@@ -152,7 +152,9 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         typeList.add(faultBean);
       }
 
-      annotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(webFault.getElementName(), webFault.getTargetNamespace(), faultBean, implicit));
+      String faultElementName = webFault.isImplicitSchemaElement() ? webFault.getElementName() : webFault.getExplicitFaultBean().getName();
+      String faultElementNamespace = webFault.isImplicitSchemaElement() ? webFault.getTargetNamespace() : webFault.getExplicitFaultBean().getNamespace();
+      annotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(faultElementName, faultElementNamespace, faultBean, implicit));
     }
 
     //process each type for client-side stubs.

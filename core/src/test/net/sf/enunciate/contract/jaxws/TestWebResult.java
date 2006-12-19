@@ -68,7 +68,7 @@ public class TestWebResult extends InAPTTestCase {
     assertEquals("doc-lit-wrapped-return", webResult.getName());
     assertEquals("urn:docLitWrapped", webResult.getTargetNamespace());
     assertEquals("doc-lit-wrapped-part", webResult.getPartName());
-    assertNull(webResult.getMessageName());
+    assertEquals("WebMethodExamples.docLitWrappedMethod.doc-lit-wrapped-return", webResult.getMessageName());
     assertFalse(webResult.isInput());
     assertTrue(webResult.isOutput());
     assertTrue(webResult.isHeader());

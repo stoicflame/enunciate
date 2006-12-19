@@ -1,8 +1,8 @@
 The following were noticed inconsistencies in the specifications:
 
 -jaxws: What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?
--jaxws: Are header elements required to be root elements?
--jaxws: property order isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
+-jaxws: Are header elements required to be root elements?  If not, what are the element names of header elements, and how do you disambiguate?
+-jaxws: property order during introspection isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
 
 -jaxb: the @XmlSchemaType and @XmlSchemaTypes annotation at the package-level take a class which might not be compiled or loadable at pre-compile time...
 -jaxb: what if you have a parametric collection of JAXBElements?  Assumption: The rule that any root elements that subclass it should be choices doesn't apply

@@ -8,6 +8,7 @@ import net.sf.enunciate.contract.validation.BaseValidator;
 import net.sf.enunciate.contract.validation.ValidationResult;
 
 import javax.xml.bind.annotation.XmlNsForm;
+import java.util.HashMap;
 
 /**
  * Validator for the xml module.
@@ -19,6 +20,8 @@ public class XMLValidator extends BaseValidator {
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
+
+    HashMap<String, WebMethod> implicitElementNames = new HashMap<String, WebMethod>();
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
         if (webMessage instanceof RequestWrapper) {
@@ -42,6 +45,17 @@ public class XMLValidator extends BaseValidator {
               result.addError(webMethod.getPosition(), "Enunciate doesn't allow declaring a target namespace for a response wrapper that is " +
                 "different from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root " +
                 "element from another namespace for the return value.");
+            }
+          }
+        }
+
+        for (WebMessagePart webMessagePart : webMessage.getParts()) {
+          if (!(webMessagePart instanceof WebFault) && (webMessagePart.isImplicitSchemaElement())) {
+            ImplicitSchemaElement el = ((ImplicitSchemaElement) webMessagePart);
+            WebMethod otherMethod = implicitElementNames.put(el.getElementName(), webMethod);
+            if (otherMethod != null) {
+              result.addError(webMethod.getPosition(), "Web method defines a message part named '" + el.getElementName() +
+                "' that is identical to the name of a web message part defined in " + otherMethod.getPosition() + ".  Please use annotations to disambiguate.");
             }
           }
         }

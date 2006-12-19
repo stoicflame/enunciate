@@ -118,7 +118,7 @@ public class TestWebParam extends InAPTTestCase {
     WebParam param3 = paramIt.next();
     assertEquals("s", param3.getElementName());
     assertEquals("s", param3.getPartName());
-    assertNull(param3.getMessageName());
+    assertEquals("WebMethodExamples.docLitWrappedMethod.s", param3.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, param3.getParticleType());
     assertEquals(new QName("urn:web-method-examples", "s"), param3.getParticleQName());
     assertTrue(param3.isImplicitSchemaElement());
@@ -208,7 +208,7 @@ public class TestWebParam extends InAPTTestCase {
     param3 = paramIt.next();
     assertEquals("s", param3.getElementName());
     assertEquals("s", param3.getPartName());
-    assertNull(param3.getMessageName());
+    assertEquals("WebMethodExamples.rpcLitWrappedMethod.s", param3.getMessageName());
     assertSame(WebMessagePart.ParticleType.TYPE, param3.getParticleType());
     assertEquals(KnownXmlType.SHORT.getQname(), param3.getParticleQName());
     assertFalse(param3.isImplicitSchemaElement());

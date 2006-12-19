@@ -3,6 +3,7 @@ package net.sf.enunciate.samples.genealogy.data;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.activation.DataHandler;
 import java.util.Collection;
 
 /**
@@ -17,6 +18,8 @@ public class Person {
   private Collection<Event> events;
   private Collection<Fact> facts;
   private Collection<Relationship> relationships;
+
+  private DataHandler picture;
 
   @XmlID
   @XmlAttribute
@@ -66,5 +69,13 @@ public class Person {
 
   public void setRelationships(Collection<Relationship> relationships) {
     this.relationships = relationships;
+  }
+
+  public DataHandler getPicture() {
+    return picture;
+  }
+
+  public void setPicture(DataHandler picture) {
+    this.picture = picture;
   }
 }
