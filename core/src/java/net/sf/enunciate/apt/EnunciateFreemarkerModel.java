@@ -18,6 +18,8 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.rest.RESTEndpoint;
+import net.sf.enunciate.contract.rest.RESTMethod;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -37,6 +39,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final Map<String, SchemaInfo> namespacesToSchemas;
   final Map<String, WsdlInfo> namespacesToWsdls;
   final Map<String, XmlTypeMirror> knownTypes;
+  final Map<String, List<RESTMethod>> nounsToRESTMethods;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
@@ -46,6 +49,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
+    this.nounsToRESTMethods = new HashMap<String, List<RESTMethod>>();
 
     setVariable("knownNamespaces", new ArrayList<String>(this.namespacesToPrefixes.keySet()));
     setVariable("ns2prefix", this.namespacesToPrefixes);
@@ -141,6 +145,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * The map of nouns to REST endpoints.
+   *
+   * @return The map of nouns to REST endpoints.
+   */
+  public Map<String, List<RESTMethod>> getNounsToRESTMethods() {
+    return nounsToRESTMethods;
+  }
+
+  /**
    * Add an endpoint interface to the model.
    *
    * @param ei The endpoint interface to add to the model.
@@ -183,6 +196,23 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
     if (position < 0) {
       this.typeDefinitions.add(-position - 1, typeDef);
+    }
+  }
+
+  /**
+   * Adds a REST endpoint to the model.
+   *
+   * @param endpoint The REST endpoint to add.
+   */
+  public void add(RESTEndpoint endpoint) {
+    for (RESTMethod restMethod : endpoint.getRESTMethods()) {
+      String noun = restMethod.getNoun();
+      List<RESTMethod> restMethods = this.nounsToRESTMethods.get(noun);
+      if (restMethods == null) {
+        restMethods = new ArrayList<RESTMethod>();
+        this.nounsToRESTMethods.put(noun, restMethods);
+      }
+      restMethods.add(restMethod);
     }
   }
 

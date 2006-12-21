@@ -12,6 +12,7 @@ Modules:
   Messaging
   HTML test form (like .NET)
   RELAX NG
+  Standalone service
 Config options:
   soap endpoint addresses
   Option to not inline request/response wrappers into the wsdl.

@@ -5,6 +5,10 @@ import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.rest.RESTMethod;
+
+import java.util.Map;
+import java.util.List;
 
 /**
  * Validator for the contract classes.  A single validator will be assigned to one set of source classes.
@@ -22,6 +26,14 @@ public interface Validator {
    * @return The result of the validation.
    */
   ValidationResult validateEndpointInterface(EndpointInterface ei);
+
+  /**
+   * Validates the REST API.
+   *
+   * @param restAPI The map of nouns to their accessor methods.
+   * @return The result of the validation.
+   */
+  ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI);
 
   /**
    * Validate a complex type definition.

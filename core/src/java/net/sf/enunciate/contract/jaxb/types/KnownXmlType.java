@@ -104,4 +104,13 @@ public enum KnownXmlType implements XmlTypeMirror {
     return false;
   }
 
+  /**
+   * Any known type is assumed to be simple.
+   *
+   * @return true
+   */
+  public boolean isSimple() {
+    return true;
+  }
+
 }

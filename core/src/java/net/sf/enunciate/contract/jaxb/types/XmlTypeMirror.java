@@ -37,4 +37,11 @@ public interface XmlTypeMirror {
    */
   boolean isAnonymous();
 
+  /**
+   * Whether this is a simple XML type.
+   *
+   * @return Whether this is a simple XML type.
+   */
+  boolean isSimple();
+
 }

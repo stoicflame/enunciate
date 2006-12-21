@@ -9,6 +9,7 @@ import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.rest.RESTEndpoint;
 import net.sf.enunciate.contract.validation.*;
 import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.modules.DeploymentModule;
@@ -96,6 +97,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         }
 
         model.add(endpointInterface);
+      }
+      else if (isRESTEndpoint(declaration)) {
+        RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
+
+        if (isVerbose()) {
+          System.out.println(declaration.getQualifiedName() + " to be considered as a REST endpoint.");
+        }
+
+        model.add(restEndpoint);
       }
       else if (isPotentialSchemaType(declaration)) {
         TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
@@ -212,6 +222,20 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     return true;
+  }
+
+  /**
+   * Whether the specified declaration is a REST endpoint.
+   *
+   * @param declaration The declaration.
+   * @return Whether the declaration is a REST endpoint.
+   */
+  public boolean isRESTEndpoint(TypeDeclaration declaration) {
+    if (!(declaration instanceof ClassDeclaration)) {
+      return false;
+    }
+
+    return declaration.getAnnotation(net.sf.enunciate.rest.annotations.RESTEndpoint.class) != null;
   }
 
   /**
@@ -350,6 +374,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     for (RootElementDeclaration rootElement : model.rootElements) {
       validationResult.aggregate(validator.validateRootElement(rootElement));
     }
+
+    validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));
 
     return validationResult;
   }

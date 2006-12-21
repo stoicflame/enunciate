@@ -7,15 +7,15 @@ import net.sf.enunciate.contract.jaxb.types.KnownXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlClassType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.*;
-import net.sf.enunciate.contract.jaxws.WebMethod;
-import net.sf.enunciate.contract.jaxws.WebParam;
-import net.sf.enunciate.contract.jaxws.WebResult;
+import net.sf.enunciate.contract.rest.RESTMethod;
+import net.sf.enunciate.contract.rest.RESTParameter;
+import net.sf.enunciate.rest.annotations.VerbType;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
-import javax.jws.*;
+import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -118,6 +118,63 @@ public class DefaultValidator implements Validator {
     }
 
     return false;
+  }
+
+  /**
+   * Does the default validation for a REST endpoint.
+   *
+   * @param restAPI The REST API
+   * @return The result of the validation.
+   */
+  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+    ValidationResult result = new ValidationResult();
+
+    for (String noun : restAPI.keySet()) {
+      EnumSet<VerbType> verbs = EnumSet.noneOf(VerbType.class);
+      List<RESTMethod> methods = restAPI.get(noun);
+      for (RESTMethod method : methods) {
+        VerbType verb = method.getVerb();
+        if (!verbs.add(verb)) {
+          result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for REST noun '" + noun + "'.");
+        }
+
+        RESTParameter properNoun = method.getProperNoun();
+        if (properNoun != null) {
+          if (!properNoun.getXmlType().isSimple()) {
+            result.addError(properNoun.getPosition(), "A proper noun must have a simple xml type.");
+          }
+
+          if (properNoun.isCollectionType()) {
+            result.addError(properNoun.getPosition(), "A proper noun is not allowed to be a collection or an array.");
+          }
+        }
+
+        HashSet<String> adjectives = new HashSet<String>();
+        for (RESTParameter adjective : method.getAdjectives()) {
+          if (!adjectives.add(adjective.getAdjectiveName())) {
+            result.addError(adjective.getPosition(), "Duplicate adjective name '" + adjective.getAdjectiveName() + "'.");
+          }
+
+          if (!adjective.getXmlType().isSimple()) {
+            result.addError(adjective.getPosition(), "An adjective must either be of simple xml type, or of a collection (or array) of simple xml types.");
+          }
+        }
+
+        RESTParameter nounValue = method.getNounValue();
+        if (nounValue != null) {
+          if ((verb == VerbType.create) || (verb == VerbType.delete)) {
+            result.addError(method.getPosition(), "The verbs 'create' and 'delete' do not support a noun value.");
+          }
+
+          XmlTypeMirror nounValueType = nounValue.getXmlType();
+          if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
+            result.addError(nounValue.getPosition(), "A noun value must be a JAXB 2.0 root element.");
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   public ValidationResult validateWebMethod(WebMethod webMethod) {

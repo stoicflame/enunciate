@@ -99,6 +99,13 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertFalse(validator.validateEndpointImplementation(impl).hasErrors());
   }
 
+  /**
+   * tests validating the REST API.
+   */
+  public void testValidateRESTAPI() throws Exception {
+    //todo: implement.
+  }
+
   public void testValidateWebMethod() throws Exception {
     EndpointInterface ei = new EndpointInterface(getDeclaration("net.sf.enunciate.samples.services.WebMethodExamples")) {
       @Override

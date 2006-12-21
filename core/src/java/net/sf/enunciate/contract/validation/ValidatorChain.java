@@ -5,9 +5,11 @@ import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
+import net.sf.enunciate.contract.rest.RESTMethod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Chains a set of validators.
@@ -45,6 +47,17 @@ public class ValidatorChain implements Validator {
 
     for (Validator validator : validators) {
       result.aggregate(validator.validateEndpointInterface(ei));
+    }
+
+    return result;
+  }
+
+  // Inherited.
+  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+    ValidationResult result = new ValidationResult();
+
+    for (Validator validator : validators) {
+      result.aggregate(validator.validateRESTAPI(restAPI));
     }
 
     return result;

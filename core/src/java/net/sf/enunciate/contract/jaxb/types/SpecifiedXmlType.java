@@ -52,4 +52,12 @@ public class SpecifiedXmlType implements XmlTypeMirror {
     return false;
   }
 
+  /**
+   * A specified type is assumed to be simple.
+   *
+   * @return true
+   */
+  public boolean isSimple() {
+    return true;
+  }
 }

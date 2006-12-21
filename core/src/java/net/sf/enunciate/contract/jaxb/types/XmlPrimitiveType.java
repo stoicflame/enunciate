@@ -47,4 +47,7 @@ public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlTypeM
     return false;
   }
 
+  public boolean isSimple() {
+    return true;
+  }
 }

@@ -9,7 +9,6 @@ import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.enunciate.contract.jaxb.types.ExplicitXmlType;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
@@ -22,6 +21,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.XMLConstants;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -34,7 +34,7 @@ public class ElementRef extends Element {
 
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
-  private final XmlTypeMirror ref;
+  private final QName ref;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef, null);
@@ -66,7 +66,7 @@ public class ElementRef extends Element {
       //this is either a single-valued JAXBElement, or a parametric collection of them...
       //todo: throw an exception if this is referencing a non-global element for this namespace?
       this.choices.add(this);
-      this.ref = new ExplicitXmlType(xmlElementRef.name(), xmlElementRef.namespace());
+      this.ref = new QName(xmlElementRef.namespace(), xmlElementRef.name());
     }
     else if (isCollectionType()) {
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
@@ -135,15 +135,15 @@ public class ElementRef extends Element {
     this.xmlElementRef = null;
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
-    this.ref = new ExplicitXmlType(ref.getName(), ref.getNamespace());
+    this.ref = new QName(ref.getNamespace(), ref.getName());
   }
 
   /**
-   * Load the referenced root element declaration.
+   * Load the qname of the referenced root element declaration.
    *
-   * @return the referenced root element declaration.
+   * @return the qname of the referenced root element declaration.
    */
-  protected XmlTypeMirror loadRef() {
+  protected QName loadRef() {
     TypeDeclaration declaration = null;
     String elementDeclaration;
     try {
@@ -178,7 +178,7 @@ public class ElementRef extends Element {
       throw new ValidationException(getPosition(), elementDeclaration + " is not a root element declaration.");
     }
 
-    return new ExplicitXmlType(refElement.getName(), refElement.getNamespace());
+    return new QName(refElement.getNamespace(), refElement.getName());
   }
 
   /**
@@ -202,7 +202,7 @@ public class ElementRef extends Element {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
-    return this.ref.getName();
+    return this.ref.getLocalPart();
   }
 
   /**
@@ -217,7 +217,8 @@ public class ElementRef extends Element {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
-    return this.ref.getNamespace();
+    //it's kind of weird to return null when the namespace is the default namesapce, but that's what the rest of the classes do...
+    return XMLConstants.NULL_NS_URI.equals(this.ref.getNamespaceURI()) ? null : this.ref.getNamespaceURI();
   }
 
   /**
@@ -231,7 +232,7 @@ public class ElementRef extends Element {
       throw new UnsupportedOperationException("No single reference for this element: multiple choices.");
     }
 
-    return new QName(this.ref.getNamespace(), this.ref.getName());
+    return this.ref;
   }
 
   /**

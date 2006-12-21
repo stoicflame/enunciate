@@ -335,6 +335,13 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
   }
 
   /**
+   * tests adding a REST endpoint
+   */
+  public void testAddRESTEndpoint() throws Exception {
+    //todo: implement
+  }
+
+  /**
    * Getting the xml type for a specified type.
    */
   public void testGetXmlType() throws Exception {
@@ -376,6 +383,10 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     }
 
     public boolean isAnonymous() {
+      return false;
+    }
+
+    public boolean isSimple() {
       return false;
     }
   }

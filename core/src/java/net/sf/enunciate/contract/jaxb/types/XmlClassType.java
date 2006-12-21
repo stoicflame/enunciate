@@ -62,6 +62,15 @@ public class XmlClassType implements XmlTypeMirror {
   }
 
   /**
+   * This type is simple if its type definition is simple.
+   *
+   * @return This type is simple if its type definition is simple.
+   */
+  public boolean isSimple() {
+    return this.typeDef.isSimple();
+  }
+
+  /**
    * Get the type definition for this class type.
    *
    * @return The type definition for this class type.

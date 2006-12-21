@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <title>Enunciate's Relational State Transfer (REST) Model</title>
+  </head>
+  <body>
+    <h1>Introduction</h1>
+    <p>
+      Enunciate's REST model is used to provide the metadata required to publish web services in
+      a RESTful manner. The REST model encourages adherence to the fundamental design principles of
+      REST, i.e.:
+    </p>
+    <ul>
+      <li>Application state and functionality are divided into resources</li>
+      <li>Every resource is uniquely addressable via URL</li>
+      <li>All resources share a uniform interface for the transfer of state between client and resource, consisting of a constrained set of well-defined operations</li>
+      <li>A protocol that is:
+        <ul>
+          <li>Client/Server</li>
+          <li>Stateless</li>
+          <li>Cacheable</li>
+          <li>Layered</li>
+        </ul>
+      </li>
+    </ul>
+    <p>
+      (see <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">Representational State Transfer on Wikipedia</a>)
+    </p>
+    <p>
+      Enunciate's REST model encourages adherence to these principles by applying a mapping between REST resources/methods and
+      Java web operations.
+    </p>
+    
+    <h1>Applying a REST Model</h1>
+    <p>
+      The invocation of a RESTful web operation can be associated metaphorically with an English sentence.  Each sentence has a verb,
+      a noun (possibly a proper noun), and an optional set of adjectives that describe the verb and the noun, respectively.
+      Likewise, a RESTful web operation has a verb (contrained to a small set, e.g. create, read, update, and delete), a noun (i.e.
+      a resource), and optionally a set of adjectives that describe more specifically on <i>what kind</i> of noun to perform the action.
+      Each Java web operation is that is mapped to RESTful invocation is assigned a verb, a noun, and an optional set of adjectives.
+      Some verbs also support a "noun value" that is the value that is to be associated with the noun.
+    </p>
+    <h2>Verbs and Nouns</h2>
+    <p>
+      In it's simplest form, a void no-arg method can be invoked when its verb is applied to its noun.  Assuming HTTP, the verb is the
+      HTTP method, and the noun is identified by the URL.  For example, consider a Java method defined like so:
+    </p>
+    <code>
+      public void ping();
+    </code>
+    <p>
+      If the verb "create" and the noun "ping" are assigned to the method, the "sentence" associated with this method becomes "Create a ping.", and
+      it could be invoked RESTfully over HTTP 1.1 by sending the following over a TCP connection to the endpoint:
+    </p>
+    <code>
+      PUT /ping HTTP/1.1
+    </code>
+    <h2>Proper Nouns</h2>
+    <p>
+      It is often desireable to perform an action on a <i>specific</i> noun.  Nouns are identified in english sentences by the use of a
+      "proper noun."  The noun "person," for example, is often identified specifically through the use of a name, e.g. "Bob."  Consider, then,
+      a Java method that is used to retrieve a specific person object out of a database:
+    </p>
+    <code>
+      public Person getPerson(String personId);
+    </code>
+    <p>
+      If the verb "read" and the noun "person" were assigned to the method, and the parameter "personId" was identified as a proper noun, the
+      "sentence" associated with this method becomes "get person 12345" where "12345" is the value of the parameter.  It could be invoked
+      RESTfully over HTTP 1.1 by sending the following over a TCP connection to the endpoint:
+    </p>
+    <code>
+      GET /person/12345 HTTP/1.1
+    </code>
+    <h2>Adjectives</h2>
+    <p>
+      While REST implies the use of only one noun (possibly identified by a proper noun), there could be additional parameters to a method invocation
+      adding specificity to <i>what kind</i> of noun to invoke the method on.  Consider the following Java method
+      used to find a person by name and birthday (note that in this case, there is no parameter identified as a proper noun):
+    </p>
+    <code>
+      public Person findPerson(String name, java.util.Date birthday);
+    </code>
+    <p>
+      If the verb "read" and the noun "person" were assigned to this method, and the parameters used were "Bob" and "01.01.2006" for the name and
+      birthday respectively, the "sentence" associated with this method becomes "find the person whose name is 'Bob' and whose birthday is '01.01.2006'". It
+      could be invoked RESTfully over HTTP 1.1 by sending the following over a TCP connection to the endpoint:
+    </p>
+    <code>
+      GET /person?name=Bob&birthday=01.01.2006 HTTP/1.1
+    </code>
+
+    <h1>XML Marshalling/Unmarshalling</h1>
+    <p>
+      Enunciate uses JAXB 2.0 to marshal and unmarshal Java objects to/from XML.  Since the proper noun and all adjectives must be put on a URL, Enunciate requires
+      the proper noun and all adjectives to be JAXB 2.0 simple types, which means the parameter types of for the adjectives must have a single value element 
+      with no attributes.  Built-in, these types include the Java primitive types, their associated wrapper classes, java.lang.String, and enums.  There is a
+      special exception that adjectives can be a collection or array of simple types.
+    </p>
+    <p>
+      If there is a parameter type that is a complex type, it must be specified as the noun value for the method.  Only the "create" and "update" verbs support
+      a noun value, and only one noun value can be specified per method. Furthermore, complex objects must be JAXB 2.0 root elements in order to correctly.
+      marshall and unmarshall.  The return type of a method, if exists, must always be a JAXB 2.0 root element.
+    </p>
+    <p>
+      At this time, Enunciate does not enable XOP.  All binary data is serialized as base64-encoded data.
+    </p>
+
+    <h1>Exceptions</h1>
+    <p>
+      Exceptions that are thrown will result in an HTTP response code and message.  The default error code is 500.  Currently, the content of the HTTP response
+      for errors is container-specific and undefined.
+    </p>
+
+    <h1>Create, Read, Update, Delete</h1>
+    <p>
+      REST contrains the set of verbs that can be applied to the available resources.  The Enunciate REST Model
+      defines this set to be { "create", "read", "update", "delete" }.  Since Enunciate currently only supports HTTP as the RESTful invocation mechanism,
+      it associates this set of verbs with HTTP methods "PUT," "GET," "POST," and "DELETE".  The following describes how each verb is applied to
+      its associated noun and adjectives.
+    </p>
+    <h2>Create</h2>
+    <p>
+      The "create" verb is mapped to the HTTP method "PUT."  There are no constraints on its use in terms of a proper noun or adjectives, but to "create" a noun
+      often implies the use of a noun value.
+    </p>
+    <p>
+      <b>Example:</b>
+    </p>
+    <code>
+      void createPerson(Person value);
+    </code>
+    <p>
+      <b>HTTP invocation</b>:
+    </p>
+    <code>
+      PUT /person HTTP/1.1<br/>
+      Content-Type: text/xml<br/><br/>
+
+      &lt;person&gt;&lt;name&gt;Bob&lt;/name&gt;&lt;birthday&gt;01.01.2006&lt;/birthday&gt;&lt;/person&gt;
+    </code>
+
+    <h2>Read</h2>
+    <p>
+      Read is the default verb.  It is mapped to the HTTP method "GET."  The "read" verb does not support the use of a noun value.  The read verb often,
+      but not always, implies a proper noun and an optional set of adjectives.
+    </p>
+    <p>
+      <b>Example:</b>
+    </p>
+    <code>
+      Person getPerson(String personId);
+    </code>
+    <p>
+      <b>HTTP invocation</b>:
+    </p>
+    <code>
+      GET /person/12345 HTTP/1.1<br/><br/>
+    </code>
+
+    <h2>Update</h2>
+    <p>
+      The "update" verb is mapped to the HTTP method "POST."  The only real difference between the "update" verb and the "create" verb is that the "update"
+      verb more often implies a proper noun.
+    </p>
+    <p>
+      <b>Example:</b>
+    </p>
+    <code>
+      void updatePerson(String personId, Person value);
+    </code>
+    <p>
+      <b>HTTP invocation</b>:
+    </p>
+    <code>
+      POST /person/12345 HTTP/1.1<br/>
+      Content-Type: text/xml<br/><br/>
+
+      &lt;person&gt;&lt;name&gt;Bob&lt;/name&gt;&lt;birthday&gt;01.01.2006&lt;/birthday&gt;&lt;/person&gt;
+    </code>
+
+    <h2>Delete</h2>
+    <p>
+      The "delete" verb is mapped to the HTTP method "DELETE." Like the "read" verb, this verb does not support a noun value.
+    </p>
+    <p>
+      <b>Example:</b>
+    </p>
+    <code>
+      void deletePerson(String personId);
+    </code>
+    <p>
+      <b>HTTP invocation</b>:
+    </p>
+    <code>
+      DELETE /person/12345 HTTP/1.1<br/><br/>
+    </code>
+  </body>
+</html>

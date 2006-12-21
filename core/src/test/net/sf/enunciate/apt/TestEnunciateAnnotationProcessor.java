@@ -118,6 +118,8 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     assertTrue(validated[0]);
     assertEquals("tContract", model.getNamespacesToPrefixes().get("http://enunciate.sf.net/samples/contract"));
     assertEquals("test", model.getNamespacesToPrefixes().get("urn:test"));
+
+    //todo: test that the REST endpoints are corrected added to the model.
   }
 
   /**
