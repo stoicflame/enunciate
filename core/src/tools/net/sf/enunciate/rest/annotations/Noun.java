@@ -19,6 +19,6 @@ public @interface Noun {
    *
    * @return The name of the noun.
    */
-  String value() default "";
+  String value();
 
 }

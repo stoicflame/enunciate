@@ -15,10 +15,10 @@ import java.lang.annotation.ElementType;
 public @interface Verb {
 
   /**
-   * The verb type.  Default: "read".
+   * The verb type.
    *
    * @return The verb type.
    */
-  VerbType value() default VerbType.read;
+  VerbType value();
   
 }

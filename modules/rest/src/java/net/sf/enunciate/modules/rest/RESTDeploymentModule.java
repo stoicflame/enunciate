@@ -1,0 +1,34 @@
+package net.sf.enunciate.modules.rest;
+
+import net.sf.enunciate.modules.BasicDeploymentModule;
+import net.sf.enunciate.contract.validation.Validator;
+
+/**
+ * The deployment module for the REST API.
+ *
+ * @author Ryan Heaton
+ */
+public class RESTDeploymentModule extends BasicDeploymentModule {
+
+  /**
+   * @return "rest"
+   */
+  @Override
+  public String getName() {
+    return "rest";
+  }
+
+  /**
+   * @return 1
+   */
+  @Override
+  public int getOrder() {
+    return 1;
+  }
+
+  @Override
+  public Validator getValidator() {
+    return new RESTValidator();
+  }
+
+}

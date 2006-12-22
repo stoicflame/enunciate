@@ -105,12 +105,12 @@ public enum KnownXmlType implements XmlTypeMirror {
   }
 
   /**
-   * Any known type is assumed to be simple.
+   * The only known type that is not simple is xs:anyType.
    *
    * @return true
    */
   public boolean isSimple() {
-    return true;
+    return !equals(KnownXmlType.ANY_TYPE);
   }
 
 }

@@ -32,8 +32,9 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     RESTParameter properNoun = null;
     RESTParameter nounValue = null;
     this.adjectives = new ArrayList<RESTParameter>();
+    int parameterPosition = 0;
     for (ParameterDeclaration parameterDeclaration : getParameters()) {
-      RESTParameter restParameter = new RESTParameter(parameterDeclaration);
+      RESTParameter restParameter = new RESTParameter(parameterDeclaration, parameterPosition++);
       if (restParameter.isProperNoun()) {
         if (properNoun != null) {
           throw new ValidationException(properNoun.getPosition(), "REST method has more than one proper noun.  The other found at " + restParameter.getPosition());
@@ -121,5 +122,14 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public Collection<RESTParameter> getAdjectives() {
     return adjectives;
+  }
+
+  /**
+   * The errors possibly thrown by this REST method.
+   *
+   * @return The errors possibly thrown by this REST method.
+   */
+  public Collection<RESTError> getRESTErrors() {
+    return RESTErrors;
   }
 }

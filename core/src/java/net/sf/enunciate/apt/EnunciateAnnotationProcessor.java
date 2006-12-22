@@ -99,7 +99,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         model.add(endpointInterface);
       }
       else if (isRESTEndpoint(declaration)) {
-        RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
+        //todo: support interfaces, too.
+        RESTEndpoint restEndpoint = new RESTEndpoint(declaration);
 
         if (isVerbose()) {
           System.out.println(declaration.getQualifiedName() + " to be considered as a REST endpoint.");
@@ -231,10 +232,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return Whether the declaration is a REST endpoint.
    */
   public boolean isRESTEndpoint(TypeDeclaration declaration) {
-    if (!(declaration instanceof ClassDeclaration)) {
-      return false;
-    }
-
     return declaration.getAnnotation(net.sf.enunciate.rest.annotations.RESTEndpoint.class) != null;
   }
 

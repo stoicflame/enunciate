@@ -4,6 +4,10 @@ The following were noticed inconsistencies in the specifications:
 -jaxws: Are header elements required to be root elements?  If not, what are the element names of header elements, and how do you disambiguate?
 -jaxws: property order during introspection isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
 
+As I was writing an implementation of the JAXB 2.0 specification for the "Java Types to XML" section of the specification, I came across some things that I couldn't answer from the spec.  Any clarifications or indications of where to go for the answers to these would be very helpful.  Note that I was only concerned with the "Java Types to XML" section, so I may have missed something in the broader context.
+
+Here we go:
+
 -jaxb: the @XmlSchemaType and @XmlSchemaTypes annotation at the package-level take a class which might not be compiled or loadable at pre-compile time...
 -jaxb: what if you have a parametric collection of JAXBElements?  Assumption: The rule that any root elements that subclass it should be choices doesn't apply
        and JAXBElement should not be a valid type() for @XmlElementRef

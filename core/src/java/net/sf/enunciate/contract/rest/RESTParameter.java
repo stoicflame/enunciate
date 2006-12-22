@@ -25,8 +25,12 @@ import com.sun.mirror.declaration.ParameterDeclaration;
  */
 public class RESTParameter extends DecoratedParameterDeclaration {
 
-  public RESTParameter(ParameterDeclaration delegate) {
+  private final int parameterPosition;
+
+  public RESTParameter(ParameterDeclaration delegate, int parameterPosition) {
     super(delegate);
+
+    this.parameterPosition = parameterPosition;
   }
 
   /**
@@ -53,7 +57,7 @@ public class RESTParameter extends DecoratedParameterDeclaration {
    * @return The name of the adjective.
    */
   public String getAdjectiveName() {
-    String adjectiveName = getSimpleName();
+    String adjectiveName = "arg" + parameterPosition;
 
     Adjective adjectiveInfo = getAnnotation(Adjective.class);
     if (adjectiveInfo != null) {
