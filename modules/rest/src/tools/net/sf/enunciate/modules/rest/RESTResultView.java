@@ -29,6 +29,24 @@ public class RESTResultView implements View {
   }
 
   /**
+   * The operation used to render this view.
+   *
+   * @return The operation used to render this view.
+   */
+  public RESTOperation getOperation() {
+    return operation;
+  }
+
+  /**
+   * The result of invoking the operation.
+   *
+   * @return The result of invoking the operation.
+   */
+  public Object getResult() {
+    return result;
+  }
+
+  /**
    * Renders the XML view of the result.
    *
    * @param map The model.
@@ -37,9 +55,12 @@ public class RESTResultView implements View {
    * @throws Exception If a problem occurred during serialization.
    */
   public void render(Map map, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    response.setContentType("text/xml");
-    Marshaller marshaller = operation.getSerializationContext().createMarshaller();
-    marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
-    marshaller.marshal(result, response.getOutputStream());
+    response.setStatus(HttpServletResponse.SC_OK);
+    if (result != null) {
+      response.setContentType("text/xml");
+      Marshaller marshaller = operation.getSerializationContext().createMarshaller();
+      marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
+      marshaller.marshal(result, response.getOutputStream());
+    }
   }
 }

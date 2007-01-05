@@ -10,10 +10,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A REST operation.
@@ -37,9 +34,9 @@ public class RESTOperation {
   /**
    * Construct a REST operation.
    *
-   * @param verb The verb for the operation.
+   * @param verb     The verb for the operation.
    * @param endpoint The REST endpoint.
-   * @param method The method.
+   * @param method   The method.
    */
   protected RESTOperation(VerbType verb, Object endpoint, Method method) {
     this.verb = verb;
@@ -110,14 +107,16 @@ public class RESTOperation {
       }
     }
 
-    Class returnType = null;
-    if (returnType != Void.TYPE) {
-      returnType = method.getReturnType();
+    Class returnType = method.getReturnType();
+    if (!Void.TYPE.equals(returnType)) {
       if (!returnType.isAnnotationPresent(XmlRootElement.class)) {
         throw new IllegalStateException("REST operation results must be xml root elements.  Invalid return type for method " +
           method.getDeclaringClass() + "." + method.getName() + ".");
       }
       contextClasses.add(returnType);
+    }
+    else {
+      returnType = null;
     }
 
 
@@ -138,7 +137,7 @@ public class RESTOperation {
    * Gets the collection type for the specified parameter as an array type.
    *
    * @param method The method.
-   * @param i The parameter index.
+   * @param i      The parameter index.
    * @return The conversion.
    */
   protected Class getCollectionTypeAsArrayType(Method method, int i) {
@@ -166,12 +165,13 @@ public class RESTOperation {
    *
    * @param properNoun The value for the proper noun.
    * @param adjectives The value for the adjectives.
-   * @param nounValue The value for the noun.
+   * @param nounValue  The value for the noun.
    * @return The result of the invocation.  If the invocation has no return type (void), returns null.
    * @throws Exception if any problems occur.
    */
   public Object invoke(Object properNoun, Map<String, Object> adjectives, Object nounValue) throws Exception {
-    Object[] parameters = new Object[this.method.getParameterTypes().length];
+    Class[] parameterTypes = this.method.getParameterTypes();
+    Object[] parameters = new Object[parameterTypes.length];
     if (properNounIndex > -1) {
       parameters[properNounIndex] = properNoun;
     }
@@ -181,7 +181,24 @@ public class RESTOperation {
     }
 
     for (String adjective : adjectiveIndices.keySet()) {
-      parameters[adjectiveIndices.get(adjective)] = adjectives.get(adjective);
+      Object adjectiveValue = adjectives.get(adjective);
+      Integer index = adjectiveIndices.get(adjective);
+      if ((adjectiveValue != null) && (Collection.class.isAssignableFrom(parameterTypes[index]))) {
+        //convert the array back into a collection...
+        Object[] values;
+        try {
+          values = (Object[]) adjectiveValue;
+        }
+        catch (ClassCastException e) {
+          throw new IllegalArgumentException("Adjective '" + adjective + "' should be an array...");
+        }
+
+        Collection collection = newCollectionInstance(parameterTypes[index]);
+        collection.addAll(Arrays.asList(values));
+        adjectiveValue = collection;
+      }
+
+      parameters[index] = adjectiveValue;
     }
 
     try {
@@ -194,6 +211,38 @@ public class RESTOperation {
       }
 
       throw (Exception) target;
+    }
+  }
+
+  /**
+   * Create a new instance of something of the specified collection type.
+   *
+   * @param collectionType The collection type.
+   * @return the new instance.
+   */
+  public static Collection newCollectionInstance(Class collectionType) {
+    if (Collection.class.isAssignableFrom(collectionType)) {
+      Collection collection;
+      if ((collectionType.isInterface()) || (Modifier.isAbstract(collectionType.getModifiers()))) {
+        if (Set.class.isAssignableFrom(collectionType)) {
+          collection = new TreeSet();
+        }
+        else {
+          collection = new ArrayList();
+        }
+      }
+      else {
+        try {
+          collection = (Collection) collectionType.newInstance();
+        }
+        catch (Exception e) {
+          throw new IllegalArgumentException("Unable to create an instance of " + collectionType.getName() + ".", e);
+        }
+      }
+      return collection;
+    }
+    else {
+      throw new IllegalArgumentException("Invalid list type: " + collectionType.getName());
     }
   }
 

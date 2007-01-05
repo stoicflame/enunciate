@@ -31,10 +31,8 @@ public class RESTEndpoint extends DecoratedTypeDeclaration {
 
     this.RESTMethods = new ArrayList<RESTMethod>();
     for (MethodDeclaration methodDeclaration : delegate.getMethods()) {
-      if ((methodDeclaration.getModifiers().contains(Modifier.PUBLIC)) && (!methodDeclaration.getModifiers().contains(Modifier.ABSTRACT))) {
-        if (methodDeclaration.getAnnotation(Exclude.class) == null) {
-          this.RESTMethods.add(new RESTMethod(methodDeclaration));
-        }
+      if ((methodDeclaration.getModifiers().contains(Modifier.PUBLIC)) && (methodDeclaration.getAnnotation(Exclude.class) == null)) {
+        this.RESTMethods.add(new RESTMethod(methodDeclaration));
       }
     }
 

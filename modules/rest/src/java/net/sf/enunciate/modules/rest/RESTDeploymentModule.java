@@ -26,6 +26,9 @@ public class RESTDeploymentModule extends BasicDeploymentModule {
     return 1;
   }
 
+  /**
+   * @return A new {@link net.sf.enunciate.modules.rest.RESTValidator}.
+   */
   @Override
   public Validator getValidator() {
     return new RESTValidator();

@@ -1,27 +1,26 @@
 package net.sf.enunciate.modules.rest;
 
-import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.servlet.ModelAndView;
+import net.sf.enunciate.rest.annotations.*;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-
-import net.sf.enunciate.rest.annotations.*;
-
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The controller for the REST API.
@@ -33,10 +32,21 @@ public class RESTController extends AbstractController {
   private final Object[] endpoints;
   private Map<String, RESTResource> RESTResources = new HashMap<String, RESTResource>();
   private Pattern urlPattern;
+  private final DocumentBuilder documentBuilder;
 
   public RESTController(Object[] endpoints) {
     this.endpoints = endpoints;
     setSubcontext("rest");
+    setSupportedMethods(new String[] {"GET", "PUT", "POST", "DELETE"});
+
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    builderFactory.setNamespaceAware(false);
+    try {
+      documentBuilder = builderFactory.newDocumentBuilder();
+    }
+    catch (ParserConfigurationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -57,10 +67,10 @@ public class RESTController extends AbstractController {
         }
 
         for (Class endpointType: endpointTypes) {
-          Method[] restMethods = endpointType.getMethods();
+          Method[] restMethods = endpointType.getDeclaredMethods();
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
-            if ((Modifier.isPublic(modifiers)) && (!Modifier.isAbstract(modifiers)) && (!restMethod.isAnnotationPresent(Exclude.class))) {
+            if ((Modifier.isPublic(modifiers)) && (!restMethod.isAnnotationPresent(Exclude.class)) && (!isImplMethod(restMethod, endpointTypes))) {
               String noun = restMethod.isAnnotationPresent(Noun.class) ? restMethod.getAnnotation(Noun.class).value() : restMethod.getName();
               VerbType verb = restMethod.isAnnotationPresent(Verb.class) ? restMethod.getAnnotation(Verb.class).value() : VerbType.read;
 
@@ -85,6 +95,39 @@ public class RESTController extends AbstractController {
   }
 
   /**
+   * Determines whether the specified rest method is an implementation of a method declared in one of
+   * the specfied endpoint types.
+   *
+   * @param restMethod The method.
+   * @param endpointTypes The endpoint types.
+   * @return Whether it's an impl method.
+   */
+  protected boolean isImplMethod(Method restMethod, Collection<Class> endpointTypes) {
+    if (restMethod.getDeclaringClass().isInterface()) {
+      return false;
+    }
+    else {
+      for (Class endpointType : endpointTypes) {
+        if (!endpointType.isInterface()) {
+          //only check the interfaces.
+          continue;
+        }
+
+        try {
+          endpointType.getMethod(restMethod.getName(), restMethod.getParameterTypes());
+        }
+        catch (NoSuchMethodException e) {
+          continue;
+        }
+        
+        return true;
+      }
+
+      return false;
+    }
+  }
+
+  /**
    * Finds the endpoint types that the specified object implements.
    *
    * @param endpoint The endpoint object.
@@ -93,14 +136,19 @@ public class RESTController extends AbstractController {
   protected Collection<Class> findEndpointTypes(Object endpoint) {
     Collection<Class> endpointTypes = new ArrayList<Class>();
 
-    Class endpointType = endpoint.getClass();
-    if (endpointType.isAnnotationPresent(RESTEndpoint.class)) {
-      endpointTypes.add(endpointType);
+    if (endpoint instanceof Advised) {
+      endpointTypes.addAll(Arrays.asList(((Advised) endpoint).getProxiedInterfaces()));
     }
+    else {
+      Class endpointType = endpoint.getClass();
+      if (endpointType.isAnnotationPresent(RESTEndpoint.class)) {
+        endpointTypes.add(endpointType);
+      }
 
-    for (Class implementedType : endpointType.getInterfaces()) {
-      if (implementedType.isAnnotationPresent(RESTEndpoint.class)) {
-        endpointTypes.add(implementedType);
+      for (Class implementedType : endpointType.getInterfaces()) {
+        if (implementedType.isAnnotationPresent(RESTEndpoint.class)) {
+          endpointTypes.add(implementedType);
+        }
       }
     }
 
@@ -127,22 +175,6 @@ public class RESTController extends AbstractController {
       }
     }
 
-    return handleRESTOperation(noun, properNoun, request, response);
-  }
-
-  protected ModelAndView handleRESTOperation(String noun, String properNoun, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (noun == null) {
-      //todo: think about spitting out the documentation in this case?
-      response.sendError(HttpServletResponse.SC_NOT_FOUND, "A REST resource must be specified.");
-      return null;
-    }
-
-    RESTResource resource = RESTResources.get(noun);
-    if (resource == null) {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown REST resource: " + noun);
-      return null;
-    }
-
     String httpMethod = request.getMethod().toUpperCase();
     VerbType verb = null;
     if ("PUT".equals(httpMethod)) {
@@ -157,24 +189,52 @@ public class RESTController extends AbstractController {
     else if ("DELETE".equals(httpMethod)) {
       verb = VerbType.delete;
     }
+    else {
+      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported HTTP operation: " + httpMethod);
+    }
 
-    RESTOperation operation = resource.getOperation(verb);
-    if (operation == null) {
-      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported HTTP method: " + httpMethod);
+    return handleRESTOperation(noun, properNoun, verb, request, response);
+  }
+
+  /**
+   * Handles a specific REST operation.
+   *
+   * @param noun The noun.
+   * @param properNoun The proper noun, if supplied by the request.
+   * @param verb The verb.
+   * @param request The request.
+   * @param response The response.
+   * @return The model and view.
+   */
+  protected ModelAndView handleRESTOperation(String noun, String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (noun == null) {
+      //todo: think about spitting out the documentation in this case?
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, "A REST resource must be specified.");
       return null;
     }
 
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    builderFactory.setNamespaceAware(false);
-    DocumentBuilder builder = builderFactory.newDocumentBuilder();
-    Document document = builder.newDocument();
+    RESTResource resource = RESTResources.get(noun);
+    if (resource == null) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown REST resource: " + noun);
+      return null;
+    }
+
+    RESTOperation operation = resource.getOperation(verb);
+    if (operation == null) {
+      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
+      return null;
+    }
+
+    Document document = documentBuilder.newDocument();
 
     Unmarshaller unmarshaller = operation.getSerializationContext().createUnmarshaller();
     unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
 
     Object properNounValue = null;
     if ((properNoun != null) && (operation.getProperNounType() != null)) {
-      properNounValue = unmarshaller.unmarshal(document.createTextNode(properNoun), operation.getProperNounType()).getValue();
+      Element element = document.createElement("unimportant");
+      element.appendChild(document.createTextNode(properNoun));
+      properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
     }
 
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
@@ -183,27 +243,29 @@ public class RESTController extends AbstractController {
 
       String[] parameterValues = request.getParameterValues(adjective);
       if ((parameterValues != null) && (parameterValues.length > 0)) {
-        Object[] adjectiveValues = new Object[parameterValues.length];
         Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
+        Class componentType = adjectiveType;
         if (adjectiveType.isArray()) {
-          adjectiveType = adjectiveType.getComponentType();
+          componentType = adjectiveType.getComponentType();
         }
+        Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
 
         for (int i = 0; i < parameterValues.length; i++) {
-          adjectiveValues[i] = unmarshaller.unmarshal(document.createTextNode(parameterValues[i]), adjectiveType).getValue();
+          Element element = document.createElement("unimportant");
+          element.appendChild(document.createTextNode(parameterValues[i]));
+          Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
         }
 
         if (adjectiveType.isArray()) {
           adjectiveValue = adjectiveValues;
         }
         else {
-          adjectiveValue = adjectiveValues[0];
+          adjectiveValue = Array.get(adjectiveValues, 0);
         }
       }
 
       adjectives.put(adjective, adjectiveValue);
     }
-
 
     Object nounValue = null;
     if (operation.getNounValueType() != null) {
@@ -221,7 +283,7 @@ public class RESTController extends AbstractController {
    * @return The REST resources for this controller.
    */
   public Map<String, RESTResource> getRESTResources() {
-    return RESTResources;
+    return Collections.unmodifiableMap(RESTResources);
   }
 
   /**

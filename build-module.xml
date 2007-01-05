@@ -43,6 +43,12 @@
     </fileset>
   </path>
 
+  <path id="rest.libs">
+    <fileset dir="${lib.dir}/rest">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
   <path id="xfire.libs">
     <fileset dir="${lib.dir}/xfire">
       <include name="*.jar"/>
