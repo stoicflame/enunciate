@@ -23,6 +23,7 @@ public class EndpointThreeImpl implements EndpointThree {
   }
 
   @Noun ( "five" )
+  @Verb ( VerbType.read )
   public RootElementExample getFive(@ProperNoun
   String which) {
     return null;
@@ -46,7 +47,6 @@ public class EndpointThreeImpl implements EndpointThree {
 
   }
 
-  @Exclude
   public void hiddenMethod() {
 
   }

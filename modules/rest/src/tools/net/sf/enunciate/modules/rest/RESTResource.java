@@ -55,4 +55,9 @@ public class RESTResource implements Comparable<RESTResource> {
   public int compareTo(RESTResource other) {
     return this.noun.compareTo(other.noun);
   }
+
+  @Override
+  public String toString() {
+    return noun;
+  }
 }

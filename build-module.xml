@@ -16,6 +16,7 @@
   <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
+  <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
 
   <!--patterns for specifying jars to include on the classpath.-->
   <property name="jar.pattern" value="*-${enunciate.version}.jar"/>

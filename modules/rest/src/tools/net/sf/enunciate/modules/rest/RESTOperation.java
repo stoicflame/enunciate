@@ -246,6 +246,11 @@ public class RESTOperation {
     }
   }
 
+  @Override
+  public String toString() {
+    return this.method.toString();
+  }
+
   /**
    * The verb for the operation.
    *

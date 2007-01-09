@@ -37,22 +37,26 @@
             </property>
           </bean>
         </entry>
-        [#elseif impl.bindingType.http]
-
-        <!-- mapping for the HTTP (restful) endpoint for ${endpointInterface.serviceName} -->
-        <!-- [#--todo: restful endpoint handler?--]
-        <entry key="/rest/${endpointInterface.serviceName}">
-          <bean parent="endpoint">
-            <property name="serviceClass">
-              <value>${impl.qualifiedName}</value>
-            </property>
-          </bean>
-        </entry>
-        -->
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
+
+        <entry key="/rest/**">
+          <bean class="net.sf.enunciate.modules.rest.RESTController">
+            <constructor-arg>
+              <list>
+                <!-- List of the REST endpoint beans -->
+                [#--todo: support to be able to configure spring interceptors for the endpoint?--]
+  [@forEachRESTEndpoint]
+    [#if endpoint.class]
+                <bean class="${endpoint.qualifiedName}"/>
+    [/#if]
+  [/@forEachRESTEndpoint]
+              </list>
+            </constructor-arg>
+          </bean>
+        </entry>
 
         <!-- all schema files will be handled by the schema handler -->
   [@forEachSchema]

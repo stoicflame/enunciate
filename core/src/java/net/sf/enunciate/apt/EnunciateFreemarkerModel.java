@@ -43,6 +43,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
+  final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
@@ -55,6 +56,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("ns2prefix", this.namespacesToPrefixes);
     setVariable("ns2schema", this.namespacesToSchemas);
     setVariable("ns2wsdl", this.namespacesToWsdls);
+    setVariable("nouns2methods", this.nounsToRESTMethods);
+    setVariable("restEndpoints", this.restEndpoints);
   }
 
   /**
@@ -154,6 +157,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * The list of REST endpoints in the model.
+   *
+   * @return The list of REST endpoints in the model.
+   */
+  public List<RESTEndpoint> getRESTEndpoints() {
+    return restEndpoints;
+  }
+
+  /**
    * Add an endpoint interface to the model.
    *
    * @param ei The endpoint interface to add to the model.
@@ -214,6 +226,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       }
       restMethods.add(restMethod);
     }
+
+    this.restEndpoints.add(endpoint);
   }
 
   /**

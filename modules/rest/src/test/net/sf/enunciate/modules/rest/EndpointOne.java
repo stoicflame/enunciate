@@ -8,8 +8,8 @@ import net.sf.enunciate.rest.annotations.*;
 @RESTEndpoint
 public interface EndpointOne {
   @Noun ( "one" )
-  RootElementExample getOne(@ProperNoun
-  String which);
+  @Verb (VerbType.read)
+  RootElementExample getOne(@ProperNoun String which);
 
   @Noun ( "one")
   @Verb ( VerbType.create )
@@ -24,8 +24,8 @@ public interface EndpointOne {
   void deleteOne(@ProperNoun String which);
 
   @Noun ( "two" )
-  RootElementExample getTwo(@ProperNoun
-  String which);
+  @Verb (VerbType.read)
+  RootElementExample getTwo(@ProperNoun String which);
 
   @Noun ( "two")
   @Verb ( VerbType.create )

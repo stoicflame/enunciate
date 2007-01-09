@@ -3,6 +3,7 @@ package net.sf.enunciate.samples.genealogy.services.impl;
 import net.sf.enunciate.samples.genealogy.data.Person;
 import net.sf.enunciate.samples.genealogy.services.PersonService;
 import net.sf.enunciate.samples.genealogy.services.ServiceException;
+import net.sf.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 @WebService (
   endpointInterface = "net.sf.enunciate.samples.genealogy.services.PersonService"
 )
+@RESTEndpoint
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {

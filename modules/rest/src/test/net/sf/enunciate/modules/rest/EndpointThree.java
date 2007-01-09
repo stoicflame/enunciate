@@ -9,8 +9,8 @@ import net.sf.enunciate.rest.annotations.*;
 public interface EndpointThree {
 
   @Noun ( "six" )
-  RootElementExample getSix(@ProperNoun
-  String which);
+  @Verb ( VerbType.read )
+  RootElementExample getSix(@ProperNoun String which);
 
   @Noun ( "six")
   @Verb ( VerbType.create )
@@ -24,6 +24,5 @@ public interface EndpointThree {
   @Verb ( VerbType.delete )
   void deleteSix(@ProperNoun String which);
 
-  @Exclude
   void dontExpose();
 }

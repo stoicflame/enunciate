@@ -9,6 +9,7 @@ import net.sf.enunciate.rest.annotations.*;
 public class EndpointTwo {
 
   @Noun ( "three" )
+  @Verb (VerbType.read)
   public RootElementExample getThree(@ProperNoun String which) {
     return null;
   }
@@ -32,6 +33,7 @@ public class EndpointTwo {
   }
 
   @Noun ( "four" )
+  @Verb (VerbType.read)
   public RootElementExample getFour(@ProperNoun String which) {
     return null;
   }

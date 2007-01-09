@@ -162,8 +162,8 @@ public class DefaultValidator implements Validator {
 
         RESTParameter nounValue = method.getNounValue();
         if (nounValue != null) {
-          if ((verb == VerbType.create) || (verb == VerbType.delete)) {
-            result.addError(method.getPosition(), "The verbs 'create' and 'delete' do not support a noun value.");
+          if ((verb == VerbType.read) || (verb == VerbType.delete)) {
+            result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
           }
 
           XmlTypeMirror nounValueType = nounValue.getXmlType();

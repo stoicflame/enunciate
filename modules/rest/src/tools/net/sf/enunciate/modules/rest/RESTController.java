@@ -5,6 +5,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,6 +34,7 @@ public class RESTController extends AbstractController {
   private Map<String, RESTResource> RESTResources = new HashMap<String, RESTResource>();
   private Pattern urlPattern;
   private final DocumentBuilder documentBuilder;
+  private HandlerExceptionResolver exceptionHandler;
 
   public RESTController(Object[] endpoints) {
     this.endpoints = endpoints;
@@ -47,6 +49,8 @@ public class RESTController extends AbstractController {
     catch (ParserConfigurationException e) {
       throw new RuntimeException(e);
     }
+
+    this.exceptionHandler = new RESTExceptionHandler();
   }
 
   /**
@@ -63,16 +67,16 @@ public class RESTController extends AbstractController {
         Collection<Class> endpointTypes = findEndpointTypes(endpoint);
         
         if (endpointTypes.isEmpty()) {
-          throw new ApplicationContextException("REST endpoint " + endpoint.getClass().getName() + " does not implement any REST endpoints.");
+          throw new ApplicationContextException("REST endpoint " + endpoint.getClass().getName() + " does not implement any REST endpoint interfaces.");
         }
 
         for (Class endpointType: endpointTypes) {
           Method[] restMethods = endpointType.getDeclaredMethods();
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
-            if ((Modifier.isPublic(modifiers)) && (!restMethod.isAnnotationPresent(Exclude.class)) && (!isImplMethod(restMethod, endpointTypes))) {
+            if ((Modifier.isPublic(modifiers)) && (restMethod.isAnnotationPresent(Verb.class)) && (!isImplMethod(restMethod, endpointTypes))) {
+              VerbType verb = restMethod.getAnnotation(Verb.class).value();
               String noun = restMethod.isAnnotationPresent(Noun.class) ? restMethod.getAnnotation(Noun.class).value() : restMethod.getName();
-              VerbType verb = restMethod.isAnnotationPresent(Verb.class) ? restMethod.getAnnotation(Verb.class).value() : VerbType.read;
 
               RESTResource resource = RESTResources.get(noun);
               if (resource == null) {
@@ -193,7 +197,17 @@ public class RESTController extends AbstractController {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported HTTP operation: " + httpMethod);
     }
 
-    return handleRESTOperation(noun, properNoun, verb, request, response);
+    try {
+      return handleRESTOperation(noun, properNoun, verb, request, response);
+    }
+    catch (Exception e) {
+      if (this.exceptionHandler != null) {
+        return this.exceptionHandler.resolveException(request, response, this, e);
+      }
+      else {
+        throw e;  
+      }
+    }
   }
 
   /**
@@ -303,5 +317,14 @@ public class RESTController extends AbstractController {
    */
   public void setSubcontext(String subcontext) {
     urlPattern = Pattern.compile(subcontext + "/([^/]+)/?(.*)$");
+  }
+
+  /**
+   * Set the the resolver for the case that an exception is thrown.
+   *
+   * @param exceptionHandler The exception handler.
+   */
+  public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
+    this.exceptionHandler = exceptionHandler;
   }
 }

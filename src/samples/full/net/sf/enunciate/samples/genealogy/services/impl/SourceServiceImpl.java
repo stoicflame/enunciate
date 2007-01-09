@@ -7,6 +7,7 @@ import net.sf.enunciate.samples.genealogy.services.ServiceException;
 import net.sf.enunciate.samples.genealogy.services.SourceService;
 import net.sf.enunciate.samples.genealogy.services.UnknownSourceBean;
 import net.sf.enunciate.samples.genealogy.services.UnknownSourceException;
+import net.sf.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
 import java.net.URI;
@@ -17,6 +18,7 @@ import java.net.URI;
 @WebService (
   endpointInterface = "net.sf.enunciate.samples.genealogy.services.SourceService"
 )
+@RESTEndpoint
 public class SourceServiceImpl implements SourceService {
 
   public void addSource(Source source) {

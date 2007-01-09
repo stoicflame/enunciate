@@ -3,6 +3,7 @@ package net.sf.enunciate.samples.genealogy.services;
 import net.sf.enunciate.samples.genealogy.cite.InfoSet;
 import net.sf.enunciate.samples.genealogy.cite.Source;
 import net.sf.enunciate.samples.genealogy.data.Event;
+import net.sf.enunciate.rest.annotations.*;
 
 import javax.jws.Oneway;
 import javax.jws.WebParam;
@@ -19,12 +20,17 @@ import javax.jws.soap.SOAPBinding;
   serviceName = "source-service",
   portName = "source-service-port"
 )
+@RESTEndpoint
 public interface SourceService {
 
   @Oneway
-  void addSource(Source source);
+  @Noun ("source")
+  @Verb ( VerbType.create )
+  void addSource(@NounValue Source source);
 
-  Source getSource(String id) throws ServiceException, UnknownSourceException;
+  @Noun ("source")
+  @Verb ( VerbType.read )
+  Source getSource(@ProperNoun String id) throws ServiceException, UnknownSourceException;
 
   @SOAPBinding (
     style = SOAPBinding.Style.RPC

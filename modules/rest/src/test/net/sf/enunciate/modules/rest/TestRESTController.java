@@ -38,7 +38,7 @@ public class TestRESTController extends TestCase {
 
       for (VerbType verbType : VerbType.values()) {
         RESTOperation operation = resource.getOperation(verbType);
-        assertNotNull(operation);
+        assertNotNull(resource.toString() + " does not contain an operation for " + verbType + ".", operation);
       }
     }
 

@@ -40,6 +40,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
   private EnunciateException ee = null;
   private IOException ioe = null;
+  private RuntimeException re = null;
   private final EnunciateConfiguration config;
 
   public EnunciateAnnotationProcessor() throws EnunciateException {
@@ -74,6 +75,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     catch (EnunciateException e) {
       process(e);
     }
+    catch (RuntimeException re) {
+      process(re);
+    }
   }
 
   /**
@@ -100,7 +104,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
       else if (isRESTEndpoint(declaration)) {
         //todo: support interfaces, too.
-        RESTEndpoint restEndpoint = new RESTEndpoint(declaration);
+        RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
 
         if (isVerbose()) {
           System.out.println(declaration.getQualifiedName() + " to be considered as a REST endpoint.");
@@ -232,7 +236,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return Whether the declaration is a REST endpoint.
    */
   public boolean isRESTEndpoint(TypeDeclaration declaration) {
-    return declaration.getAnnotation(net.sf.enunciate.rest.annotations.RESTEndpoint.class) != null;
+    return ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(net.sf.enunciate.rest.annotations.RESTEndpoint.class) != null));
   }
 
   /**
@@ -338,6 +342,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     //jaxb transforms.
     transforms.add(new ForEachSchemaTransform(namespace));
+
+    //rest transforms.
+    transforms.add(new ForEachRESTEndpointTransform(namespace));
     return transforms;
   }
 
@@ -398,6 +405,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     this.ioe = e;
   }
 
+  protected void process(RuntimeException e) {
+    this.re = e;
+  }
+
   /**
    * Throws any errors that occurred during processing.
    */
@@ -407,6 +418,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
     else if (this.ioe != null) {
       throw this.ioe;
+    }
+    else if (this.re != null) {
+      throw re;
     }
   }
 

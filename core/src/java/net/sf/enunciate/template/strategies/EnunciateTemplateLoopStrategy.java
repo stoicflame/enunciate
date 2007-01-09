@@ -4,12 +4,14 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.contract.rest.RESTEndpoint;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerTemplateBlock;
 import net.sf.jelly.apt.strategies.TemplateLoopStrategy;
 import net.sf.jelly.apt.Context;
 
 import java.util.Map;
+import java.util.Collection;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 
@@ -75,6 +77,15 @@ public abstract class EnunciateTemplateLoopStrategy<L> extends TemplateLoopStrat
    */
   protected Map<String, WsdlInfo> getNamespacesToWSDLs() {
     return getModel().getNamespacesToWSDLs();
+  }
+
+  /**
+   * The REST endpoints in the model.
+   *
+   * @return The REST endpoints in the model.
+   */
+  protected Collection<RESTEndpoint> getRESTEndpoints() {
+    return getModel().getRESTEndpoints();
   }
 
   /**

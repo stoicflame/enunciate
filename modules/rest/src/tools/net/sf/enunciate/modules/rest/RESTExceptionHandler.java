@@ -20,7 +20,7 @@ public class RESTExceptionHandler implements HandlerExceptionResolver {
   public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object object, Exception exception) {
     int errorCode = 500;
     RESTError errorInfo = exception.getClass().getAnnotation(RESTError.class);
-    if (errorInfo == null) {
+    if (errorInfo != null) {
       errorCode = errorInfo.errorCode();
     }
 

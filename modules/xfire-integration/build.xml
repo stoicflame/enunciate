@@ -35,6 +35,11 @@
       <include name="${tools.jar.pattern}"/>
     </fileset>
 
+    <fileset dir="${modules.rest.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
     <pathelement location="${basedir}/target/examples/full/classes/xfire-client/jdk14"/>
   </path>
 
@@ -87,7 +92,12 @@
       <src>
         <pathelement location="${enunciate.sample.src.dir}/full"/>
       </src>
-      <classpath refid="base.libs"/>
+      <classpath>
+        <path refid="base.libs"/>
+        <fileset dir="${core.basedir}/target">
+          <include name="${tools.jar.pattern}"/>
+        </fileset>
+      </classpath>
     </javac>
   </target>
 
@@ -105,7 +115,7 @@
     </propertyset>
 
     <antcall target="deploy-full-api" inheritall="true"/>
-    <parallel>
+    <parallel failonany="true">
       <antcall target="start-container" inheritall="true"/>
       <sequential>
         <antcall target="${container.test.delay.target}" inheritall="true"/>
