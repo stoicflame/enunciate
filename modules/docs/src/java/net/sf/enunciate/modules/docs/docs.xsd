@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+
+  <xs:element name="documentation">
+
+    <xs:annotation>
+      <xs:documentation>
+        The root "documentation" element.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="data" type="data" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="soap" type="soap" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="rest" type="rest" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+
+  </xs:element>
+
+  <xs:complexType name="data">
+
+    <xs:annotation>
+      <xs:documentation>
+        The documentation element for the data (schema objects).
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="schema" type="schema" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="schema">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element that contains the documenation for the data, grouped by namespace.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="packages" type="packages" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="types" type="types" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="elements" type="globalElements" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+
+    <xs:attribute name="namespace"/>
+  </xs:complexType>
+
+  <xs:complexType name="packages">
+
+    <xs:annotation>
+      <xs:documentation>
+        Since a schema might be composed of difference packages, this element contains
+        the documentation elements for each package.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="package" type="package" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="package">
+    <xs:annotation>
+      <xs:documentation>
+        A package element contains the documentation for a package.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:attribute name="id" type="xs:ID"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="types">
+
+    <xs:annotation>
+      <xs:documentation>
+        An element to contain the documentations for all schema types.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="type" type="type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="type">
+    <xs:annotation>
+      <xs:documentation>
+        A schema type can be tagged documentation with additinoal elements for the
+        attributes, elements, and value of a type.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="attributes" type="attributes" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="elements" type="elements" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="value" type="value" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="id" type="xs:ID"/>
+        <xs:attribute name="extendsType" type="xs:IDREF"/>
+      </xs:extension>
+    </xs:complexContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="attributes">
+
+    <xs:annotation>
+      <xs:documentation>
+        The attributes element contains all attributes of a schema type.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="attribute" type="attribute" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="attribute">
+
+    <xs:annotation>
+      <xs:documentation>
+        The attribute element contains the documentation for an attribute.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="elements">
+
+    <xs:annotation>
+      <xs:documentation>
+        The elements element contains all elements of a schema type.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="element" type="element" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="element">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element element contains the documentation for an element.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="values">
+
+    <xs:annotation>
+      <xs:documentation>
+        Element containing the list of enum values for an enum element.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="item" type="item" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="item">
+
+    <xs:annotation>
+      <xs:documentation>
+        An enum value.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:attribute name="value"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="value">
+
+    <xs:annotation>
+      <xs:documentation>
+        The value value contains the documentation for an value.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="globalElements">
+    <xs:annotation>
+      <xs:documentation>
+        The element for documentation for global elements.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="element" type="globalElement" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="globalElement">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element for the documenation of a global element
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:attribute name="type" type="xs:IDREF"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="soap">
+
+    <xs:annotation>
+      <xs:documentation>
+        The documentation element for the SOAP API.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="endpointInterfaces" type="endpointInterfaces" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="endpointInterfaces">
+
+    <xs:annotation>
+      <xs:documentation>
+        The documentation element containing the endpoint interfaces.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="endpointInterface" type="endpointInterface" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="endpointInterface">
+
+    <xs:annotation>
+      <xs:documentation>
+        The documentation element for an endpoint interface.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:ID"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="method">
+
+    <xs:annotation>
+      <xs:documentation>
+        The documentation for a method.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="parameter" type="parameter" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="result" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="fault" type="fault" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="parameter">
+
+    <xs:annotation>
+      <xs:documentation>
+        A parameter to a web method.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="input" type="xs:boolean"/>
+        <xs:attribute name="output" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="fault">
+
+    <xs:annotation>
+      <xs:documentation>
+        A fault thrown by a web method.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="rest">
+    <xs:annotation>
+      <xs:documentation>
+        The element containing the documentation for the REST API.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="resources" type="resources" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="resources">
+    <xs:annotation>
+      <xs:documentation>
+        The element listing the resources in a REST api.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="resource" type="resource" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="resource">
+    <xs:annotation>
+      <xs:documentation>
+        Documentation element for a REST resource.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="operation">
+    <xs:annotation>
+      <xs:documentation>
+        The element containing the documentation for an operation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="parameter" type="restParameter" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="inValue" type="inValue" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="outValue" type="outValue" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="error" type="restError" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="restOp"/>
+        <xs:attribute name="requiresResourceId" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="restOp">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="create"/>
+      <xs:enumeration value="read"/>
+      <xs:enumeration value="update"/>
+      <xs:enumeration value="delete"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="restParameter">
+    <xs:annotation>
+      <xs:documentation>
+        The documentation for a REST parameter.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="restError">
+    <xs:annotation>
+      <xs:documentation>
+        The documentation for a REST error.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="code" type="xs:int"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="inValue">
+    <xs:annotation>
+      <xs:documentation>
+        The documentation for a REST input value.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="outValue">
+    <xs:annotation>
+      <xs:documentation>
+        The documentation for a REST output value.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="taggedDocumentation">
+
+    <xs:annotation>
+      <xs:documentation>
+        Base type for a documentation element that may contain tags.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="tag" type="tag" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="tag">
+
+    <xs:annotation>
+      <xs:documentation>
+        A documentation tag has a name and a value.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+</xs:schema>

@@ -15,7 +15,8 @@
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
-      <xs:attribute name="label"/>
+      <xs:attribute name="label" type="xs:string"/>
+      <xs:attribute name="description" type="xs:string"/>
     </xs:complexType>
 
   </xs:element>

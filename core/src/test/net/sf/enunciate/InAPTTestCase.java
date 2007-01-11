@@ -76,7 +76,7 @@ public abstract class InAPTTestCase extends TestCase {
     return classpath;
   }
 
-  protected static File getSamplesDir() {
+  public static File getSamplesDir() {
     String subdir = System.getProperty("in.apt.src.test.dir");
     if (subdir == null) {
       throw new RuntimeException("A 'in.apt.src.test.dir' property must be defined.");

@@ -6,10 +6,14 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.ReferenceType;
 import net.sf.enunciate.contract.validation.ValidationException;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.rest.annotations.Noun;
 import net.sf.enunciate.rest.annotations.Verb;
 import net.sf.enunciate.rest.annotations.VerbType;
+import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -131,5 +135,19 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public Collection<RESTError> getRESTErrors() {
     return RESTErrors;
+  }
+
+  /**
+   * The XML type of the return value.
+   *
+   * @return The XML type of the return value.
+   */
+  public XmlTypeMirror getXMLReturnType() {
+    try {
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getReturnType());
+    }
+    catch (XmlTypeException e) {
+      throw new ValidationException(getPosition(), e.getMessage());
+    }
   }
 }

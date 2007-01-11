@@ -27,11 +27,29 @@ import java.util.Map;
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private final XmlEnum xmlEnum;
+  private final Map<String, String> enumValues;
 
   public EnumTypeDefinition(EnumDeclaration delegate) {
     super(delegate);
 
     this.xmlEnum = getAnnotation(XmlEnum.class);
+    enumValues = new LinkedHashMap<String, String>();
+    Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
+    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
+    for (EnumConstantDeclaration enumConstant : enumConstants) {
+      String value = enumConstant.getSimpleName();
+      XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
+      if (enumValue != null) {
+        value = enumValue.value();
+      }
+
+      if (!enumValues.add(value)) {
+        throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
+      }
+
+      this.enumValues.put(enumConstant.getSimpleName(), value);
+    }
+
   }
 
   // Inherited.
@@ -63,24 +81,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    * @return The map of constant declarations to their enum constant values.
    */
   public Map<String, String> getEnumValues() {
-    Map<String, String> valueMap = new LinkedHashMap<String, String>();
-    Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
-    HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
-    for (EnumConstantDeclaration enumConstant : enumConstants) {
-      String value = enumConstant.getSimpleName();
-      XmlEnumValue enumValue = enumConstant.getAnnotation(XmlEnumValue.class);
-      if (enumValue != null) {
-        value = enumValue.value();
-      }
-
-      if (!enumValues.add(value)) {
-        throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
-      }
-
-      valueMap.put(enumConstant.getSimpleName(), value);
-    }
-
-    return valueMap;
+    return this.enumValues;
   }
 
   @Override

@@ -1,0 +1,182 @@
+[#ftl]
+[@file name="docs.xml" package="docs"]
+<?xml version="1.0" encoding="UTF-8"?>
+<documentation>
+  <data>
+[@forEachSchema]
+    <schema namespace="${schema.namespace?default("")}">
+      <packages>
+  [#list schema.packages as package]
+        <package id="${package.qualifiedName}">
+          <documentation>
+            <![CDATA[${package.javaDoc}]]>
+          </documentation>
+  [#list package.javaDoc?keys as tag]
+    [#list package.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+    [/#list]
+  [/#list]
+        </package>
+  [/#list]
+      </packages>
+      <types>
+  [#list schema.typeDefinitions as type]
+        <type name="${type.name}" id="${type.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
+          <documentation>
+            <![CDATA[${type.javaDoc}]]>
+          </documentation>
+    [#list type.javaDoc?keys as tag]
+      [#list type.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+      [/#list]
+    [/#list]
+    [#if type.attributes?size > 0]
+          <attributes>
+      [#list type.attributes as attribute]
+            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace}" typeName="${attribute.baseType.qname.localPart}">
+              <![CDATA[${attribute.javaDoc.return?default(attribute.javaDoc)}]]>
+            </attribute>
+      [/#list]
+          </attributes>
+    [/#if]
+    [#if type.elements?size > 0]
+          <elements>
+      [#list type.elements as element]
+            <element name="${element.name}" typeNamespace="${element.baseType.namespace}" typeName="${element.baseType.qname.localPart}">
+              <![CDATA[${element.javaDoc.return?default(element.javaDoc)}]]>
+            </element>
+      [/#list]
+          </elements>
+    [/#if]
+    [#if type.value?exists]
+          <value typeNamespace="value.baseType.namespace" typeName="value.baseType.qname.localPart">
+            <![CDATA[${type.value.javaDoc.return?default(type.value.javaDoc)}]]>
+          </value>
+    [/#if]
+    [#if type.enum]
+          <values>
+      [#list type.delegate.enumConstants as item]
+            <item value="${type.enumValues[item.simpleName]}">
+              <documentation>
+                 <![CDATA[${item.javaDoc}]]>
+              </documentation>
+        [#list item.javaDoc?keys as tag]
+          [#list item.javaDoc[tag] as tagValue]
+              <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          [/#list]
+        [/#list]
+            </item>
+      [/#list]
+          </values>
+    [/#if]
+        </type>
+  [/#list]
+      </types>
+      <elements>
+  [#list schema.globalElements as element]
+        <element type="${element.typeDefinition.qualifiedName}">
+          <documentation>
+            <![CDATA[${element.javaDoc}]]>
+          </documentation>
+    [#list element.javaDoc?keys as tag]
+      [#list element.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+      [/#list]
+    [/#list]
+        </element>
+  [/#list]
+      </elements>
+    </schema>
+[/@forEachSchema]
+  </data>
+  <soap>
+    <endpointInterfaces>
+[@forEachWsdl]
+  [@forEachEndpointInterface]
+      <endpointInterface id="${endpointInterface.qualifiedName}">
+        <documentation>
+          <![CDATA[${endpointInterface.javaDoc}]]>
+        </documentation>
+    [#list endpointInterface.javaDoc?keys as tag]
+      [#list endpointInterface.javaDoc[tag] as tagValue]
+        <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+      [/#list]
+    [/#list]
+    [#list endpointInterface.webMethods as method]
+        <method name="${method.operationName}">
+          <documentation>
+            <![CDATA[${method.javaDoc}]]>
+          </documentation>
+      [#list method.javaDoc?keys as tag]
+        [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+          [#list method.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          [/#list]
+        [/#if]
+      [/#list]
+      [#list method.webParameters as parameter]
+          <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
+            <![CDATA[${parameter.javaDoc}]]>
+          </parameter>
+      [/#list]
+      [#if ((!method.oneWay) && (!method.returnType.void))]
+          <result>
+            <![CDATA[${method.returnType.docComment?default("")}]]>
+          </result>
+      [/#if]
+      [#list method.thrownTypes as fault]
+          <fault name="${fault.declaration.simpleName}">
+            <![CDATA[${fault.docComment?default("")}]]>
+          </fault>
+      [/#list]
+        </method>
+    [/#list]
+      </endpointInterface>
+  [/@forEachEndpointInterface]
+[/@forEachWsdl]
+    </endpointInterfaces>
+  </soap>
+  <rest>
+    <resources>
+[#list nouns2methods?keys as resource]
+      <resource name="${resource}">
+  [#list nouns2methods[resource] as method]
+        <operation type="${method.verb}" requiresResourceId="${method.properNoun?exists?string}">
+          <documentation>
+            <![CDATA[${method.javaDoc}]]>
+          </documentation>
+     [#list method.javaDoc?keys as tag]
+       [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+         [#list method.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+         [/#list]
+       [/#if]
+     [/#list]
+     [#list method.adjectives as parameter]
+          <parameter name="${parameter.adjectiveName}">
+            <![CDATA[${parameter.javaDoc}]]>
+          </parameter>
+     [/#list]
+     [#if method.nounValue?exists]
+          <inValue typeNamespace="${method.nounValue.xmlType.namespace}" typeName="${method.nounValue.xmlType.name}">
+            <![CDATA[${method.nounValue.javaDoc}]]>
+          </inValue>
+     [/#if]
+     [#if !method.returnType.void]
+          <outValue typeNamespace="${method.XMLReturnType.namespace}" typeName="${method.XMLReturnType.name}">
+            <![CDATA[${method.returnType.docComment?default("")}]]>
+          </outValue>
+     [/#if]
+     [#list method.thrownTypes as error]
+          <error code="${method.RESTErrors[error_index].errorCode}">
+            <![CDATA[${error.docComment?default("")}]]>
+          </error>
+     [/#list]
+        </operation>
+  [/#list]
+      </resource>
+[/#list]
+    </resources>
+  </rest>
+</documentation>
+[/@file]

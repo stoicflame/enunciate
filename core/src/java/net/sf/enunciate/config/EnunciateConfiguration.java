@@ -27,6 +27,7 @@ import java.util.*;
 public class EnunciateConfiguration implements ErrorHandler {
 
   private String label = "enunciate";
+  private String description = null;
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -71,6 +72,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * The description for this enunciated API.
+   *
+   * @return The description for this enunciated API.
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * The description for this enunciated API.
+   *
+   * @param description The description for this enunciated API.
+   */
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**

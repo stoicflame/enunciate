@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar" name="docs" basedir=".">
+
+  <import file="../../build-module.xml"/>
+
+  <path id="build.classpath">
+    <path refid="base.libs"/>
+    <path refid="core.libs"/>
+
+    <fileset dir="${core.basedir}/target">
+      <include name="${jar.pattern}"/>
+    </fileset>
+  </path>
+
+  <target name="compile-main" depends="base.compile-main">
+    <mkdir dir="${build.dir}/META-INF/services"/>
+    <echo message="net.sf.enunciate.modules.docs.DocumentationDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+  </target>
+
+</project>
