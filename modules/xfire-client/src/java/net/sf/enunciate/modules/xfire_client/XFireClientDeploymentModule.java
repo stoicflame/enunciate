@@ -92,6 +92,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL responseBeanTemplate = getTemplateURL("jdk14/client-response-bean.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
+    model.setFileOutputDirectory(getJdk14GenerateDir());
     ExplicitWebAnnotations annotations = new ExplicitWebAnnotations();
     TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
     List<String> typeList = new ArrayList<String>();
@@ -170,9 +171,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         }
         
         URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+        model.setFileOutputDirectory(getJdk14GenerateDir());
         processTemplate(template, model);
 
         template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
+        model.setFileOutputDirectory(getXFireTypesGenerateDir());
         processTemplate(template, model);
 
         if (!typeDefinition.isAbstract()) {
@@ -334,9 +337,9 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
-    File typesDir = getXFireTypesDir();
+    File typesDir = getXFireTypesGenerateDir();
     Collection<String> typeFiles = enunciate.getJavaFiles(typesDir);
-    Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14Dir());
+    Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
     jdk14Files.addAll(typeFiles);
 
     enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
@@ -401,21 +404,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The directory for compiling.
+   * The directory for the jdk14 client files.
    *
-   * @return The directory for compiling.
+   * @return The directory for the jdk14 client files.
    */
-  protected File getCompileDir() {
-    return new File(getEnunciate().getCompileDir(), "xfire-client");
-  }
-
-  /**
-   * The directory for building.
-   *
-   * @return The directory for building.
-   */
-  protected File getBuildDir() {
-    return new File(getEnunciate().getBuildDir(), "xfire-client");
+  protected File getJdk14GenerateDir() {
+    return new File(getGenerateDir(), "jdk14");
   }
 
   /**
@@ -432,17 +426,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for the jdk14 client files.
    */
-  protected File getJdk14Dir() {
-    return new File(new File(getEnunciate().getGenerateDir(), "xfireclient"), "jdk14");
-  }
-
-  /**
-   * The directory for the jdk14 client files.
-   *
-   * @return The directory for the jdk14 client files.
-   */
-  protected File getXFireTypesDir() {
-    return new File(new File(getEnunciate().getGenerateDir(), "xfireclient"), "types");
+  protected File getXFireTypesGenerateDir() {
+    return new File(getGenerateDir(), "types");
   }
 
   /**

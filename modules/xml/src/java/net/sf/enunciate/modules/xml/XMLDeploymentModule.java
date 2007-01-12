@@ -124,9 +124,9 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     model.put("prefix", new PrefixMethod());
+    File artifactDir = getGenerateDir();
+    model.setFileOutputDirectory(artifactDir);
     processTemplate(getTemplateURL(), model);
-
-    File artifactDir = new File(enunciate.getGenerateDir(), "xml");
 
     HashMap<String, File> ns2wsdlArtifact = new HashMap<String, File>();
     HashMap<String, File> service2artifact = new HashMap<String, File>();

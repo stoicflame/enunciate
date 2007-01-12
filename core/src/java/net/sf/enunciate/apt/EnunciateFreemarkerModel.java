@@ -17,14 +17,15 @@ import net.sf.enunciate.contract.jaxb.types.XmlTypeDecorator;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeException;
 import net.sf.enunciate.contract.jaxb.types.XmlTypeMirror;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.contract.rest.RESTEndpoint;
 import net.sf.enunciate.contract.rest.RESTMethod;
+import net.sf.enunciate.contract.validation.ValidationException;
 import net.sf.enunciate.util.ClassDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlNsForm;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -44,6 +45,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
+  private File fileOutputDirectory = null;
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
@@ -437,5 +439,23 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public List<RootElementDeclaration> getRootElementDeclarations() {
     return rootElements;
+  }
+
+  /**
+   * The file output directory.
+   *
+   * @return The file output directory.
+   */
+  public File getFileOutputDirectory() {
+    return fileOutputDirectory;
+  }
+
+  /**
+   * The file output directory.
+   *
+   * @param fileOutputDirectory The file output directory.
+   */
+  public void setFileOutputDirectory(File fileOutputDirectory) {
+    this.fileOutputDirectory = fileOutputDirectory;
   }
 }

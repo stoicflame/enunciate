@@ -51,15 +51,6 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     File docsXml = new File(getGenerateDir(), "docs.xml");
   }
 
-  /**
-   * The generate dir for the documentation.
-   *
-   * @return The generate dir for the documentation.
-   */
-  protected File getGenerateDir() {
-    return new File(getEnunciate().getGenerateDir(), "docs");
-  }
-
   @Override
   protected ObjectWrapper getObjectWrapper() {
     return new APTJellyObjectWrapper();

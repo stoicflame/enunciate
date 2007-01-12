@@ -37,7 +37,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
    * tests doing the freemarker generate.
    */
   public void testDoFreemarkerGenerate() throws Exception {
-    Enunciate enunciate = new Enunciate(null);
+    Enunciate enunciate = new Enunciate((String[]) null);
     final EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     model.add(new EndpointInterface(getDeclaration("net.sf.enunciate.samples.jaxws.AnotherEndpointInterface")));
     model.add(new EndpointInterface(getDeclaration("net.sf.enunciate.samples.jaxws.BasicEndpointInterface")));
@@ -221,15 +221,17 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     setupDefaultModel();
 
     //generate the java source file.
-    Enunciate enunciate = new Enunciate(null);
+    Enunciate enunciate = new Enunciate((String[]) null);
     File genDir = enunciate.createTempDir();
+    enunciate.setGenerateDir(genDir);
     JAXWSDeploymentModule module = new JAXWSDeploymentModule();
+    module.init(enunciate);
     EnunciateFreemarkerModel model = module.getModel();
     model.put("file", new SpecifiedOutputDirectoryFileTransform(genDir));
     model.put("message", message);
     module.processTemplate(templateURL, model);
 
-    Collection<String> srcFiles = enunciate.getJavaFiles(new File(genDir, "jaxws"));
+    Collection<String> srcFiles = enunciate.getJavaFiles(genDir);
     assertEquals("The wrapper bean should have been generated.", 1, srcFiles.size());
     srcFiles.addAll(getAllJavaFiles(getSamplesDir()));
     File buildDir = enunciate.createTempDir();

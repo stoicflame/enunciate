@@ -1,6 +1,5 @@
 package net.sf.enunciate.modules.jaxws;
 
-import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.WsdlInfo;

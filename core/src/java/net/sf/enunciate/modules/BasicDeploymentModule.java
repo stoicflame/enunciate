@@ -6,6 +6,7 @@ import net.sf.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
+import java.io.File;
 
 /**
  * Basic stub for a deployment module.  Provides methods for each step.
@@ -129,6 +130,42 @@ public class BasicDeploymentModule implements DeploymentModule {
    */
   public int getOrder() {
     return 0;
+  }
+
+  /**
+   * The generate directory for this module.  Defaults to &lt;enunciate generate dir&gt;/&lt;module name&gt;
+   *
+   * @return The generate directory for this module.
+   */
+  public File getGenerateDir() {
+    return new File(getEnunciate().getGenerateDir(), getName());
+  }
+
+  /**
+   * The compile directory for this module.  Defaults to &lt;enunciate compile dir&gt;/&lt;module name&gt;
+   *
+   * @return The compile directory for this module.
+   */
+  public File getCompileDir() {
+    return new File(getEnunciate().getCompileDir(), getName());
+  }
+
+  /**
+   * The build directory for this module.  Defaults to &lt;enunciate build dir&gt;/&lt;module name&gt;
+   *
+   * @return The build directory for this module.
+   */
+  public File getBuildDir() {
+    return new File(getEnunciate().getBuildDir(), getName());
+  }
+
+  /**
+   * The package directory for this module.  Defaults to &lt;enunciate package dir&gt;/&lt;module name&gt;
+   *
+   * @return The package directory for this module.
+   */
+  public File getPackageDir() {
+    return new File(getEnunciate().getPackageDir(), getName());
   }
 
 }

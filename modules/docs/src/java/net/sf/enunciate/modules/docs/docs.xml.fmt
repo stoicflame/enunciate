@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="docs.xml" package="docs"]
+[@file name="docs.xml"]
 <?xml version="1.0" encoding="UTF-8"?>
 <documentation>
   <data>
@@ -74,7 +74,7 @@
       </types>
       <elements>
   [#list schema.globalElements as element]
-        <element type="${element.typeDefinition.qualifiedName}">
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}">
           <documentation>
             <![CDATA[${element.javaDoc}]]>
           </documentation>
@@ -93,7 +93,7 @@
     <endpointInterfaces>
 [@forEachWsdl]
   [@forEachEndpointInterface]
-      <endpointInterface id="${endpointInterface.qualifiedName}">
+      <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}">
         <documentation>
           <![CDATA[${endpointInterface.javaDoc}]]>
         </documentation>

@@ -66,9 +66,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
 
     //generate the xfire-servlet.xml
+    model.setFileOutputDirectory(getXMLGenerateDir());
     processTemplate(getXFireServletTemplateURL(), model);
 
     //generate the rpc request/response beans.
+    model.setFileOutputDirectory(getJAXWSGenerateDir());
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
         for (WebMethod webMethod : ei.getWebMethods()) {
@@ -104,7 +106,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
     //make sure we include all the wrappers generated for the rpc methods, too...
-    jaxwsSourceFiles.addAll(enunciate.getJavaFiles(new File(getGenerateDir(), "jaxws")));
+    jaxwsSourceFiles.addAll(enunciate.getJavaFiles(getJAXWSGenerateDir()));
     StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
     jaxwsClasspath.append(File.pathSeparator).append(getCompileDir().getAbsolutePath());
     enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
@@ -156,7 +158,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
 
     //copy the xfire config file from the xfire configuration directory to the WEB-INF directory.
-    File xfireConfigDir = new File(getGenerateDir(), "xml");
+    File xfireConfigDir = getXMLGenerateDir();
     enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 
     HashSet<File> xmlArtifacts = new HashSet<File>();
@@ -237,42 +239,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     enunciate.zip(buildDir, warFile);
-  }
-
-  /**
-   * The directory for generating.
-   *
-   * @return The directory for generating.
-   */
-  protected File getGenerateDir() {
-    return new File(getEnunciate().getGenerateDir(), "xfire");
-  }
-
-  /**
-   * The directory for compiling.
-   *
-   * @return The directory for compiling.
-   */
-  protected File getCompileDir() {
-    return new File(getEnunciate().getCompileDir(), "xfire");
-  }
-
-  /**
-   * The build directory for this module.
-   *
-   * @return The build directory for this module.
-   */
-  protected File getBuildDir() {
-    return new File(getEnunciate().getBuildDir(), "xfire");
-  }
-
-  /**
-   * The package directory for this module.
-   *
-   * @return The package directory for this module.
-   */
-  protected File getPackageDir() {
-    return new File(getEnunciate().getPackageDir(), "xfire");
   }
 
   /**
@@ -405,6 +371,24 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public Validator getValidator() {
     return new XFireValidator();
+  }
+
+  /**
+   * The directory where the RPC request/response beans are generated.
+   *
+   * @return The directory where the RPC request/response beans are generated.
+   */
+  protected File getJAXWSGenerateDir() {
+    return new File(getGenerateDir(), "jaxws");
+  }
+
+  /**
+   * The directory where the servlet config file is generated.
+   *
+   * @return The directory where the servlet config file is generated.
+   */
+  protected File getXMLGenerateDir() {
+    return new File(getGenerateDir(), "xml");
   }
 
 }

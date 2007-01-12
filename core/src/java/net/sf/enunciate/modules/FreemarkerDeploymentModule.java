@@ -74,6 +74,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
     }
 
     model.setObjectWrapper(getObjectWrapper());
+    model.setFileOutputDirectory(getGenerateDir());
     return model;
   }
 

@@ -245,6 +245,7 @@
 
     <xs:complexContent>
       <xs:extension base="taggedDocumentation">
+        <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="xs:IDREF"/>
       </xs:extension>
     </xs:complexContent>
@@ -291,6 +292,7 @@
           <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="id" type="xs:ID"/>
+        <xs:attribute name="name" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

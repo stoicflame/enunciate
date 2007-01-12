@@ -1,6 +1,7 @@
 Modules:
   HTML Docs
   REST
+  Command (issue commands at given steps)
   .NET
   C/C++
   AJAX/Javascript
@@ -15,6 +16,6 @@ Modules:
   Standalone service
 Config options:
   soap endpoint addresses
-  Option to not inline request/response wrappers into the wsdl.
+  XML: Option to not inline request/response wrappers into the wsdl.
 Additional Features:
   @XmlTypeAdapter Support
