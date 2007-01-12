@@ -356,11 +356,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return 10
+   * @return 200
    */
   @Override
   public int getOrder() {
-    return 10;
+    return 200;
   }
 
   @Override

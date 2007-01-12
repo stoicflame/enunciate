@@ -1,27 +1,23 @@
 [#ftl]
 [@file name="docs.xml"]
 <?xml version="1.0" encoding="UTF-8"?>
-<documentation>
+<api-docs[#if copyright?exists] copyright="${copyright}"[/#if][#if licenseFile?exists] licenseFile="${licenseFile}"[/#if]>
+[#if apiDoc?exists]
+  <documentation>
+    <![CDATA[${type.javaDoc}]]>
+  </documentation>
+  [#list apiDoc?keys as tag]
+    [#list apiDoc[tag] as tagValue]
+  <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+    [/#list]
+  [/#list]
+[/#if]
   <data>
 [@forEachSchema]
     <schema namespace="${schema.namespace?default("")}">
-      <packages>
-  [#list schema.packages as package]
-        <package id="${package.qualifiedName}">
-          <documentation>
-            <![CDATA[${package.javaDoc}]]>
-          </documentation>
-  [#list package.javaDoc?keys as tag]
-    [#list package.javaDoc[tag] as tagValue]
-          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-    [/#list]
-  [/#list]
-        </package>
-  [/#list]
-      </packages>
       <types>
   [#list schema.typeDefinitions as type]
-        <type name="${type.name}" id="${type.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
+        <type name="${type.name}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
           <documentation>
             <![CDATA[${type.javaDoc}]]>
           </documentation>
@@ -93,7 +89,7 @@
     <endpointInterfaces>
 [@forEachWsdl]
   [@forEachEndpointInterface]
-      <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}">
+      <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
         <documentation>
           <![CDATA[${endpointInterface.javaDoc}]]>
         </documentation>
@@ -178,5 +174,19 @@
 [/#list]
     </resources>
   </rest>
-</documentation>
+  <packages>
+[@forEachPackage]
+    <package id="${package.qualifiedName}">
+      <documentation>
+        <![CDATA[${package.javaDoc}]]>
+      </documentation>
+  [#list package.javaDoc?keys as tag]
+    [#list package.javaDoc[tag] as tagValue]
+      <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+    [/#list]
+  [/#list]
+    </package>
+[@forEachPackage]
+  </packages>
+</api-docs>
 [/@file]

@@ -68,11 +68,4 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
     return new JAXWSValidator();
   }
 
-  /**
-   * @return 1
-   */
-  @Override
-  public int getOrder() {
-    return 1;
-  }
 }

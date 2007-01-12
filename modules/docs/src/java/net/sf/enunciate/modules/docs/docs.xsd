@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
 
-  <xs:element name="documentation">
+  <xs:element name="api-docs">
 
     <xs:annotation>
       <xs:documentation>
-        The root "documentation" element.
+        The root "api-docs" element.
       </xs:documentation>
     </xs:annotation>
 
     <xs:complexType>
-      <xs:sequence>
-        <xs:element name="data" type="data" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="soap" type="soap" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="rest" type="rest" minOccurs="0" maxOccurs="1"/>
-      </xs:sequence>
+      <xs:complexContent>
+        <xs:extension base="taggedDocumentation">
+          <xs:sequence>
+            <xs:element name="data" type="data" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="soap" type="soap" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="rest" type="rest" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="packages" type="packages" minOccurs="0" maxOccurs="1"/>
+            <xs:any minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+          <xs:attribute name="licenseFile" type="xs:string"/>
+          <xs:attribute name="copyright" type="xs:string"/>
+        </xs:extension>
+      </xs:complexContent>
     </xs:complexType>
 
   </xs:element>
@@ -41,7 +49,6 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="packages" type="packages" minOccurs="0" maxOccurs="1"/>
       <xs:element name="types" type="types" minOccurs="0" maxOccurs="1"/>
       <xs:element name="elements" type="globalElements" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
@@ -73,7 +80,7 @@
 
     <xs:complexContent>
       <xs:extension base="taggedDocumentation">
-        <xs:attribute name="id" type="xs:ID"/>
+        <xs:attribute name="id" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -109,8 +116,9 @@
         </xs:sequence>
         
         <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="id" type="xs:ID"/>
-        <xs:attribute name="extendsType" type="xs:IDREF"/>
+        <xs:attribute name="id" type="xs:string"/>
+        <xs:attribute name="package" type="xs:string"/>
+        <xs:attribute name="extendsType" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
 
@@ -246,7 +254,7 @@
     <xs:complexContent>
       <xs:extension base="taggedDocumentation">
         <xs:attribute name="name" type="xs:string"/>
-        <xs:attribute name="type" type="xs:IDREF"/>
+        <xs:attribute name="type" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -291,8 +299,9 @@
         <xs:sequence>
           <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="id" type="xs:ID"/>
+        <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="package" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

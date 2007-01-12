@@ -206,14 +206,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return 1
-   */
-  @Override
-  public int getOrder() {
-    return 1;
-  }
-
-  /**
    * Whether to pretty-print the xml.
    *
    * @param prettyPrint Whether to pretty-print the xml.
