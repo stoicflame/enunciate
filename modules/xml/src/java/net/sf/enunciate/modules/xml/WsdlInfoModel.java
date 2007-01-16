@@ -20,7 +20,7 @@ public class WsdlInfoModel extends StringModel {
 
   @Override
   public TemplateModel get(String key) throws TemplateModelException {
-    if (("file".equals(key)) || ("location".equals(key))) {
+    if (("filename".equals(key)) || ("location".equals(key))) {
       return wrap(wsdlInfo.getProperty(key));
     }
 

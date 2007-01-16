@@ -7,6 +7,7 @@ import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.util.ClassDeclarationComparator;
+import net.sf.enunciate.main.FileArtifact;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,9 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    getEnunciate().setProperty("jaxws.src.dir", new File(getEnunciate().getGenerateDir(), "jaxws"));
+    File genDir = getGenerateDir();
+    getEnunciate().setProperty("jaxws.src.dir", genDir);
+    getEnunciate().addArtifact(new FileArtifact(getName(), "jaxws.src.dir", genDir));
   }
 
   @Override

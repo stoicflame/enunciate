@@ -14,7 +14,7 @@
 [/#if]
   <data>
 [@forEachSchema]
-    <schema namespace="${schema.namespace?default("")}">
+    <schema namespace="${schema.namespace?default("")}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
   [#list schema.typeDefinitions as type]
         <type name="${type.name}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
@@ -86,51 +86,53 @@
 [/@forEachSchema]
   </data>
   <soap>
-    <endpointInterfaces>
+    <wsdls>
 [@forEachWsdl]
+      <wsdl namespace="${wsdl.namespace?default("")"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface]
-      <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
-        <documentation>
-          <![CDATA[${endpointInterface.javaDoc}]]>
-        </documentation>
+        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
+          <documentation>
+            <![CDATA[${endpointInterface.javaDoc}]]>
+          </documentation>
     [#list endpointInterface.javaDoc?keys as tag]
       [#list endpointInterface.javaDoc[tag] as tagValue]
-        <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
       [/#list]
     [/#list]
     [#list endpointInterface.webMethods as method]
-        <method name="${method.operationName}">
-          <documentation>
-            <![CDATA[${method.javaDoc}]]>
-          </documentation>
+          <method name="${method.operationName}">
+            <documentation>
+              <![CDATA[${method.javaDoc}]]>
+            </documentation>
       [#list method.javaDoc?keys as tag]
         [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
           [#list method.javaDoc[tag] as tagValue]
-          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
           [/#list]
         [/#if]
       [/#list]
       [#list method.webParameters as parameter]
-          <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
-            <![CDATA[${parameter.javaDoc}]]>
-          </parameter>
+            <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
+              <![CDATA[${parameter.javaDoc}]]>
+            </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
-          <result>
-            <![CDATA[${method.returnType.docComment?default("")}]]>
-          </result>
+            <result>
+              <![CDATA[${method.returnType.docComment?default("")}]]>
+            </result>
       [/#if]
       [#list method.thrownTypes as fault]
-          <fault name="${fault.declaration.simpleName}">
-            <![CDATA[${fault.docComment?default("")}]]>
-          </fault>
+            <fault name="${fault.declaration.simpleName}">
+              <![CDATA[${fault.docComment?default("")}]]>
+            </fault>
       [/#list]
-        </method>
+          </method>
     [/#list]
-      </endpointInterface>
+        </endpointInterface>
   [/@forEachEndpointInterface]
+      </wsdl>
 [/@forEachWsdl]
-    </endpointInterfaces>
+    </wsdls>
   </soap>
   <rest>
     <resources>

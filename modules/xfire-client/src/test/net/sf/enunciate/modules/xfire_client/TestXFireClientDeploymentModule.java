@@ -97,7 +97,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals(4, templateLedger.get(responseBeanTemplate).intValue());
 
     //check that all types were accounted for.
-    ArrayList<String> typeList = new ArrayList<String>((List<String>) enunciate.getProperty("client.type.list"));
+    ArrayList<String> typeList = new ArrayList<String>(module.getGeneratedTypeList());
     assertEquals(3 + 4 + 4 + 2, typeList.size()); //3 jaxb types, 4 request wrappers, 4 response wrappers, 2 fault beans.
     assertTrue(typeList.remove("net.sf.enunciate.samples.xfire_client.jaxws.DoSomethingWithADate"));
     assertTrue(typeList.remove("net.sf.enunciate.samples.xfire_client.jaxws.DoSomethingWithADateResponse"));
@@ -114,7 +114,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertTrue(typeList.remove("net.sf.enunciate.samples.xfire_client.with.a.nested.pckg.NestedSimpleType"));
 
     //check that all annotations were correctly noted on the client-side.
-    ExplicitWebAnnotations annotations = (ExplicitWebAnnotations) enunciate.getProperty("client.annotations");
+    ExplicitWebAnnotations annotations = module.getGeneratedAnnotations();
     assertEquals(0, annotations.class2HandlerChain.size());
     assertEquals("There should be a property order set for each request and response bean.", 8, annotations.class2PropertyOrder.size());
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("net.sf.enunciate.samples.xfire_client.jaxws.DoSomethingWithADate"), new String[]{"date"}));

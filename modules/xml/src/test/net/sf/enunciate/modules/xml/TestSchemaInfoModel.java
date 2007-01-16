@@ -14,10 +14,10 @@ public class TestSchemaInfoModel extends TestCase {
    */
   public void testGet() throws Exception {
     SchemaInfo schemaInfo = new SchemaInfo();
-    schemaInfo.setProperty("file", "something.xsd");
+    schemaInfo.setProperty("filename", "something.xsd");
     schemaInfo.setProperty("location", "http://localhost:8080/something.xsd");
     SchemaInfoModel model = new SchemaInfoModel(schemaInfo, new BeansWrapper());
-    assertEquals("something.xsd", model.get("file").toString());
+    assertEquals("something.xsd", model.get("filename").toString());
     assertEquals("http://localhost:8080/something.xsd", model.get("location").toString());
   }
   

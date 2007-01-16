@@ -4,6 +4,7 @@ import com.sun.mirror.declaration.PackageDeclaration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
+import net.sf.enunciate.main.Artifact;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.jelly.apt.Context;
@@ -13,6 +14,8 @@ import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * The documentation deployment module is responsible for generating the documentation
@@ -101,8 +104,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The URL to the Freemarker template for processing the base documentation xml file.
    */
-  protected URL getTemplateURL() {
+  protected URL getDocsTemplateURL() {
     return DocumentationDeploymentModule.class.getResource("docs.xml.fmt");
+  }
+
+  /**
+   * The URL to the Freemarker template for processing the client libraries xml file.
+   *
+   * @return The URL to the Freemarker template for processing the client libraries xml file.
+   */
+  protected URL getClientLibrariesTemplateURL() {
+    return DocumentationDeploymentModule.class.getResource("client-libraries.xml.fmt");
   }
 
   /**
@@ -123,8 +135,25 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       model.setVariable("licenseFile", this.licenseFile.getName());
     }
 
-    processTemplate(getTemplateURL(), model);
+    processTemplate(getDocsTemplateURL(), model);
     File docsXml = new File(getGenerateDir(), "docs.xml");
+
+    try {
+      Class libraryArtifactClass = getClass().getClassLoader().loadClass("net.sf.enunciate.modules.xfire_client.ClientLibraryArtifact");
+      List<Artifact> clientLibraries = new ArrayList<Artifact>();
+      for (Artifact artifact : enunciate.getArtifacts()) {
+        if (libraryArtifactClass.isAssignableFrom(artifact.getClass())) {
+          clientLibraries.add(artifact);
+        }
+      }
+
+      model.setVariable("libraries", clientLibraries);
+      processTemplate(getClientLibrariesTemplateURL(), model);
+    }
+    catch (ClassNotFoundException e) {
+      //fall through... no client-side libraries can be found...
+    }
+
   }
 
   @Override

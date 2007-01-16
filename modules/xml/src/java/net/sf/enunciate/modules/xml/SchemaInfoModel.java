@@ -23,7 +23,7 @@ public class SchemaInfoModel extends StringModel {
 
   @Override
   public TemplateModel get(String key) throws TemplateModelException {
-    if (("file".equals(key)) || ("location".equals(key))) {
+    if (("filename".equals(key)) || ("location".equals(key))) {
       return wrap(schemaInfo.getProperty(key));
     }
 

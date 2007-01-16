@@ -5,7 +5,6 @@ import freemarker.template.TemplateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
-import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xml.config.SchemaConfig;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -84,7 +82,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       String prefix = ns2prefix.get(schemaInfo.getNamespace());
       if (prefix != null) {
         String file = prefix + ".xsd";
-        schemaInfo.setProperty("file", file);
+        schemaInfo.setProperty("filename", file);
         schemaInfo.setProperty("location", file);
       }
     }
@@ -94,7 +92,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       String prefix = ns2prefix.get(wsdlInfo.getTargetNamespace());
       if (prefix != null) {
         String file = prefix + ".wsdl";
-        wsdlInfo.setProperty("file", file);
+        wsdlInfo.setProperty("filename", file);
       }
     }
 
@@ -103,7 +101,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
       if (schemaInfo != null) {
         if (customConfig.getFile() != null) {
-          schemaInfo.setProperty("file", customConfig.getFile());
+          schemaInfo.setProperty("filename", customConfig.getFile());
           schemaInfo.setProperty("location", customConfig.getFile());
         }
 
@@ -118,7 +116,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
       if (wsdlInfo != null) {
         if (customConfig.getFile() != null) {
-          wsdlInfo.setProperty("file", customConfig.getFile());
+          wsdlInfo.setProperty("filename", customConfig.getFile());
         }
       }
     }
@@ -128,25 +126,21 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.setFileOutputDirectory(artifactDir);
     processTemplate(getTemplateURL(), model);
 
-    HashMap<String, File> ns2wsdlArtifact = new HashMap<String, File>();
-    HashMap<String, File> service2artifact = new HashMap<String, File>();
     for (WsdlInfo wsdl : ns2wsdl.values()) {
-      String file = (String) wsdl.getProperty("file");
+      String file = (String) wsdl.getProperty("filename");
       File wsdlFile = new File(artifactDir, file);
-      ns2wsdlArtifact.put(wsdl.getTargetNamespace(), wsdlFile);
-      for (EndpointInterface endpointInterface : wsdl.getEndpointInterfaces()) {
-        service2artifact.put(endpointInterface.getServiceName(), wsdlFile);
-      }
+      wsdl.setProperty("file", wsdlFile);
 
       if (prettyPrint) {
         prettyPrint(wsdlFile);
       }
     }
 
-    HashMap<String, File> ns2schemaArtifact = new HashMap<String, File>();
     for (SchemaInfo schemaInfo : ns2schema.values()) {
-      File schemaFile = new File(artifactDir, (String) schemaInfo.getProperty("file"));
-      ns2schemaArtifact.put(schemaInfo.getNamespace(), schemaFile);
+      String file = (String) schemaInfo.getProperty("filename");
+      File schemaFile = new File(artifactDir, file);
+      schemaInfo.setProperty("file", schemaFile);
+
       if (prettyPrint) {
         prettyPrint(schemaFile);
       }
@@ -155,10 +149,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         //todo: write some logic to validate the schemas.
       }
     }
-
-    getEnunciate().setProperty("xml.ns2schema", ns2schemaArtifact);
-    getEnunciate().setProperty("xml.ns2wsdl", ns2wsdlArtifact);
-    getEnunciate().setProperty("xml.service2wsdl", service2artifact);
   }
 
   /**

@@ -53,7 +53,8 @@
       <xs:element name="elements" type="globalElements" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
 
-    <xs:attribute name="namespace"/>
+    <xs:attribute name="namespace" type="xs:string"/>
+    <xs:attribute name="file" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="packages">
@@ -268,11 +269,11 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="endpointInterfaces" type="endpointInterfaces" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="wsdls" type="wsdls" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="endpointInterfaces">
+  <xs:complexType name="wsdls">
 
     <xs:annotation>
       <xs:documentation>
@@ -281,8 +282,24 @@
     </xs:annotation>
 
     <xs:sequence>
+      <xs:element name="wsdl" type="wsdl" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="wsdl">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element containing the documentation for a WSDL.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
       <xs:element name="endpointInterface" type="endpointInterface" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="namespace" type="xs:string"/>
+    <xs:attribute name="file" type="xs:string"/>
 
   </xs:complexType>
 

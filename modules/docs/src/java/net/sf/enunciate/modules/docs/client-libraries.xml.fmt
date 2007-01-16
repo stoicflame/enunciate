@@ -1,0 +1,18 @@
+[#ftl]
+[@file name="client-libraries.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<client-libraries>
+  [#list libraries as library]
+  <library name="${library.name}">
+    <created>${library.created}</created>
+    <platform>${library.platform}</platform>
+    <files>
+    [#list library.files?keys as file]
+      <file name="${file.name}"><![CDATA[${library.files[file]}]]></file>
+    [/#list]
+    </files>
+    <description><![CDATA[${library.description}]]></description>
+  </library>
+  [/#list]
+</client-libraries>
+[/@file]

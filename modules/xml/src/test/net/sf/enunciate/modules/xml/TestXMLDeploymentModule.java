@@ -93,23 +93,17 @@ public class TestXMLDeploymentModule extends TestCase {
     module.doFreemarkerGenerate();
 
     assertTrue("Not all templates were processed.  Unprocessed templates: " + processList.toString(), processList.isEmpty());
-    assertEquals("default1.xsd", defaultSchemaInfo.getProperty("file"));
+    assertEquals("default1.xsd", defaultSchemaInfo.getProperty("filename"));
     assertEquals("default1.xsd", defaultSchemaInfo.getProperty("location"));
-    assertEquals("custom.xsd", customSchemaInfo.getProperty("file"));
+    assertEquals("custom.xsd", customSchemaInfo.getProperty("filename"));
     assertEquals("urn:custom.xsd", customSchemaInfo.getProperty("location"));
-    assertEquals("default1.wsdl", defaultWsdlInfo.getProperty("file"));
-    assertEquals("custom.wsdl", customWsdlInfo.getProperty("file"));
+    assertEquals("default1.wsdl", defaultWsdlInfo.getProperty("filename"));
+    assertEquals("custom.wsdl", customWsdlInfo.getProperty("filename"));
     File artifactDir = new File(generateDir, "xml");
-    Map<String, File> ns2schemaArtifact = (Map<String, File>) enunciate.getProperty("xml.ns2schema");
-    Map<String, File> ns2wsdlArtifact = (Map<String, File>) enunciate.getProperty("xml.ns2wsdl");
-    Map<String, File> service2wsdl = (Map<String, File>) enunciate.getProperty("xml.service2wsdl");
-    assertEquals(0, service2wsdl.size());
-    assertEquals(2, ns2schemaArtifact.size());
-    assertEquals(2, ns2wsdlArtifact.size());
-    assertEquals(new File(artifactDir, "default1.xsd"), ns2schemaArtifact.get("urn:default"));
-    assertEquals(new File(artifactDir, "default1.wsdl"), ns2wsdlArtifact.get("urn:default"));
-    assertEquals(new File(artifactDir, "custom.xsd"), ns2schemaArtifact.get("urn:custom"));
-    assertEquals(new File(artifactDir, "custom.wsdl"), ns2wsdlArtifact.get("urn:custom"));
+    assertEquals(new File(artifactDir, "default1.xsd"), defaultSchemaInfo.getProperty("file"));
+    assertEquals(new File(artifactDir, "default1.wsdl"), defaultWsdlInfo.getProperty("file"));
+    assertEquals(new File(artifactDir, "custom.xsd"), customSchemaInfo.getProperty("file"));
+    assertEquals(new File(artifactDir, "custom.wsdl"), customWsdlInfo.getProperty("file"));
 
   }
 

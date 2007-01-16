@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+
+  <xs:element name="client-libraries">
+
+    <xs:annotation>
+      <xs:documentation>
+        Root element for the xml file that describes the client libraries that are available.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="library" type="library" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+
+  </xs:element>
+
+  <xs:complexType name="library">
+
+    <xs:annotation>
+      <xs:documentation>
+        The type containing the info for a client-side library.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="created" type="xs:date" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="platform" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="files" type="files" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="files">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element containing the list of files for this library.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="file" type="file" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="file">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element describing the file.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+</xs:schema>

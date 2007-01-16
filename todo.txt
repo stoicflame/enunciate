@@ -18,4 +18,5 @@ Config options:
   soap endpoint addresses
   XML: Option to not inline request/response wrappers into the wsdl.
 Additional Features:
+  ResourceBundle (for the messages, client library file descriptions, and documentation headers)
   @XmlTypeAdapter Support

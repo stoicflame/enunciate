@@ -58,6 +58,7 @@ public class Enunciate {
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
+  private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final String[] sourceFiles;
 
   public static void main(String[] args) {
@@ -152,11 +153,21 @@ public class Enunciate {
     //todo: now export the artifacts as specified on the command line. 
   }
 
+  /**
+   * Creates a temporary directory.
+   *
+   * @return A temporary directory.
+   */
   public File createTempDir() throws IOException {
-    File genDir = File.createTempFile("enunciate", "");
-    genDir.delete();
-    genDir.mkdirs();
-    return genDir;
+    File tempDir = File.createTempFile("enunciate", "");
+    tempDir.delete();
+    tempDir.mkdirs();
+
+    if (isDebug()) {
+      System.out.println("Created directory " + tempDir);
+    }
+
+    return tempDir;
   }
 
   /**
@@ -646,6 +657,25 @@ public class Enunciate {
    */
   public void setProperty(String property, Object value) {
     this.properties.put(property, value);
+  }
+
+  /**
+   * The artifacts exportable by enunciate.
+   *
+   * @return The artifacts exportable by enunciate.
+   */
+  public Set<Artifact> getArtifacts() {
+    return artifacts;
+  }
+
+  /**
+   * Adds the specified artifact.
+   *
+   * @param artifact The artifact to add.
+   * @return Whether the artifact was successfully added.
+   */
+  public boolean addArtifact(Artifact artifact) {
+    return this.artifacts.add(artifact);
   }
 
   /**

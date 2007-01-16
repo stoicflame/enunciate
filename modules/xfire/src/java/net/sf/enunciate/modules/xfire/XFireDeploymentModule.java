@@ -3,6 +3,7 @@ package net.sf.enunciate.modules.xfire;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.contract.jaxws.*;
@@ -161,55 +162,41 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     File xfireConfigDir = getXMLGenerateDir();
     enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 
-    HashSet<File> xmlArtifacts = new HashSet<File>();
-    HashMap<String, String> ns2schemaResource = new HashMap<String, String>();
-    HashMap<String, File> ns2schema = (HashMap<String, File>) enunciate.getProperty("xml.ns2schema");
-    if (ns2schema != null) {
-      for (String ns : ns2schema.keySet()) {
-        File artifact = ns2schema.get(ns);
-        String resourceName = getXmlResourceName(artifact);
-        ns2schemaResource.put(ns, resourceName);
-        xmlArtifacts.add(artifact);
+    HashMap<String, String> ns2schema = new HashMap<String, String>();
+    for (SchemaInfo schemaInfo : getModel().getNamespacesToSchemas().values()) {
+      File schemaFile = (File) schemaInfo.getProperty("file");
+      if (schemaFile != null) {
+        String resourceName = getXmlResourceName(schemaFile);
+        ns2schema.put(schemaInfo.getNamespace(), resourceName);
+        enunciate.copyFile(schemaFile, new File(webinfClasses, resourceName));
+      }
+      else {
+        System.err.println("WARNING: No schema file for namespace [" + schemaInfo.getNamespace() +
+          "] was found.  Schema publication for that namespace will be disabled.");
       }
     }
-    else {
-      System.err.println("WARNING: No schemas for the namespaces of the project were found.  Schema publication will be disabled.");
-    }
 
-    HashMap<String, String> ns2wsdlResource = new HashMap<String, String>();
-    HashMap<String, File> ns2wsdl = (HashMap<String, File>) enunciate.getProperty("xml.ns2wsdl");
-    if (ns2wsdl != null) {
-      for (String ns : ns2wsdl.keySet()) {
-        File artifact = ns2wsdl.get(ns);
-        String resourceName = getXmlResourceName(artifact);
-        ns2wsdlResource.put(ns, resourceName);
-        xmlArtifacts.add(artifact);
+    HashMap<String, String> ns2wsdl = new HashMap<String, String>();
+    HashMap<String, String> service2wsdl = new HashMap<String, String>();
+    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      File wsdlFile = (File) wsdlInfo.getProperty("file");
+      if (wsdlFile != null) {
+        String resourceName = getXmlResourceName(wsdlFile);
+        ns2wsdl.put(wsdlInfo.getTargetNamespace(), resourceName);
+
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          service2wsdl.put(ei.getServiceName(), resourceName);
+        }
+
+        enunciate.copyFile(wsdlFile, new File(webinfClasses, resourceName));
+      }
+      else {
+        System.err.println("WARNING: No WSDLs for namespace [" + wsdlInfo.getTargetNamespace() +
+          "] was found.  WSDL publication for that namespace will be disabled.");
       }
     }
-    else {
-      System.err.println("WARNING: No wsdls for the namespaces of the project were found.  WSDL publication will be disabled.");
-    }
 
-    HashMap<String, File> service2wsdl = (HashMap<String, File>) enunciate.getProperty("xml.service2wsdl");
-    HashMap<String, String> service2WsdlResource = new HashMap<String, String>();
-    if (service2wsdl != null) {
-      for (String service : service2wsdl.keySet()) {
-        File wsdl = service2wsdl.get(service);
-        String resourceName = getXmlResourceName(wsdl);
-        service2WsdlResource.put(service, resourceName);
-        xmlArtifacts.add(wsdl);
-      }
-    }
-    else {
-      System.err.println("WARNING: No wsdls for the services of the project were found.  WSDL publication will be disabled.");
-    }
-
-    for (File artifact : xmlArtifacts) {
-      String resourceName = getXmlResourceName(artifact);
-      enunciate.copyFile(artifact, new File(webinfClasses, resourceName));
-    }
-
-    XMLAPILookup lookup = new XMLAPILookup(ns2wsdlResource, ns2schemaResource, service2WsdlResource);
+    XMLAPILookup lookup = new XMLAPILookup(ns2wsdl, ns2schema, service2wsdl);
     lookup.store(new FileOutputStream(new File(webinfClasses, "xml.lookup")));
   }
 
