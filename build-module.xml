@@ -157,6 +157,8 @@
         <include name="**/*.xml"/>
         <include name="**/*.jelly"/>
         <include name="**/*.fmt"/>
+        <include name="**/*.html"/>
+        <include name="**/package.html"/>
       </fileset>
     </copy>
 

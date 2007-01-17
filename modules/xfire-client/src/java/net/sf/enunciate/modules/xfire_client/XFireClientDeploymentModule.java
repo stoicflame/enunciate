@@ -406,17 +406,23 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @return The string form of the resource.
    */
   protected String readResource(String resource) throws IOException {
-    BufferedReader in = new BufferedReader(new InputStreamReader(XFireClientDeploymentModule.class.getResourceAsStream(resource)));
-    StringWriter writer = new StringWriter();
-    PrintWriter out = new PrintWriter(writer);
-    String line;
-    while ((line = in.readLine()) != null) {
-      out.println(line);
+    InputStream resourceIn = XFireClientDeploymentModule.class.getResourceAsStream(resource);
+    if (resourceIn != null) {
+      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
+      StringWriter writer = new StringWriter();
+      PrintWriter out = new PrintWriter(writer);
+      String line;
+      while ((line = in.readLine()) != null) {
+        out.println(line);
+      }
+      out.flush();
+      out.close();
+      writer.close();
+      return writer.toString();
     }
-    out.flush();
-    out.close();
-    writer.close();
-    return writer.toString();
+    else {
+      return null;
+    }
   }
 
   /**
