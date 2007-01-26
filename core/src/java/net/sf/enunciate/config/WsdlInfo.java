@@ -13,9 +13,28 @@ import java.util.*;
  */
 public class WsdlInfo {
 
+  private String id;
   private String targetNamespace;
   private final Collection<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
+
+  /**
+   * A unique id for this wsdl.
+   *
+   * @return A unique id for this wsdl.
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * A unique id for this wsdl.
+   *
+   * @param id A unique id for this wsdl.
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    * The target namespace.

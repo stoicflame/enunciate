@@ -4,14 +4,14 @@
 <client-libraries>
   [#list libraries as library]
   <library name="${library.name}">
-    <created>${library.created}</created>
-    <platform>${library.platform}</platform>
+    <created>${library.created?datetime?string.medium}</created>
+    <platform>${library.platform?default("")}</platform>
     <files>
     [#list library.files?keys as file]
-      <file name="${file.name}"><![CDATA[${library.files[file]}]]></file>
+      <file name="${file.name}"><![CDATA[${library.getFileDescription(file.name)?default("")}]]></file>
     [/#list]
     </files>
-    <description><![CDATA[${library.description}]]></description>
+    <description><![CDATA[${library.description?default("")}]]></description>
   </library>
   [/#list]
 </client-libraries>

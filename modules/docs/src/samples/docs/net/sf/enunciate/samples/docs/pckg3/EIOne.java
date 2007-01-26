@@ -6,6 +6,7 @@ import javax.jws.WebService;
  * documentation for EIOne.
  *
  * @author Ryan Heaton
+ * @deprecated some reason
  */
 @WebService
 public interface EIOne {

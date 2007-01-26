@@ -21,6 +21,7 @@
           </xs:sequence>
           <xs:attribute name="licenseFile" type="xs:string"/>
           <xs:attribute name="copyright" type="xs:string"/>
+          <xs:attribute name="title" type="xs:string"/>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
@@ -54,6 +55,7 @@
     </xs:sequence>
 
     <xs:attribute name="namespace" type="xs:string"/>
+    <xs:attribute name="namespaceId" type="xs:string"/>
     <xs:attribute name="file" type="xs:string"/>
   </xs:complexType>
 
@@ -299,6 +301,7 @@
       <xs:element name="endpointInterface" type="endpointInterface" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="namespace" type="xs:string"/>
+    <xs:attribute name="namespaceId" type="xs:string"/>
     <xs:attribute name="file" type="xs:string"/>
 
   </xs:complexType>
@@ -339,6 +342,7 @@
           <xs:element name="fault" type="fault" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="oneWay" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

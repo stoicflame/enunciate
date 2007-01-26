@@ -1,10 +1,10 @@
 [#ftl]
 [@file name="docs.xml"]
 <?xml version="1.0" encoding="UTF-8"?>
-<api-docs[#if copyright?exists] copyright="${copyright}"[/#if][#if licenseFile?exists] licenseFile="${licenseFile}"[/#if]>
+<api-docs[#if copyright?exists] copyright="${copyright}"[/#if][#if licenseFile?exists] licenseFile="${licenseFile}"[/#if][#if title?exists] title="${title}"[/#if]>
 [#if apiDoc?exists]
   <documentation>
-    <![CDATA[${type.javaDoc}]]>
+    <![CDATA[${apiDoc}]]>
   </documentation>
   [#list apiDoc?keys as tag]
     [#list apiDoc[tag] as tagValue]
@@ -14,13 +14,15 @@
 [/#if]
   <data>
 [@forEachSchema]
-    <schema namespace="${schema.namespace?default("")}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
+    <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
   [#list schema.typeDefinitions as type]
         <type name="${type.name}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
+    [#if type.docValue?exists]
           <documentation>
-            <![CDATA[${type.javaDoc}]]>
+            <![CDATA[${type.docValue}]]>
           </documentation>
+    [/#if]
     [#list type.javaDoc?keys as tag]
       [#list type.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
@@ -30,7 +32,7 @@
           <attributes>
       [#list type.attributes as attribute]
             <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace}" typeName="${attribute.baseType.qname.localPart}">
-              <![CDATA[${attribute.javaDoc.return?default(attribute.javaDoc)}]]>
+              <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))}]]>
             </attribute>
       [/#list]
           </attributes>
@@ -39,23 +41,25 @@
           <elements>
       [#list type.elements as element]
             <element name="${element.name}" typeNamespace="${element.baseType.namespace}" typeName="${element.baseType.qname.localPart}">
-              <![CDATA[${element.javaDoc.return?default(element.javaDoc)}]]>
+              <![CDATA[${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))}]]>
             </element>
       [/#list]
           </elements>
     [/#if]
     [#if type.value?exists]
           <value typeNamespace="value.baseType.namespace" typeName="value.baseType.qname.localPart">
-            <![CDATA[${type.value.javaDoc.return?default(type.value.javaDoc)}]]>
+            <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))}]]>
           </value>
     [/#if]
     [#if type.enum]
           <values>
       [#list type.delegate.enumConstants as item]
             <item value="${type.enumValues[item.simpleName]}">
+        [#if item.docValue?exists]
               <documentation>
-                 <![CDATA[${item.javaDoc}]]>
+                 <![CDATA[${item.docValue}]]>
               </documentation>
+        [/#if]
         [#list item.javaDoc?keys as tag]
           [#list item.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
@@ -71,9 +75,11 @@
       <elements>
   [#list schema.globalElements as element]
         <element name="${element.name}" type="${element.typeDefinition.qualifiedName}">
+    [#if element.docValue?exists]
           <documentation>
-            <![CDATA[${element.javaDoc}]]>
+            <![CDATA[${element.docValue}]]>
           </documentation>
+    [/#if]
     [#list element.javaDoc?keys as tag]
       [#list element.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
@@ -88,22 +94,26 @@
   <soap>
     <wsdls>
 [@forEachWsdl]
-      <wsdl namespace="${wsdl.namespace?default("")"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
+      <wsdl namespace="${wsdl.namespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
   [@forEachEndpointInterface]
         <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
+    [#if endpointInterface.docValue?exists]
           <documentation>
-            <![CDATA[${endpointInterface.javaDoc}]]>
+            <![CDATA[${endpointInterface.docValue}]]>
           </documentation>
+    [/#if]
     [#list endpointInterface.javaDoc?keys as tag]
       [#list endpointInterface.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
       [/#list]
     [/#list]
     [#list endpointInterface.webMethods as method]
-          <method name="${method.operationName}">
+          <method name="${method.operationName}" oneWay="${method.oneWay?string}">
+      [#if method.docValue?exists]
             <documentation>
-              <![CDATA[${method.javaDoc}]]>
+              <![CDATA[${method.docValue}]]>
             </documentation>
+      [/#if]
       [#list method.javaDoc?keys as tag]
         [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
           [#list method.javaDoc[tag] as tagValue]
@@ -113,17 +123,17 @@
       [/#list]
       [#list method.webParameters as parameter]
             <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
-              <![CDATA[${parameter.javaDoc}]]>
+              <![CDATA[${parameter.docValue?default("no documentation provided)")}]]>
             </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
             <result>
-              <![CDATA[${method.returnType.docComment?default("")}]]>
+              <![CDATA[${method.returnType.docComment?default("(no documentation provided)")}]]>
             </result>
       [/#if]
       [#list method.thrownTypes as fault]
             <fault name="${fault.declaration.simpleName}">
-              <![CDATA[${fault.docComment?default("")}]]>
+              <![CDATA[${fault.docValue?default("(no documentation provided)")}]]>
             </fault>
       [/#list]
           </method>
@@ -140,9 +150,11 @@
       <resource name="${resource}">
   [#list nouns2methods[resource] as method]
         <operation type="${method.verb}" requiresResourceId="${method.properNoun?exists?string}">
+     [#if method.docValue?exists]
           <documentation>
-            <![CDATA[${method.javaDoc}]]>
+            <![CDATA[${method.docValue}]]>
           </documentation>
+     [/#if]
      [#list method.javaDoc?keys as tag]
        [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
          [#list method.javaDoc[tag] as tagValue]
@@ -152,12 +164,12 @@
      [/#list]
      [#list method.adjectives as parameter]
           <parameter name="${parameter.adjectiveName}">
-            <![CDATA[${parameter.javaDoc}]]>
+            <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
           </parameter>
      [/#list]
      [#if method.nounValue?exists]
           <inValue typeNamespace="${method.nounValue.xmlType.namespace}" typeName="${method.nounValue.xmlType.name}">
-            <![CDATA[${method.nounValue.javaDoc}]]>
+            <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
           </inValue>
      [/#if]
      [#if !method.returnType.void]
@@ -177,18 +189,20 @@
     </resources>
   </rest>
   <packages>
-[@forEachPackage]
+[@forAllPackages var="package"]
     <package id="${package.qualifiedName}">
+  [#if package.docValue?exists]
       <documentation>
-        <![CDATA[${package.javaDoc}]]>
+        <![CDATA[${package.docValue}]]>
       </documentation>
+  [/#if]
   [#list package.javaDoc?keys as tag]
     [#list package.javaDoc[tag] as tagValue]
       <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
     [/#list]
   [/#list]
     </package>
-[@forEachPackage]
+[/@forAllPackages]
   </packages>
 </api-docs>
 [/@file]

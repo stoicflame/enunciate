@@ -64,6 +64,9 @@ h1,h2,h3 {
 .clearer {
 	clear: both;
 }
+.deprecated {
+  color: red;
+}
 
 /* structure */
 .container {
@@ -144,11 +147,30 @@ h1,h2,h3 {
 }
 .content .descr {
 	color: #333;
-	margin-bottom: 6px;
 }
 .content li {
 	list-style: url(img/li.gif);
 	margin-left: 18px;
+}
+.content table {
+	background: url(img/bgcode.gif);
+	border: 1px solid #F0F0F0;
+	border-left: 6px solid #39F;
+	color: #555;
+	display: block;
+	font: normal 1.1em "Lucida Sans Unicode",serif;
+	margin-bottom: 12px;
+	padding: 8px 10px;
+}
+.content table td {
+  vertical-align:top;
+  text-align:left;
+  padding: 3px 3px 3px 3px;
+}
+.content table th {
+  vertical-align:top;
+  text-align:left;
+  padding: 3px 3px 3px 3px;
 }
 
 /* footer */

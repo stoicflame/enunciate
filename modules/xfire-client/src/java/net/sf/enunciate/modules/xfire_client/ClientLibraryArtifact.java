@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -71,8 +72,24 @@ public class ClientLibraryArtifact extends BaseArtifact {
    *
    * @return The files (with associated descriptions) for this artifact.
    */
-  public HashMap<File, String> getFiles() {
+  public Map<File, String> getFiles() {
     return files;
+  }
+
+  /**
+   * Gets the description for the file specified by name.
+   *
+   * @param filename The filename.
+   * @return The description.
+   */
+  public String getFileDescription(String filename) {
+    for (File file : this.files.keySet()) {
+      if (file.getName().equals(filename)) {
+        return this.files.get(file);
+      }
+    }
+
+    return null;
   }
 
   /**

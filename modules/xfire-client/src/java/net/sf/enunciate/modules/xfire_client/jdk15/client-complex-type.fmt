@@ -22,14 +22,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   [#list type.attributes as attribute]
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(attribute.accessorType)} get${attribute.simpleName?cap_first}() {
     return this.${attribute.simpleName};
   }
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute.accessorType)} ${attribute.simpleName}) {
     this.${attribute.simpleName} = ${attribute.simpleName};
@@ -38,14 +38,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   [#if type.value?exists]
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(type.value.accessorType)} get${type.value.simpleName?cap_first}() {
     return this.${type.value.simpleName};
   }
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value.accessorType)} ${type.value.simpleName}) {
     this.${type.value.simpleName} = ${type.value.simpleName};
@@ -54,14 +54,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#list type.elements as element]
 
   /**
-   * ${element.javaDoc.return?default(element.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(element.accessorType)} get${element.simpleName?cap_first}() {
     return this.${element.simpleName};
   }
 
   /**
-   * ${element.javaDoc.return?default(element.javaDoc)?chop_linebreak?replace("\n", "\n   * ")}
+   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${element.simpleName?cap_first}(${classnameFor(element.accessorType)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};

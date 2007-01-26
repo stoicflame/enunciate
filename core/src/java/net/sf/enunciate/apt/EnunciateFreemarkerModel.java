@@ -175,11 +175,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   public void add(EndpointInterface ei) {
     String namespace = ei.getTargetNamespace();
 
-    addNamespace(namespace);
+    String prefix = addNamespace(namespace);
 
     WsdlInfo wsdlInfo = namespacesToWsdls.get(namespace);
     if (wsdlInfo == null) {
       wsdlInfo = new WsdlInfo();
+      wsdlInfo.setId(prefix);
       namespacesToWsdls.put(namespace, wsdlInfo);
       wsdlInfo.setTargetNamespace(namespace);
     }
@@ -197,11 +198,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     add(typeDef.getSchema());
 
     String namespace = typeDef.getNamespace();
-    addNamespace(namespace);
+    String prefix = addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
+      schemaInfo.setId(prefix);
       schemaInfo.setNamespace(namespace);
       namespacesToSchemas.put(namespace, schemaInfo);
     }
@@ -241,13 +243,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     add(rootElement.getSchema());
 
     String namespace = rootElement.getNamespace();
-    addNamespace(namespace);
+    String prefix = addNamespace(namespace);
 
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
-      namespacesToSchemas.put(namespace, schemaInfo);
+      schemaInfo.setId(prefix);
       schemaInfo.setNamespace(namespace);
+      namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getGlobalElements().add(rootElement);
 
@@ -264,13 +267,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(Schema schema) {
     String namespace = schema.getNamespace();
-    addNamespace(namespace);
+    String prefix = addNamespace(namespace);
     this.namespacesToPrefixes.putAll(schema.getSpecifiedNamespacePrefixes());
     SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
     if (schemaInfo == null) {
       schemaInfo = new SchemaInfo();
-      namespacesToSchemas.put(namespace, schemaInfo);
+      schemaInfo.setId(prefix);
       schemaInfo.setNamespace(namespace);
+      namespacesToSchemas.put(namespace, schemaInfo);
     }
 
     if (schema.getElementFormDefault() != XmlNsForm.UNSET) {

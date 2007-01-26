@@ -9,7 +9,7 @@ import net.sf.enunciate.samples.docs.pckg1.BeanOne;
 import javax.jws.WebService;
 
 /**
- * docs for RESTAndEI
+ * <child>text</child>
  *
  * @author Ryan Heaton
  */

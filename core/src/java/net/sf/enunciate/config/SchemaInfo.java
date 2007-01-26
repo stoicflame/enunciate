@@ -14,6 +14,7 @@ import java.util.*;
  */
 public class SchemaInfo {
 
+  private String id;
   private String namespace;
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
@@ -27,6 +28,24 @@ public class SchemaInfo {
    */
   public boolean isEmptyNamespace() {
     return ((getNamespace() == null) || "".equals(getNamespace()));
+  }
+
+  /**
+   * A unique id for this schema.
+   *
+   * @return A unique id for this schema.
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * A unique id for this schema.
+   *
+   * @param id A unique id for this schema.
+   */
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**

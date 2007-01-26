@@ -61,10 +61,10 @@
   [#--simple type definition--]
   [#if typeDef.simple]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
-    [#if typeDef.docComment?exists]
+    [#if typeDef.docValue?exists]
   <${xs}:annotation>
     <${xs}:documentation>
-      ${typeDef.javaDoc?trim}
+      ${typeDef.docValue}
     </${xs}:documentation>
   </${xs}:annotation>
     [/#if]
@@ -78,10 +78,10 @@
   [#--enum type definition--]
   [#elseif typeDef.enum]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
-    [#if typeDef.docComment?exists]
+    [#if typeDef.docValue?exists]
   <${xs}:annotation>
     <${xs}:documentation>
-      ${typeDef.javaDoc?trim}
+      ${typeDef.docValue}
     </${xs}:documentation>
   </${xs}:annotation>
     [/#if]
@@ -95,10 +95,10 @@
   [#--complex type definition--]
   [#elseif typeDef.complex]
 <${xs}:complexType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if][#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
-    [#if typeDef.docComment?exists]
+    [#if typeDef.docValue?exists]
   <${xs}:annotation>
     <${xs}:documentation>
-      ${typeDef.javaDoc?trim}
+      ${typeDef.docValue}
     </${xs}:documentation>
   </${xs}:annotation>
     [/#if]
@@ -114,10 +114,10 @@
         [#list typeDef.elements as element]
           [#if element.wrapped]
         <${xs}:element name="${typeDef.wrapperName}">
-            [#if element.docComment?exists]
+            [#if element.docValue?exists]
           <${xs}:annotation>
             <${xs}:documentation>
-              ${element.javaDoc?trim}
+              ${element.docValue}
             </${xs}:documentation>
           </${xs}:annotation>
             [/#if]
@@ -141,20 +141,20 @@
           [#else]
             [#if element.ref?exists]
               <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-              [#if element.docComment?exists]
+              [#if element.docValue?exists]
               <${xs}:annotation>
                 <${xs}:documentation>
-                  ${element.javaDoc?trim}
+                  ${element.docValue}
                 </${xs}:documentation>
               </${xs}:annotation>
               [/#if]
               </${xs}:element>
             [#elseif element.baseType.anonymous]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-              [#if element.docComment?exists]
+              [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
-                    ${element.javaDoc?trim}
+                    ${element.docValue}
                   </${xs}:documentation>
                 </${xs}:annotation>
               [/#if]
@@ -162,10 +162,10 @@
               </${xs}:element>
             [#elseif element.xmlList]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-              [#if element.docComment?exists]
+              [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
-                    ${element.javaDoc?trim}
+                    ${element.docValue}
                   </${xs}:documentation>
                 </${xs}:annotation>
               [/#if]
@@ -175,10 +175,10 @@
               </${xs}:element>
             [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-              [#if element.docComment?exists]
+              [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
-                    ${element.javaDoc?trim}
+                    ${element.docValue}
                   </${xs}:documentation>
                 </${xs}:annotation>
               [/#if]
@@ -204,20 +204,20 @@
     [#list typeDef.attributes as attribute]
       [#if attribute.ref?exists]
       <${xs}:attribute required="${attribute.required}" ref="${attribute.ref}">
-        [#if attribute.docComment?exists]
+        [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
-            ${attribute.javaDoc?trim}
+            ${attribute.docValue}
           </${xs}:documentation>
         </${xs}:annotation>
         [/#if]
       </${xs}:attribute>
       [#else]
       <${xs}:attribute name="${attribute.name}" required="${attribute.required?string}" type="${attribute.baseType.qname}">
-        [#if attribute.docComment?exists]
+        [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
-            ${attribute.javaDoc?trim}
+            ${attribute.docValue}
           </${xs}:documentation>
         </${xs}:annotation>
         [/#if]

@@ -151,9 +151,9 @@ Template library for WSDL.
 --]
 [#macro processPortType endpointInterface]
   <portType name="${endpointInterface.portTypeName}">
-      [#if endpointInterface.docComment?exists]
+      [#if endpointInterface.docValue?exists]
     <documentation>
-      ${endpointInterface.javaDoc?trim}
+      ${endpointInterface.docValue}
     </documentation>
       [/#if]
       [@forEachWebMethod]
@@ -169,9 +169,9 @@ Template library for WSDL.
 --]
 [#macro processOperation webMethod]
   <operation name="${webMethod.operationName}">
-      [#if webMethod.docComment?exists]
+      [#if webMethod.docValue?exists]
     <documentation>
-      ${webMethod.javaDoc?trim}
+      ${webMethod.docValue}
     </documentation>
       [/#if]
       [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
