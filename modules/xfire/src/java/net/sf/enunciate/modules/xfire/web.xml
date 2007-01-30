@@ -18,13 +18,28 @@
   </listener>
 
   <servlet>
-    <servlet-name>xfire</servlet-name>
+    <servlet-name>spring</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>xfire</servlet-name>
-    <url-pattern>/*</url-pattern>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/soap/*</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+  </servlet-mapping>
+
+  <mime-mapping>
+    <extension>wsdl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
 
 </web-app>

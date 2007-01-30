@@ -669,6 +669,24 @@ public class Enunciate {
   }
 
   /**
+   * Finds the artifact of the given id.
+   *
+   * @param artifactId The id of the artifact.
+   * @return The artifact, or null if the artifact wasn't found.
+   */
+  public Artifact findArtifact(String artifactId) {
+    if (artifactId != null) {
+      for (Artifact artifact : artifacts) {
+        if (artifactId.equals(artifact.getId())) {
+          return artifact;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Adds the specified artifact.
    *
    * @param artifact The artifact to add.

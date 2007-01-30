@@ -1,16 +1,17 @@
 package net.sf.enunciate.modules.xfire;
 
-import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.spring.remoting.XFireServletControllerAdapter;
+import org.springframework.web.servlet.View;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 
 /**
  * Xfire servlet controller the redirects to the generated documentation and WSDL.
@@ -19,11 +20,11 @@ import java.io.UnsupportedEncodingException;
  */
 public class EnunciatedXFireServletController extends XFireServletControllerAdapter {
 
-  private final XMLAPILookup xmlLookup;
+  private final View wsdlView;
 
-  public EnunciatedXFireServletController(XFire xfire, QName serviceName) {
+  public EnunciatedXFireServletController(XFire xfire, QName serviceName, View wsdlView) {
     super(xfire, serviceName);
-    xmlLookup = XMLAPILookup.load(EnunciatedXFireServletController.class.getResourceAsStream("/xml.lookup"));
+    this.wsdlView = wsdlView;
   }
 
   /**
@@ -34,8 +35,7 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
    */
   @Override
   protected void generateService(HttpServletResponse response, String serviceName) throws ServletException, IOException {
-    //todo: redirect to the generated service documentation.
-    super.generateService(response, serviceName);
+    response.sendRedirect("/");
   }
 
   /**
@@ -46,8 +46,7 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
    */
   @Override
   protected void generateServices(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    //todo: redirect to the generated services documentation.
-    super.generateServices(request, response);
+    response.sendRedirect("/");
   }
 
   /**
@@ -58,10 +57,27 @@ public class EnunciatedXFireServletController extends XFireServletControllerAdap
    */
   @Override
   protected void generateWSDL(HttpServletResponse response, String service) throws ServletException, IOException {
-    String artifact = xmlLookup.getWsdlResourceForService(service);
-    response.sendRedirect("/" + artifact);
+    if (wsdlView == null) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, "WSDL not found for service: " + service);
+    }
+    else {
+      try {
+        HashMap model = new HashMap();
+        //the only thing I might have in the model at this point is the service name...
+        model.put("service", service);
+        wsdlView.render(model, getRequest(), response);
+      }
+      catch (ServletException e) {
+        throw e;
+      }
+      catch (IOException e) {
+        throw e;
+      }
+      catch (Exception e) {
+        response.sendError(500, e.getMessage());
+      }
+    }
   }
-
 
   @Override
   protected MessageContext createMessageContext(HttpServletRequest request, HttpServletResponse response, String service) {

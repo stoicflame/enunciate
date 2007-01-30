@@ -3,11 +3,11 @@ package net.sf.enunciate.modules.xfire;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.config.WsdlInfo;
-import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.main.Artifact;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
@@ -17,7 +17,6 @@ import sun.misc.Service;
 
 import javax.servlet.ServletContext;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -44,8 +43,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   /**
    * @return The URL to "xfire-servlet.fmt"
    */
-  protected URL getXFireServletTemplateURL() {
-    return XFireDeploymentModule.class.getResource("xfire-servlet.fmt");
+  protected URL getSpringServletTemplateURL() {
+    return XFireDeploymentModule.class.getResource("spring-servlet.fmt");
   }
 
   /**
@@ -68,7 +67,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //generate the xfire-servlet.xml
     model.setFileOutputDirectory(getXMLGenerateDir());
-    processTemplate(getXFireServletTemplateURL(), model);
+    processTemplate(getSpringServletTemplateURL(), model);
 
     //generate the rpc request/response beans.
     model.setFileOutputDirectory(getJAXWSGenerateDir());
@@ -116,7 +115,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   protected void doBuild() throws IOException {
     Enunciate enunciate = getEnunciate();
-    File webinf = getWebInf();
+    File buildDir = getBuildDir();
+    File webinf = new File(buildDir, "WEB-INF");
     File webinfClasses = new File(webinf, "classes");
     File webinfLib = new File(webinf, "lib");
 
@@ -158,46 +158,18 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //todo: merge the specified web.xml with another specified in the config?
     enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
 
-    //copy the xfire config file from the xfire configuration directory to the WEB-INF directory.
+    //copy the spring servlet config from the build dir to the WEB-INF directory.
     File xfireConfigDir = getXMLGenerateDir();
-    enunciate.copyFile(new File(xfireConfigDir, "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
+    enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
 
-    HashMap<String, String> ns2schema = new HashMap<String, String>();
-    for (SchemaInfo schemaInfo : getModel().getNamespacesToSchemas().values()) {
-      File schemaFile = (File) schemaInfo.getProperty("file");
-      if (schemaFile != null) {
-        String resourceName = getXmlResourceName(schemaFile);
-        ns2schema.put(schemaInfo.getNamespace(), resourceName);
-        enunciate.copyFile(schemaFile, new File(webinfClasses, resourceName));
-      }
-      else {
-        System.err.println("WARNING: No schema file for namespace [" + schemaInfo.getNamespace() +
-          "] was found.  Schema publication for that namespace will be disabled.");
-      }
+    //now try to find the documentation and export it to the build directory...
+    Artifact artifact = enunciate.findArtifact("docs");
+    if (artifact != null) {
+      artifact.exportTo(buildDir, enunciate);
     }
-
-    HashMap<String, String> ns2wsdl = new HashMap<String, String>();
-    HashMap<String, String> service2wsdl = new HashMap<String, String>();
-    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
-      File wsdlFile = (File) wsdlInfo.getProperty("file");
-      if (wsdlFile != null) {
-        String resourceName = getXmlResourceName(wsdlFile);
-        ns2wsdl.put(wsdlInfo.getTargetNamespace(), resourceName);
-
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          service2wsdl.put(ei.getServiceName(), resourceName);
-        }
-
-        enunciate.copyFile(wsdlFile, new File(webinfClasses, resourceName));
-      }
-      else {
-        System.err.println("WARNING: No WSDLs for namespace [" + wsdlInfo.getTargetNamespace() +
-          "] was found.  WSDL publication for that namespace will be disabled.");
-      }
+    else {
+      System.out.println("WARNING: No documentation artifact found!");
     }
-
-    XMLAPILookup lookup = new XMLAPILookup(ns2wsdl, ns2schema, service2wsdl);
-    lookup.store(new FileOutputStream(new File(webinfClasses, "xml.lookup")));
   }
 
   /**
@@ -226,15 +198,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     enunciate.zip(buildDir, warFile);
-  }
-
-  /**
-   * The WEB-INF directory for this module.
-   *
-   * @return The WEB-INF directory for this module.
-   */
-  protected File getWebInf() {
-    return new File(getBuildDir(), "WEB-INF");
   }
 
   /**

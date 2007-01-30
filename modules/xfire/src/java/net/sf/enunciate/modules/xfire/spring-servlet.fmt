@@ -1,27 +1,22 @@
 [#ftl]
-[@file name="xfire-servlet.xml"]
+[@file name="spring-servlet.xml"]
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    <property name="alwaysUseFullPath">
+      <value>true</value>
+    </property>
+    
     [#--
     todo: set a (configurable) list of interceptors?
     <property name="interceptors">
     </property>
     --]
-    [#--
-    todo: set a default handler to redirect to the user documentation?
-    <property name="defaultHandler">
-    </property>
-    --]
+
     <property name="urlMap">
       <map>
   [@forEachWsdl]
-    [#if wsdl.properties['file']?exists] [#--The wsdl file might not have been generated.--]
-        <entry key="${wsdl.properties['file']}">
-          <ref bean="wsdlHandler"/>
-        </entry>
-    [/#if]
     [@forEachEndpointInterface]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
@@ -35,6 +30,18 @@
               [#--todo: support to be able to configure spring interceptors for the impl bean?--]
               <bean class="${impl.qualifiedName}"/>
             </property>
+          [#if wsdl.properties.filename?exists]
+            <property name="wsdlView">
+              <bean class="org.springframework.web.servlet.view.RedirectView">
+                <property name="url">
+                  <value>/${wsdl.properties.filename}</value>
+                </property>
+                <property name="contextRelative">
+                  <value>true</value>
+                </property>
+              </bean>
+            </property>
+          [/#if]
           </bean>
         </entry>
         [/#if]
@@ -58,26 +65,13 @@
           </bean>
         </entry>
 
-        <!-- all schema files will be handled by the schema handler -->
-  [@forEachSchema]
-    [#if schema.properties['file']?exists]  [#--The schema file might not have been generated.--]
-        <entry key="${schema.properties['file']}">
-          <ref bean="schemaHandler"/>
-        </entry>
-    [/#if]
-  [/@forEachSchema]
       </map>
     </property>
 
     [#--todo: support to configure request/response hander chain?--]
   </bean>
 
-  <!-- define the xml api handler and its aliases. -->
-  <bean id="xmlApiHandler" class="net.sf.enunciate.modules.xfire.XMLAPIController"/>
-  <alias alias="wsdlHandler" name="xmlApiHandler"/>
-  <alias alias="schemaHandler" name="xmlApiHandler"/>
-
-  <!-- define the parent for all service endpoints -->
+  <!-- define the parent for all soap service endpoints -->
   <bean id="endpoint" abstract="true" class="net.sf.enunciate.modules.xfire.EnunciatedXFireExporter">
     <property name="serviceFactory">
       <ref bean="enunciatedServiceFactory"/>

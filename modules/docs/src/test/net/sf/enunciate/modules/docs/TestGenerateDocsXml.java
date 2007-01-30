@@ -92,7 +92,7 @@ public class TestGenerateDocsXml extends TestCase {
     String typeDocsXPath = "/api-docs/data/schema[@namespace='%s']/types/type[@id='%s']/documentation";
     assertEquals("Text for EnumOne", xpath.evaluate(String.format(typeDocsXPath, "urn:pckg1", "net.sf.enunciate.samples.docs.pckg1.EnumOne"), document).trim());
     
-    //todo: finish up this testing...
+    //todo: more testing of the docs xml...
 
     File libsXml = new File(enunciate.getGenerateDir(), "docs/downloads.xml");
     document = builder.parse(libsXml);
@@ -107,12 +107,16 @@ public class TestGenerateDocsXml extends TestCase {
     assertEquals("my description 2.1", xpath.evaluate(String.format(fileDescriptionXPath, "lib2", "2.1.xml"), document).trim());
     assertEquals("my description 2.2", xpath.evaluate(String.format(fileDescriptionXPath, "lib2", "2.2.xml"), document).trim());
 
+    //todo: more testing of the downloads xml...
+
     File indexHtml = new File(enunciate.getBuildDir(), "docs/index.html");
     document = builder.parse(indexHtml);
     
     assertEquals("mytitle", xpath.evaluate("/html/head/title", document).trim());
     assertEquals("EIOneService", xpath.evaluate("//font[@style='text-decoration:line-through;']/a", document).trim());
     assertEquals("text", xpath.evaluate("//child", document).trim());
+
+    //todo: more testing of the generated HTML...
   }
 
 }

@@ -41,7 +41,7 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
     module.doFreemarkerGenerate();
 
     assertEquals(3, processedTemplates.size());
-    assertTrue(processedTemplates.contains(module.getXFireServletTemplateURL()));
+    assertTrue(processedTemplates.contains(module.getSpringServletTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCRequestBeanTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCResponseBeanTemplateURL()));
   }

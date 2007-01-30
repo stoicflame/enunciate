@@ -172,6 +172,12 @@ h1,h2,h3 {
   text-align:left;
   padding: 3px 3px 3px 3px;
 }
+.content h1 {
+  text-decoration:underline;
+}
+.content h1 a {
+  color: #367EA6;
+}
 
 /* footer */
 .footer {
