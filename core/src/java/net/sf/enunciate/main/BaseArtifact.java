@@ -44,10 +44,12 @@ public abstract class BaseArtifact implements Artifact {
    * @return The comparison.
    */
   public int compareTo(Artifact artifact) {
-    int comparison = this.module.compareTo(artifact.getModule());
-    if (comparison == 0) {
-      comparison = this.id.compareTo(artifact.getId());
+    String thisId = this.id == null ? "" : this.id;
+    String otherId = artifact.getId();
+    if (otherId == null) {
+      otherId = "";
     }
-    return comparison;
+
+    return thisId.compareTo(otherId);
   }
 }

@@ -1,12 +1,16 @@
 package net.sf.enunciate.modules.docs;
 
 import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
+import net.sf.enunciate.config.SchemaInfo;
+import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.enunciate.main.Artifact;
+import net.sf.enunciate.main.*;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
+import net.sf.enunciate.modules.docs.config.DownloadConfig;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
 import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
@@ -17,8 +21,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -32,10 +35,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
   private String splashPackage;
   private String copyright;
-  private String title;
-  private File licenseFile;
+  private String title = "Web API";
+  private boolean includeDefaultDownloads = true;
   private URL xsltURL;
   private File base;
+  private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
 
   /**
    * @return "docs"
@@ -108,21 +112,39 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The license file.
+   * Adds a download to the documentation.
    *
-   * @return The license file.
+   * @param download The download to add.
    */
-  public File getLicenseFile() {
-    return licenseFile;
+  public void addDownload(DownloadConfig download) {
+    this.downloads.add(download);
   }
 
   /**
-   * The license file.
+   * The configured list of downloads to add to the documentation.
    *
-   * @param licenseFile The license file.
+   * @return The configured list of downloads to add to the documentation.
    */
-  public void setLicenseFile(File licenseFile) {
-    this.licenseFile = licenseFile;
+  public Collection<DownloadConfig> getDownloads() {
+    return downloads;
+  }
+
+  /**
+   * Whether to include the default downloads (named artifacts) in the downloads section.
+   *
+   * @return Whether to include the default downloads (named artifacts) in the downloads section.
+   */
+  public boolean isIncludeDefaultDownloads() {
+    return includeDefaultDownloads;
+  }
+
+  /**
+   * Whether to include the default downloads (named artifacts) in the downloads section.
+   *
+   * @param includeDefaultDownloads Whether to include the default downloads (named artifacts) in the downloads section.
+   */
+  public void setIncludeDefaultDownloads(boolean includeDefaultDownloads) {
+    this.includeDefaultDownloads = includeDefaultDownloads;
   }
 
   /**
@@ -181,12 +203,12 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The URL to the Freemarker template for processing the client libraries xml file.
+   * The URL to the Freemarker template for processing the downloads xml file.
    *
-   * @return The URL to the Freemarker template for processing the client libraries xml file.
+   * @return The URL to the Freemarker template for processing the downloads xml file.
    */
-  protected URL getClientLibrariesTemplateURL() {
-    return DocumentationDeploymentModule.class.getResource("client-libraries.xml.fmt");
+  protected URL getDownloadsTemplateURL() {
+    return DocumentationDeploymentModule.class.getResource("downloads.xml.fmt");
   }
 
   /**
@@ -203,10 +225,6 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       model.setVariable("copyright", this.copyright);
     }
 
-    if (this.licenseFile != null) {
-      model.setVariable("licenseFile", this.licenseFile.getName());
-    }
-
     if (this.title != null) {
       model.setVariable("title", this.title);
     }
@@ -216,31 +234,23 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected void doBuild() throws EnunciateException, IOException {
-    generateClientLibXML();
     buildBase();
+    generateDownloadsXML();
     doXSLT();
+
+    //export the generated documentation as an artifact.
+    getEnunciate().addArtifact(new FileArtifact(getName(), "docs", getBuildDir()));
   }
 
   /**
-   * Generates the client library xml indicating the available libraries.
+   * Generates the downloads xml indicating the available downloads.
    */
-  protected void generateClientLibXML() throws IOException, EnunciateException {
-    try {
-      //first try to generate the client libraries file before processing the xslt.
-      Class libraryArtifactClass = getClass().getClassLoader().loadClass("net.sf.enunciate.modules.xfire_client.ClientLibraryArtifact");
-      List<Artifact> clientLibraries = new ArrayList<Artifact>();
-      for (Artifact artifact : enunciate.getArtifacts()) {
-        if (libraryArtifactClass.isAssignableFrom(artifact.getClass())) {
-          clientLibraries.add(artifact);
-        }
-      }
+  protected void generateDownloadsXML() throws IOException, EnunciateException {
+    EnunciateFreemarkerModel model = getModel();
+    model.put("defaultDate", new Date());
 
-      EnunciateFreemarkerModel model = getModel();
-      model.put("libraries", clientLibraries);
-      processTemplate(getClientLibrariesTemplateURL(), model);
-    }
-    catch (ClassNotFoundException e) {
-      //no client-side libraries can be found, fall through...
+    try {
+      processTemplate(getDownloadsTemplateURL(), model);
     }
     catch (TemplateException e) {
       //there's something wrong with the template.
@@ -253,15 +263,74 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    * Builds the base output directory.
    */
   protected void buildBase() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    buildDir.mkdirs();
     if (this.base == null) {
-      extractBase(loadDefaultBase(), getBuildDir());
+      extractBase(loadDefaultBase(), buildDir);
     }
     else if (this.base.isDirectory()) {
-      getEnunciate().copyDir(this.base, getBuildDir());
+      enunciate.copyDir(this.base, buildDir);
     }
     else {
-      extractBase(new FileInputStream(this.base), getBuildDir());
+      extractBase(new FileInputStream(this.base), buildDir);
     }
+
+    for (SchemaInfo schemaInfo : getModel().getNamespacesToSchemas().values()) {
+      if (schemaInfo.getProperty("file") != null) {
+        File from = (File) schemaInfo.getProperty("file");
+        String filename = schemaInfo.getProperty("filename") != null ? (String) schemaInfo.getProperty("filename") : from.getName();
+        File to = new File(getBuildDir(), filename);
+        enunciate.copyFile(from, to);
+      }
+    }
+
+    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      if (wsdlInfo.getProperty("file") != null) {
+        File from = (File) wsdlInfo.getProperty("file");
+        String filename = wsdlInfo.getProperty("filename") != null ? (String) wsdlInfo.getProperty("filename") : from.getName();
+        File to = new File(getBuildDir(), filename);
+        enunciate.copyFile(from, to);
+      }
+    }
+
+    HashSet<String> explicitArtifacts = new HashSet<String>();
+    TreeSet<Artifact> downloads = new TreeSet<Artifact>();
+    for (DownloadConfig download : this.downloads) {
+      if (download.getArtifact() != null) {
+        explicitArtifacts.add(download.getArtifact());
+      }
+      else if (download.getFile() != null) {
+        File downloadFile = download.getFile();
+        NamedFileArtifact fileArtifact = new NamedFileArtifact(getName(), downloadFile.getName(), downloadFile);
+
+        if (download.getDescription() != null) {
+          fileArtifact.setDescription(download.getDescription());
+        }
+
+        downloads.add(fileArtifact);
+      }
+    }
+
+    for (Artifact artifact : enunciate.getArtifacts()) {
+      if (((artifact instanceof NamedArtifact) && (includeDefaultDownloads)) || (explicitArtifacts.contains(artifact.getId()))) {
+        downloads.add(artifact);
+        explicitArtifacts.remove(artifact.getId());
+      }
+    }
+
+    if (explicitArtifacts.size() > 0) {
+      for (String artifactId : explicitArtifacts) {
+        System.err.println("WARNING: Unknown artifact '" + artifactId + "'.  Will not be available for download.");
+      }
+    }
+
+    for (Artifact download : downloads) {
+      download.exportTo(buildDir, enunciate);
+    }
+
+    EnunciateFreemarkerModel model = getModel();
+    model.put("downloads", downloads);
   }
 
   /**
@@ -276,13 +345,13 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     StreamSource source = new StreamSource(xsltURL.openStream());
     
     try {
-      Transformer transformer = TransformerFactory.newInstance().newTransformer(source);
+      Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
       transformer.setURIResolver(new URIResolver() {
         public Source resolve(String href, String base) throws TransformerException {
           return new StreamSource(new File(getGenerateDir(), href));
         }
       });
-      transformer.setParameter("client-xml-exists", new File(getGenerateDir(), "client-libraries.xml").exists());
+      transformer.setParameter("downloads-exists", new File(getGenerateDir(), "downloads.xml").exists());
 
       File docsXml = new File(getGenerateDir(), "docs.xml");
       File buildDir = getBuildDir();

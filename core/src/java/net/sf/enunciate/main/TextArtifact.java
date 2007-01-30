@@ -33,6 +33,10 @@ public class TextArtifact extends BaseArtifact {
    * @param file The file to export the text to.
    */
   public void exportTo(File file, Enunciate enunciate) throws IOException {
+    if (file.exists() && file.isDirectory()) {
+      file = new File(file, getId());
+    }
+    
     file.getParentFile().mkdirs();
     PrintWriter writer = new PrintWriter(file);
     writer.print(this.text);

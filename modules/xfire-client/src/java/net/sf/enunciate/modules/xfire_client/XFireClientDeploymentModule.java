@@ -10,6 +10,7 @@ import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.*;
 import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.main.NamedFileArtifact;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire_client.annotations.*;
 import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
@@ -394,8 +395,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk14Artifact.setPlatform("Java (Version 1.4+)");
     //read in the description from file:
     jdk14Artifact.setDescription(readResource("jdk14/description.html"));
-    jdk14Artifact.addFile(jdk14Jar, "The binaries for the client library.");
-    jdk14Artifact.addFile(jdk14Sources, "The sources for the client library.");
+    NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
+    binariesJar.setDescription("The binaries for the JDK 1.4 client library.");
+    jdk14Artifact.addArtifact(binariesJar);
+    NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
+    sourcesJar.setDescription("The sources for the JDK 1.4 client library.");
+    jdk14Artifact.addArtifact(sourcesJar);
     enunciate.addArtifact(jdk14Artifact);
   }
 

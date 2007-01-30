@@ -25,12 +25,12 @@ public interface Artifact extends Comparable<Artifact> {
   String getModule();
 
   /**
-   * Exports this artifact to the specified file.
+   * Exports this artifact to the specified file or directory.
    *
-   * @param file The file to export.
-   * @oaram enunciate The enunciate mechanism to use for utilities and properties as necessary.
+   * @param fileOrDirectory The file or directory to export to.
+   * @param enunciate The enunciate mechanism to use for utilities and properties as necessary.
    * @throws java.io.IOException If an error occurs exporting it.
    */
-  void exportTo(File file, Enunciate enunciate) throws IOException;
+  void exportTo(File fileOrDirectory, Enunciate enunciate) throws IOException;
   
 }

@@ -162,12 +162,12 @@ h1,h2,h3 {
 	margin-bottom: 12px;
 	padding: 8px 10px;
 }
-.content table td {
+.content table tr td {
   vertical-align:top;
   text-align:left;
   padding: 3px 3px 3px 3px;
 }
-.content table th {
+.content table tr th {
   vertical-align:top;
   text-align:left;
   padding: 3px 3px 3px 3px;

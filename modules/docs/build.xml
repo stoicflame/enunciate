@@ -11,11 +11,40 @@
     <fileset dir="${core.basedir}/target">
       <include name="${jar.pattern}"/>
     </fileset>
+    <fileset dir="${modules.xfire-client.basedir}/target">
+      <include name="${jar.pattern}"/>
+    </fileset>
+    <pathelement location="${core.basedir}/target/test-classes"/>
   </path>
+
+  <property name="in.apt.src.test.dir" value="${basedir}/src/samples/docs"/>
+
+  <target name="-init">
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
+      <path>
+        <path refid="build.classpath"/>
+      </path>
+    </pathconvert>
+
+    <propertyset id="test.sysprops">
+      <propertyref name="in.apt.src.test.dir"/>
+      <propertyref name="apt.test.class.path"/>
+    </propertyset>
+  </target>
+
+  <target name="init" depends="base.init, -init"/>
 
   <target name="compile-main" depends="base.compile-main">
     <mkdir dir="${build.dir}/META-INF/services"/>
     <echo message="net.sf.enunciate.modules.docs.DocumentationDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+  </target>
+
+  <target name="jar-main" depends="zip-default-base, base.jar-main"/>
+
+  <target name="zip-default-base">
+    <zip destfile="${build.dir}/docs.base.zip" basedir="template">
+      <exclude name="*.html"/>
+    </zip>
   </target>
 
 </project>

@@ -17,6 +17,7 @@
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
   <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
+  <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
 
   <!--patterns for specifying jars to include on the classpath.-->
   <property name="jar.pattern" value="*-${enunciate.version}.jar"/>
@@ -134,6 +135,7 @@
         <include name="**/*.jelly"/>
         <include name="**/*.fmt"/>
         <include name="**/*.xsl"/>
+        <include name="**/*.xslt"/>
       </fileset>
     </copy>
 
@@ -158,6 +160,7 @@
         <include name="**/*.jelly"/>
         <include name="**/*.fmt"/>
         <include name="**/*.html"/>
+        <include name="**/*.xslt"/>
         <include name="**/package.html"/>
       </fileset>
     </copy>

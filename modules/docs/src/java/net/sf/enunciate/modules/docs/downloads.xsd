@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
 
-  <xs:element name="client-libraries">
+  <xs:element name="downloads">
 
     <xs:annotation>
       <xs:documentation>
-        Root element for the xml file that describes the client libraries that are available.
+        Root element for the xml file that describes the download that are available.
       </xs:documentation>
     </xs:annotation>
 
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="library" type="library" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="download" type="download" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
 
   </xs:element>
 
-  <xs:complexType name="library">
+  <xs:complexType name="download">
 
     <xs:annotation>
       <xs:documentation>
-        The type containing the info for a client-side library.
+        The type containing the info for a download.
       </xs:documentation>
     </xs:annotation>
 
@@ -39,7 +39,7 @@
 
     <xs:annotation>
       <xs:documentation>
-        The element containing the list of files for this library.
+        The element containing the list of files for this download.
       </xs:documentation>
     </xs:annotation>
 

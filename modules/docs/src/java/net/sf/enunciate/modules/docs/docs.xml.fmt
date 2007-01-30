@@ -17,7 +17,7 @@
     <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
   [#list schema.typeDefinitions as type]
-        <type name="${type.name}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.qualifiedName}"[/#if]>
+        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
     [#if type.docValue?exists]
           <documentation>
             <![CDATA[${type.docValue}]]>
@@ -40,8 +40,20 @@
     [#if type.elements?size > 0]
           <elements>
       [#list type.elements as element]
-            <element name="${element.name}" typeNamespace="${element.baseType.namespace}" typeName="${element.baseType.qname.localPart}">
-              <![CDATA[${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))}]]>
+            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+        [#if element.docValue?exists]
+              <documentation>
+                <![CDATA[${element.docValue}]]>
+              </documentation>
+        [/#if]
+        [#list element.javaDoc?keys as tag]
+          [#list element.javaDoc[tag] as tagValue]
+              <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          [/#list]
+        [/#list]
+        [#list element.choices as choice]
+              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists)] typeNamespace="${choice.baseType.namespace}" typeName="${choice.baseType.qname.localPart}"[/#if]/>
+        [/#list]
             </element>
       [/#list]
           </elements>
@@ -94,7 +106,7 @@
   <soap>
     <wsdls>
 [@forEachWsdl]
-      <wsdl namespace="${wsdl.namespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
+      <wsdl namespace="${wsdl.targetNamespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface]
         <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
     [#if endpointInterface.docValue?exists]
@@ -123,12 +135,12 @@
       [/#list]
       [#list method.webParameters as parameter]
             <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
-              <![CDATA[${parameter.docValue?default("no documentation provided)")}]]>
+              <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
             </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
             <result>
-              <![CDATA[${method.returnType.docComment?default("(no documentation provided)")}]]>
+              <![CDATA[${method.returnType.docValue?default("(no documentation provided)")}]]>
             </result>
       [/#if]
       [#list method.thrownTypes as fault]
@@ -174,12 +186,12 @@
      [/#if]
      [#if !method.returnType.void]
           <outValue typeNamespace="${method.XMLReturnType.namespace}" typeName="${method.XMLReturnType.name}">
-            <![CDATA[${method.returnType.docComment?default("")}]]>
+            <![CDATA[${method.returnType.docValue?default("")}]]>
           </outValue>
      [/#if]
      [#list method.thrownTypes as error]
           <error code="${method.RESTErrors[error_index].errorCode}">
-            <![CDATA[${error.docComment?default("")}]]>
+            <![CDATA[${error.docValue?default("")}]]>
           </error>
      [/#list]
         </operation>

@@ -1,30 +1,25 @@
 package net.sf.enunciate.modules.xfire_client;
 
-import net.sf.enunciate.main.BaseArtifact;
-import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.main.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * A client-side libarary artifact.
  *
  * @author Ryan Heaton
  */
-public class ClientLibraryArtifact extends BaseArtifact {
+public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundle, NamedArtifact {
 
   private final String name;
   private Date created;
   private String platform;
   private String description;
-  private final HashMap<File, String> files = new HashMap<File, String>();
+  private final ArrayList<FileArtifact> artifacts = new ArrayList<FileArtifact>();
 
   public ClientLibraryArtifact(String module, String id, String name) {
     super(module, id);
@@ -33,28 +28,20 @@ public class ClientLibraryArtifact extends BaseArtifact {
   }
 
   /**
-   * Zips up all files in this library and writes the archive to the specified file.
+   * If the file to export to is an existing directoy, copy the artifacts to that directory.
+   * Otherwise, assume that the export is a file and zip up all the artifacts to that file.
    *
    * @param file The file to write to.
    * @param enunciate The utilities to use.
    */
   public void exportTo(File file, Enunciate enunciate) throws IOException {
-    file.getParentFile().mkdirs();
+    File dir = (file.exists() && file.isDirectory()) ? file : enunciate.createTempDir();
+    for (FileArtifact artifact : artifacts) {
+      enunciate.copyFile(artifact.getFile(), new File(dir, artifact.getFile().getName()));
+    }
 
-    ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
-    byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
-    for (File entry : this.files.keySet()) {
-      out.putNextEntry(new ZipEntry(entry.getName()));
-      
-      FileInputStream in = new FileInputStream(file);
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        out.write(buffer, 0, len);
-      }
-
-      // Complete the entry
-      out.closeEntry();
-      in.close();
+    if (!file.exists() || !file.isDirectory()) {
+      enunciate.zip(dir, file);
     }
   }
 
@@ -68,38 +55,21 @@ public class ClientLibraryArtifact extends BaseArtifact {
   }
 
   /**
-   * The files (with associated descriptions) for this artifact.
+   * The artifacts that are associated with this bundle.
    *
-   * @return The files (with associated descriptions) for this artifact.
+   * @return The artifacts that are associated with this bundle.
    */
-  public Map<File, String> getFiles() {
-    return files;
+  public Collection<? extends Artifact> getArtifacts() {
+    return this.artifacts;
   }
 
   /**
-   * Gets the description for the file specified by name.
+   * The artifact to add.
    *
-   * @param filename The filename.
-   * @return The description.
+   * @param artifact The artifact to add.
    */
-  public String getFileDescription(String filename) {
-    for (File file : this.files.keySet()) {
-      if (file.getName().equals(filename)) {
-        return this.files.get(file);
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Adds a file to this library.
-   *
-   * @param file The file to add to the librar.
-   * @param description The description of the file.
-   */
-  public void addFile(File file, String description) {
-    this.files.put(file, description);
+  public void addArtifact(FileArtifact artifact) {
+    this.artifacts.add(artifact);
   }
 
   /**

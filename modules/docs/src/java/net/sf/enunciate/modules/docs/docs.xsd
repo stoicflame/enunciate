@@ -179,9 +179,30 @@
       </xs:documentation>
     </xs:annotation>
 
+    <xs:complexContent>
+      <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="choice" type="choice" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="minOccurs" type="xs:string"/>
+        <xs:attribute name="maxOccurs" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+
+  </xs:complexType>
+
+  <xs:complexType name="choice">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element that documents a choice of element.
+      </xs:documentation>
+    </xs:annotation>
+
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="namespace" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
       </xs:extension>

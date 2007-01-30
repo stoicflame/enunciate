@@ -1,0 +1,26 @@
+[#ftl]
+[@file name="downloads.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<downloads>
+  [#list downloads as download]
+  <download name="${download.name?default("unknown")}">
+    <created>${download.created?default(defaultDate)?datetime?string.medium}</created>
+    [#if download.platform?exists]
+    <platform>${download.platform}</platform>
+    [/#if]
+    <files>
+    [#if download.artifacts?exists]
+      [#list download.artifacts as artifact]
+        [#if artifact.name?exists]
+      <file name="${artifact.name}"><![CDATA[${artifact.description?default("")}]]></file>
+        [/#if]
+      [/#list]
+    [#elseif download.name?exists]
+      <file name="${download.name}"/>
+    [/#if]
+    </files>
+    <description><![CDATA[${download.description?default("")}]]></description>
+  </download>
+  [/#list]
+</downloads>
+[/@file]

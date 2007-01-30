@@ -10,6 +10,7 @@ import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xml.config.SchemaConfig;
 import net.sf.enunciate.modules.xml.config.WsdlConfig;
 import net.sf.enunciate.modules.xml.config.XMLRuleSet;
+import net.sf.enunciate.main.FileArtifact;
 import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
@@ -134,6 +135,10 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       if (prettyPrint) {
         prettyPrint(wsdlFile);
       }
+
+      FileArtifact wsdlArtifact = new FileArtifact(getName(), wsdl.getId() + ".wsdl", wsdlFile);
+      wsdlArtifact.setDescription("WSDL file for namespace " + wsdl.getTargetNamespace());
+      getEnunciate().addArtifact(wsdlArtifact);
     }
 
     for (SchemaInfo schemaInfo : ns2schema.values()) {
@@ -148,6 +153,10 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       if (validateSchemas) {
         //todo: write some logic to validate the schemas.
       }
+
+      FileArtifact schemaArtifact = new FileArtifact(getName(), schemaInfo.getId() + ".xsd", schemaFile);
+      schemaArtifact.setDescription("Schema file for namespace " + schemaInfo.getNamespace());
+      getEnunciate().addArtifact(schemaArtifact);
     }
   }
 

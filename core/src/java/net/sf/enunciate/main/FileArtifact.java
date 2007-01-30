@@ -11,6 +11,7 @@ import java.io.IOException;
 public class FileArtifact extends BaseArtifact {
 
   private final File file;
+  private String description;
 
   public FileArtifact(String module, String id, File file) {
     super(module, id);
@@ -38,11 +39,33 @@ public class FileArtifact extends BaseArtifact {
     }
 
     if (this.file.isDirectory()) {
-      enunciate.zip(this.file, file);
+      if (file.exists() && file.isDirectory()) {
+        enunciate.copyDir(this.file, file);
+      }
+      else {
+        enunciate.zip(this.file, file);
+      }
     }
     else {
       enunciate.copyFile(this.file, file);
     }
   }
 
+  /**
+   * The description of this file artifact.
+   *
+   * @return The description of this file artifact.
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * The description of this file artifact.
+   *
+   * @param description The description of this file artifact.
+   */
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }

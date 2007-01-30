@@ -30,6 +30,11 @@
       <include name="${tools.jar.pattern}"/>
     </fileset>
 
+    <fileset dir="${modules.docs.basedir}/target">
+      <include name="${jar.pattern}"/>
+      <include name="${tools.jar.pattern}"/>
+    </fileset>
+
     <fileset dir="${modules.xfire.basedir}/target">
       <include name="${jar.pattern}"/>
       <include name="${tools.jar.pattern}"/>
@@ -130,8 +135,6 @@
   <target name="deploy-full-api">
     <copy todir="${war.deploy.dir}" file="target/examples/full/package/xfire/full.war"/>
   </target>
-
-  <target name="fail-for-tests" if="tests.failed" depends="stop-container, base.fail-for-tests"/>
 
   <target name="-delay-container-tests">
     <sleep seconds="${container.test.delay.time}"/>

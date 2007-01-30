@@ -9,6 +9,7 @@
   <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
   <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
+  <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
   <property name="modules.xfire-integration.basedir" value="${enunciate.basedir}/modules/xfire-integration"/>
 
@@ -18,6 +19,7 @@
     <ant dir="${modules.jaxws.basedir}"/>
     <ant dir="${modules.rest.basedir}"/>
     <ant dir="${modules.xfire-client.basedir}"/>
+    <ant dir="${modules.docs.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.xfire-integration.basedir}"/>
   </target>
