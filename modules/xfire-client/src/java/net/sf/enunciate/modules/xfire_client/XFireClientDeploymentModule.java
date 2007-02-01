@@ -81,15 +81,16 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
 
-    URL eiTemplate = getTemplateURL("jdk14/client-endpoint-interface.fmt");
-    URL soapImplTemplate = getTemplateURL("jdk14/client-soap-endpoint-impl.fmt");
-    URL faultTemplate = getTemplateURL("jdk14/client-web-fault.fmt");
-    URL enumTypeTemplate = getTemplateURL("jdk14/client-enum-type.fmt");
-    URL simpleTypeTemplate = getTemplateURL("jdk14/client-simple-type.fmt");
-    URL complexTypeTemplate = getTemplateURL("jdk14/client-complex-type.fmt");
-    URL faultBeanTemplate = getTemplateURL("jdk14/client-fault-bean.fmt");
-    URL requestBeanTemplate = getTemplateURL("jdk14/client-request-bean.fmt");
-    URL responseBeanTemplate = getTemplateURL("jdk14/client-response-bean.fmt");
+    URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
+    URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
+    URL faultTemplate = getTemplateURL("client-web-fault.fmt");
+    URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
+    URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
+    URL faultBeanTemplate = getTemplateURL("client-fault-bean.fmt");
+    URL requestBeanTemplate = getTemplateURL("client-request-bean.fmt");
+    URL responseBeanTemplate = getTemplateURL("client-response-bean.fmt");
+    URL jdk14EnumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
+    URL jdk15EnumTypeTemplate = getTemplateURL("client-jdk15-enum-type.fmt");
 
     //process the endpoint interfaces and gather the list of web faults...
     model.setFileOutputDirectory(getJdk14GenerateDir());
@@ -170,7 +171,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
           model.remove("rootElementName");
         }
         
-        URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+        URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
         model.setFileOutputDirectory(getJdk14GenerateDir());
         processTemplate(template, model);
 
@@ -394,7 +395,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     ClientLibraryArtifact jdk14Artifact = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
     jdk14Artifact.setPlatform("Java (Version 1.4+)");
     //read in the description from file:
-    jdk14Artifact.setDescription(readResource("jdk14/description.html"));
+    jdk14Artifact.setDescription(readResource("library_description.html"));
     NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
     binariesJar.setDescription("The binaries for the JDK 1.4 client library.");
     jdk14Artifact.addArtifact(binariesJar);

@@ -46,7 +46,6 @@ public class IntrospectingTypeCreator implements TypeCreator {
    * @return The suggested qname.
    */
   public QName getElementName(Method method, int index) {
-    //todo: implement this better?
     return this.defaultDelegate.getElementName(method, index);
   }
 
