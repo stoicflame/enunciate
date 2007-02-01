@@ -3,14 +3,12 @@ package net.sf.enunciate.modules.xfire_client;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.TemplateModelException;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
@@ -21,10 +19,6 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
 
   public ComponentTypeForMethod(Map<String, String> conversions) {
     super(conversions);
-  }
-
-  public ComponentTypeForMethod(Map<String, String> conversions, boolean jdk15) {
-    super(conversions, jdk15);
   }
 
   @Override

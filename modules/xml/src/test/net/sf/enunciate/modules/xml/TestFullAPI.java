@@ -58,6 +58,9 @@ public class TestFullAPI extends TestCase {
     wsdlConfig.setNamespace(FULL_NAMESPACE);
     wsdlConfig.setFile("full.wsdl");
     xmlModule.addWsdlConfig(wsdlConfig);
+    xmlModule.setEndpointHostname("www.thebestgenealogywebsite.com");
+    xmlModule.setEndpointContext("/genealogy/soap/");
+    xmlModule.setEndpointProtocol("https");
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
     config.putNamespace(CITE_NAMESPACE, "cite");
@@ -174,7 +177,7 @@ public class TestFullAPI extends TestCase {
         Port port = (Port) ports.values().iterator().next();
         assertEquals("PersonServiceSOAPPort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
-        assertEquals("TBD", address.getLocationURI());
+        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/PersonServiceService", address.getLocationURI());
 
         assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "PersonServiceSOAPBinding")), port.getBinding());
       }
@@ -184,7 +187,7 @@ public class TestFullAPI extends TestCase {
         Port port = (Port) ports.values().iterator().next();
         assertEquals("SourceServiceSOAPPort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
-        assertEquals("TBD", address.getLocationURI());
+        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/source-service", address.getLocationURI());
 
         assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "SourceServiceSOAPBinding")), port.getBinding());
       }

@@ -1,3 +1,6 @@
+/**
+ * The "data" package contains genealogical data.
+ */
 @XmlSchema (
   namespace = "http://enunciate.sf.net/samples/genealogy/data",
   elementFormDefault = XmlNsForm.QUALIFIED

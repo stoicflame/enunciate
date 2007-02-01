@@ -1,6 +1,4 @@
 Modules:
-  HTML Docs
-  REST
   Command (issue commands at given steps)
   .NET
   C/C++
@@ -15,7 +13,6 @@ Modules:
   RELAX NG
   Standalone service
 Config options:
-  soap endpoint addresses
   XML: Option to not inline request/response wrappers into the wsdl.
 Additional Features:
   ResourceBundle (for the messages, client library file descriptions, and documentation headers)

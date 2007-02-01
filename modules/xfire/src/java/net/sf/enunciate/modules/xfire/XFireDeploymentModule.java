@@ -150,8 +150,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    //todo: copy any additional files as resources (specified in the config);
-
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
     //copy the web.xml file to WEB-INF.
@@ -170,17 +168,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     else {
       System.out.println("WARNING: No documentation artifact found!");
     }
-  }
-
-  /**
-   * Get the name of the resource for the specified xml artifact.
-   *
-   * @param artifact The artifact.
-   * @return The resource name.
-   */
-  protected String getXmlResourceName(File artifact) {
-    //todo: generate a unique id in case artifacts of the name name are put in different directories?
-    return artifact.getName();
   }
 
   @Override

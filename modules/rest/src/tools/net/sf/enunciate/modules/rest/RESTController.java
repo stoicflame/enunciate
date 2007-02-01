@@ -222,7 +222,6 @@ public class RESTController extends AbstractController {
    */
   protected ModelAndView handleRESTOperation(String noun, String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
     if (noun == null) {
-      //todo: think about spitting out the documentation in this case?
       response.sendError(HttpServletResponse.SC_NOT_FOUND, "A REST resource must be specified.");
       return null;
     }

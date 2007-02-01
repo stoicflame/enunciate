@@ -62,21 +62,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
-
-    //generate the JDK 1.4 client code.
-    Map<String, String> conversions = getClientPackageConversions();
-    model.put("packageFor", new ClientPackageForMethod(conversions));
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions, false);
-    model.put("classnameFor", classnameFor);
-    model.put("componentTypeFor", new ComponentTypeForMethod(conversions, false));
-
-    String uuid = this.uuid;
-    model.put("uuid", uuid);
-    model.put("defaultHost", getDefaultHost());
-    model.put("defaultContext", getDefaultContext());
-    model.put("defaultPort", String.valueOf(getDefaultPort()));
-
+    //load the references to the templates....
     URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
     URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
@@ -92,18 +78,36 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL jdk14EnumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
     URL jdk15EnumTypeTemplate = getTemplateURL("client-jdk15-enum-type.fmt");
 
-    //process the endpoint interfaces and gather the list of web faults...
-    model.setFileOutputDirectory(getJdk14GenerateDir());
+
+    //set up the model, first allowing for jdk 14 compatability.
+    EnunciateFreemarkerModel model = getModel();
+    Map<String, String> conversions = getClientPackageConversions();
+    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+    ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
+    model.put("packageFor", new ClientPackageForMethod(conversions));
+    model.put("classnameFor", classnameFor);
+    model.put("componentTypeFor", componentTypeFor);
+
+    String uuid = this.uuid;
+    model.put("uuid", uuid);
+    model.put("defaultHost", getDefaultHost());
+    model.put("defaultContext", getDefaultContext());
+    model.put("defaultPort", String.valueOf(getDefaultPort()));
+
+
+    // First, generate everything that is common to both jdk 14 and jdk 15
+    // This includes all request/response beans and all xfire types.
+    // Also, we're going to gather the annotation information, the type list,
+    // and the list of unique web faults.
+    model.setFileOutputDirectory(getCommonJdkGenerateDir());
     generatedAnnotations = new ExplicitWebAnnotations();
-    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
     generatedTypeList = new ArrayList<String>();
+    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+
+    // Process the annotations, the request/response beans, and gather the set of web faults
+    // for each endpoint interface.
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        //first process the templates for the endpoint interfaces.
-        model.put("endpointInterface", ei);
-
-        processTemplate(eiTemplate, model);
-        processTemplate(soapImplTemplate, model);
         addExplicitAnnotations(ei, classnameFor);
 
         for (WebMethod webMethod : ei.getWebMethods()) {
@@ -140,16 +144,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    //process the gathered web faults.
+    //gather the annotation information and process the possible beans for each web fault.
     for (WebFault webFault : allFaults) {
       String faultClass = classnameFor.convert(webFault);
       boolean implicit = webFault.isImplicitSchemaElement();
       String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
 
-      model.put("fault", webFault);
-      processTemplate(faultTemplate, model);
-
       if (implicit) {
+        model.put("fault", webFault);
         processTemplate(faultBeanTemplate, model);
         generatedTypeList.add(faultBean);
       }
@@ -159,7 +161,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       this.generatedAnnotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(faultElementName, faultElementNamespace, faultBean, implicit));
     }
 
-    //process each type for client-side stubs.
+    //process each xfire type for client-side stubs.
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         model.put("type", typeDefinition);
@@ -171,12 +173,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
           model.remove("rootElementName");
         }
         
-        URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-        model.setFileOutputDirectory(getJdk14GenerateDir());
-        processTemplate(template, model);
-
-        template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
-        model.setFileOutputDirectory(getXFireTypesGenerateDir());
+        URL template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
         processTemplate(template, model);
 
         if (!typeDefinition.isAbstract()) {
@@ -188,8 +185,59 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         addExplicitAnnotations(rootElementDeclaration, classnameFor);
       }
     }
+    model.remove("rootElementName");
 
-    //todo: generate the JDK 1.5 client code.
+
+    //Now, generate the jdk14-compatable client-side stubs.
+    model.setFileOutputDirectory(getJdk14GenerateDir());
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        model.put("endpointInterface", ei);
+
+        processTemplate(eiTemplate, model);
+        processTemplate(soapImplTemplate, model);
+      }
+    }
+
+    for (WebFault webFault : allFaults) {
+      model.put("fault", webFault);
+      processTemplate(faultTemplate, model);
+    }
+
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        model.put("type", typeDefinition);
+        URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+        processTemplate(template, model);
+      }
+    }
+
+
+    //Now enable jdk-15 compatability and generate those client-side stubs.
+    model.setFileOutputDirectory(getJdk15GenerateDir());
+    classnameFor.setJdk15(true);
+    componentTypeFor.setJdk15(true);
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        model.put("endpointInterface", ei);
+
+        processTemplate(eiTemplate, model);
+        processTemplate(soapImplTemplate, model);
+      }
+    }
+
+    for (WebFault webFault : allFaults) {
+      model.put("fault", webFault);
+      processTemplate(faultTemplate, model);
+    }
+
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        model.put("type", typeDefinition);
+        URL template = typeDefinition.isEnum() ? jdk15EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+        processTemplate(template, model);
+      }
+    }
   }
 
   protected void addExplicitAnnotations(EndpointInterface ei, ClientClassnameForMethod conversion) {
@@ -333,27 +381,35 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
-    File typesDir = getXFireTypesGenerateDir();
+    File typesDir = getCommonJdkGenerateDir();
     Collection<String> typeFiles = enunciate.getJavaFiles(typesDir);
+
+    //Compile the jdk14 files.
     Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
     jdk14Files.addAll(typeFiles);
-
     enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
+    writeTypesFile(new File(getJdk14CompileDir(), uuid + ".types"));
+    writeAnnotationsFile(new File(getJdk14CompileDir(), uuid + ".annotations"));
 
-    if (this.generatedTypeList == null) {
-      throw new EnunciateException("The client type list wasn't generated.");
-    }
-    PrintWriter writer = new PrintWriter(new File(getJdk14CompileDir(), uuid + ".types"));
-    for (String type : this.generatedTypeList) {
-      writer.println(type);
-    }
-    writer.close();
+    //Compile the jdk15 files.
+    Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
+    jdk15Files.addAll(typeFiles);
+    enunciate.invokeJavac(enunciate.getClasspath(), getJdk15CompileDir(), Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
+    writeTypesFile(new File(getJdk15CompileDir(), uuid + ".types"));
+    writeAnnotationsFile(new File(getJdk15CompileDir(), uuid + ".annotations"));
+  }
 
+  /**
+   * Write the serializeable annotations to the specified file.
+   *
+   * @param annotationsFile The to which to write the generated annotations.
+   */
+  protected void writeAnnotationsFile(File annotationsFile) throws EnunciateException, IOException {
     if (this.generatedAnnotations == null) {
-      throw new EnunciateException("The client annotations weren't generated.");
+      throw new EnunciateException("No annotations to write.");
     }
 
-    FileOutputStream fos = new FileOutputStream(new File(getJdk14CompileDir(), uuid + ".annotations"));
+    FileOutputStream fos = new FileOutputStream(annotationsFile);
     try {
       this.generatedAnnotations.writeTo(fos);
     }
@@ -363,9 +419,27 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     finally {
       fos.close();
     }
+  }
 
-    //todo: compile the jdk 1.5 client classes.
+  /**
+   * Write the generated types list to the specified file.
+   *
+   * @param typesFile The file to write the type list to.
+   */
+  protected void writeTypesFile(File typesFile) throws EnunciateException, FileNotFoundException {
+    if (this.generatedTypeList == null) {
+      throw new EnunciateException("No type list to write.");
+    }
 
+    PrintWriter writer = new PrintWriter(typesFile);
+    for (String type : this.generatedTypeList) {
+      writer.println(type);
+    }
+    writer.close();
+
+    if (this.generatedAnnotations == null) {
+      throw new EnunciateException("The client annotations weren't generated.");
+    }
   }
 
   @Override
@@ -395,14 +469,36 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     ClientLibraryArtifact jdk14Artifact = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
     jdk14Artifact.setPlatform("Java (Version 1.4+)");
     //read in the description from file:
-    jdk14Artifact.setDescription(readResource("library_description.html"));
-    NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
-    binariesJar.setDescription("The binaries for the JDK 1.4 client library.");
-    jdk14Artifact.addArtifact(binariesJar);
-    NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
-    sourcesJar.setDescription("The sources for the JDK 1.4 client library.");
-    jdk14Artifact.addArtifact(sourcesJar);
+    jdk14Artifact.setDescription(readResource("library_description_14.html"));
+    NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
+    jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
+    jdk14Artifact.addArtifact(jdk14BinariesJar);
+    NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
+    jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
+    jdk14Artifact.addArtifact(jdk14SourcesJar);
     enunciate.addArtifact(jdk14Artifact);
+
+    File jdk15Jar = new File(getBuildDir(), jarName);
+    enunciate.zip(getJdk15CompileDir(), jdk15Jar);
+    enunciate.setProperty("client.jdk15.jar", jdk15Jar);
+
+    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
+    enunciate.zip(getJdk15GenerateDir(), jdk15Sources);
+    enunciate.setProperty("client.jdk15.sources", jdk15Sources);
+
+    //todo: generate the javadocs?
+
+    ClientLibraryArtifact jdk15Artifact = new ClientLibraryArtifact(getName(), "client.jdk15.library", "Java 5 Client Library");
+    jdk15Artifact.setPlatform("Java (Version 5+)");
+    //read in the description from file:
+    jdk15Artifact.setDescription(readResource("library_description_15.html"));
+    NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
+    jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
+    jdk15Artifact.addArtifact(jdk15BinariesJar);
+    NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
+    jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
+    jdk15Artifact.addArtifact(jdk15SourcesJar);
+    enunciate.addArtifact(jdk15Artifact);
   }
 
   /**
@@ -460,12 +556,30 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The directory for the jdk14 client files.
+   * The directory for the jdk15 client files.
    *
-   * @return The directory for the jdk14 client files.
+   * @return The directory for the jdk15 client files.
    */
-  protected File getXFireTypesGenerateDir() {
-    return new File(getGenerateDir(), "types");
+  protected File getJdk15GenerateDir() {
+    return new File(getGenerateDir(), "jdk15");
+  }
+
+  /**
+   * The directory for compiling the jdk 15 compatible classes.
+   *
+   * @return The directory for compiling the jdk 15 compatible classes.
+   */
+  protected File getJdk15CompileDir() {
+    return new File(getCompileDir(), "jdk15");
+  }
+
+  /**
+   * The directory for the java files common to both jdk 14 and jdk 15.
+   *
+   * @return The directory for the java files common to both jdk 14 and jdk 15.
+   */
+  protected File getCommonJdkGenerateDir() {
+    return new File(getGenerateDir(), "common");
   }
 
   /**

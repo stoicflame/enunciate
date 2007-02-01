@@ -91,7 +91,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
 
-    Collection<TypeDeclaration> typeDeclarations = getTypeDeclarations();
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     for (TypeDeclaration declaration : typeDeclarations) {
       if (isEndpointInterface(declaration)) {
         EndpointInterface endpointInterface = new EndpointInterface(declaration);
@@ -103,7 +104,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         model.add(endpointInterface);
       }
       else if (isRESTEndpoint(declaration)) {
-        //todo: support interfaces, too.
         RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
 
         if (isVerbose()) {
@@ -114,36 +114,32 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
       else if (isPotentialSchemaType(declaration)) {
         TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
-        if (typeDef != null) {
-          if (isVerbose()) {
-            System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
-                                             declaration.getQualifiedName(),
-                                             typeDef.getClass().getSimpleName(),
-                                             typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
-                                             typeDef.getName()));
-          }
-
-          model.add(typeDef);
-
-          RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) declaration, typeDef);
-          if (rootElement != null) {
-            if (isVerbose()) {
-              System.out.println(declaration.getQualifiedName() + " to be considered as a root element.");
-            }
-
-            model.add(rootElement);
-          }
-        }
+        loadTypeDef(typeDef, model);
       }
     }
+
+    //read in any JAXB import classes.
+    for (String jaxbClassImport : this.config.getJaxbClassImports()) {
+      TypeDeclaration typeDeclaration = env.getTypeDeclaration(jaxbClassImport);
+      if (typeDeclaration == null) {
+        throw new IllegalStateException("JAXB import class not found: " + jaxbClassImport);
+      }
+
+      if (!(typeDeclaration instanceof ClassDeclaration)) {
+        throw new IllegalStateException("Illegal JAXB import class (not a class): " + jaxbClassImport);
+      }
+
+      TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) typeDeclaration);
+      loadTypeDef(typeDef, model);
+    }
+
+    //todo: support jaxb package imports (use jaxb.index or ObjectFactory.class)
 
     //override any namespace prefix mappings as specified in the config.
     for (String ns : this.config.getNamespacesToPrefixes().keySet()) {
       model.getNamespacesToPrefixes().put(ns, this.config.getNamespacesToPrefixes().get(ns));
     }
 
-    //todo: read the config file for type declarations that aren't in the source base to preload as xml type definitions
-    //todo: read the config file for packages of type declarations that aren't in the source base to preload as xml type definitions (use jaxb.index or ObjectFactory.class)
 
     validate(model);
 
@@ -151,13 +147,32 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   /**
-   * Get the type declarations to consider for the root model.
+   * Loads the specified type definition into the specified model.
    *
-   * @return The list of type declarations to consider for the root model.
+   * @param typeDef The type definition to load.
+   * @param model The model into which to load the type definition.
    */
-  protected Collection<TypeDeclaration> getTypeDeclarations() {
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    return env.getTypeDeclarations();
+  protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
+    if (typeDef != null) {
+      if (isVerbose()) {
+        System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
+                                         typeDef.getQualifiedName(),
+                                         typeDef.getClass().getSimpleName(),
+                                         typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
+                                         typeDef.getName()));
+      }
+
+      model.add(typeDef);
+
+      RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) typeDef.getDelegate(), typeDef);
+      if (rootElement != null) {
+        if (isVerbose()) {
+          System.out.println(typeDef.getQualifiedName() + " to be considered as a root element.");
+        }
+
+        model.add(rootElement);
+      }
+    }
   }
 
   /**

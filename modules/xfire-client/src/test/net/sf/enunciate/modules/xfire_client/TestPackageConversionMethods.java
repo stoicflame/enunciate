@@ -46,8 +46,9 @@ public class TestPackageConversionMethods extends InAPTTestCase {
     HashMap<String, String> conversions = new HashMap<String, String>();
     conversions.put("net.sf.enunciate.samples", "red.herring");
     conversions.put("net.sf.enunciate.samples.xfire_client.with.a.nested", "net.sf.enunciate.other.pckg.and.nested");
-    ClientClassnameForMethod classnameFor14Method = new ClientClassnameForMethod(conversions, false);
-    ClientClassnameForMethod classnameFor15Method = new ClientClassnameForMethod(conversions, true);
+    ClientClassnameForMethod classnameFor14Method = new ClientClassnameForMethod(conversions);
+    ClientClassnameForMethod classnameFor15Method = new ClientClassnameForMethod(conversions);
+    classnameFor15Method.setJdk15(true);
     TypeDeclaration classDeclaration = getDeclaration("net.sf.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageClass");
     assertEquals("net.sf.enunciate.other.pckg.and.nested.pckg.NestedPackageClass", classnameFor14Method.convert(classDeclaration));
     assertEquals("net.sf.enunciate.other.pckg.and.nested.pckg.NestedPackageClass", classnameFor15Method.convert(classDeclaration));
@@ -90,8 +91,9 @@ public class TestPackageConversionMethods extends InAPTTestCase {
     HashMap<String, String> conversions = new HashMap<String, String>();
     conversions.put("net.sf.enunciate.samples", "red.herring");
     conversions.put("net.sf.enunciate.samples.xfire_client.with.a.nested", "net.sf.enunciate.other.pckg.and.nested");
-    ComponentTypeForMethod component14For = new ComponentTypeForMethod(conversions, false);
-    ComponentTypeForMethod component15For = new ComponentTypeForMethod(conversions, true);
+    ComponentTypeForMethod component14For = new ComponentTypeForMethod(conversions);
+    ComponentTypeForMethod component15For = new ComponentTypeForMethod(conversions);
+    component15For.setJdk15(true);
     TypeDeclaration classDeclaration = getDeclaration("net.sf.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageClass");
     for (FieldDeclaration fieldDeclaration : classDeclaration.getFields()) {
       if ("items".equals(fieldDeclaration.getSimpleName())) {

@@ -12,6 +12,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -54,6 +55,16 @@
 
     <xs:attribute name="id" use="required"/>
     <xs:attribute name="uri" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="jaxb-import">
+    <xs:annotation>
+      <xs:documentation>
+        The JAXB imports allow external dependencies on JAXB types.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="modules">

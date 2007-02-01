@@ -16,7 +16,6 @@ import java.util.Map;
  */
 @WebService (
   endpointInterface = "net.sf.enunciate.samples.petclinic.services.PetService",
-  //todo: fix or enforce having to do this for xfire.
   serviceName = "PetService"
 )
 public class PetServiceImpl implements PetService {

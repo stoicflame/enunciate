@@ -1,3 +1,6 @@
+/**
+ * The "cite" package holds information about citation information.
+ */
 @XmlSchema (
   namespace = "http://enunciate.sf.net/samples/genealogy/cite",
   elementFormDefault = XmlNsForm.QUALIFIED

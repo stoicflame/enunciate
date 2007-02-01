@@ -428,7 +428,7 @@ public class DefaultValidator implements Validator {
       if (sameName != null) {
         result.addError(attribute.getPosition(), "Attribute has the same name (" + attributeQName + ") as " + sameName.getPosition()
           + ".  Please use annotations to disambiguate.");
-        //todo: this check should really be global....
+        //todo: this check should really be global (including supertypes)....
       }
 
       result.aggregate(validateAttribute(attribute));
@@ -456,7 +456,7 @@ public class DefaultValidator implements Validator {
             elementNames.put(wrapperQName, choiceNames);
           }
 
-          //todo: this check should really be global, including supertypes.
+          //todo: this check should really be global (including supertypes)....
           QName choiceQName = new QName(choice.getNamespace(), choice.getName());
           Element sameName = choiceNames.put(choiceQName, choice);
           if (sameName != null) {

@@ -10,6 +10,7 @@ import java.io.File;
 public class DownloadConfig {
 
   private String artifact;
+  private String name;
   private String description;
   private File file;
 
@@ -29,6 +30,24 @@ public class DownloadConfig {
    */
   public void setArtifact(String artifact) {
     this.artifact = artifact;
+  }
+
+  /**
+   * The name of the download.
+   *
+   * @return The name of the download.
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * The name of the download.
+   *
+   * @param name The name of the download.
+   */
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**

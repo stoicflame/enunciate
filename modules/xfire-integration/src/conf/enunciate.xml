@@ -12,5 +12,9 @@
       </package-conversions>
     </xfire-client>
     <xfire uuid="full.example"/>
+    <docs splashPackage="net.sf.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
+      <!--todo: uncomment this when you can figure out how to do it without breaking the build (multiple run directories)-->
+      <!-- download name="License" file="src/dummy-license.txt" description="The license file governing these downloads."/ -->
+    </docs>
   </modules>
 </enunciate>

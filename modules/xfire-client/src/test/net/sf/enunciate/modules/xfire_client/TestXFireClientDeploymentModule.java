@@ -7,23 +7,21 @@ import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.contract.jaxb.ComplexTypeDefinition;
 import net.sf.enunciate.contract.jaxb.EnumTypeDefinition;
-import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
+import net.sf.enunciate.contract.jaxb.SimpleTypeDefinition;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.enunciate.main.Enunciate;
-import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.enunciate.modules.xfire_client.annotations.*;
+import net.sf.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.xfire.annotations.WebParamAnnotation;
+import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Arrays;
-
-import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
-import org.codehaus.xfire.annotations.WebParamAnnotation;
+import java.util.HashMap;
 
 /**
  * @author Ryan Heaton
@@ -70,7 +68,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     module.doFreemarkerGenerate();
 
     //check that all templates were processed.
-    assertEquals("all templates should have been used.", 12, templateLedger.size());
+    assertEquals("all templates should have been used.", 13, templateLedger.size());
     URL xfireEnumTemplate = module.getTemplateURL("xfire-enum-type.fmt");
     URL xfireSimpleTemplate = module.getTemplateURL("xfire-simple-type.fmt");
     URL xfireComplexTemplate = module.getTemplateURL("xfire-complex-type.fmt");
@@ -78,6 +76,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     URL soapImplTemplate = module.getTemplateURL("client-soap-endpoint-impl.fmt");
     URL faultTemplate = module.getTemplateURL("client-web-fault.fmt");
     URL enumTypeTemplate = module.getTemplateURL("client-jdk14-enum-type.fmt");
+    URL enum15TypeTemplate = module.getTemplateURL("client-jdk15-enum-type.fmt");
     URL simpleTypeTemplate = module.getTemplateURL("client-simple-type.fmt");
     URL complexTypeTemplate = module.getTemplateURL("client-complex-type.fmt");
     URL faultBeanTemplate = module.getTemplateURL("client-fault-bean.fmt");
@@ -86,12 +85,13 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals(1, templateLedger.get(xfireEnumTemplate).intValue());
     assertEquals(1, templateLedger.get(xfireSimpleTemplate).intValue());
     assertEquals(1, templateLedger.get(xfireComplexTemplate).intValue());
-    assertEquals(2, templateLedger.get(eiTemplate).intValue());
-    assertEquals(2, templateLedger.get(soapImplTemplate).intValue());
+    assertEquals(4, templateLedger.get(eiTemplate).intValue());
+    assertEquals(4, templateLedger.get(soapImplTemplate).intValue());
     assertEquals(1, templateLedger.get(enumTypeTemplate).intValue());
-    assertEquals(1, templateLedger.get(simpleTypeTemplate).intValue());
-    assertEquals(1, templateLedger.get(complexTypeTemplate).intValue());
-    assertEquals(2, templateLedger.get(faultTemplate).intValue());
+    assertEquals(1, templateLedger.get(enum15TypeTemplate).intValue());
+    assertEquals(2, templateLedger.get(simpleTypeTemplate).intValue());
+    assertEquals(2, templateLedger.get(complexTypeTemplate).intValue());
+    assertEquals(4, templateLedger.get(faultTemplate).intValue());
     assertEquals(2, templateLedger.get(faultBeanTemplate).intValue());
     assertEquals(4, templateLedger.get(requestBeanTemplate).intValue());
     assertEquals(4, templateLedger.get(responseBeanTemplate).intValue());

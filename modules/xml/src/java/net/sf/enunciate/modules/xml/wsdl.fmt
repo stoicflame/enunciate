@@ -132,7 +132,6 @@ Template library for WSDL.
     </documentation>
       [/#if]
       [#list webMessage.parts as part]
-    [#--todo: support encoded style? nah...--]
     <part name="${part.partName}" ${part.particleType?lower_case}="${part.particleQName}">
         [#if part.partDocs?exists]
       <documentation>
@@ -299,8 +298,7 @@ Template library for WSDL.
 [#macro processSOAPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
       [#--todo: make this address a known token so the server-side code can process it.--]
-      [#--todo: add an option to state this address statically.--]
-      <${soap}:address location="TBD"/>
+      <${soap}:address location="${endpointProtocol?default("http")}://${endpointHostname?default("localhost:8080")}/${endpointContext?default("enunciate/soap")}/${endpointInterface.serviceName}"/>
     </port>
 [/#macro]
 

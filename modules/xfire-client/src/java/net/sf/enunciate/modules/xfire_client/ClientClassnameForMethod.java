@@ -18,16 +18,10 @@ import java.util.Map;
  */
 public class ClientClassnameForMethod extends ClientPackageForMethod {
 
-  private final boolean jdk15;
+  private boolean jdk15 = false;
 
   public ClientClassnameForMethod(Map<String, String> conversions) {
-    this(conversions, true);
-  }
-
-  public ClientClassnameForMethod(Map<String, String> conversions, boolean jdk15) {
     super(conversions);
-
-    this.jdk15 = jdk15;
   }
 
   @Override
@@ -80,4 +74,21 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     throw new UnsupportedOperationException("packages don't have a client classname.");
   }
 
+  /**
+   * Whether this converter is enabled to output jdk 15 compatible classes.
+   *
+   * @return Whether this converter is enabled to output jdk 15 compatible classes.
+   */
+  public boolean isJdk15() {
+    return jdk15;
+  }
+
+  /**
+   * Whether this converter is enabled to output jdk 15 compatible classes.
+   *
+   * @param jdk15 Whether this converter is enabled to output jdk 15 compatible classes.
+   */
+  public void setJdk15(boolean jdk15) {
+    this.jdk15 = jdk15;
+  }
 }

@@ -31,6 +31,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
+  private final Set<String> jaxbPackageImports = new HashSet<String>();
+  private final Set<String> jaxbClassImports = new HashSet<String>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -121,6 +123,46 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * Add a JAXB import to the configuration.  Either class or package must be specified, but not both.
+   *
+   * @param clazz The FQN of the class to import.
+   * @param pckg The FQN of the package to import.
+   */
+  public void addJAXBImport(String clazz, String pckg) {
+    if ((clazz != null) && (pckg != null)) {
+      throw new IllegalArgumentException("Either 'class' or 'package' must be specified on a JAXB import, but not both.");
+    }
+    else if (clazz != null) {
+      this.jaxbClassImports.add(clazz);
+    }
+    else if (pckg != null) {
+      throw new UnsupportedOperationException("Sorry, jaxb package imports aren't supported yet.  It's on the todo list.  For now, you'll have to import each class.");
+      //this.jaxbPackageImports.add(pckg);
+    }
+    else {
+      throw new IllegalArgumentException("Either 'class' or 'package' must be specified on a JAXB import (but not both).");
+    }
+  }
+
+  /**
+   * The set of JAXB package imports specified.
+   *
+   * @return The set of JAXB package imports specified.
+   */
+  public Set<String> getJaxbPackageImports() {
+    return jaxbPackageImports;
+  }
+
+  /**
+   * The list of JAXB class imports specified.
+   *
+   * @return The list of JAXB class imports specified.
+   */
+  public Set<String> getJaxbClassImports() {
+    return jaxbClassImports;
+  }
+
+  /**
    * The map of namespaces to prefixes.
    *
    * @return The map of namespaces to prefixes.
@@ -191,6 +233,11 @@ public class EnunciateConfiguration implements ErrorHandler {
     //allow a validator to be configured.
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
     digester.addSetNext("enunciate/validator", "setValidator");
+
+    //allow for classes and packages to be imported for JAXB.
+    digester.addCallMethod("enunciate/jaxb-import", "addJAXBImport", 2);
+    digester.addCallParam("enunciate/jaxb-import", 0, "class");
+    digester.addCallParam("enunciate/jaxb-import", 1, "package");
 
     //allow for namespace prefixes to be specified in the config file.
     digester.addCallMethod("enunciate/namespaces/namespace", "putNamespace", 2);

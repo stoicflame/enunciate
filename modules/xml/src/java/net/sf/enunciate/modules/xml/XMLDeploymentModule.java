@@ -34,6 +34,9 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
   private final ArrayList<WsdlConfig> wsdlConfigs = new ArrayList<WsdlConfig>();
+  private String endpointHostname;
+  private String endpointContext;
+  private String endpointProtocol;
 
   /**
    * @return "xml"
@@ -68,6 +71,60 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addWsdlConfig(WsdlConfig config) {
     this.wsdlConfigs.add(config);
+  }
+
+  /**
+   * The protocol over which to access the soap endpoints.  Default "http".
+   *
+   * @return The protocol over which to access the soap endpoints.
+   */
+  public String getEndpointProtocol() {
+    return endpointProtocol;
+  }
+
+  /**
+   * The protocol over which to access the soap endpoints.  Default "http".
+   *
+   * @param endpointProtocol The protocol over which to access the soap endpoints.
+   */
+  public void setEndpointProtocol(String endpointProtocol) {
+    this.endpointProtocol = endpointProtocol;
+  }
+
+  /**
+   * The hostname of the server on which the SOAP endpoints will be mounted (for the WSDL).
+   *
+   * @return The hostname of the server on which the SOAP endpoints will be mounted (for the WSDL).
+   */
+  public String getEndpointHostname() {
+    return endpointHostname;
+  }
+
+  /**
+   * The hostname of the server on which the SOAP endpoints will be mounted (for the WSDL).
+   *
+   * @param endpointHostname The hostname of the server on which the SOAP endpoints will be mounted (for the WSDL).
+   */
+  public void setEndpointHostname(String endpointHostname) {
+    this.endpointHostname = endpointHostname;
+  }
+
+  /**
+   * The URL context at which the SOAP app will be mounted.  Defaults to [project label]/soap.
+   *
+   * @return The URL context at which the SOAP app will be mounted.
+   */
+  public String getEndpointContext() {
+    return endpointContext;
+  }
+
+  /**
+   * The URL context at which the SOAP app will be mounted. Defaults to [project label]/soap.
+   *
+   * @param endpointContext The URL context at which the SOAP app will be mounted.
+   */
+  public void setEndpointContext(String endpointContext) {
+    this.endpointContext = endpointContext;
   }
 
   @Override
@@ -122,6 +179,40 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
+    String hostname = getEndpointHostname();
+    if (hostname == null) {
+      System.out.println("WARNING: No hostname specified for the SOAP endpoints.  Defaulting to \"localhost:8080\".");
+      hostname = "localhost:8080";
+    }
+
+    String endpointContext = getEndpointContext();
+    if (endpointContext == null) {
+      String label = "enunciate";
+      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+        label = enunciate.getConfig().getLabel();
+      }
+      
+      endpointContext = label + "/soap";
+      System.out.println("WARNING: No context specified for the SOAP endpoints.  Defaulting to \"" + endpointContext + "\".");
+    }
+    else {
+      if (endpointContext.startsWith("/")) {
+        endpointContext = endpointContext.substring(1);
+      }
+
+      if (endpointContext.endsWith("/")) {
+        endpointContext = endpointContext.substring(0, endpointContext.length() - 1);
+      }
+    }
+
+    String endpointProtocol = getEndpointProtocol();
+    if (endpointProtocol == null) {
+      endpointProtocol = "http";
+    }
+
+    model.put("endpointProtocol", endpointProtocol);
+    model.put("endpointHostname", hostname);
+    model.put("endpointContext", endpointContext);
     model.put("prefix", new PrefixMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);

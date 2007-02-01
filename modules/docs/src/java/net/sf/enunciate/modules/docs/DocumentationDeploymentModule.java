@@ -11,6 +11,7 @@ import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.main.*;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.docs.config.DownloadConfig;
+import net.sf.enunciate.modules.docs.config.DocsRuleSet;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
 import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
@@ -25,6 +26,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.digester.RuleSet;
+
 /**
  * The documentation deployment module is responsible for generating the documentation
  * for the API.
@@ -38,6 +41,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   private String title = "Web API";
   private boolean includeDefaultDownloads = true;
   private URL xsltURL;
+  private File css;
   private File base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
 
@@ -174,7 +178,25 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     this.xsltURL = xslt;
   }
 
-    /**
+  /**
+   * The cascading stylesheet to use instead of the default.  This is ignored if the 'base' is also set.
+   *
+   * @return The cascading stylesheet to use.
+   */
+  public File getCss() {
+    return css;
+  }
+
+  /**
+   * The cascading stylesheet to use instead of the default.  This is ignored if the 'base' is also set.
+   *
+   * @param css The cascading stylesheet to use instead of the default.
+   */
+  public void setCss(File css) {
+    this.css = css;
+  }
+
+  /**
    * The documentation "base".  The documentation base is the initial contents of the directory
    * where the documentation will be output.  Can be a zip file or a directory.
    *
@@ -268,6 +290,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     buildDir.mkdirs();
     if (this.base == null) {
       extractBase(loadDefaultBase(), buildDir);
+
+      if (this.css != null) {
+        enunciate.copyFile(this.css, new File(buildDir, "default.css"));
+      }
     }
     else if (this.base.isDirectory()) {
       enunciate.copyDir(this.base, buildDir);
@@ -302,13 +328,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       }
       else if (download.getFile() != null) {
         File downloadFile = download.getFile();
-        NamedFileArtifact fileArtifact = new NamedFileArtifact(getName(), downloadFile.getName(), downloadFile);
+        DownloadBundle downloadArtifact = new DownloadBundle(getName(), downloadFile.getName(), downloadFile);
 
-        if (download.getDescription() != null) {
-          fileArtifact.setDescription(download.getDescription());
+        if (download.getName() != null) {
+          downloadArtifact.setName(download.getName());
         }
 
-        downloads.add(fileArtifact);
+        if (download.getDescription() != null) {
+          downloadArtifact.setDescription(download.getDescription());
+        }
+
+        downloads.add(downloadArtifact);
       }
     }
 
@@ -408,5 +438,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   protected ObjectWrapper getObjectWrapper() {
     return new APTJellyObjectWrapper();
   }
-  
+
+  @Override
+  public RuleSet getConfigurationRules() {
+    return new DocsRuleSet();
+  }
 }

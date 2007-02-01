@@ -35,7 +35,7 @@ public class FileArtifact extends BaseArtifact {
    */
   public void exportTo(File file, Enunciate enunciate) throws IOException {
     if (!this.file.exists()) {
-      throw new IOException("Unable to export non-existing file " + file);
+      throw new IOException("Unable to export non-existing file " + this.file);
     }
 
     if (this.file.isDirectory()) {
@@ -47,7 +47,12 @@ public class FileArtifact extends BaseArtifact {
       }
     }
     else {
-      enunciate.copyFile(this.file, file);
+      if (file.exists() && file.isDirectory()) {
+        enunciate.copyFile(this.file, new File(file, this.file.getName()));
+      }
+      else {
+        enunciate.copyFile(this.file, file);
+      }
     }
   }
 

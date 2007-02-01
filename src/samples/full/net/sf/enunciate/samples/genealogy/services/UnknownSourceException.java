@@ -3,6 +3,8 @@ package net.sf.enunciate.samples.genealogy.services;
 import javax.xml.ws.WebFault;
 
 /**
+ * Thrown if an attempt was made to access an unknown source.
+ *
  * @author Ryan Heaton
  */
 @WebFault (

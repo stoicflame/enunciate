@@ -81,6 +81,15 @@ public abstract class EnunciatedSOAPWebServiceImpl {
   }
 
   /**
+   * The xfire client object that backs this web service.
+   *
+   * @return The xfire client object that backs this web service.
+   */
+  public final Client getXFireClient() {
+    return client;
+  }
+
+  /**
    * Whether MTOM is enabled.
    *
    * @param MTOMEnabled Whether MTOM is enabled.
