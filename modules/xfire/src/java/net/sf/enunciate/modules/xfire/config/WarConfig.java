@@ -2,6 +2,9 @@ package net.sf.enunciate.modules.xfire.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * Configuration for the war.
@@ -12,7 +15,7 @@ public class WarConfig {
 
   private final List<String> warLibs = new ArrayList<String>();
   private String name;
-  private String file;
+  private URL webXMLTransformURL;
 
   /**
    * The name of the war.
@@ -33,30 +36,39 @@ public class WarConfig {
   }
 
   /**
-   * The full path to the war file.
-   *
-   * @return The full path to the war file.
-   */
-  public String getFile() {
-    return file;
-  }
-
-  /**
-   * The full path to the war file.
-   *
-   * @param file The full path to the war file.
-   */
-  public void setFile(String file) {
-    this.file = file;
-  }
-
-  /**
    * The list of libraries to include in the war.
    *
    * @return The list of libraries to include in the war.
    */
   public List<String> getWarLibs() {
     return warLibs;
+  }
+
+  /**
+   * The (optional) stylesheet transformation through which to pass the generated web.xml file.
+   *
+   * @return The stylesheet transformation through which to pass the generated web.xml file.
+   */
+  public URL getWebXMLTransformURL() {
+    return webXMLTransformURL;
+  }
+
+  /**
+   * The (optional) stylesheet transformation through which to pass the generated web.xml file.
+   *
+   * @param stylesheet The stylesheet transformation through which to pass the generated web.xml file.
+   */
+  public void setWebXMLTransformURL(URL stylesheet) {
+    this.webXMLTransformURL = stylesheet;
+  }
+
+  /**
+   * The (optional) stylesheet transformation through which to pass the generated web.xml file.
+   *
+   * @param stylesheet The stylesheet transformation through which to pass the generated web.xml file.
+   */
+  public void setWebXMLTransform(File stylesheet) throws MalformedURLException {
+    this.webXMLTransformURL = stylesheet.toURL();
   }
 
   /**

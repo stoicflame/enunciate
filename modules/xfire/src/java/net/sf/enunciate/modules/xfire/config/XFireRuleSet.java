@@ -20,11 +20,9 @@ public class XFireRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/xfire/war/lib");
     digester.addSetNext("enunciate/modules/xfire/war/lib", "addWarLib");
 
-    //todo: add rules for configuration of invocation handlers?
-
-    //todo: add rules for configuration of xfire in/out handlers?
-
-    //todo: add rules for configuration of spring interceptors for the service bean?
+    digester.addObjectCreate("enunciate/modules/xfire/springImport", SpringImport.class);
+    digester.addSetProperties("enunciate/modules/xfire/springImport");
+    digester.addSetNext("enunciate/modules/xfire/springImport", "addSpringImport");
   }
 
 }

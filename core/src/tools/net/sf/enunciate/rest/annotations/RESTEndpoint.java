@@ -13,4 +13,7 @@ import java.lang.annotation.ElementType;
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ( {ElementType.TYPE} )
 public @interface RESTEndpoint {
+
+  String name() default "";
+  
 }

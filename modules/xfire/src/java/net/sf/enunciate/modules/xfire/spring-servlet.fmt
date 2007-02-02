@@ -3,17 +3,17 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
-  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+  [#if springImports?exists]
+    [#list springImports as springImport]
+  <import resource="${springImport}"/>
+    [/#list]
+  [/#if]
+
+  <bean id="handlerMapping" class="net.sf.enunciate.modules.xfire.EnunciateHandlerMapping">
     <property name="alwaysUseFullPath">
       <value>true</value>
     </property>
     
-    [#--
-    todo: set a (configurable) list of interceptors?
-    <property name="interceptors">
-    </property>
-    --]
-
     <property name="urlMap">
       <map>
   [@forEachWsdl]
@@ -24,11 +24,9 @@
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
         [#--todo: what about eis with the same name, different namespace?--]
         <entry key="/soap/${endpointInterface.serviceName}">
-          [#--todo: support to be able to add xfire in/out handlers?--]
           <bean parent="endpoint">
-            <property name="serviceBean">
-              [#--todo: support to be able to configure spring interceptors for the impl bean?--]
-              <bean class="${impl.qualifiedName}"/>
+            <property name="serviceClass">
+              <value>${impl.qualifiedName}</value>
             </property>
           [#if wsdl.properties.filename?exists]
             <property name="wsdlView">
@@ -51,24 +49,22 @@
 
         <entry key="/rest/**">
           <bean class="net.sf.enunciate.modules.rest.RESTController">
-            <constructor-arg>
+            <property name="endpointClasses">
               <list>
-                <!-- List of the REST endpoint beans -->
-                [#--todo: support to be able to configure spring interceptors for the endpoint?--]
+                <!-- List of the REST endpoint bean classes -->
   [@forEachRESTEndpoint]
     [#if endpoint.class]
-                <bean class="${endpoint.qualifiedName}"/>
+                <value>${endpoint.qualifiedName}</value>
     [/#if]
   [/@forEachRESTEndpoint]
               </list>
-            </constructor-arg>
+            </property>
           </bean>
         </entry>
 
       </map>
     </property>
 
-    [#--todo: support to configure request/response hander chain?--]
   </bean>
 
   <!-- define the parent for all soap service endpoints -->

@@ -1,11 +1,14 @@
 package net.sf.enunciate.modules.rest;
 
-import net.sf.enunciate.rest.annotations.*;
+import net.sf.enunciate.rest.annotations.Noun;
+import net.sf.enunciate.rest.annotations.RESTEndpoint;
+import net.sf.enunciate.rest.annotations.Verb;
+import net.sf.enunciate.rest.annotations.VerbType;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,9 +19,9 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,14 +33,14 @@ import java.util.regex.Pattern;
  */
 public class RESTController extends AbstractController {
 
-  private final Object[] endpoints;
+  private Object[] endpoints;
+  private Class[] endpointClasses;
   private Map<String, RESTResource> RESTResources = new HashMap<String, RESTResource>();
   private Pattern urlPattern;
   private final DocumentBuilder documentBuilder;
   private HandlerExceptionResolver exceptionHandler;
 
-  public RESTController(Object[] endpoints) {
-    this.endpoints = endpoints;
+  public RESTController() {
     setSubcontext("rest");
     setSupportedMethods(new String[] {"GET", "PUT", "POST", "DELETE"});
 
@@ -61,6 +64,14 @@ public class RESTController extends AbstractController {
   @Override
   protected void initApplicationContext() throws BeansException {
     super.initApplicationContext();
+
+    if ((endpoints == null) && (endpointClasses != null)) {
+      endpoints = new Object[endpointClasses.length];
+      for (int i = 0; i < endpointClasses.length; i++) {
+        Class endpointClass = endpointClasses[i];
+        endpoints[i] = loadEndpointBean(endpointClass);
+      }
+    }
 
     if (endpoints != null) {
       for (Object endpoint : endpoints) {
@@ -96,6 +107,56 @@ public class RESTController extends AbstractController {
         }
       }
     }
+  }
+
+  /**
+   * Attempts to load the endpoint bean by first looking for beans that implement the specified endpoint class.
+   * If there is only one, it will be used.  Otherwise, if there is more than one, it will attempt to find one that is named
+   * the {@link net.sf.enunciate.rest.annotations.RESTEndpoint#name() same as the REST endpoint} or fail.  If there are
+   * no endpoint beans in the context that can be assigned to the specified endpoint class, an attempt will be made to
+   * instantiate one.
+   *
+   * @param endpointClass The class of the endpoint bean to attempt to load.
+   * @return The endpoint bean.
+   * @throws BeansException If an attempt was made to instantiate the bean but it failed.
+   */
+  protected Object loadEndpointBean(Class endpointClass) throws BeansException {
+    Object endpointBean;
+    Map endpointClassBeans = getApplicationContext().getBeansOfType(endpointClass);
+    if (endpointClassBeans.size() > 0) {
+      RESTEndpoint annotation = (RESTEndpoint) endpointClass.getAnnotation(RESTEndpoint.class);
+      String endpointName = annotation == null ? "" : annotation.name();
+      if (!"".equals(endpointName) && endpointClassBeans.containsKey(endpointName)) {
+        //first attempt will be to load the bean identified by the endpoint name:
+        endpointBean = endpointClassBeans.get(endpointName);
+      }
+      else if (endpointClassBeans.size() == 1) {
+        // not there; use the only one if it exists...
+        endpointBean = endpointClassBeans.values().iterator().next();
+      }
+      else {
+        //panic: can't determine the endpoint bean to use.
+        ArrayList beanNames = new ArrayList(endpointClassBeans.keySet());
+        if ("".equals(endpointName)) {
+          endpointName = "and supply an endpoint name with the @RESTEndpoint annotation";
+        }
+        throw new ApplicationContextException("There are more than one beans of type " + endpointClass.getName() +
+          " in the application context " + beanNames + ".  Cannot determine which one to use to handle the REST requests.  " +
+          "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the REST endpoint (" +
+          endpointName + ").");
+      }
+    }
+    else {
+      //try to instantiate the bean with the class...
+      try {
+        endpointBean = endpointClass.newInstance();
+      }
+      catch (Exception e) {
+        throw new ApplicationContextException("Unable to instantiate REST endpoint bean of class " + endpointClass.getName() + ".", e);
+      }
+    }
+
+    return endpointBean;
   }
 
   /**
@@ -306,6 +367,33 @@ public class RESTController extends AbstractController {
    */
   public Object[] getEndpoints() {
     return endpoints;
+  }
+
+  /**
+   * The REST endpoints that make up this API.
+   *
+   * @param endpoints The REST endpoints that make up this API.
+   */
+  public void setEndpoints(Object[] endpoints) {
+    this.endpoints = endpoints;
+  }
+
+  /**
+   * The classes that make up this REST API.
+   *
+   * @return The classes that make up this REST API.
+   */
+  public Class[] getEndpointClasses() {
+    return endpointClasses;
+  }
+
+  /**
+   * The classes that make up this REST API.
+   *
+   * @param endpointClasses The classes that make up this REST API.
+   */
+  public void setEndpointClasses(Class[] endpointClasses) {
+    this.endpointClasses = endpointClasses;
   }
 
   /**

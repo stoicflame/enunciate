@@ -118,6 +118,12 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
     return endpointInterface.getSimpleName() + "Service";
   }
 
+
+  @Override
+  public WebAnnotations getAnnotations() {
+    return super.getAnnotations();
+  }
+
   /**
    * The faults don't need to be initialized.  The {@link net.sf.enunciate.modules.xfire.EnunciatedJAXWSWebFaultHandler}
    * will handle it.

@@ -1,26 +1,36 @@
 package net.sf.enunciate.modules.xfire;
 
+import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.TemplateException;
 import net.sf.enunciate.EnunciateException;
-import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
-import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.config.WsdlInfo;
 import net.sf.enunciate.contract.jaxws.*;
-import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.contract.validation.Validator;
 import net.sf.enunciate.main.Artifact;
+import net.sf.enunciate.main.Enunciate;
+import net.sf.enunciate.main.FileArtifact;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
+import net.sf.enunciate.modules.xfire.config.SpringImport;
 import org.apache.commons.digester.RuleSet;
 import sun.misc.Service;
 
 import javax.servlet.ServletContext;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Deployment module for XFire.
@@ -30,6 +40,7 @@ import java.util.*;
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   private WarConfig warConfig;
+  private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -67,6 +78,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //generate the xfire-servlet.xml
     model.setFileOutputDirectory(getXMLGenerateDir());
+    model.put("springImports", getSpringImportURIs());
     processTemplate(getSpringServletTemplateURL(), model);
 
     //generate the rpc request/response beans.
@@ -113,7 +125,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   @Override
-  protected void doBuild() throws IOException {
+  protected void doBuild() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
     File webinf = new File(buildDir, "WEB-INF");
@@ -152,13 +164,33 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
-    //copy the web.xml file to WEB-INF.
-    //todo: merge the specified web.xml with another specified in the config?
-    enunciate.copyResource("/net/sf/enunciate/modules/xfire/web.xml", new File(webinf, "web.xml"));
+    //put the web.xml in WEB-INF.  Pass it through a stylesheet, if specified.
+    URL webXML = getClass().getResource("/net/sf/enunciate/modules/xfire/web.xml");
+    if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
+      URL transformURL = this.warConfig.getWebXMLTransformURL();
+      try {
+        StreamSource source = new StreamSource(transformURL.openStream());
+        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+        transformer.transform(new StreamSource(webXML.openStream()), new StreamResult(new File(webinf, "web.xml")));
+      }
+      catch (TransformerException e) {
+        throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
+      }
+    }
+    else {
+      enunciate.copyResource(webXML, new File(webinf, "web.xml"));
+    }
 
     //copy the spring servlet config from the build dir to the WEB-INF directory.
     File xfireConfigDir = getXMLGenerateDir();
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
+    for (SpringImport springImport : springImports) {
+      //copy the extra spring import files to the WEB-INF directory to be imported.
+      File importFile = springImport.getFile();
+      if (importFile != null) {
+        enunciate.copyFile(importFile, new File(webinf, importFile.getName()));
+      }
+    }
 
     //now try to find the documentation and export it to the build directory...
     Artifact artifact = enunciate.findArtifact("docs");
@@ -168,6 +200,9 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     else {
       System.out.println("WARNING: No documentation artifact found!");
     }
+
+    //export the unexpanded application directory.
+    enunciate.addArtifact(new FileArtifact(getName(), "xfire.webapp", buildDir));
   }
 
   @Override
@@ -185,6 +220,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     enunciate.zip(buildDir, warFile);
+    enunciate.addArtifact(new FileArtifact(getName(), "xfire.war", warFile));
   }
 
   /**
@@ -206,18 +242,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    * @return The war file to create.
    */
   public File getWarFile() {
-    String filename = "enunciated.war";
+    String filename = "enunciate.war";
     if (getEnunciate().getConfig().getLabel() != null) {
       filename = getEnunciate().getConfig().getLabel() + ".war";
     }
     
-    if (this.warConfig != null) {
-      if (this.warConfig.getFile() != null) {
-        return new File(this.warConfig.getFile());
-      }
-      else if (this.warConfig.getName() != null) {
-        filename = this.warConfig.getName();
-      }
+    if ((this.warConfig != null) && (this.warConfig.getName() != null)) {
+      filename = this.warConfig.getName();
     }
 
     return new File(getPackageDir(), filename);
@@ -230,6 +261,40 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setWarConfig(WarConfig warConfig) {
     this.warConfig = warConfig;
+  }
+
+  /**
+   * Get the string form of the spring imports that have been configured.
+   *
+   * @return The string form of the spring imports that have been configured.
+   */
+  protected ArrayList<String> getSpringImportURIs() {
+    ArrayList<String> springImportURIs = new ArrayList<String>(this.springImports.size());
+    for (SpringImport springImport : springImports) {
+      if (springImport.getFile() != null) {
+        if (springImport.getUri() != null) {
+          throw new IllegalStateException("A spring import configuration must specify a file or a URI, but not both.");
+        }
+
+        springImportURIs.add(springImport.getFile().getName());
+      }
+      else if (springImport.getUri() != null) {
+        springImportURIs.add(springImport.getUri());
+      }
+      else {
+        throw new IllegalStateException("A spring import configuration must specify either a file or a URI.");
+      }
+    }
+    return springImportURIs;
+  }
+
+  /**
+   * Add a spring import.
+   *
+   * @param springImports The spring import to add.
+   */
+  public void addSpringImport(SpringImport springImports) {
+    this.springImports.add(springImports);
   }
 
   /**

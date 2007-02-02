@@ -24,4 +24,15 @@
     <ant dir="${modules.xfire-integration.basedir}"/>
   </target>
 
+  <target name="clean">
+    <ant dir="${core.basedir}" target="clean"/>
+    <ant dir="${modules.xml.basedir}" target="clean"/>
+    <ant dir="${modules.jaxws.basedir}" target="clean"/>
+    <ant dir="${modules.rest.basedir}" target="clean"/>
+    <ant dir="${modules.xfire-client.basedir}" target="clean"/>
+    <ant dir="${modules.docs.basedir}" target="clean"/>
+    <ant dir="${modules.xfire.basedir}" target="clean"/>
+    <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
+  </target>
+
 </project>

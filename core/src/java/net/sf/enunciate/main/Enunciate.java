@@ -8,6 +8,7 @@ import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -413,13 +414,24 @@ public class Enunciate {
    * @param to       The file to copy to.
    */
   public void copyResource(String resource, File to) throws IOException {
-    InputStream stream = getClass().getResourceAsStream(resource);
-    if (stream == null) {
+    URL url = getClass().getResource(resource);
+    if (url == null) {
       throw new IOException("Request to copy a resource that was not found: " + resource);
     }
+    copyResource(url, to);
+  }
+
+  /**
+   * Copies a resource to a file.
+   *
+   * @param url The url of the resource.
+   * @param to The file to copy to.
+   */
+  public void copyResource(URL url, File to) throws IOException {
+    InputStream stream = url.openStream();
 
     if (isDebug()) {
-      System.out.println("Copying resource " + resource + " to " + to);
+      System.out.println("Copying resource " + url + " to " + to);
     }
 
     FileOutputStream out = new FileOutputStream(to);

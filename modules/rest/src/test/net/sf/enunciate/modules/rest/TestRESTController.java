@@ -1,22 +1,20 @@
 package net.sf.enunciate.modules.rest;
 
 import junit.framework.TestCase;
-import static org.easymock.EasyMock.*;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
 import net.sf.enunciate.rest.annotations.VerbType;
-import org.springframework.web.servlet.ModelAndView;
+import static org.easymock.EasyMock.*;
 import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletInputStream;
 import javax.xml.bind.JAXBContext;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -27,7 +25,8 @@ public class TestRESTController extends TestCase {
    * tests the initialization of the application context.
    */
   public void testInitApplicationContext() throws Exception {
-    RESTController controller = new RESTController(new Object[]{new EndpointOneImpl(), new EndpointTwo(), new EndpointThreeImpl()});
+    RESTController controller = new RESTController();
+    controller.setEndpoints(new Object[]{new EndpointOneImpl(), new EndpointTwo(), new EndpointThreeImpl()});
     controller.initApplicationContext();
 
     String[] nouns = {"one", "two", "three", "four", "five", "six"};
@@ -48,7 +47,8 @@ public class TestRESTController extends TestCase {
     ProxyFactoryBean advisedEndpoint = new ProxyFactoryBean();
     advisedEndpoint.setTarget(new EndpointOneImpl());
     advisedEndpoint.setProxyInterfaces(new String[]{"net.sf.enunciate.modules.rest.EndpointOne"});
-    controller = new RESTController(new Object[]{advisedEndpoint});
+    controller = new RESTController();
+    controller.setEndpoints(new Object[]{advisedEndpoint});
     controller.initApplicationContext();
     nouns = new String[]{"one", "two"};
     resources = new HashMap<String, RESTResource>(controller.getRESTResources());
@@ -69,7 +69,7 @@ public class TestRESTController extends TestCase {
    * Tests handling that the noun and proper noun are property extracted from the request.
    */
   public void testHandleRequestInternal() throws Exception {
-    RESTController controller = new RESTController(null) {
+    RESTController controller = new RESTController() {
       @Override
       protected ModelAndView handleRESTOperation(String noun, String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute(noun, properNoun);
@@ -139,7 +139,8 @@ public class TestRESTController extends TestCase {
    * tests the handleRESTOperation method.
    */
   public void testHandleRESTOperation() throws Exception {
-    RESTController controller = new RESTController(new Object[]{new MockRESTEndpoint()});
+    RESTController controller = new RESTController();
+    controller.setEndpoints(new Object[]{new MockRESTEndpoint()});
     controller.initApplicationContext();
 
     HttpServletRequest request = createMock(HttpServletRequest.class);

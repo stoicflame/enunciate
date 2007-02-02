@@ -284,7 +284,6 @@
       <fileset dir="target">
         <include name="${jar.pattern}"/>
       </fileset>
-      <pathelement location="${conf.dir}"/>
     </path>
 
     <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
