@@ -97,7 +97,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
   }
 
   /**
-   * @return The enum {@link ParticleType#ELEMENT}
+   * @return The enum {@link net.sf.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;

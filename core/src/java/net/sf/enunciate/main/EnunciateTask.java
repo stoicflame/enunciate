@@ -34,6 +34,7 @@ public class EnunciateTask extends MatchingTask {
   private File buildDir;
   private File packageDir;
   private Enunciate.Target target;
+  private final ArrayList<Export> exports = new ArrayList<Export>();
 
   /**
    * Executes the enunciate task.
@@ -100,6 +101,10 @@ public class EnunciateTask extends MatchingTask {
 
       if (this.target != null) {
         proxy.setTarget(this.target);
+      }
+
+      for (Export export : exports) {
+        proxy.addExport(export.getArtifactId(), export.getDestination());
       }
 
       proxy.setVerbose(verbose);
@@ -240,6 +245,62 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setClasspathRef(Reference ref) {
     createClasspath().setRefid(ref);
+  }
+
+  /**
+   * Creates a nested export task.
+   *
+   * @return the nested export task.
+   */
+  public Export createExport() {
+    Export export = new Export();
+    this.exports.add(export);
+    return export;
+  }
+
+  /**
+   * A nested export task.
+   */
+  public static class Export {
+
+    private String artifactId;
+    private File destination;
+
+    /**
+     * The id of the artifact to export.
+     *
+     * @return The id of the artifact to export.
+     */
+    public String getArtifactId() {
+      return artifactId;
+    }
+
+    /**
+     * The id of the artifact to export.
+     *
+     * @param artifactId The id of the artifact to export.
+     */
+    public void setArtifactId(String artifactId) {
+      this.artifactId = artifactId;
+    }
+
+    /**
+     * The destination (file or directory) of the export.
+     *
+     * @return The destination (file or directory) of the export.
+     */
+    public File getDestination() {
+      return destination;
+    }
+
+    /**
+     * The destination (file or directory) of the export.
+     *
+     * @param destination The destination (file or directory) of the export.
+     */
+    public void setDestination(File destination) {
+      this.destination = destination;
+    }
   }
 
 }

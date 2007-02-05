@@ -184,7 +184,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   }
 
   /**
-   * @return {@link ParticleType#ELEMENT}
+   * @return {@link net.sf.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;

@@ -60,12 +60,26 @@ public class Enunciate {
   private Target target = Target.PACKAGE;
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
-  private final String[] sourceFiles;
+  private final HashMap<String, File> exports = new HashMap<String, File>();
+  private String[] sourceFiles;
 
-  public static void main(String[] args) {
-    //todo: compile the args, set the variables, then:
-    //Enunciate enunciate = new Enunciate();
-    //enunciate.execute();
+  public static void main(String[] args) throws Exception {
+    Main.main(args);
+  }
+
+  /**
+   * Protected to ensure the source files are set.
+   */
+  protected Enunciate() {
+  }
+
+  /**
+   * Protected to allow the source files to be set after construction.
+   *
+   * @param sourceFiles The source files to enunciate.
+   */
+  protected void setSourceFiles(String[] sourceFiles) {
+    this.sourceFiles = sourceFiles;
   }
 
   /**
@@ -151,7 +165,20 @@ public class Enunciate {
       deploymentModule.close();
     }
 
-    //todo: now export the artifacts as specified on the command line. 
+    HashSet<String> exportedArtifacts = new HashSet<String>();
+    for (Artifact artifact : artifacts) {
+      String artifactId = artifact.getId();
+      if (this.exports.containsKey(artifactId)) {
+        artifact.exportTo(this.exports.get(artifactId), this);
+        exportedArtifacts.add(artifactId);
+      }
+    }
+
+    for (String export : this.exports.keySet()) {
+      if (!exportedArtifacts.remove(export)) {
+        System.out.println("WARNING: Unknown artifact '" + export + "'.  Artifact will not be exported.");
+      }
+    }
   }
 
   /**
@@ -706,6 +733,16 @@ public class Enunciate {
    */
   public boolean addArtifact(Artifact artifact) {
     return this.artifacts.add(artifact);
+  }
+
+  /**
+   * Adds an export.
+   *
+   * @param artifactId The id of the artifact to export.
+   * @param destination The file or directory to export the artifact to.
+   */
+  public void addExport(String artifactId, File destination) {
+    this.exports.put(artifactId, destination);
   }
 
   /**

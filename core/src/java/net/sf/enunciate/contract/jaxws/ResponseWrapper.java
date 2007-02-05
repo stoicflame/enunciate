@@ -97,7 +97,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
   }
 
   /**
-   * @return {@link ParticleType#ELEMENT}
+   * @return {@link net.sf.enunciate.contract.jaxws.WebMessagePart.ParticleType#ELEMENT}
    */
   public ParticleType getParticleType() {
     return ParticleType.ELEMENT;

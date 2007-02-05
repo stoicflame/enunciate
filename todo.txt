@@ -12,6 +12,7 @@ Modules:
   HTML test form (like .NET)
   RELAX NG
   Standalone service
+  JSON module
 Config options:
   XML: Option to not inline request/response wrappers into the wsdl.
 Additional Features:

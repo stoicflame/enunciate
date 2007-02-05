@@ -1,0 +1,6 @@
+org.apache.commons.digester
+org.apache.commons.digester.parser
+org.apache.commons.digester.plugins
+org.apache.commons.digester.plugins.strategies
+org.apache.commons.digester.substitution
+org.apache.commons.digester.xmlrules

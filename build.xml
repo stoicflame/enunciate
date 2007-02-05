@@ -2,8 +2,15 @@
 
 <project default="build" name="all" basedir=".">
 
+  <property name="version" value="1.0-beta1"/>
+  <property name="dist.name" value="enunciate-${version}"/>
+
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>
+  <property name="lib.dir" value="${enunciate.basedir}/lib"/>
+  <property name="docs.dir" value="${enunciate.basedir}/docs"/>
+  <property name="javadoc.dir" value="${docs.dir}/api"/>
+
   <property name="core.basedir" value="${enunciate.basedir}/core"/>
   <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
   <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
@@ -25,6 +32,8 @@
   </target>
 
   <target name="clean">
+    <delete dir="target"/>
+    
     <ant dir="${core.basedir}" target="clean"/>
     <ant dir="${modules.xml.basedir}" target="clean"/>
     <ant dir="${modules.jaxws.basedir}" target="clean"/>
@@ -33,6 +42,90 @@
     <ant dir="${modules.docs.basedir}" target="clean"/>
     <ant dir="${modules.xfire.basedir}" target="clean"/>
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
+  </target>
+
+  <target name="doc" description="generate documentation and javadoc (global)">
+    <mkdir dir="${javadoc.dir}"/>
+    <property name="title" value="enunciate-docs"/>
+
+    <javadoc doctitle="enunciate" windowtitle="enunciate" destdir="${javadoc.dir}" author="true" version="true" packagenames="*">
+      <fileset dir="${enunciate.basedir}">
+        <include name="core/src/java/**/*.java"/>
+        <include name="core/src/tools/**/*.java"/>
+        <include name="modules/*/src/java/**/*.java"/>
+        <include name="modules/*/src/tools/**/*.java"/>
+      </fileset>
+      
+      <classpath>
+        <fileset dir="${enunciate.basedir}/lib">
+          <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${java.home}/../lib/tools.jar"/>
+        <path path="${java.class.path}"/>
+      </classpath>
+
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/sdk"/>
+      <link href="http://apt-jelly.sourceforge.net/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/apt-jelly"/>
+      <link href="http://jakarta.apache.org/commons/digester/commons-digester-1.7/docs/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/commons-digester"/>
+      <link href="http://static.springframework.org/spring/docs/1.2.x/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/spring"/>
+      <link href="http://envoisolutions.com/xfire/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/xfire"/>
+    </javadoc>
+  </target>
+
+  <target name="full-jar" depends="build, full-jar-only"/>
+
+  <target name="full-jar-only">
+    <mkdir dir="target"/>
+    
+    <concat destfile="target/module.list" fixlastline="yes">
+      <fileset dir="${enunciate.basedir}" includes="**/net.sf.enunciate.modules.DeploymentModule"/>
+    </concat>
+
+    <echo file="target/preserve-in-war" message="This file is used simply to mark the enunciate-full jar as a jar to be preserved when building the war."/>
+
+    <jar destfile="target/${dist.name}-full.jar" duplicate="preserve">
+      <!--first include the concatenated deployment module list.-->
+      <zipfileset dir="target" includes="module.list" fullpath="META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+      <!--make sure the jar is marked to preserve in a war file.-->
+      <zipfileset dir="target" includes="preserve-in-war" fullpath="META-INF/enunciate/preserve-in-war"/>
+
+      <zipgroupfileset dir="${enunciate.basedir}">
+        <include name="core/target/*.jar"/>
+        <include name="modules/*/target/*.jar"/>
+      </zipgroupfileset>
+    </jar>
+
+  </target>
+
+  <target name="dist" depends="clean, full-jar, doc, dist-only"/>
+  
+  <target name="dist-only">
+    <mkdir dir="target/module-libs"/>
+    
+    <copy todir="target/module-libs">
+      <fileset dir="${enunciate.basedir}">
+        <include name="core/target/*.jar"/>
+        <include name="modules/*/target/*.jar"/>
+      </fileset>
+
+      <mapper type="flatten"/>
+    </copy>
+
+    <zip destfile="target/${dist.name}.zip">
+      <zipfileset dir="${docs.dir}" prefix="enunciate/docs"/>
+      <zipfileset dir="${lib.dir}" prefix="enunciate/lib"/>
+      <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
+      <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
+      <zipfileset dir="target" prefix="enunciate" includes="*.jar"/>
+    </zip>
+
+    <tar destfile="target/${dist.name}.tar.gz" compression="gzip">
+      <tarfileset dir="${docs.dir}" prefix="enunciate/docs"/>
+      <tarfileset dir="${lib.dir}" prefix="enunciate/lib"/>
+      <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
+      <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
+      <tarfileset dir="target" prefix="enunciate" includes="*.jar"/>
+    </tar>
   </target>
 
 </project>

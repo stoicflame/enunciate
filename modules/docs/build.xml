@@ -19,6 +19,8 @@
 
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/docs"/>
 
+  <property name="deployment.module.fqn" value="net.sf.enunciate.modules.docs.DocumentationDeploymentModule"/>
+
   <target name="-init">
     <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
       <path>
@@ -33,11 +35,6 @@
   </target>
 
   <target name="init" depends="base.init, -init"/>
-
-  <target name="compile-main" depends="base.compile-main">
-    <mkdir dir="${build.dir}/META-INF/services"/>
-    <echo message="net.sf.enunciate.modules.docs.DocumentationDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
-  </target>
 
   <target name="jar-main" depends="zip-default-base, base.jar-main"/>
 

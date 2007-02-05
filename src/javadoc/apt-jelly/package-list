@@ -1,0 +1,8 @@
+net.sf.jelly.apt
+net.sf.jelly.apt.decorations
+net.sf.jelly.apt.decorations.declaration
+net.sf.jelly.apt.decorations.type
+net.sf.jelly.apt.freemarker
+net.sf.jelly.apt.freemarker.transforms
+net.sf.jelly.apt.strategies
+net.sf.jelly.apt.tags

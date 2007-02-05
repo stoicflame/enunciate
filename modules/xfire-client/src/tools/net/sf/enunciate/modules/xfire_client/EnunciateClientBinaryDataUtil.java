@@ -76,7 +76,6 @@ public class EnunciateClientBinaryDataUtil {
    * @param mechanism The mechanism to use (swaref, mtom, or base64).
    * @param writer    The element writer to which to write the image.
    * @param context   The message context.
-   * @return The id of the attachment that was added.
    */
   public static void writeBinaryData(java.awt.Image image, String mimeType, int mechanism, MessageWriter writer, MessageContext context) throws XFireFault {
     throw new UnsupportedOperationException("No client-side serialization support yet for java.awt.Image.");
@@ -90,7 +89,6 @@ public class EnunciateClientBinaryDataUtil {
    * @param mechanism The mechanism to use (swaref, mtom, or base64).
    * @param writer    The element writer to which to write data.
    * @param context   The message context.
-   * @return The id of the attachment that was added.
    */
   public static void writeBinaryData(javax.xml.transform.Source source, String mimeType, int mechanism, MessageWriter writer, MessageContext context) throws XFireFault {
     throw new UnsupportedOperationException("No client-side serialization support yet for javax.xml.transform.Source.");

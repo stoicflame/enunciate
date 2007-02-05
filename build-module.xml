@@ -5,9 +5,7 @@
   <!--definition of "base" properties - globally referenced. -->
   <dirname file="${ant.file.base}" property="enunciate.basedir"/>
   <property name="lib.dir" value="${enunciate.basedir}/lib"/>
-  <property name="docs.dir" value="${enunciate.basedir}/docs"/>
-  <property name="javadoc.dir" value="${docs.dir}/api"/>
-  <property name="enunciate.version" value="1.0-alpha1"/>
+  <property name="enunciate.version" value="1.0-beta1"/>
   <property name="enunciate.sample.src.dir" value="${enunciate.basedir}/src/samples"/>
 
   <!--global references to other modules-->
@@ -141,7 +139,17 @@
 
   </target>
 
-  <target name="compile-main" description="compile the main code" depends="compile-tools">
+  <target name="echo-deployment-module-fqn" if="deployment.module.fqn">
+    <property name="append.discovery.module" value="false"/>
+    <property name="discovery.dir" value="${build.dir}/META-INF/services"/>
+
+    <mkdir dir="${discovery.dir}"/>
+    <echo message="${deployment.module.fqn}" file="${discovery.dir}/net.sf.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
+  </target>
+
+  <target name="compile-main" description="compile the main code" depends="compile-tools, -compile-main, echo-deployment-module-fqn"/>
+
+  <target name="-compile-main" description="compile the main code">
     <mkdir dir="${build.dir}"/>
     <javac destdir="${build.dir}" debug="true">
       <src>
@@ -226,19 +234,6 @@
 
   <target name="clean" description="clean up">
     <delete dir="target"/>
-  </target>
-
-  <target name="javadoc" description="generate javadoc (global)" depends="jar">
-    <mkdir dir="${javadoc.dir}"/>
-    <property name="title" value="enunciate-docs"/>
-
-    <javadoc use="true" private="true" destdir="${javadoc.dir}" author="true" version="true" packagenames="*">
-      <fileset dir=".">
-        <include name="*/src/java/**"/>
-        <include name="*/src/tools/**"/>
-      </fileset>
-      <classpath refid="run.classpath"/>
-    </javadoc>
   </target>
 
   <target name="generate-example-api" description="generate the artifacts for an example api.">

@@ -312,7 +312,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //instantiate a loader with this library only in its path...
     URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
-    if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
+    if (loader.findResource("META-INF/enunciate/preserve-in-war") != null) {
+      //if a jar happens to have the enunciate "preserve-in-war" file, it is NOT excluded.
+      return false;
+    }
+    else if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
       //exclude tools.jar.
       return true;
     }

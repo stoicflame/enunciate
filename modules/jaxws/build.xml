@@ -13,6 +13,8 @@
     <pathelement location="${core.basedir}/target/test-classes"/>
   </path>
 
+  <property name="deployment.module.fqn" value="net.sf.enunciate.modules.jaxws.JAXWSDeploymentModule"/>
+
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/jaxws"/>
 
   <target name="-init">
@@ -30,9 +32,4 @@
 
   <target name="init" depends="base.init, -init"/>
   
-  <target name="compile-main" depends="base.compile-main">
-    <mkdir dir="${build.dir}/META-INF/services"/>
-    <echo message="net.sf.enunciate.modules.jaxws.JAXWSDeploymentModule" file="${build.dir}/META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
-  </target>
-
 </project>
