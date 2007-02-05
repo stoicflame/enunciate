@@ -50,6 +50,7 @@ public class Main {
         if (!handled) {
           System.out.println("Unknown option: " + option);
           printUsage();
+          System.exit(1);
         }
       }
     }
@@ -135,8 +136,14 @@ public class Main {
      * @return The help information.
      */
     public String getHelpInfo() {
-      String optionFormat = this.valueName == null ? String.format("[-%s|--%s]", getId(), getName())
-                                                   : String.format("[-%s|--%s] <%s>", getId(), getName(), getValueName());
+      String optionFormat;
+      if (this == export) {
+        optionFormat = String.format("-%s %s", getId(), getValueName()); 
+      }
+      else {
+        optionFormat = this.valueName == null ? String.format("[%-3s| --%s]", "-" + getId(), getName())
+                                              : String.format("[%-3s| --%s] <%s>", "-" + getId(), getName(), getValueName());
+      }
       return String.format("  %-30s %s", optionFormat, getDescription());
     }
 
