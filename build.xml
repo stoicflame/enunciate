@@ -112,7 +112,12 @@
     </copy>
 
     <zip destfile="target/${dist.name}.zip">
-      <zipfileset dir="${docs.dir}" prefix="enunciate/docs"/>
+      <zipfileset dir="${docs.dir}" prefix="enunciate/docs">
+        <exclude name="*.txt"/>
+      </zipfileset>
+      <zipfileset dir="${enunciate.basedir}" prefix="enunciate/docs">
+        <include name="*.txt"/>
+      </zipfileset>
       <zipfileset dir="${lib.dir}" prefix="enunciate/lib"/>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
@@ -120,7 +125,12 @@
     </zip>
 
     <tar destfile="target/${dist.name}.tar.gz" compression="gzip">
-      <tarfileset dir="${docs.dir}" prefix="enunciate/docs"/>
+      <tarfileset dir="${docs.dir}" prefix="enunciate/docs">
+        <exclude name="*.txt"/>
+      </tarfileset>
+      <tarfileset dir="${enunciate.basedir}" prefix="enunciate/docs">
+        <include name="*.txt"/>
+      </tarfileset>
       <tarfileset dir="${lib.dir}" prefix="enunciate/lib"/>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>

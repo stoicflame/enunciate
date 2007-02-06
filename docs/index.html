@@ -1,81 +1,189 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-  <title>enunciate: illuminate your web api</title>
-  <link rel="stylesheet" href="blueheaven.css" type="text/css"/>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+  <title>enunciate</title>
 </head>
 
 <body>
-<div class="header" style="height:76px;">
-  <a href="index.html">enunciate</a>
-  <p class="subtitle">illuminate your web api</p>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="title">
+      <h1>enunciate</h1>
+      <p>assert your web api.</p>
+    </div>
+
+  </div>
+
+  <div class="navigation">
+    <a href="index.html">Introduction</a>
+    <a href="getting_started.html">Getting Started</a>
+    <a href="user_guide.html">User Guide</a>
+    <a href="architecture.html">Architecture</a>
+    <a href="support.html">Support</a>
+
+    <div class="clearer"><span></span></div>
+  </div>
+
+  <div class="main">
+
+    <div class="content">
+
+      <h1>Introduction</h1>
+
+      <p><b>Enunciate</b> is a web service deployment framework. It is <i>not</i> another web service stack implementation.
+        Rather, enunciate leverages existing web service technologies to provide a mechanism to build, package, deploy,
+        and to clearly, accurately deliver your web service API on the Java platform.</p>
+
+      <p>Enunciate's novel approach to web service development centers around leveraging all components of an API that are
+        definied and maintained in <i>original source code</i>, as opposed to only those that are defined by compiled bytecode.
+        <u>This means that web service development is done completely in source code</u>, where it can be maintained using your
+        favorite IDE and where the development entry barrier is low.</p>
+
+      <p>However, by starting with original source code, Enunciate avoids the interoperabilty issues of code-first development
+        by forcing developers <i>at compile time</i> to reconcile any ambiguities or other potential hazards in the resulting
+        authoritative XML contract.  This philosophy is formalized as the <a href="compiled_contract.txt">"compiled contract"
+        philosophy</a>.</p>
+
+      <p>Of course, ease of development is not the only benefit of Enunciate's unique new approach to web service development:</p>
+
+      <h1>Features</h1>
+
+      <p>Starting from original source code allows Enunciate to provide an attractive set of capabilities and features far
+        beyond your average WS stack.  These include the following:</p>
+
+      <ul>
+        <li>
+          <h3>Full User Documentation</h3>
+          <p>
+            Enunciate will generate <b>full user-level documentation</b> to describe your web API.  The content for the documentation is
+            taken from the documentation of the original source code (i.e. javadoc), consolidating the maintenance of your entire
+            web service contract to a single place.
+          </p>
+        </li>
+        <li>
+          <h3>Consolidated, Annotated WSDL and Schemas</h3>
+          <p>
+            The common WS stack will provide a WSDL for an endpoint when queried.  The WSDL is almost always generated at runtime, the
+            associated schema is inline, the semantic constructs (i.e. namespaces, message names, argument ids, etc.) are awkward
+            and inconsistent, and the scope is limited to that specific endpoint.  The XML contract is difficult to interpret (especially
+            when being consumed for client-side stubs) and doesn't give a consolidated picture of the whole API because it has no reference
+            to other endpoints and schema data that service the same namespace
+            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for an example</a>).
+          </p>
+          <p>
+            Enunciate generates the formalized XML contract at compile-time, providing for a <b>consolidated, efficient XML definition</b>.
+            Core schema data is consolidated into single schema documents (grouped by namespace), and multiple endpoints
+            that service the same namespace are put into a single WSDL.  This allows for a wider, cleaner picture of the formal contract
+            and relieves the consumer of the consolidation work.
+          </p>
+        </li>
+        <li>
+          <h3>Client Code Generation</h3>
+          <p>
+            Enunciate will generate <b>client code for multiple platforms</b> to interface remotely with your published API.  Not only is
+            the generated code <b>fully documented</b>, but it is simple, elegant and efficient.  Enunciate does not generate
+            client code from the formal XML contract (i.e. WSDL) but instead reflects it from the original source code, allowing
+            code documentation to be extracted from the existing code documentation (i.e. javadoc) and preserving valuable information
+            like method signatures, class structure, and variable names.
+          </p>
+          <p>
+            Currently, Enunciate generates code for the Java 1.4 platform and the Java 5 platform, but has plans to add modules that
+            generate code for the .NET and C/C++ platforms in the near future.  Consult the <a href="roadmap.html">roadmap</a> for
+            information on other modules in the pipe and how you can help.
+          </p>
+        </li>
+        <li>
+          <h3>Multiple Endpoints: SOAP, REST, etc.</h3>
+
+          <p>Enunciate will publish your endpoint class as a <b>SOAP endpoint</b> as defined by the JAX-WS annotations (powered by <a
+            href="http://xfire.codehaus.org/">XFire</a>).  By supplying additional metadata, the same endpoint class will be published
+            as a <b>REST endpoint</b> at a different URL.  Future support for a JSON endpoint is pending.  See the <a href="user_guide.html">user
+            guide</a> for more information.
+          </p>
+        </li>
+        <li>
+          <h3>Full App Packaging</h3>
+
+          <p>Enunciate packages your API, extended with each of the above features, into a <b>single web application archive</b> (war file).  Drop the war
+            file into your favorite J2EE container, and consider your web API enunciated.
+          </p>
+        </li>
+      </ul>
+
+      <h1>Design and Philosophy</h1>
+
+      <p>Enunciate boasts a clean, well-tested, modular design with loosely-coupled and easily extensible components, with a strong focus on
+        testability.  The Enunciate engine is highly configurable but supplies a reasonable default configuration so as not to require
+        complexity.  Enunciate aims to maintain a low entry barrier by adhering to published and proven standards and technologies so
+        developers don't have to learn a new technology to be effective.
+      </p>
+
+      <p><u>Enunciate's primary goal is to enable the web service developer without being obtrusive.</u></p>
+
+      <h1>About</h1>
+
+      <p>
+        Enunciate is an open-source project, licenced under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, version 2.0</a>.  It was
+        designed and built by Ryan Heaton, working for <a href="http://www.familysearch.org/">familysearch.org</a>.  Comments, enhancements or bug fixes to the
+        project are welcome.
+      </p>
+
+    </div>
+
+    <div class="sidenav">
+
+      <h1>Home</h1>
+      <ul>
+        <li><a href="index.html">introduction</a></li>
+        <li><a href="getting_started.html">getting started</a></li>
+        <li><a href="#">download</a></li>
+        <li><a href="support.html">support</a></li>
+        <li><a href="license.txt">license</a></li>
+      </ul>
+
+      <h1>Documentation</h1>
+      <ul>
+        <li><a href="user_guide.html">user guide</a></li>
+        <li><a href="architecture.html">architecture</a></li>
+        <li><a href="api/index.html">javadocs</a></li>
+      </ul>
+
+      <h1>Developers</h1>
+      <ul>
+        <li><a href="roadmap.html">roadmap</a></li>
+        <li><a href="#">mailing lists</a></li>
+        <li><a href="#">bugs and tasks</a></li>
+        <li><a href="#">source repository</a></li>
+      </ul>
+
+      <h1>References</h1>
+      <ul>
+        <li><a href="http://apt-jelly.sourceforge.net/">apt-jelly</a></li>
+        <li><a href="http://java.sun.com/webservices/jaxws/">JAX-WS</a></li>
+        <li><a href="https://jaxb.dev.java.net/">JAXB 2.0</a></li>
+        <li><a href="http://xfire.codehaus.org">XFire</a></li>
+        <li><a href="http://sanitystack.blogspot.com/">Ryan's Blog</a></li>
+      </ul>
+
+    </div>
+
+    <div class="clearer"><span></span></div>
+
+  </div>
+
+  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+    href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
+  </div>
+
 </div>
 
-<div style="float:left;">
-  <h3 class="title">introduction</h3>
-
-  <p><b>Enunciate</b> is a web service deployment framework. It is <i>not</i> another web service stack implementation. Rather, enunciate leverages the existing
-    web service technologies to provide a mechanism to package, to deploy, and to clearly, accurately deliver your web service API.</p>
-
-  <p>Enunciate's <a href="compiled_contract.html">"compiled contract" philosophy</a> reconciles the conflict between the code-first and WSDL-first convictions
-    by enforcing a <i>WSDL-first mindset over a code-first implementation</i>.  The pith of the <a href="compiled_contract.html">"compiled contract"
-    philosophy</a> is that while the web service API is developed and maintained in source code, developers are forced at compile time to reconcile any
-    ambiguities or other potential hazards in the resulting authoritative XML contract.</p>
-
-  <p>Currently, Enunciate supports only service endpoints written in Java that conform to the JAX-WS (JSR-181) specification.  In the future, Enunciate could be
-  expanded to support service endpoints written in other languages (e.g. .NET).</p>
-
-  <p>Enunciate provides an attractive set of capabilities and features, including the following:</p>
-
-  <ul>
-    <li>Generation of fully-documented client code for multiple client platforms, including Java 5, Java 1.3+, .NET, and C++.</li>
-    <li>Generation of a fully-annotated XML web service contract (i.e. WSDL with associated XML-Schema documents) from documented (i.e. JavaDoc) source code.</li>
-    <li>Complete packaging of the API into a J2EE-compliant web archive (war) that includes full HTML documentation of the published services.</li>
-    <li>Customization support for namespaces, schema locations, file names, and documentation sytylesheets.</li>
-  </ul>
-
-  <h3 class="title">background</h3>
-
-  <p>Web services were once touted as the silver bullet....  Every vendor was anxious to get you to use their product and to make money... That
-    was many years ago...  Then people starting figuring out that web services are not easy...</p>
-
-  <p>Having said that, things have been getting better as people have repented and provided the means to think about what the XML looks like...  But there is
-    still the interoperability issues...</p>
-
-  <p>ta-da enunciate...</p>
-
-  <h3 class="title">documentation</h3>
-
-  <p>You may want to try it out...</p>
-
-  <h3 class="title">about</h3>
-
-  <p>
-    Enunciate is an open-source project, licenced under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, version 2.0</a>.  It was
-    designed and built by Ryan Heaton, working for <a href="http://www.familysearch.org/">familysearch.org</a>.  Comments, enhancements or bug fixes to the
-    project are welcome.
-  </p>
-
-  <p class="footer">Copyright 2006 Ryan Heaton.  Page Design by <a href="http://www.oswd.org/user/profile/id/6293">Josh Powell</a></p>
-</div>
-
-<div id="navcontainer">
-
-  <b>navigation</b>
-  <br/><br/>
-  <ul id="navlinks">
-    <li><a href="#">home</a></li>
-    <li><a href="#">blog</a></li>
-    <li><a href="#">articles</a></li>
-    <li><a href="#">forums</a><br/><br/></li>
-    <li><a href="#">scripts</a></li>
-    <li><a href="#">affiliates</a></li>
-    <li><a href="#">about</a></li>
-    <li><a href="#">misc</a></li>
-    <li><a href="#">radio</a></li>
-    <li><a href="http://www.ki4bbo.org">author's homepage</a></li>
-  </ul>
-</div>
 </body>
+
 </html>
