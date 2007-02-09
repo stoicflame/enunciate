@@ -37,7 +37,24 @@
 
       <h1>Introduction</h1>
 
-      <p>Set the stage...</p>
+      <p>One of the most irritating things about web service development demos is that they attempt to "WOW!" you with the simplicity and interoperability
+      of their development tool by exposing one of three things: a "Hello, World!" app, an echo example, or a stock quote service.  The data structures are
+      no more complex than flat strings, the method signatures are single-arg and single return value with no faults, and they leave out the huge mess
+      of deployment descriptors, dependencies, configuration, packaging, and deployment that makes up a significant part of web service development.</p>
+
+      <p>This getting started guide will attempt to walk through a real-world (okay, mock-real-world) example of web service development, without trying
+      to hide the <a href="http://en.wikipedia.org/wiki/The_Wizard_of_Oz_(1939_film)">man behind the curtain</a>.  Of course, some attempt to be concise
+      needs to be made, but at least you'll get the idea of the full development effort.  And you'll see more than just "Hello, World".</p>
+
+      <p>For this demo, we'll be writing a social networking app (since that's where the <i>real</i> money is).  For this tutorial, the name of our
+      social networking app is <a href="http://www.ifyouwannabecool.com/">IfYouWannaBeCool.com</a>.  (Maybe next time, we can write an app that creates
+      a <i>network</i> of <i>social networking apps</i>, but we'll leave that for another day....)</p>
+
+      <h1>Step 1: Write The Code</h1>
+
+      <p>We'll start by defining the domain of our app.  We'll define a persona with an id, an alias, an email address, a name, and a picture.  The name is
+      a complex structure, made up of a given name and a surname.  We'll also define a link between two personas and a social group consisting of an id, a
+      group leader, the group members, and whether the group is exlusive.</p>
 
     </div>
 
