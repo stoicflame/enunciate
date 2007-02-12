@@ -250,7 +250,9 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     //set up the default root model.
     EnunciateConfiguration config = new EnunciateConfiguration(new ArrayList<DeploymentModule>());
     config.setValidator(new BaseValidator()); //skip the validation...
-    new EnunciateAnnotationProcessor(config).process();
+    Enunciate enunciate = new Enunciate((String[]) null);
+    enunciate.setConfig(config);
+    new EnunciateAnnotationProcessor(enunciate).process();
   }
 
   public static Test suite() {

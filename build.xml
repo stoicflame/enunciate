@@ -93,6 +93,10 @@
         <include name="core/target/*.jar"/>
         <include name="modules/*/target/*.jar"/>
       </zipgroupfileset>
+
+      <manifest>
+        <attribute name="Main-Class" value="net.sf.enunciate.main.Main"/>
+      </manifest>
     </jar>
 
   </target>

@@ -45,6 +45,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * @param model       The root model.
    */
   public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
+    debug("Processing template %s.", templateURL);
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(templateURL.toString());

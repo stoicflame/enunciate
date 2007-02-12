@@ -128,6 +128,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
+    info("Building the expanded WAR in %s", buildDir);
     File webinf = new File(buildDir, "WEB-INF");
     File webinfClasses = new File(webinf, "classes");
     File webinfLib = new File(webinf, "lib");
@@ -148,15 +149,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       File file = new File(pathEntry);
       if (file.exists()) {
         if (file.isDirectory()) {
-          if (enunciate.isVerbose()) {
-            System.out.println("Adding the contents of " + file.getAbsolutePath() + " to WEB-INF/classes.");
-          }
+          info("Adding the contents of %s to WEB-INF/classes.", file);
           enunciate.copyDir(file, webinfClasses);
         }
         else if (!excludeLibrary(file)) {
-          if (enunciate.isVerbose()) {
-            System.out.println("Including " + file.getName() + " in WEB-INF/lib.");
-          }
+          info("Including %s in WEB-INF/lib.", file);
           enunciate.copyFile(file, file.getParentFile(), webinfLib);
         }
       }
@@ -166,19 +163,22 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     //put the web.xml in WEB-INF.  Pass it through a stylesheet, if specified.
     URL webXML = getClass().getResource("/net/sf/enunciate/modules/xfire/web.xml");
+    File destWebXML = new File(webinf, "web.xml");
     if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
       URL transformURL = this.warConfig.getWebXMLTransformURL();
+      info("web.xml transform has been specified as %s.", transformURL);
       try {
         StreamSource source = new StreamSource(transformURL.openStream());
         Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-        transformer.transform(new StreamSource(webXML.openStream()), new StreamResult(new File(webinf, "web.xml")));
+        info("Transforming %s to %s.", webXML, destWebXML);
+        transformer.transform(new StreamSource(webXML.openStream()), new StreamResult(destWebXML));
       }
       catch (TransformerException e) {
         throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
       }
     }
     else {
-      enunciate.copyResource(webXML, new File(webinf, "web.xml"));
+      enunciate.copyResource(webXML, destWebXML);
     }
 
     //copy the spring servlet config from the build dir to the WEB-INF directory.
@@ -198,7 +198,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       artifact.exportTo(buildDir, enunciate);
     }
     else {
-      System.out.println("WARNING: No documentation artifact found!");
+      warn("WARNING: No documentation artifact found!");
     }
 
     //export the unexpanded application directory.
@@ -215,9 +215,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     Enunciate enunciate = getEnunciate();
-    if (enunciate.isVerbose()) {
-      System.out.println("Creating " + warFile.getAbsolutePath());
-    }
+    info("Creating " + warFile.getAbsolutePath());
 
     enunciate.zip(buildDir, warFile);
     enunciate.addArtifact(new FileArtifact(getName(), "xfire.war", warFile));
@@ -313,38 +311,47 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //instantiate a loader with this library only in its path...
     URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
     if (loader.findResource("META-INF/enunciate/preserve-in-war") != null) {
+      debug("%s will be excluded from the war because it contains the entry META-INF/enunciate/preserve-in-war.", file);
       //if a jar happens to have the enunciate "preserve-in-war" file, it is NOT excluded.
       return false;
     }
     else if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be tools.jar.", file);
       //exclude tools.jar.
       return true;
     }
     else if (loader.findResource(net.sf.jelly.apt.Context.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be apt-jelly.", file);
       //exclude apt-jelly-core.jar
       return true;
     }
     else if (loader.findResource(net.sf.jelly.apt.freemarker.FreemarkerModel.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be the apt-jelly-freemarker libs.", file);
       //exclude apt-jelly-freemarker.jar
       return true;
     }
     else if (loader.findResource(freemarker.template.Configuration.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be the freemarker libs.", file);
       //exclude freemarker.jar
       return true;
     }
     else if (loader.findResource(Enunciate.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be the enunciate core jar.", file);
       //exclude enunciate-core.jar
       return true;
     }
     else if (loader.findResource(ServletContext.class.getName().replace('.', '/').concat(".class")) != null) {
+      debug("%s will be excluded from the war because it appears to be the servlet api.", file);
       //exclude the servlet api.
       return true;
     }
     else if (loader.findResource("net/sf/enunciate/modules/xfire_client/EnunciatedClientSoapSerializerHandler.class") != null) {
+      debug("%s will be excluded from the war because it appears to be the enunciated xfire client tools jar.", file);
       //exclude xfire-client-tools
       return true;
     }
     else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
+      debug("%s will be excluded from the war because it appears to be an enunciate module.", file);
       //exclude by default any deployment module libraries.
       return true;
     }

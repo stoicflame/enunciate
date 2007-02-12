@@ -7,6 +7,7 @@ import junit.framework.Test;
 import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.InAPTTestCase;
 import net.sf.enunciate.OutsideAPTOkay;
+import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.*;
 import net.sf.enunciate.contract.jaxws.EndpointInterface;
@@ -39,8 +40,10 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
         return Arrays.asList(new DeploymentModule[]{mockModule});
       }
     };
+    Enunciate enunciate = new Enunciate((String[]) null);
+    enunciate.setConfig(config);
 
-    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(config) {
+    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
       @Override
       protected EnunciateFreemarkerModel getRootModel() {
         mockModule.model = new EnunciateFreemarkerModel();
@@ -63,7 +66,9 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     config.putNamespace("http://enunciate.sf.net/samples/contract", "tContract");
 
     final boolean[] validated = new boolean[]{false};
-    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(config) {
+    Enunciate enunciate = new Enunciate((String[]) null);
+    enunciate.setConfig(config);
+    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
       @Override
       protected void validate(EnunciateFreemarkerModel model) {
         validated[0] = true;
@@ -153,7 +158,9 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       }
     });
 
-    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(config);
+    Enunciate enunciate = new Enunciate((String[]) null);
+    enunciate.setConfig(config);
+    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate);
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     model.add(ei);
     model.add(beanOne);
@@ -189,7 +196,8 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     assertFalse("Bean three should have been validated three (and only three) times.", validator.validatedObjects.remove(beanThree));
     assertFalse("Bean three element should have been validated three (and only three) times.", validator.validatedObjects.remove(beanThreeElement));
 
-    processor = new EnunciateAnnotationProcessor(config) {
+    enunciate.setConfig(config);
+    processor = new EnunciateAnnotationProcessor(enunciate) {
       @Override
       protected ValidationResult validate(EnunciateFreemarkerModel model, Validator validator) {
         ValidationResult result = new ValidationResult();

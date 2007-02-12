@@ -240,14 +240,22 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
     if (this.splashPackage != null) {
       PackageDeclaration packageDeclaration = Context.getCurrentEnvironment().getPackage(this.splashPackage);
-      model.setVariable("apiDoc", new DecoratedPackageDeclaration(packageDeclaration).getJavaDoc());
+      if (packageDeclaration != null) {
+        info("Including documentation for package %s as the splash documentation.", this.splashPackage);
+        model.setVariable("apiDoc", new DecoratedPackageDeclaration(packageDeclaration).getJavaDoc());
+      }
+      else {
+        warn("Splash package %s not found.  No splash documentation included.", this.splashPackage);
+      }
     }
 
     if (this.copyright != null) {
+      debug("Documentation copyright: %s", this.copyright);
       model.setVariable("copyright", this.copyright);
     }
 
     if (this.title != null) {
+      debug("Documentation title: %s", this.title);
       model.setVariable("title", this.title);
     }
 
@@ -289,6 +297,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     File buildDir = getBuildDir();
     buildDir.mkdirs();
     if (this.base == null) {
+      debug("Default base to be used for documentation base.");
       extractBase(loadDefaultBase(), buildDir);
 
       if (this.css != null) {
@@ -296,9 +305,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     else if (this.base.isDirectory()) {
+      info("Directory %s to be used as the documentation base.", this.base);
       enunciate.copyDir(this.base, buildDir);
     }
     else {
+      info("Zip file %s to be extracted as the documentation base.", this.base);
       extractBase(new FileInputStream(this.base), buildDir);
     }
 
@@ -328,6 +339,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       }
       else if (download.getFile() != null) {
         File downloadFile = download.getFile();
+        info("File %s to be added as an extra download.", downloadFile);
         DownloadBundle downloadArtifact = new DownloadBundle(getName(), downloadFile.getName(), downloadFile);
 
         if (download.getName() != null) {
@@ -345,17 +357,19 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     for (Artifact artifact : enunciate.getArtifacts()) {
       if (((artifact instanceof NamedArtifact) && (includeDefaultDownloads)) || (explicitArtifacts.contains(artifact.getId()))) {
         downloads.add(artifact);
+        info("Artifact %s to be added as an extra download.", artifact.getId());
         explicitArtifacts.remove(artifact.getId());
       }
     }
 
     if (explicitArtifacts.size() > 0) {
       for (String artifactId : explicitArtifacts) {
-        System.err.println("WARNING: Unknown artifact '" + artifactId + "'.  Will not be available for download.");
+        warn("WARNING: Unknown artifact '%s'.  Will not be available for download.", artifactId);
       }
     }
 
     for (Artifact download : downloads) {
+      info("Exporting %s to directory %s.", download.getId(), buildDir);
       download.exportTo(buildDir, enunciate);
     }
 
@@ -367,13 +381,15 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    * Do the XSLT tranformation to generate the documentation.
    */
   protected void doXSLT() throws IOException, EnunciateException {
+    info("Executing documentation stylesheet transformation.");
     URL xsltURL = this.xsltURL;
     if (xsltURL == null) {
       xsltURL = DocumentationDeploymentModule.class.getResource("docs.xslt");
     }
 
+    debug("Using stylesheet %s", xsltURL);
     StreamSource source = new StreamSource(xsltURL.openStream());
-    
+
     try {
       Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
       transformer.setURIResolver(new URIResolver() {
@@ -382,12 +398,14 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
         }
       });
       transformer.setParameter("downloads-exists", new File(getGenerateDir(), "downloads.xml").exists());
+      debug("Extra downloads exist: %b", transformer.getParameter("downloads-exists"));
 
       File docsXml = new File(getGenerateDir(), "docs.xml");
       File buildDir = getBuildDir();
       buildDir.mkdirs();
       transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
       File indexPage = new File(buildDir, "index.html");
+      debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));
     }
     catch (TransformerException e) {
@@ -407,6 +425,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     ZipEntry entry = in.getNextEntry();
     while (entry != null) {
       File file = new File(toDir, entry.getName());
+      debug("Extracting %s to %s.", entry.getName(), file);
       if (entry.isDirectory()) {
         file.mkdirs();
       }

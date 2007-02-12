@@ -21,7 +21,6 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,20 +40,24 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private EnunciateException ee = null;
   private IOException ioe = null;
   private RuntimeException re = null;
-  private final EnunciateConfiguration config;
+  private final Enunciate enunciate;
 
   public EnunciateAnnotationProcessor() throws EnunciateException {
-    this(new EnunciateConfiguration());
+    this(new Enunciate(null, new EnunciateConfiguration()));
   }
 
-  public EnunciateAnnotationProcessor(EnunciateConfiguration config) throws EnunciateException {
+  public EnunciateAnnotationProcessor(Enunciate enunciate) throws EnunciateException {
     super(null);
 
-    if (config == null) {
-      throw new EnunciateException("A configuration must be specified.");
+    if (enunciate == null) {
+      throw new EnunciateException("An enunciate mechanism must be specified.");
+    }
+    else if (enunciate.getConfig() == null) {
+      throw new EnunciateException("An enunciate mechanism must have a configuration (even if its the default configuration).");
     }
 
-    this.config = config;
+    this.enunciate = enunciate;
+
   }
 
   @Override
@@ -62,7 +65,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     try {
       getRootModel();
 
-      for (DeploymentModule module : this.config.getEnabledModules()) {
+      EnunciateConfiguration config = this.enunciate.getConfig();
+      for (DeploymentModule module : config.getEnabledModules()) {
+        debug("Invoking %s step for module %s", Enunciate.Target.GENERATE, module.getName());
         module.step(Enunciate.Target.GENERATE);
       }
     }
@@ -93,33 +98,31 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
+    debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       if (isEndpointInterface(declaration)) {
         EndpointInterface endpointInterface = new EndpointInterface(declaration);
-
-        if (isVerbose()) {
-          System.out.println(declaration.getQualifiedName() + " to be considered as an endpoint interface.");
-        }
-
+        info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
         model.add(endpointInterface);
       }
       else if (isRESTEndpoint(declaration)) {
         RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
-
-        if (isVerbose()) {
-          System.out.println(declaration.getQualifiedName() + " to be considered as a REST endpoint.");
-        }
-
+        info("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
         model.add(restEndpoint);
       }
       else if (isPotentialSchemaType(declaration)) {
         TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
         loadTypeDef(typeDef, model);
       }
+      else {
+        debug("%s is neither an endpoint interface, rest endpoint, or JAXB schema type, so it'll be ignored.", declaration.getQualifiedName());
+      }
     }
 
     //read in any JAXB import classes.
-    for (String jaxbClassImport : this.config.getJaxbClassImports()) {
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    debug("Reading JAXB import classes...");
+    for (String jaxbClassImport : config.getJaxbClassImports()) {
       TypeDeclaration typeDeclaration = env.getTypeDeclaration(jaxbClassImport);
       if (typeDeclaration == null) {
         throw new IllegalStateException("JAXB import class not found: " + jaxbClassImport);
@@ -136,10 +139,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     //todo: support jaxb package imports (use jaxb.index or ObjectFactory.class)
 
     //override any namespace prefix mappings as specified in the config.
-    for (String ns : this.config.getNamespacesToPrefixes().keySet()) {
-      model.getNamespacesToPrefixes().put(ns, this.config.getNamespacesToPrefixes().get(ns));
+    for (String ns : config.getNamespacesToPrefixes().keySet()) {
+      String prefix = config.getNamespacesToPrefixes().get(ns);
+      String old = model.getNamespacesToPrefixes().put(ns, prefix);
+      debug("Replaced namespace prefix %s with %s for namespace %s as specified in the config.", old, prefix, ns);
     }
-
 
     validate(model);
 
@@ -154,22 +158,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
     if (typeDef != null) {
-      if (isVerbose()) {
-        System.out.println(String.format("%s to be considered as a %s (qname:{%s}%s).",
-                                         typeDef.getQualifiedName(),
-                                         typeDef.getClass().getSimpleName(),
-                                         typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
-                                         typeDef.getName()));
-      }
+      info("%s to be considered as a %s (qname:{%s}%s).",
+           typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
+           typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
+           typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
 
       model.add(typeDef);
 
       RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) typeDef.getDelegate(), typeDef);
       if (rootElement != null) {
-        if (isVerbose()) {
-          System.out.println(typeDef.getQualifiedName() + " to be considered as a root element.");
-        }
-
+        info("%s to be considered as a root element", typeDef.getQualifiedName());
         model.add(rootElement);
       }
     }
@@ -183,25 +181,31 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @throws ModelValidationException If any validation errors are encountered.
    */
   protected void validate(EnunciateFreemarkerModel model) throws ModelValidationException {
+    debug("Validating the model...");
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     ValidatorChain validator = new ValidatorChain();
-    validator.addValidator(this.config.getValidator());
-    for (DeploymentModule module : this.config.getEnabledModules()) {
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    validator.addValidator(config.getValidator());
+    debug("Default validator added to the chain.");
+    for (DeploymentModule module : config.getEnabledModules()) {
       Validator moduleValidator = module.getValidator();
       if (moduleValidator != null) {
         validator.addValidator(moduleValidator);
+        debug("Validator for module %s added to the chain.", module.getName());
       }
     }
 
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {
+      info("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
         env.getMessager().printWarning(warning.getPosition(), warning.getText());
       }
     }
 
     if (validationResult.hasErrors()) {
+      info("Validation result has errors.");
       for (ValidationMessage error : validationResult.getErrors()) {
         env.getMessager().printError(error.getPosition(), error.getText());
       }
@@ -224,10 +228,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
     if (!(declaration instanceof ClassDeclaration)) {
-      return false;
-    }
-
-    if (declaration.getAnnotation(XmlTransient.class) != null) {
+      debug("%s isn't a potential schema type because it's not a class.", declaration.getQualifiedName());
       return false;
     }
 
@@ -235,7 +236,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     for (AnnotationMirror mirror : annotationMirrors) {
       AnnotationTypeDeclaration annotationDeclaration = mirror.getAnnotationType().getDeclaration();
       if (annotationDeclaration != null) {
-        if ((annotationDeclaration.getQualifiedName().startsWith("javax.xml.ws") || (annotationDeclaration.getQualifiedName().startsWith("javax.jws")))) {
+        String fqn = annotationDeclaration.getQualifiedName();
+        //exclude all XmlTransient types and all jaxws types.
+        if ("javax.xml.bind.annotation.XmlTransient".equals(fqn) || (fqn.startsWith("javax.xml.ws") || (fqn.startsWith("javax.jws")))) {
+          debug("%s isn't a potential schema type because of annotation %s.", declaration.getQualifiedName(), fqn);
           return false;
         }
       }
@@ -368,15 +372,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   /**
-   * Whether verbose output is requested.
-   *
-   * @return Whether verbose output is requested.
-   */
-  protected boolean isVerbose() {
-    return Context.getCurrentEnvironment().getOptions().containsKey(EnunciateAnnotationProcessorFactory.VERBOSE_OPTION);
-  }
-
-  /**
    * Validates the model given a validator.
    *
    * @param model     The model to validate.
@@ -387,17 +382,22 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     ValidationResult validationResult = new ValidationResult();
 
     for (EndpointInterface ei : model.endpointInterfaces) {
+      debug("Validating %s...", ei.getQualifiedName());
+      debug("Validating %s...", ei.getQualifiedName());
       validationResult.aggregate(validator.validateEndpointInterface(ei));
     }
 
     for (TypeDefinition typeDefinition : model.typeDefinitions) {
+      debug("Validating %s...", typeDefinition.getQualifiedName());
       validationResult.aggregate(typeDefinition.accept(validator));
     }
 
     for (RootElementDeclaration rootElement : model.rootElements) {
+      debug("Validating %s...", rootElement.getQualifiedName());
       validationResult.aggregate(validator.validateRootElement(rootElement));
     }
 
+    debug("Validating the REST API...");
     validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));
 
     return validationResult;
@@ -441,6 +441,36 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     else if (this.re != null) {
       throw re;
     }
+  }
+
+  /**
+   * Handle an info-level message.
+   *
+   * @param message The info message.
+   * @param formatArgs The format args of the message.
+   */
+  public void info(String message, Object... formatArgs) {
+    this.enunciate.info(message, formatArgs);
+  }
+
+  /**
+   * Handle a debug-level message.
+   *
+   * @param message The debug message.
+   * @param formatArgs The format args of the message.
+   */
+  public void debug(String message, Object... formatArgs) {
+    this.enunciate.debug(message, formatArgs);
+  }
+
+  /**
+   * Handle a warn-level message.
+   *
+   * @param message The warn message.
+   * @param formatArgs The format args of the message.
+   */
+  public void warn(String message, Object... formatArgs) {
+    this.enunciate.warn(message, formatArgs);
   }
 
 }

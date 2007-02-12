@@ -92,6 +92,17 @@ public class Enunciate {
   }
 
   /**
+   * Construct an enunciate mechanism on the specified source files with the specified config.
+   *
+   * @param sourceFiles The source files.
+   * @param config The config
+   */
+  public Enunciate(String[] sourceFiles, EnunciateConfiguration config) {
+    this.sourceFiles = sourceFiles;
+    this.config = config;
+  }
+
+  /**
    * Construct an enunciate mechanism on the specified source files.
    *
    * @param sourceFiles The source files.
@@ -111,14 +122,18 @@ public class Enunciate {
     final List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
     int target = getTarget().ordinal();
 
+    info("\n\nInitializing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Initializing module %s.", deploymentModule.getName());
       deploymentModule.init(this);
     }
 
     if (target >= Target.GENERATE.ordinal()) {
+      info("\n\nEntering %s step.", Target.GENERATE);
       File genDir = getGenerateDir();
       if (genDir == null) {
         genDir = createTempDir();
+        debug("No generate directory specified, assigned %s.", genDir);
         setGenerateDir(genDir);
       }
 
@@ -126,42 +141,53 @@ public class Enunciate {
     }
 
     if (target >= Target.COMPILE.ordinal()) {
+      info("\n\nEntering %s step.", Target.COMPILE);
       File destdir = getCompileDir();
       if (destdir == null) {
         destdir = createTempDir();
+        debug("No compile directory specified, assigned %s.", destdir);
         setCompileDir(destdir);
       }
 
       for (DeploymentModule deploymentModule : deploymentModules) {
+        debug("Invoking %s step for module %s", Enunciate.Target.COMPILE, deploymentModule.getName());
         deploymentModule.step(Target.COMPILE);
       }
     }
 
     if (target >= Target.BUILD.ordinal()) {
+      info("\n\nEntering %s step.", Target.BUILD);
       File buildDir = getBuildDir();
       if (buildDir == null) {
         buildDir = createTempDir();
+        debug("No build directory specified, assigned %s.", buildDir);
         setBuildDir(buildDir);
       }
 
       for (DeploymentModule deploymentModule : deploymentModules) {
+        debug("Invoking %s step for module %s", Enunciate.Target.BUILD, deploymentModule.getName());
         deploymentModule.step(Target.BUILD);
       }
     }
 
     if (target >= Target.PACKAGE.ordinal()) {
+      info("\n\nEntering %s step.", Target.PACKAGE);
       File packageDir = getPackageDir();
       if (packageDir == null) {
         packageDir = createTempDir();
+        debug("No package directory specified, assigned %s.", packageDir);
         setPackageDir(packageDir);
       }
 
       for (DeploymentModule deploymentModule : deploymentModules) {
+        debug("Invoking %s step for module %s", Enunciate.Target.PACKAGE, deploymentModule.getName());
         deploymentModule.step(Target.PACKAGE);
       }
     }
 
+    info("\n\nClosing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Closing module %s.", deploymentModule.getName());
       deploymentModule.close();
     }
 
@@ -169,16 +195,52 @@ public class Enunciate {
     for (Artifact artifact : artifacts) {
       String artifactId = artifact.getId();
       if (this.exports.containsKey(artifactId)) {
-        artifact.exportTo(this.exports.get(artifactId), this);
+        File dest = this.exports.get(artifactId);
+        info("\n\nExporting artifact %s to %s.", artifactId, dest);
+        artifact.exportTo(dest, this);
         exportedArtifacts.add(artifactId);
       }
     }
 
     for (String export : this.exports.keySet()) {
       if (!exportedArtifacts.remove(export)) {
-        System.out.println("WARNING: Unknown artifact '" + export + "'.  Artifact will not be exported.");
+        warn("WARNING: Unknown artifact '%s'.  Artifact will not be exported.", export);
       }
     }
+  }
+
+  /**
+   * Handle an info-level message.
+   *
+   * @param message The info message.
+   * @param formatArgs The format args of the message.
+   */
+  public void info(String message, Object... formatArgs) {
+    if (isVerbose()) {
+      System.out.println(String.format(message, formatArgs));
+    }
+  }
+
+  /**
+   * Handle a debug-level message.
+   *
+   * @param message The debug message.
+   * @param formatArgs The format args of the message.
+   */
+  public void debug(String message, Object... formatArgs) {
+    if (isDebug()) {
+      System.out.println(String.format(message, formatArgs));
+    }
+  }
+
+  /**
+   * Handle a warn-level message.
+   *
+   * @param message The warn message.
+   * @param formatArgs The format args of the message.
+   */
+  public void warn(String message, Object... formatArgs) {
+    System.out.println(String.format(message, formatArgs));
   }
 
   /**
@@ -191,9 +253,7 @@ public class Enunciate {
     tempDir.delete();
     tempDir.mkdirs();
 
-    if (isDebug()) {
-      System.out.println("Created directory " + tempDir);
-    }
+    debug("Created directory %s", tempDir);
 
     return tempDir;
   }
@@ -215,7 +275,13 @@ public class Enunciate {
   protected EnunciateConfiguration loadConfig() throws IOException {
     EnunciateConfiguration config = new EnunciateConfiguration();
     File configFile = getConfigFile();
-    if ((configFile != null) && (configFile.exists())) {
+    if (configFile == null) {
+      info("No config file specified, using defaults....");
+    }
+    else if (!configFile.exists()) {
+      warn("Config file %s doesn't exist, using defaults....", configFile);
+    }
+    else {
       try {
         config.load(configFile);
       }
@@ -300,13 +366,15 @@ public class Enunciate {
     args.addAll(Arrays.asList(sourceFiles));
 
     if (isDebug()) {
-      System.out.println("Invoking APT with arguments: ");
+      StringBuilder message = new StringBuilder("Invoking APT with arguments:");
       for (String arg : args) {
-        System.out.println(arg);
+        message.append(' ');
+        message.append(arg);
       }
+      debug(message.toString());
     }
 
-    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this.config);
+    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this);
     com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
     apf.throwAnyErrors();
   }
@@ -362,10 +430,12 @@ public class Enunciate {
     args.addAll(Arrays.asList(sourceFiles));
 
     if (isDebug()) {
-      System.out.println("Invoking Javac with arguments: ");
+      StringBuilder message = new StringBuilder("Invoking Javac with arguments:");
       for (String arg : args) {
-        System.out.println(arg);
+        message.append(' ');
+        message.append(arg);
       }
+      debug(message.toString());
     }
 
     compileDir.mkdirs();
@@ -424,10 +494,7 @@ public class Enunciate {
       to.getParentFile().mkdirs();
     }
 
-    if (isDebug()) {
-      System.out.println("Copying " + from + " to " + to);
-    }
-
+    debug("Copying %s to %s ", from, to);
     FileChannel dstChannel = new FileOutputStream(to, false).getChannel();
     dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
     srcChannel.close();
@@ -457,10 +524,7 @@ public class Enunciate {
   public void copyResource(URL url, File to) throws IOException {
     InputStream stream = url.openStream();
 
-    if (isDebug()) {
-      System.out.println("Copying resource " + url + " to " + to);
-    }
-
+    debug("Copying resource %s to %s...", url, to);
     FileOutputStream out = new FileOutputStream(to);
     byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
     int len;
@@ -477,6 +541,7 @@ public class Enunciate {
    */
   public void zip(File dir, File toFile) throws IOException {
     if (!toFile.getParentFile().exists()) {
+      debug("Creating directory %s...", toFile.getParentFile());
       toFile.getParentFile().mkdirs();
     }
 
@@ -485,14 +550,11 @@ public class Enunciate {
 
     byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
     URI baseURI = dir.toURI();
+    debug("Creating zip file %s from directory %s...", toFile, dir);
     ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
     for (File file : files) {
       ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
-
-      if (isDebug()) {
-        System.out.println("Adding entry " + entry.getName());
-      }
-
+      debug("Adding entry %s...", entry.getName());
       zipout.putNextEntry(entry);
 
       FileInputStream in = new FileInputStream(file);
@@ -532,7 +594,7 @@ public class Enunciate {
    * @return Whether to be verbose.
    */
   public boolean isVerbose() {
-    return verbose;
+    return verbose || isDebug();
   }
 
   /**
@@ -732,6 +794,7 @@ public class Enunciate {
    * @return Whether the artifact was successfully added.
    */
   public boolean addArtifact(Artifact artifact) {
+    info("Artifact %s added for module %s.", artifact.getId(), artifact.getModule());
     return this.artifacts.add(artifact);
   }
 

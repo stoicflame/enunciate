@@ -180,20 +180,18 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     String hostname = getEndpointHostname();
-    if (hostname == null) {
-      System.out.println("WARNING: No hostname specified for the SOAP endpoints.  Defaulting to \"localhost:8080\".");
-      hostname = "localhost:8080";
-    }
-
     String endpointContext = getEndpointContext();
     if (endpointContext == null) {
-      String label = "enunciate";
-      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
-        label = enunciate.getConfig().getLabel();
+      String label = "";
+      if (hostname != null) {
+        label = "enunciate/";
+        if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+          label = enunciate.getConfig().getLabel() + "/";
+        }
       }
-      
-      endpointContext = label + "/soap";
-      System.out.println("WARNING: No context specified for the SOAP endpoints.  Defaulting to \"" + endpointContext + "\".");
+
+      endpointContext = label + "soap";
+      warn("WARNING: No context specified for the SOAP endpoints.  Defaulting to %s.", endpointContext);
     }
     else {
       if (endpointContext.startsWith("/")) {
@@ -268,12 +266,12 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         enunciate.copyFile(prettyFile, file);
       }
       else {
-        System.err.println("Unable to delete " + file.getAbsolutePath() + ".  Skipping pretty-print transformation....");
+        warn("Unable to delete %s.  Skipping pretty-print transformation....", file);
       }
     }
     catch (Exception e) {
       //fall through... skip pretty printing.
-      System.err.println("Unable to pretty-print " + file.getAbsolutePath() + " (" + e.getMessage() + ").  Skipping pretty-print transformation....");
+      warn("Unable to pretty-print %s (%s).", file, e.getMessage());
       if (enunciate.isDebug()) {
         e.printStackTrace(System.err);
       }

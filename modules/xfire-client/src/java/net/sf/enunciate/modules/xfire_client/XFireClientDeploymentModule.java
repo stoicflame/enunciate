@@ -99,6 +99,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     // This includes all request/response beans and all xfire types.
     // Also, we're going to gather the annotation information, the type list,
     // and the list of unique web faults.
+    info("Generating the XFire client classes that are common to both jdk 1.4 and jdk 1.5.");
     model.setFileOutputDirectory(getCommonJdkGenerateDir());
     generatedAnnotations = new ExplicitWebAnnotations();
     generatedTypeList = new ArrayList<String>();
@@ -189,6 +190,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
 
     //Now, generate the jdk14-compatable client-side stubs.
+    info("Generating the XFire client classes for jdk 1.4.");
     model.setFileOutputDirectory(getJdk14GenerateDir());
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -214,6 +216,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
 
     //Now enable jdk-15 compatability and generate those client-side stubs.
+    info("Generating the XFire client classes for jdk 1.5.");
     model.setFileOutputDirectory(getJdk15GenerateDir());
     classnameFor.setJdk15(true);
     componentTypeFor.setJdk15(true);
@@ -405,6 +408,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @param annotationsFile The to which to write the generated annotations.
    */
   protected void writeAnnotationsFile(File annotationsFile) throws EnunciateException, IOException {
+    info("Writing annotations to %s.", annotationsFile);
     if (this.generatedAnnotations == null) {
       throw new EnunciateException("No annotations to write.");
     }
@@ -427,6 +431,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @param typesFile The file to write the type list to.
    */
   protected void writeTypesFile(File typesFile) throws EnunciateException, FileNotFoundException {
+    info("Writing client type list to %s.", typesFile);
     if (this.generatedTypeList == null) {
       throw new EnunciateException("No type list to write.");
     }

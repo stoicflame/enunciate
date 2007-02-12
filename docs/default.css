@@ -55,8 +55,8 @@ code {
 	color: #554;
 	display: block;
 	font: normal 1.1em "Lucida Sans Unicode",serif;
-	margin-bottom: 12px;
-	padding: 8px 10px;
+	margin-bottom: 6px;
+	padding: 4px 5px;
 	white-space: pre;
 }
 blockquote {
@@ -65,6 +65,9 @@ blockquote {
 	display: block;
 	font: normal 1.3em "Lucida Sans Unicode",serif;
 	padding-left: 28px;
+}
+.console {
+  font-family: "Courier", monospace;
 }
 
 /* misc */

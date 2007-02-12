@@ -4,12 +4,16 @@ import com.ifyouwannabecool.api.PersonaService;
 import com.ifyouwannabecool.api.PermissionDeniedException;
 import com.ifyouwannabecool.domain.persona.Persona;
 
+import javax.jws.WebService;
 import java.util.Collection;
 import java.util.ArrayList;
 
 /**
  * @author Ryan Heaton
  */
+@WebService (
+  endpointInterface = "com.ifyouwannabecool.api.PersonaService"
+)
 public class PersonaServiceImpl implements PersonaService {
 
 

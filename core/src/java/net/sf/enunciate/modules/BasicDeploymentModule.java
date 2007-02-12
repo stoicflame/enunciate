@@ -168,4 +168,40 @@ public class BasicDeploymentModule implements DeploymentModule {
     return new File(getEnunciate().getPackageDir(), getName());
   }
 
+  /**
+   * Handle an info-level message.
+   *
+   * @param message The info message.
+   * @param formatArgs The format args of the message.
+   */
+  public void info(String message, Object... formatArgs) {
+    if (this.enunciate != null) {
+      this.enunciate.info(message, formatArgs);
+    }
+  }
+
+  /**
+   * Handle a debug-level message.
+   *
+   * @param message The debug message.
+   * @param formatArgs The format args of the message.
+   */
+  public void debug(String message, Object... formatArgs) {
+    if (this.enunciate != null) {
+      this.enunciate.debug(message, formatArgs);
+    }
+  }
+
+  /**
+   * Handle a warn-level message.
+   *
+   * @param message The warn message.
+   * @param formatArgs The format args of the message.
+   */
+  public void warn(String message, Object... formatArgs) {
+    if (this.enunciate != null) {
+      this.enunciate.warn(message, formatArgs);
+    }
+  }
+
 }
