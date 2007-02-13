@@ -12,13 +12,12 @@ import net.sf.enunciate.main.Enunciate;
 import net.sf.enunciate.main.FileArtifact;
 import net.sf.enunciate.modules.DeploymentModule;
 import net.sf.enunciate.modules.FreemarkerDeploymentModule;
+import net.sf.enunciate.modules.xfire.config.SpringImport;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
-import net.sf.enunciate.modules.xfire.config.SpringImport;
 import org.apache.commons.digester.RuleSet;
 import sun.misc.Service;
 
-import javax.servlet.ServletContext;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -340,7 +339,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       //exclude enunciate-core.jar
       return true;
     }
-    else if (loader.findResource(ServletContext.class.getName().replace('.', '/').concat(".class")) != null) {
+    else if (loader.findResource("javax/servlet/ServletContext.class") != null) {
       debug("%s will be excluded from the war because it appears to be the servlet api.", file);
       //exclude the servlet api.
       return true;

@@ -7,7 +7,7 @@
   <path id="build.classpath">
     <path refid="base.libs"/>
     <path refid="core.libs"/>
-    <path refid="xfire.libs"/>
+    <path refid="xfire.core.libs"/>
     <path refid="xfire.server.libs"/>
 
     <fileset dir="${core.basedir}/target">

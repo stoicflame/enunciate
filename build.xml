@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="build" name="all" basedir=".">
+<project default="full-jar" name="all" basedir=".">
 
   <property name="version" value="1.0-beta1"/>
   <property name="dist.name" value="enunciate-${version}"/>
@@ -94,9 +94,6 @@
         <include name="modules/*/target/*.jar"/>
       </zipgroupfileset>
 
-      <manifest>
-        <attribute name="Main-Class" value="net.sf.enunciate.main.Main"/>
-      </manifest>
     </jar>
 
   </target>
@@ -122,7 +119,9 @@
       <zipfileset dir="${enunciate.basedir}" prefix="enunciate/docs">
         <include name="*.txt"/>
       </zipfileset>
-      <zipfileset dir="${lib.dir}" prefix="enunciate/lib"/>
+      <zipfileset dir="${lib.dir}" prefix="enunciate/lib">
+        <exclude name="test/**"/>
+      </zipfileset>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
       <zipfileset dir="target" prefix="enunciate" includes="*.jar"/>
@@ -135,7 +134,9 @@
       <tarfileset dir="${enunciate.basedir}" prefix="enunciate/docs">
         <include name="*.txt"/>
       </tarfileset>
-      <tarfileset dir="${lib.dir}" prefix="enunciate/lib"/>
+      <tarfileset dir="${lib.dir}" prefix="enunciate/lib">
+        <exclude name="test/**"/>
+      </tarfileset>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
       <tarfileset dir="target" prefix="enunciate" includes="*.jar"/>

@@ -45,6 +45,11 @@ public class Main {
               }
             }
           }
+          else {
+            System.out.println("Unable to parse option: " + option + " (try specifying a value).");
+            printUsage();
+            System.exit(1);
+          }
         }
 
         if (!handled) {
@@ -181,10 +186,7 @@ public class Main {
      * @return Whether the option was successfully handled with the specified value.
      */
     public boolean handle(String option, String value, Enunciate enunciate) {
-      if ((this == export) && (!option.startsWith("E"))) {
-        return false;
-      }
-      else if ((!getId().equals(option)) && (!getName().equals(option))) {
+      if ((this != export) && (!getId().equals(option)) && (!getName().equals(option))) {
         return false;
       }
 
@@ -255,7 +257,11 @@ public class Main {
           return true;
 
         case export:
-          enunciate.addExport(option.substring(1).toUpperCase(), new File(value));
+          if (!option.startsWith("E")) {
+            return false;
+          }
+
+          enunciate.addExport(option.substring(1), new File(value));
           return true;
 
         default:

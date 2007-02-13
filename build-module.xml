@@ -41,29 +41,46 @@
     <fileset dir="${lib.dir}/test">
       <include name="*.jar"/>
     </fileset>
-  </path>
-
-  <path id="rest.libs">
-    <fileset dir="${lib.dir}/rest">
-      <include name="*.jar"/>
+    <fileset dir="${lib.dir}/share">
+      <include name="wsdl4j*.jar"/>
+      <include name="jaxb-impl*.jar"/>
     </fileset>
   </path>
 
-  <path id="xfire.libs">
-    <fileset dir="${lib.dir}/xfire">
+  <path id="rest.libs">
+    <fileset dir="${lib.dir}/share">
+      <include name="jaxb-impl*.jar"/>
+      <include name="servlet-api*.jar"/>
+      <include name="spring*.jar"/>
+      <include name="stax-api*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="xfire.core.libs">
+    <fileset dir="${lib.dir}/xfire-core">
       <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${lib.dir}/share">
+      <include name="wsdl4j*.jar"/>
+      <include name="stax-api*.jar"/>
     </fileset>
   </path>
 
   <path id="xfire.server.libs">
-    <fileset dir="${lib.dir}/xfire-server">
-      <include name="*.jar"/>
+    <fileset dir="${lib.dir}/share">
+      <include name="jaxb-impl*.jar"/>
+      <include name="servlet-api*.jar"/>
+      <include name="spring*.jar"/>
+      <include name="stax-api*.jar"/>
     </fileset>
   </path>
 
   <path id="xfire.client.libs">
     <fileset dir="${lib.dir}/xfire-client">
       <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${lib.dir}/share">
+      <include name="wsdl4j*.jar"/>
     </fileset>
   </path>
 

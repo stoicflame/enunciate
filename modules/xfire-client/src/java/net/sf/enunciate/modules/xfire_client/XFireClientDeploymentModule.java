@@ -390,14 +390,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     //Compile the jdk14 files.
     Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
     jdk14Files.addAll(typeFiles);
-    enunciate.invokeJavac(enunciate.getClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
+    enunciate.invokeJavac(enunciate.getDefaultClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
     writeTypesFile(new File(getJdk14CompileDir(), uuid + ".types"));
     writeAnnotationsFile(new File(getJdk14CompileDir(), uuid + ".annotations"));
 
     //Compile the jdk15 files.
     Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
     jdk15Files.addAll(typeFiles);
-    enunciate.invokeJavac(enunciate.getClasspath(), getJdk15CompileDir(), Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
+    enunciate.invokeJavac(enunciate.getDefaultClasspath(), getJdk15CompileDir(), Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
     writeTypesFile(new File(getJdk15CompileDir(), uuid + ".types"));
     writeAnnotationsFile(new File(getJdk15CompileDir(), uuid + ".annotations"));
   }
