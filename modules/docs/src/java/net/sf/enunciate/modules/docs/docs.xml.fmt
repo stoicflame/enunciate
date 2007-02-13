@@ -107,7 +107,7 @@
     <wsdls>
 [@forEachWsdl]
       <wsdl namespace="${wsdl.targetNamespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
-  [@forEachEndpointInterface]
+  [@forEachEndpointInterface wsdl=wsdl]
         <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
     [#if endpointInterface.docValue?exists]
           <documentation>

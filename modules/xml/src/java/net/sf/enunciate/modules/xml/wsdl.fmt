@@ -38,20 +38,20 @@ Template library for WSDL.
   </types>
 
     [#-- output the web messages --]
-    [@forEachWebMessage]
+    [@forEachWebMessage wsdl=wsdl]
       [@processMessage webMessage=webMessage/]
     [/@forEachWebMessage]
 
-    [@forEachEndpointInterface]
+    [@forEachEndpointInterface wsdl=wsdl]
       [@processPortType endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
     [#t]
 
-    [@forEachEndpointInterface]
+    [@forEachEndpointInterface wsdl=wsdl]
       [@processBindings endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
 
-    [@forEachEndpointInterface]
+    [@forEachEndpointInterface wsdl=wsdl]
       [@processServices endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
 </definitions>
@@ -69,7 +69,7 @@ Template library for WSDL.
   [/#list]
 
   [#--output the schema elements--]
-  [@forEachWebMessage]
+  [@forEachWebMessage wsdl=wsdl]
     [#list webMessage.parts as part]
       [#if part.implicitSchemaElement]
         [#if part.typeQName?exists]
@@ -155,7 +155,7 @@ Template library for WSDL.
       ${endpointInterface.docValue}
     </documentation>
       [/#if]
-      [@forEachWebMethod]
+      [@forEachWebMethod endpointInterface=endpointInterface]
         [@processOperation webMethod=webMethod/]
       [/@forEachWebMethod]
   </portType>
@@ -173,13 +173,13 @@ Template library for WSDL.
       ${webMethod.docValue}
     </documentation>
       [/#if]
-      [@forEachWebMessage var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
+      [@forEachWebMessage webMethod=webMethod var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
     <input message="${tns}:${input.messageName}"/>
       [/@forEachWebMessage]
-      [@forEachWebMessage var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
+      [@forEachWebMessage webMethod=webMethod var="output" includeHeaders=false includeFaults=false includeOutput=true includeInput=false]
     <output message="${tns}:${output.messageName}"/>
       [/@forEachWebMessage]
-      [@forEachThrownWebFault var="fault"]
+      [@forEachThrownWebFault webMethod=webMethod var="fault"]
     <fault name="${fault.partName}" message="${tns}:${fault.messageName}"/>
       [/@forEachThrownWebFault]
   </operation>
@@ -217,11 +217,11 @@ Template library for WSDL.
       SOAP Binding for ${endpointInterface.portTypeName}
     </documentation>
     <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
-      [@forEachWebMethod]
+      [@forEachWebMethod endpointInterface=endpointInterface]
     <operation name="${webMethod.operationName}">
       <${soap}:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
       <input>
-        [@forEachWebMessage var="message" includeFaults=false includeOutput=false]
+        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeOutput=false]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
@@ -230,7 +230,7 @@ Template library for WSDL.
         <${soap}:body use="literal"/>
       </input>
       <output>
-        [@forEachWebMessage var="message" includeFaults=false includeInput=false]
+        [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeInput=false]
           [#if message.header]
         <${soap}:header message="${tns}:${message.messageName}" part="${message.partName}"/>
           [/#if]
@@ -238,7 +238,7 @@ Template library for WSDL.
         [#-- todo: figure out if this element is valid even if there isn't a body. --]
         <${soap}:body use="literal"/>
       </output>
-        [@forEachThrownWebFault]
+        [@forEachThrownWebFault webMethod=webMethod]
       <fault>
         <${soap}:fault name="${webFault.messageName}" use="literal"/>
       </fault>
@@ -259,7 +259,7 @@ Template library for WSDL.
       HTTP Binding for ${endpointInterface.portTypeName}
     </documentation>
     <${http}:binding verb="POST"/>
-      [@forEachWebMethod]
+      [@forEachWebMethod endpointInterface=endpointInterface]
     <operation name="${webMethod.operationName}">
       <${http}:operation location="TBD"/>
       <input>

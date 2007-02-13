@@ -26,11 +26,7 @@ public class WebFaultLoopStrategy extends EnunciateTemplateLoopStrategy<WebFault
   protected Iterator<WebFault> getLoop(TemplateModel model) throws TemplateException {
     WsdlInfo wsdl = this.wsdl;
     if (wsdl == null) {
-      wsdl = (WsdlInfo) model.getVariable("wsdl");
-
-      if (wsdl == null) {
-        throw new MissingParameterException("wsdl");
-      }
+      throw new MissingParameterException("wsdl");
     }
 
     HashMap<String, WebFault> declaredFaults = new HashMap<String, WebFault>();

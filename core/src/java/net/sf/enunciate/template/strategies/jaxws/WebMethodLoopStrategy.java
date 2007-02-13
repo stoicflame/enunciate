@@ -22,11 +22,7 @@ public class WebMethodLoopStrategy extends EnunciateTemplateLoopStrategy<WebMeth
   protected Iterator<WebMethod> getLoop(TemplateModel model) throws TemplateException {
     EndpointInterface endpointInterface = this.endpointInterface;
     if (endpointInterface == null) {
-      endpointInterface = (EndpointInterface) model.getVariable("endpointInterface");
-
-      if (endpointInterface == null) {
-        throw new MissingParameterException("endpointInterface");
-      }
+      throw new MissingParameterException("endpointInterface");
     }
 
     return endpointInterface.getWebMethods().iterator();

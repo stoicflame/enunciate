@@ -33,15 +33,7 @@ public class WebMessageLoopStrategy extends EnunciateTemplateLoopStrategy<WebMes
   // Inherited.
   protected Iterator<WebMessage> getLoop(TemplateModel model) throws TemplateException {
     WebMethod webMethod = this.webMethod;
-    if (webMethod == null) {
-      webMethod = (WebMethod) model.getVariable("webMethod");
-    }
-
     WsdlInfo wsdlInfo = this.wsdl;
-    if (wsdlInfo == null) {
-      wsdlInfo = (WsdlInfo) model.getVariable("wsdl");
-    }
-
     if ((webMethod == null) && (wsdlInfo == null)) {
       throw new MissingParameterException("Either a webMethod or a wsdl must be specified to iterate over web messages.", "webMethod");
     }

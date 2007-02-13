@@ -17,7 +17,7 @@
     <property name="urlMap">
       <map>
   [@forEachWsdl]
-    [@forEachEndpointInterface]
+    [@forEachEndpointInterface wsdl=wsdl]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 

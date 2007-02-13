@@ -23,11 +23,7 @@ public class EndpointInterfaceLoopStrategy extends EnunciateTemplateLoopStrategy
   protected Iterator<EndpointInterface> getLoop(TemplateModel model) throws TemplateException {
     WsdlInfo wsdl = this.wsdl;
     if (wsdl == null) {
-      wsdl = (WsdlInfo) model.getVariable("wsdl");
-
-      if (wsdl == null) {
-        throw new MissingParameterException("wsdl");
-      }
+      throw new MissingParameterException("wsdl");
     }
 
     return wsdl.getEndpointInterfaces().iterator();

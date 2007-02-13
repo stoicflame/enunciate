@@ -23,11 +23,7 @@ public class ThrownWebFaultLoopStrategy extends EnunciateTemplateLoopStrategy<We
   protected Iterator<WebFault> getLoop(TemplateModel model) throws TemplateException {
     WebMethod webMethod = this.webMethod;
     if (webMethod == null) {
-      webMethod = (WebMethod) model.getVariable("webMethod");
-
-      if (webMethod == null) {
-        throw new MissingParameterException("webMethod");
-      }
+      throw new MissingParameterException("webMethod");
     }
 
     return webMethod.getWebFaults().iterator();

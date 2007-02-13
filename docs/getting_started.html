@@ -46,7 +46,7 @@
       to hide the <a href="http://en.wikipedia.org/wiki/The_Wizard_of_Oz_(1939_film)">man behind the curtain</a>.  Of course, some attempt to be concise
       needs to be made, but at least you'll get the idea of the full development effort.  And you'll see more than just "Hello, World".</p>
 
-      <p>For this demo, we'll be writing a social networking app (since that's where the <i>real</i> money is).  For this tutorial, the name of our
+      <p>We'll be writing a social networking app (since that's where the <i>real</i> money is).  For this tutorial, the name of our
       social networking app is <a href="http://www.ifyouwannabecool.com/">IfYouWannaBeCool.com</a>.  (Maybe next time, we can write an app that creates
       a <i>network</i> of <i>social networking apps</i>, but we'll leave that for another day....)</p>
 
@@ -77,44 +77,129 @@
       <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
 
       <code class="console">
-        src
-        |
-        |----com
-             |
-             |----ifyouwannabecool
-                  |
-                  |----api
-                  |    |
-                  |    |----ExclusiveGroupException.java
-                  |    |----LinkageService.java
-                  |    |----PermissionDeniedException.java
-                  |    |----PersonaService.java
-                  |
-                  |----domain
-                  |    |
-                  |    |----link
-                  |    |    |
-                  |    |    |----Link.java
-                  |    |    |----SocialGroup.java
-                  |    |
-                  |    |----persona
-                  |         |
-                  |         |----Name.java
-                  |         |----Persona.java
-                  |
-                  |----impl
-                       |
-                       |----LinkageServiceImpl.java
-                       |----PersonaServiceImpl.java
+src
+|
+|----com
+     |
+     |----ifyouwannabecool
+          |
+          |----api
+          |    |
+          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java?view=markup">ExclusiveGroupException.java</a>
+          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java?view=markup">LinkageService.java</a>
+          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java?view=markup">PermissionDeniedException.java</a>
+          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">PersonaService.java</a>
+          |
+          |----domain
+          |    |
+          |    |----link
+          |    |    |
+          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java?view=markup">Link.java</a>
+          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java?view=markup">SocialGroup.java</a>
+          |    |
+          |    |----persona
+          |         |
+          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java?view=markup">Name.java</a>
+          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">Persona.java</a>
+          |
+          |----impl
+               |
+               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java?view=markup">LinkageServiceImpl.java</a>
+               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java?view=markup">PersonaServiceImpl.java</a>
       </code>
 
-      <h1>Step 2: Enunciate the Code</h1>
+      <h1>Step 2: Enunciate the API</h1>
 
-      <!-- -v -Exfire.war target/wannabecool.war src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java-->
+      <p>Make sure you have your <a href="executables.html">environment set up</a>, and invoke Enunciate
+        on the source code (multi-line, single command, use the "-v" option to see more output of what Enunciate is doing):</p>
 
-      <p>
+      <code class="console">
+user@localhost&gt;enunciate -Exfire.war ifyouwannabecool.war\
+ src/com/ifyouwannabecool/api/ExclusiveGroupException.java\
+ src/com/ifyouwannabecool/api/PermissionDeniedException.java\
+ src/com/ifyouwannabecool/api/LinkageService.java\
+ src/com/ifyouwannabecool/api/PersonaService.java\
+ src/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
+ src/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/com/ifyouwannabecool/domain/persona/Name.java\
+ src/com/ifyouwannabecool/domain/persona/Persona.java\
+ src/com/ifyouwannabecool/domain/link/Link.java\
+ src/com/ifyouwannabecool/domain/link/SocialGroup.java
+      </code>
 
-      </p>
+      <p>You have successfully enunciated your web API.</p>
+
+      <h1>Step 3: Take a Look</h1>
+
+      <p>You'll notice that we exported the war artifact that was created by Enunciate to the file "ifyouwannabecool.war" (with the option
+        "-Exfire.war ifyouwannabecool.war").  Drop that into your favorite J2EE container and hit the app in a browser to see
+        what you've got!</p>
+      
+      <p>(For the majority of you who aren't actually performing the steps, you see the static elements by <a href="wannabecool/step1/index.html">clicking
+        here</a>.)</p>
+
+      <p>The first thing you'll notice is a nice-looking web page with a generic title divided into two sections.  The first section describes the SOAP API,
+      and it includes the two services we just wrote.  The second section is the data section describing our domain.  You'll notice the WSDL that was
+      generated as well as the schema that describes our domain.  (Note that the WSDL is consolidated, containing definitions of both endpoints because
+      they service the same namespace.)</p>
+
+      <p>As you continue to poke around, you'll notice that the documentation is quite sparse (although some information can be gleaned
+        from the names of the methods and arguments).</p>  
+
+      <p>The "downloads" page links to client-side binaries and source code that will access your SOAP API.  These client-side libraries were generated by
+        Enunciate and packaged up (along with everything else) in the war.  The client-side code is clean, intuitive, and powerful, handling all
+        the complexities of the API, including the faults (populating even the fields of the faults), the complex data structures, and
+        even leveraging MTOM to handle the binary data.</p>
+
+      <p>Oh, and of course the endpoints are deployed as described in the WSDL.</p>
+
+      <h1>Step 4 (Optional): Iterate</h1>
+
+      <p>Even with no extra options or decorations, Enunciate does a pretty good job publishing your API.  But there's so much more you can do with only
+      a minimal amount of effort:</p>
+
+      <ul>
+        <li>Add a REST API.</li>
+        <li>Add a splash package.</li>
+        <li>Document the endpoints, their methods, and parameters.</li>
+        <li>Document the domain data.</li>
+        <li>Specify a title.</li>
+        <li>Specify a copyright.</li>
+        <li>Add some other documents.</li>
+        <li>Specify the final deployed URL.</li>
+        <li>Specify your namespace prefixes.</li>
+        <li>Change the package structure of the client-side classes.</li>
+      </ul>
+
+      <p>And there are still a ton of other configuration options available to you as the API developer (which we won't go into here):</p>
+
+      <ul>
+        <li>Specify your own CSS for the documentation, or even your own XSLT stylesheet if you don't like the structure.</li>
+        <li>Customize the web.xml file used to deploy your app.</li>
+        <li>Add spring aspects and/or XFire in/out handlers to the server-side classes.</li>
+        <li>Add your own API rules to be enforced at compile-time.</li>
+        <li>Etc.</li>
+      </ul>
+
+      <p>Well, when we're done polishing things up, we enunciate our API again and deploy the war file as we did in steps 2 and 3.</p>
+
+      <h1>Step 5 (Optional): Behold the Glory</h1>
+
+      <p>Ooooo....  Ahhhhh....</p>
+
+      <p>(For the majority of you who aren't actually performing the steps, you see the static elements by <a href="wannabecool/step1/index.html">clicking
+        here</a>.)</p>
+
+      <h1>Step 6: Learn More As Needed</h1>
+
+      <ul>
+        <li><a href="user_guide.html">Users Guide</a></li>
+        <li><a href="architecture.html">Architecture Guide</a></li>
+        <li><a href="api/index.html">Javadocs</a></li>
+        <li><a href="support.html">Support</a></li>
+        <li><a href="https://jaxb.dev.java.net/">JAXB 2.0</a></li>
+        <li><a href="http://java.sun.com/webservices/jaxws/">JAX-WS</a></li>
+      </ul>
 
     </div>
 

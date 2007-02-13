@@ -46,7 +46,7 @@ public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServic
     this.proxy = (${endpointInterface.simpleName}) getProxy();
   }
 
-  [@forEachWebMethod]
+  [@forEachWebMethod endpointInterface=endpointInterface]
 
   // Inherited.
   public ${classnameFor(webMethod.returnType)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param.type)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if] {
