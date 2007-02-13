@@ -4,6 +4,7 @@
 
   <property name="version" value="1.0-beta1"/>
   <property name="dist.name" value="enunciate-${version}"/>
+  <property name="full.jar.name" value="${dist.name}-full.jar"/>
 
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>
@@ -72,9 +73,9 @@
     </javadoc>
   </target>
 
-  <target name="full-jar" depends="build, full-jar-only"/>
+  <target name="full-jar" depends="build, full-jar-only" description="Creates the full (aggregated) jar."/>
 
-  <target name="full-jar-only">
+  <target name="full-jar-only" description="Creates the full jar assuming everything in its place.">
     <mkdir dir="target"/>
     
     <concat destfile="target/module.list" fixlastline="yes">
@@ -83,7 +84,7 @@
 
     <echo file="target/preserve-in-war" message="This file is used simply to mark the enunciate-full jar as a jar to be preserved when building the war."/>
 
-    <jar destfile="target/${dist.name}-full.jar" duplicate="preserve">
+    <jar destfile="target/${full.jar.name}" duplicate="preserve">
       <!--first include the concatenated deployment module list.-->
       <zipfileset dir="target" includes="module.list" fullpath="META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
       <!--make sure the jar is marked to preserve in a war file.-->
@@ -98,11 +99,44 @@
 
   </target>
 
-  <target name="dist" depends="clean, full-jar, doc, dist-only"/>
-  
-  <target name="dist-only">
-    <mkdir dir="target/module-libs"/>
+  <target name="dist" depends="clean, full-jar, doc, scripts, dist-only" description="Creates the distribution bundles."/>
+
+  <target name="scripts" description="Generates the executable scripts.">
+
+    <path id="script.classpath">
+      <fileset dir="${lib.dir}">
+        <include name="**/*.jar"/>
+      </fileset>
+    </path>
+
+    <pathconvert property="unix.script.classpath" targetos="unix" refid="script.classpath">
+      <mapper type="regexp" from="/(lib/.*.jar)$$" to="$ENUNCIATE_HOME/\1"/>
+    </pathconvert>
+    <pathconvert property="windows.script.classpath" targetos="windows" refid="script.classpath">
+      <mapper type="regexp" from="/(lib/.*.jar)$$" to="%ENUNCIATE_HOME%\\\1"/>
+    </pathconvert>
+
+    <copy file="src/bin/enunciate.sh" tofile="bin/enunciate" overwrite="true">
+      <filterset begintoken="{" endtoken="}">
+        <filter token="UNIX_CLASSPATH" value="${unix.script.classpath}"/>
+        <filter token="FULL_JAR_NAME" value="${full.jar.name}"/>
+      </filterset>
+    </copy>
+    <chmod perm="766" file="bin/enunciate"/>
     
+    <copy file="src/bin/enunciate.bat" tofile="bin/enunciate.bat" overwrite="true">
+      <filterset begintoken="{" endtoken="}">
+        <filter token="WINDOWS_CLASSPATH" value="${windows.script.classpath}"/>
+        <filter token="FULL_JAR_NAME" value="${full.jar.name}"/>
+      </filterset>
+    </copy>
+
+  </target>
+  
+  <target name="dist-only" description="Creates the distribution bundles assuming everything is in its place.">
+    <mkdir dir="target/module-libs"/>
+
+    <!--copy all the libraries created by the modules to the module-libs directory.-->
     <copy todir="target/module-libs">
       <fileset dir="${enunciate.basedir}">
         <include name="core/target/*.jar"/>
@@ -112,6 +146,7 @@
       <mapper type="flatten"/>
     </copy>
 
+    <!--create the zip dist.-->
     <zip destfile="target/${dist.name}.zip">
       <zipfileset dir="${docs.dir}" prefix="enunciate/docs">
         <exclude name="*.txt"/>
@@ -122,11 +157,15 @@
       <zipfileset dir="${lib.dir}" prefix="enunciate/lib">
         <exclude name="test/**"/>
       </zipfileset>
-      <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
+      <zipfileset dir="bin" prefix="enunciate/bin">
+        <exclude name="README.txt"/>
+      </zipfileset>
       <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
+      <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <zipfileset dir="target" prefix="enunciate" includes="*.jar"/>
     </zip>
 
+    <!--create the tar.gz dist.-->
     <tar destfile="target/${dist.name}.tar.gz" compression="gzip">
       <tarfileset dir="${docs.dir}" prefix="enunciate/docs">
         <exclude name="*.txt"/>
@@ -137,8 +176,11 @@
       <tarfileset dir="${lib.dir}" prefix="enunciate/lib">
         <exclude name="test/**"/>
       </tarfileset>
-      <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
+      <tarfileset dir="bin" prefix="enunciate/bin" mode="766">
+        <exclude name="README.txt"/>
+      </tarfileset>
       <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
+      <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <tarfileset dir="target" prefix="enunciate" includes="*.jar"/>
     </tar>
   </target>
