@@ -45,6 +45,7 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
 
   public EnunciateAnnotationProcessorFactory(Enunciate enunciate) throws EnunciateException {
     this.processor = new EnunciateAnnotationProcessor(enunciate);
+    this.round = 0; //todo: fix this in APT-Jelly.  What it really needs to do is listen to the rounds.
   }
 
   //Inherited.

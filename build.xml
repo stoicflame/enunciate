@@ -11,6 +11,7 @@
   <property name="lib.dir" value="${enunciate.basedir}/lib"/>
   <property name="docs.dir" value="${enunciate.basedir}/docs"/>
   <property name="javadoc.dir" value="${docs.dir}/api"/>
+  <property name="getting.started.example.dir" value="${docs.dir}/wannabecool"/>
 
   <property name="core.basedir" value="${enunciate.basedir}/core"/>
   <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
@@ -45,7 +46,9 @@
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
-  <target name="doc" description="generate documentation and javadoc (global)">
+  <target name="doc" description="generate documentation and javadoc (global)" depends="javadoc, getting-started-examples"/>
+
+  <target name="javadoc" description="generate the javadoc.">
     <mkdir dir="${javadoc.dir}"/>
     <property name="title" value="enunciate-docs"/>
 
@@ -56,7 +59,7 @@
         <include name="modules/*/src/java/**/*.java"/>
         <include name="modules/*/src/tools/**/*.java"/>
       </fileset>
-      
+
       <classpath>
         <fileset dir="${enunciate.basedir}/lib">
           <include name="**/*.jar"/>
@@ -71,6 +74,41 @@
       <link href="http://static.springframework.org/spring/docs/1.2.x/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/spring"/>
       <link href="http://envoisolutions.com/xfire/api" offline="true" packagelistloc="${enunciate.basedir}/src/javadoc/xfire"/>
     </javadoc>
+
+  </target>
+
+  <target name="getting-started-examples" depends="full-jar, getting-started-examples-only" description="Generated the getting started examples."/>
+  
+  <target name="getting-started-examples-only" description="generates the getting started samples assuming the jar is in the right place.">
+
+    <path id="enunciate.classpath">
+      <fileset dir="lib">
+        <include name="**/*.jar"/>
+      </fileset>
+      <pathelement location="target/${full.jar.name}"/>
+    </path>
+
+    <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
+      <classpath refid="enunciate.classpath"/>
+    </taskdef>
+
+    <mkdir dir="${getting.started.example.dir}/step4"/>
+    <echo message="Generating the step4 examples...."/>
+    <copy file="src/samples/wannabecool/step4/LICENSE.txt" todir="${user.dir}" overwrite="true"/>
+    <enunciate target="build" basedir="src/samples/wannabecool/step4" configFile="src/samples/wannabecool/step4/enunciate.xml">
+      <include name="**/*.java"/>
+      <classpath refid="enunciate.classpath"/>
+      <export artifactId="docs" destination="${getting.started.example.dir}/step4"/>
+    </enunciate>
+    <delete file="${user.dir}/LICENSE.txt" failonerror="false"/>
+
+    <mkdir dir="${getting.started.example.dir}/step1"/>
+    <echo message="Generating the step1 examples...."/>
+    <enunciate target="build" basedir="src/samples/wannabecool/step1">
+      <include name="**/*.java"/>
+      <classpath refid="enunciate.classpath"/>
+      <export artifactId="docs" destination="${getting.started.example.dir}/step1"/>
+    </enunciate>
   </target>
 
   <target name="full-jar" depends="build, full-jar-only" description="Creates the full (aggregated) jar."/>
