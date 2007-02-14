@@ -28,6 +28,9 @@ public class EnunciateConfiguration implements ErrorHandler {
 
   private String label = "enunciate";
   private String description = null;
+  private String deploymentProtocol = "http";
+  private String deploymentHost = null;
+  private String deploymentContext = null;
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -110,6 +113,60 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setValidator(Validator validator) {
     this.validator = validator;
+  }
+
+  /**
+   * The protocol that will be used when the app is deployed.  Default: "http".
+   *
+   * @return The protocol that will be used when the app is deployed.  Default: "http".
+   */
+  public String getDeploymentProtocol() {
+    return deploymentProtocol;
+  }
+
+  /**
+   * The protocol that will be used when the app is deployed.  Default: "http".
+   *
+   * @param deploymentProtocol The protocol that will be used when the app is deployed.  Default: "http".
+   */
+  public void setDeploymentProtocol(String deploymentProtocol) {
+    this.deploymentProtocol = deploymentProtocol;
+  }
+
+  /**
+   * The hostname of the host that will host the deployed app.
+   *
+   * @return The hostname of the host that will host the deployed app.
+   */
+  public String getDeploymentHost() {
+    return deploymentHost;
+  }
+
+  /**
+   * The hostname of the host that will host the deployed app.
+   *
+   * @param deploymentHost The hostname of the host that will host the deployed app.
+   */
+  public void setDeploymentHost(String deploymentHost) {
+    this.deploymentHost = deploymentHost;
+  }
+
+  /**
+   * The context at which the deployed app will be mounted.
+   *
+   * @return The context at which the deployed app will be mounted.
+   */
+  public String getDeploymentContext() {
+    return deploymentContext;
+  }
+
+  /**
+   * The context at which the deployed app will be mounted.
+   *
+   * @param deploymentContext The context at which the deployed app will be mounted.
+   */
+  public void setDeploymentContext(String deploymentContext) {
+    this.deploymentContext = deploymentContext;
   }
 
   /**
@@ -238,6 +295,11 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/jaxb-import", "addJAXBImport", 2);
     digester.addCallParam("enunciate/jaxb-import", 0, "class");
     digester.addCallParam("enunciate/jaxb-import", 1, "package");
+
+    //allow for the deployment configuration to be specified.
+    digester.addSetProperties("enunciate/deployment",
+                              new String[] {"protocol", "host", "context"},
+                              new String[] {"deploymentProtocol", "deploymentHost", "deploymentContext"});
 
     //allow for namespace prefixes to be specified in the config file.
     digester.addCallMethod("enunciate/namespaces/namespace", "putNamespace", 2);

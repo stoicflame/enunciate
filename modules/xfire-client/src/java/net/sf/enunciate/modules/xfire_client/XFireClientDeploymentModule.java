@@ -5,6 +5,7 @@ import net.sf.enunciate.EnunciateException;
 import net.sf.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.enunciate.config.SchemaInfo;
 import net.sf.enunciate.config.WsdlInfo;
+import net.sf.enunciate.config.EnunciateConfiguration;
 import net.sf.enunciate.contract.jaxb.RootElementDeclaration;
 import net.sf.enunciate.contract.jaxb.TypeDefinition;
 import net.sf.enunciate.contract.jaxws.*;
@@ -90,9 +91,38 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     String uuid = this.uuid;
     model.put("uuid", uuid);
-    model.put("defaultHost", getDefaultHost());
-    model.put("defaultContext", getDefaultContext());
-    model.put("defaultPort", String.valueOf(getDefaultPort()));
+
+    String defaultProtocol = "http";
+    String defaultHost = "localhost";
+    String defaultContext = "";
+    EnunciateConfiguration config = getEnunciate().getConfig();
+    if (config != null) {
+      if (config.getDeploymentProtocol() != null) {
+        defaultProtocol = config.getDeploymentProtocol();
+      }
+
+      if (config.getDeploymentHost() != null) {
+        defaultHost = config.getDeploymentHost();
+      }
+
+      if (config.getDeploymentContext() != null) {
+        defaultContext = config.getDeploymentContext();
+      }
+    }
+
+    if ((defaultContext.length() > 0) && (defaultContext.startsWith("/"))) {
+      //no leading slashes in the context....
+      defaultContext = defaultContext.substring(1);
+    }
+
+    if ((defaultContext.length() > 0) && (!defaultContext.endsWith("/"))) {
+      //make sure there's an ending slash...
+      defaultContext = defaultContext + "/";
+    }
+
+    model.put("defaultProtocol", defaultProtocol);
+    model.put("defaultHost", defaultHost);
+    model.put("defaultContext", defaultContext);
 
 
     // First, generate everything that is common to both jdk 14 and jdk 15

@@ -58,11 +58,11 @@ public class TestFullAPI extends TestCase {
     wsdlConfig.setNamespace(FULL_NAMESPACE);
     wsdlConfig.setFile("full.wsdl");
     xmlModule.addWsdlConfig(wsdlConfig);
-    xmlModule.setEndpointHostname("www.thebestgenealogywebsite.com");
-    xmlModule.setEndpointContext("/genealogy/soap/");
-    xmlModule.setEndpointProtocol("https");
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
+    config.setDeploymentHost("www.thebestgenealogywebsite.com");
+    config.setDeploymentContext("/genealogy/soap/");
+    config.setDeploymentProtocol("https");
     config.putNamespace(CITE_NAMESPACE, "cite");
     config.putNamespace(DATA_NAMESPACE, "data");
     config.putNamespace(FULL_NAMESPACE, "full");

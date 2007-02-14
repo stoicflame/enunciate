@@ -13,6 +13,7 @@
       <xs:sequence>
         <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -31,6 +32,19 @@
     </xs:annotation>
 
     <xs:attribute name="class" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="deployment">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to define the deployment configuration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="protocol"/>
+    <xs:attribute name="host"/>
+    <xs:attribute name="context"/>
   </xs:complexType>
 
   <xs:complexType name="namespaces">

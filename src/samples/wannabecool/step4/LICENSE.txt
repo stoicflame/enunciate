@@ -1,0 +1,2 @@
+This is the license file for ifyouwannabecool.com.  You are free
+to access our API as long as you agree to give up your privacy.

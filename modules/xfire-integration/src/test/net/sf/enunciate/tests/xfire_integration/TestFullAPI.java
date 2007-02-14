@@ -60,7 +60,7 @@ public class TestFullAPI extends TestCase {
       context = System.getProperty("container.test.context");
     }
 
-    SourceService sourceService = new SourceServiceImpl("localhost", port, "/" + context + "/soap/source-service");
+    SourceService sourceService = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap/source-service");
     Source source = sourceService.getSource("valid");
     assertEquals("valid", source.getId());
     assertEquals(URI.create("uri:some-uri"), source.getLink());
@@ -119,7 +119,7 @@ public class TestFullAPI extends TestCase {
       //fall through...
     }
 
-    PersonService personService = new PersonServiceImpl("localhost", port, "/" + context + "/soap/PersonServiceService");
+    PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/soap/PersonServiceService");
     ArrayList<String> ids = new ArrayList<String>(Arrays.asList("id1", "id2", "id3", "id4"));
     Collection persons = personService.readPersons(ids);
     for (Object o : persons) {
