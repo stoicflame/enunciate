@@ -156,6 +156,32 @@
 
   </target>
 
+  <target name="extract-module-docs" if="deployment.module.fqn">
+    <pathconvert pathsep=" " dirsep="${file.separator}" property="module.src.file.args">
+      <path>
+        <fileset dir="src/java">
+          <include name="**/*.java"/>
+        </fileset>
+      </path>
+    </pathconvert>
+    <pathconvert pathsep="${path.separator}" dirsep="${file.separator}" property="apt.cp" refid="build.classpath"/>
+    <dirname property="apt.output.dir" file="target/any.txt"/>
+
+    <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
+      <classpath>
+        <path refid="build.classpath"/>
+        <pathelement location="${tools.build.dir}"/>
+      </classpath>
+      <arg line="-cp ${apt.cp}"/>
+      <arg line="-s ${apt.output.dir}"/>
+      <arg value="-nocompile"/>
+      <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
+      <arg value="-Atemplate=${enunciate.basedir}/module.docs.fmt"/>
+      <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
+      <arg line="${module.src.file.args}"/>
+    </java>
+  </target>
+
   <target name="echo-deployment-module-fqn" if="deployment.module.fqn">
     <property name="append.discovery.module" value="false"/>
     <property name="discovery.dir" value="${build.dir}/META-INF/services"/>
@@ -164,7 +190,7 @@
     <echo message="${deployment.module.fqn}" file="${discovery.dir}/net.sf.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
   </target>
 
-  <target name="compile-main" description="compile the main code" depends="compile-tools, -compile-main, echo-deployment-module-fqn"/>
+  <target name="compile-main" description="compile the main code" depends="compile-tools, -compile-main, echo-deployment-module-fqn, extract-module-docs"/>
 
   <target name="-compile-main" description="compile the main code">
     <mkdir dir="${build.dir}"/>
@@ -317,10 +343,6 @@
       <include name="**/*.java"/>
       <classpath refid="enunciate.classpath"/>
     </enunciate>
-  </target>
-
-  <target name="build-all-modules">
-    
   </target>
 
 </project>

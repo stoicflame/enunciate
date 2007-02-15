@@ -188,6 +188,11 @@ blockquote {
 .content li p {
   font-size: 1.0em;
 }
+.content .break {
+  height:1px;
+  width:100%;
+  border-top: 1px solid #A98;
+}
 
 /* footer */
 .footer {

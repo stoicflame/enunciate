@@ -1,16 +1,61 @@
-<h1>
-  Introduction
-</h1>
+  <h1>
+    Introduction
+  </h1>
 
-<p>
-  The JDK 1.4 client-side library may be used to access the SOAP API for this application via
-  the Java runtime.  Sources for the classes are included in the jar.
-</p>
+  <p>
+    The JDK 1.4 client-side library may be used to access the SOAP API for this application via
+    the Java runtime.  This library is compatible with <a href="http://java.sun.com">Java</a>,
+    version 1.4 and later.
+  </p>
 
-<h1>
-  Dependencies
-</h1>
+  <p>
+    The library is divided into service interfaces, service implementations, and service data.  The
+    service interfaces exist for convenience in testing and for possible
+    <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">aspect</a> injection.  The
+    service implementations and service data are <a href="http://en.wikipedia.org/wiki/POJO">POJO</a>s,
+    making them easy to understand and straightforward to use.  (The services can easily be
+    declared in a <a href="http://www.springframework.org/">Spring</a> beans configuration file,
+    for example.)
+  </p>
 
-<h1>
-  Example
-</h1>
+  <p>
+    As an example, suppose there existed a service interface and method for reading a purchase order.
+    Assuming the package "com.company", a typical use of the library would like like this:
+  </p>
+
+  <h1>
+    Example
+  </h1>
+
+  <code>
+//instantiate a new service with an impl
+// (or through dependency injection, or whatever)...
+com.company.PurchaseOrderService service =
+  new com.company.impl.PurchaseOrderServiceImpl();
+
+//make the remote call to read the purchase order...
+com.company.PurchaseOrder order =
+  service.readPurchaseOrder("123456");
+
+//handle the purchase order as needed...
+  </code>
+
+  <h1>
+    Dependencies
+  </h1>
+
+  <p>
+    These client-side classes have runtime dependencies on libraries external to the JVM.  These
+    libraries must be included on the classpath when consuming this client-side API.
+  </p>
+
+  <ul>
+    <li><b>XFire</b> is used as the SOAP stack engine.  It, in turn, has dependencies on
+      other libraries.  At the time of this writing, the known dependencies were the activation
+      framework jars, jdom, woodstox, commons-codec, and commons-httpclient.  However, please
+      consult the dependency guide for the xfire version you are using.  XFire and its dependencies
+      can be <a href="http://xfire.codehaus.org/">downloaded from the codehaus</a>.</li>
+    <li><b>Enunciate XFire Client Tools</b> is a small set of classes used as tools to enable the
+      correct and compatible remote invocations.  This jar can be downloaded from the Enunciate
+      home page.</li>
+  </ul>

@@ -37,7 +37,161 @@
 
       <h1>Introduction</h1>
 
-      <p>(in progress)</p>
+      <p>Welcome to the Enunciate user's guide!  The assumption is that you've read through the <a href="getting_started.html">getting started guide</a> and
+      are ready to understand a bit more of the details of how to use Enunciate.</p>
+
+      <p>The tone of this document will be much more quick and concise.  It is presumed this document will serve more often as a reference and a jump point
+        than as a full read.</p>
+
+
+
+      <a name="engine"><div class="break">&nbsp;</div></a>
+      <h1>Engine</h1>
+
+      <p>The Enunciate engine is invoked through a number of different entry points, including via the command line, Ant, or programmatically.  For
+      more information on how to invoke Enunciate, see the <a href="executables.html">executables page</a>.</p>
+
+      <p>When the engine is invoked, the <a href="#config">configuration</a> is loaded and queried for the set of modules that will handle the work of
+        enunciating the API.  The modules are ordered and initialized.  The engine then steps through its run phase. At the end of its run phase, each
+      module is closed and the artifacts are exported as needed.</p>
+
+
+
+      <a name="steps"><div class="break">&nbsp;</div></a>
+      <h1>Run Phase Steps</h1>
+
+      <p>The Enunciate run phase is separated into four distinct steps:</p>
+
+      <ul>
+        <li>
+          <h3>generate</h3>
+          <p>Used to generate all source code and configuration files needed for handling the compilation, deployment,
+            and packaging of the API.  It is during this step that the API model is established and validated
+            (<a href="#step_generate">see below</a>).</p>
+        </li>
+        <li>
+          <h3>compile</h3>
+          <p>Used to compile the source code (original and generated).</p>
+        </li>
+        <li>
+          <h3>build</h3>
+          <p>Used to assemble all the pieces of the API into a single logical structure.</p>
+        </li>
+        <li>
+          <h3>package</h3>
+          <p>Used to consolidate and package the assembled pieces.</p>
+        </li>
+      </ul>
+
+      <p>Each step carries with it certain core logic and then each module is given the chance to perform work for that step.</p>
+
+
+
+      <a name="step_generate"><div class="break">&nbsp;</div></a>
+      <h1>The Generate Step</h1>
+
+      <p>The <b>generate</b> step is the most intensive and important step in the Enunciate process.  It is during this step that the API model is
+      established.  This means that the source code for the API is read, analyzed, and loaded into an abstract form that represents the API in terms
+      of the endpoint interfaces, data structures, REST endpoints, faults, etc.  This abstract form is called <b>the API model</b> (or just "model" for
+        short).</p>
+
+      <p>Some errors in the API source are fatal in that they prevent us from establishing the API model.  These fatal errors will be thrown immediately and
+        the engine will halt, unable to establish the model.</p>
+
+
+
+      <h3><a name="validation">Validation</a></h3>
+
+      <p>When the model is established, it is then validated.  There is a default set of validation rules and each module optionally carries with it a set of
+        validation rules.  Validation rules include specification violations, interoperability constraints, and unsupported API definitions. <u>Note, therefore,
+        that it is at this step that interoperability and API clarity is enforced.</u> Validation errors and warnings are accumulated and presented to the user 
+        before halting the engine. (In the case of only warnings, the engine will not be halted.)</p>
+
+
+
+
+      <a name="modules"><div class="break">&nbsp;</div></a>
+      <h1>Modules</h1>
+
+      <p>The work of Enunciate is divided into modules.  Modules can be thought of as loosly coupled, non-interdependant extensions to the Enunciate engine.
+      Each module has a specific set of work to perform.  For example, the XML module generates the WSDL and schemas for the API, the REST module validates
+      the REST endpoints, the xfire-client module generates the xfire client libraries, etc.  Since each module has a specific set of work to do, each module
+      has also a separate set of configuration options.</p>
+
+      <p>The modules that are to be included in the Enunciate mechanism are discovered at runtime using <a href="http://java.sun.com/j2se/1.3/docs/guide/jar/jar.html#Service%20Provider">Sun's
+        discovery mechanism</a>.</p>
+
+      <p>Enunciate ships with a default set of modules:</p>
+
+      <ul>
+        <li>
+          <h3><a href="modules/module_docs.html">docs</a></h3>
+          <p>Generates the API documentation.</p>
+        </li>
+        <li>
+          <h3><a href="modules/module_jaxws.html">jaxws</a></h3>
+          <p>Generates the JAX-WS request/response/fault wrappers according to the JAX-WS specification</p>
+        </li>
+        <li>
+          <h3><a href="modules/module_rest.html">rest</a></h3>
+          <p>Validates the REST API and provides support for hosting it.</p>
+        </li>
+        <li>
+          <h3><a href="modules/module_xfire.html">xfire</a></h3>
+          <p>Builds and packages the war that will host the documentation and service the endpoints (using <a href="http://xfire.codehaus.org/">XFire</a>).</p>
+        </li>
+        <li>
+          <h3><a href="modules/module_xfire_client.html">xfire-client</a></h3>
+          <p>Builds the Java client libraries used to access the API (using <a href="http://xfire.codehaus.org/">XFire</a>)</p>
+        </li>
+        <li>
+          <h3><a href="modules/module_xml.html">xml</a></h3>
+          <p>Generates the WSDL and schemas for the API.</p>
+        </li>
+      </ul>
+
+      <p>For more information about modules (including how to write your own), see the <a href="architecture.html">architecture guide</a>.</p>
+
+
+      <a name="config"><div class="break">&nbsp;</div></a>
+      <h1>Configuration</h1>
+
+      <p>Configuration for the Enunciate engine (including any of its modules) is done in a single XML file that conforms to
+        <a href="http://enunciate.svn.sourceforge.net/viewvc/*checkout*/enunciate/trunk/enunciate/core/src/java/net/sf/enunciate/config/enunciate.xsd">this
+          schema</a>.  Here are some of the more interesting configuration options:</p>
+
+      <ul>
+        <li>
+          <h3><a name="config_jaxb_import">jaxb-import</a></h3>
+          <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
+          The 'classname' attribute of this element specified the FQN of an external class on which your API depends.</p>
+        </li>
+        <li>
+          <h3><a name="config_deployment">deployment</a></h3>
+          <p>The deployment element is used to specify the hostname and context on which your API will be deployed, so the WSDL and client code will know where
+          the endpoints will be mounted.</p>
+        </li>
+        <li>
+          <h3><a name="config_namespaces">namespaces</a></h3>
+          <p>This section is used to define the prefixes for your namespaces.</p>
+        </li>
+        <li>
+          <h3><a name="config_modules">modules</a></h3>
+          <p>This is where the configuration of the modules goes.  For specifics, see the <a href="#modules">documentation for each module</a>.</p>
+        </li>
+      </ul>
+
+
+
+      <a name="further"><div class="break">&nbsp;</div></a>
+      <h1>Further Reading</h1>
+
+      <ul>
+        <li><a href="architecture.html">architecture guide</a></li>
+        <li><a href="modules/index.html">modules documentation</a></li>
+        <li><a href="http://java.sun.com/webservices/docs/2.0/tutorial/doc/JAXWS.html#wp72279">JAX-WS tutorial</a></li>
+        <li><a href="http://java.sun.com/webservices/docs/2.0/tutorial/doc/JAXBUsing.html#wp78319">JAXB tutorial</a></li>
+      </ul>
 
     </div>
 
@@ -54,7 +208,9 @@
 
       <h1>Documentation</h1>
       <ul>
+        <li><a href="executables.html">invoking enunciate</a></li>
         <li><a href="user_guide.html">user guide</a></li>
+        <li><a href="deps.html">dependencies</a></li>
         <li><a href="architecture.html">architecture</a></li>
         <li><a href="api/index.html">javadocs</a></li>
       </ul>

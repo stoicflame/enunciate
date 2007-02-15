@@ -8,6 +8,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -45,11 +46,22 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * @param model       The root model.
    */
   public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
+    processTemplate(templateURL, model, System.out);
+  }
+
+  /**
+   * Processes the specified template with the given model.
+   *
+   * @param templateURL The template URL.
+   * @param model       The root model.
+   * @param out         The output stream to process to.
+   */
+  public void processTemplate(URL templateURL, Object model, PrintStream out) throws IOException, TemplateException {
     debug("Processing template %s.", templateURL);
     Configuration configuration = getConfiguration();
     configuration.setDefaultEncoding("UTF-8");
     Template template = configuration.getTemplate(templateURL.toString());
-    processTemplate(template, model);
+    processTemplate(template, model, out);
   }
 
   /**
@@ -59,7 +71,18 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    * @param model    The root model.
    */
   public void processTemplate(Template template, Object model) throws TemplateException, IOException {
-    template.process(model, new OutputStreamWriter(System.out));
+    processTemplate(template, model, System.out);
+  }
+
+  /**
+   * Processes the specified template to the specified output stream.
+   *
+   * @param template The template to process.
+   * @param model The model.
+   * @param out The output stream.
+   */
+  public void processTemplate(Template template, Object model, PrintStream out) throws TemplateException, IOException {
+    template.process(model, new OutputStreamWriter(out));
   }
 
   /**
