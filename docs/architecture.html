@@ -37,7 +37,28 @@
 
       <h1>Introduction</h1>
 
-      <p>(in progress)</p>
+      <p>The architecture guide at the moment is quite weak.  It is presumed that more architecture documentation
+      will be added are more people write modules and extensions to Enunciate.  For now, we'll limit the discussion
+      of the architecture to a few brief topics.</p>
+
+      <a name="modules"><div class="break">&nbsp;</div></a>
+      <h1>Enunciate Modules</h1>
+
+      <p>An enunciate module is simply a class that implements <a href="api/net/sf/enunciate/modules/DeploymentModule.html">net.sf.enunciate.modules.DeploymentModule</a>.
+      If you're writing you're own module, you may want to start by extending <a href="api/net/sf/enunciate/modules/BasicDeploymentModule.html">BasicDeploymentModule</a>,
+        or if you want to use <a href="http://freemarker.sourceforge.net/">Freemarker</a> templates during your generate step (as do most of the current
+      Enunciate modules), then you may want to extend <a href="api/net/sf/enunciate/modules/FreemarkerDeploymentModule.html">FreemarkerDeploymentModule</a>.</p>
+
+      <p>Package your module into a jar, making sure your module class FQN is put in the META-INF/services/net.sf.enunciate.modules.DeploymentModule entry of
+      the jar (see <a href="http://java.sun.com/j2se/1.3/docs/guide/jar/jar.html#Service%20Provider">Sun's discovery process</a> for details).  Then, as long
+        as your jar is on the classpath when you invoke Enunciate, it should included as part of the engine.</p>
+
+      <a name="further"><div class="break">&nbsp;</div></a>
+      <h1>Further Reading</h1>
+
+      <p>If you want to know more, the best place to get a concrete example is by checking out the Enunciate source code, picking a module, and seeing
+      how it's done.  You'll probably refer to the <a href="api/index.html">javadocs</a> a lot, and feel free to post a question
+      on the appropriate <a href="#">mailing list</a> as well.</p>
 
     </div>
 
@@ -56,6 +77,7 @@
       <ul>
         <li><a href="executables.html">invoking enunciate</a></li>
         <li><a href="user_guide.html">user guide</a></li>
+        <li><a href="modules/index.html">modules</a></li>
         <li><a href="deps.html">dependencies</a></li>
         <li><a href="architecture.html">architecture</a></li>
         <li><a href="api/index.html">javadocs</a></li>

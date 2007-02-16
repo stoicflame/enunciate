@@ -31,16 +31,86 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Deployment module for the XFire client code.
+ * <h1>Introduction</h1>
+ *
+ * <p>The XFire client deployment module generates the client-side libraries that will access the
+ * deployed web app using <a href="http://xfire.codehaus.org"/>XFire</a>.</p>
+ *
+ * <p>The order of the XFire client deployment module is 0, as it doesn't depend on any artifacts exported
+ * by any other module.</p>
+ *
+ * <ul>
+ *   <li><a href="#steps">steps</a></li>
+ *   <li><a href="#config">configuration</a></li>
+ *   <li><a href="#artifacts">artifacts</a></li>
+ * </ul>
+ *
+ * <h1><a name="steps">Steps</a></h1>
+ *
+ * <h3>generate</h3>
+ *
+ * <p>The "generate" step is by far the most intensive and complex step in the execution of the XFire client
+ * module.  The "generate" step generates all source code for accessing the deployed API.</p>
+ *
+ * <p>There XFire client deployment module currently generates code compatible with the JDK 1.4 and above
+ * as well as code for Java 5 and above.  The only difference between the two libraries is that the Java 5
+ * libraries take advantage of the newest Java 5 constructs, including typesafe enums and generics.  The
+ * logic of serialization/deserialization is the same between the two libraries.</p>
+ *
+ * <p>For more information about the XFire client libraries, see the Javadoc API for the XFire client tools.</p>
+ *
+ * <h3>compile</h3>
+ *
+ * <p>During the "compile" step, the XFire client module compiles the code that was generated.</p>
+ *
+ * <h3>build</h3>
+ *
+ * <p>The "build" step assembles the classes that were assembled into a jar.  It also creates a source jar for
+ * the libraries.</p>
+ *
+ * <h1><a name="config">Configuration</a></h1>
+ *
+ * <p>The XFire client module is configured by the "xfire-client" element under the "modules" element of the
+ * enunciate configuration file.  It supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
+ * the name will be calculated from the enunciate label, or a default will be supplied.</li>
+ * </ul>
+ *
+ * <h3>The "package-conversions" element</h3>
+ *
+ * <p>The "package-conversions" subelement of the "xfire-client" element is used to map packages from
+ * the original API packages to different package names.  This element supports an arbitrary number of
+ * "convert" child elements that are used to specify the conversions.  These "convert" elements support
+ * the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "from" attribute specifies the package that is to be converted.  This package will match
+ * all classes in the package as well as any subpackages of the package.  This means that if "org.enunciate"
+ * were specified, it would match "org.enunciate", "org.enunciate.api", and "org.enunciate.api.impl".</li>
+ *   <li>The "to" attribute specifies what the package is to be converted to.  Only the part of the package
+ * that matches the "from" attribute will be converted.</li>
+ * </ul>
+ *
+ * <h1><a name="artifacts">Artifacts</a></h1>
+ *
+ * <p>The XFire client deployment module exports the following artifacts:</p>
+ *
+ * <ul>
+ *   <li>The JDK 1.4 libraries and sources are exported under the id "client.jdk14.library".  (Note that this is a
+ * bundle, so if exporting to a directory multiple files will be exported.  If exporting to a file, the bundle will
+ * be zipped first.)</li>
+ *   <li>The JDK 1.5 libraries and sources are exported under the id "client.jdk15.library".  (Note that this is a
+ * bundle, so if exporting to a directory multiple files will be exported.  If exporting to a file, the bundle will
+ * be zipped first.)</li>
+ * </ul>
  *
  * @author Ryan Heaton
  */
 public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   private String jarName = null;
-  private String defaultHost = "localhost";
-  private int defaultPort = 8080;
-  private String defaultContext = "/";
   private final Map<String, String> clientPackageConversions;
   private final XFireClientRuleSet configurationRules;
   private String uuid;
@@ -633,73 +703,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setJarName(String jarName) {
     this.jarName = jarName;
-  }
-
-  /**
-   * The default host to which to point the client.
-   *
-   * @return The default host to which to point the client.
-   */
-  public String getDefaultHost() {
-    return defaultHost;
-  }
-
-  /**
-   * The default host to which to point the client.
-   *
-   * @param defaultHost The default host to which to point the client.
-   */
-  public void setDefaultHost(String defaultHost) {
-    this.defaultHost = defaultHost;
-  }
-
-  /**
-   * The default port to which to point the client.
-   *
-   * @return The default port to which to point the client.
-   */
-  public int getDefaultPort() {
-    return defaultPort;
-  }
-
-  /**
-   * The default port to which to point the client.
-   *
-   * @param defaultPort The default port to which to point the client.
-   */
-  public void setDefaultPort(int defaultPort) {
-    this.defaultPort = defaultPort;
-  }
-
-  /**
-   * The default context to which to point the client.
-   *
-   * @return The default context to which to point the client.
-   */
-  public String getDefaultContext() {
-    return defaultContext;
-  }
-
-  /**
-   * The default context to which to point the client.
-   *
-   * @param defaultContext The default context to which to point the client.
-   */
-  public void setDefaultContext(String defaultContext) {
-    if (defaultContext == null) {
-      defaultContext = "/";
-    }
-    else {
-      if (!defaultContext.startsWith("/")) {
-        defaultContext = "/" + defaultContext;
-      }
-
-      if (!defaultContext.endsWith("/")) {
-        defaultContext = defaultContext + "/";
-      }
-    }
-
-    this.defaultContext = defaultContext;
   }
 
   /**

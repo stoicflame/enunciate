@@ -52,26 +52,26 @@
 
       <h1>Step 1: Write The Code</h1>
 
-      <p>We'll start by defining the domain of our app.  We'll define a  <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">persona</a>
-      with an id, an alias, an email address, a name, and a picture.  The <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java?view=markup">name</a>
-      is a complex structure, made up of a given name and a surname.  We'll also define a <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java?view=markup">link</a>
-      between two personas and a <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java?view=markup">social group</a>
+      <p>We'll start by defining the domain of our app.  We'll define a  <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">persona</a>
+      with an id, an alias, an email address, a name, and a picture.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java">name</a>
+      is a complex structure, made up of a given name and a surname.  We'll also define a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java">link</a>
+      between two personas and a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java">social group</a>
       consisting of an id, a group leader, the group members, and whether the group is exlusive.</p>
 
-      <p>Next, we'll define the services available for our domain data.  The <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/PersonaService.java?view=markup">PersonaService</a>
+      <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java">PersonaService</a>
       will define the operations available on a persona.  This includes operations for reading a persona, reading multiple personas, storing a persona, and
-      deleting a persona.  The <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java?view=markup">LinkageService</a>
+      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java">LinkageService</a>
       will carry the operations that deal with linking and grouping personas.  These operations include creating a link between two personas, creating a social group,
       adding someone to a social group, and reading the social groups of a given persona.  Note that our two service interfaces are annotated with the
       @javax.jws.WebService annotation to define them as web serivces, and the two exceptions are annotated with @javax.xml.ws.WebFault to mark them as
       web faults.</p>
 
-      <p>We also define the possible exceptions that can get thrown, including a <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java?view=markup">PermissionDeniedException</a>
-      when trying to create a link between two people, and an <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java?view=markup">ExclusiveGroupException</a>
+      <p>We also define the possible exceptions that can get thrown, including a <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException</a>
+      when trying to create a link between two people, and an <a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException</a>
       when trying to add a persona to an exclusive group.</p>
 
-      <p>After having defined our service interfaces, we create our implementation classes, <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java?view=markup">PersonaServiceImpl</a> 
-      and <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java?view=markup">LinkageServiceImpl</a>.
+      <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl</a>
+      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl</a>.
       Notice that the implementation classes reference their web service interfaces with the @javax.jws.WebService annotation.</p>
 
       <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
@@ -85,33 +85,34 @@ src
           |
           |----api
           |    |
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java?view=markup">ExclusiveGroupException.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java?view=markup">LinkageService.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java?view=markup">PermissionDeniedException.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">PersonaService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService.java</a>
           |
           |----domain
           |    |
           |    |----link
           |    |    |
-          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java?view=markup">Link.java</a>
-          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java?view=markup">SocialGroup.java</a>
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java">SocialGroup.java</a>
           |    |
           |    |----persona
           |         |
-          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java?view=markup">Name.java</a>
-          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">Persona.java</a>
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java">Name.java</a>
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">Persona.java</a>
           |
           |----impl
                |
-               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java?view=markup">LinkageServiceImpl.java</a>
-               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java?view=markup">PersonaServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl.java</a>
       </code>
 
       <h1>Step 2: Enunciate the API</h1>
 
-      <p>Make sure you have your <a href="executables.html">environment set up</a>, and invoke Enunciate
-        on the source code (multi-line, single command, use the "-v" option to see more output of what Enunciate is doing):</p>
+      <p>To invoke enunciate in our example, we're going to use the command-line scripts (as opposed to the Ant task or the Java command).  We make sure we
+        have our <a href="executables.html">environment set up</a>, and invoke Enunciate on the source code (multi-line, single command, use the "-v" option
+        to see more output of what Enunciate is doing):</p>
 
       <code class="console">
 user@localhost&gt;enunciate -Exfire.war ifyouwannabecool.war\
@@ -164,47 +165,47 @@ user@localhost&gt;enunciate -Exfire.war ifyouwannabecool.war\
       <code class="console">
 src
 |
-|----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">enunciate.xml</a>
-|----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/LICENSE.txt?view=markup">LICENSE.txt</a>
+|----<a href="wannabecool/java_step4/enunciate.xml">enunciate.xml</a>
+|----<a href="wannabecool/java_step4/LICENSE.txt">LICENSE.txt</a>
 |----com
      |
      |----ifyouwannabecool
           |
           |----api
           |    |
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/api/ExclusiveGroupException.java?view=markup">ExclusiveGroupException.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/api/LinkageService.java?view=markup">LinkageService.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/api/package-info.java?view=markup">package-info.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/api/PermissionDeniedException.java?view=markup">PermissionDeniedException.java</a>
-          |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">PersonaService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/LinkageService.java">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java">package-info.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService.java</a>
           |
           |----domain
           |    |
           |    |----link
           |    |    |
-          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/Link.java?view=markup">Link.java</a>
-          |    |    |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/SocialGroup.java?view=markup">SocialGroup.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/Link.java">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/SocialGroup.java">SocialGroup.java</a>
           |    |
           |    |----persona
           |         |
-          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Name.java?view=markup">Name.java</a>
-          |         |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">Persona.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Name.java">Name.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">Persona.java</a>
           |
           |----impl
                |
-               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java?view=markup">LinkageServiceImpl.java</a>
-               |----<a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java?view=markup">PersonaServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl.java</a>
       </code>
 
       <ul>
         <li>
           <h3>Add a REST API</h3>
-          <p>By adding a few annotations, and making sure our methods conform to <a href="#">certain constraints</a>, our services are published as REST endpoints.
-            The "readPersona" method on the <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">PersonaService</a>,
+          <p>By adding a few annotations, and making sure our methods conform to <a href="modules/module_rest.html">certain constraints</a>, our services are published as REST endpoints.
+            The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService</a>,
             for example, fits nicely into a RESTful HTTP GET.  We annotate the service and its implementation with the @RESTEndpoint annotation,
             we assign the "read" verb (@Verb annotation) and the "perona" noun (@Noun annotation) to the readPersona method,
             and declare the method's only parameter to be a proper noun with the @ProperNoun annotation.  Finally, we make sure the
-            <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java?view=markup">Persona</a>
+            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">Persona</a>
             data type is declared as a root element with the @XmlRootElement annotation, and when enunciated and deployed, the method can be
             invoked as a REST endpoint.</p>
           <p>The REST endpoints are mounted under the "rest" subcontext, invoked by reference to their nouns.  For example, assuming the war artifact is
@@ -215,10 +216,10 @@ src
         </li>
         <li>
           <h3>Add a splash package</h3>
-          <p>You'll notice we added a <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/com/ifyouwannabecool/api/package-info.java?view=markup">package-info
+          <p>You'll notice we added a <a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java">package-info
             file</a> to the "com.ifyouwannabecool.api" package.  This is where we added the introductory (i.e. "splash") documentation for our API.
             We want this documentation to show up on our index page for our documentation, so we specify this package as the splash packge in our
-            <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+            <a href="wannabecool/java_step4/enunciate.xml">configuration
               file</a>. For more information, check out the <a href="user_guide.html">user guide</a>.</p>
         </li>
         <li>
@@ -230,30 +231,30 @@ src
         <li>
           <h3>Specify a title and copyright</h3>
           <p>We can specify a title and copyright to the generated documentation in the
-            <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+            <a href="wannabecool/java_step4/enunciate.xml">configuration
               file</a>.</p>
         </li>
         <li>
           <h3>Add another file to download</h3>
           <p>We want to be able to add a downloadable file to the documentation.  In this case, we add the license file that governs the use of the API.  This
-          extra download is specified in the <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+          extra download is specified in the <a href="wannabecool/java_step4/enunciate.xml">configuration
           file</a>.</p>
         </li>
         <li>
           <h3>Specify the deployment configuration</h3>
-          <p>We specify our hostname ("www.ifyouwannabecool.com") and the context at which the app will be deployed ("api") in the <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+          <p>We specify our hostname ("www.ifyouwannabecool.com") and the context at which the app will be deployed ("api") in the <a href="wannabecool/java_step4/enunciate.xml">configuration
             file</a>.  There are two advantages to this.  (1) The generated WSDL will have an absolute reference to our SOAP endpoints, making the formal XML
             contract complete.  (2) Consumers of our client code won't have to specify the URL of our endpoints if they don't want to.</p>
         </li>
         <li>
           <h3>Specify your namespace prefixes</h3>
-          <p>Again, done in the <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+          <p>Again, done in the <a href="wannabecool/java_step4/enunciate.xml">configuration
           file</a>.  Why would we want to do this?  Just because we suffer from OCD and don't like the default "ns0", "ns1", etc. prefixes that are
             automatically assigned.  It also gives a nice name to our wsdl and schema.</p>
         </li>
         <li>
           <h3>Change the package structure of the client-side classes</h3>
-          <p>Done (where else?) in the <a href="http://enunciate.svn.sourceforge.net/viewvc/enunciate/trunk/enunciate/src/samples/wannabecool/step4/enunciate.xml?view=markup">configuration
+          <p>Done (where else?) in the <a href="wannabecool/java_step4/enunciate.xml">configuration
           file</a>.  This will distinguish the generated client classes from the original server-side classes.  (Makes it easier to test, clearer that you're
           dealing with client-side classes, etc.)</p>
         </li>
@@ -325,6 +326,7 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
       <ul>
         <li><a href="executables.html">invoking enunciate</a></li>
         <li><a href="user_guide.html">user guide</a></li>
+        <li><a href="modules/index.html">modules</a></li>
         <li><a href="deps.html">dependencies</a></li>
         <li><a href="architecture.html">architecture</a></li>
         <li><a href="api/index.html">javadocs</a></li>

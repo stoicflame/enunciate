@@ -22,7 +22,61 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Deployment module for the XML schemas and WSDL.
+ * <h1>Introduction</h1>
+ *
+ * <p>The XML deployment module generates the consolidated WSDLs and schemas for the API.</a>.
+ *
+ * <p>The order of the XML deployment module is 0, as it doesn't depend on any artifacts exported
+ * by any other module.</p>
+ *
+ * <ul>
+ *   <li><a href="#steps">steps</a></li>
+ *   <li><a href="#config">configuration</a></li>
+ *   <li><a href="#artifacts">artifacts</a></li>
+ * </ul>
+ *
+ * <h1><a name="steps">Steps</a></h1>
+ *
+ * <h3>generate</h3>
+ *
+ * <p>The only significant step in the XML deployment module is the "generate" step.  This step generates the
+ * WSDLs and schemas for the API.</p>
+ *
+ * <h1><a name="config">Configuration</a></h1>
+ *
+ * <p>The configuration for the XML deployment module is specified by the "xml" child element of the "modules"
+ * element of the enunciate configuration file.  It supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "<b>prettyPrint</b>" attribute specifies that the generated XML files should be pretty printed.  Default is "true".</li>
+ * </ul>
+ *
+ * <h3>The "schema" element(s)</h3>
+ *
+ * <p>The "xml" element supports an arbitrary number of "schema" child elements that are used to configure the schema for
+ * a specified namespace.  It supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "<b>namespace</b>" attribute specifies the namespace of the schema that is to be configured.</li>
+ *   <li>The "<b>file</b>" attribute specifies name of the schema file.  The default is the prefix appended with ".xsd".</li>
+ *   <li>The "<b>location</b>" attribute specifies name of the schema location (i.e. how the schema is to be located by other schemas).
+ * The default is the name of the file.</li>
+ * </ul>
+ *
+ * <h3>The "wsdl" element(s)</h3>
+ *
+ * <p>The "xml" element supports an arbitrary number of "wsdl" child elements that are used to configure the wsdl for
+ * a specified namespace.  It supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "<b>namespace</b>" attribute specifies the namespace of the wsdl that is to be configured.</li>
+ *   <li>The "<b>file</b>" attribute specifies name of the wsdl file.  The default is the prefix appended with ".wsdl".</li>
+ * </ul>
+ *
+ * <h1><a name="artifacts">Artifacts</a></h1>
+ *
+ * <p>The XML deployment module exports artifacts for each WSDL and schema produced.  The id of the artifact is the name of the prefix for the namespace of hte
+ * file appended with ".wsdl" (for wsdls) and ".xsd" (for schemas).</p>
  *
  * @author Ryan Heaton
  */

@@ -157,10 +157,13 @@
       <h1>Configuration</h1>
 
       <p>Configuration for the Enunciate engine (including any of its modules) is done in a single XML file that conforms to
-        <a href="http://enunciate.svn.sourceforge.net/viewvc/*checkout*/enunciate/trunk/enunciate/core/src/java/net/sf/enunciate/config/enunciate.xsd">this
-          schema</a>.  Here are some of the more interesting configuration options:</p>
+        <a href="resources/enunciate.xsd">this schema</a>.  Here are some of the more interesting configuration options:</p>
 
       <ul>
+        <li>
+          <h3><a name="config_label">label</a></h3>
+          <p>The "label" attribute of the root element specifies a label for your enunciate project.</p>
+        </li>
         <li>
           <h3><a name="config_jaxb_import">jaxb-import</a></h3>
           <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
@@ -210,6 +213,7 @@
       <ul>
         <li><a href="executables.html">invoking enunciate</a></li>
         <li><a href="user_guide.html">user guide</a></li>
+        <li><a href="modules/index.html">modules</a></li>
         <li><a href="deps.html">dependencies</a></li>
         <li><a href="architecture.html">architecture</a></li>
         <li><a href="api/index.html">javadocs</a></li>

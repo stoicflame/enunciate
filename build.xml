@@ -9,7 +9,9 @@
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>
   <property name="lib.dir" value="${enunciate.basedir}/lib"/>
-  <property name="docs.dir" value="${enunciate.basedir}/docs"/>
+  <property name="static.docs.dir" value="${enunciate.basedir}/docs"/>
+  <property name="docs.dir" value="target/docs"/>
+  <property name="docs.resources.dir" value="${docs.dir}/resources"/>
   <property name="javadoc.dir" value="${docs.dir}/api"/>
   <property name="module.docs.dir" value="${docs.dir}/modules"/>
   <property name="getting.started.example.dir" value="${docs.dir}/wannabecool"/>
@@ -47,7 +49,24 @@
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
-  <target name="doc" description="generate documentation and javadoc (global)" depends="javadoc, getting-started-examples, module-docs-copy"/>
+  <target name="doc" description="generate documentation and javadoc (global)" depends="copy-static-docs, javadoc, docs-resources-copy, getting-started-examples, copy-module-docs"/>
+
+  <target name="copy-static-docs">
+    <mkdir dir="${docs.dir}"/>
+    <copy todir="${docs.dir}">
+      <fileset dir="${static.docs.dir}"/>
+    </copy>
+  </target>
+
+  <target name="docs-resources-copy">
+    <mkdir dir="${docs.resources.dir}"/>
+    <copy todir="${docs.resources.dir}">
+      <fileset dir="core/src">
+        <include name="**/*.xsd"/>
+      </fileset>
+      <mapper type="flatten"/>
+    </copy>
+  </target>
 
   <target name="javadoc" description="generate the javadoc.">
     <mkdir dir="${javadoc.dir}"/>
@@ -78,21 +97,29 @@
 
   </target>
 
-  <target name="module-docs-copy" depends="full-jar, module-docs-copy-only" description="copies over the module documentation to the right place."/>
+  <target name="copy-module-docs" depends="full-jar, copy-module-docs-only" description="copies over the module documentation to the right place."/>
 
-  <target name="module-docs-copy-only" description="copies over the module documentation to the right place, assuming its already there.">
+  <target name="copy-module-docs-only" description="copies over the module documentation to the right place, assuming its already there.">
     <mkdir dir="${module.docs.dir}"/>
-    <copy file="${modules.xml.basedir}/target/module.html" tofile="${module.docs.dir}/module_xml.html" failonerror="false"/>
-    <copy file="${modules.jaxws.basedir}/target/module.html" tofile="${module.docs.dir}/module_jaxws.html" failonerror="false"/>
-    <copy file="${modules.rest.basedir}/target/module.html" tofile="${module.docs.dir}/module_rest.html" failonerror="false"/>
-    <copy file="${modules.xfire-client.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire_client.html" failonerror="false"/>
-    <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false"/>
-    <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false"/>
+    <copy file="${modules.xml.basedir}/target/module.html" tofile="${module.docs.dir}/module_xml.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.jaxws.basedir}/target/module.html" tofile="${module.docs.dir}/module_jaxws.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.rest.basedir}/target/module.html" tofile="${module.docs.dir}/module_rest.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.xfire-client.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire_client.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false" overwrite="true"/>
+
+    <mkdir dir="${module.docs.dir}/doc-files"/>
+    <copy todir="${module.docs.dir}/doc-files">
+      <fileset dir="modules">
+        <include name="**/doc-files/*"/>
+      </fileset>
+      <mapper type="flatten"/>
+    </copy>
   </target>
 
   <target name="getting-started-examples" depends="full-jar, getting-started-examples-only" description="Generated the getting started examples."/>
   
-  <target name="getting-started-examples-only" description="generates the getting started samples assuming the jar is in the right place.">
+  <target name="getting-started-examples-only" depends="copy-getting-started-source" description="generates the getting started samples assuming the jar is in the right place.">
 
     <path id="enunciate.classpath">
       <fileset dir="lib">
@@ -105,6 +132,14 @@
       <classpath refid="enunciate.classpath"/>
     </taskdef>
 
+    <mkdir dir="${getting.started.example.dir}/step1"/>
+    <echo message="Generating the step1 examples...."/>
+    <enunciate target="build" basedir="src/samples/wannabecool/step1">
+      <include name="**/*.java"/>
+      <classpath refid="enunciate.classpath"/>
+      <export artifactId="docs" destination="${getting.started.example.dir}/step1"/>
+    </enunciate>
+
     <mkdir dir="${getting.started.example.dir}/step4"/>
     <echo message="Generating the step4 examples...."/>
     <copy file="src/samples/wannabecool/step4/LICENSE.txt" todir="${user.dir}" overwrite="true"/>
@@ -114,14 +149,19 @@
       <export artifactId="docs" destination="${getting.started.example.dir}/step4"/>
     </enunciate>
     <delete file="${user.dir}/LICENSE.txt" failonerror="false"/>
+    
+  </target>
 
-    <mkdir dir="${getting.started.example.dir}/step1"/>
-    <echo message="Generating the step1 examples...."/>
-    <enunciate target="build" basedir="src/samples/wannabecool/step1">
-      <include name="**/*.java"/>
-      <classpath refid="enunciate.classpath"/>
-      <export artifactId="docs" destination="${getting.started.example.dir}/step1"/>
-    </enunciate>
+  <target name="copy-getting-started-source">
+    <mkdir dir="${getting.started.example.dir}/java_step1"/>
+    <copy todir="${getting.started.example.dir}/java_step1" overwrite="true">
+      <fileset dir="src/samples/wannabecool/step1/"/>
+    </copy>
+
+    <mkdir dir="${getting.started.example.dir}/java_step4"/>
+    <copy todir="${getting.started.example.dir}/java_step4" overwrite="true">
+      <fileset dir="src/samples/wannabecool/step4/"/>
+    </copy>
   </target>
 
   <target name="full-jar" depends="build, full-jar-only" description="Creates the full (aggregated) jar."/>
