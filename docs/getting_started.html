@@ -200,7 +200,7 @@ src
       <ul>
         <li>
           <h3>Add a REST API</h3>
-          <p>By adding a few annotations, and making sure our methods conform to <a href="modules/module_rest.html">certain constraints</a>, our services are published as REST endpoints.
+          <p>By adding a few annotations, and making sure our methods conform to <a href="modules/module_rest.html#constraints">certain constraints</a>, our services are published as REST endpoints.
             The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService</a>,
             for example, fits nicely into a RESTful HTTP GET.  We annotate the service and its implementation with the @RESTEndpoint annotation,
             we assign the "read" verb (@Verb annotation) and the "perona" noun (@Noun annotation) to the readPersona method,
@@ -211,7 +211,7 @@ src
           <p>The REST endpoints are mounted under the "rest" subcontext, invoked by reference to their nouns.  For example, assuming the war artifact is
             mounted at the "api" context, the readPersona REST method described above can be invoked on persona id "12345" with an HTTP GET at
             http://www.ifyouwannabecool.com/api/rest/persona/12345.</p>
-          <p>For more information about the REST endpoint publication mechanism, see the <a href="#">REST module</a> in the <a href="user_guide.html">user
+          <p>For more information about the REST endpoint publication mechanism, see the <a href="modules/module_rest.html">REST module</a> in the <a href="user_guide.html">user
             guide</a></p>
         </li>
         <li>

@@ -276,4 +276,40 @@
     </tar>
   </target>
 
+  <target name="src-dist" description="Packages up the sources.">
+
+    <mkdir dir="target/src"/>
+    <copy todir="target/src">
+      <fileset dir="${enunciate.basedir}">
+        <include name="core/src/java/**/*"/>
+        <include name="modules/*/src/java/**/*"/>
+      </fileset>
+
+      <mapper type="regexp" from=".*/src/java/(.*)" to="\1"/>
+    </copy>
+
+    <copy todir="target/src">
+      <fileset dir="${enunciate.basedir}">
+        <include name="core/src/tools/**/*"/>
+        <include name="modules/*/src/tools/**/*"/>
+      </fileset>
+
+      <mapper type="regexp" from=".*/src/tools/(.*)" to="\1"/>
+    </copy>
+
+    <!--create the zip dist.-->
+    <zip destfile="target/${dist.name}-src.zip">
+      <zipfileset dir="target/src" prefix="enunciate/src">
+        <include name="**/*"/>
+      </zipfileset>
+    </zip>
+
+    <!--create the tar.gz dist.-->
+    <tar destfile="target/${dist.name}-src.tar.gz" compression="gzip">
+      <tarfileset dir="target/src" prefix="enunciate/src">
+        <include name="**/*"/>
+      </tarfileset>
+    </tar>
+  </target>
+
 </project>
