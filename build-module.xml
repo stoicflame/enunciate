@@ -159,8 +159,9 @@
   <target name="extract-module-docs" if="deployment.module.fqn">
     <pathconvert pathsep=" " dirsep="${file.separator}" property="module.src.file.args">
       <path>
-        <fileset dir="src/java">
-          <include name="**/*.java"/>
+        <fileset dir="src">
+          <include name="java/**/*.java"/>
+          <include name="tools/**/*.java"/>
         </fileset>
       </path>
     </pathconvert>
