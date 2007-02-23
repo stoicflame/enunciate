@@ -47,7 +47,7 @@ ${type.javaDoc}
       <ul>
         <li><a href="../index.html">introduction</a></li>
         <li><a href="../getting_started.html">getting started</a></li>
-        <li><a href="../#">download</a></li>
+        <li><a href="https://sourceforge.net/project/showfiles.php?group_id=166477">download</a></li>
         <li><a href="../support.html">support</a></li>
         <li><a href="../license.txt">license</a></li>
       </ul>
@@ -65,9 +65,9 @@ ${type.javaDoc}
       <h1>Developers</h1>
       <ul>
         <li><a href="../roadmap.html">roadmap</a></li>
-        <li><a href="../#">mailing lists</a></li>
-        <li><a href="../#">bugs and tasks</a></li>
-        <li><a href="../#">source repository</a></li>
+        <li><a href="https://sourceforge.net/mail/?group_id=166477">mailing lists</a></li>
+        <li><a href="https://sourceforge.net/tracker/?group_id=166477">bugs and tasks</a></li>
+        <li><a href="https://sourceforge.net/svn/?group_id=166477">source repository</a></li>
       </ul>
 
       <h1>References</h1>
