@@ -301,28 +301,42 @@ public class Enunciate {
    */
   public Collection<String> getJavaFiles(File basedir) {
     ArrayList<String> files = new ArrayList<String>();
-    findJavaFiles(basedir, files);
+    findFiles(basedir, JAVA_FILTER, files);
     return files;
   }
 
   /**
-   * Recursively finds all the java files in the specified directory and adds them all to the given collection.
+   * Finds all files in the specified base directory using the specified filter.
    *
-   * @param dir       The directory.
-   * @param filenames The collection.
+   * @param basedir The base directory.
+   * @param filter The filter to use.
+   * @return The collection of files.
    */
-  private void findJavaFiles(File dir, Collection<String> filenames) {
-    File[] javaFiles = dir.listFiles(JAVA_FILTER);
-    if (javaFiles != null) {
-      for (File javaFile : javaFiles) {
-        filenames.add(javaFile.getAbsolutePath());
+  public Collection<String> getFiles(File basedir, FileFilter filter) {
+    ArrayList<String> files = new ArrayList<String>();
+    findFiles(basedir, filter, files);
+    return files;
+  }
+
+  /**
+   * Finds all files in the specified directory (recursively) using the specified filter.
+   *
+   * @param dir The directory.
+   * @param filter The filter.
+   * @param filenames A container for the files.
+   */
+  private void findFiles(File dir, FileFilter filter, Collection<String> filenames) {
+    File[] files = dir.listFiles(filter);
+    if (files != null) {
+      for (File file : files) {
+        filenames.add(file.getAbsolutePath());
       }
     }
 
     File[] dirs = dir.listFiles(DIR_FILTER);
     if (dirs != null) {
       for (File subdir : dirs) {
-        findJavaFiles(subdir, filenames);
+        findFiles(subdir, filter, filenames);
       }
     }
   }

@@ -11,6 +11,9 @@ import net.sf.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
 import java.net.URI;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * @author Ryan Heaton
@@ -57,6 +60,16 @@ public class SourceServiceImpl implements SourceService {
     }
     else if ("unknown".equals(sourceId)) {
       throw new ServiceException("unknown source id", "anyhow");
+    }
+    else if ("resource".equals(sourceId)) {
+      InputStreamReader reader = new InputStreamReader(SourceServiceImpl.class.getResourceAsStream("infosetid.txt"));
+      BufferedReader buffered = new BufferedReader(reader);
+      try {
+        return buffered.readLine();
+      }
+      catch (IOException e) {
+        throw new ServiceException("unable to read", e.getMessage());
+      }
     }
 
     return "okay";

@@ -97,6 +97,7 @@ public class TestFullAPI extends TestCase {
     assertEquals("newid", sourceService.addInfoSet("somesource", new InfoSet()));
     assertEquals("okay", sourceService.addInfoSet("othersource", new InfoSet()));
     assertEquals("intercepted", sourceService.addInfoSet("SPECIAL", new InfoSet()));
+    assertEquals("resourceId", sourceService.addInfoSet("resource", new InfoSet()));
     try {
       sourceService.addInfoSet("unknown", new InfoSet());
       fail("Should have thrown the exception.");

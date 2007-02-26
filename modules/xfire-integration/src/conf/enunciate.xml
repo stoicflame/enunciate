@@ -12,10 +12,11 @@
       </package-conversions>
     </xfire-client>
     <xfire uuid="full.example">
-      <springImport file="custom_spring.xml"/>
+      <springImport file="target/custom_spring.xml"/>
+      <copyResources dir="target/resources" pattern="**/*.txt"/>
     </xfire>
     <docs splashPackage="net.sf.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
-      <download name="License" file="dummy-license.txt" description="The license file governing these downloads."/>
+      <download name="License" file="target/dummy-license.txt" description="The license file governing these downloads."/>
     </docs>
   </modules>
 </enunciate>

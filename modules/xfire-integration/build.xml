@@ -84,15 +84,19 @@
   <target name="init"/>
 
   <target name="enunciate-full-api" depends="jar-main">
-    <copy file="src/dummy-license.txt" todir="${user.dir}" overwrite="true"/>
-    <copy file="src/custom_spring.xml" todir="${user.dir}" overwrite="true"/>
+    <mkdir dir="${user.dir}/target/resources"/>
+    <copy todir="${user.dir}/target/resources">
+      <fileset dir="${enunciate.basedir}/src/samples/full">
+        <include name="**/*.txt"/>
+      </fileset>
+    </copy>
+    <copy file="src/dummy-license.txt" todir="${user.dir}/target" overwrite="true"/>
+    <copy file="src/custom_spring.xml" todir="${user.dir}/target" overwrite="true"/>
     <antcall target="enunciate-example-api">
       <param name="example" value="full"/>
       <param name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
       <param name="enunciate.target" value="package"/>
     </antcall>
-    <delete file="${user.dir}/dummy-license.txt" failonerror="true"/>
-    <delete file="${user.dir}/custom_spring.xml" failonerror="true"/>
   </target>
 
   <target name="compile-tests" depends="base.compile-tests">

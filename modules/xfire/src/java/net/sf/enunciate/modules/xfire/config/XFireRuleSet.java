@@ -23,6 +23,10 @@ public class XFireRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/xfire/springImport", SpringImport.class);
     digester.addSetProperties("enunciate/modules/xfire/springImport");
     digester.addSetNext("enunciate/modules/xfire/springImport", "addSpringImport");
+
+    digester.addObjectCreate("enunciate/modules/xfire/copyResources", CopyResources.class);
+    digester.addSetProperties("enunciate/modules/xfire/copyResources");
+    digester.addSetNext("enunciate/modules/xfire/copyResources", "addCopyResources");
   }
 
 }

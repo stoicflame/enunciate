@@ -15,7 +15,9 @@ import net.sf.enunciate.modules.FreemarkerDeploymentModule;
 import net.sf.enunciate.modules.xfire.config.SpringImport;
 import net.sf.enunciate.modules.xfire.config.WarConfig;
 import net.sf.enunciate.modules.xfire.config.XFireRuleSet;
+import net.sf.enunciate.modules.xfire.config.CopyResources;
 import org.apache.commons.digester.RuleSet;
+import org.springframework.util.AntPathMatcher;
 import sun.misc.Service;
 
 import javax.xml.transform.Transformer;
@@ -146,6 +148,18 @@ import java.util.List;
  * <p>For more information on spring bean configuration and interceptor advice, see
  * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
  *
+ * <h3>The "copyResources" element</h3>
+ *
+ * <p>The "copyResources" element is used to specify a pattern or resources to copy to the compile directory.  It supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
+ *   <li>The "<b>pattern</b>" attribute specifies an <a href="http://ant.apache.org/">Ant</a>-style
+ *       pattern used to find the resources to copy.  For more information, see the documentation for the
+ *       <a href="http://static.springframework.org/spring/docs/1.2.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
+ *       JavaDocs.</li>
+ * </ul>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The XFire deployment module exports the following artifacts:</p>
@@ -161,6 +175,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
+  private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -229,7 +244,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     Enunciate enunciate = getEnunciate();
-    enunciate.invokeJavac(enunciate.getDefaultClasspath(), getCompileDir(), javacAdditionalArgs, enunciate.getSourceFiles());
+    File compileDir = getCompileDir();
+    enunciate.invokeJavac(enunciate.getDefaultClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
 
     File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
     if (jaxwsSources == null) {
@@ -240,8 +256,32 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //make sure we include all the wrappers generated for the rpc methods, too...
     jaxwsSourceFiles.addAll(enunciate.getJavaFiles(getJAXWSGenerateDir()));
     StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
-    jaxwsClasspath.append(File.pathSeparator).append(getCompileDir().getAbsolutePath());
-    enunciate.invokeJavac(jaxwsClasspath.toString(), getCompileDir(), javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+    jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+    enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+
+    if (!this.copyResources.isEmpty()) {
+      AntPathMatcher matcher = new AntPathMatcher();
+      for (CopyResources copyResource : this.copyResources) {
+        String pattern = copyResource.getPattern();
+        if (pattern == null) {
+          throw new EnunciateException("A pattern must be specified for copying resources.");
+        }
+
+        if (!matcher.isPattern(pattern)) {
+          warn("'%s' is not a valid pattern.  Resources NOT copied!", pattern);
+          continue;
+        }
+
+        File basedir = copyResource.getDir();
+        if (basedir == null) {
+          basedir = new File(System.getProperty("user.dir"));
+        }
+
+        for (String file : enunciate.getFiles(basedir, new PatternFileFilter(basedir, pattern, matcher))) {
+          enunciate.copyFile(new File(file), basedir, compileDir);
+        }
+      }
+    }
   }
 
   @Override
@@ -413,6 +453,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addSpringImport(SpringImport springImports) {
     this.springImports.add(springImports);
+  }
+
+  /**
+   * Add a copy resources.
+   *
+   * @param copyResources The copy resources to add.
+   */
+  public void addCopyResources(CopyResources copyResources) {
+    this.copyResources.add(copyResources);
   }
 
   /**
