@@ -184,6 +184,7 @@
       <zipgroupfileset dir="${enunciate.basedir}">
         <include name="core/target/*.jar"/>
         <include name="modules/*/target/*.jar"/>
+        <exclude name="modules/xfire-integration/target/*.jar"/>
       </zipgroupfileset>
 
     </jar>
@@ -232,6 +233,7 @@
       <fileset dir="${enunciate.basedir}">
         <include name="core/target/*.jar"/>
         <include name="modules/*/target/*.jar"/>
+        <exclude name="modules/xfire-integration/target/*.jar"/>
       </fileset>
 
       <mapper type="flatten"/>

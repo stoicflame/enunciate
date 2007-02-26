@@ -2,6 +2,9 @@ package net.sf.enunciate.modules.rest;
 
 import net.sf.enunciate.modules.BasicDeploymentModule;
 import net.sf.enunciate.contract.validation.Validator;
+import net.sf.enunciate.EnunciateException;
+
+import java.io.IOException;
 
 /**
  * <h1>Introduction</h1>
@@ -160,4 +163,10 @@ public class RESTDeploymentModule extends BasicDeploymentModule {
     return new RESTValidator();
   }
 
+  @Override
+  protected void doGenerate() throws EnunciateException, IOException {
+    //todo: export the parameter names.
+    //todo: export the namespace prefixes for Jettison export.
+    super.doGenerate();
+  }
 }

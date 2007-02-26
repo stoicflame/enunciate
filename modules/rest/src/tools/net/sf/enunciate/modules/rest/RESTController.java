@@ -4,7 +4,6 @@ import net.sf.enunciate.rest.annotations.Noun;
 import net.sf.enunciate.rest.annotations.RESTEndpoint;
 import net.sf.enunciate.rest.annotations.Verb;
 import net.sf.enunciate.rest.annotations.VerbType;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -33,7 +32,6 @@ import java.util.regex.Pattern;
  */
 public class RESTController extends AbstractController {
 
-  private Object[] endpoints;
   private Class[] endpointClasses;
   private Map<String, RESTResource> RESTResources = new HashMap<String, RESTResource>();
   private Pattern urlPattern;
@@ -65,23 +63,16 @@ public class RESTController extends AbstractController {
   protected void initApplicationContext() throws BeansException {
     super.initApplicationContext();
 
-    if ((endpoints == null) && (endpointClasses != null)) {
-      endpoints = new Object[endpointClasses.length];
-      for (int i = 0; i < endpointClasses.length; i++) {
-        Class endpointClass = endpointClasses[i];
-        endpoints[i] = loadEndpointBean(endpointClass);
-      }
-    }
+    Map<Class, Object> class2instances = new HashMap<Class, Object>();
+    if (endpointClasses != null) {
+      for (Class endpointClass : endpointClasses) {
+        Collection<Class> endpointTypes = findEndpointTypes(endpointClass);
 
-    if (endpoints != null) {
-      for (Object endpoint : endpoints) {
-        Collection<Class> endpointTypes = findEndpointTypes(endpoint);
-        
         if (endpointTypes.isEmpty()) {
-          throw new ApplicationContextException("REST endpoint " + endpoint.getClass().getName() + " does not implement any REST endpoint interfaces.");
+          throw new ApplicationContextException("REST endpoint " + endpointClass.getName() + " does not implement any REST endpoint interfaces.");
         }
 
-        for (Class endpointType: endpointTypes) {
+        for (Class endpointType : endpointTypes) {
           Method[] restMethods = endpointType.getDeclaredMethods();
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
@@ -93,6 +84,12 @@ public class RESTController extends AbstractController {
               if (resource == null) {
                 resource = new RESTResource(noun);
                 RESTResources.put(noun, resource);
+              }
+
+              Object endpoint = class2instances.get(endpointType);
+              if (endpoint == null) {
+                endpoint = loadEndpointBean(endpointType, endpointClass);
+                class2instances.put(endpointType, endpoint);
               }
 
               if (!resource.addOperation(verb, endpoint, restMethod)) {
@@ -110,21 +107,21 @@ public class RESTController extends AbstractController {
   }
 
   /**
-   * Attempts to load the endpoint bean by first looking for beans that implement the specified endpoint class.
+   * Attempts to load the endpoint bean by first looking for beans that implement the specified endpoint type.
    * If there is only one, it will be used.  Otherwise, if there is more than one, it will attempt to find one that is named
    * the {@link net.sf.enunciate.rest.annotations.RESTEndpoint#name() same as the REST endpoint} or fail.  If there are
-   * no endpoint beans in the context that can be assigned to the specified endpoint class, an attempt will be made to
-   * instantiate one.
+   * no endpoint beans in the context that can be assigned to the specified endpoint type, an attempt will be made to
+   * instantiate type specified default implementation.
    *
-   * @param endpointClass The class of the endpoint bean to attempt to load.
+   * @param endpointType The class of the endpoint bean to attempt to load.
    * @return The endpoint bean.
    * @throws BeansException If an attempt was made to instantiate the bean but it failed.
    */
-  protected Object loadEndpointBean(Class endpointClass) throws BeansException {
+  protected Object loadEndpointBean(Class endpointType, Class defaultImpl) throws BeansException {
     Object endpointBean;
-    Map endpointClassBeans = getApplicationContext().getBeansOfType(endpointClass);
+    Map endpointClassBeans = getApplicationContext().getBeansOfType(endpointType);
     if (endpointClassBeans.size() > 0) {
-      RESTEndpoint annotation = (RESTEndpoint) endpointClass.getAnnotation(RESTEndpoint.class);
+      RESTEndpoint annotation = (RESTEndpoint) endpointType.getAnnotation(RESTEndpoint.class);
       String endpointName = annotation == null ? "" : annotation.name();
       if (!"".equals(endpointName) && endpointClassBeans.containsKey(endpointName)) {
         //first attempt will be to load the bean identified by the endpoint name:
@@ -140,19 +137,19 @@ public class RESTController extends AbstractController {
         if ("".equals(endpointName)) {
           endpointName = "and supply an endpoint name with the @RESTEndpoint annotation";
         }
-        throw new ApplicationContextException("There are more than one beans of type " + endpointClass.getName() +
+        throw new ApplicationContextException("There are more than one beans of type " + endpointType.getName() +
           " in the application context " + beanNames + ".  Cannot determine which one to use to handle the REST requests.  " +
           "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the REST endpoint (" +
           endpointName + ").");
       }
     }
     else {
-      //try to instantiate the bean with the class...
+      //try to instantiate the bean with the default impl...
       try {
-        endpointBean = endpointClass.newInstance();
+        endpointBean = defaultImpl.newInstance();
       }
       catch (Exception e) {
-        throw new ApplicationContextException("Unable to instantiate REST endpoint bean of class " + endpointClass.getName() + ".", e);
+        throw new ApplicationContextException("Unable to instantiate REST endpoint bean of class " + defaultImpl.getName() + ".", e);
       }
     }
 
@@ -193,27 +190,22 @@ public class RESTController extends AbstractController {
   }
 
   /**
-   * Finds the endpoint types that the specified object implements.
+   * Finds the endpoint types that define the API for the specified type.  (The API for some classes
+   * is made up of multiple interfaces as well as the impl class itself.)
    *
-   * @param endpoint The endpoint object.
+   * @param endpointType The type for which to find types defining its API.
    * @return The endpoint types.
    */
-  protected Collection<Class> findEndpointTypes(Object endpoint) {
+  protected Collection<Class> findEndpointTypes(Class endpointType) {
     Collection<Class> endpointTypes = new ArrayList<Class>();
 
-    if (endpoint instanceof Advised) {
-      endpointTypes.addAll(Arrays.asList(((Advised) endpoint).getProxiedInterfaces()));
+    if (endpointType.isAnnotationPresent(RESTEndpoint.class)) {
+      endpointTypes.add(endpointType);
     }
-    else {
-      Class endpointType = endpoint.getClass();
-      if (endpointType.isAnnotationPresent(RESTEndpoint.class)) {
-        endpointTypes.add(endpointType);
-      }
 
-      for (Class implementedType : endpointType.getInterfaces()) {
-        if (implementedType.isAnnotationPresent(RESTEndpoint.class)) {
-          endpointTypes.add(implementedType);
-        }
+    for (Class implementedType : endpointType.getInterfaces()) {
+      if (implementedType.isAnnotationPresent(RESTEndpoint.class)) {
+        endpointTypes.add(implementedType);
       }
     }
 
@@ -358,24 +350,6 @@ public class RESTController extends AbstractController {
    */
   public Map<String, RESTResource> getRESTResources() {
     return Collections.unmodifiableMap(RESTResources);
-  }
-
-  /**
-   * The REST endpoints that make up this API.
-   *
-   * @return The REST endpoints that make up this API.
-   */
-  public Object[] getEndpoints() {
-    return endpoints;
-  }
-
-  /**
-   * The REST endpoints that make up this API.
-   *
-   * @param endpoints The REST endpoints that make up this API.
-   */
-  public void setEndpoints(Object[] endpoints) {
-    this.endpoints = endpoints;
   }
 
   /**

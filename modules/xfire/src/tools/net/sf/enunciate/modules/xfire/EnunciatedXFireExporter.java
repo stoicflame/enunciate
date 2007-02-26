@@ -1,20 +1,22 @@
 package net.sf.enunciate.modules.xfire;
 
-import org.codehaus.xfire.spring.remoting.XFireExporter;
-import org.codehaus.xfire.annotations.AnnotationServiceFactory;
+import org.codehaus.xfire.annotations.AnnotationException;
 import org.codehaus.xfire.annotations.WebServiceAnnotation;
-import org.codehaus.xfire.service.ServiceFactory;
 import org.codehaus.xfire.handler.HandlerSupport;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
+import org.codehaus.xfire.service.ServiceFactory;
+import org.codehaus.xfire.spring.remoting.XFireExporter;
+import org.codehaus.xfire.util.ClassLoaderUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.beans.BeansException;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Exports a SOAP endpoint for XFire.
@@ -56,23 +58,34 @@ public class EnunciatedXFireExporter extends XFireExporter {
   protected Object loadServiceBean() throws InstantiationException, IllegalAccessException {
     Object serviceBean;
     Class serviceClass = getServiceClass();
-    Map serviceClassBeans = this.ctx.getBeansOfType(serviceClass);
-    if (serviceClassBeans.size() > 0) {
-      EnunciatedJAXWSServiceFactory factory = (EnunciatedJAXWSServiceFactory) getServiceFactory();
-      WebServiceAnnotation annotation = factory.getAnnotations().getWebServiceAnnotation(serviceClass);
-      String serviceName = factory.createServiceName(serviceClass, annotation, annotation.getServiceName());
-      if (serviceClassBeans.containsKey(serviceName)) {
-        //first attempt will be to load the bean identified by the service name:
-        serviceBean = serviceClassBeans.get(serviceName);
+    Class serviceInterface = null;
+    EnunciatedJAXWSServiceFactory factory = (EnunciatedJAXWSServiceFactory) getServiceFactory();
+    WebServiceAnnotation annotation = factory.getAnnotations().getWebServiceAnnotation(serviceClass);
+    String eiValue = annotation.getEndpointInterface();
+    if (eiValue != null && eiValue.length() > 0) {
+      try {
+        serviceInterface = ClassLoaderUtils.loadClass(eiValue, factory.getClass());
       }
-      else if (serviceClassBeans.size() == 1) {
+      catch (ClassNotFoundException e) {
+        throw new AnnotationException("Couldn't find endpoint interface " + annotation.getEndpointInterface(), e);
+      }
+    }
+
+    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : this.ctx.getBeansOfType(serviceInterface);
+    if (serviceInterfaceBeans.size() > 0) {
+      String serviceName = factory.createServiceName(serviceClass, annotation, annotation.getServiceName());
+      if (serviceInterfaceBeans.containsKey(serviceName)) {
+        //first attempt will be to load the bean identified by the service name:
+        serviceBean = serviceInterfaceBeans.get(serviceName);
+      }
+      else if (serviceInterfaceBeans.size() == 1) {
         // not there; use the only one if it exists...
-        serviceBean = serviceClassBeans.values().iterator().next();
+        serviceBean = serviceInterfaceBeans.values().iterator().next();
       }
       else {
         //panic: can't determine the service bean to use.
-        ArrayList beanNames = new ArrayList(serviceClassBeans.keySet());
-        throw new ApplicationContextException("There are more than one beans of type " + serviceClass.getName() +
+        ArrayList beanNames = new ArrayList(serviceInterfaceBeans.keySet());
+        throw new ApplicationContextException("There are more than one beans of type " + serviceInterface.getName() +
           " in the application context " + beanNames + ".  Cannot determine which one to use to handle the soap requests.  " +
           "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the service (\"" + serviceName + "\").");
       }

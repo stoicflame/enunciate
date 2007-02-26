@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="xfire" basedir=".">
+<project default="jar" name="xfire-integration" basedir=".">
+
+  <import file="../../build-module.xml"/>
 
   <path id="build.classpath">
 
@@ -48,8 +50,6 @@
     <pathelement location="${basedir}/target/examples/full/classes/xfire-client/jdk14"/>
   </path>
 
-  <import file="../../build-module.xml"/>
-
   <available property="container.test.support.exists" file="${container.test.support.file}"/>
   <fail unless="container.test.support.exists">
     No container test support (looked for ${container.test.support.file})
@@ -77,19 +77,22 @@
   <import file="${container.test.support.file}"/>
 
   <!--no-op because there are no java sources.  this is a test module.-->
-  <target name="compile-main"/>
-  <target name="jar-main"/>
+  <target name="compile-main" depends="base.init, -compile-main"/>
   <target name="jar-tools"/>
 
   <!--no-op to preserve our own properties when running the tests.-->
   <target name="init"/>
 
-  <target name="enunciate-full-api" depends="base.init">
+  <target name="enunciate-full-api" depends="jar-main">
+    <copy file="src/dummy-license.txt" todir="${user.dir}" overwrite="true"/>
+    <copy file="src/custom_spring.xml" todir="${user.dir}" overwrite="true"/>
     <antcall target="enunciate-example-api">
       <param name="example" value="full"/>
       <param name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
       <param name="enunciate.target" value="package"/>
     </antcall>
+    <delete file="${user.dir}/dummy-license.txt" failonerror="true"/>
+    <delete file="${user.dir}/custom_spring.xml" failonerror="true"/>
   </target>
 
   <target name="compile-tests" depends="base.compile-tests">

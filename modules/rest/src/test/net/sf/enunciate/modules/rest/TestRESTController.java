@@ -5,6 +5,8 @@ import net.sf.enunciate.rest.annotations.VerbType;
 import static org.easymock.EasyMock.*;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.beans.BeansException;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +28,8 @@ public class TestRESTController extends TestCase {
    */
   public void testInitApplicationContext() throws Exception {
     RESTController controller = new RESTController();
-    controller.setEndpoints(new Object[]{new EndpointOneImpl(), new EndpointTwo(), new EndpointThreeImpl()});
-    controller.initApplicationContext();
+    controller.setEndpointClasses(new Class[]{EndpointOneImpl.class, EndpointTwo.class, EndpointThreeImpl.class});
+    controller.setApplicationContext(new GenericWebApplicationContext());
 
     String[] nouns = {"one", "two", "three", "four", "five", "six"};
     Map<String, RESTResource> resources = new HashMap<String, RESTResource>(controller.getRESTResources());
@@ -44,12 +46,26 @@ public class TestRESTController extends TestCase {
     assertTrue(resources.isEmpty());
 
     //now we want to make sure that we can advise the impls...
-    ProxyFactoryBean advisedEndpoint = new ProxyFactoryBean();
+    final ProxyFactoryBean advisedEndpoint = new ProxyFactoryBean();
     advisedEndpoint.setTarget(new EndpointOneImpl());
     advisedEndpoint.setProxyInterfaces(new String[]{"net.sf.enunciate.modules.rest.EndpointOne"});
     controller = new RESTController();
-    controller.setEndpoints(new Object[]{advisedEndpoint});
-    controller.initApplicationContext();
+    GenericWebApplicationContext ctx = new GenericWebApplicationContext() {
+      @Override
+      public Map getBeansOfType(Class aClass) throws BeansException {
+        if (net.sf.enunciate.modules.rest.EndpointOne.class.equals(aClass)) {
+          HashMap<String, Object> beansOfType = new HashMap<String, Object>();
+          beansOfType.put("doesntmatter", advisedEndpoint);
+          return beansOfType;
+        }
+
+        return super.getBeansOfType(aClass);
+      }
+    };
+
+    controller.setEndpointClasses(new Class[]{EndpointOneImpl.class});
+    controller.setApplicationContext(ctx);
+
     nouns = new String[]{"one", "two"};
     resources = new HashMap<String, RESTResource>(controller.getRESTResources());
     for (String noun : nouns) {
@@ -58,6 +74,7 @@ public class TestRESTController extends TestCase {
 
       for (VerbType verbType : VerbType.values()) {
         RESTOperation operation = resource.getOperation(verbType);
+        assertSame(advisedEndpoint, operation.getEndpoint());
         assertNotNull(operation);
       }
     }
@@ -140,8 +157,8 @@ public class TestRESTController extends TestCase {
    */
   public void testHandleRESTOperation() throws Exception {
     RESTController controller = new RESTController();
-    controller.setEndpoints(new Object[]{new MockRESTEndpoint()});
-    controller.initApplicationContext();
+    controller.setEndpointClasses(new Class[]{MockRESTEndpoint.class});
+    controller.setApplicationContext(new GenericWebApplicationContext());
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);

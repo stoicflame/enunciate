@@ -120,13 +120,31 @@ import java.util.List;
  *
  * <h3>The "springImport" element</h3>
  *
- * <p>The "springImport" element is used to specify a spring configuration file that will be copied to the WEB-INF directory and imported by the main
+ * <p>The "springImport" element is used to specify a spring configuration file that will be imported by the main
  * spring servlet config. It supports the following attributes:</p>
  *
  * <ul>
- *   <li>The "file" attribute specifies the spring import file.</li>
- *   <li>The "uri" attribute specifies the URI to the spring import file.</li>
+ *   <li>The "file" attribute specifies the spring import file on the filesystem.  It will be copied to the WEB-INF directory.</li>
+ *   <li>The "uri" attribute specifies the URI to the spring import file.  The URI will not be resolved at compile-time, nor will anything be copied to the
+ *       WEB-INF directory. The value of this attribute will be used to reference the spring import file in the main config file.  This attribute is useful
+ *       to specify an import file on the classpath, e.g. "classpath:com/myco/spring/config.xml".</li>
  * </ul>
+ *
+ * <p>One use of specifying spring a import file is to wrap your endpoints with a spring interceptors and/or XFire in/out/fault handlers.  This can be done
+ * by simply declaring a bean that is an instance of your endpoint class.  This bean can be advised however is needed, and if it implements
+ * org.codehaus.xfire.handler.HandlerSupport (perhaps <a href="http://static.springframework.org/spring/docs/1.2.x/reference/aop.html#d0e4128">through the use
+ * of a mixin</a>?), the in/out/fault handlers will be used for the XFire invocation of that endpoint.</p>
+ *
+ * <p>It's important to note that the type on which the bean context will be searched is the type of the endpoint <i>interface</i>, and then only if it exists.
+ * If there are more than one beans that are assignable to the endpoint interface, the bean that is named the name of the service will be used.  Otherwise,
+ * the deployment of your endpoint will fail.</p>
+ *
+ * <p>The same procedure can be used to specify the beans to use as REST endpoints, although the XFire in/out/fault handlers will be ignored.  In this case,
+ * the bean context will be searched for each <i>REST interface</i> that the endpoint implements.  If there is a bean that implements that interface, it will
+ * used instead of the default implementation.  If there is more than one, the bean that is named the same as the REST endpoint will be used.</p>
+ *
+ * <p>For more information on spring bean configuration and interceptor advice, see
+ * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *

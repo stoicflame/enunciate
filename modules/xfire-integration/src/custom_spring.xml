@@ -1,0 +1,17 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="sourceAdvice" class="net.sf.enunciate.test.integration.SourceServiceAdvice"/>
+
+  <bean class="org.springframework.aop.framework.ProxyFactoryBean">
+      <property name="proxyInterfaces"><value>net.sf.enunciate.samples.genealogy.services.SourceService</value></property>
+
+      <property name="target"><bean class="net.sf.enunciate.samples.genealogy.services.impl.SourceServiceImpl"/></property>
+      <property name="interceptorNames">
+          <list>
+              <value>sourceAdvice</value>
+          </list>
+      </property>
+  </bean>
+
+</beans>

@@ -297,6 +297,15 @@ public class RESTOperation {
   }
 
   /**
+   * The endpoint handling this REST operation.
+   *
+   * @return The endpoint handling this REST operation.
+   */
+  public Object getEndpoint() {
+    return endpoint;
+  }
+
+  /**
    * The result type for the operation.
    *
    * @return The result type for the operation.
