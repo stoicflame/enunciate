@@ -32,6 +32,11 @@
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/json/*</url-pattern>
+  </servlet-mapping>
+
   <mime-mapping>
     <extension>wsdl</extension>
     <mime-type>text/xml</mime-type>

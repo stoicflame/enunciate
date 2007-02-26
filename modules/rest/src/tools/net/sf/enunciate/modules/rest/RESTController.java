@@ -8,6 +8,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -286,7 +287,7 @@ public class RESTController extends AbstractController {
     }
 
     RESTOperation operation = resource.getOperation(verb);
-    if (operation == null) {
+    if (!isOperationAllowed(operation)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
       return null;
     }
@@ -340,7 +341,28 @@ public class RESTController extends AbstractController {
     }
 
     Object result = operation.invoke(properNounValue, adjectives, nounValue);
-    return new ModelAndView(new RESTResultView(operation, result));
+    return new ModelAndView(createView(operation, result));
+  }
+
+  /**
+   * Create the view for the specified operation and result.
+   *
+   * @param operation The operation.
+   * @param result The result.
+   * @return The view.
+   */
+  protected View createView(RESTOperation operation, Object result) {
+    return new RESTResultView(operation, result);
+  }
+
+  /**
+   * Whether the specified operation is allowed.
+   *
+   * @param operation The operation to test whether it is allowed.
+   * @return Whether the specified operation is allowed.
+   */
+  protected boolean isOperationAllowed(RESTOperation operation) {
+    return operation != null;
   }
 
   /**

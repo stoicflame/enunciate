@@ -54,6 +54,9 @@
       <include name="spring*.jar"/>
       <include name="stax-api*.jar"/>
     </fileset>
+    <fileset dir="${lib.dir}/rest">
+      <include name="jettison*.jar"/>
+    </fileset>
   </path>
 
   <path id="xfire.core.libs">

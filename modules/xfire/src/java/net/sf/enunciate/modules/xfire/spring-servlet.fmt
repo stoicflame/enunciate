@@ -62,6 +62,33 @@
           </bean>
         </entry>
 
+        <entry key="/json/**">
+          <bean class="net.sf.enunciate.modules.rest.JSONController">
+            <property name="endpointClasses">
+              <list>
+                <!-- List of the REST endpoint bean classes -->
+  [@forEachRESTEndpoint]
+    [#if endpoint.class]
+                <value>${endpoint.qualifiedName}</value>
+    [/#if]
+  [/@forEachRESTEndpoint]
+              </list>
+            </property>
+            <property name="namespaces2Prefixes">
+              <map>
+  [#list ns2prefix?keys as ns]
+    [#if ns?exists]
+                <entry>
+                  <key><value>${ns}</value></key>
+                  <value>${ns2prefix[ns]}</value>
+                </entry>
+    [/#if]    
+  [/#list]
+              </map>
+            </property>
+          </bean>
+        </entry>
+
       </map>
     </property>
 

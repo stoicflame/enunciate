@@ -5,7 +5,9 @@ import org.springframework.web.servlet.View;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBException;
 import java.util.Map;
+import java.io.IOException;
 
 /**
  * A view for the result of a REST operation.
@@ -60,7 +62,17 @@ public class RESTResultView implements View {
       response.setContentType("text/xml");
       Marshaller marshaller = operation.getSerializationContext().createMarshaller();
       marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
-      marshaller.marshal(result, response.getOutputStream());
+      marshal(marshaller, request, response);
     }
+  }
+
+  /**
+   * Does the marshalling operation.
+   *
+   * @param marshaller The marshaller to use.
+   * @param response The response.
+   */
+  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    marshaller.marshal(getResult(), response.getOutputStream());
   }
 }

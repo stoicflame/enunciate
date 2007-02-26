@@ -15,6 +15,7 @@ import net.sf.enunciate.contract.validation.ValidationResult;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlList;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * The validator for the xfire-client module.
@@ -28,11 +29,17 @@ public class XFireClientValidator extends BaseValidator {
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = new ValidationResult();
 
+    HashSet<String> uniqueMethodNames = new HashSet<String>();
     for (WebMethod webMethod : ei.getWebMethods()) {
+      if (!uniqueMethodNames.add(webMethod.getSimpleName())) {
+        result.addError(webMethod.getPosition(), "Sorry, the xfire client module doesn't support overloaded methods yet.  Unfortunately, each method has " +
+          "to have a unique name.");
+      }
+
       for (WebParam webParam : webMethod.getWebParameters()) {
         if (webParam.isOutput()) {
           //todo: add support for in in/out parameters.
-          result.addError(webParam.getPosition(), "The xfire client doesn't support IN/OUT or OUT parameters yet....");
+          result.addError(webParam.getPosition(), "The xfire client module doesn't support IN/OUT or OUT parameters yet....");
         }
       }
     }

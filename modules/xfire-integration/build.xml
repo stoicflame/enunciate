@@ -8,6 +8,7 @@
 
     <path refid="base.libs"/>
     <path refid="core.libs"/>
+    <path refid="rest.libs"/>
     <path refid="xfire.core.libs"/>
     <path refid="xfire.server.libs"/>
     <path refid="xfire.client.libs"/>

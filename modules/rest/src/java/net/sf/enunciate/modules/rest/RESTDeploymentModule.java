@@ -20,6 +20,7 @@ import java.io.IOException;
  *   <li><a href="#model">REST Model</a></li>
  *   <li><a href="#constraints">Constraints</a></li>
  *   <li><a href="#java2rest">Mapping Java to a REST API</a></li>
+ *   <li><a href="#json">JSON API</a></li>
  *   <li><a href="#steps">steps</a></li>
  *   <li><a href="#config">configuration</a></li>
  *   <li><a href="#artifacts">artifacts</a></li>
@@ -131,6 +132,12 @@ import java.io.IOException;
  * can be customized with the <i>net.sf.enunciate.rest.annotations.RESTError</i> annotation on the exception
  * that gets thrown.</p>
  *
+ * <h1><a name="json">JSON API</a></h1>
+ *
+ * <p>Each READ verb (and only the read verb) is also published as a JSON endpoint.  The mapping of XML to JSON is done by default using the
+ * "mapped convention".  The badgerfish convention is also available by passing in the http request parameter named "badgerfish."  To learn
+ * more about the difference between the two convensions, see the <a href="http://jettison.codehaus.org/User%27s+Guide">Jettison user's guide</a>.</p>
+ *
  * <h1><a name="steps">Steps</a></h1>
  *
  * <p>There are no significant steps in the REST module.  </p>
@@ -165,7 +172,7 @@ public class RESTDeploymentModule extends BasicDeploymentModule {
 
   @Override
   protected void doGenerate() throws EnunciateException, IOException {
-    //todo: export the parameter names.
+    //todo: export the parameter names.  But if you do this, you have to come up with a way to support overloaded methods...
     //todo: export the namespace prefixes for Jettison export.
     super.doGenerate();
   }
