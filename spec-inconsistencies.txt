@@ -1,30 +1,40 @@
-The following were noticed inconsistencies in the specifications:
+JAX-WS
+======
 
--jaxws: What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?
--jaxws: Are header elements required to be root elements?  If not, what are the element names of header elements, and how do you disambiguate?
--jaxws: property order during introspection isn't guaranteed, so why isn't the propOrder annotation element required when generating the jaxws wrapper classes?
+As I was writing an application that consumes the JAX-WS annotations, I came across some things I couldn't answer from the spec.  Any help would be appreciated:
 
-As I was writing an implementation of the JAXB 2.0 specification for the "Java Types to XML" section of the specification, I came across some things that I couldn't answer from the spec.  Any clarifications or indications of where to go for the answers to these would be very helpful.  Note that I was only concerned with the "Java Types to XML" section, so I may have missed something in the broader context.
+1. What if a web method is RPC/literal but one of the parameters is an instance of java.util.Collection?  How is the message serialized?  Since there is no way to specify an element wrapper name using annotations, I'm assuming that the SOAP message will have multiple child elements named "argN", where N is the index of the parameter.  Is this assumption correct?
+
+2. Are header elements required to be root elements?  If not, what are the element names of header elements, and how do you disambiguate?
+
+3. Property order during introspection isn't guaranteed, so why isn't the propOrder annotation element required when generating the JAX-WS wrapper classes?
+
+Thanks!
+
+-Ryan
+
+
+JAXB 2.0
+========
+
+As I was writing an implementation of the JAXB 2.0 specification for the "Java Types to XML" section of the specification, I came across some things that I couldn't answer from the spec.  Any clarifications or indications of where to go for answers would be very helpful.  (Note that I was only concerned with the "Java Types to XML" section, so I may have missed something in the broader context.)
 
 Here we go:
 
--jaxb: the @XmlSchemaType and @XmlSchemaTypes annotation at the package-level take a class which might not be compiled or loadable at pre-compile time...
--jaxb: what if you have a parametric collection of JAXBElements?  Assumption: The rule that any root elements that subclass it should be choices doesn't apply
-       and JAXBElement should not be a valid type() for @XmlElementRef
--jaxb: what if attributeFormDefault is NOT "qualified", the namespace for the attribute is the default namespace, but the namespace for the type definition is
-       NOT the default namespace?  Assumption: this is NOT a case where it is an attribute ref, as specified in the jaxb spec, 8.9.7.2.
--jaxb: it is assumed that the namespace for the element wrapper defaults to the empty namespace if elementFormDefault is not qualified, or the namespace of
-       the containing type definition if it is qualified.
--jaxb: the @XmlSchema annotation: it's scope is unclear: does it apply to all elements and types that belong to its namespace (schema scope) or is its application
-       limited to the classes that are within its package (package scope, in which case the namespace is simply used to supply the default, and the
-       elementFormDefault, attributeFormDefault, and xmlns values *could* apply to a schema of a different namespace).  Assumption: schema-scope, and its
-       an error to have different values of elementFormDefault, attributeFormDefault, and xmlns with two different @XmlSchema annotations that apply to the
-       same schema.
--jaxb: *why* allow an item in the value of @XmlElements to *not* have a unique name?  A name is needed in order to deserialize!
--jaxb: *why* does @XmlElement.namespace() exist?  If elementFormDefault is qualified, the namespace is the same as the type.  Otherwise, its the default namespace!
-       what do you do with elements and elementWrappers that have different namespaces than their type definitions?  How do you create a schema for that?
--jaxb: what if @XmlElements contains two @XmlElement annotations, one of type "Rectangle", the other of type "Square" (Square extends Rectangle).  When marshalling,
-       a square is encountered?  Is it marshalled as a square or a rectangle and how do you know?  Or should that be an error?
--jaxb: why the contstraint that if it is a parameterized collection, then value.length must be one?  What if it's a parameterized collection of objects that
-       all inherit from collection item type?
--jaxb: xs:all compositor: what happens when a type definition extends a type definition whose compositor resolves to be xs:all?
+1. Section 8.9.7.2 says that an accessor should be mapped to an attribute use with ref attribute if the attribute namespace is not "##default" and has a different namespace than its type.  What if attributeFormDefault is not "qualified", but the namespace is "##default" and the namespace of the type definition is NOT the default namespace?  In other words, the namespace for the attribute is default, but different from the namespace of its type definition.
+
+2. What's the namespace for an element wrapper if (1) the elementFormDefault is not "qualified" or (2) the elementFormDefault is "qualified"?  Assumptions: (1) The namespace is the default namespace (2) The namespace is the namespace of the containing type definition.
+
+3. What is the application scope of the @XmlSchema annotation?  Does it apply to all elements and types that belong to the namespace of the package it annotates (i.e. "schema-scope"), or does it apply only to the classes that are within the package it annotates (i.e. "package-scope")?  If schema-scope, is it an error to have conflicting values for attributeFormDefault, elementFormDefault, and xmlns?  If package-scope, how do you resolve conflicting values of elementFormDefault, attributeFormDefault, and xmlns if there is more than one @XmlSchema annotation per schema?
+
+4. How do you create a schema for an accessor that is assigned (through @XmlElement.namespace() or @XmlElements.namespace()) a different namespace than its containing type definition?  If this has to be mapped as an reference to an element in a different schema, how do you reference that schema and how do you resolve potential naming conflicts?
+
+5. How do you deal with an @XmlElements annotation that contains two @XmlElement annotations that specify the same qname?
+
+6. Assume two objects, Square and Rectangle, Square extends Rectangle.  What if an @XmlElements annotation contains two @XmlElement annotations, one whose type() is Rectangle.class, and one whose type() is Square.class?  How do you determine how to unmarshal the child element of the type?  Do you unmarshal it as a Square or as a Rectangle?  Is that the reason for the constraint in 8.9.2.2 that the @XmlElements.value().length must be one?
+
+7. Table 8-5 states that if @XmlType.propOrder is {}, then the compositor should be xs:all.  What if there exists a type that extends this type?  You can't extend a type that has an xs:all compositor in XML Schema.
+
+Thanks for your help!
+
+-Ryan
