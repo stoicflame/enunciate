@@ -8,7 +8,7 @@ import javax.jws.WebService;
 import java.util.Collection;
 import java.util.ArrayList;
 
-import net.sf.enunciate.rest.annotations.RESTEndpoint;
+import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
 /**
  * @author Ryan Heaton

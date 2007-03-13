@@ -1,0 +1,24 @@
+package org.codehaus.enunciate.modules.xml;
+
+import junit.framework.TestCase;
+import org.codehaus.enunciate.config.SchemaInfo;
+import freemarker.ext.beans.BeansWrapper;
+
+/**
+ * @author Ryan Heaton
+ */
+public class TestSchemaInfoModel extends TestCase {
+
+  /**
+   * tests the get.
+   */
+  public void testGet() throws Exception {
+    SchemaInfo schemaInfo = new SchemaInfo();
+    schemaInfo.setProperty("filename", "something.xsd");
+    schemaInfo.setProperty("location", "http://localhost:8080/something.xsd");
+    SchemaInfoModel model = new SchemaInfoModel(schemaInfo, new BeansWrapper());
+    assertEquals("something.xsd", model.get("filename").toString());
+    assertEquals("http://localhost:8080/something.xsd", model.get("location").toString());
+  }
+  
+}

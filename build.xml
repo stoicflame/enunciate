@@ -128,7 +128,7 @@
       <pathelement location="target/${full.jar.name}"/>
     </path>
 
-    <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
+    <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
       <classpath refid="enunciate.classpath"/>
     </taskdef>
 
@@ -170,14 +170,14 @@
     <mkdir dir="target"/>
     
     <concat destfile="target/module.list" fixlastline="yes">
-      <fileset dir="${enunciate.basedir}" includes="**/net.sf.enunciate.modules.DeploymentModule"/>
+      <fileset dir="${enunciate.basedir}" includes="**/org.codehaus.enunciate.modules.DeploymentModule"/>
     </concat>
 
     <echo file="target/preserve-in-war" message="This file is used simply to mark the enunciate-full jar as a jar to be preserved when building the war."/>
 
     <jar destfile="target/${full.jar.name}" duplicate="preserve">
       <!--first include the concatenated deployment module list.-->
-      <zipfileset dir="target" includes="module.list" fullpath="META-INF/services/net.sf.enunciate.modules.DeploymentModule"/>
+      <zipfileset dir="target" includes="module.list" fullpath="META-INF/services/org.codehaus.enunciate.modules.DeploymentModule"/>
       <!--make sure the jar is marked to preserve in a war file.-->
       <zipfileset dir="target" includes="preserve-in-war" fullpath="META-INF/enunciate/preserve-in-war"/>
 

@@ -191,7 +191,7 @@
     <property name="discovery.dir" value="${build.dir}/META-INF/services"/>
 
     <mkdir dir="${discovery.dir}"/>
-    <echo message="${deployment.module.fqn}" file="${discovery.dir}/net.sf.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
+    <echo message="${deployment.module.fqn}" file="${discovery.dir}/org.codehaus.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
   </target>
 
   <target name="compile-main" description="compile the main code" depends="compile-tools, -compile-main, echo-deployment-module-fqn, extract-module-docs"/>
@@ -328,7 +328,7 @@
       </fileset>
     </path>
 
-    <taskdef name="enunciate" classname="net.sf.enunciate.main.EnunciateTask">
+    <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
       <classpath refid="enunciate.classpath"/>
     </taskdef>
 

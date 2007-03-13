@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <enunciate label="basic">
   <namespaces>
-    <namespace id="pets" uri="http://net.sf.enunciate/samples/petclinic/pets"/>
-    <namespace id="owners" uri="http://net.sf.enunciate/samples/petclinic/owners"/>
-    <namespace id="vets" uri="http://net.sf.enunciate/samples/petclinic/vets"/>
+    <namespace id="pets" uri="http://org.codehaus.enunciate/samples/petclinic/pets"/>
+    <namespace id="owners" uri="http://org.codehaus.enunciate/samples/petclinic/owners"/>
+    <namespace id="vets" uri="http://org.codehaus.enunciate/samples/petclinic/vets"/>
   </namespaces>
   <modules>
     <xml>
       <schema namespace="" file="store-types.xsd"/>
-      <schema namespace="http://net.sf.enunciate/samples/petclinic/owners" file="owners.xsd"/>
-      <schema namespace="http://net.sf.enunciate/samples/petclinic/pets" file="pets.xsd"/>
-      <schema namespace="http://net.sf.enunciate/samples/petclinic/vets" file="vets.xsd"/>
-      <wsdl namespace="http://net.sf.enunciate/samples/petclinic" file="petclinic.wsdl"/>
+      <schema namespace="http://org.codehaus.enunciate/samples/petclinic/owners" file="owners.xsd"/>
+      <schema namespace="http://org.codehaus.enunciate/samples/petclinic/pets" file="pets.xsd"/>
+      <schema namespace="http://org.codehaus.enunciate/samples/petclinic/vets" file="vets.xsd"/>
+      <wsdl namespace="http://org.codehaus.enunciate/samples/petclinic" file="petclinic.wsdl"/>
     </xml>
     <xfire-client uuid="basic.example">
       <package-conversions>
-        <convert from="net.sf.enunciate.samples.petclinic" to="net.sf.enunciate.samples.petclinic.client"/>
+        <convert from="org.codehaus.enunciate.samples.petclinic" to="org.codehaus.enunciate.samples.petclinic.client"/>
       </package-conversions>
     </xfire-client>
     <xfire uuid="basic.example">

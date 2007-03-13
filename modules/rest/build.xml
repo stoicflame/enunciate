@@ -14,6 +14,6 @@
     </fileset>
   </path>
 
-  <property name="deployment.module.fqn" value="net.sf.enunciate.modules.rest.RESTDeploymentModule"/>
+  <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.rest.RESTDeploymentModule"/>
 
 </project>

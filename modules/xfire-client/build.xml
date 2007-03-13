@@ -22,7 +22,7 @@
 
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xfire-client"/>
 
-  <property name="deployment.module.fqn" value="net.sf.enunciate.modules.xfire_client.XFireClientDeploymentModule"/>
+  <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule"/>
 
   <target name="-init">
     <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">

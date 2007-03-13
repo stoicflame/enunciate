@@ -45,4 +45,4 @@ if [ ! -f $ENUNCIATE_JAVA_HOME/lib/tools.jar ] ; then
   exit 1
 fi
 
-$ENUNCIATE_JAVA_HOME/bin/java -cp {UNIX_CLASSPATH}:$ENUNCIATE_HOME/{FULL_JAR_NAME}:$ENUNCIATE_JAVA_HOME/lib/tools.jar net.sf.enunciate.main.Main $@
+$ENUNCIATE_JAVA_HOME/bin/java -cp {UNIX_CLASSPATH}:$ENUNCIATE_HOME/{FULL_JAR_NAME}:$ENUNCIATE_JAVA_HOME/lib/tools.jar org.codehaus.enunciate.main.Main $@

@@ -5,7 +5,7 @@ import com.ifyouwannabecool.domain.persona.Persona;
 import javax.jws.WebService;
 import java.util.Collection;
 
-import net.sf.enunciate.rest.annotations.*;
+import org.codehaus.enunciate.rest.annotations.*;
 
 /**
  * The persona services is used to perform actions on the data associated with a persona.

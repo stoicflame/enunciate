@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <enunciate label="full">
   <namespaces>
-    <namespace id="data" uri="http://enunciate.sf.net/samples/genealogy/data"/>
-    <namespace id="cite" uri="http://enunciate.sf.net/samples/genealogy/cite"/>
-    <namespace id="full" uri="http://enunciate.sf.net/samples/full"/>
+    <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
+    <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
+    <namespace id="full" uri="http://enunciate.codehaus.org/samples/full"/>
   </namespaces>
   <modules>
     <xfire-client uuid="full.example">
       <package-conversions>
-        <convert from="net.sf.enunciate.samples.genealogy" to="net.sf.enunciate.samples.genealogy.client"/>
+        <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>
       </package-conversions>
     </xfire-client>
     <xfire uuid="full.example">
       <springImport file="target/custom_spring.xml"/>
       <copyResources dir="target/resources" pattern="**/*.txt"/>
     </xfire>
-    <docs splashPackage="net.sf.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
+    <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
       <download name="License" file="target/dummy-license.txt" description="The license file governing these downloads."/>
     </docs>
   </modules>

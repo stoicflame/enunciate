@@ -18,6 +18,6 @@ echo ENUNCIATE_JAVA_HOME, JAVA_HOME, or JRE_HOME is set incorrectly or could not
 goto end
 
 :enunciate
-%ENUNCIATE_JAVA_HOME%\bin\java -cp {WINDOWS_CLASSPATH};%ENUNCIATE_HOME\{FULL_JAR_NAME};%ENUNCIATE_JAVA_HOME%\lib\tools.jar net.sf.enunciate.main.Main %*
+%ENUNCIATE_JAVA_HOME%\bin\java -cp {WINDOWS_CLASSPATH};%ENUNCIATE_HOME\{FULL_JAR_NAME};%ENUNCIATE_JAVA_HOME%\lib\tools.jar org.codehaus.enunciate.main.Main %*
 
 :end

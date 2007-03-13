@@ -13,7 +13,7 @@
     <pathelement location="${core.basedir}/target/test-classes"/>
   </path>
 
-  <property name="deployment.module.fqn" value="net.sf.enunciate.modules.jaxws.JAXWSDeploymentModule"/>
+  <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.jaxws.JAXWSDeploymentModule"/>
 
   <property name="in.apt.src.test.dir" value="${basedir}/src/samples/jaxws"/>
 
