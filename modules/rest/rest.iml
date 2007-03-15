@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="ModuleRootManager" />
   <component name="NewModuleRootManager" inherit-compiler-output="true">
@@ -11,6 +10,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="java5-tools" level="application" />
     <orderEntry type="library" name="base" level="project" />
     <orderEntry type="library" name="core" level="project" />
     <orderEntry type="library" name="rest" level="project" />
@@ -21,7 +21,7 @@
   </component>
   <component name="copyright">
     <Base>
-      <setting name="state" value="2" />
+      <setting name="state" value="1" />
     </Base>
     <LanguageOptions name="$TEMPLATE$">
       <option name="templateOptions">

@@ -11,6 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="java5-tools" level="application" />
     <orderEntry type="library" name="base" level="project" />
     <orderEntry type="library" name="core" level="project" />
     <orderEntry type="library" name="test" level="project" />
@@ -22,7 +23,7 @@
   </component>
   <component name="copyright">
     <Base>
-      <setting name="state" value="2" />
+      <setting name="state" value="1" />
     </Base>
     <LanguageOptions name="$TEMPLATE$">
       <option name="templateOptions">

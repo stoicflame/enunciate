@@ -13,11 +13,12 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="base" level="project" />
+    <orderEntry type="module" module-name="core" />
     <orderEntryProperties />
   </component>
   <component name="copyright">
     <Base>
-      <setting name="state" value="2" />
+      <setting name="state" value="1" />
     </Base>
     <LanguageOptions name="$TEMPLATE$">
       <option name="templateOptions">
