@@ -16,7 +16,7 @@
 
     <div class="title">
       <h1>enunciate</h1>
-      <p>assert your web api.</p>
+      <p>clarify your web api.</p>
     </div>
 
   </div>
@@ -37,17 +37,17 @@
 
       <h1>Introduction</h1>
 
-      <p>One of the most irritating things about web service development demos is that they attempt to "WOW!" you with the simplicity and interoperability
+      <p>One of the most irritating things about Web service development demos is that they attempt to wow you with the simplicity and interoperability
       of their development tool by exposing one of three things: a "Hello, World!" app, an echo example, or a stock quote service.  The data structures are
-      no more complex than flat strings, the method signatures are single-arg and single return value with no faults, and they leave out the huge mess
-      of deployment descriptors, dependencies, configuration, packaging, and deployment that makes up a significant part of web service development.</p>
+      no more complex than flat strings, the method signatures are single-arg, single return value with no faults, and they leave out the huge mess
+      of deployment descriptors, dependencies, configuration, packaging, and deployment that makes up a significant part of Web service development.</p>
 
-      <p>This getting started guide will attempt to walk through a real-world (okay, mock-real-world) example of web service development, without trying
+      <p>This getting started guide will attempt to walk through a real-world (okay, mock-real-world) example of Web service development, without trying
       to hide the <a href="http://en.wikipedia.org/wiki/The_Wizard_of_Oz_(1939_film)">man behind the curtain</a>.  Of course, some attempt to be concise
       needs to be made, but at least you'll get the idea of the full development effort.  And you'll see more than just "Hello, World".</p>
 
       <p>We'll be writing a social networking app (since that's where the <i>real</i> money is).  For this tutorial, the name of our
-      social networking app is <u>IfYouWannaBeCool.com</u>.  (Maybe next time, we can write an app that creates
+      social networking app is <u>IfYouWannaBeCool.com</u>.  (Maybe next time we can write an app that creates
       a <i>network</i> of <i>social networking apps</i>, but we'll leave that for another day....)</p>
 
       <h1>Step 1: Write The Code</h1>
@@ -56,7 +56,7 @@
       with an id, an alias, an email address, a name, and a picture.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java">name</a>
       is a complex structure, made up of a given name and a surname.  We'll also define a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java">link</a>
       between two personas and a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java">social group</a>
-      consisting of an id, a group leader, the group members, and whether the group is exlusive.</p>
+      consisting of an id, a group leader, the group members, and whether the group is exclusive.</p>
 
       <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java">PersonaService</a>
       will define the operations available on a persona.  This includes operations for reading a persona, reading multiple personas, storing a persona, and
@@ -72,7 +72,7 @@
 
       <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl</a>
       and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl</a>.
-      Notice that the implementation classes reference their web service interfaces with the @javax.jws.WebService annotation.</p>
+      Notice that the implementation classes reference their Web service interfaces with the @javax.jws.WebService annotation.</p>
 
       <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
 
@@ -110,7 +110,7 @@ src
 
       <h1>Step 2: Enunciate the API</h1>
 
-      <p>To invoke enunciate in our example, we're going to use the command-line scripts (as opposed to the Ant task or the Java command).  We make sure we
+      <p>To invoke Enunciate in our example, we're going to use the command-line scripts (as opposed to the Ant task or the Java command).  We make sure we
         have our <a href="executables.html">environment set up</a>, and invoke Enunciate on the source code (multi-line, single command, use the "-v" option
         to see more output of what Enunciate is doing):</p>
 
@@ -249,8 +249,8 @@ src
         <li>
           <h3>Specify your namespace prefixes</h3>
           <p>Again, done in the <a href="wannabecool/java_step4/enunciate.xml">configuration
-          file</a>.  Why would we want to do this?  Just because we suffer from OCD and don't like the default "ns0", "ns1", etc. prefixes that are
-            automatically assigned.  It also gives a nice name to our wsdl and schema.</p>
+          file</a>.  Why would we want to do this?  Just because we suffer from <a href="http://en.wikipedia.org/wiki/OCD">OCD</a> and don't like the
+            default "ns0", "ns1", etc. prefixes that are automatically assigned.  It also gives a nice name to our wsdl and schema.</p>
         </li>
         <li>
           <h3>Change the package structure of the client-side classes</h3>
@@ -324,7 +324,7 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
 
       <h1>Documentation</h1>
       <ul>
-        <li><a href="executables.html">invoking enunciate</a></li>
+        <li><a href="executables.html">invoking Enunciate</a></li>
         <li><a href="user_guide.html">user guide</a></li>
         <li><a href="modules/index.html">modules</a></li>
         <li><a href="deps.html">dependencies</a></li>

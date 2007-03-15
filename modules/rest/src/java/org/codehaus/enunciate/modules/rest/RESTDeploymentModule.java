@@ -7,7 +7,7 @@ import org.codehaus.enunciate.EnunciateException;
 import java.io.IOException;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>REST Module</h1>
  *
  * <p>All metadata for REST endpoints can be discovered at runtime, therefore, the REST deployment module
  * exists only as a set of tools used to deploy the REST API.  In other words, no compile-time

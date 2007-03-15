@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>JAX-WS Module</h1>
  *
  * <p>The JAXWS deployment module is a simple module that generates the request/response/fault beans
  * for doc/lit SOAP operations as specified in the <a href="https://jax-ws.dev.java.net/">JAX-WS specification</p>.

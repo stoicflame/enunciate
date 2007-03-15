@@ -56,6 +56,7 @@
     <copy todir="${docs.dir}">
       <fileset dir="${static.docs.dir}"/>
     </copy>
+    <copy todir="${docs.dir}" overwrite="true" file="${enunciate.basedir}/license.txt"/>
   </target>
 
   <target name="docs-resources-copy">
@@ -208,7 +209,8 @@
       <mapper type="regexp" from="/(lib/.*.jar)$$" to="%ENUNCIATE_HOME%\\\1"/>
     </pathconvert>
 
-    <copy file="src/bin/enunciate.sh" tofile="bin/enunciate" overwrite="true">
+    <mkdir dir="target/bin"/>
+    <copy file="src/bin/enunciate.sh" tofile="target/bin/enunciate" overwrite="true">
       <filterset begintoken="{" endtoken="}">
         <filter token="UNIX_CLASSPATH" value="${unix.script.classpath}"/>
         <filter token="FULL_JAR_NAME" value="${full.jar.name}"/>
@@ -216,7 +218,7 @@
     </copy>
     <chmod perm="766" file="bin/enunciate"/>
     
-    <copy file="src/bin/enunciate.bat" tofile="bin/enunciate.bat" overwrite="true">
+    <copy file="src/bin/enunciate.bat" tofile="target/bin/enunciate.bat" overwrite="true">
       <filterset begintoken="{" endtoken="}">
         <filter token="WINDOWS_CLASSPATH" value="${windows.script.classpath}"/>
         <filter token="FULL_JAR_NAME" value="${full.jar.name}"/>
@@ -250,9 +252,7 @@
       <zipfileset dir="${lib.dir}" prefix="enunciate/lib">
         <exclude name="test/**"/>
       </zipfileset>
-      <zipfileset dir="bin" prefix="enunciate/bin">
-        <exclude name="README.txt"/>
-      </zipfileset>
+      <zipfileset dir="target/bin" prefix="enunciate/bin"/>
       <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <zipfileset dir="target" prefix="enunciate" includes="*.jar"/>
@@ -269,9 +269,7 @@
       <tarfileset dir="${lib.dir}" prefix="enunciate/lib">
         <exclude name="test/**"/>
       </tarfileset>
-      <tarfileset dir="bin" prefix="enunciate/bin" mode="766">
-        <exclude name="README.txt"/>
-      </tarfileset>
+      <tarfileset dir="target/bin" prefix="enunciate/bin" mode="766"/>
       <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
       <tarfileset dir="target" prefix="enunciate" includes="*.jar"/>

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>XML Module</h1>
  *
  * <p>The XML deployment module generates the consolidated WSDLs and schemas for the API.</a>.
  *

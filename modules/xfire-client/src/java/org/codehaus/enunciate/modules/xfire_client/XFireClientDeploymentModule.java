@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>XFire Client Module</h1>
  *
  * <p>The XFire client deployment module generates the client-side libraries that will access the
  * deployed web app using <a href="http://xfire.codehaus.org"/>XFire</a>.</p>

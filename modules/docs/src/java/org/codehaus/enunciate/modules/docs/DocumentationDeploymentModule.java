@@ -29,7 +29,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.digester.RuleSet;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>Documentation Module</h1>
  *
  * <p>The documentation deployment module is responsible for generating the documentation
  * for the API.  This includes both the HTML pages and any other static content put at the

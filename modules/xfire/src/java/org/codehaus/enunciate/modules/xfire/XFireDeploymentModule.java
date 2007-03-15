@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * <h1>Introduction</h1>
+ * <h1>XFire Module</h1>
  *
  * <p>The XFire deployment module generates the web app for hosting the API endpoints and documentation.</p>
  *

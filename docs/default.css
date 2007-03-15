@@ -58,6 +58,7 @@ code {
 	margin-bottom: 6px;
 	padding: 4px 5px;
 	white-space: pre;
+  overflow: auto;
 }
 blockquote {
 	background: url(img/quote.gif) no-repeat;

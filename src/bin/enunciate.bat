@@ -9,12 +9,11 @@ if "%ENUNCIATE_HOME%"=="" set ENUNCIATE_HOME=%DEFAULT_ENUNCIATE_HOME%
 set DEFAULT_ENUNCIATE_HOME=
 
 if "%ENUNCIATE_JAVA_HOME%" == "" set ENUNCIATE_JAVA_HOME=%JAVA_HOME%
-if "%ENUNCIATE_JAVA_HOME%" == "" set ENUNCIATE_JAVA_HOME=%JRE_HOME%
 if "%ENUNCIATE_JAVA_HOME%" == "" goto noJavaHome
 goto enunciate
 
 :noJavaHome
-echo ENUNCIATE_JAVA_HOME, JAVA_HOME, or JRE_HOME is set incorrectly or could not be located.  Please set one of these.
+echo ENUNCIATE_JAVA_HOME or JAVA_HOME is set incorrectly or could not be located.  Please set one of these.
 goto end
 
 :enunciate
