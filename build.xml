@@ -154,14 +154,28 @@
   </target>
 
   <target name="copy-getting-started-source">
+    <taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask">
+      <classpath>
+        <fileset dir="${lib.dir}/build">
+          <include name="**/java2html*.jar"/>
+        </fileset>
+      </classpath>
+    </taskdef>
+
     <mkdir dir="${getting.started.example.dir}/java_step1"/>
+    <java2html srcdir="src/samples/wannabecool/step1" destdir="${getting.started.example.dir}/java_step1" includes="**/*.java"/>
     <copy todir="${getting.started.example.dir}/java_step1" overwrite="true">
-      <fileset dir="src/samples/wannabecool/step1/"/>
+      <fileset dir="src/samples/wannabecool/step1/">
+        <exclude name="**/*.java"/>
+      </fileset>
     </copy>
 
     <mkdir dir="${getting.started.example.dir}/java_step4"/>
+    <java2html srcdir="src/samples/wannabecool/step4" destdir="${getting.started.example.dir}/java_step4" includes="**/*.java"/>
     <copy todir="${getting.started.example.dir}/java_step4" overwrite="true">
-      <fileset dir="src/samples/wannabecool/step4/"/>
+      <fileset dir="src/samples/wannabecool/step4/">
+        <exclude name="**/*.java"/>
+      </fileset>
     </copy>
   </target>
 
@@ -216,7 +230,7 @@
         <filter token="FULL_JAR_NAME" value="${full.jar.name}"/>
       </filterset>
     </copy>
-    <chmod perm="766" file="bin/enunciate"/>
+    <chmod perm="766" file="target/bin/enunciate"/>
     
     <copy file="src/bin/enunciate.bat" tofile="target/bin/enunciate.bat" overwrite="true">
       <filterset begintoken="{" endtoken="}">

@@ -25,7 +25,6 @@
     <a href="index.html">Introduction</a>
     <a href="getting_started.html">Getting Started</a>
     <a href="user_guide.html">User Guide</a>
-    <a href="architecture.html">Architecture</a>
     <a href="support.html">Support</a>
 
     <div class="clearer"><span></span></div>
@@ -52,26 +51,26 @@
 
       <h1>Step 1: Write The Code</h1>
 
-      <p>We'll start by defining the domain of our app.  We'll define a  <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">persona</a>
-      with an id, an alias, an email address, a name, and a picture.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java">name</a>
-      is a complex structure, made up of a given name and a surname.  We'll also define a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java">link</a>
-      between two personas and a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java">social group</a>
+      <p>We'll start by defining the domain of our app.  We'll define a  <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">persona</a>
+      with an id, an alias, an email address, a name, and a picture.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java.html">name</a>
+      is a complex structure, made up of a given name and a surname.  We'll also define a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java.html">link</a>
+      between two personas and a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java.html">social group</a>
       consisting of an id, a group leader, the group members, and whether the group is exclusive.</p>
 
-      <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java">PersonaService</a>
+      <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService</a>
       will define the operations available on a persona.  This includes operations for reading a persona, reading multiple personas, storing a persona, and
-      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java">LinkageService</a>
+      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService</a>
       will carry the operations that deal with linking and grouping personas.  These operations include creating a link between two personas, creating a social group,
       adding someone to a social group, and reading the social groups of a given persona.  Note that our two service interfaces are annotated with the
       @javax.jws.WebService annotation to define them as web serivces, and the two exceptions are annotated with @javax.xml.ws.WebFault to mark them as
       web faults.</p>
 
-      <p>We also define the possible exceptions that can get thrown, including a <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException</a>
-      when trying to create a link between two people, and an <a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException</a>
+      <p>We also define the possible exceptions that can get thrown, including a <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException</a>
+      when trying to create a link between two people, and an <a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException</a>
       when trying to add a persona to an exclusive group.</p>
 
-      <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl</a>
-      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl</a>.
+      <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl</a>
+      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl</a>.
       Notice that the implementation classes reference their Web service interfaces with the @javax.jws.WebService annotation.</p>
 
       <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
@@ -85,27 +84,27 @@ src
           |
           |----api
           |    |
-          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException.java</a>
-          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java">LinkageService.java</a>
-          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException.java</a>
-          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService.java</a>
           |
           |----domain
           |    |
           |    |----link
           |    |    |
-          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java">Link.java</a>
-          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java">SocialGroup.java</a>
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java.html">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java.html">SocialGroup.java</a>
           |    |
           |    |----persona
           |         |
-          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java">Name.java</a>
-          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java">Persona.java</a>
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java.html">Name.java</a>
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona.java</a>
           |
           |----impl
                |
-               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl.java</a>
-               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
       </code>
 
       <h1>Step 2: Enunciate the API</h1>
@@ -173,39 +172,39 @@ src
           |
           |----api
           |    |
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/ExclusiveGroupException.java">ExclusiveGroupException.java</a>
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/LinkageService.java">LinkageService.java</a>
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java">package-info.java</a>
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PermissionDeniedException.java">PermissionDeniedException.java</a>
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService.java</a>
           |
           |----domain
           |    |
           |    |----link
           |    |    |
-          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/Link.java">Link.java</a>
-          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/SocialGroup.java">SocialGroup.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/Link.java.html">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/SocialGroup.java.html">SocialGroup.java</a>
           |    |
           |    |----persona
           |         |
-          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Name.java">Name.java</a>
-          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">Persona.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Name.java.html">Name.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona.java</a>
           |
           |----impl
                |
-               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java">LinkageServiceImpl.java</a>
-               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java">PersonaServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
       </code>
 
       <ul>
         <li>
           <h3>Add a REST API</h3>
           <p>By adding a few annotations, and making sure our methods conform to <a href="modules/module_rest.html#constraints">certain constraints</a>, our services are published as REST endpoints.
-            The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">PersonaService</a>,
+            The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService</a>,
             for example, fits nicely into a RESTful HTTP GET.  We annotate the service and its implementation with the @RESTEndpoint annotation,
             we assign the "read" verb (@Verb annotation) and the "perona" noun (@Noun annotation) to the readPersona method,
             and declare the method's only parameter to be a proper noun with the @ProperNoun annotation.  Finally, we make sure the
-            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java">Persona</a>
+            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona</a>
             data type is declared as a root element with the @XmlRootElement annotation, and when enunciated and deployed, the method can be
             invoked as a REST endpoint.</p>
           <p>The REST endpoints are mounted under the "rest" subcontext, invoked by reference to their nouns.  For example, assuming the war artifact is
@@ -216,7 +215,7 @@ src
         </li>
         <li>
           <h3>Add a splash package</h3>
-          <p>You'll notice we added a <a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java">package-info
+          <p>You'll notice we added a <a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info
             file</a> to the "com.ifyouwannabecool.api" package.  This is where we added the introductory (i.e. "splash") documentation for our API.
             We want this documentation to show up on our index page for our documentation, so we specify this package as the splash packge in our
             <a href="wannabecool/java_step4/enunciate.xml">configuration
@@ -302,9 +301,9 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
 
       <ul>
         <li><a href="user_guide.html">Users Guide</a></li>
-        <li><a href="architecture.html">Architecture Guide</a></li>
+        <li><a href="#">Architecture Guide</a></li>
         <li><a href="api/index.html">Javadocs</a></li>
-        <li><a href="support.html">Support</a></li>
+        <li><a href="support.html">Support and Lists</a></li>
         <li><a href="https://jaxb.dev.java.net/">JAXB 2.0</a></li>
         <li><a href="http://java.sun.com/webservices/jaxws/">JAX-WS</a></li>
       </ul>
@@ -317,8 +316,8 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
       <ul>
         <li><a href="index.html">introduction</a></li>
         <li><a href="getting_started.html">getting started</a></li>
-        <li><a href="https://sourceforge.net/project/showfiles.php?group_id=166477">download</a></li>
-        <li><a href="support.html">support</a></li>
+        <li><a href="http://dist.codehaus.org/enunciate">download</a></li>
+        <li><a href="support.html">support/lists</a></li>
         <li><a href="license.txt">license</a></li>
       </ul>
 
@@ -328,16 +327,15 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
         <li><a href="user_guide.html">user guide</a></li>
         <li><a href="modules/index.html">modules</a></li>
         <li><a href="deps.html">dependencies</a></li>
-        <li><a href="architecture.html">architecture</a></li>
+        <li><a href="#">architecture</a></li>
         <li><a href="api/index.html">javadocs</a></li>
       </ul>
 
       <h1>Developers</h1>
       <ul>
-        <li><a href="roadmap.html">roadmap</a></li>
-        <li><a href="https://sourceforge.net/mail/?group_id=166477">mailing lists</a></li>
-        <li><a href="https://sourceforge.net/tracker/?group_id=166477">bugs and tasks</a></li>
-        <li><a href="https://sourceforge.net/svn/?group_id=166477">source repository</a></li>
+        <li><a href="#">roadmap</a></li>
+        <li><a href="http://jira.codehaus.org/browse/ENUNCIATE">bugs and tasks</a></li>
+        <li><a href="http://xircles.codehaus.org/projects/enunciate/repo">source repository</a></li>
       </ul>
 
       <h1>References</h1>
@@ -347,7 +345,7 @@ user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
         <li><a href="https://jaxb.dev.java.net/">JAXB 2.0</a></li>
         <li><a href="http://xfire.codehaus.org">XFire</a></li>
         <li><a href="http://sanitystack.blogspot.com/">Ryan's Blog</a></li>
-        <li><a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=166477&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a></li>
+
       </ul>
 
     </div>

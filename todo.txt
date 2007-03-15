@@ -1,12 +1,10 @@
 publish compiled contract document
-new template for webcohesion.com
-add the license to all files
-repackage from org.codehaus to org.codehaus
-make a better splash page (include news and a more concise intro)
-write a known issues document an include it in the docs
-setup JIRA.
-setup confluence.
-subscribe to the lists.
-links to JIRA, confluence, and lists. 
+executables.html
 deps.html
-other docs?
+Confluence:
+ intro page
+ architecture
+ known issues
+ roadmap
+ FAQ?
+Links to confluence (index, roadmap, architecture, known issues) 
