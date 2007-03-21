@@ -1,3 +1,7 @@
+[#ftl]
+[@forAllTypes var="type"]
+  [#if type.qualifiedName = aptOptions["-AEnunciateModuleFQN"]]
+    [@file name="module.html"]
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
   "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
@@ -16,7 +20,7 @@
 
     <div class="title">
       <h1>enunciate</h1>
-      <p>clarify your web api.</p>
+      <p>assert your web api.</p>
     </div>
 
   </div>
@@ -30,11 +34,7 @@
   <div class="main">
 
     <div class="content">
-
-      <h1>Dependencies</h1>
-
-      <p>No content yet....</p>
-
+${type.javaDoc}
     </div>
 
     <div class="sidenav">
@@ -54,3 +54,6 @@
 </body>
 
 </html>
+    [/@file]
+  [/#if]
+[/@forAllTypes]

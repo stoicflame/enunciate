@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+  <title>enunciate</title>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="title">
+      <h1>enunciate</h1>
+      <p>clarify your web api.</p>
+    </div>
+
+  </div>
+
+  <div class="navigation">
+@TOPNAV@
+
+    <div class="clearer"><span></span></div>
+  </div>
+
+  <div class="main">
+
+    <div class="content">
+
+      <h1>Step 1: Write The Code</h1>
+
+      <p>We'll start by defining the domain of our app.  We'll define a  <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">persona</a>
+      with an id, an alias, an email address, a name, and a picture.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java.html">name</a>
+      is a complex structure, made up of a given name and a surname.  We'll also define a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java.html">link</a>
+      between two personas and a <a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java.html">social group</a>
+      consisting of an id, a group leader, the group members, and whether the group is exclusive.</p>
+
+      <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService</a>
+      will define the operations available on a persona.  This includes operations for reading a persona, reading multiple personas, storing a persona, and
+      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService</a>
+      will carry the operations that deal with linking and grouping personas.  These operations include creating a link between two personas, creating a social group,
+      adding someone to a social group, and reading the social groups of a given persona.  Note that our two service interfaces are annotated with the
+      @javax.jws.WebService annotation to define them as web serivces, and the two exceptions are annotated with @javax.xml.ws.WebFault to mark them as
+      web faults.</p>
+
+      <p>We also define the possible exceptions that can get thrown, including a <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException</a>
+      when trying to create a link between two people, and an <a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException</a>
+      when trying to add a persona to an exclusive group.</p>
+
+      <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl</a>
+      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl</a>.
+      Notice that the implementation classes reference their Web service interfaces with the @javax.jws.WebService annotation.</p>
+
+      <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
+
+      <code class="console">
+src
+|
+|----com
+     |
+     |----ifyouwannabecool
+          |
+          |----api
+          |    |
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService.java</a>
+          |
+          |----domain
+          |    |
+          |    |----link
+          |    |    |
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/Link.java.html">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/link/SocialGroup.java.html">SocialGroup.java</a>
+          |    |
+          |    |----persona
+          |         |
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Name.java.html">Name.java</a>
+          |         |----<a href="wannabecool/java_step1/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona.java</a>
+          |
+          |----impl
+               |
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
+      </code>
+
+      <div align="right"><p><a href="getting_started_step2.html">Step 2: Enunciate the API >></a></p></div>
+    </div>
+
+    <div class="sidenav">
+@SIDENAV@
+    </div>
+
+    <div class="clearer"><span></span></div>
+
+  </div>
+
+  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+    href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
+  </div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+  <title>enunciate</title>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="title">
+      <h1>enunciate</h1>
+      <p>clarify your web api.</p>
+    </div>
+
+  </div>
+
+  <div class="navigation">
+@TOPNAV@
+
+    <div class="clearer"><span></span></div>
+  </div>
+
+  <div class="main">
+
+    <div class="content">
+
+      <h1>Step 4 (Optional): Iterate</h1>
+
+      <p>Even with no extra options or decorations, Enunciate does a pretty good job publishing your API.  But there's so much more you can do with only
+      a minimal amount of effort!  Let's give our classes some extra love, then we'll talk about what we did:</p>
+
+      <code class="console">
+src
+|
+|----<a href="wannabecool/java_step4/enunciate.xml">enunciate.xml</a>
+|----<a href="wannabecool/java_step4/LICENSE.txt">LICENSE.txt</a>
+|----com
+     |
+     |----ifyouwannabecool
+          |
+          |----api
+          |    |
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService.java</a>
+          |
+          |----domain
+          |    |
+          |    |----link
+          |    |    |
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/Link.java.html">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/SocialGroup.java.html">SocialGroup.java</a>
+          |    |
+          |    |----persona
+          |         |
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Name.java.html">Name.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona.java</a>
+          |
+          |----impl
+               |
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
+      </code>
+
+      <ul>
+        <li>
+          <h3>Add a REST API</h3>
+          <p>By adding a few annotations, and making sure our methods conform to <a href="modules/module_rest.html#constraints">certain constraints</a>, our services are published as REST endpoints.
+            The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService</a>,
+            for example, fits nicely into a RESTful HTTP GET.  We annotate the service and its implementation with the @RESTEndpoint annotation,
+            we assign the "read" verb (@Verb annotation) and the "perona" noun (@Noun annotation) to the readPersona method,
+            and declare the method's only parameter to be a proper noun with the @ProperNoun annotation.  Finally, we make sure the
+            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona</a>
+            data type is declared as a root element with the @XmlRootElement annotation, and when enunciated and deployed, the method can be
+            invoked as a REST endpoint.</p>
+          <p>The REST endpoints are mounted under the "rest" subcontext, invoked by reference to their nouns.  For example, assuming the war artifact is
+            mounted at the "api" context, the readPersona REST method described above can be invoked on persona id "12345" with an HTTP GET at
+            http://www.ifyouwannabecool.com/api/rest/persona/12345.</p>
+          <p>For more information about the REST endpoint publication mechanism, see the <a href="modules/module_rest.html">REST module</a> in the <a href="user_guide.html">user
+            guide</a></p>
+        </li>
+        <li>
+          <h3>Add a splash package</h3>
+          <p>You'll notice we added a <a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info
+            file</a> to the "com.ifyouwannabecool.api" package.  This is where we added the introductory (i.e. "splash") documentation for our API.
+            We want this documentation to show up on our index page for our documentation, so we specify this package as the splash packge in our
+            <a href="wannabecool/java_step4/enunciate.xml">configuration
+              file</a>. For more information, check out the <a href="user_guide.html">user guide</a>.</p>
+        </li>
+        <li>
+          <h3>Documentation</h3>
+          <p>We've added javadocs to everything, including the endpoints, their methods and parameters, and the domain data.  This documentation
+          will show up in our generated documentation.  You're free to use HTML tags as you want; they'll be applied in the resulting HTML.  Javadoc
+          block tags are recognized, but currently there is no support for javadoc inline tags (they'll show up unparsed in the documentation).</p>
+        </li>
+        <li>
+          <h3>Specify a title and copyright</h3>
+          <p>We can specify a title and copyright to the generated documentation in the
+            <a href="wannabecool/java_step4/enunciate.xml">configuration
+              file</a>.</p>
+        </li>
+        <li>
+          <h3>Add another file to download</h3>
+          <p>We want to be able to add a downloadable file to the documentation.  In this case, we add the license file that governs the use of the API.  This
+          extra download is specified in the <a href="wannabecool/java_step4/enunciate.xml">configuration
+          file</a>.</p>
+        </li>
+        <li>
+          <h3>Specify the deployment configuration</h3>
+          <p>We specify our hostname ("www.ifyouwannabecool.com") and the context at which the app will be deployed ("api") in the <a href="wannabecool/java_step4/enunciate.xml">configuration
+            file</a>.  There are two advantages to this.  (1) The generated WSDL will have an absolute reference to our SOAP endpoints, making the formal XML
+            contract complete.  (2) Consumers of our client code won't have to specify the URL of our endpoints if they don't want to.</p>
+        </li>
+        <li>
+          <h3>Specify your namespace prefixes</h3>
+          <p>Again, done in the <a href="wannabecool/java_step4/enunciate.xml">configuration
+          file</a>.  Why would we want to do this?  Just because we suffer from <a href="http://en.wikipedia.org/wiki/OCD">OCD</a> and don't like the
+            default "ns0", "ns1", etc. prefixes that are automatically assigned.  It also gives a nice name to our wsdl and schema.</p>
+        </li>
+        <li>
+          <h3>Change the package structure of the client-side classes</h3>
+          <p>Done (where else?) in the <a href="wannabecool/java_step4/enunciate.xml">configuration
+          file</a>.  This will distinguish the generated client classes from the original server-side classes.  (Makes it easier to test, clearer that you're
+          dealing with client-side classes, etc.)</p>
+        </li>
+      </ul>
+
+      <p>And there are still a ton of other configuration options available to you as the API developer (which we won't go into here):</p>
+
+      <ul>
+        <li>Specify your own CSS for the documentation, or even your own XSLT stylesheet if you don't like the structure.</li>
+        <li>Customize the web.xml file used to deploy your app.</li>
+        <li>Add AOP interceptors to your services and/or XFire in/out handlers to the engine.</li>
+        <li>Add your own API rules to be enforced at compile-time.</li>
+        <li>Etc.</li>
+      </ul>
+
+      <p>Well, when we're done polishing things up, we enunciate our API again and deploy the war file as we did in steps 2 and 3.  (Note that this time, we
+      specify the config file on the command line.)</p>
+
+      <code class="console">
+user@localhost&gt;enunciate -f enunciate.xml -Exfire.war ifyouwannabecool.war\
+ src/com/ifyouwannabecool/api/package-info.java\
+ src/com/ifyouwannabecool/api/ExclusiveGroupException.java\
+ src/com/ifyouwannabecool/api/PermissionDeniedException.java\
+ src/com/ifyouwannabecool/api/LinkageService.java\
+ src/com/ifyouwannabecool/api/PersonaService.java\
+ src/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
+ src/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/com/ifyouwannabecool/domain/persona/Name.java\
+ src/com/ifyouwannabecool/domain/persona/Persona.java\
+ src/com/ifyouwannabecool/domain/link/Link.java\
+ src/com/ifyouwannabecool/domain/link/SocialGroup.java
+      </code>
+
+      <!--something like this is used from the svn sandbox:-->
+      <!--target/enunciate-dist/bin/enunciate -f enunciate.xml -v -Exfire.war target/wannabecool.war src/samples/wannabecool/step4/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/package-info.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/LinkageService.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/SocialGroup.java-->
+
+      <div align="right"><p><a href="getting_started_step5.html">Step 5 (Optional): Behold the Glory >></a></p></div>
+
+    </div>
+
+    <div class="sidenav">
+@SIDENAV@
+    </div>
+
+    <div class="clearer"><span></span></div>
+
+  </div>
+
+  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+    href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
+  </div>
+
+</div>
+
+</body>
+
+</html>

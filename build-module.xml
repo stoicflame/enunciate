@@ -180,7 +180,7 @@
       <arg line="-s ${apt.output.dir}"/>
       <arg value="-nocompile"/>
       <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
-      <arg value="-Atemplate=${enunciate.basedir}/docs/modules/module.docs.fmt"/>
+      <arg value="-Atemplate=${enunciate.basedir}/docs/module.docs.fmt"/>
       <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
       <arg line="${module.src.file.args}"/>
     </java>

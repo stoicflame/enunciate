@@ -13,7 +13,7 @@
   <property name="docs.dir" value="target/docs"/>
   <property name="docs.resources.dir" value="${docs.dir}/resources"/>
   <property name="javadoc.dir" value="${docs.dir}/api"/>
-  <property name="module.docs.dir" value="${docs.dir}/modules"/>
+  <property name="module.docs.dir" value="${docs.dir}"/>
   <property name="getting.started.example.dir" value="${docs.dir}/wannabecool"/>
 
   <property name="core.basedir" value="${enunciate.basedir}/core"/>
@@ -51,10 +51,28 @@
 
   <target name="doc" description="generate documentation and javadoc (global)" depends="copy-static-docs, javadoc, docs-resources-copy, getting-started-examples, copy-module-docs"/>
 
-  <target name="copy-static-docs">
+  <target name="load-nav-docs">
+    <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
+    <loadfile srcfile="${static.docs.dir}/sidenav.include.html" property="sidenav"/>
+
+    <filterset id="nav.filterset">
+      <filter token="TOPNAV" value="${topnav}"/>
+      <filter token="SIDENAV" value="${sidenav}"/>
+    </filterset>
+  </target>
+
+  <target name="copy-static-docs" depends="load-nav-docs">
     <mkdir dir="${docs.dir}"/>
-    <copy todir="${docs.dir}">
-      <fileset dir="${static.docs.dir}"/>
+    <copy todir="${docs.dir}" overwrite="true">
+      <fileset dir="${static.docs.dir}">
+        <include name="**/*.html"/>
+      </fileset>
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy todir="${docs.dir}" overwrite="true">
+      <fileset dir="${static.docs.dir}">
+        <exclude name="**/*.html"/>
+      </fileset>
     </copy>
     <copy todir="${docs.dir}" overwrite="true" file="${enunciate.basedir}/license.txt"/>
   </target>
@@ -100,14 +118,26 @@
 
   <target name="copy-module-docs" depends="full-jar, copy-module-docs-only" description="copies over the module documentation to the right place."/>
 
-  <target name="copy-module-docs-only" description="copies over the module documentation to the right place, assuming its already there.">
+  <target name="copy-module-docs-only" depends="load-nav-docs" description="copies over the module documentation to the right place, assuming its already there.">
     <mkdir dir="${module.docs.dir}"/>
-    <copy file="${modules.xml.basedir}/target/module.html" tofile="${module.docs.dir}/module_xml.html" failonerror="false" overwrite="true"/>
-    <copy file="${modules.jaxws.basedir}/target/module.html" tofile="${module.docs.dir}/module_jaxws.html" failonerror="false" overwrite="true"/>
-    <copy file="${modules.rest.basedir}/target/module.html" tofile="${module.docs.dir}/module_rest.html" failonerror="false" overwrite="true"/>
-    <copy file="${modules.xfire-client.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire_client.html" failonerror="false" overwrite="true"/>
-    <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false" overwrite="true"/>
-    <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false" overwrite="true"/>
+    <copy file="${modules.xml.basedir}/target/module.html" tofile="${module.docs.dir}/module_xml.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.jaxws.basedir}/target/module.html" tofile="${module.docs.dir}/module_jaxws.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.rest.basedir}/target/module.html" tofile="${module.docs.dir}/module_rest.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.xfire-client.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire_client.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
 
     <mkdir dir="${module.docs.dir}/doc-files"/>
     <copy todir="${module.docs.dir}/doc-files">

@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+  <title>enunciate</title>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="title">
+      <h1>enunciate</h1>
+      <p>clarify your web api.</p>
+    </div>
+
+  </div>
+
+  <div class="navigation">
+@TOPNAV@
+
+    <div class="clearer"><span></span></div>
+  </div>
+
+  <div class="main">
+
+    <div class="content">
+
+      <h1>Step 2: Enunciate the API</h1>
+
+      <p>To invoke Enunciate in our example, we're going to use the command-line scripts (as opposed to the Ant task or the Java command).  We make sure we
+        have our <a href="executables.html">environment set up</a>, and invoke Enunciate on the source code (multi-line, single command, use the "-v" option
+        to see more output of what Enunciate is doing):</p>
+
+      <code class="console">
+user@localhost&gt;enunciate -Exfire.war ifyouwannabecool.war\
+ src/com/ifyouwannabecool/api/ExclusiveGroupException.java\
+ src/com/ifyouwannabecool/api/PermissionDeniedException.java\
+ src/com/ifyouwannabecool/api/LinkageService.java\
+ src/com/ifyouwannabecool/api/PersonaService.java\
+ src/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
+ src/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/com/ifyouwannabecool/domain/persona/Name.java\
+ src/com/ifyouwannabecool/domain/persona/Persona.java\
+ src/com/ifyouwannabecool/domain/link/Link.java\
+ src/com/ifyouwannabecool/domain/link/SocialGroup.java
+      </code>
+
+      <!--something like this is used from the svn sandbox:-->
+      <!--target/enunciate-dist/bin/enunciate -v -Exfire.war target/wannabecool.war src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java-->
+
+      <p>You have successfully enunciated your web API.</p>
+
+      <div align="right"><p><a href="getting_started_step3.html">Step 3: Take a Look >></a></p></div>
+    </div>
+
+    <div class="sidenav">
+@SIDENAV@
+    </div>
+
+    <div class="clearer"><span></span></div>
+
+  </div>
+
+  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+    href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
+  </div>
+
+</div>
+
+</body>
+
+</html>

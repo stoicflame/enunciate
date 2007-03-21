@@ -1,10 +1,2 @@
-publish compiled contract document
 executables.html
 deps.html
-Confluence:
- intro page
- architecture
- known issues
- roadmap
- FAQ?
-Links to confluence (index, roadmap, architecture, known issues) 
