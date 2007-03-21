@@ -4,7 +4,7 @@
 
   <property name="version" value="1.0-RC1"/>
   <property name="dist.name" value="enunciate-${version}"/>
-  <property name="full.jar.name" value="${dist.name}-full.jar"/>
+  <property name="full.jar.name" value="enunciate-full-${version}.jar"/>
 
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>

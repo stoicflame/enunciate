@@ -38,7 +38,7 @@ if [ ! -x $ENUNCIATE_JAVA_HOME/bin/java ] ; then
 fi
 
 if [ ! -f $ENUNCIATE_JAVA_HOME/lib/tools.jar ] ; then
-  echo "Error: unable to find tools.jar in $ENUNCIATE_JAVA_HOME/lib/tools.jar.  Does ENUNCIATE_JAVA_HOME or JAVA_HOME point to a correct Java 5 SDK home directory?"
+  echo "Error: unable to find tools.jar in $ENUNCIATE_JAVA_HOME/lib/tools.jar.  Does ENUNCIATE_JAVA_HOME or JAVA_HOME point to a correct Java 5+ SDK home directory?"
   exit 1
 fi
 

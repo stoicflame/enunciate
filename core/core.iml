@@ -12,6 +12,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="java5-tools" level="application" />
+    <orderEntry type="library" name="ant-1.6.2" level="application" />
     <orderEntry type="library" name="base" level="project" />
     <orderEntry type="library" name="core" level="project" />
     <orderEntry type="library" name="test" level="project" />

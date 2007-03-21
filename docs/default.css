@@ -194,6 +194,31 @@ blockquote {
   width:100%;
   border-top: 1px solid #A98;
 }
+.content table {
+  padding-bottom: 1.2em;
+  font-size: 1.1em;
+}
+.content table tr {
+  border-bottom: 1px solid #A98;
+  border-right: 1px solid #A98;
+}
+.content table th {
+  border-top: 1px solid #A98;
+  border-left: 1px solid #A98;
+  border-bottom: 1px solid #A98;
+  background: #CCC3AF
+}
+.content table th.last {
+  border-right: 1px solid #A98;
+}
+.content table td {
+  border-left: 1px solid #A98;
+  border-bottom: 1px solid #A98;
+  padding: 2px 2px 2px 2px;
+}
+.content table td.last {
+  border-right: 1px solid #A98;
+}
 
 /* footer */
 .footer {

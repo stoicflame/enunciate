@@ -93,7 +93,7 @@ public class Main {
     debug("vv", "Print debug-level output to the console."),
     configFile("f", "file", "The enunciate xml config file."),
     generateDir("g", "dir", "The output directory for the \"generate\" step."),
-    compileDir("d", "dir", "The output directory for the \"compile\" step."),
+    compileDir("c", "dir", "The output directory for the \"compile\" step."),
     buildDir("b", "dir", "The output directory for the \"build\" step."),
     packageDir("p", "dir", "The output directory for the \"package\" step."),
     classpath("cp", "path", "The classpath to use (defaults to the system classpath)."),

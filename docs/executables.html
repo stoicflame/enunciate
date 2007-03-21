@@ -31,21 +31,214 @@
 
     <div class="content">
 
+      <h1>Invoking Enunciate</h1>
+
+      <p>Enunciate can be invoked in a variety of different ways:</p>
+
+      <ul>
+        <li><a href="#command">Command-Line Scripts</a></li>
+        <li><a href="#ant">Ant</a></li>
+        <li><a href="#program">Programmatically in Java</a></li>
+      </ul>
+
+      <p>A set of source files to be enunciated is always required.  While invoking Enunciate without any options is valid, it likely won't get you the result
+      that you want because Enunciate won't know where to put its artifacts defaulting to an unspecified temporary location.  So make sure you specify an
+      artifact to export or a specific location to which to build.  Each module exports its own set of artifacts.  Refer to the <a href="modules.html">module
+      documentation</a> to find what you want.  Most often, it's the fully-packaged war exported by the <a href="module_xfire.html">XFire module</a>, so
+      you'll want to export the artifact identified by the id "xfire.war".</p>
+
+      <a name="command"><div class="break">&nbsp;</div></a>
       <h1>Command-Line Scripts</h1>
 
-      <p>Docs in progess...</p>
+      <p>In the distribution bundle, you can find a bash script and a batch file that you should be able to use to invoke Enunciate.  The script attempts
+      to invoke <a href="api/org/codehaus/enunciate/main/Main.html">org.codehaus.enunciate.main.Main</a> with the full classpath
+      (see <a href="deps.html">dependencies</a>).  The scripts rely on the following environment variables being set:</p>
 
+      <table cellspacing="0">
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th class="last">Default Value</th>
+        </tr>
+        <tr>
+          <td>ENUNCIATE_HOME</td>
+          <td>The main directory where the Enunciate distribution is unpacked.</td>
+          <td class="last">The parent directory of the directory containing the script.</td>
+        </tr>
+        <tr>
+          <td>ENUNCIATE_JAVA_HOME</td>
+          <td>The installation directory of the Java SDK that Enunciate is to use.</td>
+          <td class="last">The value of the JAVA_HOME environment variable.</td>
+        </tr>
+        <tr>
+          <td>JAVA_HOME</td>
+          <td>The installation directory of a valid Java 5 SDK.</td>
+          <td class="last">(none)</td>
+        </tr>
+      </table>
+
+      <p>The main argument(s) to the script are the list of source files that are to be enunciated.  Options are passed passed with a dash ("-").  You will
+      almost always want to specify an artifact to export with the -E[artifactId] option.  The following is a list of the other available options (options
+      that specify a value will assume the argument after the option is the option value):</p>
+
+      <table cellspacing="0">
+        <tr>
+          <th>option</th>
+          <th>value</th>
+          <th class="last">Description</th>
+        </tr>
+        <tr>
+          <td>v</td>
+          <td>N/A</td>
+          <td class="last">Print verbose output to the console.</td>
+        </tr>
+        <tr>
+          <td>vv</td>
+          <td>N/A</td>
+          <td class="last">Print very verbose (debug) output to the console.</td>
+        </tr>
+        <tr>
+          <td>f</td>
+          <td>configFile</td>
+          <td class="last">Use [configFile] as the configuration file.</td>
+        </tr>
+        <tr>
+          <td>g</td>
+          <td>generateDir</td>
+          <td class="last">Use [generateDir] as the output directory for the "generate" step.</td>
+        </tr>
+        <tr>
+          <td>c</td>
+          <td>compileDir</td>
+          <td class="last">Use [compileDir] as the output directory for the "compile" step.</td>
+        </tr>
+        <tr>
+          <td>b</td>
+          <td>buildDir</td>
+          <td class="last">Use [buildDir] as the output directory for the "build" step.</td>
+        </tr>
+        <tr>
+          <td>p</td>
+          <td>packageDir</td>
+          <td class="last">Use [packageDir] as the output directory for the "package" step.</td>
+        </tr>
+        <tr>
+          <td>cp</td>
+          <td>classpath</td>
+          <td class="last">Use [classpath] as the Enunciate classpath (used to find modules, invoke APT, and copy jars for building the war; defaults to the system classpath).</td>
+        </tr>
+        <tr>
+          <td>t</td>
+          <td>target</td>
+          <td class="last">Use [target] as the target step, defaults to "package".</td>
+        </tr>
+        <tr>
+          <td>E[artifactId]</td>
+          <td>destination</td>
+          <td class="last">Export the artifact identified by [artifactId] to the specified destination (file or directory).</td>
+        </tr>
+      </table>
+
+      <a name="ant"><div class="break">&nbsp;</div></a>
       <h1>Ant</h1>
 
-      <p>Docs in progess...</p>
+      <p>There's an Ant task available, <a href="api/org/codehaus/enunciate/main/EnunciateTask.html">org.codehaus.enunciate.main.EnunciateTask</a>.  This task
+        is an extension of a <a href="http://ant.apache.org/manual/api/org/apache/tools/ant/taskdefs/MatchingTask.html">MatchingTask</a>, so use the matching
+        task functionality to select the source files on which to invoke Enunciate. Here's a table of the additional attributes:</p>
 
-      <h1>Programmatic</h1>
+      <table cellspacing="0">
+        <tr>
+          <th>attribute</th>
+          <th>description</th>
+          <th class="last">required</th>
+        </tr>
+        <tr>
+          <td>basedir</td>
+          <td>The base directory to scan for the source files to Enunciate.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>configFile</td>
+          <td>The Enunciate configuration file to use.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>target</td>
+          <td>The Enunciate target step.</td>
+          <td class="last">No; defaults to "package".</td>
+        </tr>
+        <tr>
+          <td>generateDir</td>
+          <td>The directory to use as the output directory for the "generate" step.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>compileDir</td>
+          <td>The directory to use as the output directory for the "compile" step.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>buildDir</td>
+          <td>The directory to use as the output directory for the "build" step.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>packageDir</td>
+          <td>The directory to use as the output directory for the "package" step.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>classpathRef</td>
+          <td>The reference to the classpath to use to Enunciate (used to find modules, invoke APT, and copy jars for building the war).</td>
+          <td class="last">No; Defaults to the system classpath</td>
+        </tr>
+        <tr>
+          <td>verbose</td>
+          <td>Whether to print verbose output.</td>
+          <td class="last">No</td>
+        </tr>
+        <tr>
+          <td>debug</td>
+          <td>Whether to print very verbose (debug-level) output.</td>
+          <td class="last">No</td>
+        </tr>
+      </table>
 
-      <p>Docs in progess...</p>
+      <h2>Nested Elements</h2>
 
-      <h1>Command-Line Via Java</h1>
+      <p>In addition to the nested elements of a <a href="http://ant.apache.org/manual/api/org/apache/tools/ant/taskdefs/MatchingTask.html">MatchingTask</a>
+      that are used to select the source files on which to invoke Enunciate, the EnunciateTask supports two additional nested elements.</p>
 
-      <p>Docs in progess...</p>
+      <ul>
+        <li>The <b>classpath</b> element is a <a href="http://ant.apache.org/manual/using.html#path">path-like structure</a> used to specify the
+          Enunciate classpath for execution.</li>
+        <li>The <b>export</b> element is used to specify an export.  Here are its attributes:</li>
+      </ul>
+
+      <table cellspacing="0">
+        <tr>
+          <th>attribute</th>
+          <th>description</th>
+          <th class="last">required</th>
+        </tr>
+        <tr>
+          <td>artifactId</td>
+          <td>The id of the artifact to export.</td>
+          <td class="last">Yes</td>
+        </tr>
+        <tr>
+          <td>destination</td>
+          <td>The file or directory to which to export the artifact.</td>
+          <td class="last">Yes</td>
+        </tr>
+      </table>
+
+      <a name="program"><div class="break">&nbsp;</div></a>
+      <h1>Programmatic Interface</h1>
+
+      <p>The programmatic entry point is <a href="api/org/codehaus/enunciate/main/EnunciateTask.html">org.codehaus.enunciate.main.Enunciate</a>.  Just
+        instantiate one of these, configure it as needed, and call <a href="api/org/codehaus/enunciate/main/Enunciate.html#execute()">execute()</a>.  Refer
+      to the <a href="api/index.html">Javadocs</a> and <a href="http://xircles.codehaus.org/projects/enunciate/repo">source code</a> for more information.</p>
 
     </div>
 
