@@ -64,13 +64,13 @@
 
     and the following targets:
 
-    start-container (start the container)
-    stop-container (stop the container)
+    start-container (start the container this target will be executed in a daemon thread)
 
     The following properties are optional:
 
     container.port (port to which the container will be bound, defaults to 8080)
-    init.container.target (if definied, this target will be invoked before calling start-container).
+    init.container.target (if defined, this target will be invoked before calling start-container).
+    stop.container.target (if defined, this target will be invoked to stop the container).
     container.test.context (the context on which the war will be mounted, defaults to the name of the war)
     container.test.delay.time (time in seconds to wait between invoking the start-container target and executing the tests, defaults to 5)
     container.test.delay.target (if defined, instead of just waiting, this target will be invoked after start-container and before executing the tests)
@@ -121,6 +121,7 @@
     <property name="container.test.context" value="full"/>
     <property name="container.test.delay.time" value="5"/>
     <property name="container.test.delay.target" value="-delay-container-tests"/>
+    <property name="stop.container.target" value="default-stop-container"/>
 
     <propertyset id="test.sysprops">
       <propertyref name="container.port"/>
@@ -129,16 +130,20 @@
 
     <antcall target="deploy-full-api" inheritall="true"/>
     <parallel failonany="true">
-      <antcall target="start-container" inheritall="true"/>
+      <daemons>
+        <antcall target="start-container" inheritall="true"/>
+      </daemons>
       <sequential>
         <antcall target="${container.test.delay.target}" inheritall="true"/>
         <antcall target="-exec-container-tests" inheritall="true">
           <reference refid="test.sysprops"/>
         </antcall>
-        <antcall target="stop-container" inheritall="true"/>
+        <antcall target="${stop.container.target}" inheritall="true"/>
       </sequential>
     </parallel>
   </target>
+
+  <target name="default-stop-container"/>
 
   <target name="deploy-full-api">
     <copy todir="${war.deploy.dir}" file="target/examples/full/package/xfire/full.war"/>

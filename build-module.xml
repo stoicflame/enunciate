@@ -160,7 +160,7 @@
   </target>
 
   <target name="extract-module-docs" if="deployment.module.fqn">
-    <pathconvert pathsep=" " dirsep="${file.separator}" property="module.src.file.args">
+    <pathconvert pathsep="&#34; &#34;" dirsep="${file.separator}" property="module.src.file.args">
       <path>
         <fileset dir="src">
           <include name="java/**/*.java"/>
@@ -168,7 +168,6 @@
         </fileset>
       </path>
     </pathconvert>
-    <pathconvert pathsep="${path.separator}" dirsep="${file.separator}" property="apt.cp" refid="build.classpath"/>
     <dirname property="apt.output.dir" file="target/any.txt"/>
 
     <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
@@ -176,13 +175,15 @@
         <path refid="build.classpath"/>
         <pathelement location="${tools.build.dir}"/>
       </classpath>
-      <arg line="-cp ${apt.cp}"/>
-      <arg line="-s ${apt.output.dir}"/>
+      <arg value="-cp"/>
+      <arg pathref="build.classpath"/>
+      <arg value="-s"/>
+      <arg value="${apt.output.dir}"/>
       <arg value="-nocompile"/>
       <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
       <arg value="-Atemplate=${enunciate.basedir}/docs/module.docs.fmt"/>
       <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
-      <arg line="${module.src.file.args}"/>
+      <arg line="&#34;${module.src.file.args}&#34;"/>
     </java>
   </target>
 

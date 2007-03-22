@@ -59,6 +59,7 @@ code {
 	padding: 4px 5px;
 	white-space: pre;
   overflow: auto;
+  width:98%;
 }
 blockquote {
 	background: url(img/quote.gif) no-repeat;
@@ -93,7 +94,10 @@ blockquote {
 
 /* title */
 .title {
-	padding: 32px;
+  padding-top: 32px;
+  padding-right: 32px;
+  padding-bottom: 0;
+  padding-left: 32px;
 }
 .title h1 {
 	color: #E4DBCF;

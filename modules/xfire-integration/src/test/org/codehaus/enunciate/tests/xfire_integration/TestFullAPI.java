@@ -232,7 +232,8 @@ public class TestFullAPI extends TestCase {
     connection.setRequestMethod("GET");
     connection.connect();
     assertEquals(500, connection.getResponseCode());
-    assertEquals("some message", connection.getResponseMessage());
+    String message = connection.getResponseMessage();
+    assertTrue(message.startsWith("some") && message.endsWith("message")); //jetty replaces spaces with a "_"...
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "valid")).openConnection();
     connection.setRequestMethod("DELETE");
