@@ -5,7 +5,7 @@
   <!--definition of "base" properties - globally referenced. -->
   <dirname file="${ant.file.base}" property="enunciate.basedir"/>
   <property name="lib.dir" value="${enunciate.basedir}/lib"/>
-  <property name="enunciate.version" value="1.0-RC1"/>
+  <property name="enunciate.version" value="1.0"/>
   <property name="enunciate.sample.src.dir" value="${enunciate.basedir}/src/samples"/>
 
   <!--global references to other modules-->
