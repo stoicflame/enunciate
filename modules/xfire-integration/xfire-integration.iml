@@ -11,15 +11,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="java5-tools" level="application" />
-    <orderEntry type="library" name="base" level="project" />
-    <orderEntry type="library" name="core" level="project" />
-    <orderEntry type="library" name="test" level="project" />
-    <orderEntry type="library" name="rest" level="project" />
-    <orderEntry type="library" name="xfire-core" level="project" />
+    <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="xfire" />
     <orderEntry type="module" module-name="xfire-client" />
-    <orderEntry type="library" name="xfire-client" level="project" />
-    <orderEntry type="library" name="xfire" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

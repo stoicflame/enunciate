@@ -1,0 +1,29 @@
+<project>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>docs</artifactId>
+  <version>@VERSION@</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>core</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>core-test</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>xfire-client</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+  </dependencies>
+
+</project>

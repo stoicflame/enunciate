@@ -1,91 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="base" basedir=".">
+<project default="install" name="base" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <!--definition of "base" properties - globally referenced. -->
   <dirname file="${ant.file.base}" property="enunciate.basedir"/>
+  <property file="${enunciate.basedir}/build.properties"/>
   <property name="lib.dir" value="${enunciate.basedir}/lib"/>
-  <property name="enunciate.version" value="1.0"/>
   <property name="enunciate.sample.src.dir" value="${enunciate.basedir}/src/samples"/>
-
-  <!--global references to other modules-->
-  <property name="core.basedir" value="${enunciate.basedir}/core"/>
-  <property name="modules.xml.basedir" value="${enunciate.basedir}/modules/xml"/>
-  <property name="modules.jaxws.basedir" value="${enunciate.basedir}/modules/jaxws"/>
-  <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
-  <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
-  <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
-  <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
-
-  <!--patterns for specifying jars to include on the classpath.-->
-  <property name="jar.pattern" value="*-${enunciate.version}.jar"/>
-  <property name="tools.jar.pattern" value="*-tools-${enunciate.version}.jar"/>
-
-  <!--default file for container test support.-->
-  <property name="container.test.support.file" value="${user.home}/.enunciate/container-test-support.xml"/>
-
-  <path id="base.libs">
-    <fileset dir="${lib.dir}">
-      <include name="*.jar"/>
-    </fileset>
-  </path>
-
-  <path id="core.libs">
-    <fileset dir="${lib.dir}/core">
-      <include name="*.jar"/>
-    </fileset>
-    <pathelement location="${java.home}/../lib/tools.jar"/>
-  </path>
-
-  <path id="test.libs">
-    <fileset dir="${lib.dir}/test">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${lib.dir}/share">
-      <include name="wsdl4j*.jar"/>
-      <include name="jaxb-impl*.jar"/>
-    </fileset>
-  </path>
-
-  <path id="rest.libs">
-    <fileset dir="${lib.dir}/share">
-      <include name="jaxb-impl*.jar"/>
-      <include name="servlet-api*.jar"/>
-      <include name="spring*.jar"/>
-      <include name="stax-api*.jar"/>
-    </fileset>
-    <fileset dir="${lib.dir}/rest">
-      <include name="jettison*.jar"/>
-    </fileset>
-  </path>
-
-  <path id="xfire.core.libs">
-    <fileset dir="${lib.dir}/xfire-core">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${lib.dir}/share">
-      <include name="wsdl4j*.jar"/>
-      <include name="stax-api*.jar"/>
-    </fileset>
-  </path>
-
-  <path id="xfire.server.libs">
-    <fileset dir="${lib.dir}/share">
-      <include name="jaxb-impl*.jar"/>
-      <include name="servlet-api*.jar"/>
-      <include name="spring*.jar"/>
-      <include name="stax-api*.jar"/>
-    </fileset>
-  </path>
-
-  <path id="xfire.client.libs">
-    <fileset dir="${lib.dir}/xfire-client">
-      <include name="*.jar"/>
-    </fileset>
-    <fileset dir="${lib.dir}/share">
-      <include name="wsdl4j*.jar"/>
-    </fileset>
-  </path>
 
   <!--definition of "relative" properties-->
   <property name="build.dir" value="target/classes/main"/>
@@ -96,11 +17,12 @@
   <property name="tools.test.build.dir" value="target/test-classes"/>
   <property name="test.report.dir" value="target/test-reports"/>
 
-  <target name="init" description="initializes and verifies some properties">
-    <mkdir dir="${lib.dir}"/>
-    <mkdir dir="target"/>
+  <!--default file for container test support.-->
+  <property name="container.test.support.file" value="${user.home}/.enunciate/container-test-support.xml"/>
 
-    <property file="${user.home}/.enunciate/build.properties"/>
+  <!--The init target.-->
+  <target name="init" description="initializes and verifies some properties">
+    <mkdir dir="target"/>
     <property name="module.name" value="${ant.project.name}"/>
 
     <available property="main.src.exists" file="src/java"/>
@@ -109,31 +31,58 @@
     <available property="main.test.src.exists" file="src/test"/>
     <fail message="The main test code must exist in the ${basedir}/src/test directory." unless="main.test.src.exists"/>
 
-    <fail message="path item 'build.classpath' must be defined.">
-      <condition>
-        <not>
-          <isreference refid="build.classpath"/>
-        </not>
-      </condition>
-    </fail>
-
-    <path id="test.classpath">
-      <path refid="build.classpath"/>
-      <path refid="test.libs"/>
-      <pathelement location="${build.dir}"/>
-      <pathelement location="${test.build.dir}"/>
-      <pathelement location="${tools.build.dir}"/>
-      <pathelement location="${conf.dir}"/>
-    </path>
-
-    <propertyset id="test.sysprops"/>
-
     <available property="tools.exists" file="src/tools"/>
+
+    <!--load the maven tasks for handling dependencies-->
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
+      <classpath>
+        <fileset dir="${lib.dir}/build">
+          <include name="maven-artifact-ant-*.jar"/>
+        </fileset>
+      </classpath>
+    </typedef>
+
+    <!--the repo at java.net contains needed Sun jars.-->
+    <artifact:remoteRepository id="repo.java.net" url="https://maven-repository.dev.java.net/nonav/repository" layout="legacy"/>
+
+    <copy file="${module.name}-pom.xml" todir="target" failonerror="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+    <artifact:pom id="module.pom" file="target/${module.name}-pom.xml"/>
+
+    <!--finally, include any user-specific properties.-->
+    <property file="${user.home}/.enunciate/build.properties"/>
+
+    <condition property="configure.proxy">
+      <and>
+        <isset property="proxyHost"/>
+        <isset property="proxyPort"/>
+      </and>
+    </condition>
   </target>
 
-  <target name="compile" description="compile the code, tools and main." depends="init, compile-tools, compile-main"/>
+  <target name="get-tools-pom" depends="init" if="tools.exists">
+    <copy file="${module.name}-tools-pom.xml" todir="target" failonerror="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+    <artifact:pom id="module.tools.pom" file="target/${module.name}-tools-pom.xml"/>
+  </target>
 
-  <target name="compile-tools" description="compile the tools code" depends="init" if="tools.exists">
+  <target name="set-proxy" depends="init" if="configure.proxy">
+    <setproxy proxyhost="${proxyHost}" proxyport="${proxyPort}"/>
+  </target>
+
+  <target name="get-tools-classpath" depends="get-tools-pom, set-proxy" if="tools.exists">
+    <artifact:dependencies pathId="tools.classpath" pomRefId="module.tools.pom">
+      <remoteRepository refid="repo.java.net"/>
+    </artifact:dependencies>
+  </target>
+
+  <target name="compile-tools" description="compile the tools code" depends="get-tools-classpath" if="tools.exists">
     <!--default compiler for the tools is 1.5-->
     <property name="tools.compiler" value="1.5"/>
 
@@ -143,7 +92,7 @@
       <src>
         <pathelement location="src/tools"/>
       </src>
-      <classpath refid="build.classpath"/>
+      <classpath refid="tools.classpath"/>
     </javac>
 
     <copy todir="${build.dir}">
@@ -156,48 +105,31 @@
         <include name="**/*.xslt"/>
       </fileset>
     </copy>
-
   </target>
 
-  <target name="extract-module-docs" if="deployment.module.fqn">
-    <pathconvert pathsep="&#34; &#34;" dirsep="${file.separator}" property="module.src.file.args">
-      <path>
-        <fileset dir="src">
-          <include name="java/**/*.java"/>
-          <include name="tools/**/*.java"/>
-        </fileset>
-      </path>
-    </pathconvert>
-    <dirname property="apt.output.dir" file="target/any.txt"/>
-
-    <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
-      <classpath>
-        <path refid="build.classpath"/>
-        <pathelement location="${tools.build.dir}"/>
-      </classpath>
-      <arg value="-cp"/>
-      <arg pathref="build.classpath"/>
-      <arg value="-s"/>
-      <arg value="${apt.output.dir}"/>
-      <arg value="-nocompile"/>
-      <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
-      <arg value="-Atemplate=${enunciate.basedir}/docs/module.docs.fmt"/>
-      <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
-      <arg line="&#34;${module.src.file.args}&#34;"/>
-    </java>
+  <target name="jar-tools" description="create the tools jar." depends="compile-tools" if="tools.exists">
+    <jar jarfile="target/enunciate-${module.name}-tools-${version}.jar" basedir="${tools.build.dir}"/>
   </target>
 
-  <target name="echo-deployment-module-fqn" if="deployment.module.fqn">
-    <property name="append.discovery.module" value="false"/>
-    <property name="discovery.dir" value="${build.dir}/META-INF/services"/>
-
-    <mkdir dir="${discovery.dir}"/>
-    <echo message="${deployment.module.fqn}" file="${discovery.dir}/org.codehaus.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
+  <target name="install-tools" description="install the tools jar into the local repo" depends="jar-tools" if="tools.exists">
+    <artifact:install file="target/enunciate-${module.name}-tools-${version}.jar">
+      <pom refid="module.tools.pom"/>
+    </artifact:install>
   </target>
 
-  <target name="compile-main" description="compile the main code" depends="compile-tools, -compile-main, echo-deployment-module-fqn, extract-module-docs"/>
+  <target name="get-build-classpath" depends="install-tools">
+    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom">
+      <remoteRepository refid="repo.java.net"/>
+    </artifact:dependencies>
 
-  <target name="-compile-main" description="compile the main code">
+    <path id="build.classpath">
+      <!--the maven artifact tasks don't recognize the "system" jars.-->
+      <pathelement location="${java.home}/../lib/tools.jar"/>
+      <path refid="nonsystem.build.classpath"/>
+    </path>
+  </target>
+
+  <target name="compile-main" description="compile the main code" depends="get-build-classpath">
     <mkdir dir="${build.dir}"/>
     <javac destdir="${build.dir}" debug="true">
       <src>
@@ -223,17 +155,40 @@
 
   </target>
 
-  <target name="jar" description="create the jar after running the tests." depends="compile, test, jar-main, jar-tools"/>
-
-  <target name="jar-main" description="create the main jar." depends="compile-main">
-    <jar jarfile="target/enunciate-${module.name}-${enunciate.version}.jar" basedir="${build.dir}"/>
+  <target name="get-test-classpath" depends="get-build-classpath">
+    <path id="test.classpath">
+      <path refid="build.classpath"/>
+      <pathelement location="${build.dir}"/>
+      <pathelement location="${test.build.dir}"/>
+      <pathelement location="${conf.dir}"/>
+    </path>
   </target>
 
-  <target name="jar-tools" description="create the tools jar." depends="compile-tools" if="tools.exists">
-    <jar jarfile="target/enunciate-${module.name}-tools-${enunciate.version}.jar" basedir="${tools.build.dir}"/>
+  <target name="compile-tests" depends="get-test-classpath">
+    <mkdir dir="${test.build.dir}"/>
+    <javac destdir="${test.build.dir}" debug="true">
+      <src>
+        <pathelement location="src/test"/>
+      </src>
+      <classpath refid="test.classpath"/>
+      <classpath location="${build.dir}"/>
+    </javac>
+
+    <copy todir="${test.build.dir}">
+      <fileset dir="src/test">
+        <include name="**/*.xml"/>
+        <include name="**/*.fmt"/>
+      </fileset>
+    </copy>
   </target>
 
-  <target name="test" description="run the test cases" depends="compile, compile-tests">
+  <target name="compile" description="compile the main code" depends="compile-main, compile-tests"/>
+
+  <target name="get-test-sysprops">
+    <propertyset id="test.sysprops"/>
+  </target>
+
+  <target name="test" description="run the test cases" depends="compile, get-test-sysprops">
     <mkdir dir="${test.report.dir}"/>
     <junit tempdir="target" printsummary="true" failureproperty="tests.failed" haltonerror="false" haltonfailure="false">
       <classpath refid="test.classpath"/>
@@ -262,53 +217,54 @@
     <fail>There were test failures.</fail>
   </target>
 
-  <target name="compile-tests">
-    <mkdir dir="${test.build.dir}"/>
-    <javac destdir="${test.build.dir}" debug="true">
-      <src>
-        <pathelement location="src/test"/>
-      </src>
-      <classpath refid="test.classpath"/>
-      <classpath location="${build.dir}"/>
-    </javac>
+  <target name="write-discovery-metadata" if="deployment.module.fqn">
+    <property name="append.discovery.module" value="false"/>
+    <property name="discovery.dir" value="${build.dir}/META-INF/services"/>
 
-    <copy todir="${test.build.dir}">
-      <fileset dir="src/test">
-        <include name="**/*.xml"/>
-        <include name="**/*.fmt"/>
-      </fileset>
-    </copy>
+    <mkdir dir="${discovery.dir}"/>
+    <echo message="${deployment.module.fqn}" file="${discovery.dir}/org.codehaus.enunciate.modules.DeploymentModule" append="${append.discovery.module}"/>
+  </target>
+
+  <target name="extract-module-docs" if="deployment.module.fqn" depends="get-build-classpath">
+    <pathconvert pathsep="&#34; &#34;" dirsep="${file.separator}" property="module.src.file.args">
+      <path>
+        <fileset dir="src">
+          <include name="java/**/*.java"/>
+          <include name="tools/**/*.java"/>
+        </fileset>
+      </path>
+    </pathconvert>
+    <dirname property="apt.output.dir" file="target/any.txt"/>
+
+    <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
+      <classpath location="${java.home}/../lib/tools.jar"/>
+      <arg value="-cp"/>
+      <arg pathref="build.classpath"/>
+      <arg value="-s"/>
+      <arg value="${apt.output.dir}"/>
+      <arg value="-nocompile"/>
+      <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
+      <arg value="-Atemplate=${enunciate.basedir}/docs/module.docs.fmt"/>
+      <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
+      <arg line="&#34;${module.src.file.args}&#34;"/>
+    </java>
+  </target>
+
+  <target name="jar" description="create the main jar." depends="test, write-discovery-metadata, extract-module-docs">
+    <jar jarfile="target/enunciate-${module.name}-${version}.jar" basedir="${build.dir}"/>
+  </target>
+
+  <target name="install" description="install the main jar into the local repo." depends="jar">
+    <artifact:install file="target/enunciate-${module.name}-${version}.jar">
+      <pom refid="module.pom"/>
+    </artifact:install>
   </target>
 
   <target name="clean" description="clean up">
     <delete dir="target"/>
   </target>
 
-  <target name="generate-example-api" description="generate the artifacts for an example api.">
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="generate"/>
-    </antcall>
-  </target>
-
-  <target name="compile-example-api" description="generate and compile the artifacts for an example api.">
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="compile"/>
-    </antcall>
-  </target>
-
-  <target name="build-example-api" description="generate and compile the artifacts for an example api.">
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="build"/>
-    </antcall>
-  </target>
-
-  <target name="package-example-api" description="generate, compile, and package the artifacts for an example api.">
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="package"/>
-    </antcall>
-  </target>
-
-  <target name="enunciate-example-api" depends="jar-main, jar-tools" description="enunciate an example api.">
+  <target name="enunciate-example-api" depends="compile-main" description="enunciate an example api.">
     <fail unless="enunciate.target">
       You must specify an enunciate target.
     </fail>
@@ -324,9 +280,7 @@
 
     <path id="enunciate.classpath">
       <path refid="build.classpath"/>
-      <fileset dir="target">
-        <include name="${jar.pattern}"/>
-      </fileset>
+      <pathelement location="${build.dir}"/>
     </path>
 
     <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">

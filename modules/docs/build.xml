@@ -1,32 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="docs" basedir=".">
+<project default="install" name="docs" basedir=".">
 
   <import file="../../build-module.xml"/>
 
-  <path id="build.classpath">
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-
-    <fileset dir="${core.basedir}/target">
-      <include name="${jar.pattern}"/>
-    </fileset>
-    <fileset dir="${modules.xfire-client.basedir}/target">
-      <include name="${jar.pattern}"/>
-    </fileset>
-    <pathelement location="${core.basedir}/target/test-classes"/>
-  </path>
-
-  <property name="in.apt.src.test.dir" value="${basedir}/src/samples/docs"/>
-
   <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.docs.DocumentationDeploymentModule"/>
 
-  <target name="-init">
-    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
-      <path>
-        <path refid="build.classpath"/>
-      </path>
-    </pathconvert>
+  <target name="get-test-sysprops">
+    <property name="in.apt.src.test.dir" value="${basedir}/src/samples/docs"/>
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}" refid="build.classpath"/>
 
     <propertyset id="test.sysprops">
       <propertyref name="in.apt.src.test.dir"/>
@@ -34,11 +16,11 @@
     </propertyset>
   </target>
 
-  <target name="init" depends="base.init, -init"/>
-
-  <target name="jar-main" depends="zip-default-base, base.jar-main"/>
+  <target name="jar" depends="zip-default-base, base.jar"/>
 
   <target name="zip-default-base">
+    <mkdir dir="${build.dir}"/>
+    
     <zip destfile="${build.dir}/docs.base.zip" basedir="template">
       <exclude name="*.html"/>
     </zip>

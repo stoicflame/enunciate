@@ -1,32 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="xfire" basedir=".">
+<project default="install" name="xfire" basedir=".">
 
   <import file="../../build-module.xml"/>
 
-  <path id="build.classpath">
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-    <path refid="xfire.core.libs"/>
-    <path refid="xfire.server.libs"/>
-
-    <fileset dir="${core.basedir}/target">
-      <include name="${jar.pattern}"/>
-    </fileset>
-
-    <pathelement location="${core.basedir}/target/test-classes"/>
-  </path>
-
-  <property name="in.apt.src.test.dir" value="${basedir}/src/examples"/>
-
   <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.xfire.XFireDeploymentModule"/>
 
-  <target name="-init">
-    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
-      <path>
-        <path refid="build.classpath"/>
-      </path>
-    </pathconvert>
+  <target name="get-test-sysprops">
+    <property name="in.apt.src.test.dir" value="${basedir}/src/examples"/>
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}" refid="build.classpath"/>
 
     <propertyset id="test.sysprops">
       <propertyref name="in.apt.src.test.dir"/>
@@ -34,7 +16,5 @@
       <propertyref name="apt.test.class.path"/>
     </propertyset>
   </target>
-
-  <target name="init" depends="base.init, -init"/>
 
 </project>

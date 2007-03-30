@@ -12,14 +12,27 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="java5-tools" level="application" />
-    <orderEntry type="library" name="base" level="project" />
-    <orderEntry type="library" name="core" level="project" />
-    <orderEntry type="library" name="test" level="project" />
+    <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="xfire-core" level="project" />
     <orderEntry type="library" name="xfire-client" level="project" />
-    <orderEntry type="module" module-name="base" />
-    <orderEntry type="module" module-name="core" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/sun/xml/bind/jaxb-impl/2.0/jaxb-impl-2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

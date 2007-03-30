@@ -2,7 +2,7 @@
 
 <project default="full-jar" name="all" basedir=".">
 
-  <property name="version" value="1.0"/>
+  <property file="build.properties"/>
   <property name="dist.name" value="enunciate-${version}"/>
   <property name="full.jar.name" value="enunciate-full-${version}.jar"/>
 

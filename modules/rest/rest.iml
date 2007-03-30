@@ -10,13 +10,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="java5-tools" level="application" />
-    <orderEntry type="library" name="base" level="project" />
-    <orderEntry type="library" name="core" level="project" />
-    <orderEntry type="library" name="rest" level="project" />
-    <orderEntry type="library" name="test" level="project" />
-    <orderEntry type="module" module-name="base" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="library" name="rest" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/easymock/easymock/2.2/easymock-2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

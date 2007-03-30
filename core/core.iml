@@ -11,11 +11,18 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="java5-tools" level="application" />
-    <orderEntry type="library" name="ant-1.6.2" level="application" />
-    <orderEntry type="library" name="base" level="project" />
-    <orderEntry type="library" name="core" level="project" />
-    <orderEntry type="library" name="test" level="project" />
+    <orderEntry type="library" exported="" name="java5-tools" level="application" />
+    <orderEntry type="library" exported="" name="ant-1.6.2" level="application" />
+    <orderEntry type="library" exported="" name="core" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

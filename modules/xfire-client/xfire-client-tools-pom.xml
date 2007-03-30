@@ -1,0 +1,144 @@
+<project>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>xfire-client-tools</artifactId>
+  <version>@VERSION@</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>core-tools</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+      <version>2.9.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.xfire</groupId>
+      <artifactId>xfire-all</artifactId>
+      <version>1.2.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfireaegis</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfireplexus</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirewssecurity</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirepicocontainer</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirecore</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirexmpp</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejaxb2</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejms</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejava5</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfiregenerator</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirexmlbeans</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirecastor</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfireannotations</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejaxb</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejaxws</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfireloom</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirespring</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <groupId>org.codehaus.xfire</groupId>
+          <artifactId>xfirejibx</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+  </dependencies>
+
+</project>

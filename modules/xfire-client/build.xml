@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="xfire-client" basedir=".">
+<project default="install" name="xfire-client" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <property name="tools.compiler" value="1.4"/>
 
   <import file="../../build-module.xml"/>
 
-  <path id="build.classpath">
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-    <path refid="xfire.core.libs"/>
-    <path refid="xfire.client.libs"/>
-
-    <fileset dir="${core.basedir}/target">
-      <include name="${jar.pattern}"/>
-    </fileset>
-
-    <pathelement location="${core.basedir}/target/test-classes"/>
-    <pathelement location="${basedir}/target/examples/schema/classes/xfire-client/jdk14"/>
-  </path>
-
-  <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xfire-client"/>
-
   <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule"/>
 
-  <target name="-init">
-    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
-      <path>
-        <path refid="build.classpath"/>
-      </path>
-    </pathconvert>
+  <target name="get-build-classpath" depends="install-tools">
+    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom">
+      <remoteRepository refid="repo.java.net"/>
+    </artifact:dependencies>
 
+    <path id="build.classpath">
+      <!--the maven artifact tasks don't recognize the "system" jars.-->
+      <pathelement location="${java.home}/../lib/tools.jar"/>
+      <path refid="nonsystem.build.classpath"/>
+      <pathelement location="${basedir}/target/examples/schema/classes/xfire-client/jdk14"/>
+    </path>
+
+  </target>
+
+  <target name="get-test-sysprops">
+    <property name="in.apt.src.test.dir" value="${basedir}/src/samples/xfire-client"/>
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}" refid="build.classpath"/>
     <propertyset id="test.sysprops">
       <propertyref name="in.apt.src.test.dir"/>
       <propertyref name="enunciate.sample.src.dir"/>
@@ -38,26 +32,9 @@
     </propertyset>
   </target>
 
-  <target name="init" depends="base.init, -init"/>
-
-  <target name="compile-shapes">
-    <mkdir dir="${test.build.dir}"/>
-    <javac destdir="${test.build.dir}" debug="true">
-      <src>
-        <pathelement location="src/samples/schema"/>
-      </src>
-      <classpath refid="base.libs"/>
-    </javac>
-  </target>
-
-  <target name="compile-tests" depends="compile-shapes, base.compile-tests"/>
-
-  <target name="test" depends="shapes, base.test"/>
-
-  <target name="shapes" depends="compile-main">
+  <target name="shapes" depends="get-build-classpath">
     <path id="enunciate.classpath">
-      <path refid="base.libs"/>
-      <path refid="core.libs"/>
+      <path refid="build.classpath"/>
       <pathelement location="${build.dir}"/>
     </path>
 
@@ -68,5 +45,19 @@
       <reference refid="enunciate.classpath"/>
     </antcall>
   </target>
+
+  <target name="compile-shapes" depends="get-tools-classpath">
+    <mkdir dir="${test.build.dir}"/>
+    <javac destdir="${test.build.dir}" debug="true">
+      <src>
+        <pathelement location="src/samples/schema"/>
+      </src>
+      <classpath refid="tools.classpath"/>
+    </javac>
+  </target>
+
+  <target name="compile-tests" depends="compile-shapes, base.compile-tests"/>
+
+  <target name="test" depends="shapes, base.test"/>
 
 </project>

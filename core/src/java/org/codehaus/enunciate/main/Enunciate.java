@@ -520,7 +520,8 @@ public class Enunciate {
    */
   public void copyFile(File from, File to) throws IOException {
     FileChannel srcChannel = new FileInputStream(from).getChannel();
-    if (!to.exists()) {
+    to = to.getAbsoluteFile();
+    if ((!to.exists()) && (to.getParentFile() != null)) {
       to.getParentFile().mkdirs();
     }
 

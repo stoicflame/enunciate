@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project version="4" relativePaths="false">
+<project version="4" relativePaths="true">
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
   </component>
@@ -31,6 +31,9 @@
       <entry name="?*.html" />
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
+      <entry name="?*.fmt" />
+      <entry name="?*.xsd" />
+      <entry name="?*.wsdl" />
     </wildcardResourcePatterns>
   </component>
   <component name="DataSourceManagerImpl" />
@@ -487,44 +490,28 @@
     </LanguageOptions>
   </component>
   <component name="libraryTable">
-    <library name="base">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/activation-1.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jaxb-api-2.1.2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jaxws-api.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jsr181-api.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
-    </library>
     <library name="core">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/core/apt-jelly-2.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/core/commons-beanutils-1.7.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/core/commons-digester-1.7.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/core/commons-logging-1.0.4.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/core/freemarker-2.3.6.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-digester/commons-digester/1.7/commons-digester-1.7.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/net/sf/apt-jelly/apt-jelly/2.3/apt-jelly-2.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/freemarker/freemarker/2.3.6/freemarker-2.3.6.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-logging/commons-logging-api/1.0.4/commons-logging-api-1.0.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/xml/bind/jaxb-api/2.0/jaxb-api-2.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/activation/activation/1.1/activation-1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/jws/jsr181-api/1.0-MR1/jsr181-api-1.0-MR1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/xml/ws/jaxws-api/2.0/jaxws-api-2.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="rest">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/rest/jettison-1.0-beta-1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/jaxb-impl-2.1.2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/servlet-api-2.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/spring-1.2.8.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/stax-api-1.0.1.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
-    </library>
-    <library name="test">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/test/easymock-2.2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/test/junit-3.8.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/test/relaxngDatatype.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/test/xsom.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/com/sun/xml/bind/jaxb-impl/2.0/jaxb-impl-2.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/jettison/jettison/1.0-beta-1/jettison-1.0-beta-1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.8/spring-1.2.8.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -539,21 +526,20 @@
     </library>
     <library name="xfire-core">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/xfire-core/jdom-1.0.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/xfire-core/mail-1.4.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/xfire-core/wstx-asl-2.9.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/xfire-core/xfire-all-1.2.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/mail/mail/1.4/mail-1.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/woodstox/wstx-asl/2.9.3/wstx-asl-2.9.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/xfire/xfire-all/1.2.2/xfire-all-1.2.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/jdom/jdom/1.0/jdom-1.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
     <library name="xfire">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/share/jaxb-impl-2.1.2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/servlet-api-2.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/spring-1.2.8.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/stax-api-1.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/share/wsdl4j-1.5.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/com/sun/xml/bind/jaxb-impl/2.0/jaxb-impl-2.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.8/spring-1.2.8.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

@@ -115,7 +115,8 @@ public class TestFullAPI extends TestCase {
     assertNotNull(imports.get(CITE_NAMESPACE));
     assertNotNull(imports.get(FULL_NAMESPACE));
 
-    ByteArrayOutputStream tempSchema = new ByteArrayOutputStream();
+    File tempSchemaFile = new File(dataSchemaFile.getParentFile(), "temp.xsd");
+    FileOutputStream tempSchemaStream = new FileOutputStream(tempSchemaFile);
     TransformerFactory tFactory = TransformerFactory.newInstance();
     Transformer transformer = tFactory.newTransformer();
     Element schemaElement = schema.getElement();
@@ -126,35 +127,16 @@ public class TestFullAPI extends TestCase {
 
     //write out the wsdl schema to its xml form so we can parse it with XSOM...
     DOMSource source = new DOMSource(schemaElement);
-    StreamResult result = new StreamResult(tempSchema);
+    StreamResult result = new StreamResult(tempSchemaStream);
     transformer.transform(source, result);
-    tempSchema.close();
+    tempSchemaStream.close();
 
     //set up the XSOM Parser.
     XSOMParser parser = new XSOMParser();
     parser.setErrorHandler(new ThrowEverythingHandler()); //throw all errors and warnings.
-    parser.setEntityResolver(new EntityResolver() { //make sure we can resolve the schema imports.
-      public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        if ("cite.xsd".equals(systemId)) {
-          return new InputSource(new FileReader(citationSchemaFile));
-        }
-        else if ("data.xsd".equals(systemId)) {
-          return new InputSource(new FileReader(dataSchemaFile));
-        }
-        else if ("full.xsd".equals(systemId)) {
-          return new InputSource(new FileReader(fullSchemaFile));
-        }
-        else if ("default.xsd".equals(systemId)) {
-          return new InputSource(new FileReader(defaultSchemaFile));
-        }
-        else {
-          throw new SAXException("Unknown entity: " + systemId);
-        }
-      }
-    });
 
     //make sure the schema included in the wsdl is correct.
-    parser.parse(new ByteArrayInputStream(tempSchema.toByteArray()));
+    parser.parse(tempSchemaFile.toURL());
     XSSchemaSet schemaSet = parser.getResult();
     XSSchema wsdlSchema = schemaSet.getSchema(FULL_NAMESPACE);
     assertNotNull(wsdlSchema);

@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="rest" basedir=".">
+<project default="install" name="rest" basedir=".">
 
   <import file="../../build-module.xml"/>
-
-  <path id="build.classpath">
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-    <path refid="rest.libs"/>
-
-    <fileset dir="${core.basedir}/target">
-      <include name="${jar.pattern}"/>
-    </fileset>
-  </path>
 
   <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.rest.RESTDeploymentModule"/>
 

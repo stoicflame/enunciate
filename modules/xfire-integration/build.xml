@@ -1,55 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="xfire-integration" basedir=".">
+<project default="test" name="xfire-integration" basedir=".">
 
   <import file="../../build-module.xml"/>
-
-  <path id="build.classpath">
-
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-    <path refid="rest.libs"/>
-    <path refid="xfire.core.libs"/>
-    <path refid="xfire.server.libs"/>
-    <path refid="xfire.client.libs"/>
-
-    <fileset dir="${core.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.jaxws.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.xml.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.xfire-client.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.docs.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.xfire.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <fileset dir="${modules.rest.basedir}/target">
-      <include name="${jar.pattern}"/>
-      <include name="${tools.jar.pattern}"/>
-    </fileset>
-
-    <pathelement location="${basedir}/target/examples/full/classes/xfire-client/jdk14"/>
-  </path>
 
   <available property="container.test.support.exists" file="${container.test.support.file}"/>
   <fail unless="container.test.support.exists">
@@ -78,13 +31,7 @@
   <import file="${container.test.support.file}"/>
 
   <!--no-op because there are no java sources.  this is a test module.-->
-  <target name="compile-main" depends="base.init, -compile-main"/>
-  <target name="jar-tools"/>
-
-  <!--no-op to preserve our own properties when running the tests.-->
-  <target name="init"/>
-
-  <target name="enunciate-full-api" depends="jar-main">
+  <target name="enunciate-full-api">
     <mkdir dir="${user.dir}/target/resources"/>
     <copy todir="${user.dir}/target/resources">
       <fileset dir="${enunciate.basedir}/src/samples/full">
@@ -105,12 +52,7 @@
       <src>
         <pathelement location="${enunciate.sample.src.dir}/full"/>
       </src>
-      <classpath>
-        <path refid="base.libs"/>
-        <fileset dir="${core.basedir}/target">
-          <include name="${tools.jar.pattern}"/>
-        </fileset>
-      </classpath>
+      <classpath refid="build.classpath"/>
     </javac>
   </target>
 

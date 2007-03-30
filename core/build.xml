@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="jar" name="core" basedir=".">
+<project default="install" name="core" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <import file="../build-module.xml"/>
 
-  <path id="build.classpath">
-    <path refid="base.libs"/>
-    <path refid="core.libs"/>
-  </path>
-
-  <property name="in.apt.src.test.dir" value="${basedir}/src/samples/contract"/>
-
-  <target name="-init">
-    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}">
-      <path>
-        <path refid="build.classpath"/>
-        <path refid="test.libs"/>
-      </path>
-    </pathconvert>
+  <target name="get-test-sysprops" depends="get-build-classpath">
+    <property name="in.apt.src.test.dir" value="${basedir}/src/samples/contract"/>
+    <pathconvert property="apt.test.class.path" pathsep="${path.separator}" dirsep="${file.separator}" refid="build.classpath"/>
 
     <propertyset id="test.sysprops">
       <propertyref name="in.apt.src.test.dir"/>
@@ -25,6 +14,20 @@
     </propertyset>
   </target>
 
-  <target name="init" depends="base.init, -init"/>
+  <target name="install" description="install the main jar into the local repo." depends="base.install">
+    <copy file="core-test-pom.xml" todir="target" failonerror="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+
+    <artifact:pom id="core.test.pom" file="target/core-test-pom.xml"/>
+
+    <jar jarfile="target/enunciate-core-test-${version}.jar" basedir="target/test-classes"/>
+    
+    <artifact:install file="target/enunciate-core-test-${version}.jar">
+      <pom refid="core.test.pom"/>
+    </artifact:install>
+  </target>
 
 </project>

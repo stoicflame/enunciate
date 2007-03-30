@@ -10,11 +10,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="java5-tools" level="application" />
-    <orderEntry type="library" name="base" level="project" />
-    <orderEntry type="library" name="core" level="project" />
-    <orderEntry type="library" name="test" level="project" />
-    <orderEntry type="module" module-name="base" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="xfire-client" />
     <orderEntryProperties />
