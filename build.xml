@@ -240,6 +240,8 @@
 
   <target name="scripts" description="Generates the executable scripts.">
 
+    <fail>sorry, can't create scripts yet; got to figure out how to get the dependency libs now that they're not in the source tree.</fail>
+
     <path id="script.classpath">
       <fileset dir="${lib.dir}">
         <include name="**/*.jar"/>
@@ -284,6 +286,8 @@
 
       <mapper type="flatten"/>
     </copy>
+
+    <fail>sorry, can't create dist yet: need to figure out how to get all the dependencies in the dist now.</fail>
 
     <!--create the zip dist.-->
     <zip destfile="target/${dist.name}.zip">

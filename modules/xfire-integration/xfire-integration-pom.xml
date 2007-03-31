@@ -26,6 +26,12 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>rest</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>xml</artifactId>
       <version>@VERSION@</version>
     </dependency>

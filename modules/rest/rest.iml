@@ -10,8 +10,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="library" name="rest" level="project" />
+    <orderEntry type="module" module-name="core" exported="" />
+    <orderEntry type="library" exported="" name="rest" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

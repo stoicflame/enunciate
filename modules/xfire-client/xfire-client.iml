@@ -12,9 +12,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="library" name="xfire-core" level="project" />
-    <orderEntry type="library" name="xfire-client" level="project" />
+    <orderEntry type="module" module-name="core" exported="" />
+    <orderEntry type="library" exported="" name="xfire-core" level="project" />
+    <orderEntry type="library" exported="" name="xfire-client" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -28,6 +28,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/target/examples/schema/classes/xfire-client/jdk14" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

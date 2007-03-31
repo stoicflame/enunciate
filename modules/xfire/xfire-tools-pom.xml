@@ -67,92 +67,75 @@
       <exclusions>
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfireaegis</artifactId>
+          <artifactId>xfire-aegis</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfireplexus</artifactId>
+          <artifactId>xfire-plexus</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirewssecurity</artifactId>
+          <artifactId>xfire-ws-security</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirepicocontainer</artifactId>
+          <artifactId>xfire-picocontainer</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirecore</artifactId>
+          <artifactId>xfire-core</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirexmpp</artifactId>
+          <artifactId>xfire-xmpp</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejaxb2</artifactId>
+          <artifactId>xfire-jaxb2</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejms</artifactId>
+          <artifactId>xfire-jms</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejava5</artifactId>
+          <artifactId>xfire-java5</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfiregenerator</artifactId>
+          <artifactId>xfire-generator</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirexmlbeans</artifactId>
+          <artifactId>xfire-xmlbeans</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirecastor</artifactId>
+          <artifactId>xfire-castor</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfireannotations</artifactId>
+          <artifactId>xfire-annotations</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejaxb</artifactId>
+          <artifactId>xfire-jaxb</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejaxws</artifactId>
+          <artifactId>xfire-jaxws</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfireloom</artifactId>
+          <artifactId>xfire-loom</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirespring</artifactId>
+          <artifactId>xfire-spring</artifactId>
         </exclusion>
-
         <exclusion>
           <groupId>org.codehaus.xfire</groupId>
-          <artifactId>xfirejibx</artifactId>
+          <artifactId>xfire-jibx</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

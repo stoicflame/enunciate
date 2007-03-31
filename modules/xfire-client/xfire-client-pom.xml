@@ -38,13 +38,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
 </project>

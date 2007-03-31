@@ -2,6 +2,8 @@
 
 <project default="test" name="xfire-integration" basedir=".">
 
+  <property name="build.dir" value="target/examples/full/classes/xfire-client/jdk14"/>
+
   <import file="../../build-module.xml"/>
 
   <available property="container.test.support.exists" file="${container.test.support.file}"/>
@@ -30,8 +32,7 @@
   </fail>
   <import file="${container.test.support.file}"/>
 
-  <!--no-op because there are no java sources.  this is a test module.-->
-  <target name="enunciate-full-api">
+  <target name="init-example-api">
     <mkdir dir="${user.dir}/target/resources"/>
     <copy todir="${user.dir}/target/resources">
       <fileset dir="${enunciate.basedir}/src/samples/full">
@@ -40,12 +41,14 @@
     </copy>
     <copy file="src/dummy-license.txt" todir="${user.dir}/target" overwrite="true"/>
     <copy file="src/custom_spring.xml" todir="${user.dir}/target" overwrite="true"/>
-    <antcall target="enunciate-example-api">
-      <param name="example" value="full"/>
-      <param name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
-      <param name="enunciate.target" value="package"/>
-    </antcall>
+
+    <property name="example" value="full"/>
+    <property name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
+    <property name="enunciate.target" value="package"/>
   </target>
+
+  <!--no-op because there are no java sources.  this is a test module.-->
+  <target name="enunciate-full-api" depends="init-example-api, enunciate-example-api"/>
 
   <target name="compile-tests" depends="base.compile-tests">
     <javac destdir="${test.build.dir}" debug="true">
@@ -56,7 +59,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="enunciate-full-api">
+  <target name="test" depends="enunciate-full-api, compile-tests">
     <antcall target="-init-container-tests" inheritall="true"/>
 
     <property name="container.port" value="8080"/>
@@ -77,8 +80,10 @@
       </daemons>
       <sequential>
         <antcall target="${container.test.delay.target}" inheritall="true"/>
-        <antcall target="-exec-container-tests" inheritall="true">
-          <reference refid="test.sysprops"/>
+        <antcall target="-test">
+          <reference refid="nonsystem.build.classpath"/>
+          <reference refid="build.classpath"/>
+          <reference refid="test.classpath"/>
         </antcall>
         <antcall target="${stop.container.target}" inheritall="true"/>
       </sequential>
@@ -98,7 +103,5 @@
   <target name="-init-container-tests" if="init.container.target">
     <antcall target="${init.container.target}"/>
   </target>
-
-  <target name="-exec-container-tests" depends="base.test"/>
 
 </project>

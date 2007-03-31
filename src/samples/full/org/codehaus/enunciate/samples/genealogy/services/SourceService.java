@@ -50,8 +50,7 @@ public interface SourceService {
   @Oneway
   @Noun ("source")
   @Verb ( VerbType.create )
-  void addSource(@NounValue
-  Source source);
+  void addSource(@NounValue Source source);
 
   /**
    * Reads a source from the database.

@@ -32,18 +32,12 @@
     </propertyset>
   </target>
 
-  <target name="shapes" depends="get-build-classpath">
-    <path id="enunciate.classpath">
-      <path refid="build.classpath"/>
-      <pathelement location="${build.dir}"/>
-    </path>
+  <target name="shapes" depends="compile-main, init-enunciate-shapes, enunciate-example-api"/>
 
-    <antcall target="enunciate-example-api">
-      <param name="enunciate.target" value="compile"/>
-      <param name="example" value="schema"/>
-      <param name="example.dir" value="${basedir}/src/samples/schema"/>
-      <reference refid="enunciate.classpath"/>
-    </antcall>
+  <target name="init-enunciate-shapes">
+    <property name="enunciate.target" value="compile"/>
+    <property name="example" value="schema"/>
+    <property name="example.dir" value="${basedir}/src/samples/schema"/>
   </target>
 
   <target name="compile-shapes" depends="get-tools-classpath">

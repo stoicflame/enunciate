@@ -27,17 +27,16 @@ import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.xfire.MessageContext;
-import org.codehaus.xfire.exchange.MessageExchange;
-import org.codehaus.xfire.exchange.OutMessage;
-import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
 import org.codehaus.xfire.aegis.type.TypeMapping;
+import org.codehaus.xfire.exchange.MessageExchange;
+import org.codehaus.xfire.exchange.OutMessage;
+import org.codehaus.xfire.soap.SoapConstants;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -211,7 +210,7 @@ public class TestFullAPI extends TestCase {
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod("GET");
     connection.connect();
-    assertEquals(HttpServletResponse.SC_OK, connection.getResponseCode());
+    assertEquals(200, connection.getResponseCode());
 
     SourceXFireType sourceType = new SourceXFireType();
     TypeMapping defaultTypeMapping = new DefaultTypeMappingRegistry(true).getDefaultTypeMapping();
@@ -225,7 +224,7 @@ public class TestFullAPI extends TestCase {
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "invalid")).openConnection();
     connection.setRequestMethod("GET");
     connection.connect();
-    assertEquals(HttpServletResponse.SC_OK, connection.getResponseCode());
+    assertEquals(200, connection.getResponseCode());
     assertTrue("expected empty data returned", connection.getInputStream().read() < 0);
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "throw")).openConnection();
@@ -238,7 +237,7 @@ public class TestFullAPI extends TestCase {
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "valid")).openConnection();
     connection.setRequestMethod("DELETE");
     connection.connect();
-    assertEquals(HttpServletResponse.SC_METHOD_NOT_ALLOWED, connection.getResponseCode());
+    assertFalse(200 == connection.getResponseCode());
 
     String personConnectString = String.format("http://localhost:%s/%s/rest/person", port, context);
     url = new URL(personConnectString);
