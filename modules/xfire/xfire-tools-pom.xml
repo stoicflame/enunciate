@@ -2,13 +2,13 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>xfire-tools</artifactId>
+  <artifactId>enunciate-xfire-tools</artifactId>
   <version>@VERSION@</version>
 
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core-tools</artifactId>
+      <artifactId>enunciate-core-tools</artifactId>
       <version>@VERSION@</version>
     </dependency>
 

@@ -2,19 +2,19 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>rest</artifactId>
+  <artifactId>enunciate-rest</artifactId>
   <version>@VERSION@</version>
 
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>enunciate-core</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>rest-tools</artifactId>
+      <artifactId>enunciate-rest-tools</artifactId>
       <version>@VERSION@</version>
     </dependency>
 

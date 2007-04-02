@@ -2,19 +2,19 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>xml</artifactId>
+  <artifactId>enunciate-xml</artifactId>
   <version>@VERSION@</version>
 
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>enunciate-core</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core-test</artifactId>
+      <artifactId>enunciate-core-test</artifactId>
       <version>@VERSION@</version>
       <scope>test</scope>
     </dependency>

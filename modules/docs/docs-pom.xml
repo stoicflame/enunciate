@@ -2,25 +2,26 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>docs</artifactId>
+  <artifactId>enunciate-docs</artifactId>
   <version>@VERSION@</version>
 
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>enunciate-core</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core-test</artifactId>
+      <artifactId>enunciate-core-test</artifactId>
       <version>@VERSION@</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>xfire-client</artifactId>
+      <artifactId>enunciate-xfire-client</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
