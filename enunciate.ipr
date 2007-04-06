@@ -518,9 +518,9 @@
     </library>
     <library name="xfire-client">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/xfire-client/commons-codec-1.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/xfire-client/commons-httpclient-3.0.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/wsdl4j/wsdl4j/1.5.2/wsdl4j-1.5.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-codec/commons-codec/1.3/commons-codec-1.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-httpclient/commons-httpclient/3.0/commons-httpclient-3.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -534,7 +534,9 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/xfire/xfire-all/1.2.2/xfire-all-1.2.2-sources.jar!/" />
+      </SOURCES>
     </library>
     <library name="xfire">
       <CLASSES>

@@ -56,6 +56,7 @@ public class TestFullAPI extends TestCase {
   public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
   public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";
   public static final String CITE_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/cite";
+  public static final String RELATIONSHIP_NAMESPACE = "http://services.genealogy.samples.enunciate.codehaus.org/";
 
   /**
    * Tests the xml artifact generation against the "full" API.
@@ -73,6 +74,10 @@ public class TestFullAPI extends TestCase {
     WsdlConfig wsdlConfig = new WsdlConfig();
     wsdlConfig.setNamespace(FULL_NAMESPACE);
     wsdlConfig.setFile("full.wsdl");
+    xmlModule.addWsdlConfig(wsdlConfig);
+    wsdlConfig = new WsdlConfig();
+    wsdlConfig.setNamespace(RELATIONSHIP_NAMESPACE);
+    wsdlConfig.setFile("relationship.wsdl");
     xmlModule.addWsdlConfig(wsdlConfig);
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
@@ -93,15 +98,17 @@ public class TestFullAPI extends TestCase {
     final File citationSchemaFile = new File(enunciate.getGenerateDir(), "xml/cite.xsd");
     final File fullSchemaFile = new File(enunciate.getGenerateDir(), "xml/full.xsd");
     final File defaultSchemaFile = new File(enunciate.getGenerateDir(), "xml/default.xsd");
-    File wsdlFile = new File(enunciate.getGenerateDir(), "xml/full.wsdl");
+    File fullWsdlFile = new File(enunciate.getGenerateDir(), "xml/full.wsdl");
+    File relationshipWsdlFile = new File(enunciate.getGenerateDir(), "xml/relationship.wsdl");
 
     assertTrue(dataSchemaFile.exists());
     assertTrue(citationSchemaFile.exists());
-    assertTrue(wsdlFile.exists());
+    assertTrue(fullWsdlFile.exists());
+    assertTrue(relationshipWsdlFile.exists());
 
     //make sure the wsdl is built correctly
     WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-    Definition definition = wsdlReader.readWSDL(null, wsdlFile.toURL().toString());
+    Definition definition = wsdlReader.readWSDL(null, fullWsdlFile.toURL().toString());
     assertEquals(FULL_NAMESPACE, definition.getTargetNamespace());
     Types types = definition.getTypes();
     List extensibilityElements = types.getExtensibilityElements();
@@ -993,12 +1000,18 @@ public class TestFullAPI extends TestCase {
     XSModelGroup modelGroup = particle.getTerm().asModelGroup();
     assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
     XSParticle[] childElements = modelGroup.getChildren();
-    assertEquals(3, childElements.length);
+    assertEquals(4, childElements.length);
     for (XSParticle childElement : childElements) {
       assertTrue(childElement.getTerm().isElementDecl());
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
-      if ("type".equals(childElementName)) {
+      if ("id".equals(childElementName)) {
+        assertEquals(0, childElement.getMinOccurs());
+        assertEquals(1, childElement.getMaxOccurs());
+        XSType relationshipIdType = elementDecl.getType();
+        assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", relationshipIdType);
+      }
+      else if ("type".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
         XSType relationshipTypeType = elementDecl.getType();

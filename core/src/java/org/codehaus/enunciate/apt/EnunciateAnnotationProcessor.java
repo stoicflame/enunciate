@@ -19,9 +19,11 @@ package org.codehaus.enunciate.apt;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.ClassType;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.XmlTransient;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
@@ -31,6 +33,10 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.template.freemarker.*;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
@@ -116,15 +122,20 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
-      if (isEndpointInterface(declaration)) {
-        EndpointInterface endpointInterface = new EndpointInterface(declaration);
-        info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
-        model.add(endpointInterface);
-      }
-      else if (isRESTEndpoint(declaration)) {
-        RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
-        info("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
-        model.add(restEndpoint);
+      final boolean isEndpointInterface = isEndpointInterface(declaration);
+      final boolean isRESTEndpoint = isRESTEndpoint(declaration);
+      if (isEndpointInterface || isRESTEndpoint) {
+        if (isEndpointInterface) {
+          EndpointInterface endpointInterface = new EndpointInterface(declaration);
+          info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
+          model.add(endpointInterface);
+        }
+
+        if (isRESTEndpoint) {
+          RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
+          info("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
+          model.add(restEndpoint);
+        }
       }
       else if (isPotentialSchemaType(declaration)) {
         TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
@@ -249,19 +260,46 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     Collection<AnnotationMirror> annotationMirrors = declaration.getAnnotationMirrors();
+    boolean explicitXMLTypeOrElement = false;
     for (AnnotationMirror mirror : annotationMirrors) {
       AnnotationTypeDeclaration annotationDeclaration = mirror.getAnnotationType().getDeclaration();
       if (annotationDeclaration != null) {
         String fqn = annotationDeclaration.getQualifiedName();
         //exclude all XmlTransient types and all jaxws types.
-        if ("javax.xml.bind.annotation.XmlTransient".equals(fqn) || (fqn.startsWith("javax.xml.ws") || (fqn.startsWith("javax.jws")))) {
+        if ("org.codehaus.enunciate.XmlTransient".equals(fqn)
+          || "javax.xml.bind.annotation.XmlTransient".equals(fqn)
+          || (fqn.startsWith("javax.xml.ws")
+          || (fqn.startsWith("javax.jws")))) {
           debug("%s isn't a potential schema type because of annotation %s.", declaration.getQualifiedName(), fqn);
           return false;
+        }
+        else {
+          explicitXMLTypeOrElement = ("javax.xml.bind.annotation.XmlType".equals(fqn))
+            || ("javax.xml.bind.annotation.XmlRootElement".equals(fqn));
         }
       }
     }
 
-    return true;
+    return explicitXMLTypeOrElement || !isThrowable(declaration);
+  }
+
+  /**
+   * Whether the specified declaration is throwable.
+   *
+   * @param declaration The declaration to determine whether it is throwable.
+   * @return Whether the specified declaration is throwable.
+   */
+  protected boolean isThrowable(TypeDeclaration declaration) {
+    if (!(declaration instanceof ClassDeclaration)) {
+      return false;
+    }
+    else if (Throwable.class.getName().equals(declaration.getQualifiedName())) {
+      return false;
+    }
+    else {
+      ClassType superClass = ((ClassDeclaration) declaration).getSuperclass();
+      return ((DecoratedTypeMirror) TypeMirrorDecorator.decorate(superClass)).isInstanceOf(Throwable.class.getName());
+    }
   }
 
   /**

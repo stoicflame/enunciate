@@ -49,7 +49,7 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
   public void invoke(MessageContext context) throws Exception {
     XFireFault fault = (XFireFault) context.getExchange().getFaultMessage().getBody();
     Throwable cause = fault.getCause();
-    if ((cause != null) && (cause.getClass().isAnnotationPresent(WebFault.class))) {
+    if (cause != null) {
       handleFault(context, fault, cause, null /*fault info is ignored*/);
     }
   }

@@ -23,9 +23,11 @@ import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Event;
 import org.codehaus.enunciate.samples.genealogy.client.data.Person;
 import org.codehaus.enunciate.samples.genealogy.client.data.PersonXFireType;
+import org.codehaus.enunciate.samples.genealogy.client.data.Relationship;
 import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
+import org.codehaus.enunciate.samples.genealogy.client.services.impl.RelationshipServiceImpl;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
@@ -46,6 +48,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A very big test of the functionality of the full API deployed with the XFire client and server modules.
@@ -65,7 +68,7 @@ public class TestFullAPI extends TestCase {
    * Tests the full API
    */
   public void testFullSOAPAPI() throws Exception {
-    int port = 8080;
+    int port = 8081;
     if (System.getProperty("container.port") != null) {
       port = Integer.parseInt(System.getProperty("container.port"));
     }
@@ -186,6 +189,21 @@ public class TestFullAPI extends TestCase {
     }
 
     assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
+
+    RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap/RelationshipServiceService");
+    List list = relationshipService.getRelationships("someid");
+    for (int i = 0; i < list.size(); i++) {
+      Relationship relationship = (Relationship) list.get(i);
+      assertEquals(String.valueOf(i), relationship.getId());
+    }
+
+    try {
+      relationshipService.getRelationships("throw");
+      fail("Should have thrown the relationship service exception, even though it wasn't annotated with @WebFault.");
+    }
+    catch (RelationshipException e) {
+      assertEquals("hi", e.getMessage());
+    }
 
     //todo: test attachments as service parameters.
     //todo: test IN/OUT and OUT parameters when the xfire-client module supports them.

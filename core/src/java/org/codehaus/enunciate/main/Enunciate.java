@@ -128,79 +128,33 @@ public class Enunciate {
   }
 
   /**
+   * Get a stepper that can be used to step through the Enunciate mechanism, which will be initialized.
+   *
+   * @return A stepper.
+   * @throws java.util.ConcurrentModificationException If a stepper has already been retrieved.
+   * @throws EnunciateException If there was an error initializing the Enunciate mechanism.
+   * @throws IOException If there was an error initializing the Enunciate mechanism.
+   */
+  public Stepper getStepper() throws EnunciateException, IOException {
+    return new Stepper();
+  }
+
+  /**
    * Execute the mechanism.
    */
   public void execute() throws EnunciateException, IOException {
-    if (this.config == null) {
-      this.config = loadConfig();
-    }
+    Enunciate.Stepper stepper = getStepper();
+    stepper.stepTo(this.target);
+    stepper.close();
+  }
 
-    final List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
-    int target = getTarget().ordinal();
-
-    info("\n\nInitializing Enunciate mechanism.");
-    for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Initializing module %s.", deploymentModule.getName());
-      deploymentModule.init(this);
-    }
-
-    if (target >= Target.GENERATE.ordinal()) {
-      info("\n\nEntering %s step.", Target.GENERATE);
-      File genDir = getGenerateDir();
-      if (genDir == null) {
-        genDir = createTempDir();
-        debug("No generate directory specified, assigned %s.", genDir);
-        setGenerateDir(genDir);
-      }
-
-      invokeApt(getSourceFiles());
-    }
-
-    if (target >= Target.COMPILE.ordinal()) {
-      info("\n\nEntering %s step.", Target.COMPILE);
-      File destdir = getCompileDir();
-      if (destdir == null) {
-        destdir = createTempDir();
-        debug("No compile directory specified, assigned %s.", destdir);
-        setCompileDir(destdir);
-      }
-
-      for (DeploymentModule deploymentModule : deploymentModules) {
-        debug("Invoking %s step for module %s", Enunciate.Target.COMPILE, deploymentModule.getName());
-        deploymentModule.step(Target.COMPILE);
-      }
-    }
-
-    if (target >= Target.BUILD.ordinal()) {
-      info("\n\nEntering %s step.", Target.BUILD);
-      File buildDir = getBuildDir();
-      if (buildDir == null) {
-        buildDir = createTempDir();
-        debug("No build directory specified, assigned %s.", buildDir);
-        setBuildDir(buildDir);
-      }
-
-      for (DeploymentModule deploymentModule : deploymentModules) {
-        debug("Invoking %s step for module %s", Enunciate.Target.BUILD, deploymentModule.getName());
-        deploymentModule.step(Target.BUILD);
-      }
-    }
-
-    if (target >= Target.PACKAGE.ordinal()) {
-      info("\n\nEntering %s step.", Target.PACKAGE);
-      File packageDir = getPackageDir();
-      if (packageDir == null) {
-        packageDir = createTempDir();
-        debug("No package directory specified, assigned %s.", packageDir);
-        setPackageDir(packageDir);
-      }
-
-      for (DeploymentModule deploymentModule : deploymentModules) {
-        debug("Invoking %s step for module %s", Enunciate.Target.PACKAGE, deploymentModule.getName());
-        deploymentModule.step(Target.PACKAGE);
-      }
-    }
-
+  /**
+   * Logic for handling the closing of the Enunciate mechanism.  Closes the modules and exports
+   * the artifacts.
+   *
+   * @param deploymentModules The deployment modules to close.
+   */
+  protected void doClose(List<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
     info("\n\nClosing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("Closing module %s.", deploymentModule.getName());
@@ -223,6 +177,100 @@ public class Enunciate {
         warn("WARNING: Unknown artifact '%s'.  Artifact will not be exported.", export);
       }
     }
+  }
+
+  /**
+   * Do the package logic.
+   *
+   * @param deploymentModules The deployment modules to use.
+   */
+  protected void doPackage(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+    File packageDir = getPackageDir();
+    if (packageDir == null) {
+      packageDir = createTempDir();
+      debug("No package directory specified, assigned %s.", packageDir);
+      setPackageDir(packageDir);
+    }
+
+    for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Invoking %s step for module %s", Target.PACKAGE, deploymentModule.getName());
+      deploymentModule.step(Target.PACKAGE);
+    }
+  }
+
+  /**
+   * Do the build logic.
+   *
+   * @param deploymentModules The deployment modules to use.
+   */
+  protected void doBuild(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+    File buildDir = getBuildDir();
+    if (buildDir == null) {
+      buildDir = createTempDir();
+      debug("No build directory specified, assigned %s.", buildDir);
+      setBuildDir(buildDir);
+    }
+
+    for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Invoking %s step for module %s", Target.BUILD, deploymentModule.getName());
+      deploymentModule.step(Target.BUILD);
+    }
+  }
+
+  /**
+   * Do the compile logic.
+   *
+   * @param deploymentModules The deployment modules to use.
+   */
+  protected void doCompile(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+    File destdir = getCompileDir();
+    if (destdir == null) {
+      destdir = createTempDir();
+      debug("No compile directory specified, assigned %s.", destdir);
+      setCompileDir(destdir);
+    }
+
+    for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Invoking %s step for module %s", Target.COMPILE, deploymentModule.getName());
+      deploymentModule.step(Target.COMPILE);
+    }
+  }
+
+  /**
+   * Do the generate logic.
+   *
+   * @param deploymentModules The deployment modules to use.
+   */
+  protected void doGenerate(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+    File genDir = getGenerateDir();
+    if (genDir == null) {
+      genDir = createTempDir();
+      debug("No generate directory specified, assigned %s.", genDir);
+      setGenerateDir(genDir);
+    }
+
+    invokeApt(getSourceFiles());
+  }
+
+  /**
+   * Do the initialization logic.  Loads and initializes the deployment modules.
+   *
+   * @return The deployment modules that were loaded and initialized.
+   */
+  protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
+    if (this.config == null) {
+      this.config = loadConfig();
+    }
+
+    List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
+
+    info("\n\nInitializing Enunciate mechanism.");
+    for (DeploymentModule deploymentModule : deploymentModules) {
+      debug("Initializing module %s.", deploymentModule.getName());
+      deploymentModule.init(this);
+    }
+
+    return deploymentModules;
   }
 
   /**
@@ -883,5 +931,84 @@ public class Enunciate {
       return file.isDirectory();
     }
   };
+
+  /**
+   * Mechansim for stepping through the Enunciate build process.
+   */
+  public final class Stepper {
+
+    private final List<DeploymentModule> deploymentModules;
+    private Target nextTarget;
+
+    private Stepper() throws EnunciateException, IOException {
+      deploymentModules = doInit();
+      this.nextTarget = Target.GENERATE;
+    }
+
+    /**
+     * The next target that is to be executed.
+     *
+     * @return The next target that is to be executed.
+     */
+    public Target getNextTarget() {
+      return nextTarget;
+    }
+
+    /**
+     * Steps to the next target in the process.
+     */
+    public synchronized void step() throws EnunciateException, IOException {
+      if (this.nextTarget == null) {
+        throw new EnunciateExecutionException("All steps completed.");
+      }
+
+      info("\n\nEntering %s step....", this.nextTarget);
+
+      switch (this.nextTarget) {
+        case GENERATE:
+          doGenerate(this.deploymentModules);
+          this.nextTarget = Target.COMPILE;
+          break;
+        case COMPILE:
+          doCompile(this.deploymentModules);
+          this.nextTarget = Target.BUILD;
+          break;
+        case BUILD:
+          doBuild(this.deploymentModules);
+          this.nextTarget = Target.PACKAGE;
+          break;
+        case PACKAGE:
+          doPackage(this.deploymentModules);
+          this.nextTarget = null;
+          break;
+        default:
+          throw new IllegalStateException("Unknown next step: " + this.nextTarget);
+      }
+
+    }
+
+    /**
+     * Steps to the specified target.
+     *
+     * @param target The target to step to.
+     */
+    public synchronized void stepTo(Target target) throws EnunciateException, IOException {
+      if (this.nextTarget == null) {
+        throw new EnunciateExecutionException("Cannot step: stepper must be initialized.");
+      }
+
+      while ((this.nextTarget != null) && (this.nextTarget.ordinal() <= target.ordinal())) {
+        step();
+      }
+    }
+
+    /**
+     * Closes the stepper and the underlying enunciate mechanism.
+     */
+    public synchronized void close() throws EnunciateException, IOException {
+      doClose(this.deploymentModules);
+    }
+
+  }
 
 }

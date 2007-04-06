@@ -23,9 +23,28 @@ package org.codehaus.enunciate.samples.genealogy.data;
  */
 public class Relationship extends Assertion {
 
+  private String id;
   private RelationshipType type;
   private Name sourcePersonName;
   private Name targetPersonName;
+
+  /**
+   * The id of the relationship.
+   *
+   * @return The id of the relationship.
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * The id of the relationship.
+   *
+   * @param id The id of the relationship.
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 
   /**
    * The relationship type.

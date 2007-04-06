@@ -139,6 +139,18 @@ public class EnunciatedXFireExporter extends XFireExporter {
     super.setServiceFactory(serviceFactory);
   }
 
+
+  /**
+   * For some reason, the XFireExporter expects requires the service class to be an interface.  This is
+   * inconsistent with the JAXWS spec, so this fixes that inconsistency.
+   *
+   * @return The service bean.
+   */
+  @Override
+  protected Object getProxyForService() {
+    return getServiceBean();
+  }
+
   /**
    * Asserts that the specified service factory is a valid service factory for this exporter.
    *
