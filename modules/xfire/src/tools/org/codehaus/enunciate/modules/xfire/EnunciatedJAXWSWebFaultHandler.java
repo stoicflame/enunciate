@@ -57,17 +57,19 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
   @Override
   protected void handleFault(MessageContext context, XFireFault fault, Throwable cause, MessagePartInfo faultPart) throws XFireFault {
     Object faultBean = getFaultBean(cause, faultPart, context);
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(faultBean.getClass());
-      Marshaller marshaller = jaxbContext.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-      marshaller.setAttachmentMarshaller(new AttachmentMarshaller(context));
-      JDOMStreamWriter writer = new JDOMStreamWriter(fault.getDetail());
-      marshaller.marshal(faultBean, writer);
-    }
-    catch (JAXBException e) {
-      LOG.error("Unable to marshal the fault bean of type " + faultBean.getClass().getName() + ".", e);
-      //fall through... let the fault be handled by something else...
+    if (faultBean != null) {
+      try {
+        JAXBContext jaxbContext = JAXBContext.newInstance(faultBean.getClass());
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+        marshaller.setAttachmentMarshaller(new AttachmentMarshaller(context));
+        JDOMStreamWriter writer = new JDOMStreamWriter(fault.getDetail());
+        marshaller.marshal(faultBean, writer);
+      }
+      catch (JAXBException e) {
+        LOG.error("Unable to marshal the fault bean of type " + faultBean.getClass().getName() + ".", e);
+        //fall through... let the fault be handled by something else...
+      }
     }
   }
 
@@ -93,6 +95,10 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
 
     //doesn't conform to the spec pattern, use the generated fault bean class.
     Class faultBeanClass = getFaultBeanClass(faultClass);
+
+    if (faultBeanClass == null) {
+      return null;
+    }
 
     try {
       BeanInfo beanInfo = Introspector.getBeanInfo(faultBeanClass, Object.class);
@@ -127,7 +133,7 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
    * doesn't conform to the JAXWS pattern.
    *
    * @param faultClass The fault class.
-   * @return The fault bean class.
+   * @return The fault bean class, or null if it wasn't found.
    */
   public static Class getFaultBeanClass(Class<? extends Throwable> faultClass) {
     String faultBeanClassName;
@@ -146,12 +152,12 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
       faultBeanClassName = builder.toString();
     }
 
-    Class faultBeanClass;
+    Class faultBeanClass = null;
     try {
       faultBeanClass = ClassLoaderUtils.loadClass(faultBeanClassName, faultClass);
     }
     catch (ClassNotFoundException e) {
-      throw new XFireRuntimeException("Unable to load fault bean class.", e);
+      //fall through.  treat it as a runtime exception...
     }
     return faultBeanClass;
   }
@@ -172,7 +178,7 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
       //3. needs to have a constructor matching WebFault(String message, FaultBean faultBean, Throwable cause) {...}
       faultClass.getConstructor(String.class, getFaultInfoMethod.getReturnType(), Throwable.class);
 
-      conformsToJAXWSFaultPattern = true;
+      conformsToJAXWSFaultPattern = faultClass.isAnnotationPresent(WebFault.class);
     }
     catch (NoSuchMethodException e) {
       //fall through.  doesn't conform to the spec pattern.

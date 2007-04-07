@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# OS specific support
+DARWIN=false;
+case "`uname`" in
+  Darwin*)
+    DARWIN=true
+    ;;
+esac
+
 # Put some effort into finding ENUNCIATE_HOME (copies from ant's bash script)
 if [ -z "$ENUNCIATE_HOME" -o ! -d "$ENUNCIATE_HOME" ] ; then
   # try to find enunciate...
@@ -38,8 +46,10 @@ if [ ! -x $ENUNCIATE_JAVA_HOME/bin/java ] ; then
 fi
 
 if [ ! -f $ENUNCIATE_JAVA_HOME/lib/tools.jar ] ; then
-  echo "Error: unable to find tools.jar in $ENUNCIATE_JAVA_HOME/lib/tools.jar.  Does ENUNCIATE_JAVA_HOME or JAVA_HOME point to a correct Java 5+ SDK home directory?"
-  exit 1
+  if [ "$DARWIN" != "true" ] ; then
+    echo "Error: unable to find tools.jar in $ENUNCIATE_JAVA_HOME/lib/tools.jar.  Does ENUNCIATE_JAVA_HOME or JAVA_HOME point to a correct Java 5+ SDK home directory?"
+    exit 1
+  fi
 fi
 
 $ENUNCIATE_JAVA_HOME/bin/java -cp {UNIX_CLASSPATH}:$ENUNCIATE_HOME/{FULL_JAR_NAME}:$ENUNCIATE_JAVA_HOME/lib/tools.jar org.codehaus.enunciate.main.Main $@

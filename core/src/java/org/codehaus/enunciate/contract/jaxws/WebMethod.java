@@ -76,7 +76,12 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
         throw new ValidationException(getPosition(), "Unknown declaration for " + referenceType);
       }
 
-      webFaults.add(new WebFault((ClassDeclaration) declaration));
+      WebFault webFault = new WebFault((ClassDeclaration) declaration);
+
+      if (!webFault.isImplicitSchemaElement() || endpointInterface.getTargetNamespace().equals(webFault.getTargetNamespace())) {
+        //todo: remove this hack when you allow for faults, params, and request/response wrappers of a different target namespace...
+        webFaults.add(webFault);
+      }
     }
     this.webFaults = webFaults;
 

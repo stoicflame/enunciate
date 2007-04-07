@@ -64,6 +64,14 @@ public class XMLValidator extends BaseValidator {
             }
           }
         }
+        else if (webMessage instanceof WebFault) {
+          WebFault fault = ((WebFault) webMessage);
+          if (fault.isImplicitSchemaElement() && !webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(fault.getTargetNamespace())) {
+            result.addError(webMethod.getPosition(), "Enunciate doesn't (yet) allow web faults with target namespaces that are " +
+              "different from the target namespace of the endpoint interface that throws them.  If you must have a different namespace," +
+              "declare an explicit fault bean.");
+          }
+        }
 
         for (WebMessagePart webMessagePart : webMessage.getParts()) {
           if (!(webMessagePart instanceof WebFault) && (webMessagePart.isImplicitSchemaElement())) {

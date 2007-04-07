@@ -77,6 +77,9 @@ public class EnunciatedXFireExporter extends XFireExporter {
     Class serviceInterface = null;
     EnunciatedJAXWSServiceFactory factory = (EnunciatedJAXWSServiceFactory) getServiceFactory();
     WebServiceAnnotation annotation = factory.getAnnotations().getWebServiceAnnotation(serviceClass);
+    if (annotation == null) {
+      throw new AnnotationException("Can't find the @javax.jws.WebService annotation on " + serviceClass.getName());
+    }
     String eiValue = annotation.getEndpointInterface();
     if (eiValue != null && eiValue.length() > 0) {
       try {

@@ -29,6 +29,7 @@ import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServi
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.RelationshipServiceImpl;
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
@@ -68,7 +69,7 @@ public class TestFullAPI extends TestCase {
    * Tests the full API
    */
   public void testFullSOAPAPI() throws Exception {
-    int port = 8081;
+    int port = 8080;
     if (System.getProperty("container.port") != null) {
       port = Integer.parseInt(System.getProperty("container.port"));
     }
@@ -203,6 +204,14 @@ public class TestFullAPI extends TestCase {
     }
     catch (RelationshipException e) {
       assertEquals("hi", e.getMessage());
+    }
+
+    try {
+      relationshipService.getRelationships("outthrow");
+      fail("Should have thrown the outside exception, even though it wasn't part of the API.");
+    }
+    catch (Exception e) {
+      assertEquals("outside message", e.getCause().getMessage());
     }
 
     //todo: test attachments as service parameters.

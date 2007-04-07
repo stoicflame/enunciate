@@ -134,7 +134,7 @@ public class WebMethodExamples {
     style = SOAPBinding.Style.DOCUMENT,
     parameterStyle = SOAPBinding.ParameterStyle.BARE
   )
-  public BeanOne docLitBareMethod(BeanTwo beanTwo, @WebParam(header=true) boolean bool) throws ExplicitFaultBean, ImplicitWebFault {
+  public BeanOne docLitBareMethod(BeanTwo beanTwo, @WebParam(header=true) boolean bool) throws WebMethodExamplesFaultOne, WebMethodExamplesFaultTwo {
     return null;
   }
 
@@ -169,7 +169,7 @@ public class WebMethodExamples {
     partName = "doc-lit-wrapped-part"
   )
   public BeanThree docLitWrappedMethod(@WebParam(name = "hah", partName="hoo") boolean b, int i, @WebParam(header = true) short s,
-                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws ExplicitFaultBean, ImplicitWebFault {
+                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws WebMethodExamplesFaultOne, WebMethodExamplesFaultTwo {
     return null;
   }
 
@@ -177,7 +177,7 @@ public class WebMethodExamples {
     style = SOAPBinding.Style.RPC
   )
   public BeanThree rpcLitWrappedMethod(@WebParam(name = "hah", partName="hoo") boolean b, int i, @WebParam(header = true) short s,
-                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws ExplicitFaultBean, ImplicitWebFault {
+                                       @WebParam( mode = WebParam.Mode.INOUT ) Holder<Float> c) throws WebMethodExamplesFaultOne, WebMethodExamplesFaultTwo {
     return null;
   }
 

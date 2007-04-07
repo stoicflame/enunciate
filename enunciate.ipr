@@ -536,6 +536,7 @@
       <JAVADOC />
       <SOURCES>
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/xfire/xfire-all/1.2.2/xfire-all-1.2.2-sources.jar!/" />
+        <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-java5/src/main" />
       </SOURCES>
     </library>
     <library name="xfire">

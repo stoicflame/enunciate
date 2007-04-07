@@ -218,6 +218,10 @@ public class DefaultValidator implements Validator {
       result.addError(webMethod.getPosition(), "A one-way method must have a void return type.");
     }
 
+    if (oneway && webMethod.getThrownTypes() != null && !webMethod.getThrownTypes().isEmpty()) {
+      result.addError(webMethod.getPosition(), "A one-way method can't throw any exceptions.");
+    }
+
     if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (soapBindingStyle != SOAPBinding.Style.DOCUMENT)) {
       result.addError(webMethod.getPosition(), "A BARE web method must have a DOCUMENT binding style.");
     }

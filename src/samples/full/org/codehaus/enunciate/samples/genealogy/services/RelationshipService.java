@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.samples.genealogy.services;
 
 import org.codehaus.enunciate.samples.genealogy.data.Relationship;
+import org.codehaus.enunciate.samples.genealogy.exceptions.OutsideException;
 
 import javax.jws.WebService;
 import java.util.List;
@@ -30,9 +31,13 @@ import java.util.ArrayList;
 @WebService
 public class RelationshipService {
 
-  public List<Relationship> getRelationships(String personId) throws RelationshipException {
+  public List<Relationship> getRelationships(String personId) throws RelationshipException, OutsideException {
     if ("throw".equals(personId)) {
       throw new RelationshipException("hi");
+    }
+
+    if ("outthrow".equals(personId)) {
+      throw new OutsideException("outside message");
     }
     
     ArrayList<Relationship> list = new ArrayList<Relationship>();

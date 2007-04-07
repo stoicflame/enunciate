@@ -30,6 +30,11 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     Enunciate enunciate = new Enunciate();
+    if ((args == null) || (args.length < 1)) {
+      printUsage();
+      System.exit(1);
+    }
+
     for (int argIndex = 0; argIndex < args.length; argIndex++) {
       String option = args[argIndex];
 
