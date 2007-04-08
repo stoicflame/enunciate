@@ -275,18 +275,20 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     //strip out all the header parameters...
     ArrayList filteredParams = new ArrayList();
-    for (int i = 0; i < params.length; i++) {
-      Object param = params[i];
-      OperationInfo operationInfo = context.getExchange().getOperation();
-      if (operationInfo != null) {
-        WebParamAnnotation annotation = annotations.getWebParamAnnotation(operationInfo.getMethod(), i);
-        if ((annotation != null) && (annotation.isHeader())) {
-          //skip the headers....
-          continue;
+    if (params != null) {
+      for (int i = 0; i < params.length; i++) {
+        Object param = params[i];
+        OperationInfo operationInfo = context.getExchange().getOperation();
+        if (operationInfo != null) {
+          WebParamAnnotation annotation = annotations.getWebParamAnnotation(operationInfo.getMethod(), i);
+          if ((annotation != null) && (annotation.isHeader())) {
+            //skip the headers....
+            continue;
+          }
         }
-      }
 
-      filteredParams.add(param);
+        filteredParams.add(param);
+      }
     }
     params = filteredParams.toArray();
 

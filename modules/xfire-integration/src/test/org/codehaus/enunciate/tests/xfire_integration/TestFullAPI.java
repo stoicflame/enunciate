@@ -214,6 +214,8 @@ public class TestFullAPI extends TestCase {
       assertEquals("outside message", e.getCause().getMessage());
     }
 
+    relationshipService.touch();
+
     //todo: test attachments as service parameters.
     //todo: test IN/OUT and OUT parameters when the xfire-client module supports them.
   }

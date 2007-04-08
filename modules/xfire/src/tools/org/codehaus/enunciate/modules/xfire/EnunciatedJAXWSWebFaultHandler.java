@@ -156,6 +156,9 @@ public class EnunciatedJAXWSWebFaultHandler extends CustomFaultHandler {
     try {
       faultBeanClass = ClassLoaderUtils.loadClass(faultBeanClassName, faultClass);
     }
+    catch (NullPointerException npe) {
+      //fall through.  treat the same as a class not found...
+    }
     catch (ClassNotFoundException e) {
       //fall through.  treat it as a runtime exception...
     }

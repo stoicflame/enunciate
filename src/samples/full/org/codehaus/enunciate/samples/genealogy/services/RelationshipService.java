@@ -48,4 +48,8 @@ public class RelationshipService {
     }
     return list;
   }
+
+  public void touch() {
+    
+  }
 }
