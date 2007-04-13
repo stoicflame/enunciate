@@ -192,6 +192,11 @@ public class Enunciate {
       setPackageDir(packageDir);
     }
 
+    if (packageDir.equals(getBuildDir())) {
+      throw new EnunciateException("The package output directory cannot be the same as the build directory. " +
+        "(BTW, if you don't specify a package output directory, a suitable temp directory wil be created for you.)");
+    }
+
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("Invoking %s step for module %s", Target.PACKAGE, deploymentModule.getName());
       deploymentModule.step(Target.PACKAGE);
@@ -211,6 +216,11 @@ public class Enunciate {
       setBuildDir(buildDir);
     }
 
+    if (buildDir.equals(getCompileDir())) {
+      throw new EnunciateException("The build output directory cannot be the same as the compile directory. " +
+        "(BTW, if you don't specify a build output directory, a suitable temp directory wil be created for you.)");
+    }
+
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("Invoking %s step for module %s", Target.BUILD, deploymentModule.getName());
       deploymentModule.step(Target.BUILD);
@@ -228,6 +238,11 @@ public class Enunciate {
       destdir = createTempDir();
       debug("No compile directory specified, assigned %s.", destdir);
       setCompileDir(destdir);
+    }
+
+    if (compileDir.equals(getBuildDir())) {
+      throw new EnunciateException("The compile output directory cannot be the same as the generate directory. " +
+        "(BTW, if you don't specify a compile output directory, a suitable temp directory wil be created for you.)");
     }
 
     for (DeploymentModule deploymentModule : deploymentModules) {
