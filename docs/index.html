@@ -90,7 +90,8 @@
             and inconsistent, and the scope is limited to that specific endpoint.  The XML contract is difficult to interpret (especially
             when being consumed for client-side stubs) and doesn't give a consolidated picture of the whole API because it has no reference
             to other endpoints and schema data that service the same namespace
-            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for an example</a>).
+            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for a more
+            complete discussion</a>).
           </p>
           <p>
             Enunciate generates the formalized XML contract at compile-time, providing for a <b>consolidated, efficient XML definition</b>.
@@ -103,7 +104,7 @@
           <h3>Multiple Endpoints: SOAP, REST, JSON, etc.</h3>
           <p>Enunciate will publish your endpoint class as a <b>SOAP endpoint</b> as defined by the JAX-WS annotations (powered by <a
             href="http://xfire.codehaus.org/">XFire</a>).  By supplying additional metadata, the same endpoint class will be published
-            as a <b>REST endpoint</b> at a different URL.  Furthermore, certain REST endpoints will be automatically available as JSON
+            as a <b>XML REST endpoint</b> at a different URL.  Furthermore, certain REST endpoints will be automatically available as JSON
             endpoints at yet another URL.  See the <a href="module_rest.html">REST module documentation</a> for more information.
           </p>
         </li>

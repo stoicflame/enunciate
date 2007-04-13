@@ -39,19 +39,15 @@
       <p>The tone of this document will be much more quick and concise.  It is presumed this document will serve more often as a reference and a jump point
         than as a full read.</p>
 
-
-
       <a name="engine"><div class="break">&nbsp;</div></a>
       <h1>Engine</h1>
 
-      <p>The Enunciate engine is invoked through a number of different entry points, including via the command line, Ant, or programmatically.  For
+      <p>The Enunciate engine is invoked through a number of different entry points, including via the command line, Ant, Maven, or programmatically.  For
       more information on how to invoke Enunciate, see the <a href="executables.html">executables page</a>.</p>
 
       <p>When the engine is invoked, the <a href="#config">configuration</a> is loaded and queried for the set of modules that will handle the work of
-        enunciating the API.  The modules are ordered and initialized.  The engine then steps through its run phase. At the end of its run phase, each
+      enunciating the API.  The modules are ordered and initialized.  The engine then steps through its run phase. At the end of its run phase, each
       module is closed and the artifacts are exported as needed.</p>
-
-
 
       <a name="steps"><div class="break">&nbsp;</div></a>
       <h1>Run Phase Steps</h1>
@@ -89,10 +85,10 @@
       <p>The <b>generate</b> step is the most intensive and important step in the Enunciate process.  It is during this step that the API model is
       established.  This means that the source code for the API is read, analyzed, and loaded into an abstract form that represents the API in terms
       of the endpoint interfaces, data structures, REST endpoints, faults, etc.  This abstract form is called <b>the API model</b> (or just "model" for
-        short).</p>
+      short).</p>
 
       <p>Some errors in the API source are fatal in that they prevent us from establishing the API model.  These fatal errors will be thrown immediately and
-        the engine will halt, unable to establish the model.</p>
+      the engine will halt, unable to establish the model.</p>
 
 
 
