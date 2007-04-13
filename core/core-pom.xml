@@ -8,7 +8,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>core-tools</artifactId>
+      <artifactId>enunciate-core-tools</artifactId>
       <version>@VERSION@</version>
     </dependency>
 

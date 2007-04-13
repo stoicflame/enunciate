@@ -258,6 +258,10 @@ public class Enunciate {
    * @return The deployment modules that were loaded and initialized.
    */
   protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
+    if ((this.sourceFiles == null) || (this.sourceFiles.length == 0)) {
+      throw new EnunciateException("No source files have been specified!");
+    }
+
     if (this.config == null) {
       this.config = loadConfig();
     }
@@ -846,7 +850,7 @@ public class Enunciate {
    * @return The artifacts exportable by enunciate.
    */
   public Set<Artifact> getArtifacts() {
-    return artifacts;
+    return Collections.unmodifiableSet(artifacts);
   }
 
   /**

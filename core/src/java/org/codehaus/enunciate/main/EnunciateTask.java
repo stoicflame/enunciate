@@ -22,6 +22,7 @@ import org.codehaus.enunciate.modules.DeploymentModule;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
@@ -70,7 +71,7 @@ public class EnunciateTask extends MatchingTask {
     }
 
     try {
-      Enunciate proxy = new Enunciate(files);
+      Enunciate proxy = new AntLoggingEnunciate(files);
       EnunciateConfiguration config;
 
       if (classpath != null) {
@@ -316,6 +317,33 @@ public class EnunciateTask extends MatchingTask {
      */
     public void setDestination(File destination) {
       this.destination = destination;
+    }
+  }
+
+  /**
+   * An Enunciate mechanism that leverages Ant's logging capabilities, too.
+   */
+  private class AntLoggingEnunciate extends Enunciate {
+
+    public AntLoggingEnunciate(String[] sourceFiles) {
+      super(sourceFiles);
+    }
+
+    @Override
+    public void debug(String message, Object... formatArgs) {
+      super.debug(message, formatArgs);
+      getProject().log(String.format(message, formatArgs), Project.MSG_DEBUG);
+    }
+
+    @Override
+    public void info(String message, Object... formatArgs) {
+      super.info(message, formatArgs);
+      getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
+    }
+
+    @Override
+    public void warn(String message, Object... formatArgs) {
+      getProject().log(String.format(message, formatArgs), Project.MSG_WARN);
     }
   }
 

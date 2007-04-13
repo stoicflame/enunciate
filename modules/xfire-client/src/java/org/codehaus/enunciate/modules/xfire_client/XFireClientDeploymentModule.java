@@ -587,17 +587,19 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: generate the javadocs?
 
-    ClientLibraryArtifact jdk14Artifact = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
-    jdk14Artifact.setPlatform("Java (Version 1.4+)");
+    ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
+    jdk14ArtifactBundle.setPlatform("Java (Version 1.4+)");
     //read in the description from file:
-    jdk14Artifact.setDescription(readResource("library_description_14.html"));
+    jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
     NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
     jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
-    jdk14Artifact.addArtifact(jdk14BinariesJar);
+    jdk14ArtifactBundle.addArtifact(jdk14BinariesJar);
     NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
     jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
-    jdk14Artifact.addArtifact(jdk14SourcesJar);
-    enunciate.addArtifact(jdk14Artifact);
+    jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
+    enunciate.addArtifact(jdk14BinariesJar);
+    enunciate.addArtifact(jdk14SourcesJar);
+    enunciate.addArtifact(jdk14ArtifactBundle);
 
     File jdk15Jar = new File(getBuildDir(), jarName);
     enunciate.zip(getJdk15CompileDir(), jdk15Jar);
@@ -609,17 +611,19 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: generate the javadocs?
 
-    ClientLibraryArtifact jdk15Artifact = new ClientLibraryArtifact(getName(), "client.jdk15.library", "Java 5 Client Library");
-    jdk15Artifact.setPlatform("Java (Version 5+)");
+    ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "Java 5 Client Library");
+    jdk15ArtifactBundle.setPlatform("Java (Version 5+)");
     //read in the description from file:
-    jdk15Artifact.setDescription(readResource("library_description_15.html"));
+    jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
     NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
     jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
-    jdk15Artifact.addArtifact(jdk15BinariesJar);
+    jdk15ArtifactBundle.addArtifact(jdk15BinariesJar);
     NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
     jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
-    jdk15Artifact.addArtifact(jdk15SourcesJar);
-    enunciate.addArtifact(jdk15Artifact);
+    jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
+    enunciate.addArtifact(jdk15BinariesJar);
+    enunciate.addArtifact(jdk15SourcesJar);
+    enunciate.addArtifact(jdk15ArtifactBundle);
   }
 
   /**

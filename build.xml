@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="full-jar" name="all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project default="install" name="all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <property file="build.properties"/>
   <property name="dist.name" value="enunciate-${version}"/>
@@ -38,7 +38,7 @@
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
-  <target name="build">
+  <target name="build" depends="init">
     <ant dir="${core.basedir}"/>
     <ant dir="${modules.xml.basedir}"/>
     <ant dir="${modules.jaxws.basedir}"/>
@@ -246,7 +246,13 @@
 
   </target>
 
-  <target name="dist" depends="clean, full-jar, doc, scripts, dist-only" description="Creates the distribution bundles."/>
+  <target name="install" depends="full-jar">
+    <artifact:install file="target/${full.jar.name}">
+      <pom refid="full.pom"/>
+    </artifact:install>
+  </target>
+
+  <target name="dist" depends="clean, install, doc, scripts, dist-only" description="Creates the distribution bundles."/>
 
   <target name="copy-dist-libs" depends="init">
     <mkdir dir="target/lib"/>
