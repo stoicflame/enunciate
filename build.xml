@@ -5,6 +5,7 @@
   <property file="build.properties"/>
   <property name="dist.name" value="enunciate-${version}"/>
   <property name="full.jar.name" value="enunciate-full-${version}.jar"/>
+  <property name="top.jar.name" value="enunciate-top-${version}.jar"/>
 
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>
@@ -38,17 +39,6 @@
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
-  <target name="build" depends="init">
-    <ant dir="${core.basedir}"/>
-    <ant dir="${modules.xml.basedir}"/>
-    <ant dir="${modules.jaxws.basedir}"/>
-    <ant dir="${modules.rest.basedir}"/>
-    <ant dir="${modules.xfire-client.basedir}"/>
-    <ant dir="${modules.docs.basedir}"/>
-    <ant dir="${modules.xfire.basedir}"/>
-    <ant dir="${modules.xfire-integration.basedir}"/>
-  </target>
-
   <target name="init">
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
       <classpath>
@@ -58,14 +48,13 @@
       </classpath>
     </typedef>
 
-    <copy file="full-pom.xml" todir="target" failonerror="true">
+    <copy file="top-pom.xml" todir="target" failonerror="true">
       <filterset>
         <filter token="VERSION" value="${version}"/>
       </filterset>
     </copy>
 
-    <artifact:pom id="full.pom" file="target/full-pom.xml"/>
-    <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="full.pom" useScope="runtime"/>
+    <artifact:pom id="top.pom" file="target/top-pom.xml"/>
 
     <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
     <loadfile srcfile="${static.docs.dir}/sidenav.include.html" property="sidenav"/>
@@ -74,6 +63,19 @@
       <filter token="TOPNAV" value="${topnav}"/>
       <filter token="SIDENAV" value="${sidenav}"/>
     </filterset>
+  </target>
+
+  <target name="build" depends="init">
+    <ant dir="${core.basedir}"/>
+    <ant dir="${modules.xml.basedir}"/>
+    <ant dir="${modules.jaxws.basedir}"/>
+    <ant dir="${modules.rest.basedir}"/>
+    <ant dir="${modules.xfire-client.basedir}"/>
+    <ant dir="${modules.docs.basedir}"/>
+    <ant dir="${modules.xfire.basedir}"/>
+    <ant dir="${modules.xfire-integration.basedir}"/>
+
+    <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>
   </target>
 
   <target name="docs-resources-copy">
@@ -102,7 +104,7 @@
     <copy todir="${docs.dir}" overwrite="true" file="${enunciate.basedir}/license.txt"/>
   </target>
 
-  <target name="javadoc" depends="init" description="generate the javadoc.">
+  <target name="javadoc" depends="build" description="generate the javadoc.">
     <mkdir dir="${javadoc.dir}"/>
     <property name="title" value="enunciate-docs"/>
 
@@ -188,9 +190,7 @@
     </copy>
   </target>
 
-  <target name="getting-started-examples" depends="build, getting-started-examples-only" description="Generated the getting started examples."/>
-  <target name="getting-started-examples-only" depends="init, copy-getting-started-source" description="generates the getting started samples assuming the jar is in the right place.">
-
+  <target name="getting-started-examples" depends="build, copy-getting-started-source" description="Generated the getting started examples.">
     <path id="enunciate.classpath">
       <path refid="dist.libs.path"/>
       <pathelement location="target/${full.jar.name}"/>
@@ -247,14 +247,23 @@
   </target>
 
   <target name="install" depends="full-jar">
-    <artifact:install file="target/${full.jar.name}">
-      <pom refid="full.pom"/>
+    <mkdir dir="target/top-jar"/>
+    <echo file="target/top-jar/README.txt">
+Empty jar for the sole purpose of consolidating the reference to all known Enunciate
+jars for the purposes of Maven integration.
+    </echo>
+    <jar destfile="target/${top.jar.name}">
+      <fileset dir="target/top-jar"/>
+    </jar>
+
+    <artifact:install file="target/${top.jar.name}">
+      <pom refid="top.pom"/>
     </artifact:install>
   </target>
 
   <target name="dist" depends="clean, install, doc, scripts, dist-only" description="Creates the distribution bundles."/>
 
-  <target name="copy-dist-libs" depends="init">
+  <target name="copy-dist-libs" depends="build">
     <mkdir dir="target/lib"/>
     <mkdir dir="target/module-libs"/>
 
@@ -307,24 +316,28 @@
   <target name="dist-only" depends="copy-dist-libs" description="Creates the distribution bundles assuming everything is in its place.">
     <!--create the zip dist.-->
     <zip destfile="target/${dist.name}.zip">
-      <zipfileset dir="${docs.dir}" prefix="enunciate/docs" excludes="*.txt"/>
-      <zipfileset dir="${enunciate.basedir}" prefix="enunciate/docs" includes="*.txt"/>
-      <zipfileset dir="target/bin" prefix="enunciate/bin"/>
-      <zipfileset dir="target/lib" prefix="enunciate/lib"/>
-      <zipfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
-      <zipfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
-      <zipfileset dir="target" prefix="enunciate" includes="*.jar"/>
+      <zipfileset dir="${docs.dir}" prefix="${dist.name}/docs" excludes="*.txt"/>
+      <zipfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="*.txt"/>
+      <zipfileset dir="target/bin" prefix="${dist.name}/bin"/>
+      <zipfileset dir="target/lib" prefix="${dist.name}/lib"/>
+      <zipfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>
+      <zipfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
+      <zipfileset dir="target" prefix="${dist.name}" includes="*.jar"/>
+      <zipfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
+      <zipfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
     </zip>
 
     <!--create the tar.gz dist.-->
     <tar destfile="target/${dist.name}.tar.gz" compression="gzip">
-      <tarfileset dir="${docs.dir}" prefix="enunciate/docs" excludes="*.txt"/>
-      <tarfileset dir="${enunciate.basedir}" prefix="enunciate/docs" includes="*.txt"/>
-      <tarfileset dir="target/bin" prefix="enunciate/bin" mode="766"/>
-      <tarfileset dir="target/lib" prefix="enunciate/lib"/>
-      <tarfileset dir="target/module-libs" prefix="enunciate/modules" includes="*.jar"/>
-      <tarfileset dir="." includes="license.txt notice.txt" prefix="enunciate"/>
-      <tarfileset dir="target" prefix="enunciate" includes="*.jar"/>
+      <tarfileset dir="${docs.dir}" prefix="${dist.name}/docs" excludes="*.txt"/>
+      <tarfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="*.txt"/>
+      <tarfileset dir="target/bin" prefix="${dist.name}/bin" mode="766"/>
+      <tarfileset dir="target/lib" prefix="${dist.name}/lib"/>
+      <tarfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>
+      <tarfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
+      <tarfileset dir="target" prefix="${dist.name}" includes="*.jar"/>
+      <tarfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
+      <tarfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
     </tar>
   </target>
 

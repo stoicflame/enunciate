@@ -135,4 +135,12 @@ public class TestGenerateDocsXml extends TestCase {
     //todo: more testing of the generated HTML...
   }
 
+  /**
+   * testing the absolute file stuff.
+   */
+  public void testAbsoluteFileStuff() throws Exception {
+    File file = new File("License.txt");
+    assertFalse(file.isAbsolute());
+  }
+
 }

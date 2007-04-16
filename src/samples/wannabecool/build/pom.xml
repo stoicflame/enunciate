@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ifyouwannabecool.api</groupId>
+  <artifactId>wannabecool</artifactId>
+  <packaging>enunciate-app</packaging>
+  <version>1.0</version>
+  <name>ifyouwannabecool</name>
+  <url>http://www.ifyouwannabecool.com</url>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.enunciate</groupId>
+        <artifactId>maven-enunciate-plugin</artifactId>
+        <version>1.1</version>
+        <extensions>true</extensions>
+
+        <configuration>
+          <exports>
+            <client.jdk14.library.binaries>wannabecool-client.jar</client.jdk14.library.binaries>
+          </exports>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-top</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

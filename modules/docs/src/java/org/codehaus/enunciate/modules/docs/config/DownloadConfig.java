@@ -28,7 +28,7 @@ public class DownloadConfig {
   private String artifact;
   private String name;
   private String description;
-  private File file;
+  private String file;
 
   /**
    * The artifact to expose as a download.
@@ -89,7 +89,7 @@ public class DownloadConfig {
    *
    * @return The file to expose as a download. (Ignored if "artifact" is set.)
    */
-  public File getFile() {
+  public String getFile() {
     return file;
   }
 
@@ -98,7 +98,7 @@ public class DownloadConfig {
    *
    * @param file The file to expose as a download. (Ignored if "artifact" is set.)
    */
-  public void setFile(File file) {
+  public void setFile(String file) {
     this.file = file;
   }
 }

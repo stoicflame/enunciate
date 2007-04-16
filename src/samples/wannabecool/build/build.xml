@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--Ant build file for building the sample API.-->
+<project default="enunciate">
+
+  <!--The ${enunciate.home} property should point to the Enunciate home distribution directory. -->
+  <property name="enunciate.home" value="${basedir}/../.."/>
+
+  <target name="enunciate">
+    <!--The enunciate classpath points to all the jars in the "lib" directory and the "full" jar.-->
+    <path id="enunciate.classpath">
+      <fileset dir="${enunciate.home}/lib">
+        <include name="**/*.jar"/>
+      </fileset>
+      <fileset dir="${enunciate.home}">
+        <include name="enunciate-full-*.jar"/>
+      </fileset>
+    </path>
+
+    <!--define the task...-->
+    <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
+      <classpath refid="enunciate.classpath"/>
+    </taskdef>
+
+    <mkdir dir="target"/>
+    <enunciate dir="${basedir}/src/main/java"
+      configFile="${basedir}/src/main/java/enunciate.xml">
+      <include name="**/*.java"/>
+      <classpath refid="enunciate.classpath"/>
+
+      <!--
+        The artifact identified by the id 'xfire.war' will be exported to
+        a file called 'wannabecool.war' in the 'target' directory.
+      -->
+      <export artifactId="xfire.war" destination="target/wannabecool.war"/>
+
+      <!--
+        The artifact identified by the id 'client.jdk15.library.binaries' will be exported to
+        a file called 'wannabecool.client.jar' in the 'target' directory.
+
+        (This artifact is the jar for accessing the published remote API via JDK 1.5)
+      -->
+      <export artifactId="client.jdk15.library.binaries" destination="target/wannabecool-client.jar"/>
+    </enunciate>
+  </target>
+
+</project>
+

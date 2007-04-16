@@ -98,6 +98,7 @@ public class EnunciateTask extends MatchingTask {
       if (this.configFile != null) {
         getProject().log("Loading config " + this.configFile);
         config.load(this.configFile);
+        proxy.setConfigFile(this.configFile);
       }
 
       if (this.generateDir != null) {
@@ -146,6 +147,15 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setBasedir(File basedir) {
     this.basedir = basedir;
+  }
+
+  /**
+   * The base directory for the source files.
+   *
+   * @param basedir The base directory for the source files.
+   */
+  public void setDir(File basedir) {
+    setBasedir(basedir);
   }
 
   /**

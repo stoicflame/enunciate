@@ -51,7 +51,7 @@ public class FileArtifact extends BaseArtifact {
    */
   public void exportTo(File file, Enunciate enunciate) throws IOException {
     if (!this.file.exists()) {
-      throw new IOException("Unable to export non-existing file " + this.file);
+      throw new IOException("Unable to export non-existing file " + this.file.getAbsolutePath());
     }
 
     if (this.file.isDirectory()) {

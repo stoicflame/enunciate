@@ -444,8 +444,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
         explicitArtifacts.add(download.getArtifact());
       }
       else if (download.getFile() != null) {
-        File downloadFile = download.getFile();
-        info("File %s to be added as an extra download.", downloadFile);
+        File downloadFile = enunciate.resolvePath(download.getFile());
+
+        info("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
         DownloadBundle downloadArtifact = new DownloadBundle(getName(), downloadFile.getName(), downloadFile);
 
         if (download.getName() != null) {

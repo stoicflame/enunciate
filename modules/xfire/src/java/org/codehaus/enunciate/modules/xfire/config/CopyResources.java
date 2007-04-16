@@ -26,7 +26,7 @@ import java.io.File;
 public class CopyResources {
 
   private String pattern;
-  private File dir;
+  private String dir;
 
   /**
    * The matching pattern for the resources to copy.
@@ -51,7 +51,7 @@ public class CopyResources {
    *
    * @return The base directory for the resource copy.
    */
-  public File getDir() {
+  public String getDir() {
     return dir;
   }
 
@@ -60,7 +60,7 @@ public class CopyResources {
    *
    * @param dir The base directory for the resource copy.
    */
-  public void setDir(File dir) {
+  public void setDir(String dir) {
     this.dir = dir;
   }
 }

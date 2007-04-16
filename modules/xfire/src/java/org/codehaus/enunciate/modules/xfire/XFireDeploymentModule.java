@@ -288,9 +288,18 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
           continue;
         }
 
-        File basedir = copyResource.getDir();
-        if (basedir == null) {
-          basedir = new File(System.getProperty("user.dir"));
+        File basedir;
+        if (copyResource.getDir() == null) {
+          File configFile = enunciate.getConfigFile();
+          if (configFile != null) {
+            basedir = configFile.getAbsoluteFile().getParentFile();
+          }
+          else {
+            basedir = new File(System.getProperty("user.dir"));
+          }
+        }
+        else {
+          basedir = enunciate.resolvePath(copyResource.getDir());
         }
 
         for (String file : enunciate.getFiles(basedir, new PatternFileFilter(basedir, pattern, matcher))) {
@@ -362,8 +371,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.
-      File importFile = springImport.getFile();
-      if (importFile != null) {
+      if (springImport.getFile() != null) {
+        File importFile = enunciate.resolvePath(springImport.getFile());
         enunciate.copyFile(importFile, new File(webinf, importFile.getName()));
       }
     }
@@ -450,7 +459,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
           throw new IllegalStateException("A spring import configuration must specify a file or a URI, but not both.");
         }
 
-        springImportURIs.add(springImport.getFile().getName());
+        springImportURIs.add(new File(springImport.getFile()).getName());
       }
       else if (springImport.getUri() != null) {
         springImportURIs.add(springImport.getUri());

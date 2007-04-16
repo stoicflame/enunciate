@@ -25,7 +25,7 @@ import java.io.File;
  */
 public class SpringImport {
 
-  private File file;
+  private String file;
   private String Uri;
 
   /**
@@ -33,7 +33,7 @@ public class SpringImport {
    *
    * @return The spring file to import.
    */
-  public File getFile() {
+  public String getFile() {
     return file;
   }
 
@@ -42,7 +42,7 @@ public class SpringImport {
    *
    * @param file The spring file to import.
    */
-  public void setFile(File file) {
+  public void setFile(String file) {
     this.file = file;
   }
 

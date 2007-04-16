@@ -33,15 +33,6 @@
   <import file="${container.test.support.file}"/>
 
   <target name="init-example-api">
-    <mkdir dir="${user.dir}/target/resources"/>
-    <copy todir="${user.dir}/target/resources">
-      <fileset dir="${enunciate.basedir}/src/samples/full">
-        <include name="**/*.txt"/>
-      </fileset>
-    </copy>
-    <copy file="src/dummy-license.txt" todir="${user.dir}/target" overwrite="true"/>
-    <copy file="src/custom_spring.xml" todir="${user.dir}/target" overwrite="true"/>
-
     <property name="example" value="full"/>
     <property name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
     <property name="enunciate.target" value="package"/>

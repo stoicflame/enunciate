@@ -671,6 +671,27 @@ public class Enunciate {
   }
 
   /**
+   * Resolves a path relative to the Enunciate config file, if present, otherwise the file will be a relative file
+   * to the current user directory.
+   *
+   * @param filePath The file path to resolve.
+   * @return The resolved file.
+   */
+  public File resolvePath(String filePath) {
+    File downloadFile = new File(filePath);
+
+    if (!downloadFile.isAbsolute()) {
+      //try to relativize this download file to the directory of the config file.
+      File configFile = getConfigFile();
+      if (configFile != null) {
+        downloadFile = new File(configFile.getAbsoluteFile().getParentFile(), filePath);
+        debug("%s relatived to %s.", filePath, downloadFile.getAbsolutePath());
+      }
+    }
+    return downloadFile;
+  }
+
+  /**
    * Adds all files in a specified directory to a list.
    *
    * @param dir  The directory.
