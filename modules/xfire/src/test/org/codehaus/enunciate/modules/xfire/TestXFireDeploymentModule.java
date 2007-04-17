@@ -51,7 +51,7 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
       }
     };
 
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setGenerateDir(enunciate.createTempDir());
     module.init(enunciate);
     module.doFreemarkerGenerate();

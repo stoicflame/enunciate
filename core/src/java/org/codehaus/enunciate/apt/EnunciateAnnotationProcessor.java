@@ -65,7 +65,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private final Enunciate enunciate;
 
   public EnunciateAnnotationProcessor() throws EnunciateException {
-    this(new Enunciate(null, new EnunciateConfiguration()));
+    this(new Enunciate(new String[0], new EnunciateConfiguration()));
   }
 
   public EnunciateAnnotationProcessor(Enunciate enunciate) throws EnunciateException {

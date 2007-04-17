@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="base" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project default="deploy" name="base" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <!--definition of "base" properties - globally referenced. -->
   <dirname file="${ant.file.base}" property="enunciate.basedir"/>
@@ -34,7 +34,7 @@
     <available property="tools.exists" file="src/tools"/>
 
     <!--load the maven tasks for handling dependencies-->
-    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" loaderref="antlib.loader">
       <classpath>
         <fileset dir="${lib.dir}/build">
           <include name="maven-artifact-ant-*.jar"/>
@@ -51,6 +51,19 @@
       </filterset>
     </copy>
     <artifact:pom id="module.pom" file="target/${module.name}-pom.xml"/>
+
+    <condition property="deploy.main">
+      <and>
+        <isreference refid="deploy.repo"/>
+      </and>
+    </condition>
+
+    <condition property="deploy.tools">
+      <and>
+        <isset property="tools.exists"/>
+        <isset property="deploy.main"/>
+      </and>
+    </condition>
 
     <!--finally, include any user-specific properties.-->
     <property file="${user.home}/.enunciate/build.properties"/>
@@ -257,6 +270,22 @@
       <pom refid="module.pom"/>
     </artifact:install>
   </target>
+
+  <target name="deploy-tools" depends="init" if="deploy.tools">
+    <artifact:deploy file="target/enunciate-${module.name}-tools-${version}.jar">
+      <pom refid="module.tools.pom"/>
+      <remoteRepository refid="deploy.repo"/>
+    </artifact:deploy>
+  </target>
+
+  <target name="deploy-main" depends="init" if="deploy.main">
+    <artifact:deploy file="target/enunciate-${module.name}-${version}.jar">
+      <pom refid="module.pom"/>
+      <remoteRepository refid="deploy.repo"/>
+    </artifact:deploy>
+  </target>
+
+  <target name="deploy" depends="install, deploy-tools, deploy-main" description="build, install, and deploy the tools and the main jars into the deploy repo."/>
 
   <target name="clean" description="clean up">
     <delete dir="target"/>

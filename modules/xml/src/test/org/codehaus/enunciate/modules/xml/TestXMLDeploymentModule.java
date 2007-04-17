@@ -102,7 +102,7 @@ public class TestXMLDeploymentModule extends TestCase {
     wsdlConfig.setFile("custom.wsdl");
     module.addWsdlConfig(wsdlConfig);
 
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     File generateDir = enunciate.createTempDir();
     enunciate.setGenerateDir(generateDir);
     module.init(enunciate);

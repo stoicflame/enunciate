@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="core" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project default="deploy" name="core" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <import file="../build-module.xml"/>
 

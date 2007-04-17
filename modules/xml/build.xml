@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="xml" basedir=".">
+<project default="deploy" name="xml" basedir=".">
 
   <import file="../../build-module.xml"/>
 

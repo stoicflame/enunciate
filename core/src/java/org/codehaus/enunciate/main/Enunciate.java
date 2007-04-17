@@ -95,6 +95,12 @@ public class Enunciate {
    * @param sourceFiles The source files to enunciate.
    */
   protected void setSourceFiles(String[] sourceFiles) {
+    for (String sourceFile : sourceFiles) {
+      if (!sourceFile.endsWith(".java")) {
+        throw new IllegalArgumentException("Illegal name of java source file: " + sourceFile + ".  (Must end with \".java\")");
+      }
+    }
+
     this.sourceFiles = sourceFiles;
   }
 
@@ -104,7 +110,7 @@ public class Enunciate {
    * @param sourceFiles The source files.
    */
   public Enunciate(String[] sourceFiles) {
-    this.sourceFiles = sourceFiles;
+    setSourceFiles(sourceFiles);
   }
 
   /**
@@ -114,7 +120,7 @@ public class Enunciate {
    * @param config The config
    */
   public Enunciate(String[] sourceFiles, EnunciateConfiguration config) {
-    this.sourceFiles = sourceFiles;
+    setSourceFiles(sourceFiles);
     this.config = config;
   }
 
@@ -124,7 +130,7 @@ public class Enunciate {
    * @param sourceFiles The source files.
    */
   public Enunciate(List<String> sourceFiles) {
-    this.sourceFiles = sourceFiles.toArray(new String[sourceFiles.size()]);
+    setSourceFiles(sourceFiles.toArray(new String[sourceFiles.size()]));
   }
 
   /**

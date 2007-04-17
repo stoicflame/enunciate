@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="xfire" basedir=".">
+<project default="deploy" name="xfire" basedir=".">
 
   <import file="../../build-module.xml"/>
 

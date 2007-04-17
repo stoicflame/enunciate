@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="jaxws" basedir=".">
+<project default="deploy" name="jaxws" basedir=".">
 
   <import file="../../build-module.xml"/>
 

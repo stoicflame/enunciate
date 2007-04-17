@@ -75,7 +75,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
       }
     };
 
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     module.init(enunciate);
     ClientPackageConversion conversion = new ClientPackageConversion();
     conversion.setFrom("net.nothing");

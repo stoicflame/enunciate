@@ -81,6 +81,8 @@
     </parallel>
   </target>
 
+  <target name="deploy" depends="install"/>
+
   <target name="default-stop-container"/>
 
   <target name="deploy-full-api">

@@ -53,7 +53,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
    * tests doing the freemarker generate.
    */
   public void testDoFreemarkerGenerate() throws Exception {
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     final EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     model.add(new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.jaxws.AnotherEndpointInterface")));
     model.add(new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.jaxws.BasicEndpointInterface")));
@@ -237,7 +237,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     setupDefaultModel();
 
     //generate the java source file.
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     File genDir = enunciate.createTempDir();
     enunciate.setGenerateDir(genDir);
     JAXWSDeploymentModule module = new JAXWSDeploymentModule();
@@ -266,7 +266,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     //set up the default root model.
     EnunciateConfiguration config = new EnunciateConfiguration(new ArrayList<DeploymentModule>());
     config.setValidator(new BaseValidator()); //skip the validation...
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setConfig(config);
     new EnunciateAnnotationProcessor(enunciate).process();
   }

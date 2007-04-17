@@ -56,7 +56,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
         return Arrays.asList(new DeploymentModule[]{mockModule});
       }
     };
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setConfig(config);
 
     EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
@@ -82,7 +82,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     config.putNamespace("http://enunciate.codehaus.org/samples/contract", "tContract");
 
     final boolean[] validated = new boolean[]{false};
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setConfig(config);
     EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
       @Override
@@ -174,7 +174,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       }
     });
 
-    Enunciate enunciate = new Enunciate((String[]) null);
+    Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setConfig(config);
     EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate);
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();

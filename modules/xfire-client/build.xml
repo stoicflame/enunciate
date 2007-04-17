@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project default="install" name="xfire-client" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project default="deploy" name="xfire-client" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
   <property name="tools.compiler" value="1.4"/>
 
