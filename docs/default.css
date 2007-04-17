@@ -135,6 +135,15 @@ blockquote {
 	padding: 0 10px 12px 28px;
 }
 
+/* little news insert */
+.sidenews {
+  background-color: white;
+  float: right;
+  width: 218px;
+  border: 1px solid #999;
+  padding: 4px 4px 4px 4px;
+}
+
 /* sub navigation */
 .sidenav {
 	float: right;
