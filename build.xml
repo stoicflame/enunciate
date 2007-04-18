@@ -388,14 +388,14 @@ jars for the purposes of Maven integration.
 
     <!--create the zip dist.-->
     <zip destfile="target/${dist.name}-src.zip">
-      <zipfileset dir="target/src" prefix="enunciate/src">
+      <zipfileset dir="target/src" prefix="${dist.name}/src">
         <include name="**/*"/>
       </zipfileset>
     </zip>
 
     <!--create the tar.gz dist.-->
     <tar destfile="target/${dist.name}-src.tar.gz" compression="gzip">
-      <tarfileset dir="target/src" prefix="enunciate/src">
+      <tarfileset dir="target/src" prefix="${dist.name}/src">
         <include name="**/*"/>
       </tarfileset>
     </tar>
