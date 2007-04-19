@@ -100,7 +100,7 @@ public class RESTParameter extends DecoratedParameterDeclaration {
    */
   public XmlTypeMirror getXmlType() {
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getType());
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

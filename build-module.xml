@@ -61,7 +61,7 @@
     <condition property="deploy.tools">
       <and>
         <isset property="tools.exists"/>
-        <isset property="deploy.main"/>
+        <isreference refid="deploy.repo"/>
       </and>
     </condition>
 

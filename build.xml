@@ -66,38 +66,14 @@
   </target>
 
   <target name="build" depends="init">
-    <ant dir="${core.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.xml.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.jaxws.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.rest.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.xfire-client.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.docs.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.xfire.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
-    <ant dir="${modules.xfire-integration.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
+    <ant dir="${core.basedir}"/>
+    <ant dir="${modules.xml.basedir}"/>
+    <ant dir="${modules.jaxws.basedir}"/>
+    <ant dir="${modules.rest.basedir}"/>
+    <ant dir="${modules.xfire-client.basedir}"/>
+    <ant dir="${modules.docs.basedir}"/>
+    <ant dir="${modules.xfire.basedir}"/>
+    <ant dir="${modules.xfire-integration.basedir}"/>
 
     <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>
   </target>
@@ -399,18 +375,6 @@ jars for the purposes of Maven integration.
         <include name="**/*"/>
       </tarfileset>
     </tar>
-  </target>
-
-  <target name="init-deploy-repo" depends="init">
-    <fail unless="deploy.repo.url" message="A URL to a remote deploy repo must be supplied with the 'deploy.repo.url' property."/>
-    <artifact:remoteRepository id="deploy.repo" url="${deploy.repo.url}"/>
-  </target>
-
-  <target name="deploy" depends="clean, init-deploy-repo, dist">
-    <artifact:deploy file="target/${top.jar.name}">
-      <pom refid="top.pom"/>
-      <remoteRepository refid="deploy.repo"/>
-    </artifact:deploy>
   </target>
 
 </project>

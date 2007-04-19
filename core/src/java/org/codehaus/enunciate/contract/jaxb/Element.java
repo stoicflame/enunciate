@@ -243,10 +243,10 @@ public class Element extends Accessor {
 
       try {
         if (typeClass == null) {
-          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(typeMirror);
+          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, typeMirror);
         }
         else if (typeClass != XmlElement.DEFAULT.class) {
-          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(typeClass);
+          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, typeClass);
         }
       }
       catch (XmlTypeException e) {

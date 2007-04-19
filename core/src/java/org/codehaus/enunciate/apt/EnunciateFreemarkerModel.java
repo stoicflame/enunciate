@@ -20,6 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
@@ -344,19 +345,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   /**
    * Get the xml type for the specified type.
    *
+   * @param referer The declaration that wants to know the XML type.
    * @param type The type.
    * @return The xml type for the specified type.
+   * @throws XmlTypeException If the XML type cannot be determined...
    */
-  public XmlTypeMirror getXmlType(TypeMirror type) throws XmlTypeException {
-    //first make sure it's a known type.
-    if (type instanceof DeclaredType) {
-      XmlTypeMirror knownOrSpecifiedType = getKnownOrSpecifiedType(((DeclaredType) type));
-      if (knownOrSpecifiedType != null) {
-        return knownOrSpecifiedType;
-      }
-    }
-
-    return createXmlType(type);
+  public XmlTypeMirror getXmlType(Declaration referer, TypeMirror type) throws XmlTypeException {
+    return XmlTypeDecorator.decorate(type);
   }
 
   /**
@@ -386,16 +381,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
-   * Creates an xml type from a type mirror.
-   *
-   * @param type The type to use to create the xml type.
-   * @return The created xml type.
-   */
-  protected XmlTypeMirror createXmlType(TypeMirror type) throws XmlTypeException {
-    return XmlTypeDecorator.decorate(type);
-  }
-
-  /**
    * Gets the specified types for a given package.
    *
    * @param pckg The package.
@@ -408,11 +393,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   /**
    * Get the xml type for a specific class.
    *
+   * @param referer The declaration that wants to know the XML type.
    * @param clazz The class.
    * @return The xml type for a specific class.
    * @throws XmlTypeException If there was an error getting the xml type for the specified class.
    */
-  public XmlTypeMirror getXmlType(Class clazz) throws XmlTypeException {
+  public XmlTypeMirror getXmlType(Declaration referer, Class clazz) throws XmlTypeException {
     if (knownTypes.containsKey(clazz.getName())) {
       return knownTypes.get(clazz.getName());
     }
@@ -420,7 +406,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Types types = env.getTypeUtils();
     TypeDeclaration declaration = env.getTypeDeclaration(clazz.getName());
-    return getXmlType(types.getDeclaredType(declaration));
+    return getXmlType(referer, types.getDeclaredType(declaration));
   }
 
   /**

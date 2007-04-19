@@ -264,7 +264,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
   public QName getTypeQName() {
     try {
       EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-      XmlTypeMirror xmlType = model.getXmlType(getDelegate());
+      XmlTypeMirror xmlType = model.getXmlType(method, getDelegate());
       if (xmlType.isAnonymous()) {
         throw new ValidationException(method.getPosition(), "Type of web result cannot be anonymous.");
       }

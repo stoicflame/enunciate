@@ -307,7 +307,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
       try {
         DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
-        XmlTypeMirror xmlType = model.getXmlType(propertyType);
+        XmlTypeMirror xmlType = model.getXmlType(property, propertyType);
         if (xmlType.isAnonymous()) {
           throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
         }

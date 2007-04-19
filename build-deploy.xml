@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="deploy" name="deploy-all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+
+  <import file="build.xml"/>
+
+  <target name="init" depends="all.init">
+    <fail unless="deploy.repo.url" message="A URL to a remote deploy repo must be supplied with the 'deploy.repo.url' property."/>
+    <artifact:remoteRepository id="deploy.repo" url="${deploy.repo.url}"/>
+  </target>
+
+  <target name="build" depends="init">
+    <ant dir="${core.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.xml.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.jaxws.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.rest.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.xfire-client.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.docs.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.xfire.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+    <ant dir="${modules.xfire-integration.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
+
+    <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>
+  </target>
+
+  <target name="deploy" depends="dist">
+    <artifact:deploy file="target/${top.jar.name}">
+      <pom refid="top.pom"/>
+      <remoteRepository refid="deploy.repo"/>
+    </artifact:deploy>
+  </target>
+
+</project>

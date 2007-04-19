@@ -43,7 +43,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
     if (baseType == null) {
       try {
-        baseType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getSuperclass());
+        baseType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getSuperclass());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());

@@ -31,6 +31,7 @@ import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -361,50 +362,24 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    * Getting the xml type for a specified type.
    */
   public void testGetXmlType() throws Exception {
-    final XmlTypeMirror mockXmlType = new MockXmlType();
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel() {
-      @Override
-      protected XmlTypeMirror createXmlType(TypeMirror type) {
-        return mockXmlType;
-      }
-    };
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
 
     DeclaredType stringType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("java.lang.String"));
-    XmlTypeMirror stringXmlType = model.getXmlType(stringType);
+    XmlTypeMirror stringXmlType = model.getXmlType(null, stringType);
     assertSame(KnownXmlType.STRING, stringXmlType);
-    assertSame(stringXmlType, model.getXmlType(String.class));
+    assertSame(stringXmlType, model.getXmlType(null, String.class));
 
     DeclaredType beanFourType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.BeanFour"));
-    XmlTypeMirror beanFourXmlType = model.getXmlType(beanFourType);
+    XmlTypeMirror beanFourXmlType = model.getXmlType(null, beanFourType);
     assertEquals("The xml type for bean four should have been specified at the package-level.", "specified-bean-four", beanFourXmlType.getName());
     assertEquals("The xml type for bean four should have been specified at the package-level.", "http://org.codehaus.enunciate/core/samples/beanfour", beanFourXmlType.getNamespace());
 
-    DeclaredType beanThreeType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.BeanThree"));
-    assertSame("The xml type for bean three should have been created.", mockXmlType, model.getXmlType(beanThreeType));
-
-    assertSame("The xml type for an actual class should have been created.", mockXmlType, model.getXmlType(DynaBean.class));
-  }
-
-  private static class MockXmlType implements XmlTypeMirror {
-    public String getName() {
-      return null;
-    }
-
-    public String getNamespace() {
-      return null;
-    }
-
-    public QName getQname() {
-      return null;
-    }
-
-    public boolean isAnonymous() {
-      return false;
-    }
-
-    public boolean isSimple() {
-      return false;
-    }
+    ClassDeclaration decl = (ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.BeanThree");
+    ComplexTypeDefinition definition = new ComplexTypeDefinition(decl);
+    model.add(definition);
+    DeclaredType beanThreeType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(decl);
+    assertNotNull("The xml type for bean three should have been created.", model.getXmlType(null, beanThreeType));
   }
 
   public static Test suite() {

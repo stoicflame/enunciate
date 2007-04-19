@@ -217,7 +217,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
       }
 
       EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-      XmlTypeMirror xmlType = model.getXmlType(type);
+      XmlTypeMirror xmlType = model.getXmlType(this, type);
       if (xmlType.isAnonymous()) {
         throw new ValidationException(getPosition(), "Type of web parameter cannot be anonymous.");
       }

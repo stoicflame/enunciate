@@ -130,7 +130,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getAccessorType());
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getAccessorType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

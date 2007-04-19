@@ -160,7 +160,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public XmlTypeMirror getXMLReturnType() {
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(getReturnType());
+      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, getReturnType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

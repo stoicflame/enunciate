@@ -77,10 +77,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       try {
         try {
           Class enumClass = xmlEnum.value();
-          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(enumClass);
+          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, enumClass);
         }
         catch (MirroredTypeException e) {
-          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(e.getTypeMirror());
+          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, e.getTypeMirror());
         }
       }
       catch (XmlTypeException e) {
