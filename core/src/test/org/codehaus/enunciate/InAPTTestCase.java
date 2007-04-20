@@ -20,18 +20,18 @@ import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import static org.codehaus.enunciate.EnunciateTestUtil.*;
-import net.sf.jelly.apt.ProcessorFactory;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.ProcessorFactory;
+import static org.codehaus.enunciate.EnunciateTestUtil.getAllJavaFiles;
+import static org.codehaus.enunciate.EnunciateTestUtil.invokeAPT;
 
+import java.io.File;
 import java.net.URL;
 import java.util.*;
-import java.io.File;
-
-import junit.framework.TestCase;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.framework.TestResult;
 
 /**
  * A test case that invokes itself within APT.

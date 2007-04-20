@@ -16,10 +16,10 @@
 
 package org.codehaus.enunciate.config;
 
-import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSet;
 import org.apache.commons.digester.RuleSetBase;
+import org.codehaus.enunciate.modules.BasicDeploymentModule;
 
 import java.util.HashMap;
 

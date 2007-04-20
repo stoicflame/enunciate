@@ -23,7 +23,7 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public interface XmlTypeMirror {
+public interface XmlType {
 
   /**
    * The (local) name of this xml type.

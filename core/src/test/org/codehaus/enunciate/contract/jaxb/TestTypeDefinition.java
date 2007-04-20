@@ -19,17 +19,16 @@ package org.codehaus.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import junit.framework.Test;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import java.util.Collection;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton
@@ -98,7 +97,7 @@ public class TestTypeDefinition extends InAPTTestCase {
       return null;
     }
 
-    public XmlTypeMirror getBaseType() {
+    public XmlType getBaseType() {
       return null;
     }
   }

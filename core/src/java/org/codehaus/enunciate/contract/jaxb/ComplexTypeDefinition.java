@@ -17,14 +17,13 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
  * A complex type definition.
@@ -38,12 +37,12 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
   }
 
   @Override
-  public XmlTypeMirror getBaseType() {
-    XmlTypeMirror baseType = super.getBaseType();
+  public XmlType getBaseType() {
+    XmlType baseType = super.getBaseType();
 
     if (baseType == null) {
       try {
-        baseType = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getSuperclass());
+        baseType = XmlTypeFactory.getXmlType(getSuperclass());
       }
       catch (XmlTypeException e) {
         throw new ValidationException(getPosition(), e.getMessage());

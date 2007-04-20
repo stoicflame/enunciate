@@ -19,9 +19,9 @@ package org.codehaus.enunciate.contract.jaxb;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
 import junit.framework.TestCase;
+import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 
 /**
  * @author Ryan Heaton

@@ -17,22 +17,21 @@
 package org.codehaus.enunciate.contract.validation;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.EnumDeclaration;
+import junit.framework.Test;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
-import org.codehaus.enunciate.contract.jaxb.*;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
 import java.util.Collection;
 import java.util.Iterator;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton

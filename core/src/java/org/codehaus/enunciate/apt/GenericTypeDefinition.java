@@ -19,7 +19,7 @@ package org.codehaus.enunciate.apt;
 import com.sun.mirror.declaration.ClassDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 
@@ -37,7 +37,7 @@ class GenericTypeDefinition extends TypeDefinition {
     return new ValidationResult();
   }
 
-  public XmlTypeMirror getBaseType() {
+  public XmlType getBaseType() {
     return KnownXmlType.ANY_TYPE;
   }
 }

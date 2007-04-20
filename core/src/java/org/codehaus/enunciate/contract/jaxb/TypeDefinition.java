@@ -20,16 +20,16 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.*;
 import java.beans.Introspector;
+import java.util.*;
 
 /**
  * A xml type definition.
@@ -38,7 +38,7 @@ import java.beans.Introspector;
  */
 public abstract class TypeDefinition extends DecoratedClassDeclaration {
 
-  private final XmlType xmlType;
+  private final javax.xml.bind.annotation.XmlType xmlType;
   private final Schema schema;
   private final SortedSet<Element> elements;
   private final Collection<Attribute> attributes;
@@ -48,7 +48,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
 
-    this.xmlType = getAnnotation(XmlType.class);
+    this.xmlType = getAnnotation(javax.xml.bind.annotation.XmlType.class);
     this.schema = new Schema(delegate.getPackage());
 
     ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder());
@@ -390,6 +390,6 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    *
    * @return The base type of this type definition.
    */
-  public abstract XmlTypeMirror getBaseType();
+  public abstract XmlType getBaseType();
 
 }

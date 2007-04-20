@@ -25,7 +25,7 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public class XmlClassType implements XmlTypeMirror {
+public class XmlClassType implements XmlType {
 
   private final TypeDefinition typeDef;
 

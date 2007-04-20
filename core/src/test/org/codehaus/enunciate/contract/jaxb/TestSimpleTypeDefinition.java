@@ -16,13 +16,13 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
-import org.codehaus.enunciate.InAPTTestCase;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import com.sun.mirror.declaration.ClassDeclaration;
 import junit.framework.Test;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 /**
  * @author Ryan Heaton
@@ -37,7 +37,7 @@ public class TestSimpleTypeDefinition extends InAPTTestCase {
     FreemarkerModel.set(model);
 
     SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeSimpleContentBean"));
-    XmlTypeMirror baseType = simpleType.getBaseType();
+    XmlType baseType = simpleType.getBaseType();
     assertEquals(KnownXmlType.INT.getQname(), baseType.getQname());
   }
 

@@ -22,14 +22,13 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.ReferenceType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.rest.annotations.Noun;
 import org.codehaus.enunciate.rest.annotations.Verb;
 import org.codehaus.enunciate.rest.annotations.VerbType;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,9 +157,9 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    *
    * @return The XML type of the return value.
    */
-  public XmlTypeMirror getXMLReturnType() {
+  public XmlType getXMLReturnType() {
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, getReturnType());
+      return XmlTypeFactory.getXmlType(getReturnType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

@@ -24,14 +24,13 @@ import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -141,7 +140,7 @@ public class Element extends Accessor {
     QName ref = null;
 
     //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
-    XmlTypeMirror baseType = getBaseType();
+    XmlType baseType = getBaseType();
     if (baseType.isAnonymous()) {
       TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
       if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
@@ -230,7 +229,7 @@ public class Element extends Accessor {
    * @return The base type.
    */
   @Override
-  public XmlTypeMirror getBaseType() {
+  public XmlType getBaseType() {
     if (xmlElement != null) {
       Class typeClass = null;
       TypeMirror typeMirror = null;
@@ -243,10 +242,10 @@ public class Element extends Accessor {
 
       try {
         if (typeClass == null) {
-          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, typeMirror);
+          return XmlTypeFactory.getXmlType(typeMirror);
         }
         else if (typeClass != XmlElement.DEFAULT.class) {
-          return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, typeClass);
+          return XmlTypeFactory.getXmlType(typeClass);
         }
       }
       catch (XmlTypeException e) {

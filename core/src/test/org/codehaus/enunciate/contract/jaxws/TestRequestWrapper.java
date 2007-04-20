@@ -16,13 +16,12 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
+import junit.framework.Test;
 import org.codehaus.enunciate.InAPTTestCase;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Iterator;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton

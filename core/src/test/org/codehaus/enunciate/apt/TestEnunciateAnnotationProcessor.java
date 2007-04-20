@@ -23,13 +23,13 @@ import junit.framework.Test;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.OutsideAPTOkay;
-import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
 

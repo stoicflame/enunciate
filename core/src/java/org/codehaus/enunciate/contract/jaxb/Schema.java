@@ -16,20 +16,24 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.contract.jaxb.types.SpecifiedXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.validation.ValidationException;
+import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
+import org.codehaus.enunciate.contract.jaxb.types.SpecifiedXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import java.util.*;
 
 /**
  * A package declaration decorated so as to be able to describe itself an XML-Schema root element.
@@ -40,9 +44,13 @@ import java.util.Map;
  */
 public class Schema extends DecoratedPackageDeclaration implements Comparable<Schema> {
 
+  private static final Map<String, Schema> SCHEMA_CACHE = Collections.synchronizedMap(new HashMap<String, Schema>());
+
   private final XmlSchema xmlSchema;
   private final XmlAccessorType xmlAccessorType;
   private final XmlAccessorOrder xmlAccessorOrder;
+  private final Map<String, XmlType> adaptedJavaTypes;
+  private final Map<String, XmlType> explicitSchemaTypes;
 
   public Schema(PackageDeclaration delegate) {
     super(delegate);
@@ -50,6 +58,9 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
     xmlSchema = getAnnotation(XmlSchema.class);
     xmlAccessorType = getAnnotation(XmlAccessorType.class);
     xmlAccessorOrder = getAnnotation(XmlAccessorOrder.class);
+    adaptedJavaTypes = loadAdaptedJavaTypes();
+    explicitSchemaTypes = loadExplicitSchemaTypes();
+    SCHEMA_CACHE.put(getQualifiedName(), this);
   }
 
   /**
@@ -132,8 +143,109 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
    *
    * @return The map of classes to their xml schema types.
    */
-  public Map<String, XmlTypeMirror> getSpecifiedTypes() {
-    HashMap<String, XmlTypeMirror> types = new HashMap<String, XmlTypeMirror>();
+  public Map<String, XmlType> getSpecifiedTypes() {
+    Map<String, XmlType> types = new HashMap<String, XmlType>();
+    types.putAll(getExplicitSchemaTypes());
+    types.putAll(getAdaptedJavaTypes());
+    return types;
+  }
+
+  /**
+   * Get the adapted Java types for this package.
+   *
+   * @return The adapted Java types for this package.
+   */
+  public Map<String, XmlType> getAdaptedJavaTypes() {
+    return this.adaptedJavaTypes;
+  }
+
+  /**
+   * Loads the adapted java types for this package.
+   *
+   * @return The adapted java types for this package.
+   */
+  private Map<String, XmlType> loadAdaptedJavaTypes() {
+    if (SCHEMA_CACHE.containsKey(getQualifiedName())) {
+      //cache this result because its expensive.
+      return SCHEMA_CACHE.get(getQualifiedName()).adaptedJavaTypes;
+    }
+    
+    HashMap<String, XmlType> types = new HashMap<String, XmlType>();
+
+    XmlJavaTypeAdapter javaType = getAnnotation(XmlJavaTypeAdapter.class);
+    XmlJavaTypeAdapters javaTypes = getAnnotation(XmlJavaTypeAdapters.class);
+
+    if ((javaType != null) || (javaTypes != null)) {
+      ArrayList<XmlJavaTypeAdapter> allAdaptedTypes = new ArrayList<XmlJavaTypeAdapter>();
+      if (javaType != null) {
+        allAdaptedTypes.add(javaType);
+      }
+
+      if (javaTypes != null) {
+        allAdaptedTypes.addAll(Arrays.asList(javaTypes.value()));
+      }
+
+      for (XmlJavaTypeAdapter adaptedTypeInfo : allAdaptedTypes) {
+        String typeFqn;
+        TypeMirror adaptedType;
+
+        try {
+          Class adaptedClass = adaptedTypeInfo.type();
+          if (adaptedClass == XmlJavaTypeAdapter.DEFAULT.class) {
+            throw new ValidationException(getPosition(), "A type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
+          }
+          typeFqn = adaptedClass.getName();
+
+          AnnotationProcessorEnvironment aptenv = Context.getCurrentEnvironment();
+          TypeDeclaration typeDeclaration = aptenv.getTypeDeclaration(typeFqn);
+          if (typeDeclaration == null) {
+            throw new ValidationException(getPosition(), "The type " + typeFqn +
+              " specified by the XmlJavaTypeAdapter is not a valid class type (it can't be an array, anonymous, local, or primitive.");
+          }
+          adaptedType = aptenv.getTypeUtils().getDeclaredType(typeDeclaration);
+        }
+        catch (MirroredTypeException e) {
+          adaptedType = e.getTypeMirror();
+          if (!(adaptedType instanceof DeclaredType)) {
+            throw new ValidationException(getPosition(), "Unadaptable type: " + adaptedType);
+          }
+          typeFqn = ((DeclaredType) adaptedType).getDeclaration().getQualifiedName();
+        }
+
+        XmlType xmlType;
+        try {
+          xmlType = XmlTypeFactory.getAdaptedType((DeclaredType) adaptedType, adaptedTypeInfo);
+        }
+        catch (XmlTypeException e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+        types.put(typeFqn, xmlType);
+      }
+    }
+    return types;
+  }
+
+  /**
+   * Get the types in this package that have explicitly-defined schema types.
+   *
+   * @return The types in this package that have explicitly-defined schema types.
+   */
+  public Map<String, XmlType> getExplicitSchemaTypes() {
+    return this.explicitSchemaTypes;
+  }
+
+  /**
+   * Loads the explicit schema types for this package.
+   *
+   * @return The explicit schema types for this package.
+   */
+  private Map<String, XmlType> loadExplicitSchemaTypes() {
+    if (SCHEMA_CACHE.containsKey(getQualifiedName())) {
+      //cache this result because its expensive.
+      return SCHEMA_CACHE.get(getQualifiedName()).explicitSchemaTypes;
+    }
+
+    HashMap<String, XmlType> types = new HashMap<String, XmlType>();
 
     XmlSchemaType schemaType = getAnnotation(XmlSchemaType.class);
     XmlSchemaTypes schemaTypes = getAnnotation(XmlSchemaTypes.class);
@@ -160,7 +272,7 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
         catch (MirroredTypeException e) {
           TypeMirror typeMirror = e.getTypeMirror();
           if (!(typeMirror instanceof DeclaredType)) {
-            throw new ValidationException(getPosition(), "Unrecognized type : " + typeMirror);
+            throw new ValidationException(getPosition(), "Unrecognized type: " + typeMirror);
           }
           typeFqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
         }
@@ -168,10 +280,14 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
         types.put(typeFqn, new SpecifiedXmlType(specifiedType));
       }
     }
-
     return types;
   }
 
+  /**
+   * Gets the specified namespace prefixes for this package.
+   *
+   * @return The specified namespace prefixes for this package.
+   */
   public Map<String, String> getSpecifiedNamespacePrefixes() {
     HashMap<String, String> namespacePrefixes = new HashMap<String, String>();
     if (xmlSchema != null) {

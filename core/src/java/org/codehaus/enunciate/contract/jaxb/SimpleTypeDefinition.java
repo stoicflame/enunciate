@@ -17,7 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 
@@ -37,7 +37,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
    *
    * @return The base type for this simple type.
    */
-  public XmlTypeMirror getBaseType() {
+  public XmlType getBaseType() {
     Value value = getValue();
 
     if (value != null) {

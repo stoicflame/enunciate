@@ -16,18 +16,17 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.EnumDeclaration;
+import junit.framework.Test;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import com.sun.mirror.declaration.EnumDeclaration;
-import com.sun.mirror.declaration.ClassDeclaration;
 
 import javax.xml.namespace.QName;
-import java.util.Map;
 import java.util.HashMap;
-
-import junit.framework.Test;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton

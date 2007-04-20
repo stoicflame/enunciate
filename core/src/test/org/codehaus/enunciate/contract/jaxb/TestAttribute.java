@@ -16,13 +16,12 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
-import org.codehaus.enunciate.InAPTTestCase;
 import com.sun.mirror.declaration.ClassDeclaration;
+import junit.framework.Test;
+import org.codehaus.enunciate.InAPTTestCase;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton

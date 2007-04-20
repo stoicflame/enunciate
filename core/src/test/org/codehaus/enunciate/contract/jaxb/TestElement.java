@@ -20,20 +20,19 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
+import junit.framework.Test;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import net.sf.jelly.apt.Context;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton
@@ -154,7 +153,7 @@ public class TestElement extends InAPTTestCase {
     assertNull(element.getRef());
     DeclaredType enumType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType((TypeDeclaration) enumDef.getDelegate());
     assertTrue(element.getAccessorType().equals(enumType));
-    XmlTypeMirror baseType = element.getBaseType();
+    XmlType baseType = element.getBaseType();
     assertEquals(enumDef.getName(), baseType.getName());
     assertEquals(enumDef.getNamespace(), baseType.getNamespace());
     assertFalse(element.isNillable());

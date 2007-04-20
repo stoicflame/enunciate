@@ -17,13 +17,12 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import junit.framework.Test;
 import org.codehaus.enunciate.InAPTTestCase;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton

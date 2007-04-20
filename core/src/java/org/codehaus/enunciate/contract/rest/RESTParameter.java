@@ -18,14 +18,13 @@ package org.codehaus.enunciate.contract.rest;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.rest.annotations.ProperNoun;
 import org.codehaus.enunciate.rest.annotations.Adjective;
 import org.codehaus.enunciate.rest.annotations.NounValue;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import com.sun.mirror.declaration.ParameterDeclaration;
 
 /**
@@ -98,9 +97,9 @@ public class RESTParameter extends DecoratedParameterDeclaration {
    *
    * @return The XML type of this REST parameter.
    */
-  public XmlTypeMirror getXmlType() {
+  public XmlType getXmlType() {
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getType());
+      return XmlTypeFactory.getXmlType(getType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

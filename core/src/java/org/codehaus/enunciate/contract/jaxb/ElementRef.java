@@ -24,20 +24,20 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import javax.xml.XMLConstants;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -258,7 +258,7 @@ public class ElementRef extends Element {
    *
    */
   @Override
-  public XmlTypeMirror getBaseType() {
+  public XmlType getBaseType() {
     throw new UnsupportedOperationException("There is no base type for an element ref.");
   }
 

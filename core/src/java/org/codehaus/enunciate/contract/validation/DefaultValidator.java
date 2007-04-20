@@ -21,7 +21,7 @@ import com.sun.mirror.type.*;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTParameter;
@@ -182,7 +182,7 @@ public class DefaultValidator implements Validator {
             result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
           }
 
-          XmlTypeMirror nounValueType = nounValue.getXmlType();
+          XmlType nounValueType = nounValue.getXmlType();
           if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
             result.addError(nounValue.getPosition(), "A noun value must be a JAXB 2.0 root element.");
           }
@@ -313,7 +313,7 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = validateTypeDefinition(complexType);
 
-    XmlTypeMirror baseType = complexType.getBaseType();
+    XmlType baseType = complexType.getBaseType();
     while ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
       ComplexTypeDefinition superType = (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition();
       baseType = superType.getBaseType();
@@ -343,7 +343,7 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = validateTypeDefinition(simpleType);
 
-    XmlTypeMirror baseType = simpleType.getBaseType();
+    XmlType baseType = simpleType.getBaseType();
     if (baseType == null) {
       result.addError(simpleType.getPosition(), "No base type specified.");
     }
@@ -373,7 +373,7 @@ public class DefaultValidator implements Validator {
       result.addError(typeDef.getPosition(), "XmlTransient type definition.");
     }
 
-    XmlType xmlType = typeDef.getAnnotation(XmlType.class);
+    javax.xml.bind.annotation.XmlType xmlType = typeDef.getAnnotation(javax.xml.bind.annotation.XmlType.class);
 
     if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
       result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
@@ -384,7 +384,7 @@ public class DefaultValidator implements Validator {
       String factoryClassFqn = null;
       try {
         Class factoryClass = xmlType.factoryClass();
-        if (factoryClass != XmlType.DEFAULT.class) {
+        if (factoryClass != javax.xml.bind.annotation.XmlType.DEFAULT.class) {
           factoryClassFqn = factoryClass.getName();
         }
       }
@@ -563,7 +563,7 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateAttribute(Attribute attribute) {
     ValidationResult result = validateAccessor(attribute);
 
-    XmlTypeMirror baseType = attribute.getBaseType();
+    XmlType baseType = attribute.getBaseType();
     if (baseType == null) {
       result.addError(attribute.getPosition(), "No base type specified.");
     }
@@ -638,7 +638,7 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateValue(Value value) {
     ValidationResult result = validateAccessor(value);
 
-    XmlTypeMirror baseType = value.getBaseType();
+    XmlType baseType = value.getBaseType();
     if (baseType == null) {
       result.addError(value.getPosition(), "No base type specified.");
     }

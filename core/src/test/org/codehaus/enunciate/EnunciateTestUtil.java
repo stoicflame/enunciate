@@ -17,6 +17,7 @@
 package org.codehaus.enunciate;
 
 import com.sun.mirror.apt.AnnotationProcessorFactory;
+import static junit.framework.Assert.fail;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -24,8 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import static junit.framework.Assert.*;
 
 /**
  * Utility methods for enunciate test cases.

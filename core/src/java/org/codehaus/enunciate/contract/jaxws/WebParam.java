@@ -21,14 +21,13 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -216,8 +215,12 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
         type = typeArgs.iterator().next();
       }
 
-      EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-      XmlTypeMirror xmlType = model.getXmlType(this, type);
+
+      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
+      if (xmlType == null) {
+        xmlType = XmlTypeFactory.getXmlType(type);
+      }
+
       if (xmlType.isAnonymous()) {
         throw new ValidationException(getPosition(), "Type of web parameter cannot be anonymous.");
       }

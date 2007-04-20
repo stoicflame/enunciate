@@ -21,13 +21,12 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.TypeVisitor;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -263,8 +262,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
    */
   public QName getTypeQName() {
     try {
-      EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-      XmlTypeMirror xmlType = model.getXmlType(method, getDelegate());
+      XmlType xmlType = XmlTypeFactory.getXmlType(getDelegate());
       if (xmlType.isAnonymous()) {
         throw new ValidationException(method.getPosition(), "Type of web result cannot be anonymous.");
       }

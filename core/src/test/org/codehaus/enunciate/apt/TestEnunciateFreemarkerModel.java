@@ -17,8 +17,6 @@
 package org.codehaus.enunciate.apt;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
 import junit.framework.Test;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.OutsideAPTOkay;
@@ -27,17 +25,11 @@ import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
-import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.beanutils.DynaBean;
 
 /**
  * @author Ryan Heaton
@@ -50,7 +42,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
   @OutsideAPTOkay
   public void testInit() throws Exception {
     final Map<String, String> knownNamespaces = new HashMap<String, String>();
-    final Map<String, XmlTypeMirror> mockKnownTypes = new HashMap<String, XmlTypeMirror>();
+    final Map<String, XmlType> mockKnownTypes = new HashMap<String, XmlType>();
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel() {
       @Override
       protected Map<String, String> loadKnownNamespaces() {
@@ -58,7 +50,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
       }
 
       @Override
-      protected Map<String, XmlTypeMirror> loadKnownTypes() {
+      protected Map<String, XmlType> loadKnownTypes() {
         return mockKnownTypes;
       }
     };
@@ -77,10 +69,10 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
   @OutsideAPTOkay
   public void testKnownTypes() throws Exception {
 
-    Map<String, XmlTypeMirror> knownTypes = new EnunciateFreemarkerModel().loadKnownTypes();
+    Map<String, XmlType> knownTypes = new EnunciateFreemarkerModel().loadKnownTypes();
 
     //JAXB 2.0 Spec, section 8.5.1:
-    XmlTypeMirror knownType = knownTypes.get(Boolean.TYPE.getName());
+    XmlType knownType = knownTypes.get(Boolean.TYPE.getName());
     assertNotNull("The primitive boolean type should be a known type.", knownType);
     assertEquals("http://www.w3.org/2001/XMLSchema", knownType.getNamespace());
     assertEquals("boolean", knownType.getName());
@@ -356,30 +348,6 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    */
   public void testAddRESTEndpoint() throws Exception {
     //todo: implement
-  }
-
-  /**
-   * Getting the xml type for a specified type.
-   */
-  public void testGetXmlType() throws Exception {
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
-    FreemarkerModel.set(model);
-
-    DeclaredType stringType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("java.lang.String"));
-    XmlTypeMirror stringXmlType = model.getXmlType(null, stringType);
-    assertSame(KnownXmlType.STRING, stringXmlType);
-    assertSame(stringXmlType, model.getXmlType(null, String.class));
-
-    DeclaredType beanFourType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.BeanFour"));
-    XmlTypeMirror beanFourXmlType = model.getXmlType(null, beanFourType);
-    assertEquals("The xml type for bean four should have been specified at the package-level.", "specified-bean-four", beanFourXmlType.getName());
-    assertEquals("The xml type for bean four should have been specified at the package-level.", "http://org.codehaus.enunciate/core/samples/beanfour", beanFourXmlType.getNamespace());
-
-    ClassDeclaration decl = (ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.BeanThree");
-    ComplexTypeDefinition definition = new ComplexTypeDefinition(decl);
-    model.add(definition);
-    DeclaredType beanThreeType = Context.getCurrentEnvironment().getTypeUtils().getDeclaredType(decl);
-    assertNotNull("The xml type for bean three should have been created.", model.getXmlType(null, beanThreeType));
   }
 
   public static Test suite() {

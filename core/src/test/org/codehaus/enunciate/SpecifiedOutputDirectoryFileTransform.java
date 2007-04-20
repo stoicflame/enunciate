@@ -20,7 +20,9 @@ import net.sf.jelly.apt.freemarker.transforms.FileTransform;
 import net.sf.jelly.apt.strategies.FileStrategy;
 import net.sf.jelly.apt.strategies.MissingParameterException;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author Ryan Heaton

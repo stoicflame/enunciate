@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
 /**
  * @author Ryan Heaton
  */
-public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlTypeMirror {
+public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlType {
 
   public XmlPrimitiveType(PrimitiveType delegate) {
     super(delegate);

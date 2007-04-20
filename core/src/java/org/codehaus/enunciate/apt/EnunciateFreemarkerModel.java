@@ -16,30 +16,26 @@
 
 package org.codehaus.enunciate.apt;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.Types;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.Schema;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeDecorator;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlNsForm;
 import java.io.File;
@@ -56,7 +52,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final Map<String, String> namespacesToPrefixes;
   final Map<String, SchemaInfo> namespacesToSchemas;
   final Map<String, WsdlInfo> namespacesToWsdls;
-  final Map<String, XmlTypeMirror> knownTypes;
+  final Map<String, XmlType> knownTypes;
   final Map<String, List<RESTMethod>> nounsToRESTMethods;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
@@ -103,8 +99,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @return The map of known types, keyed off the Java fqn.
    */
-  protected Map<String, XmlTypeMirror> loadKnownTypes() {
-    HashMap<String, XmlTypeMirror> knownTypes = new HashMap<String, XmlTypeMirror>();
+  protected Map<String, XmlType> loadKnownTypes() {
+    HashMap<String, XmlType> knownTypes = new HashMap<String, XmlType>();
 
     knownTypes.put(Boolean.class.getName(), KnownXmlType.BOOLEAN);
     knownTypes.put(Byte.class.getName(), KnownXmlType.BYTE);
@@ -350,63 +346,37 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @return The xml type for the specified type.
    * @throws XmlTypeException If the XML type cannot be determined...
    */
-  public XmlTypeMirror getXmlType(Declaration referer, TypeMirror type) throws XmlTypeException {
-    return XmlTypeDecorator.decorate(type);
+  public XmlType getXmlType(Declaration referer, TypeMirror type) throws XmlTypeException {
+    return XmlTypeFactory.getXmlType(type);
   }
 
   /**
-   * Gets the known or specified type for the given declared type.
+   * Gets the known type for the given declared type.
    *
    * @param declaredType The declared type.
-   * @return The known or specified type for the given declared type, or null if the declared type is not known or specified.
+   * @return The known type for the given declared type, or null if the declared type is not known.
    */
-  public XmlTypeMirror getKnownOrSpecifiedType(DeclaredType declaredType) {
-    XmlTypeMirror knownOrSpecifiedType = null;
+  public XmlType getKnownType(DeclaredType declaredType) {
+    XmlType knownType = null;
     TypeDeclaration declaration = declaredType.getDeclaration();
     if (declaration != null) {
       if (knownTypes.containsKey(declaration.getQualifiedName())) {
         //first check the known types.
-        knownOrSpecifiedType = knownTypes.get(declaration.getQualifiedName());
-      }
-      else {
-        //not known, check the specified types for the package.
-        Map<String, XmlTypeMirror> specifiedTypes = getSpecifiedTypes(declaration.getPackage());
-        if (specifiedTypes.containsKey(declaration.getQualifiedName())) {
-          knownOrSpecifiedType = specifiedTypes.get(declaration.getQualifiedName());
-        }
+        knownType = getKnownType(declaration);
       }
     }
 
-    return knownOrSpecifiedType;
+    return knownType;
   }
 
   /**
-   * Gets the specified types for a given package.
+   * Gets the known type for the given declaration.
    *
-   * @param pckg The package.
-   * @return The specified types for the package.
+   * @param declaration The declaration.
+   * @return The known type for the given declaration, or null if the XML type of the declaration is not known.
    */
-  protected Map<String, XmlTypeMirror> getSpecifiedTypes(PackageDeclaration pckg) {
-    return new Schema(pckg).getSpecifiedTypes();
-  }
-
-  /**
-   * Get the xml type for a specific class.
-   *
-   * @param referer The declaration that wants to know the XML type.
-   * @param clazz The class.
-   * @return The xml type for a specific class.
-   * @throws XmlTypeException If there was an error getting the xml type for the specified class.
-   */
-  public XmlTypeMirror getXmlType(Declaration referer, Class clazz) throws XmlTypeException {
-    if (knownTypes.containsKey(clazz.getName())) {
-      return knownTypes.get(clazz.getName());
-    }
-
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Types types = env.getTypeUtils();
-    TypeDeclaration declaration = env.getTypeDeclaration(clazz.getName());
-    return getXmlType(referer, types.getDeclaredType(declaration));
+  public XmlType getKnownType(TypeDeclaration declaration) {
+    return knownTypes.get(declaration.getQualifiedName());
   }
 
   /**

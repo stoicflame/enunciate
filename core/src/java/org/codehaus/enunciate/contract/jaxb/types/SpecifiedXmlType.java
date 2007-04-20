@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public class SpecifiedXmlType implements XmlTypeMirror {
+public class SpecifiedXmlType implements XmlType {
 
   private final XmlSchemaType annotation;
 

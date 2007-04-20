@@ -23,12 +23,6 @@ import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.SpecifiedXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
@@ -36,7 +30,11 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -110,11 +108,11 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    *
    * @return The base type.
    */
-  public XmlTypeMirror getBaseType() {
+  public XmlType getBaseType() {
     //first check to see if the base type is dictated by a specific annotation.
-    XmlSchemaType schemaType = getAnnotation(XmlSchemaType.class);
-    if (schemaType != null) {
-      return new SpecifiedXmlType(schemaType);
+    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
+    if (xmlType != null) {
+      return xmlType;
     }
 
     if (isXmlID()) {
@@ -130,7 +128,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     try {
-      return ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(this, getAccessorType());
+      return XmlTypeFactory.getXmlType(getAccessorType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

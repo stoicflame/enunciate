@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.config;
 
 import com.sun.mirror.declaration.TypeDeclaration;
+import junit.framework.Test;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 
@@ -24,8 +25,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton

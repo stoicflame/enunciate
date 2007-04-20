@@ -19,14 +19,13 @@ package org.codehaus.enunciate.contract.jaxb;
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.type.MirroredTypeException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -70,17 +69,17 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   // Inherited.
   @Override
-  public XmlTypeMirror getBaseType() {
-    XmlTypeMirror typeMirror = KnownXmlType.STRING;
+  public XmlType getBaseType() {
+    XmlType xmlType = KnownXmlType.STRING;
 
     if (xmlEnum != null) {
       try {
         try {
           Class enumClass = xmlEnum.value();
-          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, enumClass);
+          xmlType = XmlTypeFactory.getXmlType(enumClass);
         }
         catch (MirroredTypeException e) {
-          typeMirror = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getXmlType(null, e.getTypeMirror());
+          xmlType = XmlTypeFactory.getXmlType(e.getTypeMirror());
         }
       }
       catch (XmlTypeException e) {
@@ -88,7 +87,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       }
     }
 
-    return typeMirror;
+    return xmlType;
   }
 
   /**

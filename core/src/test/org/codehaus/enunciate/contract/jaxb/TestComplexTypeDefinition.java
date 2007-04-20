@@ -17,16 +17,15 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.InAPTTestCase;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import junit.framework.Test;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import junit.framework.Test;
 
 /**
  * @author Ryan Heaton
@@ -44,7 +43,7 @@ public class TestComplexTypeDefinition extends InAPTTestCase {
     assertEquals(KnownXmlType.ANY_TYPE, complexContentType.getBaseType());
     model.add(complexContentType);
     ComplexTypeDefinition exComplexContentType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ExtendedBeanOne"));
-    XmlTypeMirror baseType = exComplexContentType.getBaseType();
+    XmlType baseType = exComplexContentType.getBaseType();
     assertEquals(complexContentType.getName(), baseType.getName());
     assertEquals(complexContentType.getNamespace(), baseType.getNamespace());
   }

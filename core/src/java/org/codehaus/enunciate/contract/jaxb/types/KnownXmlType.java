@@ -23,7 +23,7 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public enum KnownXmlType implements XmlTypeMirror {
+public enum KnownXmlType implements XmlType {
 
   //known xml-schema types.
   STRING("string", "http://www.w3.org/2001/XMLSchema"),

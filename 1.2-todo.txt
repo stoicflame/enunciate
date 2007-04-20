@@ -1,0 +1,1 @@
+known issues: packages can't have array types.

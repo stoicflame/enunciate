@@ -17,15 +17,14 @@
 package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.TypeDeclaration;
+import junit.framework.Test;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.Collection;
 import java.util.Iterator;
-
-import junit.framework.Test;
 
 /**
  * Test suite for the web service decoration.

@@ -22,16 +22,15 @@ import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -298,7 +297,6 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
 
-    EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
     for (PropertyDeclaration property : getAllProperties(this)) {
       String propertyName = property.getPropertyName();
       if (("cause".equals(propertyName)) || ("localizedMessage".equals(propertyName)) || ("stackTrace".equals(propertyName))) {
@@ -307,7 +305,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
       try {
         DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
-        XmlTypeMirror xmlType = model.getXmlType(property, propertyType);
+        XmlType xmlType = XmlTypeFactory.findSpecifiedType(property);
+        if (xmlType == null) {
+          xmlType = XmlTypeFactory.getXmlType(propertyType);
+        }
         if (xmlType.isAnonymous()) {
           throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
         }
@@ -382,11 +383,11 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   public static class FaultBeanChildElement implements ImplicitChildElement {
 
     private final PropertyDeclaration property;
-    private final XmlTypeMirror xmlType;
+    private final XmlType xmlType;
     private final int minOccurs;
     private final String maxOccurs;
 
-    public FaultBeanChildElement(PropertyDeclaration property, XmlTypeMirror xmlType, int minOccurs, String maxOccurs) {
+    public FaultBeanChildElement(PropertyDeclaration property, XmlType xmlType, int minOccurs, String maxOccurs) {
       this.property = property;
       this.xmlType = xmlType;
       this.minOccurs = minOccurs;
