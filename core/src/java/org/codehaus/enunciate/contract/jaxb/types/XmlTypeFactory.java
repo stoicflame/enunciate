@@ -221,7 +221,7 @@ public class XmlTypeFactory {
 
     ClassDeclaration adaptorDeclaration = adaptorType.getDeclaration();
 
-    InterfaceType adaptorInterfaceType = findXmlAdapterType(adaptorDeclaration);
+    ClassType adaptorInterfaceType = findXmlAdapterType(adaptorDeclaration);
     if (adaptorInterfaceType == null) {
       throw new IllegalStateException("Unable to find the type of XmlAdapter for " + adaptorDeclaration.getQualifiedName());
     }
@@ -229,7 +229,7 @@ public class XmlTypeFactory {
     Collection<TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getActualTypeArguments();
     if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
       throw new XmlTypeException("The type " + adaptorDeclaration.getQualifiedName() +
-        " needs to be a class that extends an XmlAdapter interface type that has two type arguments specifying the value type and the bound type.");
+        " needs to be a class that extends an XmlAdapter type that has two type arguments specifying the value type and the bound type.");
     }
 
     Iterator<TypeMirror> formalTypeIt = adaptorTypeArgs.iterator();
@@ -249,19 +249,17 @@ public class XmlTypeFactory {
    * @param declaration The declaration.
    * @return The interface type, or null if none found.
    */
-  protected static InterfaceType findXmlAdapterType(ClassDeclaration declaration) {
+  protected static ClassType findXmlAdapterType(ClassDeclaration declaration) {
     if (Object.class.getName().equals(declaration.getQualifiedName())) {
       return null;
     }
 
-    Collection<InterfaceType> implementedInterfaces = declaration.getSuperinterfaces();
-    for (InterfaceType implementedInterface : implementedInterfaces) {
-      if (XmlAdapter.class.getName().equals(implementedInterface.getDeclaration().getQualifiedName())) {
-        return implementedInterface;
-      }
+    ClassType superClass = declaration.getSuperclass();
+    if (XmlAdapter.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
+      return superClass;
     }
-
-    return findXmlAdapterType(declaration.getSuperclass().getDeclaration());
+    
+    return findXmlAdapterType(superClass.getDeclaration());
   }
 
   /**

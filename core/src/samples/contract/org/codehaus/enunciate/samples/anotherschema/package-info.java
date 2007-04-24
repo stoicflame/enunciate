@@ -31,9 +31,17 @@
   namespace = "http://org.codehaus.enunciate/core/samples/beanfour",
   type = BeanFour.class
 )
+@XmlJavaTypeAdapters (
+  {
+    @XmlJavaTypeAdapter( value = StringBufferBeanAdapter.class, type = StringBuffer.class )
+  }
+)
+
 package org.codehaus.enunciate.samples.anotherschema;
 
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

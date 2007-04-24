@@ -33,11 +33,12 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  */
 public class JAXWSValidator extends BaseValidator {
+  
+  private final HashSet<String> jaxwsBeans = new HashSet<String>();
 
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
-    HashSet<String> jaxwsBeans = new HashSet<String>();
     TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new ClassDeclarationComparator());
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
