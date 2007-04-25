@@ -35,11 +35,12 @@ import java.util.TreeSet;
 public class JAXWSValidator extends BaseValidator {
   
   private final HashSet<String> jaxwsBeans = new HashSet<String>();
+  private final TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new ClassDeclarationComparator());
 
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
-    TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    TreeSet<WebFault> unvisitedFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
         if (webMessage instanceof RequestWrapper) {
@@ -49,12 +50,15 @@ public class JAXWSValidator extends BaseValidator {
           result.aggregate(validateResponseWrapper((ResponseWrapper) webMessage, jaxwsBeans));
         }
         else if (webMessage instanceof WebFault) {
-          faultSet.add((WebFault) webMessage);
+          WebFault webFault = (WebFault) webMessage;
+          if (faultSet.add(webFault)) {
+            unvisitedFaults.add(webFault);
+          }
         }
       }
     }
 
-    for (WebFault webFault : faultSet) {
+    for (WebFault webFault : unvisitedFaults) {
       result.aggregate(validateWebFault(webFault, jaxwsBeans));
     }
 

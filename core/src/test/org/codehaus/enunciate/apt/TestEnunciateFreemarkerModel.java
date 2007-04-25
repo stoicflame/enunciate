@@ -31,6 +31,8 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 /**
  * @author Ryan Heaton
  */
@@ -238,6 +240,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    */
   public void testAddTypeDefinition() throws Exception {
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
     int nsCount = model.getNamespacesToPrefixes().size();
     ComplexTypeDefinition typeDef1 = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne"));
     String targetNamespace = typeDef1.getNamespace();
@@ -289,6 +292,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    */
   public void testAddRootElementDeclaration() throws Exception {
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
     int nsCount = model.getNamespacesToPrefixes().size();
     ClassDeclaration declaration = (ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree");
     TypeDefinition typeDef1 = new ComplexTypeDefinition(declaration);

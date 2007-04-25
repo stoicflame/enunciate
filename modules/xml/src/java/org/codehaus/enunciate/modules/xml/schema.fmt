@@ -197,7 +197,7 @@
     [#--complex type with simple content--]
     [#elseif typeDef.contentType.simple]
   <${xs}:simpleContent>
-    <${xs}:extension base="${typeDef.value.baseType.qname}">
+    <${xs}:extension base="${typeDef.baseType.qname}">
     [/#if]
 [#t]
     [#--list all the attributes.--]

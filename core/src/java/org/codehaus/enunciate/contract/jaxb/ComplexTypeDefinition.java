@@ -79,7 +79,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
         return ContentType.COMPLEX;
       }
     }
-    else if (getValue() != null) {
+    else if (getBaseType().isSimple()) {
       return ContentType.SIMPLE;
     }
     else {
