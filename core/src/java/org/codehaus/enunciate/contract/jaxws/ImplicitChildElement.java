@@ -16,7 +16,11 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+
 import javax.xml.namespace.QName;
+
+import com.sun.mirror.type.TypeMirror;
 
 /**
  * An implicit child element.
@@ -46,4 +50,17 @@ public interface ImplicitChildElement extends ImplicitSchemaElement {
    */
   QName getTypeQName();
 
+  /**
+   * Gets the xml type for this child element.
+   *
+   * @return The xml type.
+   */
+  XmlType getXmlType();
+
+  /**
+   * Gets the java type for this child element.
+   *
+   * @return The xml type.
+   */
+  TypeMirror getType();
 }

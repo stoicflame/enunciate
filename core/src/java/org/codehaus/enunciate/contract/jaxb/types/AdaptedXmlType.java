@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.ReferenceType;
+import com.sun.mirror.type.TypeMirror;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 
 import javax.xml.namespace.QName;
@@ -31,12 +32,14 @@ public class AdaptedXmlType implements XmlType {
 
   private final ReferenceType adaptedType;
   private final ClassType adaptorType;
-  private final XmlType adaptingType;
+  private final TypeMirror adaptingType;
+  private final XmlType adaptingXmlType;
 
-  public AdaptedXmlType(ReferenceType adaptedType, ClassType adaptorType, XmlType adaptingType) {
+  public AdaptedXmlType(ReferenceType adaptedType, ClassType adaptorType, TypeMirror adaptingType) throws XmlTypeException {
     this.adaptedType = adaptedType;
     this.adaptorType = adaptorType;
     this.adaptingType = adaptingType;
+    this.adaptingXmlType = XmlTypeFactory.getXmlType(adaptingType);
   }
 
   /**
@@ -45,7 +48,7 @@ public class AdaptedXmlType implements XmlType {
    * @return The XML name of the adapting type.
    */
   public String getName() {
-    return adaptingType.getName();
+    return adaptingXmlType.getName();
   }
 
   /**
@@ -54,7 +57,7 @@ public class AdaptedXmlType implements XmlType {
    * @return The XML namespace of the adapting type.
    */
   public String getNamespace() {
-    return adaptingType.getNamespace();
+    return adaptingXmlType.getNamespace();
   }
 
   /**
@@ -63,7 +66,7 @@ public class AdaptedXmlType implements XmlType {
    * @return The qname of the adapting type.
    */
   public QName getQname() {
-    return adaptingType.getQname();
+    return adaptingXmlType.getQname();
   }
 
   /**
@@ -72,7 +75,7 @@ public class AdaptedXmlType implements XmlType {
    * @return Whether the adapting type is anonymous.
    */
   public boolean isAnonymous() {
-    return adaptingType.isAnonymous();
+    return adaptingXmlType.isAnonymous();
   }
 
   /**
@@ -91,8 +94,8 @@ public class AdaptedXmlType implements XmlType {
    */
   public TypeDefinition getTypeDefinition() {
     TypeDefinition typeDef = null;
-    if (adaptingType instanceof XmlClassType) {
-      typeDef = ((XmlClassType) adaptingType).getTypeDefinition();
+    if (adaptingXmlType instanceof XmlClassType) {
+      typeDef = ((XmlClassType) adaptingXmlType).getTypeDefinition();
     }
     return typeDef;
   }
@@ -113,5 +116,14 @@ public class AdaptedXmlType implements XmlType {
    */
   public ClassType getAdaptorType() {
     return adaptorType;
+  }
+
+  /**
+   * The type that is to be adapted to.
+   *
+   * @return The type that is to be adapted to.
+   */
+  public TypeMirror getAdaptingType() {
+    return adaptingType;
   }
 }

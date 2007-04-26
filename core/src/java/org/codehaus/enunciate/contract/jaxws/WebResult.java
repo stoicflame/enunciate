@@ -146,7 +146,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     else if (isHeader()) {
       messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getName();
     }
-    
+
     return messageName;
   }
 
@@ -261,13 +261,27 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
    * @throws ValidationException If the type is anonymous or otherwise problematic.
    */
   public QName getTypeQName() {
-    try {
-      XmlType xmlType = XmlTypeFactory.getXmlType(getDelegate());
-      if (xmlType.isAnonymous()) {
-        throw new ValidationException(method.getPosition(), "Type of web result cannot be anonymous.");
-      }
+    XmlType xmlType = getXmlType();
 
-      return xmlType.getQname();
+    if (xmlType.isAnonymous()) {
+      throw new ValidationException(method.getPosition(), "Type of web result cannot be anonymous.");
+    }
+
+    return xmlType.getQname();
+  }
+
+  /**
+   * Gets the xml type of this result.
+   *
+   * @return The xml type of this result.
+   */
+  public XmlType getXmlType() {
+    try {
+      XmlType xmlType = XmlTypeFactory.findSpecifiedType(getDelegate(), getWebMethod());
+      if (xmlType == null) {
+        xmlType = XmlTypeFactory.getXmlType(getDelegate());
+      }
+      return xmlType;
     }
     catch (XmlTypeException e) {
       throw new ValidationException(method.getPosition(), e.getMessage());

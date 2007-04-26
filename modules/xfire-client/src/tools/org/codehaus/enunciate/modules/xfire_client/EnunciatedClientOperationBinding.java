@@ -16,15 +16,17 @@
 
 package org.codehaus.enunciate.modules.xfire_client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import org.codehaus.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.xfire.MessageContext;
-import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
-import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.Type;
+import org.codehaus.xfire.annotations.WebParamAnnotation;
+import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.InMessage;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.exchange.OutMessage;
@@ -32,8 +34,6 @@ import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.util.ClassLoaderUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.beans.BeanInfo;
@@ -44,8 +44,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * The binding for a JAXWS operation.

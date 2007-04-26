@@ -118,7 +118,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
     else if (isHeader()) {
       messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getSimpleName();
     }
-    
+
     return messageName;
   }
 
@@ -204,28 +204,37 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
    * @throws ValidationException If the type is anonymous or otherwise problematic.
    */
   public QName getTypeQName() {
+    XmlType xmlType = getXmlType();
+
+    if (xmlType.isAnonymous()) {
+      throw new ValidationException(getPosition(), "Type of web parameter cannot be anonymous.");
+    }
+
+    return xmlType.getQname();
+  }
+
+  /**
+   * Gets the xml type for this web parameter.
+   *
+   * @return The xml type.
+   */
+  public XmlType getXmlType() {
     try {
-      TypeMirror type = getType();
-      if (isHolder()) {
-        Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
-        if ((typeArgs == null) || (typeArgs.size() == 0)) {
-          throw new ValidationException(getPosition(), "Unable to get the type of the holder.");
-        }
-
-        type = typeArgs.iterator().next();
-      }
-
-
       XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
+
       if (xmlType == null) {
+        TypeMirror type = getType();
+        if (isHolder()) {
+          Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
+          if ((typeArgs == null) || (typeArgs.size() == 0)) {
+            throw new ValidationException(getPosition(), "Unable to get the type of the holder.");
+          }
+
+          type = typeArgs.iterator().next();
+        }
         xmlType = XmlTypeFactory.getXmlType(type);
       }
-
-      if (xmlType.isAnonymous()) {
-        throw new ValidationException(getPosition(), "Type of web parameter cannot be anonymous.");
-      }
-
-      return xmlType.getQname();
+      return xmlType;
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());

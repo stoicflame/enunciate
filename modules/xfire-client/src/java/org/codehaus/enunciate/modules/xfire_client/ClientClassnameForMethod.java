@@ -27,6 +27,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.AdaptedXmlType;
+import org.codehaus.enunciate.contract.jaxws.WebResult;
+import org.codehaus.enunciate.contract.jaxws.WebParam;
+import org.codehaus.enunciate.contract.jaxws.WebFault;
+import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
+
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
  *
@@ -40,13 +48,65 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     super(conversions);
   }
 
+
+  @Override
+  protected String convertUnknownObject(Object unwrapped) throws TemplateModelException {
+    if (unwrapped instanceof Accessor) {
+      return convert((Accessor) unwrapped);
+    }
+    else if (unwrapped instanceof ImplicitChildElement) {
+      return convert((ImplicitChildElement) unwrapped);
+    }
+
+    return super.convertUnknownObject(unwrapped);
+  }
+
+  /**
+   * Converts the specified fault bean child element.
+   *
+   * @param childElement The fault bean child element.
+   * @return The conversion.
+   */
+  protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
+    TypeMirror faultElementType;
+    XmlType xmlType = childElement.getXmlType();
+    if ((!isJdk15()) && (xmlType instanceof AdaptedXmlType)) {
+      //if we're on jdk14, we can't use the XmlAdapter that is compatible with only > 1.5...
+      faultElementType = ((AdaptedXmlType) xmlType).getAdaptingType();
+    }
+    else {
+      faultElementType = childElement.getType();
+    }
+
+    return convert(faultElementType);
+  }
+
+  /**
+   * Converts the type of an accessor.
+   *
+   * @param accessor The accessor.
+   * @return The accessor.
+   */
+  protected String convert(Accessor accessor) throws TemplateModelException {
+    TypeMirror accessorType;
+    XmlType baseType = accessor.getBaseType();
+    if ((!isJdk15()) && (baseType instanceof AdaptedXmlType)) {
+      //if we're on jdk14, we can't use the XmlAdapter that is compatible with only > 1.5...
+      accessorType = ((AdaptedXmlType) baseType).getAdaptingType();
+    }
+    else {
+      accessorType = accessor.getAccessorType();
+    }
+    return convert(accessorType);
+  }
+
   @Override
   protected String convert(TypeMirror typeMirror) throws TemplateModelException {
     boolean isArray = typeMirror instanceof ArrayType;
     String conversion = super.convert(typeMirror);
 
     //if we're using converting to a java 5+ client code, take into account the type arguments.
-    if ((this.jdk15) && (typeMirror instanceof DeclaredType)) {
+    if ((isJdk15()) && (typeMirror instanceof DeclaredType)) {
       DeclaredType declaredType = (DeclaredType) typeMirror;
       Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
       if (actualTypeArguments.size() > 0) {

@@ -496,11 +496,11 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-digester/commons-digester/1.7/commons-digester-1.7.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/net/sf/apt-jelly/apt-jelly/2.3/apt-jelly-2.3.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/freemarker/freemarker/2.3.6/freemarker-2.3.6.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-logging/commons-logging-api/1.0.4/commons-logging-api-1.0.4.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/xml/bind/jaxb-api/2.0/jaxb-api-2.0.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/activation/activation/1.1/activation-1.1.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/jws/jsr181-api/1.0-MR1/jsr181-api-1.0-MR1.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/xml/ws/jaxws-api/2.0/jaxws-api-2.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -535,7 +535,6 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/xfire/xfire-all/1.2.2/xfire-all-1.2.2-sources.jar!/" />
         <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-java5/src/main" />
       </SOURCES>
     </library>

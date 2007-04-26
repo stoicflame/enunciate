@@ -21,6 +21,7 @@ import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.jaxws.WebResult;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 import javax.xml.namespace.QName;
 
@@ -80,6 +81,24 @@ public class RPCPartChildElementAdapter implements ImplicitChildElement {
    */
   public String getElementDocs() {
     return this.rpcPart.getPartDocs();
+  }
+
+
+  /**
+   * The xml type of the delegate.
+   *
+   * @return The xml type of the delegate.
+   */
+  public XmlType getXmlType() {
+    if (this.rpcPart instanceof WebParam) {
+      return ((WebParam) this.rpcPart).getXmlType();
+    }
+    else if (this.rpcPart instanceof WebResult) {
+      return ((WebResult) this.rpcPart).getXmlType();
+    }
+    else {
+      return null;
+    }
   }
 
   /**

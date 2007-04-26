@@ -410,6 +410,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       return docs;
     }
 
+    public XmlType getXmlType() {
+      return xmlType;
+    }
+
     public QName getTypeQName() {
       return xmlType.getQname();
     }

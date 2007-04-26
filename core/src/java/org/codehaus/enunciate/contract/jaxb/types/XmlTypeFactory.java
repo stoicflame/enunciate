@@ -107,7 +107,7 @@ public class XmlTypeFactory {
    * @param referer The referring declaration.
    * @return The XML type, or null if none was specified.
    */
-  private static XmlType findSpecifiedType(TypeMirror typeMirror, Declaration referer) {
+  public static XmlType findSpecifiedType(TypeMirror typeMirror, Declaration referer) {
     XmlType xmlType = null;
     XmlJavaTypeAdapter typeAdapter = referer.getAnnotation(XmlJavaTypeAdapter.class);
     XmlSchemaType schemaType = referer.getAnnotation(XmlSchemaType.class);
@@ -239,8 +239,7 @@ public class XmlTypeFactory {
       throw new XmlTypeException(adaptorType + " is not adapting type " + adaptedType);
     }
     
-    adaptingType = getXmlType(valueTypeMirror);
-    return new AdaptedXmlType(adaptedType, adaptorType, adaptingType);
+    return new AdaptedXmlType(adaptedType, adaptorType, valueTypeMirror);
   }
 
   /**
