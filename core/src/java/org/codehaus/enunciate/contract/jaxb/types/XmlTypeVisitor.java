@@ -19,9 +19,6 @@ package org.codehaus.enunciate.contract.jaxb.types;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedClassType;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -35,6 +32,10 @@ import java.util.Iterator;
  */
 class XmlTypeVisitor implements TypeVisitor {
 
+  /**
+   * State-keeping variable used to determine whether we've already been visited by an array type.
+   */
+  boolean isInArray;
   private XmlType xmlType;
   private String errorMessage = null;
 
@@ -65,7 +66,13 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitPrimitiveType(PrimitiveType primitiveType) {
-    this.xmlType = new XmlPrimitiveType(primitiveType);
+    if (isInArray && (primitiveType.getKind() == PrimitiveType.Kind.BYTE)) {
+      //special case for byte[]
+      this.xmlType = KnownXmlType.BASE64_BINARY;
+    }
+    else {
+      this.xmlType = new XmlPrimitiveType(primitiveType);
+    }
   }
 
   public void visitVoidType(VoidType voidType) {
@@ -84,13 +91,9 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitClassType(ClassType classType) {
-    DecoratedClassType type = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
     XmlType adaptedType = XmlTypeFactory.findAdaptedTypeOfDeclaration(classType);
     if (adaptedType != null) {
       this.xmlType = adaptedType;
-    }
-    else if (type.isCollection()) {
-      visitCollectionType(type);
     }
     else {
       XmlType xmlType = null;
@@ -117,31 +120,14 @@ class XmlTypeVisitor implements TypeVisitor {
     }
   }
 
-  protected void visitCollectionType(DeclaredType classType) {
-    //if it's a colleciton type, the xml type is its component type.
-    Iterator<TypeMirror> actualTypeArguments = classType.getActualTypeArguments().iterator();
-    if (!actualTypeArguments.hasNext()) {
-      //no type arguments, java.lang.Object type.
-      this.xmlType = KnownXmlType.ANY_TYPE;
-    }
-    else {
-      TypeMirror componentType = actualTypeArguments.next();
-      componentType.accept(this);
-    }
-  }
-
   public void visitEnumType(EnumType enumType) {
     visitClassType(enumType);
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
-    DecoratedTypeMirror type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType);
     XmlType adaptedType = XmlTypeFactory.findAdaptedTypeOfDeclaration(interfaceType);
     if (adaptedType != null) {
       this.xmlType = adaptedType;
-    }
-    else if (type.isCollection()) {
-      visitCollectionType(interfaceType);
     }
     else {
       this.xmlType = null;
@@ -155,17 +141,16 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitArrayType(ArrayType arrayType) {
-    //special case for byte[]...
-    TypeMirror componentType = arrayType.getComponentType();
-    if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
-      this.xmlType = KnownXmlType.BASE64_BINARY;
+    if (isInArray) {
+      this.xmlType = null;
+      this.errorMessage = "No support yet for multidimensional arrays.";
+      return;
     }
-    else {
-      componentType.accept(this);
 
-      if (this.errorMessage != null) {
-        this.errorMessage = "Problem with the array component type: " + this.errorMessage;
-      }
+    arrayType.getComponentType().accept(this);
+
+    if (this.errorMessage != null) {
+      this.errorMessage = "Problem with the array component type: " + this.errorMessage;
     }
   }
 

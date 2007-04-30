@@ -22,18 +22,15 @@ import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.types.AdaptedXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.AdaptedXmlType;
-import org.codehaus.enunciate.contract.jaxws.WebResult;
-import org.codehaus.enunciate.contract.jaxws.WebParam;
-import org.codehaus.enunciate.contract.jaxws.WebFault;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
