@@ -17,7 +17,7 @@
     <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
   [#list schema.typeDefinitions as type]
-        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.contentType?exists && !type.contentType.implied] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
+        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.superclass?exists && type.superclass.declaration.qualifiedName != "java.lang.Object"] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
     [#if type.docValue?exists]
           <documentation>
             <![CDATA[${type.docValue}]]>
