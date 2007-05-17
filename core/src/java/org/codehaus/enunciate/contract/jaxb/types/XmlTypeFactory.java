@@ -17,23 +17,23 @@
 package org.codehaus.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.*;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.MirroredTypeException;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedClassType;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.Schema;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import static org.codehaus.enunciate.contract.jaxb.util.JAXBUtil.unwrapComponentType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.XmlSchemaType;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import javax.xml.bind.annotation.XmlSchemaTypes;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * A decorator that decorates the relevant type mirrors as xml type mirrors.
@@ -42,132 +42,88 @@ import java.util.Map;
  */
 public class XmlTypeFactory {
 
-  /**
-   * Finds the specified type of the given parameter declaration, if it exists.
-   *
-   * @param param The parameter declaration for which to find the specified type.
-   * @return The specified XML type, or null if it doesn't exist.
-   */
-  public static XmlType findSpecifiedType(ParameterDeclaration param) {
-    return findSpecifiedType(param.getType(), param);
-  }
+  private static final HashMap<String, HashMap<String, XmlSchemaType>> EXPLICIT_ELEMENTS_BY_PACKAGE = new HashMap<String, HashMap<String, XmlSchemaType>>();
 
   /**
-   * Finds the xml type of the specified accessor.
+   * Find the specified type of the given adaptable element, if it exists.
    *
-   * @param accessor The accessor.
+   * @param adaptable The adaptable element for which to find the specified type.
    * @return The specified XML type, or null if it doesn't exist.
    */
-  public static XmlType findSpecifiedType(Accessor accessor) {
-    TypeMirror accessorType = accessor.getAccessorType();
-    XmlType xmlType = findSpecifiedType(accessorType, accessor);
-
-    if ((xmlType == null) && (accessorType instanceof DeclaredType)) {
-      xmlType = findSpecifiedType(((DeclaredType) accessorType).getDeclaration(), accessor.getDeclaringType().getPackage());
+  public static XmlType findSpecifiedType(Adaptable adaptable) throws XmlTypeException {
+    XmlType xmlType = null;
+    if (adaptable.isAdapted()) {
+      xmlType = getXmlType(adaptable.getAdapterType().getAdaptingType());
+    }
+    else if (adaptable instanceof Accessor) {
+      //The XML type of accessors can be explicitly defined...
+      xmlType = findExplicitSchemaType((Accessor) adaptable);
     }
 
     return xmlType;
   }
 
   /**
-   * Finds the xml type of the specified property.
+   * Finds the explicit schema type for the given accessor.
    *
-   * @param property The property.
-   * @return The specified XML type, or null if it doesn't exist.
-   */
-  public static XmlType findSpecifiedType(PropertyDeclaration property) {
-    TypeMirror propertyType = property.getPropertyType();
-    XmlType xmlType = findSpecifiedType(propertyType, property);
-
-    if ((xmlType == null) && (propertyType instanceof DeclaredType)) {
-      xmlType = findSpecifiedType(((DeclaredType) propertyType).getDeclaration(), property.getDeclaringType().getPackage());
-    }
-
-    return xmlType;
-  }
-
-  /**
-   * Finds the xml type of the specified field.
-   *
-   * @param field The field.
-   * @return The specified XML type, or null if it doesn't exist.
-   */
-  public static XmlType findSpecifiedType(FieldDeclaration field) {
-    TypeMirror fieldType = field.getType();
-    XmlType xmlType = findSpecifiedType(fieldType, field);
-
-    if ((xmlType == null) && (fieldType instanceof DeclaredType)) {
-      xmlType = findSpecifiedType(((DeclaredType) fieldType).getDeclaration(), field.getDeclaringType().getPackage());
-    }
-
-    return xmlType;
-  }
-
-  /**
-   * Finds the specified type for the given type and given referring declaration.
-   *
-   * @param typeMirror The type.
-   * @param referer    The referring declaration.
+   * @param accessor    The accessor.
    * @return The XML type, or null if none was specified.
    */
-  public static XmlType findSpecifiedType(TypeMirror typeMirror, Declaration referer) {
-    DecoratedTypeMirror decoratedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
-    
-    if (decoratedType.isArray()) {
-      typeMirror = ((ArrayType) typeMirror).getComponentType();
-    }
-    else if (decoratedType.isCollection()) {
-      //if it's a collection type, the xml type is its component type.
-      Iterator<TypeMirror> actualTypeArguments = ((DeclaredType) typeMirror).getActualTypeArguments().iterator();
-      if (!actualTypeArguments.hasNext()) {
-        //no type arguments, java.lang.Object type.
-        return KnownXmlType.ANY_TYPE;
-      }
-      else {
-        typeMirror = actualTypeArguments.next();
-      }
-    }
+  public static XmlType findExplicitSchemaType(Accessor accessor) {
+    TypeMirror typeMirror = unwrapComponentType(accessor.getAccessorType());
 
     XmlType xmlType = null;
-    XmlJavaTypeAdapter typeAdapter = referer.getAnnotation(XmlJavaTypeAdapter.class);
-    XmlSchemaType schemaType = referer.getAnnotation(XmlSchemaType.class);
+    XmlSchemaType schemaType = accessor.getAnnotation(XmlSchemaType.class);
 
-    if (typeAdapter != null) {
-      if (!(typeMirror instanceof ReferenceType)) {
-        throw new ValidationException(referer.getPosition(), "XmlJavaTypeAdapter can only be applied to a reference type. "
-          + typeMirror + " isn't a reference type.");
+    if ((schemaType == null) && (typeMirror instanceof DeclaredType)) {
+      PackageDeclaration pckg = accessor.getDeclaringType().getPackage();
+      String packageName = pckg.getQualifiedName();
+      HashMap<String, XmlSchemaType> explicitTypes = EXPLICIT_ELEMENTS_BY_PACKAGE.get(packageName);
+      if (explicitTypes == null) {
+        explicitTypes = new HashMap<String, XmlSchemaType>();
+        EXPLICIT_ELEMENTS_BY_PACKAGE.put(packageName, explicitTypes);
+
+        XmlSchemaType schemaTypeInfo = pckg.getAnnotation(XmlSchemaType.class);
+        XmlSchemaTypes schemaTypes = pckg.getAnnotation(XmlSchemaTypes.class);
+
+        if ((schemaTypeInfo != null) || (schemaTypes != null)) {
+          ArrayList<XmlSchemaType> allSpecifiedTypes = new ArrayList<XmlSchemaType>();
+          if (schemaTypeInfo != null) {
+            allSpecifiedTypes.add(schemaTypeInfo);
+          }
+
+          if (schemaTypes != null) {
+            allSpecifiedTypes.addAll(Arrays.asList(schemaTypes.value()));
+          }
+
+          for (XmlSchemaType specifiedType : allSpecifiedTypes) {
+            String typeFqn;
+            try {
+              Class specifiedClass = specifiedType.type();
+              if (specifiedClass == XmlSchemaType.DEFAULT.class) {
+                throw new ValidationException(pckg.getPosition(), "A type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+              }
+              typeFqn = specifiedClass.getName();
+            }
+            catch (MirroredTypeException e) {
+              TypeMirror explicitTypeMirror = e.getTypeMirror();
+              if (!(explicitTypeMirror instanceof DeclaredType)) {
+                throw new ValidationException(pckg.getPosition(), "Only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
+              }
+              typeFqn = ((DeclaredType) explicitTypeMirror).getDeclaration().getQualifiedName();
+            }
+
+            explicitTypes.put(typeFqn, specifiedType);
+          }
+        }
+
       }
 
-      try {
-        xmlType = getAdaptedType((ReferenceType) typeMirror, typeAdapter);
-      }
-      catch (XmlTypeException e) {
-        throw new ValidationException(referer.getPosition(), e.getMessage());
-      }
+      schemaType = explicitTypes.get(((DeclaredType) typeMirror).getDeclaration().getQualifiedName());
     }
-    else if (schemaType != null) {
+
+    if (schemaType != null) {
       xmlType = new SpecifiedXmlType(schemaType);
-    }
-    else if (typeMirror instanceof DeclaredType) {
-      xmlType = findAdaptedTypeOfDeclaration((DeclaredType) typeMirror);
-    }
-
-    return xmlType;
-  }
-
-  /**
-   * Returns the specified type of the given declaration as refered to in the given package.
-   *
-   * @param declaration The declaration for which to find the specified type.
-   * @param pckg        The referring package.
-   * @return The XML type, or null if the XML type isn't specified.
-   */
-  public static XmlType findSpecifiedType(TypeDeclaration declaration, PackageDeclaration pckg) {
-    XmlType xmlType = null;
-    Schema schema = new Schema(pckg);
-    Map<String, XmlType> packageSpecifiedTypes = schema.getSpecifiedTypes();
-    if (packageSpecifiedTypes.containsKey(declaration.getQualifiedName())) {
-      xmlType = packageSpecifiedTypes.get(declaration.getQualifiedName());
     }
 
     return xmlType;
@@ -181,25 +137,9 @@ public class XmlTypeFactory {
    * @throws XmlTypeException If the type is invalid or unknown as an xml type.
    */
   public static XmlType getXmlType(TypeMirror typeMirror) throws XmlTypeException {
-    DecoratedTypeMirror decoratedType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
-    if (decoratedType.isArray()) {
-      typeMirror = ((ArrayType) typeMirror).getComponentType();
-    }
-    else if (decoratedType.isCollection()) {
-      //if it's a collection type, the xml type is its component type.
-      Iterator<TypeMirror> actualTypeArguments = ((DeclaredType) typeMirror).getActualTypeArguments().iterator();
-      if (!actualTypeArguments.hasNext()) {
-        //no type arguments, java.lang.Object type.
-        return KnownXmlType.ANY_TYPE;
-      }
-      else {
-        typeMirror = actualTypeArguments.next();
-      }
-    }
-
     XmlTypeVisitor visitor = new XmlTypeVisitor();
-    visitor.isInArray = decoratedType.isArray();
-    typeMirror.accept(visitor);
+    visitor.isInArray = (typeMirror instanceof ArrayType);
+    unwrapComponentType(typeMirror).accept(visitor);
 
     if (visitor.getErrorMessage() != null) {
       throw new XmlTypeException(visitor.getErrorMessage());
@@ -219,107 +159,6 @@ public class XmlTypeFactory {
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     TypeDeclaration declaration = env.getTypeDeclaration(type.getName());
     return getXmlType(env.getTypeUtils().getDeclaredType(declaration));
-  }
-
-  /**
-   * Gets the xml type for the specified adapted type and the specified adapted type metadata.
-   *
-   * @param adaptedType     The adapted type.
-   * @param adaptedTypeInfo the adapted type metadata.
-   * @return The xml type.
-   * @throws XmlTypeException If there was a problem getting the adapted type for the specified clas type and annotation.
-   */
-  public static XmlType getAdaptedType(ReferenceType adaptedType, XmlJavaTypeAdapter adaptedTypeInfo) throws XmlTypeException {
-    ClassType adaptorType;
-    XmlType adaptingType;
-    try {
-      Class<? extends XmlAdapter> adaptorClass = adaptedTypeInfo.value();
-
-      AnnotationProcessorEnvironment aptenv = Context.getCurrentEnvironment();
-      TypeDeclaration adaptorDeclaration = aptenv.getTypeDeclaration(adaptorClass.getName());
-      if (adaptorDeclaration == null) {
-        throw new XmlTypeException("The type " + adaptorClass.getName() +
-          " specified by the XmlJavaTypeAdapter is not a valid class type (it can't be anonymous or local.");
-      }
-      DeclaredType declaredType = aptenv.getTypeUtils().getDeclaredType(adaptorDeclaration);
-      if (!(declaredType instanceof ClassType)) {
-        throw new XmlTypeException("The type " + adaptorClass.getName() + " needs to be a class type (not an interface type).");
-      }
-      adaptorType = (ClassType) declaredType;
-
-    }
-    catch (MirroredTypeException e) {
-      TypeMirror typeMirror = e.getTypeMirror();
-      if (!(typeMirror instanceof ClassType)) {
-        throw new XmlTypeException("The type " + typeMirror + " needs to be a class type (not an interface type).");
-      }
-      adaptorType = ((ClassType) typeMirror);
-    }
-
-    ClassDeclaration adaptorDeclaration = adaptorType.getDeclaration();
-
-    ClassType adaptorInterfaceType = findXmlAdapterType(adaptorDeclaration);
-    if (adaptorInterfaceType == null) {
-      throw new IllegalStateException("Unable to find the type of XmlAdapter for " + adaptorDeclaration.getQualifiedName());
-    }
-
-    Collection<TypeMirror> adaptorTypeArgs = adaptorInterfaceType.getActualTypeArguments();
-    if ((adaptorTypeArgs == null) || (adaptorTypeArgs.size() != 2)) {
-      throw new XmlTypeException("The type " + adaptorDeclaration.getQualifiedName() +
-        " needs to be a class that extends an XmlAdapter type that has two type arguments specifying the value type and the bound type.");
-    }
-
-    Iterator<TypeMirror> formalTypeIt = adaptorTypeArgs.iterator();
-    TypeMirror valueTypeMirror = formalTypeIt.next();
-    TypeMirror boundTypeMirror = formalTypeIt.next();
-    if (!adaptedType.equals(boundTypeMirror)) {
-      throw new XmlTypeException(adaptorType + " is not adapting type " + adaptedType);
-    }
-
-    return new AdaptedXmlType(adaptedType, adaptorType, valueTypeMirror);
-  }
-
-  /**
-   * Finds the interface type that declares that the specified declaration implements XmlAdapter.
-   *
-   * @param declaration The declaration.
-   * @return The interface type, or null if none found.
-   */
-  protected static ClassType findXmlAdapterType(ClassDeclaration declaration) {
-    if (Object.class.getName().equals(declaration.getQualifiedName())) {
-      return null;
-    }
-
-    ClassType superClass = declaration.getSuperclass();
-    if (XmlAdapter.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
-      return superClass;
-    }
-
-    return findXmlAdapterType(superClass.getDeclaration());
-  }
-
-  /**
-   * Finds the adapted type of the specified declared type, if any.
-   *
-   * @param declaredType The declared type.
-   * @return The adapted type, or null.
-   */
-  protected static XmlType findAdaptedTypeOfDeclaration(DeclaredType declaredType) {
-    XmlType xmlType = null;
-    TypeDeclaration declaration = declaredType.getDeclaration();
-    if (declaration != null) {
-      XmlJavaTypeAdapter typeAdapter = declaration.getAnnotation(XmlJavaTypeAdapter.class);
-
-      if (typeAdapter != null) {
-        try {
-          xmlType = getAdaptedType(declaredType, typeAdapter);
-        }
-        catch (XmlTypeException e) {
-          throw new ValidationException(declaration.getPosition(), e.getMessage());
-        }
-      }
-    }
-    return xmlType;
   }
 
 }

@@ -15,21 +15,21 @@ import javax.xml.namespace.QName;
 public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_client.GeneratedWrapperBean {
 
   [#list fault.childElements as childElement]
-  private ${classnameFor(childElement.type)} ${childElement.elementName};
+  private ${classnameFor(childElement)} ${childElement.elementName};
   [/#list]
   [#list fault.childElements as childElement]
 
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(childElement.type)} get${childElement.elementName?cap_first}() {
+  public ${classnameFor(childElement)} get${childElement.elementName?cap_first}() {
     return this.${childElement.elementName};
   }
 
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${childElement.elementName?cap_first}(${classnameFor(childElement.type)} ${childElement.elementName}) {
+  public void set${childElement.elementName?cap_first}(${classnameFor(childElement)} ${childElement.elementName}) {
     this.${childElement.elementName} = ${childElement.elementName};
   }
 
@@ -55,7 +55,7 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
    */
   public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
     if (this.${childElement.elementName} == null) {
-      this.${childElement.elementName} = (${classnameFor(childElement.type)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${classnameFor(childElement.type)}.class);
+      this.${childElement.elementName} = (${classnameFor(childElement)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${collectionTypeFor(childElement)}.class);
     }
 
     this.${childElement.elementName}.add(item);

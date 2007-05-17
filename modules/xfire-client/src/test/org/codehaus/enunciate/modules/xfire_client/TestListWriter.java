@@ -20,8 +20,11 @@ import junit.framework.TestCase;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
 import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.MessageContext;
+import org.codehaus.enunciate.contract.jaxws.WebFault;
 
 import java.util.Arrays;
+
+import freemarker.ext.beans.BeansWrapper;
 
 /**
  * @author Ryan Heaton

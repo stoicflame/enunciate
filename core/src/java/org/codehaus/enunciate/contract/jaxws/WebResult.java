@@ -22,6 +22,9 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.TypeVisitor;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
@@ -40,13 +43,14 @@ import java.util.Collection;
  *
  * @author Ryan Heaton
  */
-public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
 
   private final boolean header;
   private final String name;
   private final String targetNamespace;
   private final String partName;
   private final WebMethod method;
+  private final AdapterType adapterType;
 
   protected WebResult(TypeMirror delegate, WebMethod method) {
     super(delegate);
@@ -72,6 +76,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     }
     this.partName = partName;
     this.header = ((annotation != null) && (annotation.header()));
+    this.adapterType = AdapterUtil.findAdapterType(method);
   }
 
   public void accept(TypeVisitor typeVisitor) {
@@ -277,7 +282,7 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
    */
   public XmlType getXmlType() {
     try {
-      XmlType xmlType = XmlTypeFactory.findSpecifiedType(getDelegate(), getWebMethod());
+      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
       if (xmlType == null) {
         xmlType = XmlTypeFactory.getXmlType(getDelegate());
       }
@@ -333,4 +338,13 @@ public class WebResult extends DecoratedTypeMirror implements WebMessage, WebMes
     return getDelegate();
   }
 
+  // Inherited.
+  public boolean isAdapted() {
+    return this.adapterType != null;
+  }
+
+  // Inherited.
+  public AdapterType getAdapterType() {
+    return this.adapterType;
+  }
 }

@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.samples.xfire_client;
+package org.codehaus.enunciate.samples.schema;
 
-import javax.xml.ws.WebFault;
+import org.codehaus.enunciate.samples.anotherschema.BeanFour;
 
 /**
  * @author Ryan Heaton
  */
-@WebFault (
-  name = "bf2",
-  targetNamespace = "urn:bf2",
-  faultBean = "net.nothing.BasicFault2"
-)
-public class BasicFaultTwo extends Exception {
+public class DifferentPackageReferencingBeanFour {
 
-  private String anotherMessage;
-
-  public String getAnotherMessage() {
-    return anotherMessage;
-  }
-
-  public void setAnotherMessage(String anotherMessage) {
-    this.anotherMessage = anotherMessage;
-  }
+  public BeanFour beanFour;
 }

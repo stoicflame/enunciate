@@ -171,9 +171,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     Map<String, String> conversions = getClientPackageConversions();
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
     ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
+    CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
     model.put("packageFor", new ClientPackageForMethod(conversions));
     model.put("classnameFor", classnameFor);
     model.put("componentTypeFor", componentTypeFor);
+    model.put("collectionTypeFor", collectionTypeFor);
 
     String uuid = this.uuid;
     model.put("uuid", uuid);
@@ -336,6 +338,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.setFileOutputDirectory(getJdk15GenerateDir());
     classnameFor.setJdk15(true);
     componentTypeFor.setJdk15(true);
+    collectionTypeFor.setJdk15(true);
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
         model.put("endpointInterface", ei);

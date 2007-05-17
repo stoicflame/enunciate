@@ -34,20 +34,20 @@ public class ${type.simpleName}XFireType extends Type {
 
     [#if type.value.xmlList]
       [#if type.value.accessorType.collection]
-    ListParser listParser = new ListParser(reader.getValue(), ${type.value.accessorType.declaration.qualifiedName}.class, ${classnameFor(type.value.collectionItemType)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping(), context);
       [#else]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value.accessorType)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping(), context);
       [/#if]
-    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) listParser.getList();
+    ${classnameFor(type.value)} value = (${classnameFor(type.value)}) listParser.getList();
     [#elseif type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
     ${type.value.accessorType} value = [@unwrapIfPrimitive](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
     [#elseif type.value.binaryData]
     int mechanism = EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if];
-    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value.accessorType)}.class, mechanism, reader, context);
+    ${classnameFor(type.value)} value = (${classnameFor(type.value)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value)}.class, mechanism, reader, context);
     [#else]
-    Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
-    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
+    Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
+    ${classnameFor(type.value)} value = (${classnameFor(type.value)}) type.readObject(reader, context);
     [/#if]
     instance.set${type.value.simpleName?cap_first}(value);
 
@@ -67,7 +67,7 @@ public class ${type.simpleName}XFireType extends Type {
     [#if type.value.accessorType.primitive]
     writer.writeValue(String.valueOf(instance.get${type.value.simpleName?cap_first}()));
     [#else]
-    ${classnameFor(type.value.accessorType)} value = instance.get${type.value.simpleName?cap_first}();
+    ${classnameFor(type.value)} value = instance.get${type.value.simpleName?cap_first}();
     if (value != null) {
       [#if type.value.xmlList]
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
@@ -75,7 +75,7 @@ public class ${type.simpleName}XFireType extends Type {
       [#elseif type.value.binaryData]
       EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
       [#else]
-      Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
+      Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
       type.writeObject(value, writer, context);
       [/#if]
     }

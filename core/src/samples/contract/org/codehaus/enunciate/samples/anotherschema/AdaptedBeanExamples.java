@@ -17,10 +17,13 @@
 package org.codehaus.enunciate.samples.anotherschema;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.jws.WebService;
+import javax.jws.WebMethod;
 
 /**
  * @author Ryan Heaton
  */
+@WebService
 public class AdaptedBeanExamples {
 
   @XmlJavaTypeAdapter (
@@ -30,11 +33,9 @@ public class AdaptedBeanExamples {
   public AdaptedBeanThree adaptedBeanThree;
   public StringBuffer stringBuffer;
   public BeanTwo beanTwo;
-  @XmlJavaTypeAdapter(BadXmlAdapter.class)
-  public String stringField1;
-  @XmlJavaTypeAdapter ( AdaptedBeanThreeXmlAdapter.class )
-  public String stringField2;
+  public BeanFour beanFour;
 
+  @WebMethod
   public int doSomethingWithAdaptedBeanFour(@XmlJavaTypeAdapter(AdaptedBeanFourXmlAdapter.class) AdaptedBeanFour adaptedBeanFour) {
     return 0;
   }

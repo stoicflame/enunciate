@@ -21,13 +21,16 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -40,10 +43,11 @@ import java.util.Collection;
 /**
  * @author Ryan Heaton
  */
-public class WebParam extends DecoratedParameterDeclaration implements WebMessage, WebMessagePart, ImplicitChildElement {
+public class WebParam extends DecoratedParameterDeclaration implements Adaptable, WebMessage, WebMessagePart, ImplicitChildElement {
 
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
+  private final AdapterType adapterType;
 
   protected WebParam(ParameterDeclaration delegate, WebMethod method) {
     super(delegate);
@@ -54,6 +58,7 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
     }
 
     annotation = delegate.getAnnotation(javax.jws.WebParam.class);
+    this.adapterType = AdapterUtil.findAdapterType(this);
   }
 
   /**
@@ -349,4 +354,13 @@ public class WebParam extends DecoratedParameterDeclaration implements WebMessag
     return new ArrayList<WebMessagePart>(Arrays.asList(this));
   }
 
+  // Inherited.
+  public boolean isAdapted() {
+    return this.adapterType != null;
+  }
+
+  // Inherited.
+  public AdapterType getAdapterType() {
+    return adapterType;
+  }
 }

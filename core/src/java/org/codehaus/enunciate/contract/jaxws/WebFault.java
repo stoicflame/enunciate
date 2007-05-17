@@ -22,15 +22,18 @@ import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Types;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -122,7 +125,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    */
   public String getElementName() {
     String name = null;
-    
+
     if (isImplicitSchemaElement()) {
       name = getSimpleName();
 
@@ -303,23 +306,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
         continue;
       }
 
-      try {
-        DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
-        XmlType xmlType = XmlTypeFactory.findSpecifiedType(property);
-        if (xmlType == null) {
-          xmlType = XmlTypeFactory.getXmlType(propertyType);
-        }
-        if (xmlType.isAnonymous()) {
-          throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
-        }
-        int minOccurs = propertyType.isPrimitive() ? 1 : 0;
-        String maxOccurs = propertyType.isArray() || propertyType.isCollection() ? "unbounded" : "1";
-
-        childElements.add(new FaultBeanChildElement(property, xmlType, minOccurs, maxOccurs));
-      }
-      catch (XmlTypeException e) {
-        throw new ValidationException(property.getPosition(), e.getMessage());
-      }
+      childElements.add(new FaultBeanChildElement(property));
     }
 
     return childElements;
@@ -380,16 +367,20 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     return true;
   }
 
-  public static class FaultBeanChildElement implements ImplicitChildElement {
+  public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement {
 
     private final PropertyDeclaration property;
-    private final XmlType xmlType;
     private final int minOccurs;
     private final String maxOccurs;
+    private final AdapterType adaperType;
 
-    public FaultBeanChildElement(PropertyDeclaration property, XmlType xmlType, int minOccurs, String maxOccurs) {
+    private FaultBeanChildElement(PropertyDeclaration property) {
+      DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
+      this.adaperType = AdapterUtil.findAdapterType(property.getGetter());
+      int minOccurs = propertyType.isPrimitive() ? 1 : 0;
+      String maxOccurs = propertyType.isArray() || propertyType.isCollection() ? "unbounded" : "1";
+
       this.property = property;
-      this.xmlType = xmlType;
       this.minOccurs = minOccurs;
       this.maxOccurs = maxOccurs;
     }
@@ -411,11 +402,27 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     public XmlType getXmlType() {
+
+      XmlType xmlType;
+      try {
+        xmlType = XmlTypeFactory.findSpecifiedType(this);
+        if (xmlType == null) {
+          xmlType = XmlTypeFactory.getXmlType(property.getPropertyType());
+        }
+      }
+      catch (XmlTypeException e) {
+        throw new ValidationException(property.getPosition(), e.getMessage());
+      }
+
+      if (xmlType.isAnonymous()) {
+        throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
+      }
+
       return xmlType;
     }
 
     public QName getTypeQName() {
-      return xmlType.getQname();
+      return getXmlType().getQname();
     }
 
     public int getMinOccurs() {
@@ -430,6 +437,13 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       return getProperty().getPropertyType();
     }
 
+    public boolean isAdapted() {
+      return this.adaperType != null;
+    }
+
+    public AdapterType getAdapterType() {
+      return this.adaperType;
+    }
   }
 
 }

@@ -18,9 +18,12 @@ package org.codehaus.enunciate.modules.xfire_client;
 
 import com.sun.mirror.declaration.FieldDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.contract.jaxws.WebFault;
+import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,6 +101,10 @@ public class TestPackageConversionMethods extends InAPTTestCase {
     catch (UnsupportedOperationException e) {
       //fall through.
     }
+
+    WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.xfire_client.BasicFaultTwo"));
+    ImplicitChildElement childElement = webFault.getChildElements().iterator().next();
+    assertEquals("java.lang.String", classnameFor14Method.convert(childElement));
   }
 
   /**

@@ -22,6 +22,8 @@ import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.jaxws.WebResult;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 
 import javax.xml.namespace.QName;
 
@@ -30,7 +32,7 @@ import javax.xml.namespace.QName;
  *
  * @author Ryan Heaton
  */
-public class RPCPartChildElementAdapter implements ImplicitChildElement {
+public class RPCPartChildElementAdapter implements Adaptable, ImplicitChildElement {
 
   private final WebMessagePart rpcPart;
 
@@ -116,5 +118,15 @@ public class RPCPartChildElementAdapter implements ImplicitChildElement {
     else {
       return null;
     }
+  }
+
+  // Inherited.
+  public boolean isAdapted() {
+    return this.rpcPart instanceof Adaptable && ((Adaptable) this.rpcPart).isAdapted();
+  }
+
+  // Inherited.
+  public AdapterType getAdapterType() {
+    return (this.rpcPart instanceof Adaptable) ? ((Adaptable) this.rpcPart).getAdapterType(): null;
   }
 }

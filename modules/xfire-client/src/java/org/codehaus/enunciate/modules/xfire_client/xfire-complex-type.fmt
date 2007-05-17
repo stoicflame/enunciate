@@ -91,11 +91,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if attribute_index > 0]else [/#if]if ("${attribute.namespace?default("")}".equals(name.getNamespaceURI()) && ("${attribute.name}".equals(name.getLocalPart()))) {
         [#if attribute.xmlList]
           [#if attribute.accessorType.collection]
-      ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute.accessorType)}.class, ${classnameFor(attribute.collectionItemType)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(attributeReader.getValue(), ${collectionTypeFor(attribute)}.class, ${componentTypeFor(attribute)}.class, getTypeMapping(), context);
           [#else]
-      ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute.accessorType)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute)}.class, getTypeMapping(), context);
           [/#if]
-      instance.set${attribute.simpleName?cap_first}((${classnameFor(attribute.accessorType)}) listParser.getList());
+      instance.set${attribute.simpleName?cap_first}((${classnameFor(attribute)}) listParser.getList());
         [#else]
           [#if attribute.accessorType.primitive]
       Type type = getTypeMapping().getType([@primitiveWrapper type=attribute.accessorType/].class);
@@ -109,13 +109,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
       }
 
-      integrityHandler.registerReference(idref, ${classnameFor(attribute.bareAccessorType)}.class, new ReferenceResolutionCallback() {
+      integrityHandler.registerReference(idref, ${componentTypeFor(attribute)}.class, new ReferenceResolutionCallback() {
         public void handleResolution(Object resolution) {
 
-      ${classnameFor(attribute.bareAccessorType)} value = (${classnameFor(attribute.bareAccessorType)}) resolution;
+      ${componentTypeFor(attribute)} value = (${componentTypeFor(attribute)}) resolution;
           [#else]
-      Type type = getTypeMapping().getType(${classnameFor(attribute.accessorType)}.class);
-      ${classnameFor(attribute.accessorType)} value = (${classnameFor(attribute.accessorType)}) type.readObject(attributeReader, context);
+      Type type = getTypeMapping().getType(${classnameFor(attribute)}.class);
+      ${classnameFor(attribute)} value = (${classnameFor(attribute)}) type.readObject(attributeReader, context);
           [/#if]
       instance.set${attribute.simpleName?cap_first}(value);
         [/#if]
@@ -153,21 +153,21 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     //Read the xml value
       [#if type.value.xmlList]
         [#if type.value.accessorType.collection]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value.accessorType)}.class, ${classnameFor(type.value.collectionItemType)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping(), context);
         [#else]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value.accessorType)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping(), context);
         [/#if]
-    instance.set${type.value.simpleName?cap_first}((${classnameFor(type.value.accessorType)}) listParser.getList());
+    instance.set${type.value.simpleName?cap_first}((${classnameFor(type.value)}) listParser.getList());
       [#else]
         [#if type.value.accessorType.primitive]
     Type type = getTypeMapping().getType([@primitiveWrapper type=type.value.accessorType/].class);
     ${type.value.accessorType} value = [@unwrapIfPrimitive type=type.value.accessorType](([@primitiveWrapper type=type.value.accessorType/]) type.readObject(reader, context))[/@unwrapIfPrimitive];
         [#elseif type.value.binaryData]
     int mechanism = EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if];
-    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value.accessorType)}.class, mechanism, reader, context);
+    ${classnameFor(type.value)} value = (${classnameFor(type.value)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(type.value)}.class, mechanism, reader, context);
         [#else]
-    Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
-    ${classnameFor(type.value.accessorType)} value = (${classnameFor(type.value.accessorType)}) type.readObject(reader, context);
+    Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
+    ${classnameFor(type.value)} value = (${classnameFor(type.value)}) type.readObject(reader, context);
         [/#if]
     instance.set${type.value.simpleName?cap_first}(value);
       [/#if]
@@ -190,28 +190,28 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [/#if]
     [#if type.elements?size > 0]
     final ${classname} instance = (${classname}) object;
-      [#list type.elements as item]
-        [#assign virtual_item_index = item_index]
-        [#if item.wrapped]
-    [#if virtual_item_index > 0]else [/#if]if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${item.wrapperName}".equals(name.getLocalPart()))) {
+      [#list type.elements as element]
+        [#assign element_codeblock_index = element_index]
+        [#if element.wrapped]
+    [#if element_codeblock_index > 0]else [/#if]if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.wrapperName}".equals(name.getLocalPart()))) {
       ElementsUtil.readWrappedElements(elementReader, context, new WrappedItemCallback() {
         public void handleChildElement(QName name, MessageReader elementReader, MessageContext context) throws XFireFault {
 
-        [#assign virtual_item_index = 0]
+        [#assign element_codeblock_index = 0]
         [/#if]
-        [#list item.choices as element]
-    [#if (element_index + virtual_item_index) > 0]else [/#if]if ("${element.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.name}".equals(name.getLocalPart()))) {
-          [#if element.xmlList]
-            [#if element.accessorType.collection]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${element.accessorType.declaration.qualifiedName}.class, ${classnameFor(element.collectionItemType)}.class, getTypeMapping(), context);
+        [#list element.choices as elementChoice]
+    [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
+          [#if elementChoice.xmlList]
+            [#if elementChoice.accessorType.collection]
+      ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, getTypeMapping(), context);
             [#else]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(element.accessorType)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(elementChoice)}.class, getTypeMapping(), context);
             [/#if]
-      ${classnameFor(element.accessorType)} value = (${classnameFor(element.accessorType)}) listParser.getList();
-          [#elseif element.bareAccessorType.primitive]
-      Type type = getTypeMapping().getType([@primitiveWrapper type=element.bareAccessorType/].class);
-      ${element.bareAccessorType} value = [@unwrapIfPrimitive  type=element.bareAccessorType](([@primitiveWrapper type=element.bareAccessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
-          [#elseif element.xmlIDREF]
+      ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) listParser.getList();
+          [#elseif elementChoice.bareAccessorType.primitive]
+      Type type = getTypeMapping().getType([@primitiveWrapper type=elementChoice.bareAccessorType/].class);
+      ${elementChoice.bareAccessorType} value = [@unwrapIfPrimitive  type=elementChoice.bareAccessorType](([@primitiveWrapper type=elementChoice.bareAccessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
+          [#elseif elementChoice.xmlIDREF]
       Type type = getTypeMapping().getType(java.lang.String.class);
       java.lang.String idref = (java.lang.String) type.readObject(elementReader, context);
       ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
@@ -220,37 +220,37 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         context.setProperty(ReferentialIntegrityHandler.class.getName(), integrityHandler);
       }
 
-      integrityHandler.registerReference(idref, ${classnameFor(element.bareAccessorType)}.class, new ReferenceResolutionCallback() {
+      integrityHandler.registerReference(idref, ${componentTypeFor(elementChoice)}.class, new ReferenceResolutionCallback() {
         public void handleResolution(Object resolution) {
 
-      ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) resolution;
-          [#elseif element.binaryData]
-      ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) EnunciateClientBinaryDataUtil.readBinaryData(${classnameFor(element.bareAccessorType)}.class, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], elementReader, context);
+      ${componentTypeFor(elementChoice)} value = (${componentTypeFor(elementChoice)}) resolution;
+          [#elseif elementChoice.binaryData]
+      ${componentTypeFor(elementChoice)} value = (${componentTypeFor(elementChoice)}) EnunciateClientBinaryDataUtil.readBinaryData(${componentTypeFor(elementChoice)}.class, EnunciateClientBinaryDataUtil.[#if elementChoice.swaRef]SWAREF[#elseif elementChoice.MTOMAttachment]MTOM[#else]BASE64[/#if], elementReader, context);
           [#else]
-      Type type = getTypeMapping().getType(${classnameFor(element.bareAccessorType)}.class);
-      ${classnameFor(element.bareAccessorType)} value = (${classnameFor(element.bareAccessorType)}) type.readObject(elementReader, context);
+      Type type = getTypeMapping().getType(${componentTypeFor(elementChoice)}.class);
+      ${componentTypeFor(elementChoice)} value = (${componentTypeFor(elementChoice)}) type.readObject(elementReader, context);
           [/#if]
-          [#if item.collectionType]
-            [#if item.accessorType.collection]
-      if (instance.get${element.simpleName?cap_first}() == null) {
-        instance.set${element.simpleName?cap_first}((${item.accessorType.declaration.qualifiedName}) ListParser.newCollectionInstance(${item.accessorType.declaration.qualifiedName}.class));
+          [#if element.collectionType]
+            [#if element.accessorType.collection]
+      if (instance.get${elementChoice.simpleName?cap_first}() == null) {
+        instance.set${elementChoice.simpleName?cap_first}((${element.accessorType.declaration.qualifiedName}) ListParser.newCollectionInstance(${collectionTypeFor(element)}.class));
       }
-      instance.get${element.simpleName?cap_first}().add(value);
+      instance.get${elementChoice.simpleName?cap_first}().add(value);
             [#else]
       java.util.ArrayList elementList;
-      if (instance.get${element.simpleName?cap_first}() == null) {
+      if (instance.get${elementChoice.simpleName?cap_first}() == null) {
         elementList = new java.util.ArrayList();
       }
       else {
-        elementList = new java.util.ArrayList(java.util.Arrays.asList(instance.get${element.simpleName?cap_first}()));
+        elementList = new java.util.ArrayList(java.util.Arrays.asList(instance.get${elementChoice.simpleName?cap_first}()));
       }
       elementList.add(value);
-      instance.set${element.simpleName?cap_first}((${classnameFor(item.accessorType)}) elementList.toArray(new ${classnameFor(item.accessorType.componentType)}[elementList.size()]));
+      instance.set${elementChoice.simpleName?cap_first}((${componentTypeFor(element)}[]) elementList.toArray(new ${componentTypeFor(element)}[elementList.size()]));
             [/#if]
           [#else]
-      instance.set${element.simpleName?cap_first}(value);
+      instance.set${elementChoice.simpleName?cap_first}(value);
           [/#if]
-          [#if element.xmlID]
+          [#if elementChoice.xmlID]
           
       ReferentialIntegrityHandler integrityHandler = (ReferentialIntegrityHandler) context.getProperty(ReferentialIntegrityHandler.class.getName());
       if (integrityHandler == null) {
@@ -259,14 +259,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       }
 
       integrityHandler.registerResolution(java.lang.String.valueOf(value), instance);
-          [#elseif element.xmlIDREF]
+          [#elseif elementChoice.xmlIDREF]
           
         }
       });
           [/#if]
     }
         [/#list]
-        [#if item.wrapped]
+        [#if element.wrapped]
 
         }
       });
@@ -326,7 +326,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       [#if type.value.accessorType.primitive]
     writer.writeValue(String.valueOf(instance.get${type.value.simpleName?cap_first}()));
       [#else]
-    ${classnameFor(type.value.accessorType)} value = instance.get${type.value.simpleName?cap_first}();
+    ${classnameFor(type.value)} value = instance.get${type.value.simpleName?cap_first}();
     if (value != null) {
         [#if type.value.xmlList]
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
@@ -334,7 +334,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [#elseif type.value.binaryData]
       EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
         [#else]
-      Type type = getTypeMapping().getType(${classnameFor(type.value.accessorType)}.class);
+      Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
       type.writeObject(value, writer, context);
         [/#if]
     }
@@ -352,7 +352,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     if (property != null) {
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
           [#if element.binaryData]
-      EnunciateClientBinaryDataUtil.writeBinaryData((${classnameFor(element.bareAccessorType)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+      EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
           [#else]
       Type type = getTypeMapping().getType(property.getClass());
             [#if element.xmlIDREF]
@@ -396,7 +396,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#elseif element.choices?size > 1]
         QName itemName;
             [#list element.choices as choice]
-        [#if choice_index > 0]else [/#if]if (item instanceof [#if choice.accessorType.primitive][@primitiveWrapper type=choice.accessorType/][#else]${classnameFor(choice.accessorType)}[/#if]) {
+        [#if choice_index > 0]else [/#if]if (item instanceof [#if choice.accessorType.primitive][@primitiveWrapper type=choice.accessorType/][#else]${classnameFor(choice)}[/#if]) {
           itemName = new QName("${choice.namespace?default("")}", "${choice.name}");
         }
             [/#list]

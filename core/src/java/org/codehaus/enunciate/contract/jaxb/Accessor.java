@@ -30,6 +30,9 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
@@ -45,9 +48,10 @@ import java.util.Iterator;
  *
  * @author Ryan Heaton
  */
-public abstract class Accessor extends DecoratedMemberDeclaration {
+public abstract class Accessor extends DecoratedMemberDeclaration implements Adaptable {
 
   private final TypeDefinition typeDefinition;
+  private final AdapterType adapterType;
 
   public Accessor(MemberDeclaration delegate, TypeDefinition typeDef) {
     super(delegate);
@@ -57,6 +61,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     this.typeDefinition = typeDef;
+    this.adapterType = AdapterUtil.findAdapterType(this);
   }
 
   /**
@@ -110,11 +115,6 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
    */
   public XmlType getBaseType() {
     //first check to see if the base type is dictated by a specific annotation.
-    XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
-    if (xmlType != null) {
-      return xmlType;
-    }
-
     if (isXmlID()) {
       return KnownXmlType.ID;
     }
@@ -128,7 +128,8 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     try {
-      return XmlTypeFactory.getXmlType(getAccessorType());
+      XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
+      return (xmlType != null) ? xmlType : XmlTypeFactory.getXmlType(getAccessorType());
     }
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());
@@ -313,5 +314,15 @@ public abstract class Accessor extends DecoratedMemberDeclaration {
     }
 
     return getXmlIDAccessor(classType.getSuperclass());
+  }
+
+  // Inherited.
+  public boolean isAdapted() {
+    return this.adapterType != null;
+  }
+
+  // Inherited.
+  public AdapterType getAdapterType() {
+    return this.adapterType;
   }
 }

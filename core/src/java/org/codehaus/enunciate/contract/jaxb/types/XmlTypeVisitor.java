@@ -22,6 +22,8 @@ import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 
 import java.util.Iterator;
 
@@ -91,32 +93,26 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitClassType(ClassType classType) {
-    XmlType adaptedType = XmlTypeFactory.findAdaptedTypeOfDeclaration(classType);
-    if (adaptedType != null) {
-      this.xmlType = adaptedType;
+    XmlType xmlType = null;
+    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+    ClassDeclaration declaration = classType.getDeclaration();
+    if (declaration != null) {
+      XmlType knownType = model.getKnownType(declaration);
+      if (knownType != null) {
+        xmlType = knownType;
+      }
+      else {
+        //type not known, not specified.  Last chance: look for the type definition.
+        TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
+        if (typeDefinition != null) {
+          xmlType = new XmlClassType(typeDefinition);
+        }
+      }
     }
-    else {
-      XmlType xmlType = null;
-      EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-      ClassDeclaration declaration = classType.getDeclaration();
-      if (declaration != null) {
-        XmlType knownType = model.getKnownType(declaration);
-        if (knownType != null) {
-          xmlType = knownType;
-        }
-        else {
-          //type not known, not specified.  Last chance: look for the type definition.
-          TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
-          if (typeDefinition != null) {
-            xmlType = new XmlClassType(typeDefinition);
-          }
-        }
-      }
 
-      this.xmlType = xmlType;
-      if (xmlType == null) {
-        this.errorMessage = "Unknown xml type for class: " + classType;
-      }
+    this.xmlType = xmlType;
+    if (xmlType == null) {
+      this.errorMessage = "Unknown xml type for class: " + classType;
     }
   }
 
@@ -125,9 +121,9 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitInterfaceType(InterfaceType interfaceType) {
-    XmlType adaptedType = XmlTypeFactory.findAdaptedTypeOfDeclaration(interfaceType);
-    if (adaptedType != null) {
-      this.xmlType = adaptedType;
+    AdapterType adapterType = AdapterUtil.findAdapterType(interfaceType.getDeclaration());
+    if (adapterType != null) {
+      adapterType.getAdaptingType().accept(this);
     }
     else {
       this.xmlType = null;

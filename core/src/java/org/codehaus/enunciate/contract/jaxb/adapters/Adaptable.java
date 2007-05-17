@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.samples.xfire_client;
-
-import javax.xml.ws.WebFault;
+package org.codehaus.enunciate.contract.jaxb.adapters;
 
 /**
+ * Marks an element that has a type that is possibly adaptable according to the JAXB specification.
+ * 
  * @author Ryan Heaton
  */
-@WebFault (
-  name = "bf2",
-  targetNamespace = "urn:bf2",
-  faultBean = "net.nothing.BasicFault2"
-)
-public class BasicFaultTwo extends Exception {
+public interface Adaptable {
 
-  private String anotherMessage;
+  /**
+   * Whether this element is adapted according to the JAXB spec.
+   *
+   * @return Whether the element is adapted.
+   */
+  boolean isAdapted();
 
-  public String getAnotherMessage() {
-    return anotherMessage;
-  }
+  /**
+   * The class type of the adaptor.
+   *
+   * @return The class type of the adaptor.
+   */
+  AdapterType getAdapterType();
 
-  public void setAnotherMessage(String anotherMessage) {
-    this.anotherMessage = anotherMessage;
-  }
 }

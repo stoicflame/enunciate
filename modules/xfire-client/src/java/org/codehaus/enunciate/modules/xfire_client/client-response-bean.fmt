@@ -16,9 +16,9 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
 
   [#list message.childElements as childElement]
     [#if "return" = childElement.elementName]
-  private ${classnameFor(childElement.type)} _retval;
+  private ${classnameFor(childElement)} _retval;
     [#else]
-  private ${classnameFor(childElement.type)} ${childElement.elementName};
+  private ${classnameFor(childElement)} ${childElement.elementName};
     [/#if]
   [/#list]
   [#list message.childElements as childElement]
@@ -31,14 +31,14 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(childElement.type)} get${childElement.elementName?cap_first}() {
+  public ${classnameFor(childElement)} get${childElement.elementName?cap_first}() {
     return this.${varname};
   }
 
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${childElement.elementName?cap_first}(${classnameFor(childElement.type)} value) {
+  public void set${childElement.elementName?cap_first}(${classnameFor(childElement)} value) {
     this.${varname} = value;
   }
 
@@ -64,7 +64,7 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
    */
   public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
     if (this.${varname} == null) {
-      this.${varname} = (${classnameFor(childElement.type)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${classnameFor(childElement.type)}.class);
+      this.${varname} = (${classnameFor(childElement)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${collectionTypeFor(childElement)}.class);
     }
 
     this.${varname}.add(item);

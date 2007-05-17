@@ -339,18 +339,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
-   * Get the xml type for the specified type.
-   *
-   * @param referer The declaration that wants to know the XML type.
-   * @param type The type.
-   * @return The xml type for the specified type.
-   * @throws XmlTypeException If the XML type cannot be determined...
-   */
-  public XmlType getXmlType(Declaration referer, TypeMirror type) throws XmlTypeException {
-    return XmlTypeFactory.getXmlType(type);
-  }
-
-  /**
    * Gets the known type for the given declared type.
    *
    * @param declaredType The declared type.

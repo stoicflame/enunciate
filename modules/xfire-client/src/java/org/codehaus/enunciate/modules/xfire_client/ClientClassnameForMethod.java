@@ -16,16 +16,18 @@
 
 package org.codehaus.enunciate.modules.xfire_client;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
-import org.codehaus.enunciate.contract.jaxb.types.AdaptedXmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Collection;
@@ -47,35 +49,42 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
 
   @Override
-  protected String convertUnknownObject(Object unwrapped) throws TemplateModelException {
+  protected String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
     if (unwrapped instanceof Accessor) {
       return convert((Accessor) unwrapped);
     }
     else if (unwrapped instanceof ImplicitChildElement) {
       return convert((ImplicitChildElement) unwrapped);
     }
-
-    return super.convertUnknownObject(unwrapped);
+    else {
+      return super.convertUnwrappedObject(unwrapped);
+    }
   }
 
   /**
-   * Converts the specified fault bean child element.
+   * Converts the specified implicit child element.
    *
-   * @param childElement The fault bean child element.
+   * @param childElement The implicit child element.
    * @return The conversion.
    */
   protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
-    TypeMirror faultElementType;
-    XmlType xmlType = childElement.getXmlType();
-    if ((!isJdk15()) && (xmlType instanceof AdaptedXmlType)) {
-      //if we're on jdk14, we can't use the XmlAdapter that is compatible with only > 1.5...
-      faultElementType = ((AdaptedXmlType) xmlType).getAdaptingType();
-    }
-    else {
-      faultElementType = childElement.getType();
+    TypeMirror elementType = childElement.getType();
+    if (!isJdk15()) {
+      boolean isArray = elementType instanceof ArrayType;
+      if (isArray || !((DecoratedTypeMirror) TypeMirrorDecorator.decorate(elementType)).isCollection()) {
+        if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
+          elementType = (((Adaptable) childElement).getAdapterType().getAdaptingType());
+
+          if (isArray) {
+            //the adapting type adapts the component, so we need to convert it back to an array type.
+            AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+            elementType = ape.getTypeUtils().getArrayType(elementType);
+          }
+        }
+      }
     }
 
-    return convert(faultElementType);
+    return convert(elementType);
   }
 
   /**
@@ -85,15 +94,22 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    * @return The accessor.
    */
   protected String convert(Accessor accessor) throws TemplateModelException {
-    TypeMirror accessorType;
-    XmlType baseType = accessor.getBaseType();
-    if ((!isJdk15()) && (baseType instanceof AdaptedXmlType)) {
-      //if we're on jdk14, we can't use the XmlAdapter that is compatible with only > 1.5...
-      accessorType = ((AdaptedXmlType) baseType).getAdaptingType();
+    TypeMirror accessorType = accessor.getAccessorType();
+    if (!isJdk15()) {
+      boolean isArray = accessorType instanceof ArrayType;
+      if (isArray || !accessor.isCollectionType()) { //we don't care about collections because jdk 14 doesn't have generics.
+        if (accessor.isAdapted()) {
+          accessorType = accessor.getAdapterType().getAdaptingType();
+          
+          if (isArray) {
+            //the adapting type will adapt the component, so we need to convert it back to an array type.
+            AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+            accessorType = ape.getTypeUtils().getArrayType(accessorType);
+          }
+        }
+      }
     }
-    else {
-      accessorType = accessor.getAccessorType();
-    }
+
     return convert(accessorType);
   }
 

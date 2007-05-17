@@ -71,7 +71,16 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    return convertUnwrappedObject(unwrapped);
+  }
 
+  /**
+   * Converts an unwrapped object.
+   *
+   * @param unwrapped The unwrapped object to convert.
+   * @return The conversion.
+   */
+  protected String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
     String conversion;
     if (unwrapped instanceof TypeMirror) {
       conversion = convert((TypeMirror) unwrapped);
@@ -83,21 +92,9 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
       conversion = convert((PackageDeclaration) unwrapped);
     }
     else {
-      conversion = convertUnknownObject(unwrapped);
+      conversion = convert(String.valueOf(unwrapped));
     }
-
     return conversion;
-  }
-
-  /**
-   * Converts an object of an unknown type.
-   *
-   * @param unwrapped The unwrapped object.
-   * @return The conversion.
-   * @throws TemplateModelException Object cannot be converted for some reason.
-   */
-  protected String convertUnknownObject(Object unwrapped) throws TemplateModelException {
-    return convert(String.valueOf(unwrapped));
   }
 
   /**

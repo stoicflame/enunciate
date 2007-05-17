@@ -54,19 +54,19 @@ public class ${fault.simpleName} extends Exception {
     [#list fault.childElements as childElement]
       [#assign element=childElement.property/]
 
-  private ${classnameFor(element.propertyType)} ${element.simpleName};
+  private ${classnameFor(childElement)} ${element.simpleName};
 
   /**
    * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(element.propertyType)} get${element.simpleName?cap_first}() {
+  public ${classnameFor(childElement)} get${element.simpleName?cap_first}() {
     return this.${element.simpleName};
   }
 
   /**
    * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${element.simpleName?cap_first}(${classnameFor(element.propertyType)} ${element.simpleName}) {
+  public void set${element.simpleName?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};
   }
     [/#list]

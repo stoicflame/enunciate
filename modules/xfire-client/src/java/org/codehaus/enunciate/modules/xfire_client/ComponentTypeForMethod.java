@@ -18,10 +18,14 @@ package org.codehaus.enunciate.modules.xfire_client;
 
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -38,9 +42,35 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   }
 
   @Override
+  protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
+    if ((!isJdk15()) && (childElement instanceof Adaptable) && (((Adaptable)childElement).isAdapted())) {
+      //the adapting type is already unwrapped...
+      return convert(((Adaptable)childElement).getAdapterType().getAdaptingType());
+    }
+    else {
+      return convert(childElement.getType());
+    }
+
+  }
+
+  @Override
+  protected String convert(Accessor accessor) throws TemplateModelException {
+    if (!isJdk15() && accessor.isAdapted()) {
+      //if the type is adapted, the adapting type is already unwrapped.
+      return convert(accessor.getAdapterType().getAdaptingType());
+    }
+    else {
+      return convert(accessor.getAccessorType());
+    }
+  }
+
+  @Override
   protected String convert(TypeMirror typeMirror) throws TemplateModelException {
     if (typeMirror instanceof ArrayType) {
-      return super.convert(((ArrayType) typeMirror).getComponentType());
+      TypeMirror componentType = ((ArrayType) typeMirror).getComponentType();
+      if (!(componentType instanceof PrimitiveType) || (((PrimitiveType)componentType).getKind() != PrimitiveType.Kind.BYTE)) {
+        return super.convert(componentType);
+      }
     }
     else if (typeMirror instanceof DeclaredType) {
       DecoratedTypeMirror decoratedTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
@@ -53,7 +83,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
       }
     }
 
-    throw new TemplateModelException("No component type for " + typeMirror);
+    return super.convert(typeMirror);
   }
 
 }
