@@ -91,9 +91,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if attribute_index > 0]else [/#if]if ("${attribute.namespace?default("")}".equals(name.getNamespaceURI()) && ("${attribute.name}".equals(name.getLocalPart()))) {
         [#if attribute.xmlList]
           [#if attribute.accessorType.collection]
-      ListParser listParser = new ListParser(attributeReader.getValue(), ${collectionTypeFor(attribute)}.class, ${componentTypeFor(attribute)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(attributeReader.getValue(), ${collectionTypeFor(attribute)}.class, ${componentTypeFor(attribute)}.class, getTypeMapping().getType(${componentTypeFor(attribute)}.class), context);
           [#else]
-      ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(attributeReader.getValue(), ${classnameFor(attribute)}.class, getTypeMapping().getType(${classnameFor(attribute)}.class.getComponentType()), context);
           [/#if]
       instance.set${attribute.simpleName?cap_first}((${classnameFor(attribute)}) listParser.getList());
         [#else]
@@ -153,9 +153,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     //Read the xml value
       [#if type.value.xmlList]
         [#if type.value.accessorType.collection]
-    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping().getType(${componentTypeFor(type.value)}.class), context);
         [#else]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping().getType(${classnameFor(type.value)}.class.getComponentType()), context);
         [/#if]
     instance.set${type.value.simpleName?cap_first}((${classnameFor(type.value)}) listParser.getList());
       [#else]
@@ -203,9 +203,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
           [#if elementChoice.xmlList]
             [#if elementChoice.accessorType.collection]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, getTypeMapping().getType(${componentTypeFor(elementChoice)}.class), context);
             [#else]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(elementChoice)}.class, getTypeMapping(), context);
+      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(elementChoice)}.class, getTypeMapping().getType(${classnameFor(elementChoice)}.class.getComponentType()), context);
             [/#if]
       ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) listParser.getList();
           [#elseif elementChoice.bareAccessorType.primitive]

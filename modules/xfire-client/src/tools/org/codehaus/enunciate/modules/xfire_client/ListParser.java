@@ -44,26 +44,26 @@ public class ListParser extends AbstractMessageReader {
    *
    * @param value       The space-separated list xml list.
    * @param listType    The type of list.
-   * @param typeMapping The type mapping.
+   * @param xfireComponentType The type mapping.
    * @param context     The context.
    * @throws IllegalArgumentException If the type isn't an array.
    */
-  public ListParser(String value, Class listType, TypeMapping typeMapping, MessageContext context) throws XFireFault {
-    this(value, listType, listType.getComponentType(), typeMapping, context);
+  public ListParser(String value, Class listType, Type xfireComponentType, MessageContext context) throws XFireFault {
+    this(value, listType, listType.getComponentType(), xfireComponentType, context);
   }
 
   /**
    * Construct a list parser that will parse a space-separated xml list into a list of the specified type.  Since the component
    * type is specified, the list type can be a collection.
    *
-   * @param value         The space-separated list xml list.
-   * @param listType      The type of list.
-   * @param componentType The component type.
-   * @param typeMapping   The type mapping.
-   * @param context       The context.
+   * @param value              The space-separated list xml list.
+   * @param listType           The type of list.
+   * @param componentType      The component type.
+   * @param xfireComponentType The type mapping.
+   * @param context            The context.
    * @throws IllegalArgumentException If the type isn't a collection or an array.
    */
-  public ListParser(String value, Class listType, Class componentType, TypeMapping typeMapping, MessageContext context) throws XFireFault {
+  public ListParser(String value, Class listType, Class componentType, Type xfireComponentType, MessageContext context) throws XFireFault {
     if ((componentType == null) && (!listType.isArray())) {
       throw new IllegalArgumentException(listType.getName() + " is not an array type.  " +
         "It can be an instance of java.util.Collection, but the component type must be specified.");
@@ -77,7 +77,6 @@ public class ListParser extends AbstractMessageReader {
       tokens = value.split(" ");
     }
 
-    Type xfireComponentType = typeMapping.getType(componentType);
     Object array = Array.newInstance(componentType, tokens.length);
     for (int i = 0; i < tokens.length; i++) {
       this.value = tokens[i];

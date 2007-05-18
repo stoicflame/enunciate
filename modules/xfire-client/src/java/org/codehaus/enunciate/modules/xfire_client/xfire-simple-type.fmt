@@ -34,9 +34,9 @@ public class ${type.simpleName}XFireType extends Type {
 
     [#if type.value.xmlList]
       [#if type.value.accessorType.collection]
-    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${collectionTypeFor(type.value)}.class, ${componentTypeFor(type.value)}.class, getTypeMapping().getType(${componentTypeFor(type.value)}.class), context);
       [#else]
-    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping(), context);
+    ListParser listParser = new ListParser(reader.getValue(), ${classnameFor(type.value)}.class, getTypeMapping().getType(${classnameFor(type.value)}.class.getComponentType()), context);
       [/#if]
     ${classnameFor(type.value)} value = (${classnameFor(type.value)}) listParser.getList();
     [#elseif type.value.accessorType.primitive]

@@ -31,7 +31,7 @@ public class TestListParser extends TestCase {
    * tests parsing an xml list.
    */
   public void testParseList() throws Exception {
-    ListParser parser = new ListParser("123 456 789 0", Collection.class, Integer.class, new DefaultTypeMappingRegistry(true).getDefaultTypeMapping(), new MessageContext());
+    ListParser parser = new ListParser("123 456 789 0", Collection.class, Integer.class, new DefaultTypeMappingRegistry(true).getDefaultTypeMapping().getType(Integer.class), new MessageContext());
     Object listObj = parser.getList();
     assertTrue(listObj instanceof Collection);
     Collection coll = (Collection) listObj;
@@ -41,7 +41,7 @@ public class TestListParser extends TestCase {
     assertTrue(coll.contains(new Integer(789)));
     assertTrue(coll.contains(new Integer(0)));
 
-    parser = new ListParser("123 456 789 0", int[].class, new DefaultTypeMappingRegistry(true).getDefaultTypeMapping(), new MessageContext());
+    parser = new ListParser("123 456 789 0", int[].class, new DefaultTypeMappingRegistry(true).getDefaultTypeMapping().getType(int[].class.getComponentType()), new MessageContext());
     listObj = parser.getList();
     assertTrue(listObj.getClass().isArray());
     assertSame(Integer.TYPE, listObj.getClass().getComponentType());
