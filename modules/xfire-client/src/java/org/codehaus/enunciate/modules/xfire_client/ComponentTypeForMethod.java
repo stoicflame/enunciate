@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Converts a fully-qualified class name to its alternate client fully-qualified class name.
+ * Converts the
  *
  * @author Ryan Heaton
  */
@@ -43,9 +43,9 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
 
   @Override
   protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
-    if ((!isJdk15()) && (childElement instanceof Adaptable) && (((Adaptable)childElement).isAdapted())) {
+    if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
       //the adapting type is already unwrapped...
-      return convert(((Adaptable)childElement).getAdapterType().getAdaptingType());
+      return convert(((Adaptable) childElement).getAdapterType().getAdaptingType());
     }
     else {
       return convert(childElement.getType());
@@ -55,7 +55,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
 
   @Override
   protected String convert(Accessor accessor) throws TemplateModelException {
-    if (!isJdk15() && accessor.isAdapted()) {
+    if (accessor.isAdapted()) {
       //if the type is adapted, the adapting type is already unwrapped.
       return convert(accessor.getAdapterType().getAdaptingType());
     }
@@ -68,7 +68,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   protected String convert(TypeMirror typeMirror) throws TemplateModelException {
     if (typeMirror instanceof ArrayType) {
       TypeMirror componentType = ((ArrayType) typeMirror).getComponentType();
-      if (!(componentType instanceof PrimitiveType) || (((PrimitiveType)componentType).getKind() != PrimitiveType.Kind.BYTE)) {
+      if (!(componentType instanceof PrimitiveType) || (((PrimitiveType) componentType).getKind() != PrimitiveType.Kind.BYTE)) {
         return super.convert(componentType);
       }
     }

@@ -203,14 +203,16 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
           [#if elementChoice.xmlList]
             [#if elementChoice.accessorType.collection]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, getTypeMapping().getType(${componentTypeFor(elementChoice)}.class), context);
+      Type type = getTypeMapping().getType(${componentTypeFor(elementChoice)}.class);
+      ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, type, context);
             [#else]
-      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(elementChoice)}.class, getTypeMapping().getType(${classnameFor(elementChoice)}.class.getComponentType()), context);
+      Type type = getTypeMapping().getType(${classnameFor(elementChoice)}.class.getComponentType());
+      ListParser listParser = new ListParser(elementReader.getValue(), ${classnameFor(elementChoice)}.class, type, context);
             [/#if]
       ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) listParser.getList();
           [#elseif elementChoice.bareAccessorType.primitive]
       Type type = getTypeMapping().getType([@primitiveWrapper type=elementChoice.bareAccessorType/].class);
-      ${elementChoice.bareAccessorType} value = [@unwrapIfPrimitive  type=elementChoice.bareAccessorType](([@primitiveWrapper type=elementChoice.bareAccessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
+      ${elementChoice.bareAccessorType} value = [@unwrapIfPrimitive type=elementChoice.bareAccessorType](([@primitiveWrapper type=elementChoice.bareAccessorType/]) type.readObject(elementReader, context))[/@unwrapIfPrimitive];
           [#elseif elementChoice.xmlIDREF]
       Type type = getTypeMapping().getType(java.lang.String.class);
       java.lang.String idref = (java.lang.String) type.readObject(elementReader, context);

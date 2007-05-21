@@ -24,8 +24,6 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
@@ -69,18 +67,14 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    */
   protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
     TypeMirror elementType = childElement.getType();
-    if (!isJdk15()) {
+    if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
       boolean isArray = elementType instanceof ArrayType;
-      if (isArray || !((DecoratedTypeMirror) TypeMirrorDecorator.decorate(elementType)).isCollection()) {
-        if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
-          elementType = (((Adaptable) childElement).getAdapterType().getAdaptingType());
+      elementType = (((Adaptable) childElement).getAdapterType().getAdaptingType());
 
-          if (isArray) {
-            //the adapting type adapts the component, so we need to convert it back to an array type.
-            AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-            elementType = ape.getTypeUtils().getArrayType(elementType);
-          }
-        }
+      if (isArray) {
+        //the adapting type adapts the component, so we need to convert it back to an array type.
+        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        elementType = ape.getTypeUtils().getArrayType(elementType);
       }
     }
 
@@ -95,18 +89,15 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    */
   protected String convert(Accessor accessor) throws TemplateModelException {
     TypeMirror accessorType = accessor.getAccessorType();
-    if (!isJdk15()) {
+
+    if (accessor.isAdapted()) {
       boolean isArray = accessorType instanceof ArrayType;
-      if (isArray || !accessor.isCollectionType()) { //we don't care about collections because jdk 14 doesn't have generics.
-        if (accessor.isAdapted()) {
-          accessorType = accessor.getAdapterType().getAdaptingType();
-          
-          if (isArray) {
-            //the adapting type will adapt the component, so we need to convert it back to an array type.
-            AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-            accessorType = ape.getTypeUtils().getArrayType(accessorType);
-          }
-        }
+      accessorType = accessor.getAdapterType().getAdaptingType();
+
+      if (isArray) {
+        //the adapting type will adapt the component, so we need to convert it back to an array type.
+        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        accessorType = ape.getTypeUtils().getArrayType(accessorType);
       }
     }
 

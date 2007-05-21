@@ -505,7 +505,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //instantiate a loader with this library only in its path...
     URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
     if (loader.findResource("META-INF/enunciate/preserve-in-war") != null) {
-      debug("%s will be excluded from the war because it contains the entry META-INF/enunciate/preserve-in-war.", file);
+      debug("%s will be included in the war because it contains the entry META-INF/enunciate/preserve-in-war.", file);
       //if a jar happens to have the enunciate "preserve-in-war" file, it is NOT excluded.
       return false;
     }

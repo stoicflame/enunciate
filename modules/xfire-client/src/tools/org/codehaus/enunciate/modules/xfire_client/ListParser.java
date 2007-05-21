@@ -20,7 +20,6 @@ import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.AbstractMessageReader;
 import org.codehaus.xfire.aegis.MessageReader;
 import org.codehaus.xfire.aegis.type.Type;
-import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.fault.XFireFault;
 
 import javax.xml.namespace.QName;
