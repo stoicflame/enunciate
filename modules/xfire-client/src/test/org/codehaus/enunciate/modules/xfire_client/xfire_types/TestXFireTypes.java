@@ -33,6 +33,7 @@ import org.codehaus.xfire.exchange.MessageExchange;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
 import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
+import org.joda.time.DateTime;
 import shapes.CircleXFireType;
 import shapes.RectangleXFireType;
 import shapes.TriangleXFireType;
@@ -372,6 +373,7 @@ public class TestXFireTypes extends TestCase {
     window.setWidth(10);
     window.setLineStyle(LineStyle.solid);
     house.setWindows(Arrays.asList(window));
+    house.setConstructedDate(new DateTime(3L));
 
     JAXBContext context = JAXBContext.newInstance(House.class);
     Marshaller marshaller = context.createMarshaller();
@@ -418,6 +420,7 @@ public class TestXFireTypes extends TestCase {
     assertEquals(10, clientWindow.getHeight());
     assertEquals(10, clientWindow.getWidth());
     assertNull(clientWindow.getId());
+    assertEquals(new Date(3L), clientHouse.getConstructedDate());
 
     out = new ByteArrayOutputStream();
     QName rootElementName = houseType.getRootElementName();
@@ -463,6 +466,7 @@ public class TestXFireTypes extends TestCase {
     assertEquals(10, window.getHeight());
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
+    assertEquals(new DateTime(3L), house.getConstructedDate());
 
     //now let's check the nillable and required stuff:
 

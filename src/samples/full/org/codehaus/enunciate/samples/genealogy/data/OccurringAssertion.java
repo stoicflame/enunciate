@@ -16,7 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.data;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 /**
  * An assertion that occurs at some point in time.
@@ -25,7 +25,7 @@ import java.util.Date;
  */
 public abstract class OccurringAssertion extends Assertion {
 
-  private Date date;
+  private DateTime date;
   private String place;
 
   /**
@@ -33,7 +33,7 @@ public abstract class OccurringAssertion extends Assertion {
    *
    * @return The date of the occurrence.
    */
-  public Date getDate() {
+  public DateTime getDate() {
     return date;
   }
 
@@ -42,7 +42,7 @@ public abstract class OccurringAssertion extends Assertion {
    *
    * @param date The date of the occurrence.
    */
-  public void setDate(Date date) {
+  public void setDate(DateTime date) {
     this.date = date;
   }
 

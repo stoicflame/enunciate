@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-/**
- * The "data" package contains genealogical data.
- */
-@XmlSchema (
-  namespace = "http://enunciate.codehaus.org/samples/genealogy/data",
-  elementFormDefault = XmlNsForm.QUALIFIED
-)
-@XmlJavaTypeAdapters (
-  {@XmlJavaTypeAdapter ( value = DateTimeXmlAdapter.class, type = DateTime.class)}
-)
 package org.codehaus.enunciate.samples.genealogy.data;
 
 import org.joda.time.DateTime;
+import org.codehaus.enunciate.XmlTransient;
 
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Date;
+
+/**
+ * An adapter for joda-time.
+ *
+ * @author Ryan Heaton
+ */
+@XmlTransient
+public class DateTimeXmlAdapter extends XmlAdapter<Date, DateTime> {
+
+  public DateTime unmarshal(Date date) throws Exception {
+    return new DateTime(date.getTime());
+  }
+
+  public Date marshal(DateTime dateTime) throws Exception {
+    return new Date(dateTime.getMillis());
+  }
+}

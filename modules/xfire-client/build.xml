@@ -40,13 +40,13 @@
     <property name="example.dir" value="${basedir}/src/samples/schema"/>
   </target>
 
-  <target name="compile-shapes" depends="get-tools-classpath">
+  <target name="compile-shapes" depends="get-test-classpath">
     <mkdir dir="${test.build.dir}"/>
     <javac destdir="${test.build.dir}" debug="true">
       <src>
         <pathelement location="src/samples/schema"/>
       </src>
-      <classpath refid="tools.classpath"/>
+      <classpath refid="test.classpath"/>
     </javac>
   </target>
 

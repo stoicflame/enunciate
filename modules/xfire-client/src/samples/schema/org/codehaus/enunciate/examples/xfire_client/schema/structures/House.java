@@ -20,10 +20,12 @@ import org.codehaus.enunciate.examples.xfire_client.schema.Rectangle;
 import org.codehaus.enunciate.examples.xfire_client.schema.Triangle;
 import org.codehaus.enunciate.examples.xfire_client.schema.Circle;
 import org.codehaus.enunciate.examples.xfire_client.schema.Figure;
+import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 
 /**
@@ -37,6 +39,7 @@ public class House extends Figure {
   private Rectangle door;
   private Circle doorKnob;
   private List<Rectangle> windows;
+  private DateTime constructedDate;
 
   @XmlElement (
     required = true
@@ -86,5 +89,14 @@ public class House extends Figure {
 
   public void setWindows(List<Rectangle> windows) {
     this.windows = windows;
+  }
+
+  @XmlJavaTypeAdapter (DateTimeXmlAdapter.class)
+  public DateTime getConstructedDate() {
+    return constructedDate;
+  }
+
+  public void setConstructedDate(DateTime constructedDate) {
+    this.constructedDate = constructedDate;
   }
 }

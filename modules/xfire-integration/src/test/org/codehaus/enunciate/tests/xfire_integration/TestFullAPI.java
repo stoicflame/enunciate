@@ -46,10 +46,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * A very big test of the functionality of the full API deployed with the XFire client and server modules.
@@ -146,6 +143,7 @@ public class TestFullAPI extends TestCase {
     for (Object o : persons) {
       Person person = (Person) o;
       assertTrue(ids.remove(person.getId()));
+      assertEquals(new Date(1L), ((Event) person.getEvents().iterator().next()).getDate());
     }
 
     assertNull(personService.readPersons(null));

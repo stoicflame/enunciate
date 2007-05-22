@@ -17,13 +17,16 @@
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
 import org.codehaus.enunciate.samples.genealogy.data.Person;
+import org.codehaus.enunciate.samples.genealogy.data.Event;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
+import org.joda.time.DateTime;
 
 import javax.jws.WebService;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author Ryan Heaton
@@ -48,6 +51,10 @@ public class PersonServiceImpl implements PersonService {
       Person person = new Person();
       person.setId(personId);
       persons.add(person);
+
+      Event event = new Event();
+      event.setDate(new DateTime(1L));
+      person.setEvents(Arrays.asList(event));
     }
 
     return persons;
