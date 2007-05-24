@@ -407,7 +407,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       try {
         xmlType = XmlTypeFactory.findSpecifiedType(this);
         if (xmlType == null) {
-          xmlType = XmlTypeFactory.getXmlType(property.getPropertyType());
+          xmlType = XmlTypeFactory.getXmlType(getType());
         }
       }
       catch (XmlTypeException e) {
@@ -434,7 +434,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     public TypeMirror getType() {
-      return getProperty().getPropertyType();
+      return property.getPropertyType();
     }
 
     public boolean isAdapted() {

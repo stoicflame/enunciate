@@ -84,13 +84,15 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    * @return The type of the accessor.
    */
   public TypeMirror getAccessorType() {
+    TypeMirror accessorType;
     Declaration delegate = getDelegate();
     if (delegate instanceof FieldDeclaration) {
-      return ((FieldDeclaration) delegate).getType();
+      accessorType = ((FieldDeclaration) delegate).getType();
     }
     else {
-      return ((PropertyDeclaration) delegate).getPropertyType();
+      accessorType = ((PropertyDeclaration) delegate).getPropertyType();
     }
+    return accessorType;
   }
 
   /**
@@ -106,9 +108,9 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    * The base xml type of the accessor. The base type is either:
    * <p/>
    * <ol>
-   *   <li>The xml type of the accessor type.</li>
-   *   <li>The xml type of the component type of the accessor type if the accessor
-   *       type is a collection type.</li>
+   * <li>The xml type of the accessor type.</li>
+   * <li>The xml type of the component type of the accessor type if the accessor
+   * type is a collection type.</li>
    * </ol>
    *
    * @return The base type.
@@ -199,7 +201,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
   public boolean isSwaRef() {
     return (getAnnotation(XmlAttachmentRef.class) != null)
       && (getAccessorType() instanceof DeclaredType)
-      && ("javax.activation.DataHandler".equals(((DeclaredType)getAccessorType()).getDeclaration().getQualifiedName()));
+      && ("javax.activation.DataHandler".equals(((DeclaredType) getAccessorType()).getDeclaration().getQualifiedName()));
   }
 
   /**
@@ -221,7 +223,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
     if (mimeType != null) {
       return mimeType.value();
     }
-    
+
     return null;
   }
 

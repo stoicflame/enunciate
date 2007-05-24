@@ -22,8 +22,10 @@ import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
+import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.util.MapTypeUtil;
 
 import java.util.Iterator;
 
@@ -88,31 +90,42 @@ class XmlTypeVisitor implements TypeVisitor {
   }
 
   public void visitDeclaredType(DeclaredType declaredType) {
-    this.xmlType = null;
-    this.errorMessage = "Unknown xml type: " + declaredType;
+    MapType mapType = MapTypeUtil.findMapType(declaredType);
+    if (mapType != null) {
+      setMapXmlType(mapType);
+    }
+    else {
+      this.xmlType = null;
+      this.errorMessage = "Unknown xml type: " + declaredType;
+    }
   }
 
   public void visitClassType(ClassType classType) {
-    XmlType xmlType = null;
-    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-    ClassDeclaration declaration = classType.getDeclaration();
-    if (declaration != null) {
-      XmlType knownType = model.getKnownType(declaration);
-      if (knownType != null) {
-        xmlType = knownType;
-      }
-      else {
-        //type not known, not specified.  Last chance: look for the type definition.
-        TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
-        if (typeDefinition != null) {
-          xmlType = new XmlClassType(typeDefinition);
+    MapType mapType = MapTypeUtil.findMapType(classType);
+    if (mapType != null) {
+      setMapXmlType(mapType);
+    }
+    else {
+      XmlType xmlType = null;
+      EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+      ClassDeclaration declaration = classType.getDeclaration();
+      if (declaration != null) {
+        XmlType knownType = model.getKnownType(declaration);
+        if (knownType != null) {
+          xmlType = knownType;
+        }
+        else {
+          //type not known, not specified.  Last chance: look for the type definition.
+          TypeDefinition typeDefinition = model.findTypeDefinition(declaration);
+          if (typeDefinition != null) {
+            xmlType = new XmlClassType(typeDefinition);
+          }
         }
       }
-    }
-
-    this.xmlType = xmlType;
-    if (xmlType == null) {
-      this.errorMessage = "Unknown xml type for class: " + classType;
+      this.xmlType = xmlType;
+      if (xmlType == null) {
+        this.errorMessage = "Unknown xml type for class: " + classType;
+      }
     }
   }
 
@@ -126,8 +139,30 @@ class XmlTypeVisitor implements TypeVisitor {
       adapterType.getAdaptingType().accept(this);
     }
     else {
-      this.xmlType = null;
-      this.errorMessage = "An interface type cannot be an xml type.";
+      MapType mapType = MapTypeUtil.findMapType(interfaceType);
+      if (mapType != null) {
+        setMapXmlType(mapType);
+      }
+      else {
+        this.xmlType = null;
+        this.errorMessage = "An interface type cannot be an xml type.";
+      }
+    }
+  }
+
+  /**
+   * Sets the map xml type.
+   *
+   * @param mapType The map type to use.
+   */
+  private void setMapXmlType(MapType mapType) {
+    try {
+      XmlType keyType = XmlTypeFactory.getXmlType(mapType.getKeyType());
+      XmlType valueType = XmlTypeFactory.getXmlType(mapType.getValueType());
+      this.xmlType = new MapXmlType(keyType, valueType);
+    }
+    catch (XmlTypeException e) {
+      this.errorMessage = "Error with map type: " + e.getMessage();
     }
   }
 

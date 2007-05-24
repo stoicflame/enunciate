@@ -120,15 +120,6 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   }
 
   /**
-   * Get the delegate.
-   *
-   * @return The delegate.
-   */
-  public TypeMirror getDelegate() {
-    return this.delegate;
-  }
-
-  /**
    * Whether this is a bare web result.
    *
    * @return Whether this is a bare web result.
@@ -219,7 +210,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The qname of the particle for this web result as a part.
    */
   public QName getParticleQName() {
-    TypeMirror returnType = getDelegate();
+    TypeMirror returnType = getType();
     if (returnType instanceof DeclaredType) {
       TypeDeclaration returnTypeDeclaration = ((DeclaredType) returnType).getDeclaration();
       if ((method.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT) && (returnTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
@@ -243,7 +234,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    */
   public boolean isImplicitSchemaElement() {
     if (method.getSoapBindingStyle() != SOAPBinding.Style.RPC) {
-      TypeMirror returnType = getDelegate();
+      TypeMirror returnType = getType();
       return !((returnType instanceof DeclaredType) && (((DeclaredType) returnType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
     }
 
@@ -284,7 +275,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     try {
       XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
       if (xmlType == null) {
-        xmlType = XmlTypeFactory.getXmlType(getDelegate());
+        xmlType = XmlTypeFactory.getXmlType(getType());
       }
       return xmlType;
     }
@@ -335,7 +326,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The delegate.
    */
   public TypeMirror getType() {
-    return getDelegate();
+    return this.delegate;
   }
 
   // Inherited.

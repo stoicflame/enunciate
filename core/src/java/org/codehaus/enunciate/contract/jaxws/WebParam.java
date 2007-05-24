@@ -31,6 +31,8 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.util.MapType;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;

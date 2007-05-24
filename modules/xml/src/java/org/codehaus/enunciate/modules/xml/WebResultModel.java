@@ -48,11 +48,8 @@ public class WebResultModel implements TemplateHashModel {
     else if ("webMethod".equals(key)) {
       return this.wrapper.wrap(result.getWebMethod());
     }
-    else if ("delegate".equals(key)) {
-      return this.wrapper.wrap(null);
-    }
     else {
-      return ((TemplateHashModel) this.wrapper.wrap(result.getDelegate())).get(key);
+      return ((TemplateHashModel) this.wrapper.wrap(result.getType())).get(key);
     }
   }
 
