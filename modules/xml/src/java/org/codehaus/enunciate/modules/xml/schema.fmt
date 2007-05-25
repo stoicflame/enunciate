@@ -131,7 +131,7 @@
                 <${xs}:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
               [#elseif elementChoice.baseType.anonymous]
                 <${xs}:element name="${elementChoice.name}">
-                  [@processTypeDef typeDef=elementChoice.baseType.typeDefinition/]
+                  [@processAnonymousType type=elementChoice.baseType/]
                 </${xs}:element>
               [#else]
                 <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
@@ -158,7 +158,7 @@
                   </${xs}:documentation>
                 </${xs}:annotation>
               [/#if]
-                [@processTypeDef typeDef=element.baseType.typeDefinition/]
+                [@processAnonymousType type=element.baseType/]
               </${xs}:element>
             [#elseif element.xmlList]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
@@ -237,4 +237,39 @@
   [#else]
     [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]
   [/#if]
+[/#macro]
+
+[#macro processAnonymousType type]
+  [#if type.map?default(false)]
+    [@processMapType mapType=type/]
+  [#else]
+    [@processTypeDef typeDef=type.typeDefinition/]
+  [/#if]
+[/#macro]
+
+[#macro processMapType mapType]
+  <${xs}:complexType>
+    <${xs}:sequence>
+      <${xs}:element name="entry" minOccurs="0" maxOccurs="unbounded">
+        <${xs}:complexType>
+          <${xs}:sequence>
+            [#if mapType.keyType.anonymous]
+            <${xs}:element name="key" minOccurs="1" maxOccurs="1">
+              [@processAnonymousType type=mapType.keyType/]
+            </${xs}:element>
+            [#else]
+            <${xs}:element name="key" minOccurs="1" maxOccurs="1" type="${mapType.keyType.qname}"/>
+            [/#if]
+            [#if mapType.valueType.anonymous]
+            <${xs}:element name="value" minOccurs="1" maxOccurs="1">
+              [@processAnonymousType type=mapType.valueType/]
+            </${xs}:element>
+            [#else]
+            <${xs}:element name="value" minOccurs="1" maxOccurs="1" type="${mapType.valueType.qname}"/>
+            [/#if]
+          </${xs}:sequence>
+        </${xs}:complexType>
+      </${xs}:element>
+    </${xs}:sequence>
+  </${xs}:complexType>
 [/#macro]
