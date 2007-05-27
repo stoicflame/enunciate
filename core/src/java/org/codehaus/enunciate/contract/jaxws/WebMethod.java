@@ -23,12 +23,11 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.VoidType;
-import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
-import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,12 +75,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
         throw new ValidationException(getPosition(), "Unknown declaration for " + referenceType);
       }
 
-      WebFault webFault = new WebFault((ClassDeclaration) declaration);
-
-      if (!webFault.isImplicitSchemaElement() || endpointInterface.getTargetNamespace().equals(webFault.getTargetNamespace())) {
-        //todo: remove this hack when you allow for faults, params, and request/response wrappers of a different target namespace...
-        webFaults.add(webFault);
-      }
+      webFaults.add(new WebFault((ClassDeclaration) declaration));
     }
     this.webFaults = webFaults;
 
@@ -178,20 +172,6 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     for (WebMessage message : messages) {
       for (WebMessagePart part : message.getParts()) {
         namespaces.add(part.getParticleQName().getNamespaceURI());
-        if (part instanceof ImplicitSchemaElement) {
-          ImplicitSchemaElement implicitElement = (ImplicitSchemaElement) part;
-
-          QName typeQName = implicitElement.getTypeQName();
-          if (typeQName != null) {
-            namespaces.add(typeQName.getNamespaceURI());
-          }
-
-          if (implicitElement instanceof ImplicitRootElement) {
-            for (ImplicitChildElement childElement : ((ImplicitRootElement) implicitElement).getChildElements()) {
-              namespaces.add(childElement.getTypeQName().getNamespaceURI());
-            }
-          }
-        }
       }
     }
     

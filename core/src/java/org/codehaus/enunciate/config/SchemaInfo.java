@@ -18,6 +18,12 @@ package org.codehaus.enunciate.config;
 
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.*;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
+import org.codehaus.enunciate.contract.jaxws.ImplicitSchemaElement;
+import org.codehaus.enunciate.contract.jaxws.ImplicitRootElement;
+import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
@@ -32,6 +38,7 @@ public class SchemaInfo {
 
   private String id;
   private String namespace;
+  private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
@@ -89,6 +96,15 @@ public class SchemaInfo {
    */
   public Collection<TypeDefinition> getTypeDefinitions() {
     return typeDefinitions;
+  }
+
+  /**
+   * Get the implicit schema elements to be included in this schema.
+   *
+   * @return The implicit schema elements to be included in this schema.
+   */
+  public Collection<ImplicitSchemaElement> getImplicitSchemaElements() {
+    return implicitSchemaElements;
   }
 
   /**
@@ -177,32 +193,7 @@ public class SchemaInfo {
     Set<String> referencedNamespaces = new HashSet<String>();
 
     for (TypeDefinition typeDefinition : getTypeDefinitions()) {
-      for (Attribute attribute : typeDefinition.getAttributes()) {
-        QName ref = attribute.getRef();
-        if (ref != null) {
-          referencedNamespaces.add(ref.getNamespaceURI());
-        }
-        else {
-          referencedNamespaces.add(attribute.getBaseType().getNamespace());
-        }
-      }
-
-      for (Element element : typeDefinition.getElements()) {
-        QName ref = element.getRef();
-        if (ref != null) {
-          referencedNamespaces.add(ref.getNamespaceURI());
-        }
-        else {
-          referencedNamespaces.add(element.getBaseType().getNamespace());
-        }
-      }
-
-      Value value = typeDefinition.getValue();
-      if (value != null) {
-        referencedNamespaces.add(value.getBaseType().getNamespace());
-      }
-
-      referencedNamespaces.add(typeDefinition.getBaseType().getNamespace());
+      addReferencedNamespaces(typeDefinition, referencedNamespaces);
     }
 
     for (RootElementDeclaration rootElement : getGlobalElements()) {
@@ -210,10 +201,77 @@ public class SchemaInfo {
       referencedNamespaces.add(rootElement.getTypeDefinition().getNamespace());
     }
 
+    for (ImplicitSchemaElement schemaElement : implicitSchemaElements) {
+      QName typeQName = schemaElement.getTypeQName();
+      if (typeQName != null) {
+        referencedNamespaces.add(typeQName.getNamespaceURI());
+      }
+
+      if (schemaElement instanceof ImplicitRootElement) {
+        for (ImplicitChildElement childElement : ((ImplicitRootElement) schemaElement).getChildElements()) {
+          addReferencedNamespaces(childElement.getXmlType(), referencedNamespaces);
+        }
+      }
+    }
+
     //remove the obvious referenced namespace.
     referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema");
 
     return referencedNamespaces;
+  }
+
+  /**
+   * Adds the referenced namespaces of the given type definition to the given set.
+   *
+   * @param typeDefinition The type definition.
+   * @param referencedNamespaces The set of referenced namespaces.
+   */
+  private void addReferencedNamespaces(TypeDefinition typeDefinition, Set<String> referencedNamespaces) {
+    for (Attribute attribute : typeDefinition.getAttributes()) {
+      QName ref = attribute.getRef();
+      if (ref != null) {
+        referencedNamespaces.add(ref.getNamespaceURI());
+      }
+      else {
+        addReferencedNamespaces(attribute.getBaseType(), referencedNamespaces);
+      }
+    }
+
+    for (Element element : typeDefinition.getElements()) {
+      QName ref = element.getRef();
+      if (ref != null) {
+        referencedNamespaces.add(ref.getNamespaceURI());
+      }
+      else {
+        addReferencedNamespaces(element.getBaseType(), referencedNamespaces);
+      }
+    }
+
+    Value value = typeDefinition.getValue();
+    if (value != null) {
+      addReferencedNamespaces(value.getBaseType(), referencedNamespaces);
+    }
+
+    addReferencedNamespaces(typeDefinition.getBaseType(), referencedNamespaces);
+  }
+
+  /**
+   * Adds the referenced namespaces of the given xml type to the given set.
+   *
+   * @param xmlType The xml type.
+   * @param referencedNamespaces The set of referenced namespaces.
+   */
+  private void addReferencedNamespaces(XmlType xmlType, Set<String> referencedNamespaces) {
+    if (!xmlType.isAnonymous()) {
+      referencedNamespaces.add(xmlType.getNamespace());
+    }
+    else if (xmlType instanceof MapXmlType) {
+      referencedNamespaces.add(((MapXmlType) xmlType).getKeyType().getNamespace());
+      referencedNamespaces.add(((MapXmlType) xmlType).getValueType().getNamespace());
+    }
+    else if (xmlType instanceof XmlClassType) {
+      addReferencedNamespaces(((XmlClassType) xmlType).getTypeDefinition(), referencedNamespaces);
+    }
   }
 
   /**
@@ -269,5 +327,20 @@ public class SchemaInfo {
    */
   protected EnunciateFreemarkerModel getModel() {
     return ((EnunciateFreemarkerModel) FreemarkerModel.get());
+  }
+
+  /**
+   * Compares implicit elements by element name.
+   */
+  private static class ImplicitSchemaElementComparator implements Comparator<ImplicitSchemaElement> {
+
+    /**
+     * @param element1 The first element.
+     * @param element2 The second element.
+     * @return The comparison of the element names.
+     */
+    public int compare(ImplicitSchemaElement element1, ImplicitSchemaElement element2) {
+      return element1.getElementName().compareTo(element2.getElementName());
+    }
   }
 }

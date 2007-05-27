@@ -201,7 +201,12 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
         [#list element.choices as elementChoice]
     [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
-          [#if elementChoice.xmlList]
+          [#if elementChoice.accessorType.map?default(false)]
+      Type keyType = getTypeMapping().getType(${classnameFor(element.accessorType.keyType)}.class);
+      Type valueType = getTypeMapping().getType(${classnameFor(element.accessorType.valueType)}.class);
+      MapType type = new MapType(keyType, valueType);
+      ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) type.readObject(elementReader, context);
+          [#elseif elementChoice.xmlList]
             [#if elementChoice.accessorType.collection]
       Type type = getTypeMapping().getType(${componentTypeFor(elementChoice)}.class);
       ListParser listParser = new ListParser(elementReader.getValue(), ${collectionTypeFor(elementChoice)}.class, ${componentTypeFor(elementChoice)}.class, type, context);
@@ -356,7 +361,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if element.binaryData]
       EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
           [#else]
+            [#if element.accessorType.map?default(false)]
+      Type type = new MapType(getTypeMapping().getType(${classnameFor(element.accessorType.keyType)}.class), getTypeMapping().getType(${classnameFor(element.accessorType.valueType)}.class));
+            [#else]
       Type type = getTypeMapping().getType(property.getClass());
+            [/#if]
             [#if element.xmlIDREF]
       if (!(type instanceof EnunciatedType)) {
         throw new XFireFault(property.getClass().getName() + " does not have a known xml id, but its id is being referenced.", XFireFault.RECEIVER);

@@ -71,4 +71,11 @@ public class MapType extends DecoratedInterfaceType {
   public void setValueType(TypeMirror valueType) {
     this.valueType = valueType;
   }
+
+  /**
+   * @return true.
+   */
+  public boolean isMap() {
+    return true;
+  }
 }

@@ -101,11 +101,10 @@ public class TestWebMethod extends InAPTTestCase {
     assertNotNull(docLitWrappedMethod.getWebResult());
     assertEquals(4, docLitWrappedMethod.getWebParameters().size());
     assertEquals(2, docLitWrappedMethod.getWebFaults().size());
-    assertEquals("There should be 5 web messages: 1 for in, 1 for out, 2 for faults, 2 for header.", 6, docLitWrappedMethod.getMessages().size());
+    assertEquals("There should be 6 web messages: 1 for in, 1 for out, 2 for faults, 2 for header.", 6, docLitWrappedMethod.getMessages().size());
     referencedNamespaces = docLitWrappedMethod.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
-    assertTrue(referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema"));
-    assertTrue(referencedNamespaces.remove("")); //empty namespace for the explicit fault bean
+    assertTrue(referencedNamespaces.remove("")); //empty namespace for the return type header
     assertTrue(referencedNamespaces.isEmpty());
     assertEquals("", docLitWrappedMethod.getAction());
     assertFalse(docLitWrappedMethod.isOneWay());
@@ -122,8 +121,6 @@ public class TestWebMethod extends InAPTTestCase {
     assertEquals("There should be 5 web messages: 1 for in, 1 for out, 2 for faults, 1 for header.", 5, docLitBareMethod.getMessages().size());
     referencedNamespaces = docLitBareMethod.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
-    assertTrue(referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema"));
-    assertTrue(referencedNamespaces.remove("")); //empty namespace for the explicit fault bean
     assertTrue(referencedNamespaces.isEmpty());
     assertEquals("", docLitBareMethod.getAction());
     assertFalse(docLitBareMethod.isOneWay());
@@ -141,7 +138,7 @@ public class TestWebMethod extends InAPTTestCase {
     referencedNamespaces = rpcLitWrappedMethod.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
     assertTrue(referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema"));
-    assertTrue(referencedNamespaces.remove("")); //empty namespace for the explicit fault bean
+    assertTrue(referencedNamespaces.remove(""));
     assertTrue(referencedNamespaces.isEmpty());
     assertEquals("", rpcLitWrappedMethod.getAction());
     assertFalse(rpcLitWrappedMethod.isOneWay());

@@ -67,55 +67,6 @@ Template library for WSDL.
   [#list wsdl.importedSchemas as schema]
     <${xs}:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
-
-  [#--output the schema elements--]
-  [@forEachWebMessage wsdl=wsdl]
-    [#list webMessage.parts as part]
-      [#if part.implicitSchemaElement]
-        [#if part.typeQName?exists]
-    <${xs}:element name="${part.elementName}" type="${part.typeQName}">
-          [#if part.elementDocs?exists]
-      <${xs}:annotation>
-        <${xs}:documentation>
-          ${part.elementDocs?trim}
-        </${xs}:documentation>
-      </${xs}:annotation>
-          [/#if]
-    </${xs}:element>
-
-        [#else]
-          [#assign childElements=part.childElements]
-    <${xs}:element name="${part.elementName}">
-          [#if part.elementDocs?exists]
-      <${xs}:annotation>
-        <${xs}:documentation>
-          ${part.elementDocs?trim}
-        </${xs}:documentation>
-      </${xs}:annotation>
-          [/#if]
-          [#if childElements?size > 0]
-      <${xs}:complexType>
-        <${xs}:sequence>
-            [#list childElements as childElement]
-          <${xs}:element name="${childElement.elementName}" type="${childElement.typeQName}" minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
-              [#if childElement.elementDocs?exists]
-            <${xs}:annotation>
-              <${xs}:documentation>
-                ${childElement.elementDocs?trim}
-              </${xs}:documentation>
-            </${xs}:annotation>
-              [/#if]
-          </${xs}:element>
-            [/#list]
-        </${xs}:sequence>
-      </${xs}:complexType>
-          [/#if]
-    </${xs}:element>
-
-        [/#if]
-      [/#if]
-    [/#list]
-  [/@forEachWebMessage]
   </${xs}:schema>
 [/#macro]
 

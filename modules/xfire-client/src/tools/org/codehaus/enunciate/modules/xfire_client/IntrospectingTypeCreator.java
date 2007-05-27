@@ -112,7 +112,10 @@ public class IntrospectingTypeCreator implements TypeCreator {
    */
   public Type createType(Class clazz) {
     Type type;
-    if (GeneratedWrapperBean.class.isAssignableFrom(clazz)) {
+    if (java.util.Map.class.isAssignableFrom(clazz)) {
+      return new MapType(null, null);
+    }
+    else if (GeneratedWrapperBean.class.isAssignableFrom(clazz)) {
       type = new GeneratedWrapperBeanType(clazz);
     }
     else {

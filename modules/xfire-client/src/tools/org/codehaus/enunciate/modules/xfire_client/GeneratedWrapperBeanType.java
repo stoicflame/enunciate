@@ -28,9 +28,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * An XFire type for a generated wrapper bean.
@@ -83,11 +85,30 @@ public class GeneratedWrapperBeanType extends Type {
       if (pd != null) {
         Method getter = pd.getReadMethod();
         Class propertyType = getter.getReturnType();
-        if (propertyType.isArray()) {
+        if (Map.class.isAssignableFrom(propertyType)) {
+          try {
+            Method putIn = getPutInMethod(pd.getName());
+            Class keyType = putIn.getParameterTypes()[0];
+            Class valueType = putIn.getParameterTypes()[1];
+            while (elementReader.hasMoreElementReaders()) {
+              MessageReader entryReader = elementReader.getNextElementReader();
+
+              MessageReader keyReader = entryReader.getNextElementReader();
+              Object key = getTypeMapping().getType(keyType).readObject(keyReader, context);
+              MessageReader valueReader = entryReader.getNextElementReader();
+              Object value = getTypeMapping().getType(valueType).readObject(valueReader, context);
+              putIn.invoke(instance, new Object[]{key, value});
+            }
+          }
+          catch (Exception e) {
+            throw new XFireFault("Unable to put in map property " + pd.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
+          }
+        }
+        else if (propertyType.isArray()) {
           Object item = getTypeMapping().getType(propertyType.getComponentType()).readObject(elementReader, context);
           try {
             Method addTo = getAddToMethod(pd.getName());
-            addTo.invoke(instance, new Object[] {item});
+            addTo.invoke(instance, new Object[]{item});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to add to property " + pd.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -98,7 +119,7 @@ public class GeneratedWrapperBeanType extends Type {
             Method addTo = getAddToMethod(pd.getName());
             Class componentType = addTo.getParameterTypes()[0];
             Object item = getTypeMapping().getType(componentType).readObject(elementReader, context);
-            addTo.invoke(instance, new Object[] {item});
+            addTo.invoke(instance, new Object[]{item});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to add to property " + pd.getName() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -108,7 +129,7 @@ public class GeneratedWrapperBeanType extends Type {
           Object value = getTypeMapping().getType(propertyType).readObject(elementReader, context);
 
           try {
-            pd.getWriteMethod().invoke(instance, new Object[] {value});
+            pd.getWriteMethod().invoke(instance, new Object[]{value});
           }
           catch (Exception e) {
             throw new XFireFault("Unable to invoke " + pd.getWriteMethod() + " for the wrapper bean " + beanClass.getName(), e, XFireFault.RECEIVER);
@@ -132,6 +153,25 @@ public class GeneratedWrapperBeanType extends Type {
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
       if (("addTo" + propertyName).equals(method.getName())) {
+        return method;
+      }
+    }
+
+    throw new NoSuchMethodException();
+  }
+
+  /**
+   * Get the "putIn" method for the specified property.
+   *
+   * @param propertyName The property name.
+   * @return The putInMethod
+   */
+  protected Method getPutInMethod(String propertyName) throws NoSuchMethodException {
+    propertyName = Character.toString(propertyName.charAt(0)).toUpperCase() + propertyName.substring(1);
+    Method[] methods = beanClass.getMethods();
+    for (int i = 0; i < methods.length; i++) {
+      Method method = methods[i];
+      if (("putIn" + propertyName).equals(method.getName())) {
         return method;
       }
     }
@@ -173,7 +213,35 @@ public class GeneratedWrapperBeanType extends Type {
       if (propertyValue != null) {
         Class propertyType = getter.getReturnType();
         QName propertyQName = new QName(wrapperQName.getNamespaceURI(), property.getName());
-        if (propertyType.isArray()) {
+        if (Map.class.isAssignableFrom(propertyType)) {
+          Class keyClass;
+          Class valueClass;
+          try {
+            Class[] paramTypes = getPutInMethod(property.getName()).getParameterTypes();
+            keyClass = paramTypes[0];
+            valueClass = paramTypes[1];
+          }
+          catch (NoSuchMethodException e) {
+            throw new XFireFault("Unable to map property " + property.getName() + " for the wrapper bean: unknown key/value types." + beanClass.getName(), e, XFireFault.RECEIVER);
+          }
+          Type keyType = getTypeMapping().getType(keyClass);
+          Type valueType = getTypeMapping().getType(valueClass);
+          Iterator it = ((Map) propertyValue).entrySet().iterator();
+          while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            MessageWriter entryWriter = writer.getElementWriter("entry");
+            MessageWriter keyWriter = entryWriter.getElementWriter("key");
+            Object key = entry.getKey();
+            keyType.writeObject(key, keyWriter, context);
+            keyWriter.close();
+            MessageWriter valueWriter = entryWriter.getElementWriter("value");
+            Object value = entry.getValue();
+            valueType.writeObject(value, valueWriter, context);
+            valueWriter.close();
+            entryWriter.close();
+          }
+        }
+        else if (propertyType.isArray()) {
           Class componentType = propertyType.getComponentType();
           Type type = getTypeMapping().getType(componentType);
           int length = Array.getLength(propertyValue);

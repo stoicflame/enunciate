@@ -49,6 +49,10 @@
     [/#if]
   [/#list]
 [#t]
+  [#list schema.implicitSchemaElements as implicitElement]
+    [@processImplicitElement implicitElement=implicitElement/]
+  [/#list]
+[#t]
 </${xs}:schema>
 [/#macro]
 
@@ -272,4 +276,50 @@
       </${xs}:element>
     </${xs}:sequence>
   </${xs}:complexType>
+[/#macro]
+
+[#macro processImplicitElement implicitElement]
+  [#if implicitElement.typeQName?exists]
+<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">
+    [#if implicitElement.elementDocs?exists]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      ${implicitElement.elementDocs?trim}
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+</${xs}:element>
+
+  [#else]
+    [#assign childElements=implicitElement.childElements]
+<${xs}:element name="${implicitElement.elementName}">
+    [#if implicitElement.elementDocs?exists]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      ${implicitElement.elementDocs?trim}
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+    [#if childElements?size > 0]
+  <${xs}:complexType>
+    <${xs}:sequence>
+      [#list childElements as childElement]
+      <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+        [#if childElement.elementDocs?exists]
+        <${xs}:annotation>
+          <${xs}:documentation>
+            ${childElement.elementDocs?trim}
+          </${xs}:documentation>
+        </${xs}:annotation>
+        [/#if]
+        [#if childElement.xmlType.anonymous]
+          [@processAnonymousType type=childElement.xmlType/]
+        [/#if]
+      </${xs}:element>
+      [/#list]
+    </${xs}:sequence>
+  </${xs}:complexType>
+    [/#if]
+</${xs}:element>
+  [/#if]
 [/#macro]

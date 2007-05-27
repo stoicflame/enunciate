@@ -17,10 +17,8 @@
 package org.codehaus.enunciate.apt;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -29,9 +27,7 @@ import org.codehaus.enunciate.contract.jaxb.Schema;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -196,6 +192,25 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       wsdlInfo.setId(prefix);
       namespacesToWsdls.put(namespace, wsdlInfo);
       wsdlInfo.setTargetNamespace(namespace);
+    }
+
+    for (WebMethod webMethod : ei.getWebMethods()) {
+      for (WebMessage webMessage : webMethod.getMessages()) {
+        for (WebMessagePart messagePart : webMessage.getParts()) {
+          if (messagePart.isImplicitSchemaElement()) {
+            ImplicitSchemaElement implicitElement = (ImplicitSchemaElement) messagePart;
+            String particleNamespace = messagePart.getParticleQName().getNamespaceURI();
+            SchemaInfo schemaInfo = namespacesToSchemas.get(particleNamespace);
+            if (schemaInfo == null) {
+              schemaInfo = new SchemaInfo();
+              schemaInfo.setId(addNamespace(particleNamespace));
+              schemaInfo.setNamespace(particleNamespace);
+              namespacesToSchemas.put(particleNamespace, schemaInfo);
+            }
+            schemaInfo.getImplicitSchemaElements().add(implicitElement);
+          }
+        }
+      }
     }
 
     wsdlInfo.getEndpointInterfaces().add(ei);

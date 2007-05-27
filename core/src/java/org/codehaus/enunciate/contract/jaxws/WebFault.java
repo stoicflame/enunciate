@@ -402,23 +402,16 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     public XmlType getXmlType() {
-
-      XmlType xmlType;
       try {
-        xmlType = XmlTypeFactory.findSpecifiedType(this);
+        XmlType xmlType = XmlTypeFactory.findSpecifiedType(this);
         if (xmlType == null) {
           xmlType = XmlTypeFactory.getXmlType(getType());
         }
+        return xmlType;
       }
       catch (XmlTypeException e) {
         throw new ValidationException(property.getPosition(), e.getMessage());
       }
-
-      if (xmlType.isAnonymous()) {
-        throw new ValidationException(property.getPosition(), "Implicit fault bean properties must not be anonymous types.");
-      }
-
-      return xmlType;
     }
 
     public QName getTypeQName() {

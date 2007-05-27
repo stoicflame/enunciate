@@ -28,6 +28,7 @@ import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.RelationshipServiceImpl;
+import org.codehaus.enunciate.samples.genealogy.client.exceptions.OutsideException;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.aegis.stax.ElementReader;
@@ -206,10 +207,10 @@ public class TestFullAPI extends TestCase {
 
     try {
       relationshipService.getRelationships("outthrow");
-      fail("Should have thrown the outside exception, even though it wasn't part of the API.");
+      fail("Should have thrown the outside exception.");
     }
-    catch (Exception e) {
-      assertEquals("outside message", e.getCause().getMessage());
+    catch (OutsideException e) {
+      assertEquals("outside message", e.getMessage());
     }
 
     relationshipService.touch();

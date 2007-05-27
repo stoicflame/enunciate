@@ -257,13 +257,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @throws ValidationException If the type is anonymous or otherwise problematic.
    */
   public QName getTypeQName() {
-    XmlType xmlType = getXmlType();
-
-    if (xmlType.isAnonymous()) {
-      throw new ValidationException(method.getPosition(), "Type of web result cannot be anonymous.");
-    }
-
-    return xmlType.getQname();
+    return getXmlType().getQname();
   }
 
   /**

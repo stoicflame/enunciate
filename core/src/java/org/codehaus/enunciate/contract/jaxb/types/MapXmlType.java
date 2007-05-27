@@ -48,10 +48,10 @@ public class MapXmlType implements XmlType {
   }
 
   /**
-   * @return The qname.
+   * @return null (anonymous)
    */
   public QName getQname() {
-    return new QName("", "");
+    return null;
   }
 
   /**
