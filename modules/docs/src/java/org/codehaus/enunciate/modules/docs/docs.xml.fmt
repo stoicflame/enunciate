@@ -52,7 +52,7 @@
           [/#list]
         [/#list]
         [#list element.choices as choice]
-              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if]/>
+              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if]/>
         [/#list]
             </element>
       [/#list]

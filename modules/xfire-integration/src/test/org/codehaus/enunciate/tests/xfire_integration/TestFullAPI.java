@@ -20,10 +20,8 @@ import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
-import org.codehaus.enunciate.samples.genealogy.client.data.Event;
-import org.codehaus.enunciate.samples.genealogy.client.data.Person;
-import org.codehaus.enunciate.samples.genealogy.client.data.PersonXFireType;
-import org.codehaus.enunciate.samples.genealogy.client.data.Relationship;
+import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
+import org.codehaus.enunciate.samples.genealogy.client.data.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
@@ -145,6 +143,10 @@ public class TestFullAPI extends TestCase {
       Person person = (Person) o;
       assertTrue(ids.remove(person.getId()));
       assertEquals(new Date(1L), ((Event) person.getEvents().iterator().next()).getDate());
+
+      Map notes = person.getNotes();
+      assertEquals("text1", ((Note) notes.get("contributor1")).getText());
+      assertEquals("text2", ((Note) notes.get("contributor2")).getText());
     }
 
     assertNull(personService.readPersons(null));
@@ -190,6 +192,24 @@ public class TestFullAPI extends TestCase {
 
     assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
 
+// todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
+//    Map map = personService.readFamily("myChildId");
+//    for (Object key : map.keySet()) {
+//      RelationshipType type = (RelationshipType) key;
+//      if (type == RelationshipType.parent) {
+//        Person parent = (Person) map.get(type);
+//        assertEquals("parentId", parent.getId());
+//      }
+//      else if (type == RelationshipType.spouse) {
+//        Person spouse = (Person) map.get(type);
+//        assertEquals("spouseId", spouse.getId());
+//      }
+//      else if (type == RelationshipType.child) {
+//        Person me = (Person) map.get(type);
+//        assertEquals("myChildId", me.getId());
+//      }
+//    }
+//
     RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap/RelationshipServiceService");
     List list = relationshipService.getRelationships("someid");
     for (int i = 0; i < list.size(); i++) {

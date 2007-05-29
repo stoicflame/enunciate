@@ -18,15 +18,15 @@ package org.codehaus.enunciate.samples.genealogy.services.impl;
 
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
+import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
+import org.codehaus.enunciate.samples.genealogy.cite.Note;
 import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 import org.joda.time.DateTime;
 
 import javax.jws.WebService;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -55,6 +55,15 @@ public class PersonServiceImpl implements PersonService {
       Event event = new Event();
       event.setDate(new DateTime(1L));
       person.setEvents(Arrays.asList(event));
+
+      HashMap<String, Note> notes = new HashMap<String, Note>();
+      Note note1 = new Note();
+      note1.setText("text1");
+      notes.put("contributor1", note1);
+      Note note2 = new Note();
+      note2.setText("text2");
+      notes.put("contributor2", note2);
+      person.setNotes(notes);
     }
 
     return persons;
@@ -64,5 +73,19 @@ public class PersonServiceImpl implements PersonService {
     if (personId == null) {
       throw new ServiceException("a person id must be supplied", "no person id.");
     }
+  }
+
+  public Map<RelationshipType, Person> readFamily(String personId) throws ServiceException {
+    HashMap<RelationshipType, Person> pedigree = new HashMap<RelationshipType, Person>();
+    Person person = new Person();
+    person.setId("parent");
+    pedigree.put(RelationshipType.parent, person);
+    Person spouse = new Person();
+    spouse.setId("spouse");
+    pedigree.put(RelationshipType.spouse, spouse);
+    Person child = new Person();
+    child.setId(personId);
+    pedigree.put(RelationshipType.child, child);
+    return pedigree;
   }
 }

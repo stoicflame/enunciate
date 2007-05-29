@@ -21,6 +21,7 @@ import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.MapType;
 import net.sf.jelly.apt.Context;
 
 import java.util.HashSet;
@@ -55,6 +56,16 @@ public class JAXWSValidator extends BaseValidator {
             unvisitedFaults.add(webFault);
           }
         }
+      }
+
+      for (WebParam webParam : webMethod.getWebParameters()) {
+        if (webParam.getType() instanceof MapType) {
+          result.addError(webParam.getPosition(), "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
+        }
+      }
+
+      if (webMethod.getWebResult().getType() instanceof MapType) {
+        result.addError(webMethod.getPosition(), "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
       }
     }
 

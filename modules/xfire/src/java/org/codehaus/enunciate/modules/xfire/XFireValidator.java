@@ -21,6 +21,7 @@ import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
+import org.codehaus.enunciate.util.MapType;
 
 import java.util.HashMap;
 

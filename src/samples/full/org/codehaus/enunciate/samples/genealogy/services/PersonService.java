@@ -17,11 +17,13 @@
 package org.codehaus.enunciate.samples.genealogy.services;
 
 import org.codehaus.enunciate.samples.genealogy.data.Person;
+import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * The person service is used to access persons in the database.
@@ -73,4 +75,13 @@ public interface PersonService {
     "person"
   )
   void deletePerson(@ProperNoun String personId) throws ServiceException;
+// todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
+//  /**
+//   * Reads the family of a given person.  Tests out maps.
+//   *
+//   * @param personId The id of the person for which to read the family.
+//   * @return The persons in the family by relationship type.
+//   * @throws ServiceException If some problem occurred.
+//   */
+//  Map<RelationshipType, Person> readFamily(String personId) throws ServiceException;
 }

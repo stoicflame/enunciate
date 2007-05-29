@@ -39,6 +39,13 @@ public class MapType extends Type {
   public MapType(Type keyType, Type valueType) {
     this.keyType = keyType;
     this.valueType = valueType;
+
+    if (keyType == null) {
+      throw new IllegalArgumentException("A map type must be supplied a key type.");
+    }
+    if (valueType == null) {
+      throw new IllegalArgumentException("A map type must be supplied a value type.");
+    }
   }
 
   public Object readObject(MessageReader reader, MessageContext context) throws XFireFault {
@@ -47,33 +54,28 @@ public class MapType extends Type {
       MessageReader entryReader = reader.getNextElementReader();
       Object key = keyType.readObject(entryReader.getNextElementReader(), context);
       Object value = valueType.readObject(entryReader.getNextElementReader(), context);
+      entryReader.readToEnd();
       map.put(key, value);
     }
+    reader.readToEnd();
     return map;
   }
 
   public void writeObject(Object value, MessageWriter writer, MessageContext context) throws XFireFault {
     Map map = (Map) value;
     Iterator it = map.entrySet().iterator();
-    MessageWriter entryWriter = writer.getElementWriter("entry");
     while (it.hasNext()) {
+      MessageWriter entryWriter = writer.getElementWriter("entry");
       Map.Entry entry = (Map.Entry) it.next();
+      
       MessageWriter keyWriter = entryWriter.getElementWriter("key");
-      Type keyType = this.keyType;
-      if (keyType == null) {
-        keyType = getTypeMapping().getType(entry.getKey().getClass());
-      }
-      keyType.writeObject(entry.getKey(), keyWriter, context);
+      this.keyType.writeObject(entry.getKey(), keyWriter, context);
       keyWriter.close();
 
       MessageWriter valueWriter = entryWriter.getElementWriter("value");
-      Type valueType = this.valueType;
-      if (valueType == null) {
-        valueType = getTypeMapping().getType(entry.getValue().getClass());
-      }
-      valueType.writeObject(entry.getValue(), valueWriter, context);
+      this.valueType.writeObject(entry.getValue(), valueWriter, context);
       valueWriter.close();
+      entryWriter.close();
     }
-    entryWriter.close();
   }
 }

@@ -34,6 +34,8 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.util.MapType;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -427,7 +429,12 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     public TypeMirror getType() {
-      return property.getPropertyType();
+      TypeMirror propertyType = property.getPropertyType();
+      MapType mapType = MapTypeUtil.findMapType(propertyType);
+      if (mapType != null) {
+        propertyType = mapType;
+      }
+      return propertyType;
     }
 
     public boolean isAdapted() {

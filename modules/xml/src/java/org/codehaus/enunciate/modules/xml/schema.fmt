@@ -242,7 +242,7 @@
     [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]
   [/#if]
 [/#macro]
-
+[#t]
 [#macro processAnonymousType type]
   [#if type.map?default(false)]
     [@processMapType mapType=type/]
@@ -250,7 +250,7 @@
     [@processTypeDef typeDef=type.typeDefinition/]
   [/#if]
 [/#macro]
-
+[#t]
 [#macro processMapType mapType]
   <${xs}:complexType>
     <${xs}:sequence>
@@ -277,7 +277,7 @@
     </${xs}:sequence>
   </${xs}:complexType>
 [/#macro]
-
+[#t]
 [#macro processImplicitElement implicitElement]
   [#if implicitElement.typeQName?exists]
 <${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">

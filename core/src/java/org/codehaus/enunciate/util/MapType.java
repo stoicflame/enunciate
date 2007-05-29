@@ -27,13 +27,27 @@ import net.sf.jelly.apt.decorations.type.DecoratedInterfaceType;
  */
 public class MapType extends DecoratedInterfaceType {
 
-  private TypeMirror keyType;
-  private TypeMirror valueType;
+  private final TypeMirror keyType;
+  private final TypeMirror valueType;
 
   public MapType(InterfaceType interfaceType, TypeMirror keyType, TypeMirror valueType) {
     super(interfaceType);
-    this.keyType = keyType;
-    this.valueType = valueType;
+
+    TypeMirror mapKeyType = MapTypeUtil.findMapType(keyType);
+    if (mapKeyType != null) {
+      this.keyType = mapKeyType;
+    }
+    else {
+      this.keyType = keyType;
+    }
+
+    TypeMirror mapValueType = MapTypeUtil.findMapType(valueType);
+    if (mapValueType != null) {
+      this.valueType = mapValueType;
+    }
+    else {
+      this.valueType = valueType;
+    }
   }
 
   /**
@@ -48,28 +62,10 @@ public class MapType extends DecoratedInterfaceType {
   /**
    * The key type associated with this map type.
    *
-   * @param keyType The key type associated with this map type.
-   */
-  public void setKeyType(TypeMirror keyType) {
-    this.keyType = keyType;
-  }
-
-  /**
-   * The key type associated with this map type.
-   *
    * @return The key type associated with this map type.
    */
   public TypeMirror getValueType() {
     return valueType;
-  }
-
-  /**
-   * The key type associated with this map type.
-   *
-   * @param valueType The key type associated with this map type.
-   */
-  public void setValueType(TypeMirror valueType) {
-    this.valueType = valueType;
   }
 
   /**

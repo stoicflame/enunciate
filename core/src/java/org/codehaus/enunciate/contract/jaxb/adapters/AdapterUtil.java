@@ -20,10 +20,12 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import static org.codehaus.enunciate.contract.jaxb.util.JAXBUtil.unwrapComponentType;
@@ -67,6 +69,13 @@ public class AdapterUtil {
       WebParam parameter = ((WebParam) declaration);
       return findAdapterType(parameter.getType(), parameter, parameter.getWebMethod().getDeclaringEndpointInterface().getPackage());
     }
+    else if (declaration instanceof TypeDeclaration) {
+      TypeDeclaration typeDeclaration = (TypeDeclaration) declaration;
+      AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+      typeDeclaration = ape.getTypeDeclaration(typeDeclaration.getQualifiedName()); //unwrap the decorated stuff as necessary...
+      DeclaredType declaredType = ape.getTypeUtils().getDeclaredType(typeDeclaration);
+      return findAdapterType(declaredType, null, null);
+    }
     else {
       throw new IllegalArgumentException("A " + declaration.getClass().getSimpleName() + " is not an adaptable declaration according to the JAXB spec.");
     }
@@ -82,13 +91,13 @@ public class AdapterUtil {
    */
   private static AdapterType findAdapterType(TypeMirror adaptedType, Declaration referer, PackageDeclaration pckg) {
     adaptedType = unwrapComponentType(adaptedType);
-    XmlJavaTypeAdapter typeAdapterInfo = referer.getAnnotation(XmlJavaTypeAdapter.class);
+    XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {
       if (typeAdapterInfo == null) {
         typeAdapterInfo = ((DeclaredType) adaptedType).getDeclaration().getAnnotation(XmlJavaTypeAdapter.class);
       }
 
-      if (typeAdapterInfo == null) {
+      if ((typeAdapterInfo == null) && (pckg != null)) {
         typeAdapterInfo = getAdaptersOfPackage(pckg).get(((DeclaredType) adaptedType).getDeclaration().getQualifiedName());
       }
 

@@ -23,8 +23,11 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
 import com.sun.mirror.type.VoidType;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.util.MapType;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
@@ -54,7 +57,12 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     this.annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
-    this.webResult = new WebResult(getReturnType(), this);
+    TypeMirror returnType = getReturnType();
+    MapType mapType = MapTypeUtil.findMapType(returnType);
+    if (mapType != null) {
+      returnType = mapType;
+    }
+    this.webResult = new WebResult(returnType, this);
 
     Collection<ParameterDeclaration> parameters = getParameters();
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());

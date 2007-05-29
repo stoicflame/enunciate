@@ -202,9 +202,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [#list element.choices as elementChoice]
     [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
           [#if elementChoice.accessorType.map?default(false)]
-      Type keyType = getTypeMapping().getType(${classnameFor(element.accessorType.keyType)}.class);
-      Type valueType = getTypeMapping().getType(${classnameFor(element.accessorType.valueType)}.class);
-      MapType type = new MapType(keyType, valueType);
+      Type type = [@mapTypeOrRegisteredType type=elementChoice.accessorType/];
       ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) type.readObject(elementReader, context);
           [#elseif elementChoice.xmlList]
             [#if elementChoice.accessorType.collection]
@@ -362,7 +360,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
           [#else]
             [#if element.accessorType.map?default(false)]
-      Type type = new MapType(getTypeMapping().getType(${classnameFor(element.accessorType.keyType)}.class), getTypeMapping().getType(${classnameFor(element.accessorType.valueType)}.class));
+      Type type = [@mapTypeOrRegisteredType type=element.accessorType/];
             [#else]
       Type type = getTypeMapping().getType(property.getClass());
             [/#if]
@@ -478,3 +476,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   [/#if]
 }
 [/@file]
+[#t]
+[#macro mapTypeOrRegisteredType type]
+  [#if type.map?default(false)]new MapType([@mapTypeOrRegisteredType type=type.keyType/], [@mapTypeOrRegisteredType type=type.valueType/])[#else]getTypeMapping().getType(${classnameFor(type)}.class)[/#if]
+[/#macro]

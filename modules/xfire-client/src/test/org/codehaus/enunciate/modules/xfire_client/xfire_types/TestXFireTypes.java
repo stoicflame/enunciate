@@ -18,6 +18,13 @@ package org.codehaus.enunciate.modules.xfire_client.xfire_types;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.examples.xfire_client.schema.*;
+import org.codehaus.enunciate.examples.xfire_client.schema.Triangle;
+import org.codehaus.enunciate.examples.xfire_client.schema.Color;
+import org.codehaus.enunciate.examples.xfire_client.schema.Circle;
+import org.codehaus.enunciate.examples.xfire_client.schema.LineStyle;
+import org.codehaus.enunciate.examples.xfire_client.schema.Line;
+import org.codehaus.enunciate.examples.xfire_client.schema.Rectangle;
+import org.codehaus.enunciate.examples.xfire_client.schema.Label;
 import org.codehaus.enunciate.examples.xfire_client.schema.animals.Cat;
 import org.codehaus.enunciate.examples.xfire_client.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.xfire_client.schema.draw.CanvasAttachment;
@@ -34,9 +41,7 @@ import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
 import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
 import org.joda.time.DateTime;
-import shapes.CircleXFireType;
-import shapes.RectangleXFireType;
-import shapes.TriangleXFireType;
+import shapes.*;
 import shapes.animals.CatXFireType;
 import shapes.draw.CanvasXFireType;
 import shapes.structures.HouseXFireType;
@@ -239,6 +244,14 @@ public class TestXFireTypes extends TestCase {
     window3.setHeight(2);
     window3.setLineStyle(LineStyle.solid);
     bus.setWindows(Arrays.asList(window1, window2, window3));
+    Map<Integer, Circle> riders = new HashMap<Integer, Circle>();
+    Circle rider3 = new Circle();
+    rider3.setRadius(3);
+    riders.put(3, rider3);
+    Circle rider4 = new Circle();
+    rider4.setRadius(4);
+    riders.put(4, rider4);
+    bus.setRiders(riders);
 
     JAXBContext context = JAXBContext.newInstance(Bus.class);
     Marshaller marshaller = context.createMarshaller();
@@ -287,6 +300,11 @@ public class TestXFireTypes extends TestCase {
     assertEquals(2, clientWindows[2].getHeight());
     assertEquals(shapes.Color.BLUE, clientWindows[2].getColor());
     assertEquals(shapes.LineStyle.solid, clientWindows[2].getLineStyle());
+    Map clientRiders = clientBus.getRiders();
+    shapes.Circle clientRider3 = (shapes.Circle) clientRiders.get(new Integer(3));
+    assertEquals(3, clientRider3.getRadius());
+    shapes.Circle clientRider4 = (shapes.Circle) clientRiders.get(new Integer(4));
+    assertEquals(4, clientRider4.getRadius());
 
     out = new ByteArrayOutputStream();
     QName rootElementName = busType.getRootElementName();
@@ -327,6 +345,9 @@ public class TestXFireTypes extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
+    riders = bus.getRiders();
+    assertEquals(3, riders.get(3).getRadius());
+    assertEquals(4, riders.get(4).getRadius());
 
     //todo: test an element wrapper around elementRefs
   }

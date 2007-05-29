@@ -214,6 +214,16 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
     return getXmlType().getQname();
   }
 
+  @Override
+  public TypeMirror getType() {
+    TypeMirror type = super.getType();
+    MapType mapType = MapTypeUtil.findMapType(type);
+    if (mapType != null) {
+      type = mapType;
+    }
+    return type;
+  }
+
   /**
    * Gets the xml type for this web parameter.
    *

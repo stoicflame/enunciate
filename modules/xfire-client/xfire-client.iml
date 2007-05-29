@@ -39,7 +39,10 @@
           <root url="file://$MODULE_DIR$/target/examples/schema/classes/xfire-client/jdk14" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/target/examples/schema/gen/xfire-client/common" />
+          <root url="file://$MODULE_DIR$/target/examples/schema/gen/xfire-client/jdk14" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

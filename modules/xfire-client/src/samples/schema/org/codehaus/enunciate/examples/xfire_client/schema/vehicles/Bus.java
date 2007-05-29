@@ -23,6 +23,7 @@ import org.codehaus.enunciate.examples.xfire_client.schema.Circle;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -34,6 +35,7 @@ public class Bus extends Figure {
   private Circle[] wheels;
   private Collection<Rectangle> windows;
   private Rectangle door;
+  private Map<Integer, Circle> riders;
 
   public Rectangle getFrame() {
     return frame;
@@ -68,5 +70,13 @@ public class Bus extends Figure {
 
   public void setDoor(Rectangle door) {
     this.door = door;
+  }
+
+  public Map<Integer, Circle> getRiders() {
+    return riders;
+  }
+
+  public void setRiders(Map<Integer, Circle> riders) {
+    this.riders = riders;
   }
 }

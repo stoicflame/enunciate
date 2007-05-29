@@ -141,7 +141,7 @@ public class Element extends Accessor {
 
     //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
     XmlType baseType = getBaseType();
-    if (baseType.isAnonymous()) {
+    if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
       TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
       if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
         RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);

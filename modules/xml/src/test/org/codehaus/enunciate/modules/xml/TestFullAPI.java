@@ -28,13 +28,15 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
-import org.xml.sax.*;
 import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
-import javax.wsdl.extensions.soap.*;
 import javax.wsdl.extensions.schema.Schema;
+import javax.wsdl.extensions.soap.*;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
@@ -43,7 +45,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 
 /**
@@ -239,6 +242,20 @@ public class TestFullAPI extends TestCase {
             SOAPFault soapFault = (SOAPFault) bindingFault.getExtensibilityElements().get(0);
             assertEquals("literal", soapFault.getUse());
           }
+//          else if ("readFamily".equals(operationName)) {
+//            SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
+//            assertEquals("", soapOp.getSoapActionURI());
+//            assertEquals("document", soapOp.getStyle());
+//
+//            SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
+//            assertEquals("literal", soapBody.getUse());
+//            soapBody = (SOAPBody) operation.getBindingOutput().getExtensibilityElements().get(0);
+//            assertEquals("literal", soapBody.getUse());
+//
+//            BindingFault bindingFault = (BindingFault) operation.getBindingFaults().values().iterator().next();
+//            SOAPFault soapFault = (SOAPFault) bindingFault.getExtensibilityElements().get(0);
+//            assertEquals("literal", soapFault.getUse());
+//          }
           else if ("deletePerson".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
@@ -368,6 +385,15 @@ public class TestFullAPI extends TestCase {
             assertNotNull(fault);
             assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "ServiceException")), fault.getMessage());
           }
+//          else if ("readFamily".equals(operationName)) {
+//            Input input = operation.getInput();
+//            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "PersonService.readFamily")), input.getMessage());
+//            Output output = operation.getOutput();
+//            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "PersonService.readFamilyResponse")), output.getMessage());
+//            Fault fault = operation.getFault("ServiceException");
+//            assertNotNull(fault);
+//            assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "ServiceException")), fault.getMessage());
+//          }
           else if ("deletePerson".equals(operationName)) {
             Input input = operation.getInput();
             assertEquals(definition.getMessage(new QName(FULL_NAMESPACE, "PersonService.deletePerson")), input.getMessage());
@@ -463,6 +489,12 @@ public class TestFullAPI extends TestCase {
         assertEquals(new QName(FULL_NAMESPACE, "readPersons"), part.getElementName());
         assertNull(part.getTypeName());
       }
+//      else if ("PersonService.readFamily".equals(messageName)) {
+//        assertEquals(1, message.getParts().size());
+//        Part part = message.getPart("readFamily");
+//        assertEquals(new QName(FULL_NAMESPACE, "readFamily"), part.getElementName());
+//        assertNull(part.getTypeName());
+//      }
       else if ("PersonService.deletePerson".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("deletePerson");
@@ -481,6 +513,12 @@ public class TestFullAPI extends TestCase {
         assertEquals(new QName(FULL_NAMESPACE, "readPersonsResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }
+//      else if ("PersonService.readFamilyResponse".equals(messageName)) {
+//        assertEquals(1, message.getParts().size());
+//        Part part = message.getPart("readFamilyResponse");
+//        assertEquals(new QName(FULL_NAMESPACE, "readFamilyResponse"), part.getElementName());
+//        assertNull(part.getTypeName());
+//      }
       else if ("PersonService.deletePersonResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("deletePersonResponse");
@@ -567,7 +605,7 @@ public class TestFullAPI extends TestCase {
     assertEmailType(emailType);
 
     Map<String, XSComplexType> complexTypes = citeSchema.getComplexTypes();
-    assertEquals(4, complexTypes.size());
+    assertEquals(5, complexTypes.size());
     XSComplexType contributorType = complexTypes.get("contributor");
     assertNotNull(contributorType);
     assertContributorType(contributorType);
@@ -580,6 +618,9 @@ public class TestFullAPI extends TestCase {
     XSComplexType sourceType = complexTypes.get("source");
     assertNotNull(sourceType);
     assertSourceType(sourceType);
+    XSComplexType noteType = complexTypes.get("note");
+    assertNotNull(noteType);
+    assertNoteType(noteType);
   }
 
   protected void assertEmailType(XSSimpleType emailType) {
@@ -858,6 +899,38 @@ public class TestFullAPI extends TestCase {
     }
   }
 
+  protected void assertNoteType(XSComplexType noteType) {
+    assertEquals("note", noteType.getName());
+    assertFalse(noteType.isAbstract());
+    assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "anyType", noteType.getBaseType());
+    assertEquals(RESTRICTION, noteType.getDerivationMethod());
+
+    Collection<? extends XSAttributeUse> attributes = noteType.getAttributeUses();
+    assertEquals(0, attributes.size());
+
+    XSContentType contentType = noteType.getContentType();
+    XSParticle particle = contentType.asParticle();
+    assertNotNull(particle);
+    assertTrue(particle.getTerm().isModelGroup());
+    XSModelGroup modelGroup = particle.getTerm().asModelGroup();
+    assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
+    XSParticle[] childElements = modelGroup.getChildren();
+    assertEquals(1, childElements.length);
+    for (XSParticle childElement : childElements) {
+      assertTrue(childElement.getTerm().isElementDecl());
+      XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
+      String childElementName = elementDecl.getName();
+      if ("text".equals(childElementName)) {
+        assertEquals(0, childElement.getMinOccurs());
+        assertEquals(1, childElement.getMaxOccurs());
+        assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
+      }
+      else {
+        fail("Unknown child element: " + childElementName);
+      }
+    }
+  }
+
   protected void assertInfosetType(XSComplexType infosetType) {
     assertEquals("infoSet", infosetType.getName());
     assertFalse(infosetType.isAbstract());
@@ -945,7 +1018,7 @@ public class TestFullAPI extends TestCase {
     XSModelGroup modelGroup = particle.getTerm().asModelGroup();
     assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
     XSParticle[] childElements = modelGroup.getChildren();
-    assertEquals(6, childElements.length);
+    assertEquals(7, childElements.length);
     for (XSParticle childElement : childElements) {
       assertTrue(childElement.getTerm().isElementDecl());
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
@@ -980,10 +1053,48 @@ public class TestFullAPI extends TestCase {
         assertEquals(1, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "base64Binary", elementDecl.getType());
       }
+      else if ("notes".equals(childElementName)) {
+        assertEquals(0, childElement.getMinOccurs());
+        assertEquals(1, childElement.getMaxOccurs());
+        assertNoteAnonymousType(elementDecl);
+      }
       else {
         fail("Unknown child element: " + childElementName);
       }
     }
+  }
+
+  protected void assertNoteAnonymousType(XSElementDecl elementDecl) {
+    XSType noteType = elementDecl.getType();
+    assertTrue(noteType.isComplexType());
+    XSParticle particle = noteType.asComplexType().getContentType().asParticle();
+    assertTrue(particle.getTerm().isModelGroup());
+    XSModelGroup modelGroup = particle.getTerm().asModelGroup();
+    assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
+    XSParticle[] childElements = modelGroup.getChildren();
+    assertEquals(1, childElements.length);
+    XSElementDecl entryElement = childElements[0].getTerm().asElementDecl();
+    assertEquals("entry", entryElement.getName());
+    assertEquals(0, childElements[0].getMinOccurs());
+    assertEquals(XSParticle.UNBOUNDED, childElements[0].getMaxOccurs());
+
+    particle = entryElement.getType().asComplexType().getContentType().asParticle();
+    assertTrue(particle.getTerm().isModelGroup());
+    modelGroup = particle.getTerm().asModelGroup();
+    assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
+    childElements = modelGroup.getChildren();
+    assertEquals(2, childElements.length);
+    XSElementDecl keyElement = childElements[0].getTerm().asElementDecl();
+    assertEquals("key", keyElement.getName());
+    assertEquals(1, childElements[0].getMinOccurs());
+    assertEquals(1, childElements[0].getMaxOccurs());
+    assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", keyElement.getType());
+
+    XSElementDecl valueElement = childElements[1].getTerm().asElementDecl();
+    assertEquals("value", valueElement.getName());
+    assertEquals(1, childElements[1].getMinOccurs());
+    assertEquals(1, childElements[1].getMaxOccurs());
+    assertQNameEquals(CITE_NAMESPACE, "note", valueElement.getType());
   }
 
   protected void assertRelationshipType(XSComplexType relationshipType) {

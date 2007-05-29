@@ -47,11 +47,11 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
    * Puts an entry into the ${childElement.elementName} map.
    */
   public void putIn${childElement.elementName?cap_first}(${classnameFor(childElement.type.keyType)} key, ${classnameFor(childElement.type.valueType)} value) {
-    if (this.${childElement.elementName} == null) {
-      this.${childElement.elementName} = (${classnameFor(childElement)}) new java.util.HashMap();
+    if (this.${varname} == null) {
+      this.${varname} = (${classnameFor(childElement)}) new java.util.HashMap();
     }
 
-    this.${childElement.elementName}.put(key, value);
+    this.${varname}.put(key, value);
   }
     [#elseif childElement.type.array]
   /**
