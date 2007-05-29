@@ -36,6 +36,10 @@ public class XFireRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/xfire/war/lib");
     digester.addSetNext("enunciate/modules/xfire/war/lib", "addWarLib");
 
+    digester.addObjectCreate("enunciate/modules/xfire/war/excludeJar", ExcludeJars.class);
+    digester.addSetProperties("enunciate/modules/xfire/war/excludeJar");
+    digester.addSetNext("enunciate/modules/xfire/war/excludeJar", "addExcludeJars");
+
     digester.addObjectCreate("enunciate/modules/xfire/springImport", SpringImport.class);
     digester.addSetProperties("enunciate/modules/xfire/springImport");
     digester.addSetNext("enunciate/modules/xfire/springImport", "addSpringImport");

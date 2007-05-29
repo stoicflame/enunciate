@@ -80,6 +80,9 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
         if (actualTypeArguments.hasNext()) {
           return super.convert(actualTypeArguments.next());
         }
+        else {
+          return Object.class.getName();
+        }
       }
     }
 

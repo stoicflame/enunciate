@@ -17,14 +17,13 @@
 package org.codehaus.enunciate.modules.xfire.config;
 
 /**
- * Configuration element used to specify a pattern of resources to copy.
+ * Configuration element used to specify a pattern of jars to exclude from the war.
  *
  * @author Ryan Heaton
  */
-public class CopyResources {
+public class ExcludeJars {
 
   private String pattern;
-  private String dir;
 
   /**
    * The matching pattern for the resources to copy.
@@ -44,21 +43,4 @@ public class CopyResources {
     this.pattern = pattern;
   }
 
-  /**
-   * The base directory for the resource copy.
-   *
-   * @return The base directory for the resource copy.
-   */
-  public String getDir() {
-    return dir;
-  }
-
-  /**
-   * The base directory for the resource copy.
-   *
-   * @param dir The base directory for the resource copy.
-   */
-  public void setDir(String dir) {
-    this.dir = dir;
-  }
 }

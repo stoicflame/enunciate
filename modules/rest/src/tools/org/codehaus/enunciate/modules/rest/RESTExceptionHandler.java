@@ -40,8 +40,13 @@ public class RESTExceptionHandler implements HandlerExceptionResolver {
       errorCode = errorInfo.errorCode();
     }
 
+    String message = exception.getMessage();
+    if ((message == null) && (errorCode == 404)) {
+      message = request.getRequestURI();
+    }
+
     try {
-      response.sendError(errorCode, exception.getMessage());
+      response.sendError(errorCode, message);
     }
     catch (IOException e) {
       //fall through...

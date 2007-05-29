@@ -28,10 +28,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.xfire.config.SpringImport;
-import org.codehaus.enunciate.modules.xfire.config.WarConfig;
-import org.codehaus.enunciate.modules.xfire.config.XFireRuleSet;
-import org.codehaus.enunciate.modules.xfire.config.CopyResources;
+import org.codehaus.enunciate.modules.xfire.config.*;
 import org.apache.commons.digester.RuleSet;
 import org.springframework.util.AntPathMatcher;
 import sun.misc.Service;
@@ -133,8 +130,16 @@ import java.util.List;
  *       directory.  No tranformation will be applied if none is specified.</li>
  * </ul>
  *
- * <p>The "war" element also supports an arbitrary number of "lib" child elements that specify the libraries that are to be included in the war.  The "lib"
- * element supports a single attribute, "path", that specifies the path to the library.</p>
+ * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of directories on the classpath
+ * will be copied to the "classes" directory).  There is a set of known jars that will not be copied to the "lib" directory.  These include the jars that
+ * ship by default with the JDK and the jars that are known to be build-time-only jars for Enunciate.  You can specify additional jars that are to be
+ * excluded with an arbitrary number of "excludeJar" child elements under the "war" element in the configuration file.  The "excludeJar" element supports a
+ * single attribute, "pattern", that is an ant-style pattern matcher against the absolute path of the file (or directory) on the classpath that should not
+ * be copied to the destination war.</p>
+ *
+ * <p>More strict control over what gets copied to the "lib" directory in the war can be obtained by using an arbitrary number of "lib" child elements under the
+ * "war" element of the configuration file. The "lib" element supports a single attribute, "path", that specifies the path to the library that is to be copied.
+ * <i>NOTE: if ANY "lib" child elements are specified, then only those files will be copied, and no others.</i></p>
  *
  * <h3>The "springImport" element</h3>
  *
@@ -192,6 +197,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
+  private final List<ExcludeJars> excludeJars = new ArrayList<ExcludeJars>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -330,9 +336,19 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       warLibs = Arrays.asList(classpath.split(File.pathSeparator));
     }
 
-    for (String pathEntry : warLibs) {
+    AntPathMatcher excludeJarsMatcher = new AntPathMatcher();
+    PATH_ENTRIES : for (String pathEntry : warLibs) {
       File file = new File(pathEntry);
       if (file.exists()) {
+        if (!excludeJars.isEmpty()) {
+          for (ExcludeJars excludeJar : excludeJars) {
+            String pattern = excludeJar.getPattern();
+            if ((excludeJarsMatcher.isPattern(pattern)) && (excludeJarsMatcher.match(pattern, file.getAbsolutePath()))) {
+              continue PATH_ENTRIES;
+            }
+          }
+        }
+
         if (file.isDirectory()) {
           info("Adding the contents of %s to WEB-INF/classes.", file);
           enunciate.copyDir(file, webinfClasses);
@@ -490,6 +506,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * Add a exclude jars.
+   *
+   * @param excludeJars The exclude jars to add.
+   */
+  public void addExcludeJars(ExcludeJars excludeJars) {
+    this.excludeJars.add(excludeJars);
+  }
+
+  /**
    * Whether to exclude a file from copying to the WEB-INF/lib directory.
    *
    * @param file The file to exclude.
@@ -542,6 +567,51 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     else if (loader.findResource("org/codehaus/enunciate/modules/xfire_client/EnunciatedClientSoapSerializerHandler.class") != null) {
       debug("%s will be excluded from the war because it appears to be the enunciated xfire client tools jar.", file);
       //exclude xfire-client-tools
+      return true;
+    }
+    else if (loader.findResource("javax/swing/SwingBeanInfoBase.class") != null) {
+      debug("%s will be excluded from the war because it appears to be dt.jar.", file);
+      //exclude dt.jar
+      return true;
+    }
+    else if (loader.findResource("HTMLConverter.class") != null) {
+      debug("%s will be excluded from the war because it appears to be htmlconverter.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("sun/tools/jconsole/JConsole.class") != null) {
+      debug("%s will be excluded from the war because it appears to be jconsole.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("sun/jvm/hotspot/debugger/Debugger.class") != null) {
+      debug("%s will be excluded from the war because it appears to be sa-jdi.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("sun/io/ByteToCharDoubleByte.class") != null) {
+      debug("%s will be excluded from the war because it appears to be charsets.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("com/sun/deploy/ClientContainer.class") != null) {
+      debug("%s will be excluded from the war because it appears to be deploy.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("com/sun/javaws/Globals.class") != null) {
+      debug("%s will be excluded from the war because it appears to be javaws.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("javax/crypto/SecretKey.class") != null) {
+      debug("%s will be excluded from the war because it appears to be jce.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("sun/net/www/protocol/https/HttpsClient.class") != null) {
+      debug("%s will be excluded from the war because it appears to be jsse.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("sun/plugin/JavaRunTime.class") != null) {
+      debug("%s will be excluded from the war because it appears to be plugin.jar.", file);
+      return true;
+    }
+    else if (loader.findResource("com/sun/corba/se/impl/activation/ServerMain.class") != null) {
+      debug("%s will be excluded from the war because it appears to be rt.jar.", file);
       return true;
     }
     else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
