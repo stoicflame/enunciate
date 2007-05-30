@@ -65,6 +65,7 @@ public class Enunciate {
 
   private boolean verbose = false;
   private boolean debug = false;
+  private boolean javacCheck = false;
 
   private File configFile;
   private File generateDir;
@@ -281,6 +282,10 @@ public class Enunciate {
   protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
     if ((this.sourceFiles == null) || (this.sourceFiles.length == 0)) {
       throw new EnunciateException("No source files have been specified!");
+    }
+
+    if (isJavacCheck()) {
+      invokeJavac(createTempDir(), this.sourceFiles);
     }
 
     if (this.config == null) {
@@ -748,6 +753,24 @@ public class Enunciate {
    */
   public void setDebug(boolean debug) {
     this.debug = debug;
+  }
+
+  /**
+   * Whether to do a javac check before invoking the Enunciate mechanism.
+   *
+   * @return Whether to do a javac check before invoking the Enunciate mechanism.
+   */
+  public boolean isJavacCheck() {
+    return javacCheck;
+  }
+
+  /**
+   * Whether to do a javac check before invoking the Enunciate mechanism.
+   *
+   * @param javacCheck Whether to do a javac check before invoking the Enunciate mechanism.
+   */
+  public void setJavacCheck(boolean javacCheck) {
+    this.javacCheck = javacCheck;
   }
 
   /**

@@ -503,7 +503,9 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../apt-jelly/src/java/core" />
+      </SOURCES>
     </library>
     <library name="rest">
       <CLASSES>

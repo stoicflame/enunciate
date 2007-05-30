@@ -1,0 +1,19 @@
+1. Update the documentation to reflect any changes.
+    1a. Make sure you've updated the insert sidebox on the index page.
+    1b. Make sure you've updated the downloads page to reflect where the new files will be.
+    1c. Make sure you've also updated the version in the executables.html page.
+2. Update the version in build.properties.
+3. Make sure the dist builds as expected (e.g. "ant dist")
+4. svn ci
+5. mount the maven repo (e.g. "mount /home/heatonra/mnt/enunciate/m2")
+6. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
+7. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
+8. Build the dist again using the live deploy build file. (e.g. "ant -Ddeploy.repo=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
+9. Build the src dist (e.g. "ant src-dist")
+10. Copy the dist and src dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
+    10a. Make sure the links you have on the downloads page are correct.
+11. Copy the web content to the web repo (e.g. "rsync -av target/docs/ /home/heatonra/mnt/enunciate/web")
+12. Make your announcements.
+    12a. Codehaus news
+    12b. Java.net
+13. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.

@@ -317,7 +317,7 @@ jars for the purposes of Maven integration.
     <!--create the zip dist.-->
     <zip destfile="target/${dist.name}.zip">
       <zipfileset dir="${docs.dir}" prefix="${dist.name}/docs" excludes="*.txt"/>
-      <zipfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="*.txt"/>
+      <zipfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <zipfileset dir="target/bin" prefix="${dist.name}/bin"/>
       <zipfileset dir="target/lib" prefix="${dist.name}/lib"/>
       <zipfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>
@@ -330,7 +330,7 @@ jars for the purposes of Maven integration.
     <!--create the tar.gz dist.-->
     <tar destfile="target/${dist.name}.tar.gz" compression="gzip">
       <tarfileset dir="${docs.dir}" prefix="${dist.name}/docs" excludes="*.txt"/>
-      <tarfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="*.txt"/>
+      <tarfileset dir="${enunciate.basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <tarfileset dir="target/bin" prefix="${dist.name}/bin" mode="766"/>
       <tarfileset dir="target/lib" prefix="${dist.name}/lib"/>
       <tarfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>

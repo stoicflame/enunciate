@@ -96,6 +96,7 @@ public class Main {
 
     verbose("v", "Print verbose output to the console."),
     debug("vv", "Print debug-level output to the console."),
+    javacCheck("Xc", "Do a javac check before invoking Enunciate."),
     configFile("f", "file", "The enunciate xml config file."),
     generateDir("g", "dir", "The output directory for the \"generate\" step."),
     compileDir("c", "dir", "The output directory for the \"compile\" step."),
@@ -191,6 +192,9 @@ public class Main {
           return true;
         case debug:
           enunciate.setDebug(true);
+          return true;
+        case javacCheck:
+          enunciate.setJavacCheck(true);
           return true;
         default:
           return false;
