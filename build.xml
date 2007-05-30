@@ -91,14 +91,18 @@
   <target name="copy-static-docs" depends="init, docs-resources-copy">
     <mkdir dir="${docs.dir}"/>
     <copy todir="${docs.dir}" overwrite="true">
+      <!--first copy all the html docs.-->
       <fileset dir="${static.docs.dir}">
         <include name="**/*.html"/>
+        <exclude name="**/*.include.html"/>
       </fileset>
       <filterset refid="nav.filterset"/>
     </copy>
     <copy todir="${docs.dir}" overwrite="true">
+      <!--now copy all the non-html docs except the freemarker templates.-->
       <fileset dir="${static.docs.dir}">
         <exclude name="**/*.html"/>
+        <exclude name="**/*.fmt"/>
       </fileset>
     </copy>
     <copy todir="${docs.dir}" overwrite="true" file="${enunciate.basedir}/license.txt"/>

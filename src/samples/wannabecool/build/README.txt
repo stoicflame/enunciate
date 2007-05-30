@@ -23,7 +23,7 @@ Run "ant" in this directory.
 
 Invocation via Maven
 ====================
-Run "mvn publish" in this directory.  "mvn install" will install the war
+Run "mvn package" in this directory.  "mvn install" will install the war
 in your local repo.
 
 
