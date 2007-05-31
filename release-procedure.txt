@@ -22,4 +22,5 @@
     13a. Codehaus news
     13b. Java.net
     13c. Webcohesion?
+    13d. Mailing lists.
 14. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
