@@ -197,7 +197,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
-  private final List<ExcludeJars> excludeJars = new ArrayList<ExcludeJars>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -340,10 +339,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     PATH_ENTRIES : for (String pathEntry : warLibs) {
       File file = new File(pathEntry);
       if (file.exists()) {
-        if (!excludeJars.isEmpty()) {
-          for (ExcludeJars excludeJar : excludeJars) {
+        if ((this.warConfig != null) && (!this.warConfig.getExcludeJars().isEmpty())) {
+          for (ExcludeJars excludeJar : this.warConfig.getExcludeJars()) {
             String pattern = excludeJar.getPattern();
-            if ((excludeJarsMatcher.isPattern(pattern)) && (excludeJarsMatcher.match(pattern, file.getAbsolutePath()))) {
+            if ((pattern != null) && (excludeJarsMatcher.isPattern(pattern)) && (excludeJarsMatcher.match(pattern, file.getAbsolutePath()))) {
               continue PATH_ENTRIES;
             }
           }
@@ -503,15 +502,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addCopyResources(CopyResources copyResources) {
     this.copyResources.add(copyResources);
-  }
-
-  /**
-   * Add a exclude jars.
-   *
-   * @param excludeJars The exclude jars to add.
-   */
-  public void addExcludeJars(ExcludeJars excludeJars) {
-    this.excludeJars.add(excludeJars);
   }
 
   /**

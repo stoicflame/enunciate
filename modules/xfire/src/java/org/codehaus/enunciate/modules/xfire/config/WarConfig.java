@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 public class WarConfig {
 
   private final List<String> warLibs = new ArrayList<String>();
+  private final List<ExcludeJars> excludeJars = new ArrayList<ExcludeJars>();
   private String name;
   private URL webXMLTransformURL;
 
@@ -58,6 +59,24 @@ public class WarConfig {
    */
   public List<String> getWarLibs() {
     return warLibs;
+  }
+
+  /**
+   * Add a exclude jars.
+   *
+   * @param excludeJars The exclude jars to add.
+   */
+  public void addExcludeJars(ExcludeJars excludeJars) {
+    this.excludeJars.add(excludeJars);
+  }
+
+  /**
+   * Get the list of exclude jars.
+   *
+   * @return The list of exclude jars.
+   */
+  public List<ExcludeJars> getExcludeJars() {
+    return excludeJars;
   }
 
   /**
