@@ -65,7 +65,7 @@ Template library for WSDL.
 [#macro processSchema wsdl]
   <${xs}:schema targetNamespace="${wsdl.targetNamespace}">
   [#list wsdl.importedSchemas as schema]
-    <${xs}:import namespace="${schema.namespace?default("")}"[#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+    <${xs}:import[#if schema.namespace?exists] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
   </${xs}:schema>
 [/#macro]
@@ -79,14 +79,14 @@ Template library for WSDL.
   <message name="${webMessage.messageName}">
       [#if webMessage.messageDocs?exists]
     <documentation>
-      ${webMessage.messageDocs?trim}
+      <![CDATA[${webMessage.messageDocs?trim}]]>
     </documentation>
       [/#if]
       [#list webMessage.parts as part]
     <part name="${part.partName}" ${part.particleType?lower_case}="${part.particleQName}">
         [#if part.partDocs?exists]
       <documentation>
-        ${part.partDocs?trim}
+        <![CDATA[${part.partDocs?trim}]]>
       </documentation>
         [/#if]
     </part>
@@ -103,7 +103,7 @@ Template library for WSDL.
   <portType name="${endpointInterface.portTypeName}">
       [#if endpointInterface.docValue?exists]
     <documentation>
-      ${endpointInterface.docValue}
+      <![CDATA[${endpointInterface.docValue}]]>
     </documentation>
       [/#if]
       [@forEachWebMethod endpointInterface=endpointInterface]
@@ -121,7 +121,7 @@ Template library for WSDL.
   <operation name="${webMethod.operationName}">
       [#if webMethod.docValue?exists]
     <documentation>
-      ${webMethod.docValue}
+      <![CDATA[${webMethod.docValue}]]>
     </documentation>
       [/#if]
       [@forEachWebMessage webMethod=webMethod var="input" includeHeaders=false includeFaults=false includeOutput=false includeInput=true]
@@ -165,7 +165,7 @@ Template library for WSDL.
 [#macro processSOAPBinding endpointInterface]
   <binding name="${endpointInterface.simpleName}SOAPBinding" type="${tns}:${endpointInterface.portTypeName}">
     <documentation>
-      SOAP Binding for ${endpointInterface.portTypeName}
+      <![CDATA[SOAP Binding for ${endpointInterface.portTypeName}]]>
     </documentation>
     <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
       [@forEachWebMethod endpointInterface=endpointInterface]
@@ -207,7 +207,7 @@ Template library for WSDL.
 [#macro processHTTPBinding endpointInterface]
   <binding name="${endpointInterface.simpleName}HTTPBinding" type="${tns}:${endpointInterface.portTypeName}">
     <documentation>
-      HTTP Binding for ${endpointInterface.portTypeName}
+      <![CDATA[HTTP Binding for ${endpointInterface.portTypeName}]]>
     </documentation>
     <${http}:binding verb="POST"/>
       [@forEachWebMethod endpointInterface=endpointInterface]

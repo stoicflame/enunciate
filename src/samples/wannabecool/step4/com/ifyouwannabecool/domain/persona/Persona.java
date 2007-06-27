@@ -17,10 +17,12 @@
 package com.ifyouwannabecool.domain.persona;
 
 import javax.activation.DataHandler;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class Persona {
 
   private String id;
