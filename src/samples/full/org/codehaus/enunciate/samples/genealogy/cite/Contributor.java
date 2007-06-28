@@ -23,7 +23,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import java.util.Collection;
 
 /**
- * A contributor of information from a source.
+ * A contributor of information from a source.<br>
+ * With some invalid XML in the documentation...
  * 
  * @author Ryan Heaton
  */

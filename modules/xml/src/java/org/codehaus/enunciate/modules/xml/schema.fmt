@@ -12,7 +12,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
-<${xs}:schema version="1.0" targetNamespace="${schema.namespace?default("")}"
+<${xs}:schema version="1.0"[#if schema.namespace?exists && schema.namespace?length > 0] targetNamespace="${schema.namespace?default("")}"[/#if]
   [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
   [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
@@ -30,7 +30,7 @@
   [/#if]
 [#t]
   [#list schema.importedSchemas as schema]
-  <${xs}:import[#if schema.namespace?exists] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+  <${xs}:import[#if schema.namespace?exists && schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
 
   [#list schema.globalElements as globalElement]
@@ -309,7 +309,7 @@
         <${xs}:annotation>
           <${xs}:documentation>
             <![CDATA[${childElement.elementDocs?trim}]]>
-          </${xs}: >
+          </${xs}:documentation>
         </${xs}:annotation>
         [/#if]
         [#if childElement.xmlType.anonymous]

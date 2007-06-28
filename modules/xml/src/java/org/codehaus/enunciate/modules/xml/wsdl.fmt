@@ -65,7 +65,13 @@ Template library for WSDL.
 [#macro processSchema wsdl]
   <${xs}:schema targetNamespace="${wsdl.targetNamespace}">
   [#list wsdl.importedSchemas as schema]
-    <${xs}:import[#if schema.namespace?exists] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+    [#if wsdl.targetNamespace = schema.namespace]
+      [#if schema.location?exists]
+    <${xs}:include schemaLocation="${schema.location}"/>
+      [/#if]
+    [#else]
+    <${xs}:import[#if schema.namespace?exists || schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+    [/#if]
   [/#list]
   </${xs}:schema>
 [/#macro]

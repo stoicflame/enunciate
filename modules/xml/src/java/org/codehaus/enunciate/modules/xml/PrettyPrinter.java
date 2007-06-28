@@ -123,7 +123,9 @@ public class PrettyPrinter extends DefaultHandler {
         bodyStack.addFirst(true);
       }
 
+      writer.print("<![CDATA[");
       writer.print(chars);
+      writer.print("]]>");
       writer.println();
     }
   }
