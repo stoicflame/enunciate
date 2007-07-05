@@ -29,10 +29,21 @@
   </${xs}:annotation>
   [/#if]
 [#t]
-  [#list schema.importedSchemas as schema]
-  <${xs}:import[#if schema.namespace?exists && schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
+  [#list schema.importedSchemas as importedSchema]
+  <${xs}:import[#if importedSchema.namespace?exists && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.location?exists] schemaLocation="${importedSchema.location}"[/#if]/>
   [/#list]
 
+  [@processSchemaBody schema=schema/]
+</${xs}:schema>
+[/#macro]
+
+[#--
+  The processSchemaBody macro outputs the body of a given schema
+
+  @param schema The schema to output (instance of org.codehaus.enunciate.config.SchemaInfo)
+--]
+[#macro processSchemaBody schema]
+[#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
   [#list schema.globalElements as globalElement]
     [#if globalElement.typeDefinition.anonymous]
   <${xs}:element name="${globalElement.name}">
@@ -53,7 +64,6 @@
     [@processImplicitElement implicitElement=implicitElement/]
   [/#list]
 [#t]
-</${xs}:schema>
 [/#macro]
 
 [#--

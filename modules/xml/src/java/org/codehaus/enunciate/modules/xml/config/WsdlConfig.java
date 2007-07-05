@@ -25,6 +25,7 @@ public class WsdlConfig {
 
   private String namespace;
   private String file;
+  private boolean inlineSchema = true;
 
   /**
    * The target namespace.
@@ -62,4 +63,21 @@ public class WsdlConfig {
     this.file = file;
   }
 
+  /**
+   * Whether to inline the schema for this WSDL.
+   *
+   * @return Whether to inline the schema for this WSDL.
+   */
+  public boolean isInlineSchema() {
+    return inlineSchema;
+  }
+
+  /**
+   * Whether to inline the schema for this WSDL.
+   *
+   * @param inlineSchema Whether to inline the schema for this WSDL.
+   */
+  public void setInlineSchema(boolean inlineSchema) {
+    this.inlineSchema = inlineSchema;
+  }
 }

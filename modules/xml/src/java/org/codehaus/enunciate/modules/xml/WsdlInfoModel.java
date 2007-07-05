@@ -20,7 +20,11 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.StringModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author Ryan Heaton
@@ -36,8 +40,27 @@ public class WsdlInfoModel extends StringModel {
 
   @Override
   public TemplateModel get(String key) throws TemplateModelException {
-    if (("filename".equals(key)) || ("location".equals(key))) {
+    if (("filename".equals(key)) || ("location".equals(key)) || ("inlineSchema".equals(key))) {
       return wrap(wsdlInfo.getProperty(key));
+    }
+    else if ("importedNamespaces".equals(key)) {
+      Set<String> importedNamespaces = wsdlInfo.getImportedNamespaces();
+      SchemaInfo associatedSchema = wsdlInfo.getAssociatedSchema();
+      Boolean inlineSchema = (Boolean) wsdlInfo.getProperty("inlineSchema");
+      if (associatedSchema != null && inlineSchema != null && inlineSchema) {
+        importedNamespaces.addAll(associatedSchema.getReferencedNamespaces());
+      }
+      return wrap(importedNamespaces);
+    }
+    else if ("importedSchemas".equals(key)) {
+      TreeSet<SchemaInfo> schemas = new TreeSet<SchemaInfo>(new SchemaInfoComparator());
+      schemas.addAll(wsdlInfo.getImportedSchemas());
+      SchemaInfo associatedSchema = wsdlInfo.getAssociatedSchema();
+      Boolean inlineSchema = (Boolean) wsdlInfo.getProperty("inlineSchema");
+      if (associatedSchema != null && inlineSchema != null && inlineSchema) {
+        schemas.addAll(associatedSchema.getImportedSchemas());
+      }
+      return wrap(schemas);
     }
 
     return super.get(key);

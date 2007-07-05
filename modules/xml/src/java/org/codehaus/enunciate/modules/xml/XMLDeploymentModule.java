@@ -100,6 +100,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean prettyPrint = true;
   private boolean validateSchemas = true;
+  private boolean inlineWSDLSchemas = true;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
@@ -164,6 +165,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       if (prefix != null) {
         String file = prefix + ".wsdl";
         wsdlInfo.setProperty("filename", file);
+        wsdlInfo.setProperty("inlineSchema", inlineWSDLSchemas);
       }
     }
 
@@ -189,6 +191,8 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         if (customConfig.getFile() != null) {
           wsdlInfo.setProperty("filename", customConfig.getFile());
         }
+
+        wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());
       }
     }
 
@@ -332,5 +336,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setValidateSchemas(boolean validateSchemas) {
     this.validateSchemas = validateSchemas;
+  }
+
+  /**
+   * Whether to inline the WSDL schemas.
+   *
+   * @param inlineWSDLSchemas Whether to inline the WSDL schemas.
+   */
+  public void setInlineWSDLSchemas(boolean inlineWSDLSchemas) {
+    this.inlineWSDLSchemas = inlineWSDLSchemas;
   }
 }

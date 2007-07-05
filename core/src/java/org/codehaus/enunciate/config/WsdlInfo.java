@@ -142,6 +142,7 @@ public class WsdlInfo {
    */
   public List<SchemaInfo> getImportedSchemas() {
     Set<String> importedNamespaces = getImportedNamespaces();
+    importedNamespaces.remove(getTargetNamespace()); //the "associated" schema is either inlined or included, but not imported.
     List<SchemaInfo> schemas = new ArrayList<SchemaInfo>();
     for (String ns : importedNamespaces) {
       SchemaInfo schema = lookupSchema(ns);
@@ -150,6 +151,15 @@ public class WsdlInfo {
       }
     }
     return schemas;
+  }
+
+  /**
+   * Get the schema associated with this WSDL.
+   *
+   * @return The schema associated with this WSDL.
+   */
+  public SchemaInfo getAssociatedSchema() {
+    return lookupSchema(getTargetNamespace());
   }
 
   /**

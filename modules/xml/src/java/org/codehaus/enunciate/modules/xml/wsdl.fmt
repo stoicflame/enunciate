@@ -8,11 +8,11 @@ Template library for WSDL.
 
   @param wsdl The WSDL to output.  (Instance of org.codehaus.enunciate.config.WsdlInfo)
 --]
+[#import "schema.fmt" as libSchema/]
+
 [#macro processWsdl wsdl]
 [#-- assign the prefix variable for the "this" namespace --]
 [#assign tns=prefix(wsdl.targetNamespace)]
-[#-- assign the prefix variable for the "wsdl" namespace --]
-[#assign wsdl=prefix("http://schemas.xmlsoap.org/wsdl/")]
 [#-- assign the prefix variable for the "http" namespace --]
 [#assign http=prefix("http://schemas.xmlsoap.org/wsdl/http/")]
 [#-- assign the prefix variable for the "mime" namespace --]
@@ -65,14 +65,15 @@ Template library for WSDL.
 [#macro processSchema wsdl]
   <${xs}:schema targetNamespace="${wsdl.targetNamespace}">
   [#list wsdl.importedSchemas as schema]
-    [#if wsdl.targetNamespace = schema.namespace]
-      [#if schema.location?exists]
-    <${xs}:include schemaLocation="${schema.location}"/>
-      [/#if]
-    [#else]
-    <${xs}:import[#if schema.namespace?exists || schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
-    [/#if]
+    <${xs}:import[#if schema.namespace?exists && schema.namespace?length > 0] namespace="${schema.namespace}"[/#if][#if schema.location?exists] schemaLocation="${schema.location}"[/#if]/>
   [/#list]
+  [#if wsdl.associatedSchema?exists]
+    [#if wsdl.inlineSchema]
+      [@libSchema.processSchemaBody schema=wsdl.associatedSchema/]
+    [#elseif wsdl.associatedSchema.location?exists]
+      <${xs}:include schemaLocation="${wsdl.associatedSchema.location}"/>
+    [/#if]
+  [/#if]
   </${xs}:schema>
 [/#macro]
 

@@ -120,12 +120,10 @@ public class TestFullAPI extends TestCase {
     assertEquals(new QName(W3C_XML_SCHEMA_NS_URI, "schema"), ee.getElementType());
     Schema schema = (Schema) ee;
     Map imports = schema.getImports();
-    assertEquals(2, imports.size());
+    assertEquals(3, imports.size());
     assertNotNull(imports.get(DATA_NAMESPACE));
     assertNotNull(imports.get(CITE_NAMESPACE));
-
-    List includes = schema.getIncludes();
-    assertEquals(1, includes.size());
+    assertNotNull(imports.get(null));
 
     File tempSchemaFile = new File(dataSchemaFile.getParentFile(), "temp.xsd");
     FileOutputStream tempSchemaStream = new FileOutputStream(tempSchemaFile);
