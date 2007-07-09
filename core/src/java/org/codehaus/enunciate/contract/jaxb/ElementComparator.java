@@ -21,6 +21,8 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import javax.xml.bind.annotation.XmlAccessOrder;
 import java.util.Comparator;
 
+import com.sun.mirror.util.SourcePosition;
+
 /**
  * A comparator for accessors.
  *
@@ -66,9 +68,18 @@ public class ElementComparator implements Comparator<Element> {
     }
 
     //If no order is specified, it's undefined. We'll put it in source order.
-    int comparison = accessor1.getPosition().line() - accessor2.getPosition().line();
-    if (comparison == 0) {
-      comparison = accessor1.getPosition().column() - accessor2.getPosition().column();
+    SourcePosition position1 = accessor1.getPosition();
+    SourcePosition position2 = accessor2.getPosition();
+    int comparison = 0;
+    if ((position1 != null) && (position2 != null)) {
+      comparison = position1.line() - position2.line();
+      if (comparison == 0) {
+        comparison = accessor1.getPosition().column() - accessor2.getPosition().column();
+      }
+    }
+    else {
+      //no order is specified, no source position is available, we'll have to take a random comparison.
+      comparison = accessor1.hashCode() - accessor2.hashCode();
     }
 
     return comparison;
