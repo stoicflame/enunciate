@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules;
 
 import freemarker.cache.URLTemplateLoader;
 import freemarker.template.*;
+import freemarker.core.Environment;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -25,6 +26,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -135,8 +137,24 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
   protected Configuration getConfiguration() {
     Configuration configuration = new Configuration();
     configuration.setTemplateLoader(getTemplateLoader());
+    configuration.setTemplateExceptionHandler(getTemplateExceptionHandler());
     configuration.setLocalizedLookup(false);
     return configuration;
+  }
+
+  /**
+   * Get the template exception handler.  The default one prints the stack trace to <code>System.err</code>
+   * rather than the writer because often Freemarker is printing to temp files.
+   *
+   * @return The template exception handler.
+   */
+  protected TemplateExceptionHandler getTemplateExceptionHandler() {
+    return new TemplateExceptionHandler() {
+      public void handleTemplateException(TemplateException templateException, Environment environment, Writer writer) throws TemplateException {
+        templateException.printStackTrace(System.err);
+        throw templateException;
+      }
+    };
   }
 
   /**
