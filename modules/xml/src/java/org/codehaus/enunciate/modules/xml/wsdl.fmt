@@ -197,8 +197,8 @@ Template library for WSDL.
         <${soap}:body use="literal"/>
       </output>
         [@forEachThrownWebFault webMethod=webMethod]
-      <fault>
-        <${soap}:fault name="${webFault.messageName}" use="literal"/>
+      <fault name="${webFault.partName}">
+        <${soap}:fault name="${webFault.partName}" use="literal"/>
       </fault>
         [/@forEachThrownWebFault]
     </operation>

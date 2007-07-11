@@ -30,6 +30,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -293,7 +294,8 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The max occurs.
    */
   public String getMaxOccurs() {
-    return isArray() || isCollection() ? "unbounded" : "1";
+    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate);
+    return typeMirror.isArray() || typeMirror.isCollection() ? "unbounded" : "1";
   }
 
   /**

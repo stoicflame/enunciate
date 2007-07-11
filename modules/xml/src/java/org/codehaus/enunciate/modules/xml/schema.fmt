@@ -217,7 +217,7 @@
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
       [#if attribute.ref?exists]
-      <${xs}:attribute required="${attribute.required}" ref="${attribute.ref}">
+      <${xs}:attribute[#if attribute.required] use="required"[/#if] ref="${attribute.ref}">
         [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
@@ -227,7 +227,7 @@
         [/#if]
       </${xs}:attribute>
       [#else]
-      <${xs}:attribute name="${attribute.name}" required="${attribute.required?string}" type="${attribute.baseType.qname}">
+      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}">
         [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>

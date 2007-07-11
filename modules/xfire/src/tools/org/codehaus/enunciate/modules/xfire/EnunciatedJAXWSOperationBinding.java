@@ -225,6 +225,11 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     RESPONSE_PROPERTY_LOOP :
     for (int i = 0; i < propOrder.length; i++) {
       String property = propOrder[i];
+      if ((property.length() > 1) && (!Character.isLowerCase(property.charAt(1)))) {
+        //if the second letter is uppercase, javabean spec says the first character of the property is also to be kept uppercase.
+        property = capitalize(property);
+      }
+
       for (PropertyDescriptor descriptor : pds) {
         if (descriptor.getName().equals(property)) {
           props[i] = descriptor;
