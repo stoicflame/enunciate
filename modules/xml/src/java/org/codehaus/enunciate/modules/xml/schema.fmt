@@ -290,7 +290,7 @@
 [#t]
 [#macro processImplicitElement implicitElement]
   [#if implicitElement.typeQName?exists]
-<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">
+<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}" form="unqualified">
     [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -302,7 +302,7 @@
 
   [#else]
     [#assign childElements=implicitElement.childElements]
-<${xs}:element name="${implicitElement.elementName}">
+<${xs}:element name="${implicitElement.elementName}" form="unqualified">
     [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>

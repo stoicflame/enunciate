@@ -23,12 +23,10 @@ import org.codehaus.xfire.aegis.MessageWriter;
 import org.codehaus.xfire.aegis.type.Type;
 import org.codehaus.xfire.fault.XFireFault;
 
-import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -198,7 +196,6 @@ public class GeneratedWrapperBeanType extends Type {
 
   // Inherited.
   public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
-    QName wrapperQName = ((GeneratedWrapperBean) object).getWrapperQName();
     for (int n = 0; n < beanProperties.length; n++) {
       PropertyDescriptor property = beanProperties[n];
       Method getter = property.getReadMethod();
@@ -212,7 +209,6 @@ public class GeneratedWrapperBeanType extends Type {
 
       if (propertyValue != null) {
         Class propertyType = getter.getReturnType();
-        QName propertyQName = new QName(wrapperQName.getNamespaceURI(), property.getName());
         if (Map.class.isAssignableFrom(propertyType)) {
           Class keyClass;
           Class valueClass;
@@ -246,7 +242,7 @@ public class GeneratedWrapperBeanType extends Type {
           Type type = getTypeMapping().getType(componentType);
           int length = Array.getLength(propertyValue);
           for (int i = 0; i < length; i++) {
-            MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
+            MessageWriter propertyWriter = writer.getElementWriter(property.getName());
             Object item = Array.get(propertyValue, i);
             type.writeObject(item, propertyWriter, context);
             propertyWriter.close();
@@ -265,13 +261,13 @@ public class GeneratedWrapperBeanType extends Type {
           Iterator it = ((Collection) propertyValue).iterator();
           while (it.hasNext()) {
             Object item = it.next();
-            MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
+            MessageWriter propertyWriter = writer.getElementWriter(property.getName());
             type.writeObject(item, propertyWriter, context);
             propertyWriter.close();
           }
         }
         else {
-          MessageWriter propertyWriter = writer.getElementWriter(propertyQName);
+          MessageWriter propertyWriter = writer.getElementWriter(property.getName());
           Type type = getTypeMapping().getType(propertyType);
           type.writeObject(propertyValue, propertyWriter, context);
           propertyWriter.close();

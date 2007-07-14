@@ -33,9 +33,6 @@ public class ${simpleBeanName} {
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.xml.bind.annotation.XmlElement (
-    namespace = "${message.elementNamespace}"
-  )
   public ${childElement.type} get${childElement.elementName?cap_first}() {
     [#if "return" = childElement.elementName]
     return this._retval;

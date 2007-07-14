@@ -538,6 +538,7 @@
       <JAVADOC />
       <SOURCES>
         <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-java5/src/main" />
+        <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-aegis/src/main" />
       </SOURCES>
     </library>
     <library name="xfire">

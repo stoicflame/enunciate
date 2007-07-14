@@ -29,9 +29,6 @@ public class ${simpleBeanName} {
   /**
    * ${part.partDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  @javax.xml.bind.annotation.XmlElement (
-    namespace = "${message.targetNamespace}"
-  )
   public ${part.type} get${part.partName?cap_first}() {
     return this.${part.partName};
   }

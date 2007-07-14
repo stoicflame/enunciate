@@ -16,34 +16,28 @@
 
 package org.codehaus.enunciate.modules.xfire;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.XFireRuntimeException;
-import org.codehaus.xfire.transport.Channel;
-import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
-import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
-import org.codehaus.xfire.aegis.AegisBindingProvider;
-import org.codehaus.xfire.aegis.stax.ElementReader;
-import org.codehaus.xfire.aegis.stax.ElementWriter;
-import org.codehaus.xfire.aegis.type.Type;
 import org.codehaus.xfire.exchange.InMessage;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.fault.XFireFault;
+import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
+import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
 import org.codehaus.xfire.service.OperationInfo;
-import org.codehaus.xfire.service.Service;
-import org.codehaus.xfire.service.MessagePartInfo;
 import org.codehaus.xfire.util.ClassLoaderUtils;
-import org.codehaus.xfire.util.stax.DOMStreamWriter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import javax.jws.soap.SOAPBinding;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.*;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
-import javax.jws.soap.SOAPBinding;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -52,7 +46,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.OutputStream;
 
 /**
  * The binding for a JAXWS operation.

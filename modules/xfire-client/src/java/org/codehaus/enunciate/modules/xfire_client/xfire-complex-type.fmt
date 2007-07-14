@@ -306,7 +306,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
     if (property != null) {
       Type type = getTypeMapping().getType(property.getClass());
-      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace?default("")}");
+      [#if attribute.namespace?exists]
+      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", "${attribute.namespace}");
+      [#else]
+      MessageWriter attributeWriter = writer.getAttributeWriter("${attribute.name}", null);
+      [/#if]
       [#if attribute.xmlIDREF]
       if (!(type instanceof EnunciatedType)) {
         throw new XFireFault(property.getClass().getName() + " does not have a known xml id, but its id is being referenced.", XFireFault.RECEIVER);
@@ -355,7 +359,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     property = [@wrapIfPrimitive type=element.accessorType]instance.get${element.simpleName?cap_first}()[/@wrapIfPrimitive];
           [/#if]
     if (property != null) {
-      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
+      [#if element.namespace?exists]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+      [#else]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
+      [/#if]
           [#if element.binaryData]
       EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
           [#else]
@@ -378,7 +386,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if element.required]
     else {
             [#if element.nillable]
-      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace?default("")}");
+              [#if element.namespace?exists]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+              [#else]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
+              [/#if]
       elementWriter.writeXsiNil();
       elementWriter.close();
             [#else]
@@ -390,7 +402,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     if (instance.get${element.simpleName?cap_first}() != null) {
           [#if element.wrapped]
       MessageWriter parent = writer;
-      writer = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+            [#if element.wrapperNamespace?exists]
+      writer = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
+            [#else]
+      writer = writer.getElementWriter("${element.wrapperName}", null);
+            [/#if]
           [/#if]
       java.util.Iterator itemIt = ElementsUtil.asCollection(instance.get${element.simpleName?cap_first}()).iterator();
       while (itemIt.hasNext()) {
@@ -401,22 +417,29 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           throw new XFireFault(item.getClass().getName() + " is not a known root element, but it's being serialized as an element ref.", XFireFault.RECEIVER);
         }
 
-        QName itemName = ((EnunciatedType) itemType).getRootElementName();
+        MessageWriter itemWriter = writer.getElementWriter(((EnunciatedType) itemType).getRootElementName());
           [#elseif element.choices?size > 1]
-        QName itemName;
+        MessageWriter itemWriter;
             [#list element.choices as choice]
         [#if choice_index > 0]else [/#if]if (item instanceof [#if choice.accessorType.primitive][@primitiveWrapper type=choice.accessorType/][#else]${classnameFor(choice)}[/#if]) {
-          itemName = new QName("${choice.namespace?default("")}", "${choice.name}");
+              [#if choice.namespace?exists]
+          itemWriter = writer.getElementWriter("${choice.name}", "${choice.namespace}");
+              [#else]
+          itemWriter = writer.getElementWriter("${choice.name}", null);
+              [/#if]
         }
             [/#list]
         else {
           throw new ClassCastException("Unexpected item type: " + item.getClass());
         }
           [#else]
-        QName itemName = new QName("${element.namespace?default("")}", "${element.name}");
+            [#if element.namespace?exists]
+        MessageWriter itemWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+            [#else]
+        MessageWriter itemWriter = writer.getElementWriter("${element.name}", null);
+            [/#if]
           [/#if]
 
-        MessageWriter itemWriter = writer.getElementWriter(itemName);
           [#if element.xmlIDREF]
         if (!(itemType instanceof EnunciatedType)) {
           throw new XFireFault(item.getClass().getName() + " does not have a known xml id, but its id is being referenced.", XFireFault.RECEIVER);
@@ -435,7 +458,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     }
           [#if element.wrapperNillable]
     else {
-      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${type.namespace?default("")}");
+            [#if element.wrapperNamespace?exists]
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
+            [#else]
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", null);
+            [/#if]
       subwriter.writeXsiNil();
       subwriter.close();
     }
