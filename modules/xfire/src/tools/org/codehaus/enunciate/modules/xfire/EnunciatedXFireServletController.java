@@ -21,6 +21,7 @@ import org.codehaus.xfire.XFire;
 import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.spring.remoting.XFireServletControllerAdapter;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

@@ -548,7 +548,9 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.8/spring-1.2.8.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../../tools/spring-framework-1.2.8/src" />
+      </SOURCES>
     </library>
   </component>
   <component name="uidesigner-configuration">

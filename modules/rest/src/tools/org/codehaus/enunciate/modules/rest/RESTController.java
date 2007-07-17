@@ -20,6 +20,9 @@ import org.codehaus.enunciate.rest.annotations.Noun;
 import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 import org.codehaus.enunciate.rest.annotations.Verb;
 import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
+import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -47,8 +50,9 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class RESTController extends AbstractController {
+public class RESTController extends AbstractController implements EnunciateServiceFactoryAware {
 
+  private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
   private Class[] endpointClasses;
   private Map<String, RESTResource> RESTResources = new HashMap<String, RESTResource>();
   private Pattern urlPattern;
@@ -170,7 +174,7 @@ public class RESTController extends AbstractController {
       }
     }
 
-    return endpointBean;
+    return this.enunciateServiceFactory.getInstance(endpointBean);
   }
 
   /**
@@ -425,5 +429,14 @@ public class RESTController extends AbstractController {
    */
   public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
     this.exceptionHandler = exceptionHandler;
+  }
+
+  /**
+   * Sets the enunciate service factory for this REST controller.
+   *
+   * @param enunciateServiceFactory The enunciate service factory.
+   */
+  public void setEnunciateServiceFactory(EnunciateServiceFactory enunciateServiceFactory) {
+    this.enunciateServiceFactory = enunciateServiceFactory;
   }
 }

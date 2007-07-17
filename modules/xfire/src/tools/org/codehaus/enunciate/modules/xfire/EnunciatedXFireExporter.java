@@ -22,6 +22,9 @@ import org.codehaus.xfire.handler.HandlerSupport;
 import org.codehaus.xfire.service.ServiceFactory;
 import org.codehaus.xfire.spring.remoting.XFireExporter;
 import org.codehaus.xfire.util.ClassLoaderUtils;
+import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
+import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -39,8 +42,9 @@ import java.util.Map;
  * 
  * @author Ryan Heaton
  */
-public class EnunciatedXFireExporter extends XFireExporter {
+public class EnunciatedXFireExporter extends XFireExporter implements EnunciateServiceFactoryAware {
 
+  private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
   private ApplicationContext ctx;
   private EnunciatedXFireServletController delegate;
   private View wsdlView = null;
@@ -113,7 +117,8 @@ public class EnunciatedXFireExporter extends XFireExporter {
       //try to instantiate the bean with the class...
       serviceBean = serviceClass.newInstance();
     }
-    return serviceBean;
+
+    return this.enunciateServiceFactory.getInstance(serviceBean);
   }
 
   //inherited.
@@ -163,5 +168,10 @@ public class EnunciatedXFireExporter extends XFireExporter {
     if (!(serviceFactory instanceof EnunciatedJAXWSServiceFactory)) {
       throw new IllegalArgumentException("Sorry, the service factory must be an instance of EnunciatedJAXWSServiceFactory...");
     }
+  }
+
+  // Inherited.
+  public void setEnunciateServiceFactory(EnunciateServiceFactory enunciateServiceFactory) {
+    this.enunciateServiceFactory = enunciateServiceFactory;
   }
 }

@@ -166,12 +166,36 @@ import java.util.List;
  * the bean context will be searched for each <i>REST interface</i> that the endpoint implements.  If there is a bean that implements that interface, it will
  * used instead of the default implementation.  If there is more than one, the bean that is named the same as the REST endpoint will be used.</p>
  *
+ * <p>There also exists a mechanism to add certain AOP interceptors to all service endpoint beans.  Such interceptors are referred to as "global service
+ * interceptors." This can be done by using the "globalServiceInterceptor" element (see below), or by simply creating an interceptor that implements
+ * org.codehaus.enunciate.modules.xfire.EnunciateServiceAdvice or org.codehaus.enunciate.modules.xfire.EnunciateServiceAdvisor and declaring it in your
+ * imported spring beans file.</p>
+ *
+ * <p>Each global interceptor has an order.  The default order is 0 (zero).  If a global service interceptor implements org.springframework.core.Ordered, the
+ * order will be respected. As a global service interceptors are added, it will be assigned a position in the chain according to it's order.  Interceptors
+ * of the same order will be ordered together according to their position in the config file, with priority to those declared by the "globalServiceInterceptor"
+ * element, then to instances of org.codehaus.enunciate.modules.xfire.EnunciateServiceAdvice, then to instances of
+ * org.codehaus.enunciate.modules.xfire.EnunciateServiceAdvisor.</p>
+ *
+ * <p>For more information on spring bean configuration and interceptor advice, see
+ * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
+ *
+ * <h3>The "globalServiceInterceptor" element</h3>
+ *
+ * <p>The "globalServiceInterceptor" element is used to specify a Spring interceptor (instance of org.aopalliance.aop.Advice or
+ * org.springframework.aop.Advisor) that is to be injected on all service endpoint beans.</p>
+ *
+ * <ul>
+ *   <li>The "interceptorClass" attribute class of the interceptor.</p>
+ *   <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
+ * </ul>
+ *
  * <p>For more information on spring bean configuration and interceptor advice, see
  * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
  *
  * <h3>The "copyResources" element</h3>
  *
- * <p>The "copyResources" element is used to specify a pattern or resources to copy to the compile directory.  It supports the following attributes:</p>
+ * <p>The "copyResources" element is used to specify a pattern of resources to copy to the compile directory.  It supports the following attributes:</p>
  *
  * <ul>
  *   <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
@@ -197,6 +221,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
+  private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -235,6 +260,14 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //generate the xfire-servlet.xml
     model.setFileOutputDirectory(getXMLGenerateDir());
     model.put("springImports", getSpringImportURIs());
+    if (!globalServiceInterceptors.isEmpty()) {
+      for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
+        if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
+          throw new IllegalStateException("A global interceptor must have either a bean name or a class set.");
+        }
+      }
+      model.put("globalServiceInterceptors", this.globalServiceInterceptors);
+    }
     processTemplate(getSpringServletTemplateURL(), model);
 
     //generate the rpc request/response beans.
@@ -502,6 +535,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addCopyResources(CopyResources copyResources) {
     this.copyResources.add(copyResources);
+  }
+
+  /**
+   * Add a global service interceptor to the spring configuration.
+   *
+   * @param interceptorConfig The interceptor configuration.
+   */
+  public void addGlobalServiceInterceptor(GlobalServiceInterceptor interceptorConfig) {
+    this.globalServiceInterceptors.add(interceptorConfig);
   }
 
   /**

@@ -13,7 +13,20 @@
     <property name="alwaysUseFullPath">
       <value>true</value>
     </property>
-    
+
+  [#if globalServiceInterceptors?exists]
+    <property name="globalServiceInterceptors">
+      <list>
+    [#list globalServiceInterceptors as interceptor]
+        [#if interceptor.interceptorClass?exists]
+        <bean class="${interceptor.interceptorClass}"/>
+        [#else]
+        <ref bean="${interceptor.beanName}"/>
+        [/#if]
+    [/#list]
+      </list>
+    </property>
+  [/#if]
     <property name="urlMap">
       <map>
   [@forEachWsdl]

@@ -58,11 +58,13 @@ src
           |    |----link
           |    |    |
           |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/Link.java.html">Link.java</a>
+          |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/package-info.java.html">package-info.java</a>
           |    |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/SocialGroup.java.html">SocialGroup.java</a>
           |    |
           |    |----persona
           |         |
           |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Name.java.html">Name.java</a>
+          |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/package-info.java.html">package-info.java</a>
           |         |----<a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona.java</a>
           |
           |----impl
@@ -87,6 +89,13 @@ src
             http://www.ifyouwannabecool.com/api/rest/persona/12345.</p>
           <p>For more information about the REST endpoint publication mechanism, see the <a href="modules/module_rest.html">REST module</a> in the <a href="user_guide.html">user
             guide</a></p>
+        </li>
+        <li>
+          <h3>Removed the use of the default namespace</h3>
+          <p>It is considered a "best practice" to namespace-qualify your domain API.  We did this with the use of the package-info.java files for the
+           <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/package-info.java.html">link API</a> and the
+           <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/package-info.java.html">persona API</a>.  Namespace-qualifying your domain API
+            ensures maximum compatability as the use of the default namespace is confusing to implementation vendors.</p>
         </li>
         <li>
           <h3>Add a splash package</h3>
