@@ -123,7 +123,7 @@
   <${xs}:complexContent>
     <${xs}:extension base="${typeDef.baseType.qname}">
       [/#if]
-      [#if !typeDef.contentType.empty]
+      [#if !typeDef.contentType.empty || typeDef.attributes?size > 0]
       <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
           [#if element.wrapped]

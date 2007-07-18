@@ -281,6 +281,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [/#if]
   }
   [/#if]
+  [#if baseobject]
 
   /**
    * Writes the value for an instance of ${type.simpleName} to a writer.
@@ -289,13 +290,26 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
    * @param writer The writer.
    * @param context The context.
    */
-  public void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
-    [#if !baseobject]super.writeObject(object, writer, context);[/#if]
+  public final void writeObject(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
+    writeAttributes(object, writer, context);
+    writeElementsOrValue(object, writer, context);
+  }
+  [/#if]
+
+  /**
+   * Writes the attributes for an instance of ${type.simpleName} to a writer.
+   *
+   * @param object The ${type.simpleName}.
+   * @param writer The writer.
+   * @param context The context.
+   */
+  protected void writeAttributes(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
+    [#if !baseobject]super.writeAttributes(object, writer, context);[/#if]
+    [#if type.attributes?size > 0]
     ${classname} instance = (${classname}) object;
 
     Object property;  [#--todo: here set the default value, if specified?--]
     ListWriter listWriter;
-    [#if type.attributes?size > 0]
     // write the attributes.
       [#list type.attributes as attribute]
         [#if attribute.xmlList]
@@ -328,147 +342,167 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
 
       [/#list]
+    [#else]
+    //no attributes to write...
     [/#if]
+  }
 
-    [#if type.value?exists]
+  /**
+   * Writes the either the value or the child elements for an instance of ${type.simpleName} to a writer.
+   *
+   * @param object The ${type.simpleName}.
+   * @param writer The writer.
+   * @param context The context.
+   */
+  protected void writeElementsOrValue(Object object, MessageWriter writer, MessageContext context) throws XFireFault {
+    [#if !baseobject]super.writeElementsOrValue(object, writer, context);[/#if]
+    [#if type.value?exists || type.elements?size > 0]
+    ${classname} instance = (${classname}) object;
+
+    Object property;  [#--todo: here set the default value, if specified?--]
+    ListWriter listWriter;
+      [#if type.value?exists]
     //write the value.
-      [#if type.value.accessorType.primitive]
+        [#if type.value.accessorType.primitive]
     writer.writeValue(String.valueOf(instance.get${type.value.simpleName?cap_first}()));
-      [#else]
+        [#else]
     ${classnameFor(type.value)} value = instance.get${type.value.simpleName?cap_first}();
     if (value != null) {
-        [#if type.value.xmlList]
+          [#if type.value.xmlList]
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
-        [#elseif type.value.binaryData]
+          [#elseif type.value.binaryData]
       EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
-        [#else]
+          [#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
       type.writeObject(value, writer, context);
-        [/#if]
+          [/#if]
     }
-      [/#if]
-    [#elseif type.elements?size > 0]
+        [/#if]
+      [#elseif type.elements?size > 0]
     //write the elements.
-      [#list type.elements as element]
-        [#if element.xmlList || !element.collectionType]
-          [#if element.xmlList]
+        [#list type.elements as element]
+          [#if element.xmlList || !element.collectionType]
+            [#if element.xmlList]
     listWriter = new ListWriter(instance.get${element.simpleName?cap_first}(), getTypeMapping(), context);
     property = listWriter.getValue();
-          [#else]
-    property = [@wrapIfPrimitive type=element.accessorType]instance.get${element.simpleName?cap_first}()[/@wrapIfPrimitive];
-          [/#if]
-    if (property != null) {
-      [#if element.namespace?exists]
-      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
-      [#else]
-      MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
-      [/#if]
-          [#if element.binaryData]
-      EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
-          [#else]
-            [#if element.accessorType.map?default(false)]
-      Type type = [@mapTypeOrRegisteredType type=element.accessorType/];
             [#else]
-      Type type = getTypeMapping().getType(property.getClass());
+    property = [@wrapIfPrimitive type=element.accessorType]instance.get${element.simpleName?cap_first}()[/@wrapIfPrimitive];
             [/#if]
-            [#if element.xmlIDREF]
+    if (property != null) {
+        [#if element.namespace?exists]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+        [#else]
+      MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
+        [/#if]
+            [#if element.binaryData]
+      EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+            [#else]
+              [#if element.accessorType.map?default(false)]
+      Type type = [@mapTypeOrRegisteredType type=element.accessorType/];
+              [#else]
+      Type type = getTypeMapping().getType(property.getClass());
+              [/#if]
+              [#if element.xmlIDREF]
       if (!(type instanceof EnunciatedType)) {
         throw new XFireFault(property.getClass().getName() + " does not have a known xml id, but its id is being referenced.", XFireFault.RECEIVER);
       }
       ((EnunciatedType) type).writeXmlID(property, elementWriter);
-            [#else]
+              [#else]
       type.writeObject(property, elementWriter, context);
+              [/#if]
             [/#if]
-          [/#if]
       elementWriter.close();
     }
-          [#if element.required]
+            [#if element.required]
     else {
-            [#if element.nillable]
-              [#if element.namespace?exists]
+              [#if element.nillable]
+                [#if element.namespace?exists]
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
-              [#else]
+                [#else]
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
-              [/#if]
+                [/#if]
       elementWriter.writeXsiNil();
       elementWriter.close();
-            [#else]
+              [#else]
       throw new NullPointerException("Required property '${element.simpleName}' on ${classname} was not set.");
-            [/#if]
+              [/#if]
     }
-          [/#if]
-        [#else]
-    if (instance.get${element.simpleName?cap_first}() != null) {
-          [#if element.wrapped]
-      MessageWriter parent = writer;
-            [#if element.wrapperNamespace?exists]
-      writer = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
-            [#else]
-      writer = writer.getElementWriter("${element.wrapperName}", null);
             [/#if]
-          [/#if]
+          [#else]
+    if (instance.get${element.simpleName?cap_first}() != null) {
+            [#if element.wrapped]
+      MessageWriter parent = writer;
+              [#if element.wrapperNamespace?exists]
+      writer = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
+              [#else]
+      writer = writer.getElementWriter("${element.wrapperName}", null);
+              [/#if]
+            [/#if]
       java.util.Iterator itemIt = ElementsUtil.asCollection(instance.get${element.simpleName?cap_first}()).iterator();
       while (itemIt.hasNext()) {
         Object item = itemIt.next();
         Type itemType = getTypeMapping().getType(item.getClass());
-          [#if element.elementRefs?default(false)]
+            [#if element.elementRefs?default(false)]
         if (!(itemType instanceof EnunciatedType)) {
           throw new XFireFault(item.getClass().getName() + " is not a known root element, but it's being serialized as an element ref.", XFireFault.RECEIVER);
         }
 
         MessageWriter itemWriter = writer.getElementWriter(((EnunciatedType) itemType).getRootElementName());
-          [#elseif element.choices?size > 1]
+            [#elseif element.choices?size > 1]
         MessageWriter itemWriter;
-            [#list element.choices as choice]
-        [#if choice_index > 0]else [/#if]if (item instanceof [#if choice.accessorType.primitive][@primitiveWrapper type=choice.accessorType/][#else]${classnameFor(choice)}[/#if]) {
-              [#if choice.namespace?exists]
+              [#list element.choices as choice]
+          [#if choice_index > 0]else [/#if]if (item instanceof [#if choice.accessorType.primitive][@primitiveWrapper type=choice.accessorType/][#else]${classnameFor(choice)}[/#if]) {
+                [#if choice.namespace?exists]
           itemWriter = writer.getElementWriter("${choice.name}", "${choice.namespace}");
-              [#else]
+                [#else]
           itemWriter = writer.getElementWriter("${choice.name}", null);
-              [/#if]
+                [/#if]
         }
-            [/#list]
+              [/#list]
         else {
           throw new ClassCastException("Unexpected item type: " + item.getClass());
         }
-          [#else]
-            [#if element.namespace?exists]
-        MessageWriter itemWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
             [#else]
+              [#if element.namespace?exists]
+        MessageWriter itemWriter = writer.getElementWriter("${element.name}", "${element.namespace}");
+              [#else]
         MessageWriter itemWriter = writer.getElementWriter("${element.name}", null);
+              [/#if]
             [/#if]
-          [/#if]
 
-          [#if element.xmlIDREF]
+            [#if element.xmlIDREF]
         if (!(itemType instanceof EnunciatedType)) {
           throw new XFireFault(item.getClass().getName() + " does not have a known xml id, but its id is being referenced.", XFireFault.RECEIVER);
         }
 
         ((EnunciatedType) itemType).writeXmlID(item, itemWriter);
-          [#else]
+            [#else]
         itemType.writeObject(item, itemWriter, context);
-          [/#if]
+            [/#if]
         itemWriter.close();
       }
-          [#if element.wrapped]
+            [#if element.wrapped]
       writer.close();
       writer = parent;
-          [/#if]
-    }
-          [#if element.wrapperNillable]
-    else {
-            [#if element.wrapperNamespace?exists]
-      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
-            [#else]
-      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", null);
             [/#if]
+    }
+            [#if element.wrapperNillable]
+    else {
+              [#if element.wrapperNamespace?exists]
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", "${element.wrapperNamespace}");
+              [#else]
+      MessageWriter subwriter = writer.getElementWriter("${element.wrapperName}", null);
+              [/#if]
       subwriter.writeXsiNil();
       subwriter.close();
     }
+            [/#if]
           [/#if]
-        [/#if]
-      [/#list]
+        [/#list]
+      [/#if]
+    [#else]
+    //no elements or type to write...
     [/#if]
   }
 

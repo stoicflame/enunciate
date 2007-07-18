@@ -1196,7 +1196,13 @@ public class TestFullAPI extends TestCase {
     }
 
     XSContentType contentType = genderType.getExplicitContent();
-    assertNotNull(contentType.asEmpty());
+    XSParticle particle = contentType.asParticle();
+    assertNotNull(particle);
+    assertTrue(particle.getTerm().isModelGroup());
+    XSModelGroup modelGroup = particle.getTerm().asModelGroup();
+    assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
+    XSParticle[] childElements = modelGroup.getChildren();
+    assertEquals(0, childElements.length);
   }
 
   protected void assertFactType(XSComplexType factType) {
