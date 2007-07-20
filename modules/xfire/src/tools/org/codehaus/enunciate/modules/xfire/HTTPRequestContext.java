@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HTTPRequestContext {
 
-  private static final ThreadLocal<HTTPRequestContext> TL_CONTEXT = new ThreadLocal<HTTPRequestContext>();
+  protected static final ThreadLocal<HTTPRequestContext> TL_CONTEXT = new ThreadLocal<HTTPRequestContext>();
 
   private HttpServletRequest request;
   private HttpServletResponse response;

@@ -51,12 +51,14 @@ public class EnunciateHandlerMapping extends SimpleUrlHandlerMapping {
   protected void loadInterceptors() {
     ApplicationContext ctx = getApplicationContext();
     Map interceptorBeans = ctx.getBeansOfType(EnunciateHandlerInterceptor.class);
+    ArrayList<EnunciateHandlerInterceptor> interceptors = new ArrayList<EnunciateHandlerInterceptor>();
     if (interceptorBeans.size() > 0) {
-      ArrayList<EnunciateHandlerInterceptor> interceptors = new ArrayList<EnunciateHandlerInterceptor>();
       interceptors.addAll(interceptorBeans.values());
       Collections.sort(interceptors, EnunciateHandlerInterceptorComparator.INSTANCE);
-      setInterceptors(interceptors.toArray(new EnunciateHandlerInterceptor[interceptors.size()]));
     }
+    //always add a http context interceptor first.
+    interceptors.add(0, new HTTPRequestContextInterceptor());
+    setInterceptors(interceptors.toArray(new EnunciateHandlerInterceptor[interceptors.size()]));
   }
 
 }
