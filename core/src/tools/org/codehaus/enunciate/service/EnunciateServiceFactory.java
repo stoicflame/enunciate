@@ -27,16 +27,18 @@ public interface EnunciateServiceFactory {
    * Gets an instance of the specified service.
    *
    * @param implClass The base implementation class.
+   * @param interfaces The interfaces to be implemented.
    * @return The instance.
    */
-  Object getInstance(Class implClass) throws IllegalAccessException, InstantiationException;
+  Object getInstance(Class implClass, Class... interfaces) throws IllegalAccessException, InstantiationException;
   
   /**
    * Gets an instance of the specified service.
    *
    * @param impl The base implementation object.
+   * @param interfaces The interfaces to be implemented.
    * @return The instance.
    */
-  Object getInstance(Object impl);
+  Object getInstance(Object impl, Class... interfaces);
 
 }

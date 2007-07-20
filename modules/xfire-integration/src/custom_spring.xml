@@ -1,6 +1,8 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
+  <bean id="globalServiceAdvice" class="org.codehaus.enunciate.test.integration.GlobalServiceAdvice"/>
+
   <bean id="sourceAdvice" class="org.codehaus.enunciate.test.integration.SourceServiceAdvice"/>
 
   <bean class="org.springframework.aop.framework.ProxyFactoryBean">

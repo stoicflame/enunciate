@@ -3,6 +3,22 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 
+  <bean id="enunciate-interceptor-processor" class="org.codehaus.enunciate.modules.xfire.EnunciateGlobalInterceptorProcessor">
+    [#if globalServiceInterceptors?exists]
+      <property name="globalServiceInterceptors">
+        <list>
+      [#list globalServiceInterceptors as interceptor]
+          [#if interceptor.interceptorClass?exists]
+          <bean class="${interceptor.interceptorClass}"/>
+          [#else]
+          <ref bean="${interceptor.beanName}"/>
+          [/#if]
+      [/#list]
+        </list>
+      </property>
+    [/#if]
+  </bean>  
+
   [#if springImports?exists]
     [#list springImports as springImport]
   <import resource="${springImport}"/>
@@ -14,19 +30,6 @@
       <value>true</value>
     </property>
 
-  [#if globalServiceInterceptors?exists]
-    <property name="globalServiceInterceptors">
-      <list>
-    [#list globalServiceInterceptors as interceptor]
-        [#if interceptor.interceptorClass?exists]
-        <bean class="${interceptor.interceptorClass}"/>
-        [#else]
-        <ref bean="${interceptor.beanName}"/>
-        [/#if]
-    [/#list]
-      </list>
-    </property>
-  [/#if]
     <property name="urlMap">
       <map>
   [@forEachWsdl]
@@ -37,7 +40,7 @@
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
         [#--todo: what about eis with the same name, different namespace?--]
         <entry key="/soap/${endpointInterface.serviceName}">
-          <bean parent="endpoint">
+          <bean parent="soap-endpoint">
             <property name="serviceClass">
               <value>${impl.qualifiedName}</value>
             </property>
@@ -61,7 +64,7 @@
   [/@forEachWsdl]
 
         <entry key="/rest/**">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTController">
+          <bean parent="rest-endpoint">
             <property name="endpointClasses">
               <list>
                 <!-- List of the REST endpoint bean classes -->
@@ -76,7 +79,7 @@
         </entry>
 
         <entry key="/json/**">
-          <bean class="org.codehaus.enunciate.modules.rest.JSONController">
+          <bean parent="json-endpoint">
             <property name="endpointClasses">
               <list>
                 <!-- List of the REST endpoint bean classes -->
@@ -108,16 +111,33 @@
   </bean>
 
   <!-- define the parent for all soap service endpoints -->
-  <bean id="endpoint" abstract="true" class="org.codehaus.enunciate.modules.xfire.EnunciatedXFireExporter">
+  <bean id="soap-endpoint" abstract="true" class="org.codehaus.enunciate.modules.xfire.EnunciatedXFireExporter">
     <property name="serviceFactory">
       <ref bean="enunciatedServiceFactory"/>
     </property>
     <property name="xfire">
       <ref bean="xfire"/>
     </property>
+    <property name="enunciateServiceFactory">
+      <ref bean="enunciate-interceptor-processor"/>
+    </property>
   </bean>
 
   <bean id="enunciatedServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
+
+  <!-- define the parent for all xml-rest service endpoints -->
+  <bean id="rest-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTController">
+    <property name="enunciateServiceFactory">
+      <ref bean="enunciate-interceptor-processor"/>
+    </property>
+  </bean>
+
+  <!-- define the parent for all json service endpoints -->
+  <bean id="json-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.JSONController">
+    <property name="enunciateServiceFactory">
+      <ref bean="enunciate-interceptor-processor"/>
+    </property>
+  </bean>
 
 </beans>
 [/@file]

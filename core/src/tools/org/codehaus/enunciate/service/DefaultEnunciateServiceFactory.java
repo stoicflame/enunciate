@@ -23,11 +23,11 @@ package org.codehaus.enunciate.service;
  */
 public class DefaultEnunciateServiceFactory implements EnunciateServiceFactory {
 
-  public Object getInstance(Class implClass) throws IllegalAccessException, InstantiationException {
-    return getInstance(implClass.newInstance());
+  public Object getInstance(Class implClass, Class... interfaces) throws IllegalAccessException, InstantiationException {
+    return getInstance(implClass.newInstance(), interfaces);
   }
 
-  public Object getInstance(Object impl) {
+  public Object getInstance(Object impl, Class... interfaces) {
     return impl;
   }
 

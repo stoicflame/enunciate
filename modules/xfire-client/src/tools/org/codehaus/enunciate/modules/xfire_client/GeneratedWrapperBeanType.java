@@ -27,10 +27,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An XFire type for a generated wrapper bean.
@@ -42,6 +39,11 @@ public class GeneratedWrapperBeanType extends Type {
 
   private final Class beanClass;
   private final PropertyDescriptor[] beanProperties;
+
+  public GeneratedWrapperBeanType(Class beanClass, PropertyDescriptor[] beanProperties) {
+    this.beanClass = beanClass;
+    this.beanProperties = beanProperties;
+  }
 
   public GeneratedWrapperBeanType(Class beanType) {
     this.beanClass = beanType;
@@ -63,7 +65,6 @@ public class GeneratedWrapperBeanType extends Type {
     catch (Exception e) {
       throw new XFireRuntimeException("Error getting info for wrapper bean " + beanType.getName(), e);
     }
-
   }
 
   // Inherited.

@@ -25,6 +25,7 @@ import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.Type;
+import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.InMessage;
@@ -237,10 +238,15 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       throw new XFireFault("Message cannot be read: no response info was found.", XFireFault.RECEIVER);
     }
 
-    Class wrapperClass = this.responseInfo.getBeanClass();
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
-    Type type = provider.getType(service, wrapperClass);
+    TypeMapping typeMapping = provider.getTypeMapping(service);
+    Class beanClass = this.responseInfo.getBeanClass();
+    if ((!typeMapping.isRegistered(beanClass)) && (GeneratedWrapperBean.class.isAssignableFrom(beanClass))) {
+      typeMapping.register(new GeneratedWrapperBeanType(this.responseInfo.getBeanClass(), this.responseInfo.getPropertyOrder()));
+    }
+
+    Type type = provider.getType(service, beanClass);
     Object bean = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
     List parameters = new ArrayList();
 
@@ -257,10 +263,10 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
           parameters.add(descriptor.getReadMethod().invoke(bean, null));
         }
         catch (IllegalAccessException e) {
-          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
         }
         catch (InvocationTargetException e) {
-          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + wrapperClass.getName() + ".", e, XFireFault.RECEIVER);
+          throw new XFireFault("Problem with property " + descriptor.getName() + " on " + beanClass.getName() + ".", e, XFireFault.RECEIVER);
         }
       }
     }
@@ -333,6 +339,11 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
+    TypeMapping typeMapping = provider.getTypeMapping(service);
+    if ((!typeMapping.isRegistered(beanClass)) && (bean instanceof GeneratedWrapperBean)) {
+      typeMapping.register(new GeneratedWrapperBeanType(this.requestInfo.getBeanClass(), this.requestInfo.getPropertyOrder()));
+    }
+
     Type type = provider.getType(service, beanClass);
     type.writeObject(bean, new ElementWriter(writer), context);
   }

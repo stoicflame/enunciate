@@ -18,14 +18,13 @@ package org.codehaus.enunciate.test.integration;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.codehaus.xfire.handler.HandlerSupport;
-import org.codehaus.xfire.handler.AbstractHandler;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.exchange.InMessage;
+import org.codehaus.xfire.handler.HandlerSupport;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Advice for a source service.

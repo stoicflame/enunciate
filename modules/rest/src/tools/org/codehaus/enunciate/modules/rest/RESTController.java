@@ -135,6 +135,7 @@ public class RESTController extends AbstractController implements EnunciateServi
    * instantiate type specified default implementation.
    *
    * @param endpointType The class of the endpoint bean to attempt to load.
+   * @param defaultImpl The default implementation class.
    * @return The endpoint bean.
    * @throws BeansException If an attempt was made to instantiate the bean but it failed.
    */
@@ -174,7 +175,11 @@ public class RESTController extends AbstractController implements EnunciateServi
       }
     }
 
-    return this.enunciateServiceFactory.getInstance(endpointBean);
+    if (endpointType.isInterface()) {
+      endpointBean = this.enunciateServiceFactory.getInstance(endpointBean, endpointType);
+    }
+
+    return endpointBean;
   }
 
   /**

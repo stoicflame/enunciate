@@ -545,7 +545,7 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/com/sun/xml/bind/jaxb-impl/2.0/jaxb-impl-2.0.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.8/spring-1.2.8.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.9/spring-1.2.9.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>

@@ -13,7 +13,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/springframework/spring/1.2.8/spring-1.2.8.jar!/" />
+          <root url="file://$MODULE_DIR$/target/examples/full/classes/xfire-client/jdk14" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -22,7 +22,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/target/examples/full/classes/xfire-client/jdk14" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/springframework/spring/1.2.9/spring-1.2.9.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

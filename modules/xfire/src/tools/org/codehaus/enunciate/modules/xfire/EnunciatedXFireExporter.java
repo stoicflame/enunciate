@@ -118,7 +118,11 @@ public class EnunciatedXFireExporter extends XFireExporter implements EnunciateS
       serviceBean = serviceClass.newInstance();
     }
 
-    return this.enunciateServiceFactory.getInstance(serviceBean);
+    if ((serviceInterface != null) && (serviceInterface.isInterface())) {
+      serviceBean = this.enunciateServiceFactory.getInstance(serviceBean, serviceInterface);
+    }
+
+    return serviceBean;
   }
 
   //inherited.
