@@ -25,7 +25,6 @@ import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.Type;
-import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.InMessage;
@@ -125,7 +124,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
         builder.append("jaxws.");
 
         String methodName = method.getName();
-        builder.append(capitalize(methodName));
+        builder.append(PropertyUtil.capitalize(methodName));
         requestWrapperClassName = builder.toString();
       }
 
@@ -172,7 +171,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
         builder.append("jaxws.");
 
         String methodName = method.getName();
-        builder.append(capitalize(methodName)).append("Response");
+        builder.append(PropertyUtil.capitalize(methodName)).append("Response");
         responseWrapperClassName = builder.toString();
       }
 
@@ -209,28 +208,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
       throw new XFireFault("Unable to introspect " + wrapperClass.getName(), e, XFireFault.RECEIVER);
     }
 
-    PropertyDescriptor[] pds = responseBeanInfo.getPropertyDescriptors();
-    PropertyDescriptor[] outputProperties = new PropertyDescriptor[propOrder.length];
-    RESPONSE_PROPERTY_LOOP:
-    for (int i = 0; i < propOrder.length; i++) {
-      String property = propOrder[i];
-      if ((property.length() > 1) && (!Character.isLowerCase(property.charAt(1)))) {
-        //if the second letter is uppercase, javabean spec says the first character of the property is also to be kept uppercase.
-        property = capitalize(property);
-      }
-      
-      for (int j = 0; j < pds.length; j++) {
-        PropertyDescriptor descriptor = pds[j];
-        if (descriptor.getName().equals(property)) {
-          outputProperties[i] = descriptor;
-          continue RESPONSE_PROPERTY_LOOP;
-        }
-      }
-
-      throw new XFireFault("Unknown property " + property + " on wrapper " + wrapperClass.getName(), XFireFault.RECEIVER);
-    }
-
-    return outputProperties;
+    return PropertyUtil.sortProperties(wrapperClass, responseBeanInfo.getPropertyDescriptors(), propOrder);
   }
 
   public void readMessage(InMessage message, MessageContext context) throws XFireFault {
@@ -240,12 +218,7 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
-    TypeMapping typeMapping = provider.getTypeMapping(service);
     Class beanClass = this.responseInfo.getBeanClass();
-    if ((!typeMapping.isRegistered(beanClass)) && (GeneratedWrapperBean.class.isAssignableFrom(beanClass))) {
-      typeMapping.register(new GeneratedWrapperBeanType(this.responseInfo.getBeanClass(), this.responseInfo.getPropertyOrder()));
-    }
-
     Type type = provider.getType(service, beanClass);
     Object bean = type.readObject(new ElementReader(message.getXMLStreamReader()), context);
     List parameters = new ArrayList();
@@ -339,23 +312,8 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
 
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
-    TypeMapping typeMapping = provider.getTypeMapping(service);
-    if ((!typeMapping.isRegistered(beanClass)) && (bean instanceof GeneratedWrapperBean)) {
-      typeMapping.register(new GeneratedWrapperBeanType(this.requestInfo.getBeanClass(), this.requestInfo.getPropertyOrder()));
-    }
-
     Type type = provider.getType(service, beanClass);
     type.writeObject(bean, new ElementWriter(writer), context);
-  }
-
-  /**
-   * Capitalizes a string.
-   *
-   * @param string The string to capitalize.
-   * @return The capitalized value.
-   */
-  private String capitalize(String string) {
-    return Character.toString(string.charAt(0)).toUpperCase() + string.substring(1);
   }
 
   /**

@@ -76,4 +76,9 @@ public class GeneratedWrapperBeanExample implements GeneratedWrapperBean {
   public QName getWrapperQName() {
     return new QName("urn:generated-wrapper-bean-example", "bean");
   }
+
+
+  public String[] getPropertyOrder() {
+    return new String[] {"strings", "simple", "integers"};
+  }
 }

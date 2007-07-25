@@ -40,11 +40,6 @@ public class GeneratedWrapperBeanType extends Type {
   private final Class beanClass;
   private final PropertyDescriptor[] beanProperties;
 
-  public GeneratedWrapperBeanType(Class beanClass, PropertyDescriptor[] beanProperties) {
-    this.beanClass = beanClass;
-    this.beanProperties = beanProperties;
-  }
-
   public GeneratedWrapperBeanType(Class beanType) {
     this.beanClass = beanType;
     setTypeClass(beanType);
@@ -60,7 +55,7 @@ public class GeneratedWrapperBeanType extends Type {
           beanProperties.add(pd);
         }
       }
-      this.beanProperties = (PropertyDescriptor[]) beanProperties.toArray(new PropertyDescriptor[beanProperties.size()]);
+      this.beanProperties = PropertyUtil.sortProperties(beanType, (PropertyDescriptor[]) beanProperties.toArray(new PropertyDescriptor[beanProperties.size()]), emptyInstance.getPropertyOrder());
     }
     catch (Exception e) {
       throw new XFireRuntimeException("Error getting info for wrapper bean " + beanType.getName(), e);

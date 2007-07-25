@@ -78,5 +78,10 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
   public QName getWrapperQName() {
     return new QName("${fault.targetNamespace}", "${fault.elementName}");
   }
+
+  // Inherited.
+  public String[] getPropertyOrder() {
+    return new String[] {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] };
+  }
 }
 [/@file]

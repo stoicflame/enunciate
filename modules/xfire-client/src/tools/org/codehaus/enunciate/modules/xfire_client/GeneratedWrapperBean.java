@@ -42,4 +42,11 @@ public interface GeneratedWrapperBean {
    */
   public QName getWrapperQName();
 
+  /**
+   * Gets the order of the properties.
+   *
+   * @return The order of the properties.
+   */
+  public String[] getPropertyOrder();
+
 }
