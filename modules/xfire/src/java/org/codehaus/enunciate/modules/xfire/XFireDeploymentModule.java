@@ -186,7 +186,17 @@ import java.util.List;
  * org.springframework.aop.Advisor) that is to be injected on all service endpoint beans.</p>
  *
  * <ul>
- *   <li>The "interceptorClass" attribute class of the interceptor.</p>
+ *   <li>The "interceptorClass" attribute specified the class of the interceptor.</p>
+ *   <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
+ * </ul>
+ *
+ * <h3>The "handlerInterceptor" element</h3>
+ *
+ * <p>The "handlerInterceptor" element is used to specify a Spring interceptor (instance of org.springframework.web.servlet.HandlerInterceptor)
+ * that is to be injected on the handler mapping.</p>
+ *
+ * <ul>
+ *   <li>The "interceptorClass" attribute specifies the class of the interceptor.</p>
  *   <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
  * </ul>
  *
@@ -222,6 +232,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
+  private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
   private boolean compileDebugInfo = true;
 
   /**
@@ -267,6 +278,14 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
       model.put("globalServiceInterceptors", this.globalServiceInterceptors);
+    }
+    if (!handlerInterceptors.isEmpty()) {
+      for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+        if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
+          throw new IllegalStateException("A handler interceptor must have either a bean name or a class set.");
+        }
+      }
+      model.put("handlerInterceptors", this.handlerInterceptors);
     }
     processTemplate(getSpringServletTemplateURL(), model);
 
@@ -544,6 +563,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addGlobalServiceInterceptor(GlobalServiceInterceptor interceptorConfig) {
     this.globalServiceInterceptors.add(interceptorConfig);
+  }
+
+  /**
+   * Add a handler interceptor to the spring configuration.
+   *
+   * @param interceptorConfig The interceptor configuration.
+   */
+  public void addHandlerInterceptor(HandlerInterceptor interceptorConfig) {
+    this.handlerInterceptors.add(interceptorConfig);
   }
 
   /**

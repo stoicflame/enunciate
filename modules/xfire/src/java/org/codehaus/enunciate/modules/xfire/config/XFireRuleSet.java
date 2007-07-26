@@ -51,6 +51,10 @@ public class XFireRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/xfire/globalServiceInterceptor", GlobalServiceInterceptor.class);
     digester.addSetProperties("enunciate/modules/xfire/globalServiceInterceptor");
     digester.addSetNext("enunciate/modules/xfire/globalServiceInterceptor", "addGlobalServiceInterceptor");
+
+    digester.addObjectCreate("enunciate/modules/xfire/handlerInterceptor", HandlerInterceptor.class);
+    digester.addSetProperties("enunciate/modules/xfire/handlerInterceptor");
+    digester.addSetNext("enunciate/modules/xfire/handlerInterceptor", "addHandlerInterceptor");
   }
 
 }

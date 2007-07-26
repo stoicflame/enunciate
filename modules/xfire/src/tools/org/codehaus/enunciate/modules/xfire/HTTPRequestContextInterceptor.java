@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.xfire;
 
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Ryan Heaton
  */
-public class HTTPRequestContextInterceptor implements EnunciateHandlerInterceptor {
+public class HTTPRequestContextInterceptor implements HandlerInterceptor {
 
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
     HTTPRequestContext.TL_CONTEXT.set(new HTTPRequestContext(request, response));

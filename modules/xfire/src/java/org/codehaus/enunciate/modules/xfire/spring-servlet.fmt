@@ -8,11 +8,11 @@
       <property name="globalServiceInterceptors">
         <list>
       [#list globalServiceInterceptors as interceptor]
-          [#if interceptor.interceptorClass?exists]
+        [#if interceptor.interceptorClass?exists]
           <bean class="${interceptor.interceptorClass}"/>
-          [#else]
+        [#else]
           <ref bean="${interceptor.beanName}"/>
-          [/#if]
+        [/#if]
       [/#list]
         </list>
       </property>
@@ -25,9 +25,24 @@
     [/#list]
   [/#if]
 
-  <bean id="handlerMapping" class="org.codehaus.enunciate.modules.xfire.EnunciateHandlerMapping">
+  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     <property name="alwaysUseFullPath">
       <value>true</value>
+    </property>
+
+    <property name="interceptors">
+      <list>
+        <bean class="org.codehaus.enunciate.modules.xfire.HTTPRequestContextInterceptor"/>
+  [#if handlerInterceptors?exists]
+    [#list handlerInterceptors as interceptor]
+      [#if interceptor.interceptorClass?exists]
+        <bean class="${interceptor.interceptorClass}"/>
+      [#else]
+        <ref bean="${interceptor.beanName}"/>
+      [/#if]
+    [/#list]
+  [/#if]
+      </list>
     </property>
 
     <property name="urlMap">
