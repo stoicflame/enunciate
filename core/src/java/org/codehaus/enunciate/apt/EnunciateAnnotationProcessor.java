@@ -384,8 +384,25 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       return false;
     }
 
-    GenericTypeDefinition typeDef = new GenericTypeDefinition((ClassDeclaration) declaration);
-    return ((typeDef.getValue() != null) && (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty()));
+
+    ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
+    GenericTypeDefinition typeDef = new GenericTypeDefinition(classDeclaration);
+    return ((typeDef.getValue() != null) && (hasNeitherAttributesNorElements(typeDef)));
+  }
+
+  /**
+   * Whether the specified type definition has neither attributes nor elements.
+   *
+   * @param typeDef The type def.
+   * @return Whether the specified type definition has neither attributes nor elements.
+   */
+  protected boolean hasNeitherAttributesNorElements(GenericTypeDefinition typeDef) {
+    boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
+    ClassDeclaration superDeclaration = ((ClassDeclaration) typeDef.getDelegate()).getSuperclass().getDeclaration();
+    if (!Object.class.getName().equals(superDeclaration.getQualifiedName())) {
+      none &= hasNeitherAttributesNorElements(new GenericTypeDefinition(superDeclaration));
+    }
+    return none;
   }
 
   /**
