@@ -17,7 +17,23 @@
         </list>
       </property>
     [/#if]
-  </bean>  
+  </bean>
+
+  <bean id="enunciate-rest-resource-factory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
+    <property name="enunciateServiceFactory">
+      <ref bean="enunciate-interceptor-processor"/>
+    </property>
+    <property name="endpointClasses">
+      <list>
+        <!-- List of the REST endpoint bean classes -->
+  [@forEachRESTEndpoint]
+    [#if endpoint.class]
+        <value>${endpoint.qualifiedName}</value>
+    [/#if]
+  [/@forEachRESTEndpoint]
+      </list>
+    </property>
+  </bean>
 
   [#if springImports?exists]
     [#list springImports as springImport]
@@ -78,48 +94,39 @@
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
 
-        <entry key="/rest/**">
-          <bean parent="rest-endpoint">
-            <property name="endpointClasses">
-              <list>
-                <!-- List of the REST endpoint bean classes -->
-  [@forEachRESTEndpoint]
-    [#if endpoint.class]
-                <value>${endpoint.qualifiedName}</value>
-    [/#if]
-  [/@forEachRESTEndpoint]
-              </list>
-            </property>
+  [@forEachRESTNoun]
+        <entry key="/rest/${noun}">
+          <bean parent="xml-endpoint">
+            <constructor-arg><value>${noun.name}</value></constructor-arg>
+            <constructor-arg><value>${noun.context}</value></constructor-arg>
+            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
           </bean>
         </entry>
 
-        <entry key="/json/**">
+        <entry key="/rest/${noun}/**">
+          <bean parent="xml-endpoint">
+            <constructor-arg><value>${noun.name}</value></constructor-arg>
+            <constructor-arg><value>${noun.context}</value></constructor-arg>
+            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+          </bean>
+        </entry>
+
+        <entry key="/json/${noun}">
           <bean parent="json-endpoint">
-            <property name="endpointClasses">
-              <list>
-                <!-- List of the REST endpoint bean classes -->
-  [@forEachRESTEndpoint]
-    [#if endpoint.class]
-                <value>${endpoint.qualifiedName}</value>
-    [/#if]
-  [/@forEachRESTEndpoint]
-              </list>
-            </property>
-            <property name="namespaces2Prefixes">
-              <map>
-  [#list ns2prefix?keys as ns]
-    [#if ns?exists]
-                <entry>
-                  <key><value>${ns}</value></key>
-                  <value>${ns2prefix[ns]}</value>
-                </entry>
-    [/#if]    
-  [/#list]
-              </map>
-            </property>
+            <constructor-arg><value>${noun.name}</value></constructor-arg>
+            <constructor-arg><value>${noun.context}</value></constructor-arg>
+            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
           </bean>
         </entry>
 
+        <entry key="/json/${noun}/**">
+          <bean parent="json-endpoint">
+            <constructor-arg><value>${noun.name}</value></constructor-arg>
+            <constructor-arg><value>${noun.context}</value></constructor-arg>
+            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+          </bean>
+        </entry>
+  [/@forEachRESTNoun]
       </map>
     </property>
 
@@ -141,16 +148,21 @@
   <bean id="enunciatedServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
 
   <!-- define the parent for all xml-rest service endpoints -->
-  <bean id="rest-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTController">
-    <property name="enunciateServiceFactory">
-      <ref bean="enunciate-interceptor-processor"/>
-    </property>
-  </bean>
+  <bean id="xml-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter"/>
 
   <!-- define the parent for all json service endpoints -->
-  <bean id="json-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.JSONController">
-    <property name="enunciateServiceFactory">
-      <ref bean="enunciate-interceptor-processor"/>
+  <bean id="json-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
+    <property name="namespaces2Prefixes">
+      <map>
+  [#list ns2prefix?keys as ns]
+    [#if ns?exists]
+        <entry>
+          <key><value>${ns}</value></key>
+          <value>${ns2prefix[ns]}</value>
+        </entry>
+    [/#if]
+  [/#list]
+      </map>
     </property>
   </bean>
 

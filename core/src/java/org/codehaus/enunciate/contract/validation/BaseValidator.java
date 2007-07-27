@@ -22,6 +22,7 @@ import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 
 import java.util.Map;
 import java.util.List;
@@ -43,7 +44,7 @@ public class BaseValidator implements Validator {
   /**
    * @return An empty result. @param restAPI
    */
-  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
     return new ValidationResult();
   }
 

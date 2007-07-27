@@ -432,6 +432,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     //rest transforms.
     transforms.add(new ForEachRESTEndpointTransform(namespace));
+    transforms.add(new ForEachRESTNounTransform(namespace));
 
     //set up the enunciate file transform.
     EnunciateFileTransform fileTransform = new EnunciateFileTransform(namespace);

@@ -16,10 +16,10 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.codehaus.enunciate.rest.annotations.VerbType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,24 +30,20 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class JSONController extends RESTController {
+public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
   private Map<String, String> ns2prefix;
   private boolean enabled = false;
 
-
-  public JSONController() {
-    super();
-
-    setSubcontext("json");
+  public RESTResourceJSONExporter(String noun, String nounContext, RESTResourceFactory resourceFactory) {
+    super(noun, nounContext, resourceFactory);
   }
 
-  @Override
   protected void initApplicationContext() throws BeansException {
     super.initApplicationContext();
 
     try {
-      Class.forName("org.codehaus.jettison.mapped.MappedXMLOutputFactory", true, JSONController.class.getClassLoader());
+      Class.forName("org.codehaus.jettison.mapped.MappedXMLOutputFactory", true, RESTResourceJSONExporter.class.getClassLoader());
       enabled = true;
     }
     catch (ClassNotFoundException e) {
@@ -61,7 +57,7 @@ public class JSONController extends RESTController {
       return super.handleRequestInternal(request, response);
     }
     else {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, request.getRequestURI());
       return null;
     }
   }

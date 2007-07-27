@@ -19,25 +19,42 @@ package org.codehaus.enunciate.modules.rest;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
 import java.util.EnumMap;
+import java.util.Set;
 import java.lang.reflect.Method;
 
 /**
- * A REST resource.  Consists of a noun with its available operations.
+ * A REST resource is composed of the following:
+ *
+ * <ul>
+ *   <li>A noun in its context.</li>
+ *   <li>The set of verbs that are applicable to the noun.</li>
+ * </ul>
  *
  * @author Ryan Heaton
  */
 public class RESTResource implements Comparable<RESTResource> {
 
   private final String noun;
+  private final String nounContext;
   private final EnumMap<VerbType, RESTOperation> operations = new EnumMap<VerbType, RESTOperation>(VerbType.class);
 
   /**
-   * Construct a REST resource for the specified noun.
+   * Construct a REST resource for the specified noun, assuming the empty context.
    *
    * @param noun The noun for this REST resource.
    */
   public RESTResource(String noun) {
+    this(noun, "");
+  }
+
+  /**
+   * Construct a REST resource for the specified noun and noun context.
+   * @param noun The noun.
+   * @param nounContext The noun context.
+   */
+  public RESTResource(String noun, String nounContext) {
     this.noun = noun;
+    this.nounContext = nounContext;
   }
 
   /**
@@ -60,6 +77,33 @@ public class RESTResource implements Comparable<RESTResource> {
    */
   public RESTOperation getOperation(VerbType verb) {
     return operations.get(verb);
+  }
+
+  /**
+   * The noun for this resource.
+   *
+   * @return The noun for this resource.
+   */
+  public String getNoun() {
+    return noun;
+  }
+
+  /**
+   * The noun context for this resource.
+   *
+   * @return The noun context for this resource.
+   */
+  public String getNounContext() {
+    return nounContext;
+  }
+
+  /**
+   * Gets the supported verbs for this resource.
+   *
+   * @return The supported verbs.
+   */
+  public Set<VerbType> getSupportedVerbs() {
+    return operations.keySet();
   }
 
   /**

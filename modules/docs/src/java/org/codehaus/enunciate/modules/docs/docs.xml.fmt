@@ -158,9 +158,9 @@
   </soap>
   <rest>
     <resources>
-[#list nouns2methods?keys as resource]
-      <resource name="${resource}">
-  [#list nouns2methods[resource] as method]
+[#list nouns2methods?values as methodList]
+      <resource name="${(methodList?first).noun}">
+  [#list methodList as method]
         <operation type="${method.verb}" requiresResourceId="${method.properNoun?exists?string}">
      [#if method.docValue?exists]
           <documentation>

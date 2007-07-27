@@ -22,6 +22,7 @@ import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +70,7 @@ public class ValidatorChain implements Validator {
   }
 
   // Inherited.
-  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
     ValidationResult result = new ValidationResult();
 
     for (Validator validator : validators) {

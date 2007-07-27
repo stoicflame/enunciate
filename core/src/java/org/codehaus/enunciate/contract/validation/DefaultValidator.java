@@ -25,6 +25,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTParameter;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
@@ -142,10 +143,10 @@ public class DefaultValidator implements Validator {
    * @param restAPI The REST API
    * @return The result of the validation.
    */
-  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
     ValidationResult result = new ValidationResult();
 
-    for (String noun : restAPI.keySet()) {
+    for (RESTNoun noun : restAPI.keySet()) {
       EnumSet<VerbType> verbs = EnumSet.noneOf(VerbType.class);
       List<RESTMethod> methods = restAPI.get(noun);
       for (RESTMethod method : methods) {

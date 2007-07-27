@@ -30,6 +30,11 @@ import java.lang.annotation.ElementType;
 @Target ( {ElementType.TYPE} )
 public @interface RESTEndpoint {
 
+  /**
+   * The custom name of the endpoint.
+   *
+   * @return The custom name of the endpoint.
+   */
   String name() default "";
-  
+
 }

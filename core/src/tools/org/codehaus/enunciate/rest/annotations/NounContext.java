@@ -22,12 +22,12 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Customizes the context of a noun.
+ * Customizes the context of all nouns on a given REST endpoint.
  *
  * @author Ryan Heaton
  */
 @Retention ( RetentionPolicy.RUNTIME )
-@Target ( { ElementType.METHOD, ElementType.TYPE } )
+@Target ( ElementType.TYPE )
 public @interface NounContext {
 
   /**

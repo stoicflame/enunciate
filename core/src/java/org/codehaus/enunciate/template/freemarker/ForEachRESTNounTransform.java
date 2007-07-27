@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
+package org.codehaus.enunciate.template.freemarker;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import net.sf.jelly.apt.freemarker.FreemarkerTransform;
+import org.codehaus.enunciate.template.strategies.rest.RESTNounLoopStrategy;
 
 /**
- * Customizes the noun associated with the annotated method.
- *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( ElementType.METHOD )
-public @interface Noun {
+public class ForEachRESTNounTransform extends FreemarkerTransform<RESTNounLoopStrategy> {
 
   /**
-   * The name of the noun.
+   * Construct a new transform under the specified namespace.  <code>null</code> or <code>""</code> means the root namespace.
    *
-   * @return The name of the noun.
+   * @param namespace The namespace.
    */
-  String value();
+  public ForEachRESTNounTransform(String namespace) {
+    super(namespace);
+  }
 
-  /**
-   * The context of the noun.  The default is the empty context.
-   *
-   * @return The context of the noun.
-   */
-  String context() default "##default";
-
+  public RESTNounLoopStrategy newStrategy() {
+    return new RESTNounLoopStrategy();
+  }
 }

@@ -30,6 +30,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
 
@@ -49,7 +50,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final Map<String, SchemaInfo> namespacesToSchemas;
   final Map<String, WsdlInfo> namespacesToWsdls;
   final Map<String, XmlType> knownTypes;
-  final Map<String, List<RESTMethod>> nounsToRESTMethods;
+  final Map<RESTNoun, List<RESTMethod>> nounsToRESTMethods;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
@@ -61,7 +62,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
-    this.nounsToRESTMethods = new HashMap<String, List<RESTMethod>>();
+    this.nounsToRESTMethods = new HashMap<RESTNoun, List<RESTMethod>>();
 
     setVariable("knownNamespaces", new ArrayList<String>(this.namespacesToPrefixes.keySet()));
     setVariable("ns2prefix", this.namespacesToPrefixes);
@@ -163,7 +164,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @return The map of nouns to REST endpoints.
    */
-  public Map<String, List<RESTMethod>> getNounsToRESTMethods() {
+  public Map<RESTNoun, List<RESTMethod>> getNounsToRESTMethods() {
     return nounsToRESTMethods;
   }
 
@@ -250,7 +251,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(RESTEndpoint endpoint) {
     for (RESTMethod restMethod : endpoint.getRESTMethods()) {
-      String noun = restMethod.getNoun();
+      RESTNoun noun = restMethod.getNoun();
       List<RESTMethod> restMethods = this.nounsToRESTMethods.get(noun);
       if (restMethods == null) {
         restMethods = new ArrayList<RESTMethod>();

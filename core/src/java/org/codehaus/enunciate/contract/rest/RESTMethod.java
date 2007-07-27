@@ -28,6 +28,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.rest.annotations.Noun;
 import org.codehaus.enunciate.rest.annotations.Verb;
 import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.codehaus.enunciate.rest.annotations.NounContext;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import java.util.ArrayList;
@@ -40,12 +41,13 @@ import java.util.Collection;
  */
 public class RESTMethod extends DecoratedMethodDeclaration {
 
+  private final RESTNoun noun;
   private final RESTParameter properNoun;
   private final RESTParameter nounValue;
   private final Collection<RESTParameter> adjectives;
   private final Collection<RESTError> RESTErrors;
 
-  public RESTMethod(MethodDeclaration delegate) {
+  public RESTMethod(MethodDeclaration delegate, RESTEndpoint endpoint) {
     super(delegate);
 
     RESTParameter properNoun = null;
@@ -82,6 +84,22 @@ public class RESTMethod extends DecoratedMethodDeclaration {
       this.RESTErrors.add(new RESTError(throwableDeclaration));
     }
 
+    String noun = getSimpleName();
+    Noun nounInfo = getAnnotation(Noun.class);
+    if ((nounInfo != null) && (!"".equals(nounInfo.value()))) {
+      noun = nounInfo.value();
+    }
+
+    String nounContext = "";
+    NounContext nounContextInfo = endpoint.getAnnotation(NounContext.class);
+    if (nounContextInfo != null) {
+      nounContext = nounContextInfo.value();
+    }
+    if ((nounInfo != null) && (!"##default".equals(nounInfo.context()))) {
+      nounContext = nounInfo.value();
+    }
+    
+    this.noun = new RESTNoun(noun, nounContext);
   }
 
   /**
@@ -89,14 +107,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    *
    * @return The noun for this method.
    */
-  public String getNoun() {
-    String noun = getSimpleName();
-
-    Noun nounInfo = getAnnotation(Noun.class);
-    if ((nounInfo != null) && (!"".equals(nounInfo.value()))) {
-      noun = nounInfo.value();
-    }
-
+  public RESTNoun getNoun() {
     return noun;
   }
 

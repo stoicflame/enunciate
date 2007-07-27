@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.rest;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.Map;
 public class RESTValidator extends BaseValidator {
 
   @Override
-  public ValidationResult validateRESTAPI(Map<String, List<RESTMethod>> restAPI) {
+  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
     ValidationResult result = super.validateRESTAPI(restAPI);
 
     // Can't think of any additional rules beyond what's
