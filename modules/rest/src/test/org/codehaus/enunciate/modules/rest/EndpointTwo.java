@@ -22,6 +22,9 @@ import org.codehaus.enunciate.rest.annotations.*;
  * @author Ryan Heaton
  */
 @RESTEndpoint
+@NounContext (
+  "three/or/four"
+)
 public class EndpointTwo {
 
   @Noun ( "three" )

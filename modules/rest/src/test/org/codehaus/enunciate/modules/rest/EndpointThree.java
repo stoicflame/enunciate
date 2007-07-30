@@ -24,19 +24,31 @@ import org.codehaus.enunciate.rest.annotations.*;
 @RESTEndpoint
 public interface EndpointThree {
 
-  @Noun ( "six" )
+  @Noun (
+    value = "six",
+    context = "evens"
+  )
   @Verb ( VerbType.read )
   RootElementExample getSix(@ProperNoun String which);
 
-  @Noun ( "six")
+  @Noun (
+    value = "six",
+    context = "evens"
+  )
   @Verb ( VerbType.create )
   void addSix(@NounValue RootElementExample ex);
 
-  @Noun ( "six" )
+  @Noun (
+    value = "six",
+    context = "evens"
+  )
   @Verb ( VerbType.update )
   RootElementExample setSix(@ProperNoun String which, @NounValue RootElementExample ex);
 
-  @Noun ( "six" )
+  @Noun (
+    value = "six",
+    context = "evens"
+  )
   @Verb ( VerbType.delete )
   void deleteSix(@ProperNoun String which);
 

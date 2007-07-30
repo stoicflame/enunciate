@@ -57,7 +57,7 @@ import java.io.IOException;
  * <h3>Adjectives</h3>
  *
  * <p>REST adjectives are used to qualify a REST noun or a REST verb.  For a REST invocation, an adjective
- * has a name and one or more values.  In terms of HTTP, adjectives are passed as an HTTP parameters.</p>
+ * has a name and one or more values.  In terms of HTTP, adjectives are passed as HTTP parameters.</p>
  *
  * <p>For example, if we were to invoke the verb "read" on a noun "circle", but we wanted to describe the
  * color of the circle as "red", then "color" would be the adjective and "red" would be the adjective value.
@@ -96,6 +96,13 @@ import java.io.IOException;
  * &lt;circle color="red"/&gt;
  * </code>
  *
+ * <h3>Noun Context</h3>
+ *
+ * <p>A noun can be qualified by a noun context.  The noun context can be though of as a "grouping" of nouns.
+ * Perhaps, as an admittedly contrived example, we were to have two separate resources for the noun "rectangle",
+ * say "wide" and "tall". The "rectangle" those two contexts could be applied to qualify the different "rectangle"
+ * nouns.</p>
+ *
  * <h1><a name="constraints">Constraints</a></h1>
  *
  * <p>Enunciate uses J2EE and JAXB 2.0 to map a REST model onto HTTP.  In order to do that definitively, Enunciate
@@ -132,8 +139,11 @@ import java.io.IOException;
  * verb with the <i>org.codehaus.enunciate.rest.annotations.Verb</i> annotation.  A method that is not assigned a verb will
  * not be considered to service a REST endpoint.</p>
  *
- * <p>A method that is assigned a verb will be assigned a noun as well.  By default, the noun is the name of the method.  The
- * noun can also be customized with the <i>org.codehaus.enunciate.rest.annotations.Noun</i> annotation.</p>
+ * <p>A method that is assigned a verb must be assigned a noun as well.  The noun is specified with the
+ * <i>org.codehaus.enunciate.rest.annotations.Noun</i> annotation, which can supply both the name and the context of the noun.  As a convenience,
+ * The <i>org.codehaus.enunciate.rest.annotations.NounContext</i> annotation can be supplied along with the @RESTEndpoint
+ * annotation at the level of the interface (or class) to specify the default context for all nouns that are defined by the methods
+ * of the interface (or class).</p>
  *
  * <h3>Java Method Parameters</h3>
  *

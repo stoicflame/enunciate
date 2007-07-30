@@ -53,6 +53,10 @@ public class RESTResourceXMLExporter extends AbstractController {
   private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
 
   public RESTResourceXMLExporter(String noun, String nounContext, RESTResourceFactory resourceFactory) {
+    this(noun, nounContext, resourceFactory.getRESTResource(nounContext, noun));
+  }
+
+  public RESTResourceXMLExporter(String noun, String nounContext, RESTResource resource) {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(false);
     try {
@@ -63,7 +67,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
     this.noun = noun;
     this.nounContext = nounContext;
-    this.resource = resourceFactory.getRESTResource(nounContext, noun);
+    this.resource = resource;
     this.urlPattern = Pattern.compile(nounContext + "/" + noun + "/?(.*)$");
   }
 
@@ -113,6 +117,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
     else {
       response.sendError(HttpServletResponse.SC_NOT_FOUND, request.getRequestURI());
+      return null;
     }
 
     String httpMethod = request.getMethod().toUpperCase();
@@ -131,6 +136,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
     else {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported HTTP operation: " + httpMethod);
+      return null;
     }
 
     try {
