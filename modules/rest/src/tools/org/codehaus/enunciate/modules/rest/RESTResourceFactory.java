@@ -76,7 +76,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
 
               String noun = restMethod.isAnnotationPresent(Noun.class) ? nounInfo.value() : restMethod.getName();
 
-              RESTResource resource = getRESTResource(context, noun);
+              RESTResource resource = getRESTResource(noun, context);
               if (resource == null) {
                 resource = new RESTResource(noun, context);
                 RESTResources.add(resource);
@@ -105,11 +105,11 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
   /**
    * Gets the REST resource identified by the given context and noun.
    *
-   * @param context The context.
    * @param noun The noun.
+   * @param context The context.
    * @return The resource, or null if none was found.
    */
-  public RESTResource getRESTResource(String context, String noun) {
+  public RESTResource getRESTResource(String noun, String context) {
     for (RESTResource restResource : RESTResources) {
       if ((restResource.getNounContext().equals(context)) && (restResource.getNoun().equals(noun))) {
         return restResource;

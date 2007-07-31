@@ -17,38 +17,74 @@
 package org.codehaus.enunciate.contract.rest;
 
 import junit.framework.TestCase;
+import org.codehaus.enunciate.InAPTTestCase;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.ClassDeclaration;
+
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author Ryan Heaton
  */
-public class TestRESTContract extends TestCase {
+public class TestRESTContract extends InAPTTestCase {
 
   /**
    * tests the REST endpoint
    */
   public void testRESTEndpoint() throws Exception {
-    //todo: implement.
+    TypeDeclaration declaration = getDeclaration("org.codehaus.enunciate.samples.services.RESTEndpointExamples");
+    RESTEndpoint endpoint = new RESTEndpoint((ClassDeclaration) declaration);
+    ArrayList<RESTMethod> methods = new ArrayList<RESTMethod>(endpoint.getRESTMethods());
+    assertEquals(3, methods.size());
+
+    Iterator<RESTMethod> it = methods.iterator();
+    while (it.hasNext()) {
+      RESTMethod method = it.next();
+      if ("getFirstThing".equals(method.getSimpleName())) {
+        assertEquals("my/default/context", method.getNoun().getContext());
+        assertEquals("getFirstThing", method.getNoun().getName());
+        assertEquals("my/default/context/getFirstThing", method.getNoun().toString());
+      }
+      else if ("getSecondThing".equals(method.getSimpleName())) {
+        assertEquals("my/other/context", method.getNoun().getContext());
+        assertEquals("second", method.getNoun().getName());
+        assertEquals("my/other/context/second", method.getNoun().toString());
+      }
+      else if ("getThirdThing".equals(method.getSimpleName())) {
+        assertEquals("", method.getNoun().getContext());
+        assertEquals("third", method.getNoun().getName());
+        assertEquals("third", method.getNoun().toString());
+      }
+      else {
+        fail("Unknown REST method: " + method.getSimpleName());
+      }
+
+      it.remove();
+    }
+
   }
 
-  /**
-   * tests the REST method
-   */
-  public void testRESTMethod() throws Exception {
-    //todo: implement.
-  }
-
-  /**
-   * tests the REST parameter
-   */
-  public void testRESTParameter() throws Exception {
-    //todo: implement.
-  }
-
-  /**
-   * tests the REST error
-   */
-  public void testRESTError() throws Exception {
-    //todo: implement.
-  }
+//  /**
+//   * tests the REST method
+//   */
+//  public void testRESTMethod() throws Exception {
+//    //todo: implement.
+//  }
+//
+//  /**
+//   * tests the REST parameter
+//   */
+//  public void testRESTParameter() throws Exception {
+//    //todo: implement.
+//  }
+//
+//  /**
+//   * tests the REST error
+//   */
+//  public void testRESTError() throws Exception {
+//    //todo: implement.
+//  }
 
 }

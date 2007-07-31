@@ -45,18 +45,12 @@ import java.lang.reflect.Array;
  */
 public class RESTResourceXMLExporter extends AbstractController {
 
-  private final String noun;
-  private final String nounContext;
   private final DocumentBuilder documentBuilder;
-  private final Pattern urlPattern;
+  private Pattern urlPattern;
   private final RESTResource resource;
   private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
 
-  public RESTResourceXMLExporter(String noun, String nounContext, RESTResourceFactory resourceFactory) {
-    this(noun, nounContext, resourceFactory.getRESTResource(nounContext, noun));
-  }
-
-  public RESTResourceXMLExporter(String noun, String nounContext, RESTResource resource) {
+  public RESTResourceXMLExporter(RESTResource resource) {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(false);
     try {
@@ -65,10 +59,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     catch (ParserConfigurationException e) {
       throw new RuntimeException(e);
     }
-    this.noun = noun;
-    this.nounContext = nounContext;
     this.resource = resource;
-    this.urlPattern = Pattern.compile(nounContext + "/" + noun + "/?(.*)$");
   }
 
   @Override
@@ -76,8 +67,12 @@ public class RESTResourceXMLExporter extends AbstractController {
     super.initApplicationContext();
 
     if (resource == null) {
-      throw new ApplicationContextException("No REST resource available for noun '" + this.noun + "' in context '" + this.nounContext + "'.");
+      throw new ApplicationContextException("A REST resource must be provided.");
     }
+
+    String noun = resource.getNoun();
+    String nounContext = resource.getNounContext();
+    this.urlPattern = Pattern.compile(nounContext + "/" + noun + "/?(.*)$");
 
     Set<VerbType> supportedVerbs = resource.getSupportedVerbs();
     String[] supportedMethods = new String[supportedVerbs.size()];
@@ -106,7 +101,7 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String properNoun = null;
+    String properNoun;
     Matcher matcher = urlPattern.matcher(request.getRequestURI());
     if (matcher.find()) {
       properNoun = matcher.group(1);
@@ -121,7 +116,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
 
     String httpMethod = request.getMethod().toUpperCase();
-    VerbType verb = null;
+    VerbType verb;
     if ("PUT".equals(httpMethod)) {
       verb = VerbType.create;
     }

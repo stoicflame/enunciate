@@ -17,22 +17,21 @@
 package org.codehaus.enunciate.modules.rest;
 
 import junit.framework.TestCase;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.codehaus.enunciate.rest.annotations.VerbType;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.*;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletInputStream;
 import javax.xml.bind.JAXBContext;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author Ryan Heaton
@@ -43,14 +42,24 @@ public class TestRESTResourceXMLExporter extends TestCase {
    * Tests handling that the noun and proper noun are property extracted from the request.
    */
   public void testHandleRequestInternal() throws Exception {
-    RESTResourceXMLExporter exporter = new RESTResourceXMLExporter("mynoun", "subcontext", new RESTResource("mynoun")) {
+    RESTResource restResource = new RESTResource("mynoun") {
+
+      @Override
+      public Set<VerbType> getSupportedVerbs() {
+        return new TreeSet(Arrays.asList(VerbType.values()));
+      }
+    };
+    RESTResourceXMLExporter exporter = new RESTResourceXMLExporter(restResource) {
       @Override
       protected ModelAndView handleRESTOperation(String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute("properNoun", properNoun);
         request.setAttribute("verb", verb);
         return null;
       }
+
+
     };
+    exporter.setApplicationContext(new GenericApplicationContext());
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
@@ -110,9 +119,16 @@ public class TestRESTResourceXMLExporter extends TestCase {
    * tests the handleRESTOperation method.
    */
   public void testHandleRESTOperation() throws Exception {
-    RESTResource resource = new RESTResource("example");
+    RESTResource resource = new RESTResource("example") {
+
+      @Override
+      public Set<VerbType> getSupportedVerbs() {
+        return new TreeSet(Arrays.asList(VerbType.values()));
+      }
+    };
     resource.addOperation(VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class));
-    RESTResourceXMLExporter controller = new RESTResourceXMLExporter("example", "subcontext", resource);
+    RESTResourceXMLExporter controller = new RESTResourceXMLExporter(resource);
+    controller.setApplicationContext(new GenericApplicationContext());
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);

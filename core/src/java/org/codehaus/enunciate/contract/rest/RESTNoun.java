@@ -71,19 +71,16 @@ public class RESTNoun {
       return true;
     }
 
-    if (o == null || getClass() != o.getClass()) {
+    if (o == null || !(o instanceof RESTNoun)) {
       return false;
     }
 
     RESTNoun restNoun = (RESTNoun) o;
-    return context.equals(restNoun.context) && name.equals(restNoun.name);
+    return toString().equals(restNoun.toString());
   }
 
   @Override
   public int hashCode() {
-    int result;
-    result = name.hashCode();
-    result = 31 * result + context.hashCode();
-    return result;
+    return toString().hashCode();
   }
 }

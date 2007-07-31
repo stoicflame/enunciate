@@ -50,7 +50,7 @@ public class TestRESTResourceFactory extends TestCase {
         context = "evens";
       }
 
-      RESTResource resource = factory.getRESTResource(context, noun);
+      RESTResource resource = factory.getRESTResource(noun, context);
       assertNotNull(resource);
 
       for (VerbType verbType : VerbType.values()) {
@@ -95,7 +95,7 @@ public class TestRESTResourceFactory extends TestCase {
         context = "evens";
       }
 
-      RESTResource resource = factory.getRESTResource(context, noun);
+      RESTResource resource = factory.getRESTResource(noun, context);
       assertNotNull(resource);
 
       for (VerbType verbType : VerbType.values()) {

@@ -97,33 +97,45 @@
   [@forEachRESTNoun]
         <entry key="/rest/${noun}">
           <bean parent="xml-endpoint">
-            <constructor-arg><value>${noun.name}</value></constructor-arg>
-            <constructor-arg><value>${noun.context}</value></constructor-arg>
-            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+            <constructor-arg>
+              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
+                <constructor-arg><value>${noun.name}</value></constructor-arg>
+                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              </bean>
+            </constructor-arg>
           </bean>
         </entry>
 
         <entry key="/rest/${noun}/**">
           <bean parent="xml-endpoint">
-            <constructor-arg><value>${noun.name}</value></constructor-arg>
-            <constructor-arg><value>${noun.context}</value></constructor-arg>
-            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+            <constructor-arg>
+              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
+                <constructor-arg><value>${noun.name}</value></constructor-arg>
+                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              </bean>
+            </constructor-arg>
           </bean>
         </entry>
 
         <entry key="/json/${noun}">
           <bean parent="json-endpoint">
-            <constructor-arg><value>${noun.name}</value></constructor-arg>
-            <constructor-arg><value>${noun.context}</value></constructor-arg>
-            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+            <constructor-arg>
+              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
+                <constructor-arg><value>${noun.name}</value></constructor-arg>
+                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              </bean>
+            </constructor-arg>
           </bean>
         </entry>
 
         <entry key="/json/${noun}/**">
           <bean parent="json-endpoint">
-            <constructor-arg><value>${noun.name}</value></constructor-arg>
-            <constructor-arg><value>${noun.context}</value></constructor-arg>
-            <constructor-arg><ref bean="enunciate-rest-resource-factory"/></constructor-arg>
+            <constructor-arg>
+              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
+                <constructor-arg><value>${noun.name}</value></constructor-arg>
+                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              </bean>
+            </constructor-arg>
           </bean>
         </entry>
   [/@forEachRESTNoun]

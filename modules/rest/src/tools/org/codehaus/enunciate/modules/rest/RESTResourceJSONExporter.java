@@ -35,8 +35,9 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   private Map<String, String> ns2prefix;
   private boolean enabled = false;
 
-  public RESTResourceJSONExporter(String noun, String nounContext, RESTResourceFactory resourceFactory) {
-    super(noun, nounContext, resourceFactory);
+
+  public RESTResourceJSONExporter(RESTResource resource) {
+    super(resource);
   }
 
   protected void initApplicationContext() throws BeansException {

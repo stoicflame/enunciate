@@ -96,7 +96,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
       nounContext = nounContextInfo.value();
     }
     if ((nounInfo != null) && (!"##default".equals(nounInfo.context()))) {
-      nounContext = nounInfo.value();
+      nounContext = nounInfo.context();
     }
     
     this.noun = new RESTNoun(noun, nounContext);
