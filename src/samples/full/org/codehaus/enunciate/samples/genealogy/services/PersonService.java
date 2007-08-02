@@ -34,6 +34,7 @@ import java.util.Map;
   targetNamespace = "http://enunciate.codehaus.org/samples/full"
 )
 @RESTEndpoint
+@NounContext ( "pedigree" )
 public interface PersonService {
 
   /**
@@ -72,7 +73,8 @@ public interface PersonService {
     VerbType.delete
   )
   @Noun (
-    "person"
+    value = "person",
+    context = "remover/pedigree"
   )
   void deletePerson(@ProperNoun String personId) throws ServiceException;
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.

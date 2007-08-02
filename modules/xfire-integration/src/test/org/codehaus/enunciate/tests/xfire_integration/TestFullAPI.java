@@ -18,17 +18,19 @@ package org.codehaus.enunciate.tests.xfire_integration;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
+import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
-import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
-import org.codehaus.enunciate.samples.genealogy.client.data.*;
+import org.codehaus.enunciate.samples.genealogy.client.data.Event;
+import org.codehaus.enunciate.samples.genealogy.client.data.Person;
+import org.codehaus.enunciate.samples.genealogy.client.data.PersonXFireType;
+import org.codehaus.enunciate.samples.genealogy.client.data.Relationship;
+import org.codehaus.enunciate.samples.genealogy.client.exceptions.OutsideException;
 import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
-import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.RelationshipServiceImpl;
-import org.codehaus.enunciate.samples.genealogy.client.exceptions.OutsideException;
+import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.xfire.MessageContext;
-import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
@@ -295,7 +297,7 @@ public class TestFullAPI extends TestCase {
     connection.connect();
     assertFalse(200 == connection.getResponseCode());
 
-    String personConnectString = String.format("http://localhost:%s/%s/rest/person", port, context);
+    String personConnectString = String.format("http://localhost:%s/%s/rest/pedigree/person", port, context);
     url = new URL(personConnectString);
     connection = (HttpURLConnection) url.openConnection();
     connection.setDoOutput(true);
@@ -349,6 +351,7 @@ public class TestFullAPI extends TestCase {
 
     assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
 
+    personConnectString = String.format("http://localhost:%s/%s/rest/remover/pedigree/person", port, context);
     url = new URL(personConnectString + "/SPECIAL");
     connection = (HttpURLConnection) url.openConnection();
     connection.setDoOutput(true);

@@ -63,18 +63,16 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
             int modifiers = restMethod.getModifiers();
             if ((Modifier.isPublic(modifiers)) && (restMethod.isAnnotationPresent(Verb.class)) && (!isImplMethod(restMethod, endpointTypes))) {
               VerbType verb = restMethod.getAnnotation(Verb.class).value();
+              String noun = restMethod.getName();
               Noun nounInfo = restMethod.getAnnotation(Noun.class);
-              String context = nounInfo.context();
-              if ("##default".equals(context)) {
-                if (endpointType.isAnnotationPresent(NounContext.class)) {
-                  context = ((NounContext) endpointType.getAnnotation(NounContext.class)).value();
-                }
-                else {
-                  context = "";
+              NounContext nounContextInfo = ((NounContext) endpointType.getAnnotation(NounContext.class));
+              String context = nounContextInfo != null ? nounContextInfo.value() : "";
+              if (nounInfo != null) {
+                noun = nounInfo.value();
+                if (!"##default".equals(nounInfo.context())) {
+                  context = nounInfo.context();
                 }
               }
-
-              String noun = restMethod.isAnnotationPresent(Noun.class) ? nounInfo.value() : restMethod.getName();
 
               RESTResource resource = getRESTResource(noun, context);
               if (resource == null) {
