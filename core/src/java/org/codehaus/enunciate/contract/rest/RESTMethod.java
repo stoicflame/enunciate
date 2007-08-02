@@ -47,7 +47,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final Collection<RESTParameter> adjectives;
   private final Collection<RESTError> RESTErrors;
 
-  public RESTMethod(MethodDeclaration delegate, RESTEndpoint endpoint) {
+  public RESTMethod(MethodDeclaration delegate) {
     super(delegate);
 
     RESTParameter properNoun = null;
@@ -91,7 +91,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     }
 
     String nounContext = "";
-    NounContext nounContextInfo = endpoint.getAnnotation(NounContext.class);
+    NounContext nounContextInfo = delegate.getDeclaringType().getAnnotation(NounContext.class);
     if (nounContextInfo != null) {
       nounContext = nounContextInfo.value();
     }

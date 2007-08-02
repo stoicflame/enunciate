@@ -76,7 +76,7 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
 
     this.RESTMethods = new ArrayList<RESTMethod>();
     for (MethodDeclaration methodDeclaration : methods) {
-      this.RESTMethods.add(new RESTMethod(methodDeclaration, this));
+      this.RESTMethods.add(new RESTMethod(methodDeclaration));
     }
   }
 
