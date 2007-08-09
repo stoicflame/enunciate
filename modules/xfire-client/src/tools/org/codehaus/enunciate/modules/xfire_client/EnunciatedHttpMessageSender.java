@@ -21,13 +21,19 @@ import org.codehaus.xfire.XFireException;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.soap.SoapConstants;
 import org.codehaus.xfire.transport.http.CommonsHttpMessageSender;
+import org.apache.commons.httpclient.HttpException;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Iterator;
 
 /**
  * @author Ryan Heaton
  */
 public class EnunciatedHttpMessageSender extends CommonsHttpMessageSender {
+
+  public static final String HTTP_HEADERS = "org.codehaus.enunciate.modules.xfire_client.EnunciatedHttpMessageSender#HTTP_HEADERS";
+  public static final String REQUEST_HANDLER = "org.codehaus.enunciate.modules.xfire_client.EnunciatedHttpMessageSender#REQUEST_HANDLER";
 
   public EnunciatedHttpMessageSender(OutMessage message, MessageContext context) {
     super(message, context);
@@ -46,5 +52,27 @@ public class EnunciatedHttpMessageSender extends CommonsHttpMessageSender {
     }
 
     getMethod().setRequestHeader("Accept", acceptHeaderValue);
+
+    Map httpHeaders = (Map) context.getContextualProperty(HTTP_HEADERS);
+    if (httpHeaders != null) {
+      Iterator headerKeys = httpHeaders.keySet().iterator();
+      while (headerKeys.hasNext()) {
+        String headerKey = (String) headerKeys.next();
+        getMethod().setRequestHeader(headerKey, (String) httpHeaders.get(headerKey));
+      }
+    }
+
+    RequestHandler handler = (RequestHandler) context.getContextualProperty(REQUEST_HANDLER);
+    if (handler != null) {
+      handler.beforeSend(getMethod());
+    }
+  }
+
+  public void send() throws HttpException, IOException, XFireException {
+    super.send();
+    RequestHandler handler = (RequestHandler) getMessageContext().getContextualProperty(REQUEST_HANDLER);
+    if (handler != null) {
+      handler.afterSend(getMethod());
+    }
   }
 }

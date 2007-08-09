@@ -32,8 +32,6 @@ import java.util.Map;
  */
 public class JSONResultView extends RESTResultView {
 
-  private final Map<String, String> ns2prefix;
-
   /**
    * Construct a view for the result of a REST operation.
    *
@@ -42,8 +40,7 @@ public class JSONResultView extends RESTResultView {
    * @param ns2prefix The map of namespaces to prefixes.
    */
   public JSONResultView(RESTOperation operation, Object result, Map<String, String> ns2prefix) {
-    super(operation, result);
-    this.ns2prefix = ns2prefix;
+    super(operation, result, ns2prefix);
   }
 
   /**
@@ -56,7 +53,7 @@ public class JSONResultView extends RESTResultView {
   @Override
   protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
     XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
-      new MappedXMLOutputFactory(this.ns2prefix).createXMLStreamWriter(response.getOutputStream()) :
+      new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(response.getOutputStream()) :
       new BadgerFishXMLOutputFactory().createXMLStreamWriter(response.getOutputStream());
     response.setContentType("application/json");
     marshaller.marshal(getResult(), streamWriter);

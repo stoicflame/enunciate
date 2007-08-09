@@ -24,9 +24,14 @@ import org.codehaus.xfire.client.XFireProxyFactory;
 import org.codehaus.xfire.client.XFireProxy;
 import org.codehaus.xfire.service.Service;
 import org.codehaus.xfire.transport.TransportManager;
+import org.codehaus.xfire.transport.Channel;
 import org.codehaus.xfire.transport.http.SoapHttpTransport;
+import org.codehaus.xfire.transport.http.HttpChannel;
+import org.codehaus.xfire.transport.http.CommonsHttpMessageSender;
+import org.apache.commons.httpclient.HttpState;
 
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 /**
  * A base class for client-side soap web service implementations.
@@ -60,7 +65,6 @@ public abstract class EnunciatedSOAPWebServiceImpl {
    * @param endpoint The endpoint URL of the SOAP port.
    * @return The proxy.
    */
-  //todo: make this a statically-accessed helper method.  Then you could actually replace this class with another in the config.
   protected final Object loadProxy(Class iface, String uuid, String endpoint) {
     XFire xFire = XFireFactory.newInstance().getXFire();
     TransportManager transportManager = xFire.getTransportManager();
@@ -112,5 +116,64 @@ public abstract class EnunciatedSOAPWebServiceImpl {
    */
   public final void setMTOMEnabled(boolean MTOMEnabled) {
     this.client.setProperty(SoapConstants.MTOM_ENABLED, String.valueOf(MTOMEnabled));
+  }
+
+  /**
+   * Sets the HTTP AUTH credentials for this service.
+   *
+   * @param username The username.
+   * @param password The password.
+   */
+  public final void setHttpAuthCredentials(String username, String password) {
+    this.client.setProperty(Channel.USERNAME, username);
+    this.client.setProperty(Channel.PASSWORD, password);
+  }
+
+  /**
+   * Sets the http headers to use for this service.
+   *
+   * @param httpHeaders The http headers to use.
+   */
+  public final void setHttpHeaders(Map httpHeaders) {
+    this.client.setProperty(EnunciatedHttpMessageSender.HTTP_HEADERS, httpHeaders);
+  }
+
+  /**
+   * Sets the request handler for this service.
+   *
+   * @param requestHandler The request handler.
+   */
+  public final void setRequestHandler(RequestHandler requestHandler) {
+    this.client.setProperty(EnunciatedHttpMessageSender.REQUEST_HANDLER, requestHandler);
+  }
+
+  /**
+   * Gets the HTTP state for this service.
+   *
+   * @return The http state, or null if none has been set or created yet.
+   */
+  public final HttpState getHttpState() {
+    try {
+      HttpChannel httpChannel = (HttpChannel) getXFireClient().getTransport().createChannel(getXFireClient().getEndpointUri());
+      return (HttpState) httpChannel.getProperty(CommonsHttpMessageSender.HTTP_STATE);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Sets the HTTP state for this service.
+   *
+   * @param state The http state.
+   */
+  public final void setHttpState(HttpState state) {
+    try {
+      HttpChannel httpChannel = (HttpChannel) getXFireClient().getTransport().createChannel(getXFireClient().getEndpointUri());
+      httpChannel.setProperty(CommonsHttpMessageSender.HTTP_STATE, state);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

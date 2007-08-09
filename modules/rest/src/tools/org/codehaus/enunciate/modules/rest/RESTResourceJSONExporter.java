@@ -32,9 +32,7 @@ import java.util.Map;
  */
 public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
-  private Map<String, String> ns2prefix;
   private boolean enabled = false;
-
 
   public RESTResourceJSONExporter(RESTResource resource) {
     super(resource);
@@ -70,15 +68,7 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
   @Override
   protected View createView(RESTOperation operation, Object result) {
-    return new JSONResultView(operation, result, this.ns2prefix);
+    return new JSONResultView(operation, result, getNamespaces2Prefixes());
   }
 
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @param ns2prefix The map of namespaces to prefixes.
-   */
-  public void setNamespaces2Prefixes(Map<String, String> ns2prefix) {
-    this.ns2prefix = ns2prefix;
-  }
 }

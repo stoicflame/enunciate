@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.Map;
 import java.lang.reflect.Array;
 
 /**
@@ -49,6 +50,8 @@ public class RESTResourceXMLExporter extends AbstractController {
   private Pattern urlPattern;
   private final RESTResource resource;
   private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
+  private Map<String, String> ns2prefix;
+  private String[] supportedMethods;
 
   public RESTResourceXMLExporter(RESTResource resource) {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -97,7 +100,8 @@ public class RESTResourceXMLExporter extends AbstractController {
       }
       supportedMethods[i++] = method;
     }
-    setSupportedMethods(supportedMethods);
+    this.supportedMethods = supportedMethods;
+    super.setSupportedMethods(new String[] { "GET", "PUT", "POST", "DELETE" });
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -130,8 +134,11 @@ public class RESTResourceXMLExporter extends AbstractController {
       verb = VerbType.delete;
     }
     else {
-      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported HTTP operation: " + httpMethod);
-      return null;
+      throw new MethodNotAllowedException(this.supportedMethods);
+    }
+
+    if (!resource.getSupportedVerbs().contains(verb)) {
+      throw new MethodNotAllowedException(this.supportedMethods);
     }
 
     try {
@@ -223,7 +230,7 @@ public class RESTResourceXMLExporter extends AbstractController {
    * @return The view.
    */
   protected View createView(RESTOperation operation, Object result) {
-    return new RESTResultView(operation, result);
+    return new RESTResultView(operation, result, getNamespaces2Prefixes());
   }
 
   /**
@@ -236,5 +243,21 @@ public class RESTResourceXMLExporter extends AbstractController {
     return operation != null;
   }
 
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @param ns2prefix The map of namespaces to prefixes.
+   */
+  public void setNamespaces2Prefixes(Map<String, String> ns2prefix) {
+    this.ns2prefix = ns2prefix;
+  }
 
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @return The map of namespaces to prefixes.
+   */
+  public Map<String, String> getNamespaces2Prefixes() {
+    return this.ns2prefix;
+  }
 }

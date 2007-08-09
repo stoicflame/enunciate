@@ -21,9 +21,7 @@ import org.springframework.web.servlet.View;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
 import java.util.Map;
-import java.io.IOException;
 
 /**
  * A view for the result of a REST operation.
@@ -34,6 +32,8 @@ public class RESTResultView implements View {
 
   private final RESTOperation operation;
   private final Object result;
+  private final Map<String, String> ns2prefix;
+  private final PrefixMapper prefixMapper;
 
   /**
    * Construct a view for the result of a REST operation.
@@ -41,9 +41,11 @@ public class RESTResultView implements View {
    * @param operation The operation.
    * @param result The result.
    */
-  public RESTResultView(RESTOperation operation, Object result) {
+  public RESTResultView(RESTOperation operation, Object result, Map<String, String> ns2prefix) {
     this.operation = operation;
     this.result = result;
+    this.ns2prefix = ns2prefix;
+    this.prefixMapper = new PrefixMapper(ns2prefix);
   }
 
   /**
@@ -77,6 +79,7 @@ public class RESTResultView implements View {
     if (result != null) {
       response.setContentType("text/xml");
       Marshaller marshaller = operation.getSerializationContext().createMarshaller();
+      marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
       marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
       marshal(marshaller, request, response);
     }
@@ -90,5 +93,14 @@ public class RESTResultView implements View {
    */
   protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
     marshaller.marshal(getResult(), response.getOutputStream());
+  }
+
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @return The map of namespaces to prefixes.
+   */
+  public Map<String, String> getNamespaces2Prefixes() {
+    return this.ns2prefix;
   }
 }

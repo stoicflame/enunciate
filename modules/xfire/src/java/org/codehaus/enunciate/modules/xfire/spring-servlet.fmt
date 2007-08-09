@@ -96,7 +96,7 @@
 
   [@forEachRESTNoun]
         <entry key="/rest/${noun}">
-          <bean parent="xml-endpoint">
+          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
                 <constructor-arg><value>${noun.name}</value></constructor-arg>
@@ -107,7 +107,7 @@
         </entry>
 
         <entry key="/rest/${noun}/**">
-          <bean parent="xml-endpoint">
+          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
                 <constructor-arg><value>${noun.name}</value></constructor-arg>
@@ -118,7 +118,7 @@
         </entry>
 
         <entry key="/json/${noun}">
-          <bean parent="json-endpoint">
+          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
                 <constructor-arg><value>${noun.name}</value></constructor-arg>
@@ -129,7 +129,7 @@
         </entry>
 
         <entry key="/json/${noun}/**">
-          <bean parent="json-endpoint">
+          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
                 <constructor-arg><value>${noun.name}</value></constructor-arg>
@@ -160,10 +160,7 @@
   <bean id="enunciatedServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
 
   <!-- define the parent for all xml-rest service endpoints -->
-  <bean id="xml-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter"/>
-
-  <!-- define the parent for all json service endpoints -->
-  <bean id="json-endpoint" abstract="true" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
+  <bean id="rest-endpoint" abstract="true">
     <property name="namespaces2Prefixes">
       <map>
   [#list ns2prefix?keys as ns]
