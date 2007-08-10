@@ -45,11 +45,13 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String label = "enunciate";
   private String description = null;
   private String deploymentProtocol = "http";
-  private String deploymentHost = null;
+  private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
+  private String defaultSoapSubcontext = "/soap/";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
+  private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
   private final Set<String> jaxbPackageImports = new HashSet<String>();
   private final Set<String> jaxbClassImports = new HashSet<String>();
 
@@ -196,6 +198,52 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * The default soap context.
+   *
+   * @return The default soap context.
+   */
+  public String getDefaultSoapSubcontext() {
+    return defaultSoapSubcontext;
+  }
+
+  /**
+   * The default soap context.
+   *
+   * @param defaultSoapSubcontext The default soap context.
+   */
+  public void setDefaultSoapSubcontext(String defaultSoapSubcontext) {
+    this.defaultSoapSubcontext = defaultSoapSubcontext;
+  }
+
+  /**
+   * Adds a custom soap endpoint location for an SOAP service.
+   *
+   * @param serviceName The service name.
+   * @param relativePath The relative path to the service.
+   */
+  public void addSoapEndpointLocation(String serviceName, String relativePath) {
+    if (serviceName == null) {
+      throw new IllegalArgumentException("A service name must be provided for a custom soap endpoint location.");
+    }
+
+    if (relativePath != null) {
+      if ("".equals(relativePath)) {
+        throw new IllegalArgumentException("A relative path for the custom soap location must be provided for the service name '" + serviceName + "'.");
+      }
+
+      if (relativePath.endsWith("/")) {
+        throw new IllegalArgumentException("A custom relative path must not end with a '/'.");
+      }
+
+      if (!relativePath.startsWith("/")) {
+        relativePath = "/" + relativePath;
+      }
+
+      this.soapServices2Paths.put(serviceName, relativePath);
+    }
+  }
+
+  /**
    * Add a JAXB import to the configuration.  Either class or package must be specified, but not both.
    *
    * @param clazz The FQN of the class to import.
@@ -242,6 +290,15 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public Map<String, String> getNamespacesToPrefixes() {
     return this.namespaces;
+  }
+
+  /**
+   * Get the map of SOAP service names to custom paths.
+   *
+   * @return The map of soap service names to custom paths.
+   */
+  public Map<String, String> getSoapServices2Paths() {
+    return soapServices2Paths;
   }
 
   /**
@@ -321,6 +378,14 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/namespaces/namespace", "putNamespace", 2);
     digester.addCallParam("enunciate/namespaces/namespace", 0, "uri");
     digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
+
+    //allow for the default soap subcontext to be set.
+    digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
+
+    //allow for custom location of soap endpoints
+    digester.addCallMethod("enunciate/services/soap/location", "addSoapEndpointLocation", 2);
+    digester.addCallParam("enunciate/services/soap/location", 0, "serviceName");
+    digester.addCallParam("enunciate/services/soap/location", 1, "relativePath");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

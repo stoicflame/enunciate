@@ -60,6 +60,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private IOException ioe = null;
   private RuntimeException re = null;
   private final Enunciate enunciate;
+  private final String deploymentBaseURL;
 
   public EnunciateAnnotationProcessor() throws EnunciateException {
     this(new Enunciate(new String[0], new EnunciateConfiguration()));
@@ -77,6 +78,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     this.enunciate = enunciate;
 
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
+    if (config.getDeploymentContext() != null) {
+      baseURL += "/" + config.getDeploymentContext();
+    }
+    this.deploymentBaseURL = baseURL;
   }
 
   @Override
@@ -125,6 +132,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
+          endpointInterface.setSoapAddressBase(this.deploymentBaseURL);
+          endpointInterface.setSoapAddressPath(getSoapAddressPath(endpointInterface));
           model.add(endpointInterface);
         }
 
@@ -172,6 +181,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     validate(model);
 
     return model;
+  }
+
+  protected String getSoapAddressPath(EndpointInterface endpointInterface) {
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    String path = config.getDefaultSoapSubcontext() + endpointInterface.getServiceName();
+    if (config.getSoapServices2Paths().containsKey(endpointInterface.getServiceName())) {
+      path = config.getSoapServices2Paths().get(endpointInterface.getServiceName());
+    }
+    return path;
   }
 
   /**

@@ -40,10 +40,13 @@ public class RESTOperation {
   final Method method;
   private final int properNounIndex;
   private final Class properNounType;
+  private final Boolean properNounOptional;
   private final Map<String, Integer> adjectiveIndices;
   private final Map<String, Class> adjectiveTypes;
+  private final Map<String, Boolean> adjectivesOptional;
   private final int nounValueIndex;
   private final Class nounValueType;
+  private final Boolean nounValueOptional;
   private final JAXBContext context;
   private final Class resultType;
 
@@ -61,10 +64,13 @@ public class RESTOperation {
 
     int properNounIndex = -1;
     Class properNoun = null;
+    Boolean properNounOptional = null;
     int nounValueIndex = -1;
     Class nounValue = null;
+    Boolean nounValueOptional = null;
     adjectiveTypes = new HashMap<String, Class>();
     adjectiveIndices = new HashMap<String, Integer>();
+    adjectivesOptional = new HashMap<String, Boolean>();
     Class[] parameterTypes = method.getParameterTypes();
     HashSet<Class> contextClasses = new HashSet<Class>();
     for (int i = 0; i < parameterTypes.length; i++) {
@@ -72,6 +78,7 @@ public class RESTOperation {
 
       boolean isAdjective = true;
       String adjectiveName = "arg" + i;
+      boolean adjectiveOptional = false;
       Annotation[] parameterAnnotations = method.getParameterAnnotations()[i];
       for (Annotation annotation : parameterAnnotations) {
         if (annotation instanceof ProperNoun) {
@@ -80,6 +87,15 @@ public class RESTOperation {
               method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
           else if (properNoun == null) {
+            if (((ProperNoun) annotation).optional()) {
+              if (parameterType.isPrimitive()) {
+                throw new IllegalStateException("An optional proper noun cannot be a primitive type for method " +
+                  method.getDeclaringClass().getName() + "." + method.getName() + ".");
+              }
+
+              properNounOptional = true;
+            }
+
             properNoun = parameterType;
             properNounIndex = i;
             isAdjective = false;
@@ -95,6 +111,15 @@ public class RESTOperation {
               method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
           else if (nounValue == null) {
+            if (((NounValue) annotation).optional()) {
+              if (parameterType.isPrimitive()) {
+                throw new IllegalStateException("An optional noun value cannot be a primitive type for method " +
+                  method.getDeclaringClass().getName() + "." + method.getName() + ".");
+              }
+
+              nounValueOptional = true;
+            }
+
             nounValue = parameterType;
             nounValueIndex = i;
             isAdjective = false;
@@ -105,6 +130,15 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof Adjective) {
+          if (((Adjective) annotation).optional()) {
+            if (parameterType.isPrimitive()) {
+              throw new IllegalStateException("An optional adjective cannot be a primitive type for method " +
+                method.getDeclaringClass().getName() + "." + method.getName() + ".");
+            }
+
+            adjectiveOptional = true;
+          }
+
           adjectiveName = ((Adjective) annotation).name();
           break;
         }
@@ -113,6 +147,7 @@ public class RESTOperation {
       if (isAdjective) {
         this.adjectiveTypes.put(adjectiveName, parameterType);
         this.adjectiveIndices.put(adjectiveName, i);
+        this.adjectivesOptional.put(adjectiveName, adjectiveOptional);
       }
 
       if (parameterType.isArray()) {
@@ -138,8 +173,10 @@ public class RESTOperation {
 
     this.properNounType = properNoun;
     this.properNounIndex = properNounIndex;
+    this.properNounOptional = properNounOptional;
     this.nounValueType = nounValue;
     this.nounValueIndex = nounValueIndex;
+    this.nounValueOptional = nounValueOptional;
     this.resultType = returnType;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
@@ -286,6 +323,15 @@ public class RESTOperation {
   }
 
   /**
+   * Whether the proper noun is optional.
+   *
+   * @return Whether the proper noun is optional, or null if no proper noun.
+   */
+  public Boolean isProperNounOptional() {
+    return properNounOptional;
+  }
+
+  /**
    * If this operation accepts a noun value, return the type of the noun value.  Otherwise, return null.
    *
    * @return The noun value type, or null.
@@ -295,12 +341,30 @@ public class RESTOperation {
   }
 
   /**
+   * Whether the noun value is optional.
+   *
+   * @return Whether the noun value is optional, or null if no noun value.
+   */
+  public Boolean isNounValueOptional() {
+    return nounValueOptional;
+  }
+
+  /**
    * The adjective types for this operation.
    *
    * @return The adjective types for this operation.
    */
   public Map<String, Class> getAdjectiveTypes() {
     return adjectiveTypes;
+  }
+
+  /**
+   * The map of whether the adjectives are optional.
+   *
+   * @return The map of whether the adjectives are optional.
+   */
+  public Map<String, Boolean> getAdjectivesOptional() {
+    return adjectivesOptional;
   }
 
   /**

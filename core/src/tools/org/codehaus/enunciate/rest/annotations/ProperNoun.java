@@ -29,4 +29,12 @@ import java.lang.annotation.ElementType;
 @Retention ( RetentionPolicy.RUNTIME )
 @Target ( ElementType.PARAMETER )
 public @interface ProperNoun {
+
+  /**
+   * Whether the noun value is optional.
+   *
+   * @return Whether the noun value is optional.
+   */
+  boolean optional() default true;
+
 }

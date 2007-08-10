@@ -67,6 +67,25 @@ public class RESTParameter extends DecoratedParameterDeclaration {
   }
 
   /**
+   * Whether this REST parameter is optional.
+   *
+   * @return Whether this REST parameter is optional.
+   */
+  public boolean isOptional() {
+    if (isProperNoun()) {
+      return getAnnotation(ProperNoun.class).optional();
+    }
+    else if (isNounValue()) {
+      return getAnnotation(NounValue.class).optional();
+    }
+    else if (getAnnotation(Adjective.class) != null) {
+      return getAnnotation(Adjective.class).optional();
+    }
+
+    return false;
+  }
+
+  /**
    * The name of the adjective.
    *
    * @return The name of the adjective.

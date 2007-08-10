@@ -200,13 +200,30 @@ public class TestRESTOperation extends TestCase {
    * Tests the invoke operation.
    */
   public void testInvoke() throws Exception {
-    RESTOperation operation = new RESTOperation(VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("invokeableOp", RootElementExample.class, String.class, Float.TYPE, Collection.class));
+    RESTOperation operation = new RESTOperation(VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("invokeableOp", RootElementExample.class, String.class, Float.class, Collection.class));
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
     adjectives.put("hi", new Float(1234.5));
     adjectives.put("arg1", "adjective1Value");
     adjectives.put("arg3", new Short[] {8, 7, 6});
     RootElementExample ex = new RootElementExample();
     assertSame(ex, operation.invoke(null, adjectives, ex));
+  }
+
+  /**
+   * Tests the invoke2 operation.
+   */
+  public void testInvoke2() throws Exception {
+    RESTOperation operation = new RESTOperation(VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("invokeableOp2", RootElementExample.class, String.class, Float.class));
+    HashMap<String, Object> adjectives = new HashMap<String, Object>();
+    adjectives.put("hi", new Float(1234.5));
+    adjectives.put("ho", new Float(888.777));
+    RootElementExample ex = new RootElementExample();
+    assertSame(ex, operation.invoke("properNounValue", adjectives, ex));
+    assertNull(operation.invoke(null, adjectives, ex));
+    adjectives.remove("hi");
+    Object differentEx = operation.invoke("properNounValue", adjectives, ex);
+    assertNotNull(differentEx);
+    assertFalse(differentEx == ex);
   }
 
 }

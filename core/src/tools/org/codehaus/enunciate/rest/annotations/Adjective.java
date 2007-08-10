@@ -38,4 +38,11 @@ public @interface Adjective {
    */
   String name();
 
+  /**
+   * Whether the noun value is optional.
+   *
+   * @return Whether the noun value is optional.
+   */
+  boolean optional() default true;
+
 }

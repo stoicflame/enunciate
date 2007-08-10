@@ -37,7 +37,7 @@ public class RESTOperationExamples {
   }
 
   public void customAdjectives(@Adjective (name = "howdy") String adjective1,
-                               @Adjective (name = "doody") double adjective2) {
+                               @Adjective (name = "doody", optional = false) double adjective2) {
   }
 
   public void adjectivesAsLists(@Adjective (name = "bools") boolean[] bools, @Adjective (name="ints") Collection<Integer> ints) {
@@ -72,7 +72,7 @@ public class RESTOperationExamples {
     return null;
   }
 
-  public RootElementExample invokeableOp(@NounValue RootElementExample ex, String adjective1, @Adjective(name="hi") float adjective2, Collection<Short> adjective3) {
+  public RootElementExample invokeableOp(@NounValue RootElementExample ex, String adjective1, @Adjective(name="hi") Float adjective2, Collection<Short> adjective3) {
     if (!"adjective1Value".equals(adjective1)) {
       throw new RuntimeException();
     }
@@ -89,6 +89,24 @@ public class RESTOperationExamples {
       throw new RuntimeException();
     }
     if (6 != iterator.next()) {
+      throw new RuntimeException();
+    }
+
+    return ex;
+  }
+
+  public RootElementExample invokeableOp2(@NounValue RootElementExample ex, @ProperNoun String properNoun, @Adjective(name="hi") Float adjective) {
+    if (properNoun == null) {
+      return null;
+    }
+    else if (!"properNounValue".equals(properNoun)) {
+      throw new RuntimeException();
+    }
+
+    if (adjective == null) {
+      return new RootElementExample();
+    }
+    else if (1234.5 != adjective) {
       throw new RuntimeException();
     }
 

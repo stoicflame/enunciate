@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
+package org.codehaus.enunciate.modules.rest;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import org.codehaus.enunciate.rest.annotations.RESTError;
 
 /**
- * Indicates that the annotated parameter is the value for the noun for its method.
+ * Thrown when a required parameter is not present.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( ElementType.PARAMETER )
-public @interface NounValue {
+@RESTError (
+  errorCode = 400
+)
+public class MissingParameterException extends Exception {
 
-  /**
-   * Whether the noun value is optional.
-   *
-   * @return Whether the noun value is optional.
-   */
-  boolean optional() default false;
+  public MissingParameterException(String message) {
+    super(message);
+  }
   
 }

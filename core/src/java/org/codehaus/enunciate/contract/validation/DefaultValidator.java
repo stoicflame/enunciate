@@ -164,6 +164,10 @@ public class DefaultValidator implements Validator {
           if (properNoun.isCollectionType()) {
             result.addError(properNoun.getPosition(), "A proper noun is not allowed to be a collection or an array.");
           }
+
+          if ((properNoun.isOptional()) && (properNoun.getType() instanceof PrimitiveType)) {
+            result.addError(properNoun.getPosition(), "An optional proper noun parameter cannot be a primitive type.");
+          }
         }
 
         HashSet<String> adjectives = new HashSet<String>();
@@ -174,6 +178,10 @@ public class DefaultValidator implements Validator {
 
           if (!adjective.getXmlType().isSimple()) {
             result.addError(adjective.getPosition(), "An adjective must either be of simple xml type, or of a collection (or array) of simple xml types.");
+          }
+
+          if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
+            result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
           }
         }
 
@@ -186,6 +194,10 @@ public class DefaultValidator implements Validator {
           XmlType nounValueType = nounValue.getXmlType();
           if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
             result.addError(nounValue.getPosition(), "A noun value must be a JAXB 2.0 root element.");
+          }
+
+          if ((nounValue.isOptional()) && (nounValue.getType() instanceof PrimitiveType)) {
+            result.addError(nounValue.getPosition(), "An optional noun value parameter cannot be a primitive type.");
           }
         }
       }

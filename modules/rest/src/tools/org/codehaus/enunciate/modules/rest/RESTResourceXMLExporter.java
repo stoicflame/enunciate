@@ -16,28 +16,28 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.View;
+import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
-import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.AbstractController;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.bind.Unmarshaller;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.Set;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.Array;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An xml exporter for a REST resource.
@@ -176,10 +176,20 @@ public class RESTResourceXMLExporter extends AbstractController {
     unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
 
     Object properNounValue = null;
-    if ((properNoun != null) && (operation.getProperNounType() != null)) {
-      Element element = document.createElement("unimportant");
-      element.appendChild(document.createTextNode(properNoun));
-      properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
+    if (operation.getProperNounType() != null) {
+      if (properNoun != null) {
+        if (!String.class.isAssignableFrom(operation.getProperNounType())) {
+          Element element = document.createElement("unimportant");
+          element.appendChild(document.createTextNode(properNoun));
+          properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
+        }
+        else {
+          properNounValue = properNoun;
+        }
+      }
+      else if (!operation.isProperNounOptional()) {
+        throw new MissingParameterException("A specific '" + resource.getNoun() + "' must be specified on the URL.");
+      }
     }
 
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
@@ -196,9 +206,14 @@ public class RESTResourceXMLExporter extends AbstractController {
         Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
 
         for (int i = 0; i < parameterValues.length; i++) {
-          Element element = document.createElement("unimportant");
-          element.appendChild(document.createTextNode(parameterValues[i]));
-          Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
+          if (!String.class.isAssignableFrom(componentType)) {
+            Element element = document.createElement("unimportant");
+            element.appendChild(document.createTextNode(parameterValues[i]));
+            Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
+          }
+          else {
+            Array.set(adjectiveValues, i, parameterValues[i]);
+          }
         }
 
         if (adjectiveType.isArray()) {
@@ -209,13 +224,25 @@ public class RESTResourceXMLExporter extends AbstractController {
         }
       }
 
+      if ((adjectiveValue == null) && (!operation.getAdjectivesOptional().get(adjective))) {
+        throw new MissingParameterException("Missing request parameter: " + adjective);
+      }
+
       adjectives.put(adjective, adjectiveValue);
     }
 
     Object nounValue = null;
     if (operation.getNounValueType() != null) {
-      //if the operation has a noun value type, unmarshall it from the body....
-      nounValue = unmarshaller.unmarshal(request.getInputStream());
+      try {
+        //if the operation has a noun value type, unmarshall it from the body....
+        nounValue = unmarshaller.unmarshal(request.getInputStream());
+      }
+      catch (Exception e) {
+        //if we can't unmarshal the noun value, continue if the noun value is optional.
+        if (!operation.isNounValueOptional()) {
+          throw e;
+        }
+      }
     }
 
     Object result = operation.invoke(properNounValue, adjectives, nounValue);
