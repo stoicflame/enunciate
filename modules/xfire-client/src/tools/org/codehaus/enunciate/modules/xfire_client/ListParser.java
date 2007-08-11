@@ -104,7 +104,7 @@ public class ListParser extends AbstractMessageReader {
       Collection collection;
       if ((collectionType.isInterface()) || (Modifier.isAbstract(collectionType.getModifiers()))) {
         if (Set.class.isAssignableFrom(collectionType)) {
-          collection = new TreeSet();
+          collection = new HashSet();
         }
         else {
           collection = new ArrayList();

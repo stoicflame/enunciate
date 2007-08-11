@@ -196,48 +196,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    String endpointProtocol = "http";
-    String endpointHostname = null;
-    String endpointContext = null;
-    if (enunciate.getConfig() != null) {
-      if (enunciate.getConfig().getDeploymentProtocol() != null) {
-        endpointProtocol = enunciate.getConfig().getDeploymentProtocol();
-      }
-
-      if (enunciate.getConfig().getDeploymentHost() != null) {
-        endpointHostname = enunciate.getConfig().getDeploymentHost();
-      }
-
-      if (enunciate.getConfig().getDeploymentContext() != null) {
-        endpointContext = enunciate.getConfig().getDeploymentContext();
-      }
-    }
-
-    if (endpointContext == null) {
-      String label = "";
-      if (endpointHostname != null) {
-        label = "enunciate/";
-        if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
-          label = enunciate.getConfig().getLabel() + "/";
-        }
-      }
-
-      endpointContext = label + "soap";
-      warn("WARNING: No context specified for the SOAP endpoints.  Defaulting to %s.", endpointContext);
-    }
-    else {
-      if (endpointContext.startsWith("/")) {
-        endpointContext = endpointContext.substring(1);
-      }
-
-      if (endpointContext.endsWith("/")) {
-        endpointContext = endpointContext.substring(0, endpointContext.length() - 1);
-      }
-    }
-
-    model.put("endpointProtocol", endpointProtocol);
-    model.put("endpointHostname", endpointHostname);
-    model.put("endpointContext", endpointContext);
     model.put("prefix", new PrefixMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);

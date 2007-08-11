@@ -60,6 +60,7 @@
     <xs:complexContent>
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="size" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

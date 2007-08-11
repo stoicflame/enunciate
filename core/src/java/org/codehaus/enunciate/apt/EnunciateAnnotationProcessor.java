@@ -81,7 +81,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     EnunciateConfiguration config = this.enunciate.getConfig();
     String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
     if (config.getDeploymentContext() != null) {
-      baseURL += "/" + config.getDeploymentContext();
+      baseURL += config.getDeploymentContext();
+    }
+    else if ((config.getLabel() != null) && (!"".equals(config.getLabel()))) {
+      //we don't have a default context set, so we'll just guess that it's the project label.
+      baseURL += ("/" + config.getLabel());
     }
     this.deploymentBaseURL = baseURL;
   }
@@ -183,6 +187,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     return model;
   }
 
+  /**
+   * Get the soap address path for the specified endpoint interface.
+   *
+   * @param endpointInterface The endpoint interface for which to get the soap address path.
+   * @return The soap address path for the endpoint interface.
+   */
   protected String getSoapAddressPath(EndpointInterface endpointInterface) {
     EnunciateConfiguration config = this.enunciate.getConfig();
     String path = config.getDefaultSoapSubcontext() + endpointInterface.getServiceName();

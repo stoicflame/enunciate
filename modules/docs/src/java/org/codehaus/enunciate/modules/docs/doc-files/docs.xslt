@@ -544,11 +544,13 @@
                         <table>
                           <tr>
                             <th>file</th>
+                            <th>size</th>
                             <th>description</th>
                           </tr>
                           <xsl:for-each select="files/file">
                             <tr>
                               <td><a href="{@name}"><xsl:value-of select="@name"/></a></td>
+                              <td><xsl:value-of select="@size"/></td>
                               <td><xsl:value-of select="." disable-output-escaping="yes"/></td>
                             </tr>
                           </xsl:for-each>
@@ -558,10 +560,12 @@
                         <table>
                           <tr>
                             <th>file</th>
+                            <th>size</th>
                           </tr>
                           <xsl:for-each select="files/file">
                             <tr>
                               <td><a href="{@name}"><xsl:value-of select="@name"/></a></td>
+                              <td><xsl:value-of select="@size"/></td>
                             </tr>
                           </xsl:for-each>
                         </table>

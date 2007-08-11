@@ -15,6 +15,7 @@
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="services" type="services" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute name="label" type="xs:string"/>
@@ -31,7 +32,7 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="class" use="required"/>
+    <xs:attribute name="class" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="deployment">
@@ -42,9 +43,50 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="protocol"/>
-    <xs:attribute name="host"/>
-    <xs:attribute name="context"/>
+    <xs:attribute name="protocol" type="xs:string" />
+    <xs:attribute name="host" type="xs:string" />
+    <xs:attribute name="context" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="services">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for specific services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="soap" type="services-soap" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="services-soap">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for SOAP services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="service" type="services-soap-service" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+    <xs:attribute name="defaultSubcontext" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="services-soap-service">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for a specific soap service.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="name" use="required" type="xs:string" />
+    <xs:attribute name="relativePath" use="required" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="namespaces">
@@ -67,8 +109,8 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="id" use="required"/>
-    <xs:attribute name="uri" use="required"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="uri" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="jaxb-import">

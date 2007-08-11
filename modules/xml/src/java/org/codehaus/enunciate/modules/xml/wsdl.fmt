@@ -255,12 +255,7 @@ Template library for WSDL.
 --]
 [#macro processSOAPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
-      [#--todo: make this address a known token so the server-side code can process it.--]
-  [#if endpointHostname?exists]
-      <${soap}:address location="${endpointProtocol?default("http")}://${endpointHostname}/${endpointContext?default("enunciate/soap")}/${endpointInterface.serviceName}"/>
-  [#else]
-      <${soap}:address location="${endpointContext?default("soap")}/${endpointInterface.serviceName}"/>
-  [/#if]
+      <${soap}:address location="${endpointInterface.soapAddressLocation}"/>
     </port>
 [/#macro]
 

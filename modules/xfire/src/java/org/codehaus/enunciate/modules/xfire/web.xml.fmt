@@ -1,3 +1,5 @@
+[#ftl]
+[@file name="web.xml"]
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <!DOCTYPE web-app PUBLIC
@@ -22,20 +24,40 @@
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
   </servlet>
 
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+      [#list endpointInterface.endpointImplementations as impl]
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/soap/*</url-pattern>
+    <url-pattern>${endpointInterface.soapAddressPath}</url-pattern>
+  </servlet-mapping>
+        [/#if]
+      [/#list]
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+  [@forEachRESTNoun]
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/rest/${noun}</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/rest/${noun}/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/json/*</url-pattern>
+    <url-pattern>/json/${noun}</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/json/${noun}/*</url-pattern>
+  </servlet-mapping>
+  [/@forEachRESTNoun]
 
   <mime-mapping>
     <extension>wsdl</extension>
@@ -48,3 +70,4 @@
   </mime-mapping>
 
 </web-app>
+[/@file]

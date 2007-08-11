@@ -36,6 +36,7 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
   private String platform;
   private String description;
   private final ArrayList<FileArtifact> artifacts = new ArrayList<FileArtifact>();
+  private long size = -1;
 
   public ClientLibraryArtifact(String module, String id, String name) {
     super(module, id);
@@ -58,6 +59,7 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
 
     if (!file.exists() || !file.isDirectory()) {
       enunciate.zip(dir, file);
+      size = file.length();
     }
   }
 
@@ -77,6 +79,15 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
    */
   public Collection<? extends Artifact> getArtifacts() {
     return this.artifacts;
+  }
+
+  /**
+   * If this artifact has been exported to a zip file, it will return the size in bytes of that file.  Otherwise, -1.
+   *
+   * @return The size in bytes of the zip file, or -1 if no zip file has been created yet.
+   */
+  public long getSize() {
+    return this.size;
   }
 
   /**

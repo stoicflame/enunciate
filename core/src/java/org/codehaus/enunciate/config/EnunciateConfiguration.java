@@ -184,6 +184,20 @@ public class EnunciateConfiguration implements ErrorHandler {
    * @param deploymentContext The context at which the deployed app will be mounted.
    */
   public void setDeploymentContext(String deploymentContext) {
+    if (deploymentContext == null) {
+      deploymentContext = "";
+    }
+
+    if (!"".equals(deploymentContext)) {
+      if (!deploymentContext.startsWith("/")) {
+        deploymentContext = "/" + deploymentContext;
+      }
+
+      if (deploymentContext.endsWith("/")) {
+        deploymentContext = deploymentContext.substring(0, deploymentContext.length() - 1);
+      }
+    }
+
     this.deploymentContext = deploymentContext;
   }
 
@@ -212,6 +226,22 @@ public class EnunciateConfiguration implements ErrorHandler {
    * @param defaultSoapSubcontext The default soap context.
    */
   public void setDefaultSoapSubcontext(String defaultSoapSubcontext) {
+    if (defaultSoapSubcontext == null) {
+      throw new IllegalArgumentException("The default SOAP context must not be null.");
+    }
+
+    if ("".equals(defaultSoapSubcontext)) {
+      throw new IllegalArgumentException("The default SOAP context must not be the emtpy string.");
+    }
+
+    if (!defaultSoapSubcontext.startsWith("/")) {
+      defaultSoapSubcontext = "/" + defaultSoapSubcontext;
+    }
+
+    if (!defaultSoapSubcontext.endsWith("/")) {
+      defaultSoapSubcontext = defaultSoapSubcontext + "/";
+    }
+
     this.defaultSoapSubcontext = defaultSoapSubcontext;
   }
 
@@ -383,9 +413,9 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
 
     //allow for custom location of soap endpoints
-    digester.addCallMethod("enunciate/services/soap/location", "addSoapEndpointLocation", 2);
-    digester.addCallParam("enunciate/services/soap/location", 0, "serviceName");
-    digester.addCallParam("enunciate/services/soap/location", 1, "relativePath");
+    digester.addCallMethod("enunciate/services/soap/service", "addSoapEndpointLocation", 2);
+    digester.addCallParam("enunciate/services/soap/service", 0, "name");
+    digester.addCallParam("enunciate/services/soap/service", 1, "relativePath");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

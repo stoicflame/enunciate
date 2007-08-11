@@ -70,6 +70,15 @@ public class DownloadBundle extends BaseArtifact implements ArtifactBundle, Name
   }
 
   /**
+   * The size of this download bundle.
+   *
+   * @return The size of this download bundle.
+   */
+  public long getSize() {
+    return this.file.getSize();
+  }
+
+  /**
    * The name of this bundle.
    *
    * @param name The name of this bundle.

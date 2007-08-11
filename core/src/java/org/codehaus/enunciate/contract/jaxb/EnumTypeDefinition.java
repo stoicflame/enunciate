@@ -29,6 +29,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -106,7 +107,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isEnum() {
-    return true;
+    return getAnnotation(XmlJavaTypeAdapter.class) == null;
   }
 
   @Override

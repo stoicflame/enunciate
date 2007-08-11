@@ -29,6 +29,7 @@ import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipInputStream;
 
 /**
  * Main enunciate entry point.
@@ -573,6 +574,36 @@ public class Enunciate {
       else {
         copyFile(file, new File(to, file.getName()));
       }
+    }
+  }
+
+  /**
+   * Extracts the (zipped up) base to the specified directory.
+   *
+   * @param baseIn The stream to the base.
+   * @param toDir The directory to extract to.
+   */
+  public void extractBase(InputStream baseIn, File toDir) throws IOException {
+    ZipInputStream in = new ZipInputStream(baseIn);
+    ZipEntry entry = in.getNextEntry();
+    while (entry != null) {
+      File file = new File(toDir, entry.getName());
+      debug("Extracting %s to %s.", entry.getName(), file);
+      if (entry.isDirectory()) {
+        file.mkdirs();
+      }
+      else {
+        FileOutputStream out = new FileOutputStream(file);
+        byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+          out.write(buffer, 0, len);
+        }
+        out.close();
+      }
+
+      in.closeEntry();
+      entry = in.getNextEntry();
     }
   }
 

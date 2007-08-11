@@ -26,6 +26,7 @@ import java.io.IOException;
  */
 public class FileArtifact extends BaseArtifact {
 
+  private boolean bundled;
   private final File file;
   private String description;
 
@@ -73,6 +74,15 @@ public class FileArtifact extends BaseArtifact {
   }
 
   /**
+   * The size of the file.
+   *
+   * @return The size of the file.
+   */
+  public long getSize() {
+    return this.file.length();
+  }
+
+  /**
    * The description of this file artifact.
    *
    * @return The description of this file artifact.
@@ -88,5 +98,23 @@ public class FileArtifact extends BaseArtifact {
    */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * Whether this file artifact is bundled.
+   *
+   * @return Whether this file artifact is bundled.
+   */
+  public boolean isBundled() {
+    return bundled;
+  }
+
+  /**
+   * Whether this file artifact is bundled.
+   *
+   * @param bundled Whether this file artifact is bundled.
+   */
+  public void setBundled(boolean bundled) {
+    this.bundled = bundled;
   }
 }

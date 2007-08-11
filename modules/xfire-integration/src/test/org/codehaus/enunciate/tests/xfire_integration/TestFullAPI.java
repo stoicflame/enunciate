@@ -77,7 +77,7 @@ public class TestFullAPI extends TestCase {
       context = System.getProperty("container.test.context");
     }
 
-    SourceService sourceService = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap/source-service");
+    SourceService sourceService = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/sources/source");
     Source source = sourceService.getSource("valid");
     assertEquals("valid", source.getId());
     assertEquals(URI.create("uri:some-uri"), source.getLink());
@@ -139,7 +139,7 @@ public class TestFullAPI extends TestCase {
       //fall through...
     }
 
-    PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/soap/PersonServiceService");
+    PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/PersonServiceService");
     ArrayList<String> ids = new ArrayList<String>(Arrays.asList("id1", "id2", "id3", "id4"));
     Collection persons = personService.readPersons(ids);
     for (Object o : persons) {
@@ -220,7 +220,7 @@ public class TestFullAPI extends TestCase {
 //      }
 //    }
 //
-    RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap/RelationshipServiceService");
+    RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/RelationshipServiceService");
     List list = relationshipService.getRelationships("someid");
     for (int i = 0; i < list.size(); i++) {
       Relationship relationship = (Relationship) list.get(i);

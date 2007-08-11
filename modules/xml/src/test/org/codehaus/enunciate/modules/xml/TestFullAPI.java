@@ -85,8 +85,10 @@ public class TestFullAPI extends TestCase {
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
     config.setDeploymentHost("www.thebestgenealogywebsite.com");
-    config.setDeploymentContext("/genealogy/soap/");
+    config.setDeploymentContext("/genealogy");
     config.setDeploymentProtocol("https");
+    config.setDefaultSoapSubcontext("/bubbles");
+    config.addSoapEndpointLocation("source-service", "/some/path/way/out/there");
     config.putNamespace(CITE_NAMESPACE, "cite");
     config.putNamespace(DATA_NAMESPACE, "data");
     config.putNamespace(FULL_NAMESPACE, "full");
@@ -185,7 +187,7 @@ public class TestFullAPI extends TestCase {
         Port port = (Port) ports.values().iterator().next();
         assertEquals("PersonServiceSOAPPort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
-        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/PersonServiceService", address.getLocationURI());
+        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/bubbles/PersonServiceService", address.getLocationURI());
 
         assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "PersonServiceSOAPBinding")), port.getBinding());
       }
@@ -195,7 +197,7 @@ public class TestFullAPI extends TestCase {
         Port port = (Port) ports.values().iterator().next();
         assertEquals("SourceServiceSOAPPort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
-        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/source-service", address.getLocationURI());
+        assertEquals("https://www.thebestgenealogywebsite.com/genealogy/some/path/way/out/there", address.getLocationURI());
 
         assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "SourceServiceSOAPBinding")), port.getBinding());
       }

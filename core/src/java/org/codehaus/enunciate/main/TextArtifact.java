@@ -19,6 +19,7 @@ package org.codehaus.enunciate.main;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * An artifact that is some text.
@@ -27,6 +28,7 @@ import java.io.PrintWriter;
  */
 public class TextArtifact extends BaseArtifact {
 
+  private boolean bundled;
   private final String text;
 
   public TextArtifact(String module, String id, String text) {
@@ -58,5 +60,37 @@ public class TextArtifact extends BaseArtifact {
     writer.print(this.text);
     writer.flush();
     writer.close();
+  }
+
+  /**
+   * The size of the bytes of the text, UTF-8.
+   *
+   * @return The size of the bytes of the text, UTF-8.
+   */
+  public long getSize() {
+    try {
+      return this.text.getBytes("utf-8").length;
+    }
+    catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Whether this file artifact is bundled.
+   *
+   * @return Whether this file artifact is bundled.
+   */
+  public boolean isBundled() {
+    return bundled;
+  }
+
+  /**
+   * Whether this file artifact is bundled.
+   *
+   * @param bundled Whether this file artifact is bundled.
+   */
+  public void setBundled(boolean bundled) {
+    this.bundled = bundled;
   }
 }

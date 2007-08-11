@@ -33,6 +33,8 @@ public class WarConfig {
   private final List<ExcludeJars> excludeJars = new ArrayList<ExcludeJars>();
   private String name;
   private URL webXMLTransformURL;
+  private String preBase;
+  private String postBase;
 
   /**
    * The name of the war.
@@ -115,5 +117,39 @@ public class WarConfig {
     this.warLibs.add(warLib.getPath());
   }
 
+  /**
+   * The base of the war directory before copying enunciate-specific files.
+   *
+   * @return The base of the war directory before copying enunciate-specific files.
+   */
+  public String getPreBase() {
+    return preBase;
+  }
 
+  /**
+   * The base of the war directory before copying enunciate-specific files.
+   *
+   * @param preBase The base of the war directory before copying enunciate-specific files.
+   */
+  public void setPreBase(String preBase) {
+    this.preBase = preBase;
+  }
+
+  /**
+   * The base of the war directory after copying enunciate-specific files.
+   *
+   * @return The base of the war directory after copying enunciate-specific files.
+   */
+  public String getPostBase() {
+    return postBase;
+  }
+
+  /**
+   * The base of the war directory after copying enunciate-specific files.
+   *
+   * @param postBase The base of the war directory after copying enunciate-specific files.
+   */
+  public void setPostBase(String postBase) {
+    this.postBase = postBase;
+  }
 }

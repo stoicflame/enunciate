@@ -39,6 +39,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileReader;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -94,8 +96,8 @@ import java.util.List;
  * it's contents are copied to WEB-INF/classes.)</p>
  *
  * <p>The web.xml file is copied to the WEB-INF directory.  A tranformation can be applied to the web.xml file before the copy,
- * if specified on the config, allowing you to apply your own servlet filters, etc.  <a href="doc-files/web.xml">Click here</a>
- * to see the default one that can be transformed.</p>
+ * if specified on the config, allowing you to apply your own servlet filters, etc.  <i>Take care to preserve the existing elements
+ * when applying a transformation to the web.xml file, as losing data will result in missing or malfunctioning endpoints.</i></p>
  *
  * <p>The spring-servlet.xml file is generated and copied to the WEB-INF directory.  You can specify other spring config files that
  * will be copied (and imported by the spring-servlet.xml file) in the configuration.  This option allows you to specify spring AOP
@@ -128,6 +130,10 @@ import java.util.List;
  *       directory.  No tranformation will be applied if none is specified.</li>
  *   <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
  *       directory.  No tranformation will be applied if none is specified.</li>
+ *   <li>The "<b>preBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
+ *       the building war directory <i>before</i> it is provided with any Enunciate-specific files and directories.</li>
+ *   <li>The "<b>postBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
+ *       the building war directory <i>after</i> it is provided with any Enunciate-specific files and directories.</li>
  * </ul>
  *
  * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of directories on the classpath
@@ -234,6 +240,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
   private boolean compileDebugInfo = true;
+  private File preBase = null;
+  private File postBase = null;
 
   /**
    * @return "xfire"
@@ -248,6 +256,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected URL getSpringServletTemplateURL() {
     return XFireDeploymentModule.class.getResource("spring-servlet.fmt");
+  }
+
+  /**
+   * @return The URL to "xfire-servlet.fmt"
+   */
+  protected URL getWebXmlTemplateURL() {
+    return XFireDeploymentModule.class.getResource("web.xml.fmt");
   }
 
   /**
@@ -288,6 +303,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       model.put("handlerInterceptors", this.handlerInterceptors);
     }
     processTemplate(getSpringServletTemplateURL(), model);
+    processTemplate(getWebXmlTemplateURL(), model);
 
     //generate the rpc request/response beans.
     model.setFileOutputDirectory(getJAXWSGenerateDir());
@@ -370,6 +386,18 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
+    if ((this.warConfig != null) && (this.warConfig.getPreBase() != null)) {
+      File preBase = enunciate.resolvePath(this.warConfig.getPreBase());
+      if (preBase.isDirectory()) {
+        info("Copying preBase directory %s to %s...", preBase, buildDir);
+        enunciate.copyDir(preBase, buildDir);
+      }
+      else {
+        info("Extracting preBase zip file %s to %s...", preBase, buildDir);
+        enunciate.extractBase(new FileInputStream(preBase), buildDir);
+      }
+    }
+
     info("Building the expanded WAR in %s", buildDir);
     File webinf = new File(buildDir, "WEB-INF");
     File webinfClasses = new File(webinf, "classes");
@@ -414,7 +442,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
     //put the web.xml in WEB-INF.  Pass it through a stylesheet, if specified.
-    URL webXML = getClass().getResource("/org/codehaus/enunciate/modules/xfire/doc-files/web.xml");
+    File xfireConfigDir = getXMLGenerateDir();
+    File webXML = new File(xfireConfigDir, "web.xml");
     File destWebXML = new File(webinf, "web.xml");
     if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
       URL transformURL = this.warConfig.getWebXMLTransformURL();
@@ -423,18 +452,17 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
         StreamSource source = new StreamSource(transformURL.openStream());
         Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
         info("Transforming %s to %s.", webXML, destWebXML);
-        transformer.transform(new StreamSource(webXML.openStream()), new StreamResult(destWebXML));
+        transformer.transform(new StreamSource(new FileReader(webXML)), new StreamResult(destWebXML));
       }
       catch (TransformerException e) {
         throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
       }
     }
     else {
-      enunciate.copyResource(webXML, destWebXML);
+      enunciate.copyFile(webXML, destWebXML);
     }
 
     //copy the spring servlet config from the build dir to the WEB-INF directory.
-    File xfireConfigDir = getXMLGenerateDir();
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.
@@ -451,6 +479,19 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
     else {
       warn("WARNING: No documentation artifact found!");
+    }
+
+    //extract a post base if specified.
+    if ((this.warConfig != null) && (this.warConfig.getPostBase() != null)) {
+      File postBase = enunciate.resolvePath(this.warConfig.getPostBase());
+      if (postBase.isDirectory()) {
+        info("Copying preBase directory %s to %s...", postBase, buildDir);
+        enunciate.copyDir(postBase, buildDir);
+      }
+      else {
+        info("Extracting preBase zip file %s to %s...", postBase, buildDir);
+        enunciate.extractBase(new FileInputStream(postBase), buildDir);
+      }
     }
 
     //export the unexpanded application directory.

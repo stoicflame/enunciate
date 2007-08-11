@@ -70,7 +70,7 @@
 
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
         [#--todo: what about eis with the same name, different namespace?--]
-        <entry key="/soap/${endpointInterface.serviceName}">
+        <entry key="${endpointInterface.soapAddressPath}">
           <bean parent="soap-endpoint">
             <property name="serviceClass">
               <value>${impl.qualifiedName}</value>

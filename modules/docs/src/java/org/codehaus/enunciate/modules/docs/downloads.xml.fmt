@@ -12,11 +12,11 @@
     [#if download.artifacts?exists]
       [#list download.artifacts as artifact]
         [#if artifact.name?exists]
-      <file name="${artifact.name}"><![CDATA[${artifact.description?default("")}]]></file>
+      <file name="${artifact.name}" size="${artifact.size}"><![CDATA[${artifact.description?default("")}]]></file>
         [/#if]
       [/#list]
     [#elseif download.name?exists]
-      <file name="${download.name}"/>
+      <file name="${download.name}" size="${download.size}"/>
     [/#if]
     </files>
     <description><![CDATA[${download.description?default("")}]]></description>

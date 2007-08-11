@@ -20,29 +20,34 @@ import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.main.*;
-import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
-import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
-import net.sf.jelly.apt.freemarker.APTJellyObjectWrapper;
+import org.apache.commons.digester.RuleSet;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.SchemaInfo;
+import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.main.Artifact;
+import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.NamedArtifact;
+import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
+import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
 
-import javax.xml.transform.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import org.apache.commons.digester.RuleSet;
 
 /**
  * <h1>Documentation Module</h1>
@@ -404,7 +409,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     buildDir.mkdirs();
     if (this.base == null) {
       debug("Default base to be used for documentation base.");
-      extractBase(loadDefaultBase(), buildDir);
+      enunciate.extractBase(loadDefaultBase(), buildDir);
 
       if (this.css != null) {
         enunciate.copyFile(this.css, new File(buildDir, "default.css"));
@@ -416,7 +421,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     }
     else {
       info("Zip file %s to be extracted as the documentation base.", this.base);
-      extractBase(new FileInputStream(this.base), buildDir);
+      enunciate.extractBase(new FileInputStream(this.base), buildDir);
     }
 
     for (SchemaInfo schemaInfo : getModel().getNamespacesToSchemas().values()) {
@@ -463,7 +468,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
     for (Artifact artifact : enunciate.getArtifacts()) {
       if (((artifact instanceof NamedArtifact) && (includeDefaultDownloads)) || (explicitArtifacts.contains(artifact.getId()))) {
-        downloads.add(artifact);
+        if (!artifact.isBundled()) {
+          downloads.add(artifact);
+        }
+
         info("Artifact %s to be added as an extra download.", artifact.getId());
         explicitArtifacts.remove(artifact.getId());
       }
@@ -522,36 +530,6 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Extracts the (zipped up) base to the specified directory.
-   *
-   * @param baseIn The stream to the base.
-   * @param toDir The directory to extract to.
-   */
-  protected void extractBase(InputStream baseIn, File toDir) throws IOException {
-    ZipInputStream in = new ZipInputStream(baseIn);
-    ZipEntry entry = in.getNextEntry();
-    while (entry != null) {
-      File file = new File(toDir, entry.getName());
-      debug("Extracting %s to %s.", entry.getName(), file);
-      if (entry.isDirectory()) {
-        file.mkdirs();
-      }
-      else {
-        FileOutputStream out = new FileOutputStream(file);
-        byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
-        int len;
-        while ((len = in.read(buffer)) > 0) {
-          out.write(buffer, 0, len);
-        }
-        out.close();
-      }
-
-      in.closeEntry();
-      entry = in.getNextEntry();
-    }
-  }
-
-  /**
    * Loads the default base for the documentation.
    *
    * @return The default base for the documentation.
@@ -562,7 +540,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected ObjectWrapper getObjectWrapper() {
-    return new APTJellyObjectWrapper();
+    return new DocumentationObjectWrapper();
   }
 
   @Override

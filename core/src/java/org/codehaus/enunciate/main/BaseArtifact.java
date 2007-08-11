@@ -68,4 +68,13 @@ public abstract class BaseArtifact implements Artifact {
 
     return thisId.compareTo(otherId);
   }
+
+  /**
+   * This artifact is, by default, not bundled if it's an artifact bundle.
+   *
+   * @return This artifact is, by default, not bundled if it's an artifact bundle.
+   */
+  public boolean isBundled() {
+    return !(this instanceof ArtifactBundle);
+  }
 }

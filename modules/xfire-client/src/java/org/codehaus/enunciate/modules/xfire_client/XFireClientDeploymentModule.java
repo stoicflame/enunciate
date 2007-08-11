@@ -180,39 +180,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     String uuid = this.uuid;
     model.put("uuid", uuid);
 
-    String defaultProtocol = "http";
-    String defaultHost = "localhost";
-    String defaultContext = "";
-    EnunciateConfiguration config = getEnunciate().getConfig();
-    if (config != null) {
-      if (config.getDeploymentProtocol() != null) {
-        defaultProtocol = config.getDeploymentProtocol();
-      }
-
-      if (config.getDeploymentHost() != null) {
-        defaultHost = config.getDeploymentHost();
-      }
-
-      if (config.getDeploymentContext() != null) {
-        defaultContext = config.getDeploymentContext();
-      }
-    }
-
-    if ((defaultContext.length() > 0) && (defaultContext.startsWith("/"))) {
-      //no leading slashes in the context....
-      defaultContext = defaultContext.substring(1);
-    }
-
-    if ((defaultContext.length() > 0) && (!defaultContext.endsWith("/"))) {
-      //make sure there's an ending slash...
-      defaultContext = defaultContext + "/";
-    }
-
-    model.put("defaultProtocol", defaultProtocol);
-    model.put("defaultHost", defaultHost);
-    model.put("defaultContext", defaultContext);
-
-
     // First, generate everything that is common to both jdk 14 and jdk 15
     // This includes all request/response beans and all xfire types.
     // Also, we're going to gather the annotation information, the type list,
@@ -596,9 +563,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
     NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
     jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
+    jdk14BinariesJar.setBundled(true);
     jdk14ArtifactBundle.addArtifact(jdk14BinariesJar);
     NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
     jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
+    jdk14SourcesJar.setBundled(true);
     jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
     enunciate.addArtifact(jdk14BinariesJar);
     enunciate.addArtifact(jdk14SourcesJar);
@@ -620,9 +589,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
     NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
     jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
+    jdk15BinariesJar.setBundled(true);
     jdk15ArtifactBundle.addArtifact(jdk15BinariesJar);
     NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
     jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
+    jdk15SourcesJar.setBundled(true);
     jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
     enunciate.addArtifact(jdk15BinariesJar);
     enunciate.addArtifact(jdk15SourcesJar);

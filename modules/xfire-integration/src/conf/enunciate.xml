@@ -5,6 +5,11 @@
     <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
     <namespace id="full" uri="http://enunciate.codehaus.org/samples/full"/>
   </namespaces>
+  <services>
+    <soap defaultSubcontext="/soap-services/">
+      <service name="source-service" relativePath="/soap-services/sources/source"/>
+    </soap>
+  </services>
   <modules>
     <xfire-client uuid="full.example">
       <package-conversions>

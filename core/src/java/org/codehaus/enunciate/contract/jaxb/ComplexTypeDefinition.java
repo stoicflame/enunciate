@@ -25,6 +25,8 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A complex type definition.
  *
@@ -94,7 +96,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isComplex() {
-    return true;
+    return getAnnotation(XmlJavaTypeAdapter.class) == null;
   }
 
   @Override

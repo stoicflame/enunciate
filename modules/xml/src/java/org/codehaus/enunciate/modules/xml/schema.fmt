@@ -248,8 +248,6 @@
     [/#if]
 </${xs}:complexType>
 
-  [#else]
-    [#stop "type definition is neither simple, complex, nor enum: " + typeDef.class.name]
   [/#if]
 [/#macro]
 [#t]

@@ -21,6 +21,8 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A simple type definition.
  *
@@ -53,7 +55,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
 
   @Override
   public boolean isSimple() {
-    return true;
+    return getAnnotation(XmlJavaTypeAdapter.class) == null;
   }
 
 }

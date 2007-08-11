@@ -48,5 +48,19 @@ public interface Artifact extends Comparable<Artifact> {
    * @throws java.io.IOException If an error occurs exporting it.
    */
   void exportTo(File fileOrDirectory, Enunciate enunciate) throws IOException;
+
+  /**
+   * The size, in bytes, of this artifact.
+   *
+   * @return The size, in bytes, of this artifact.
+   */
+  long getSize();
+
+  /**
+   * Whether this artifact is bundled elsewhere.
+   *
+   * @return Whether this artifact is bundled elsewhere.
+   */
+  boolean isBundled();
   
 }
