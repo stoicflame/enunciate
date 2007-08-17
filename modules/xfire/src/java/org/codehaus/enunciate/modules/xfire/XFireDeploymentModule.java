@@ -425,6 +425,9 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
             if ((pattern != null) && (excludeJarsMatcher.isPattern(pattern)) && (excludeJarsMatcher.match(pattern, file.getAbsolutePath()))) {
               continue PATH_ENTRIES;
             }
+            else if ((excludeJar.getFile() != null) && (excludeJar.getFile().equals(file))) {
+              continue PATH_ENTRIES;
+            }
           }
         }
 
@@ -512,6 +515,15 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
     enunciate.zip(buildDir, warFile);
     enunciate.addArtifact(new FileArtifact(getName(), "xfire.war", warFile));
+  }
+
+  /**
+   * The configuration for the war.
+   *
+   * @return The configuration for the war.
+   */
+  public WarConfig getWarConfig() {
+    return warConfig;
   }
 
   /**

@@ -16,10 +16,7 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.rest.annotations.Adjective;
-import org.codehaus.enunciate.rest.annotations.NounValue;
-import org.codehaus.enunciate.rest.annotations.ProperNoun;
-import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -392,5 +389,23 @@ public class RESTOperation {
    */
   public Class getResultType() {
     return resultType;
+  }
+
+  /**
+   * The content type of this REST operation.
+   *
+   * @return The content type of this REST operation.
+   */
+  public String getContentType() {
+    return this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
+  }
+
+  /**
+   * The character set of this REST operation.
+   *
+   * @return The character set of this REST operation.
+   */
+  public String getCharset() {
+    return this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
   }
 }

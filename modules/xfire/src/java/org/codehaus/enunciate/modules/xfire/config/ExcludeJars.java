@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.modules.xfire.config;
 
+import java.io.File;
+
 /**
  * Configuration element used to specify a pattern of jars to exclude from the war.
  *
@@ -23,7 +25,26 @@ package org.codehaus.enunciate.modules.xfire.config;
  */
 public class ExcludeJars {
 
+  private File file;
   private String pattern;
+
+  /**
+   * The file to exclude.
+   *
+   * @return The file to exclude.
+   */
+  public File getFile() {
+    return file;
+  }
+
+  /**
+   * The file to exclude.
+   *
+   * @param file The file to exclude.
+   */
+  public void setFile(File file) {
+    this.file = file;
+  }
 
   /**
    * The matching pattern for the resources to copy.

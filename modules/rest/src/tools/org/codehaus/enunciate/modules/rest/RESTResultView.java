@@ -77,7 +77,7 @@ public class RESTResultView implements View {
   public void render(Map map, HttpServletRequest request, HttpServletResponse response) throws Exception {
     response.setStatus(HttpServletResponse.SC_OK);
     if (result != null) {
-      response.setContentType("text/xml");
+      response.setContentType(String.format("%s;charset=%s", this.operation.getContentType(), this.operation.getCharset()));
       Marshaller marshaller = operation.getSerializationContext().createMarshaller();
       marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
       marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
