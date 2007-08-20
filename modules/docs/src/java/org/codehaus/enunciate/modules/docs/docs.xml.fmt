@@ -161,40 +161,42 @@
 [#list nouns2methods?values as methodList]
       <resource name="${(methodList?first).noun}">
   [#list methodList as method]
-        <operation type="${method.verb}" requiresResourceId="${method.properNoun?exists?string}">
-     [#if method.docValue?exists]
+    [#list method.verbs as verb]
+        <operation type="${verb}" requiresResourceId="${method.properNoun?exists?string}">
+      [#if method.docValue?exists]
           <documentation>
             <![CDATA[${method.docValue}]]>
           </documentation>
-     [/#if]
-     [#list method.javaDoc?keys as tag]
-       [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-         [#list method.javaDoc[tag] as tagValue]
+      [/#if]
+      [#list method.javaDoc?keys as tag]
+        [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+          [#list method.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-         [/#list]
-       [/#if]
-     [/#list]
-     [#list method.adjectives as parameter]
+          [/#list]
+        [/#if]
+      [/#list]
+      [#list method.adjectives as parameter]
           <parameter name="${parameter.adjectiveName}">
             <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
           </parameter>
-     [/#list]
-     [#if method.nounValue?exists]
+      [/#list]
+      [#if method.nounValue?exists]
           <inValue typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name}">
             <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
           </inValue>
-     [/#if]
-     [#if !method.returnType.void]
+      [/#if]
+      [#if !method.returnType.void]
           <outValue typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name}">
             <![CDATA[${method.returnType.docValue?default("")}]]>
           </outValue>
-     [/#if]
-     [#list method.thrownTypes as error]
+      [/#if]
+      [#list method.thrownTypes as error]
           <error code="${method.RESTErrors[error_index].errorCode}">
             <![CDATA[${error.docValue?default("")}]]>
           </error>
-     [/#list]
+      [/#list]
         </operation>
+    [/#list]
   [/#list]
       </resource>
 [/#list]

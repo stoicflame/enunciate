@@ -39,23 +39,3 @@ com.company.PurchaseOrder order =
 
 //handle the purchase order as needed...
   </code>
-
-  <h1>
-    Dependencies
-  </h1>
-
-  <p>
-    These client-side classes have runtime dependencies on libraries external to the JVM.  These
-    libraries must be included on the classpath when consuming this client-side API.
-  </p>
-
-  <ul>
-    <li><b>XFire</b> is used as the SOAP stack engine.  It, in turn, has dependencies on
-      other libraries.  At the time of this writing, the known dependencies were the activation
-      framework jars, jdom, woodstox, commons-codec, and commons-httpclient.  However, please
-      consult the dependency guide for the xfire version you are using.  XFire and its dependencies
-      can be <a href="http://xfire.codehaus.org/">downloaded from the codehaus</a>.</li>
-    <li><b>Enunciate XFire Client Tools</b> is a small set of classes used as tools to enable the
-      correct and compatible remote invocations.  This jar can be downloaded from the Enunciate
-      home page.</li>
-  </ul>

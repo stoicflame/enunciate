@@ -26,8 +26,7 @@ import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.NamedFileArtifact;
+import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
@@ -555,6 +554,74 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.zip(getJdk14GenerateDir(), jdk14Sources);
     enunciate.setProperty("client.jdk14.sources", jdk14Sources);
 
+    List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
+    MavenDependency xfireClientDependency = new MavenDependency();
+    xfireClientDependency.setId("enunciate-xfire-client-tools");
+    xfireClientDependency.setArtifactType("jar");
+    xfireClientDependency.setDescription("Support classes for invoking the client.");
+    xfireClientDependency.setGroupId("org.codehaus.enunciate");
+    xfireClientDependency.setURL("http://enunciate.codehaus.org/");
+    xfireClientDependency.setVersion(enunciate.getVersion());
+    clientDeps.add(xfireClientDependency);
+
+    BaseArtifactDependency dep = new BaseArtifactDependency();
+    dep.setId("xfire");
+    dep.setArtifactType("jar");
+    dep.setDescription("The XFire engine.");
+    dep.setURL("http://xfire.codehaus.org/");
+    dep.setVersion("1.2.2");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("stax-api");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.0.1");
+    dep.setDescription("The stax APIs.");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("wsdl4j");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.5.2");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("woodstox");
+    dep.setArtifactType("jar");
+    dep.setVersion("2.9.3");
+    dep.setDescription("Woodstox stax implementation");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("commons-codec");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.3");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("commons-httpclient");
+    dep.setArtifactType("jar");
+    dep.setVersion("3.0");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("jdom");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.0");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("mail");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.4");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("activation");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.1");
+    clientDeps.add(dep);
+
     //todo: generate the javadocs?
 
     ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
@@ -569,6 +636,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
     jdk14SourcesJar.setBundled(true);
     jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
+    jdk14ArtifactBundle.setDependencies(clientDeps);
     enunciate.addArtifact(jdk14BinariesJar);
     enunciate.addArtifact(jdk14SourcesJar);
     enunciate.addArtifact(jdk14ArtifactBundle);
@@ -595,6 +663,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
     jdk15SourcesJar.setBundled(true);
     jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
+    jdk15ArtifactBundle.setDependencies(clientDeps);
     enunciate.addArtifact(jdk15BinariesJar);
     enunciate.addArtifact(jdk15SourcesJar);
     enunciate.addArtifact(jdk15ArtifactBundle);

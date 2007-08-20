@@ -583,6 +583,33 @@
                         </table>
                       </xsl:otherwise>
                     </xsl:choose>
+
+                    <xsl:if test="count(dependencies/dependency) &gt; 0">
+                      <h2>Dependencies</h2>
+                      <table>
+                        <tr>
+                          <th>name</th>
+                          <th>version</th>
+                          <th>type</th>
+                          <th>description</th>
+                        </tr>
+                        <xsl:for-each select="dependencies/dependency">
+                          <tr>
+                            <xsl:choose>
+                              <xsl:when test="@href">
+                                <td><a href="{@href}"><xsl:value-of select="@id"/></a></td>
+                              </xsl:when>
+                              <xsl:otherwise>
+                                <td><xsl:value-of select="@id"/></td>
+                              </xsl:otherwise>
+                            </xsl:choose>
+                            <td><xsl:value-of select="@version"/></td>
+                            <td><xsl:value-of select="@type"/></td>
+                            <td><xsl:value-of select="." disable-output-escaping="yes"/></td>
+                          </tr>
+                        </xsl:for-each>
+                      </table>
+                    </xsl:if>
                   </div>
                 </xsl:for-each>
 

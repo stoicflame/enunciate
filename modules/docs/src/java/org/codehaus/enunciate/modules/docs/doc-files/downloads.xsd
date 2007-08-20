@@ -30,6 +30,7 @@
       <xs:element name="platform" type="xs:string" minOccurs="0" maxOccurs="1"/>
       <xs:element name="files" type="files" minOccurs="0" maxOccurs="1"/>
       <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="dependencies" type="files" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
 
     <xs:attribute name="name" type="xs:string"/>
@@ -61,6 +62,38 @@
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="size" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dependencies">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element containing the list of dependencies for this download.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="dependency" type="dependency" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
+  </xs:complexType>
+
+  <xs:complexType name="dependency">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element describing the dependency.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="id" type="xs:string"/>
+        <xs:attribute name="version" type="xs:string"/>
+        <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="href" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -116,15 +116,15 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    *
    * @return The verb for this method.
    */
-  public VerbType getVerb() {
-    VerbType verb = VerbType.read;
+  public VerbType[] getVerbs() {
+    VerbType[] verbs = { VerbType.read };
 
     Verb verbInfo = getAnnotation(Verb.class);
     if (verbInfo != null) {
-      verb = verbInfo.value();
+      verbs = verbInfo.value();
     }
 
-    return verb;
+    return verbs;
   }
 
   /**

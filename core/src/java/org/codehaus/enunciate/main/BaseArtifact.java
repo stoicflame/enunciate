@@ -16,6 +16,9 @@
 
 package org.codehaus.enunciate.main;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * Base implementation for an artifact.
  * 
@@ -25,6 +28,7 @@ public abstract class BaseArtifact implements Artifact {
 
   private final String module;
   private final String id;
+  private final List<ArtifactDependency> dependencies = new ArrayList<ArtifactDependency>();
 
   /**
    * @param module The name of the module.
@@ -76,5 +80,33 @@ public abstract class BaseArtifact implements Artifact {
    */
   public boolean isBundled() {
     return !(this instanceof ArtifactBundle);
+  }
+
+  /**
+   * The dependencies for this artifact.
+   *
+   * @return The dependencies for this artifact.
+   */
+  public List<ArtifactDependency> getDependencies() {
+    return dependencies;
+  }
+
+  /**
+   * Adds a dependency to this artifact.
+   *
+   * @param dependency The dependency to add.
+   */
+  public void addDependency(ArtifactDependency dependency) {
+    this.dependencies.add(dependency);
+  }
+
+  /**
+   * Sets the dependencies for this artifact.
+   *
+   * @param dependencies The dependencies to set.
+   */
+  public void setDependencies(List<ArtifactDependency> dependencies) {
+    this.dependencies.clear();
+    this.dependencies.addAll(dependencies);
   }
 }

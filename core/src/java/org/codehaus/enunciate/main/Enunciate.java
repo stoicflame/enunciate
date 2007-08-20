@@ -787,6 +787,27 @@ public class Enunciate {
   }
 
   /**
+   * The version of the Enunciate mechanism.
+   *
+   * @return The version of the Enunciate mechanism.
+   */
+  public String getVersion() {
+    String version = "1.0";
+    URL resource = Enunciate.class.getResource("/enunciate.properties");
+    if (resource != null) {
+      Properties properties = new Properties();
+      try {
+        properties.load(resource.openStream());
+        version = (String) properties.get("version");
+      }
+      catch (IOException e) {
+        //fall through...
+      }
+    }
+    return version;
+  }
+
+  /**
    * Whether to do a javac check before invoking the Enunciate mechanism.
    *
    * @return Whether to do a javac check before invoking the Enunciate mechanism.

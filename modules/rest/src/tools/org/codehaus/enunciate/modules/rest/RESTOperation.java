@@ -46,6 +46,8 @@ public class RESTOperation {
   private final Boolean nounValueOptional;
   private final JAXBContext context;
   private final Class resultType;
+  private final String contentType;
+  private final String charset;
 
   /**
    * Construct a REST operation.
@@ -175,6 +177,8 @@ public class RESTOperation {
     this.nounValueIndex = nounValueIndex;
     this.nounValueOptional = nounValueOptional;
     this.resultType = returnType;
+    this.contentType = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
+    this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
@@ -397,7 +401,7 @@ public class RESTOperation {
    * @return The content type of this REST operation.
    */
   public String getContentType() {
-    return this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
+    return contentType;
   }
 
   /**
@@ -406,6 +410,6 @@ public class RESTOperation {
    * @return The character set of this REST operation.
    */
   public String getCharset() {
-    return this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
+    return charset;
   }
 }

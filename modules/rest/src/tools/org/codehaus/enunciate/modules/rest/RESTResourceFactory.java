@@ -62,7 +62,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
             if ((Modifier.isPublic(modifiers)) && (restMethod.isAnnotationPresent(Verb.class)) && (!isImplMethod(restMethod, endpointTypes))) {
-              VerbType verb = restMethod.getAnnotation(Verb.class).value();
+              VerbType[] verbs = restMethod.getAnnotation(Verb.class).value();
               String noun = restMethod.getName();
               Noun nounInfo = restMethod.getAnnotation(Noun.class);
               NounContext nounContextInfo = ((NounContext) endpointType.getAnnotation(NounContext.class));
@@ -86,12 +86,14 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
                 class2instances.put(endpointType, endpoint);
               }
 
-              if (!resource.addOperation(verb, endpoint, restMethod)) {
-                RESTOperation duplicateOperation = resource.getOperation(verb);
+              for (VerbType verb : verbs) {
+                if (!resource.addOperation(verb, endpoint, restMethod)) {
+                  RESTOperation duplicateOperation = resource.getOperation(verb);
 
-                throw new ApplicationContextException("Noun '" + noun + "' in context '" + context + "' has more than one '" + verb +
-                  "' verbs.  One was found at " + restMethod.getDeclaringClass().getName() + "." + restMethod.getName() + ", the other at " +
-                  duplicateOperation.method.getDeclaringClass().getName() + "." + duplicateOperation.method.getName() + ".");
+                  throw new ApplicationContextException("Noun '" + noun + "' in context '" + context + "' has more than one '" + verb +
+                    "' verbs.  One was found at " + restMethod.getDeclaringClass().getName() + "." + restMethod.getName() + ", the other at " +
+                    duplicateOperation.method.getDeclaringClass().getName() + "." + duplicateOperation.method.getName() + ".");
+                }
               }
             }
           }

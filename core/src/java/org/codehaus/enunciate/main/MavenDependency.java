@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+package org.codehaus.enunciate.main;
 
 /**
- * Customizes the verb associated with the annotated method.
+ * A maven dependency.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( ElementType.METHOD )
-public @interface Verb {
+public class MavenDependency extends BaseArtifactDependency {
 
-  /**
-   * The verb type.
-   *
-   * @return The verb type.
-   */
-  VerbType[] value();
-  
+  private String groupId;
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
 }

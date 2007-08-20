@@ -150,9 +150,11 @@ public class DefaultValidator implements Validator {
       EnumSet<VerbType> verbs = EnumSet.noneOf(VerbType.class);
       List<RESTMethod> methods = restAPI.get(noun);
       for (RESTMethod method : methods) {
-        VerbType verb = method.getVerb();
-        if (!verbs.add(verb)) {
-          result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for REST noun '" + noun + "'.");
+        List<VerbType> verbList = Arrays.asList(method.getVerbs());
+        for (VerbType verb : verbList) {
+          if (!verbs.add(verb)) {
+            result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for REST noun '" + noun + "'.");
+          }
         }
 
         RESTParameter properNoun = method.getProperNoun();
@@ -187,7 +189,7 @@ public class DefaultValidator implements Validator {
 
         RESTParameter nounValue = method.getNounValue();
         if (nounValue != null) {
-          if ((verb == VerbType.read) || (verb == VerbType.delete)) {
+          if ((verbList.contains(VerbType.read)) || (verbList.contains(VerbType.delete))) {
             result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
           }
 

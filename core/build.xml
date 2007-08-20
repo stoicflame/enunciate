@@ -30,4 +30,8 @@
     </artifact:install>
   </target>
 
+  <target name="compile-main" depends="base.compile-main">
+    <copy file="../build.properties" tofile="${build.dir}/enunciate.properties" failonerror="true"/>
+  </target>
+
 </project>

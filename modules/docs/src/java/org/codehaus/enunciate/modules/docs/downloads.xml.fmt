@@ -20,6 +20,13 @@
     [/#if]
     </files>
     <description><![CDATA[${download.description?default("")}]]></description>
+    <dependencies>
+    [#if download.dependencies?exists]
+      [#list download.dependencies as dependency]
+      <dependency id="${dependency.id?default("unknown")}" version="${dependency.version?default("unknown")}" type="${dependency.artifactType?default("unknown")}"[#if dependency.URL?exists] href="${dependency.URL}"[/#if]>${dependency.description?default("")}</dependency>
+      [/#list]
+    [/#if]
+    </dependencies>
   </download>
   [/#list]
 </downloads>

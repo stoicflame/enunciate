@@ -18,6 +18,7 @@ package org.codehaus.enunciate.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * An artifact that can be exported by Enunciate.
@@ -57,10 +58,17 @@ public interface Artifact extends Comparable<Artifact> {
   long getSize();
 
   /**
-   * Whether this artifact is bundled elsewhere.
+   * Whether this artifact is bundled with others in an {@link org.codehaus.enunciate.main.ArtifactBundle}.
    *
    * @return Whether this artifact is bundled elsewhere.
    */
   boolean isBundled();
-  
+
+  /**
+   * The list of dependencies for this artifact.
+   *
+   * @return The list of dependencies for this artifact.
+   */
+  List<ArtifactDependency> getDependencies();
+
 }
