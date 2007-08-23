@@ -1,0 +1,52 @@
+Release summary:
+
+Allowed for customization of where endpoints are mounted.
+Supplied a mechanism to apply aspects to the service beans.
+Better compatability with generated WSDL and WS-I BP.
+Numerous bug fixes and small enhancements.
+Adding a way to get the HTTP request/response objects (HTTP request context).
+Client-side enhancements for setting username/password and request headers.
+
+Details:
+
+-fix for exclude jars mechanism.
+-adding a package to the sample classes.
+-enhancing an error message.
+-adding CDATA sections for javadoc comments into the schema and wsdl.
+-adding CDATA sections, using include instead of import for schemas of the same namespace.  Removing the "targetNamespace" attribute for schemas in the default namespace.
+-option to inline wsdl schemas.
+-Fix for ENUNCIATE-53
+-Fix for ENUNCIATE-51
+-web result displaying maxOccurs correctly.
+-schema displaying use=required correctly.
+-wsdl fixes: fault name applied.
+-Fix for javabeans property spec (2nd character capitalization)
+-fix for significant namespacing bug.
+-removing the "form" on the implicit child elements.
+-updating docs, adding mechanism for "global service interceptors".
+-ENUNCIATE-63
+-Fix for subclasses of XFireTypes writing attributes after writing the superclass's elements.
+-bug fixes in request wrapper order and in the global interceptor handling.
+-adding a handler interceptor to handle setting the HTTPRequestContext.
+-ordering the properties on the wrapper classes correctly.
+-removed the enunciate-specific handler mapping and the handler interceptors and rearranged setting the interceptors via the config.
+-adding the NounContext annotation.  Checking superclasses before calling something a simpleType.
+-adding the concept of a noun context.
+-unit tests for the new noun context.
+-fixing a bug with the noun context.  adding more tests.
+-picking up the @NounContext correctly for a given method.
+-tests for the noun context.
+-creating a namespace prefix mapper and enhancing the generated client stubs to provide for handling the http request.
+-adding optional params for REST calls.  initial make on mounting soap endpoints at a custom path.
+-Custom endpoint location configuration for SOAP endpoints.
+-Not generating schema types for classes annotated with @XmlJavaTypeAdapter
+-Adding file sizes to the download pages.
+-Using HashSet instead of TreeSet for the generated client-side code.
+-Adding a "preBase" and a "postBase" to the XFire war config.
+-Other bug fixes.
+-adding file size to the downloads section. supporting custom content-type and charset. adding a specific file to exclude jars for the xfire war build.
+-adding the concept of dependencies to Enunciate artifacts.
+-supporting multiple verbs per operation.
+-making non-primitive adjective optional by default.
+-adding the default-autowire and default-dependency-check attributes to the xfire module.
+
