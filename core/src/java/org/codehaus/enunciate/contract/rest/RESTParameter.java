@@ -26,6 +26,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.type.PrimitiveType;
 
 /**
  * A parameter declaration decorated as a REST parameter.  A REST parameter is one and only one of the following:
@@ -81,8 +82,11 @@ public class RESTParameter extends DecoratedParameterDeclaration {
     else if (getAnnotation(Adjective.class) != null) {
       return getAnnotation(Adjective.class).optional();
     }
+    else if (getType() instanceof PrimitiveType) {
+      return false;
+    }
 
-    return false;
+    return true;
   }
 
   /**

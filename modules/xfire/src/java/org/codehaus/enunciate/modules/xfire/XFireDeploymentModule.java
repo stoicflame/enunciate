@@ -118,6 +118,8 @@ import java.util.List;
  *
  * <ul>
  *   <li>The "<b>compileDebugInfo</b>" attribute specifies that the compiled classes should be compiled with debug info.  The default is "true."</li>
+ *   <li>The "<b>springDefaultDependencyCheck</b>" attribute specifies that value of the "default-dependency-check" for the generated spring file.</li>
+ *   <li>The "<b>springDefaultAutowire</b>" attribute specifies that value of the "default-autowire" for the generated spring file.</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -240,8 +242,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
   private boolean compileDebugInfo = true;
-  private File preBase = null;
-  private File postBase = null;
+  private String springDefaultAutowire = null;
+  private String springDefaultDependencyCheck = null;
 
   /**
    * @return "xfire"
@@ -286,6 +288,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     //generate the xfire-servlet.xml
     model.setFileOutputDirectory(getXMLGenerateDir());
     model.put("springImports", getSpringImportURIs());
+    model.put("defaultDependencyCheck", getSpringDefaultDependencyCheck());
+    model.put("defaultAutowire", getSpringDefaultAutowire());
     if (!globalServiceInterceptors.isEmpty()) {
       for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
         if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
@@ -625,6 +629,42 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addHandlerInterceptor(HandlerInterceptor interceptorConfig) {
     this.handlerInterceptors.add(interceptorConfig);
+  }
+
+  /**
+   * The value for the spring default autowiring.
+   *
+   * @return The value for the spring default autowiring.
+   */
+  public String getSpringDefaultAutowire() {
+    return springDefaultAutowire;
+  }
+
+  /**
+   * The value for the spring default autowiring.
+   *
+   * @param springDefaultAutowire The value for the spring default autowiring.
+   */
+  public void setSpringDefaultAutowire(String springDefaultAutowire) {
+    this.springDefaultAutowire = springDefaultAutowire;
+  }
+
+  /**
+   * The value for the spring default dependency checking.
+   *
+   * @return The value for the spring default dependency checking.
+   */
+  public String getSpringDefaultDependencyCheck() {
+    return springDefaultDependencyCheck;
+  }
+
+  /**
+   * The value for the spring default dependency checking.
+   *
+   * @param springDefaultDependencyCheck The value for the spring default dependency checking.
+   */
+  public void setSpringDefaultDependencyCheck(String springDefaultDependencyCheck) {
+    this.springDefaultDependencyCheck = springDefaultDependencyCheck;
   }
 
   /**

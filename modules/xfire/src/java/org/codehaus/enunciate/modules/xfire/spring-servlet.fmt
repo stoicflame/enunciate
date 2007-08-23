@@ -1,7 +1,7 @@
 [#ftl]
 [@file name="spring-servlet.xml"]
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+<beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
 
   <bean id="enunciate-interceptor-processor" class="org.codehaus.enunciate.modules.xfire.EnunciateGlobalInterceptorProcessor">
     [#if globalServiceInterceptors?exists]

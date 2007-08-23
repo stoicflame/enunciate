@@ -77,7 +77,7 @@ public class RESTOperation {
 
       boolean isAdjective = true;
       String adjectiveName = "arg" + i;
-      boolean adjectiveOptional = false;
+      boolean adjectiveOptional = !parameterType.isPrimitive();
       Annotation[] parameterAnnotations = method.getParameterAnnotations()[i];
       for (Annotation annotation : parameterAnnotations) {
         if (annotation instanceof ProperNoun) {
@@ -129,13 +129,12 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof Adjective) {
-          if (((Adjective) annotation).optional()) {
-            if (parameterType.isPrimitive()) {
-              throw new IllegalStateException("An optional adjective cannot be a primitive type for method " +
-                method.getDeclaringClass().getName() + "." + method.getName() + ".");
-            }
-
-            adjectiveOptional = true;
+          if ((((Adjective) annotation).optional()) && (parameterType.isPrimitive())) {
+            throw new IllegalStateException("An optional adjective cannot be a primitive type for method " +
+              method.getDeclaringClass().getName() + "." + method.getName() + ".");
+          }
+          else {
+            adjectiveOptional = false;
           }
 
           adjectiveName = ((Adjective) annotation).name();
