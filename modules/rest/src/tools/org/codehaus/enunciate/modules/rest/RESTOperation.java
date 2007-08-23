@@ -129,14 +129,11 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof Adjective) {
-          if ((((Adjective) annotation).optional()) && (parameterType.isPrimitive())) {
+          adjectiveOptional = ((Adjective) annotation).optional();
+          if (adjectiveOptional && parameterType.isPrimitive()) {
             throw new IllegalStateException("An optional adjective cannot be a primitive type for method " +
               method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
-          else {
-            adjectiveOptional = false;
-          }
-
           adjectiveName = ((Adjective) annotation).name();
           break;
         }
