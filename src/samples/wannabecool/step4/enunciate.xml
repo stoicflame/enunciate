@@ -14,5 +14,6 @@
     <docs splashPackage="com.ifyouwannabecool.api" title="If You Wanna Be Cool API" copyright="IfYouWannaBeCool.com">
       <download name="License" file="LICENSE.txt" description="The license file governing the use of this API."/>
     </docs>
+    <gwt disabled="false" gwtModuleName="com.ifyouwannabecool.IfYouWannaBeCool"/>
   </modules>
 </enunciate>

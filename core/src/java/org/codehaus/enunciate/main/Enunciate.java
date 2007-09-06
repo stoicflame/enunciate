@@ -119,7 +119,7 @@ public class Enunciate {
    * Construct an enunciate mechanism on the specified source files with the specified config.
    *
    * @param sourceFiles The source files.
-   * @param config The config
+   * @param config      The config
    */
   public Enunciate(String[] sourceFiles, EnunciateConfiguration config) {
     setSourceFiles(sourceFiles);
@@ -139,9 +139,10 @@ public class Enunciate {
    * Get a stepper that can be used to step through the Enunciate mechanism, which will be initialized.
    *
    * @return A stepper.
-   * @throws java.util.ConcurrentModificationException If a stepper has already been retrieved.
+   * @throws java.util.ConcurrentModificationException
+   *                            If a stepper has already been retrieved.
    * @throws EnunciateException If there was an error initializing the Enunciate mechanism.
-   * @throws IOException If there was an error initializing the Enunciate mechanism.
+   * @throws IOException        If there was an error initializing the Enunciate mechanism.
    */
   public Stepper getStepper() throws EnunciateException, IOException {
     return new Stepper();
@@ -307,7 +308,7 @@ public class Enunciate {
   /**
    * Handle an info-level message.
    *
-   * @param message The info message.
+   * @param message    The info message.
    * @param formatArgs The format args of the message.
    */
   public void info(String message, Object... formatArgs) {
@@ -319,7 +320,7 @@ public class Enunciate {
   /**
    * Handle a debug-level message.
    *
-   * @param message The debug message.
+   * @param message    The debug message.
    * @param formatArgs The format args of the message.
    */
   public void debug(String message, Object... formatArgs) {
@@ -331,7 +332,7 @@ public class Enunciate {
   /**
    * Handle a warn-level message.
    *
-   * @param message The warn message.
+   * @param message    The warn message.
    * @param formatArgs The format args of the message.
    */
   public void warn(String message, Object... formatArgs) {
@@ -404,7 +405,7 @@ public class Enunciate {
    * Finds all files in the specified base directory using the specified filter.
    *
    * @param basedir The base directory.
-   * @param filter The filter to use.
+   * @param filter  The filter to use.
    * @return The collection of files.
    */
   public Collection<String> getFiles(File basedir, FileFilter filter) {
@@ -416,8 +417,8 @@ public class Enunciate {
   /**
    * Finds all files in the specified directory (recursively) using the specified filter.
    *
-   * @param dir The directory.
-   * @param filter The filter.
+   * @param dir       The directory.
+   * @param filter    The filter.
    * @param filenames A container for the files.
    */
   private void findFiles(File dir, FileFilter filter, Collection<String> filenames) {
@@ -581,7 +582,7 @@ public class Enunciate {
    * Extracts the (zipped up) base to the specified directory.
    *
    * @param baseIn The stream to the base.
-   * @param toDir The directory to extract to.
+   * @param toDir  The directory to extract to.
    */
   public void extractBase(InputStream baseIn, File toDir) throws IOException {
     ZipInputStream in = new ZipInputStream(baseIn);
@@ -660,7 +661,7 @@ public class Enunciate {
    * Copies a resource to a file.
    *
    * @param url The url of the resource.
-   * @param to The file to copy to.
+   * @param to  The file to copy to.
    */
   public void copyResource(URL url, File to) throws IOException {
     InputStream stream = url.openStream();
@@ -675,38 +676,40 @@ public class Enunciate {
   }
 
   /**
-   * zip up a directory to a specified zip file.
+   * zip up directories to a specified zip file.
    *
-   * @param dir    The directory to zip up.
    * @param toFile The file to zip to.
+   * @param dirs   The directories to zip up.
    */
-  public void zip(File dir, File toFile) throws IOException {
+  public void zip(File toFile, File... dirs) throws IOException {
     if (!toFile.getParentFile().exists()) {
       debug("Creating directory %s...", toFile.getParentFile());
       toFile.getParentFile().mkdirs();
     }
 
-    ArrayList<File> files = new ArrayList<File>();
-    buildFileList(dir, files);
-
     byte[] buffer = new byte[2 * 1024]; //buffer of 2K should be fine.
-    URI baseURI = dir.toURI();
-    debug("Creating zip file %s from directory %s...", toFile, dir);
     ZipOutputStream zipout = new ZipOutputStream(new FileOutputStream(toFile));
-    for (File file : files) {
-      ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
-      debug("Adding entry %s...", entry.getName());
-      zipout.putNextEntry(entry);
+    for (File dir : dirs) {
 
-      FileInputStream in = new FileInputStream(file);
-      int len;
-      while ((len = in.read(buffer)) > 0) {
-        zipout.write(buffer, 0, len);
+      URI baseURI = dir.toURI();
+      debug("Adding contents of directory %s to zip file %s...", dir, toFile);
+      ArrayList<File> files = new ArrayList<File>();
+      buildFileList(files, dir);
+      for (File file : files) {
+        ZipEntry entry = new ZipEntry(baseURI.relativize(file.toURI()).getPath());
+        debug("Adding entry %s...", entry.getName());
+        zipout.putNextEntry(entry);
+
+        FileInputStream in = new FileInputStream(file);
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+          zipout.write(buffer, 0, len);
+        }
+
+        // Complete the entry
+        zipout.closeEntry();
+        in.close();
       }
-
-      // Complete the entry
-      zipout.closeEntry();
-      in.close();
     }
 
     zipout.close();
@@ -734,18 +737,20 @@ public class Enunciate {
   }
 
   /**
-   * Adds all files in a specified directory to a list.
+   * Adds all files in specified directories to a list.
    *
-   * @param dir  The directory.
    * @param list The list.
+   * @param dirs The directories.
    */
-  protected void buildFileList(File dir, List<File> list) {
-    for (File file : dir.listFiles()) {
-      if (file.isDirectory()) {
-        buildFileList(file, list);
-      }
-      else {
-        list.add(file);
+  protected void buildFileList(List<File> list, File... dirs) {
+    for (File dir : dirs) {
+      for (File file : dir.listFiles()) {
+        if (file.isDirectory()) {
+          buildFileList(list, file);
+        }
+        else {
+          list.add(file);
+        }
       }
     }
   }
@@ -1002,7 +1007,7 @@ public class Enunciate {
   /**
    * Adds an export.
    *
-   * @param artifactId The id of the artifact to export.
+   * @param artifactId  The id of the artifact to export.
    * @param destination The file or directory to export the artifact to.
    */
   public void addExport(String artifactId, File destination) {
@@ -1024,6 +1029,23 @@ public class Enunciate {
    */
   public EnunciateConfiguration getConfig() {
     return config;
+  }
+
+  /**
+   * Whether the specified module is enabled.
+   *
+   * @param moduleName The name of the module.
+   * @return Whether the module is enabled.
+   */
+  public boolean isModuleEnabled(String moduleName) {
+    if (this.config != null) {
+      for (DeploymentModule module : this.config.getEnabledModules()) {
+        if (module.getName().equals(moduleName)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

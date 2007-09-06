@@ -58,7 +58,7 @@ public class ClientLibraryArtifact extends BaseArtifact implements ArtifactBundl
     }
 
     if (!file.exists() || !file.isDirectory()) {
-      enunciate.zip(dir, file);
+      enunciate.zip(file, dir);
       size = file.length();
     }
   }

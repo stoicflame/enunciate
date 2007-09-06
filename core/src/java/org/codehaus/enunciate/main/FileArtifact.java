@@ -60,7 +60,7 @@ public class FileArtifact extends BaseArtifact {
         enunciate.copyDir(this.file, file);
       }
       else {
-        enunciate.zip(this.file, file);
+        enunciate.zip(file, this.file);
       }
     }
     else {

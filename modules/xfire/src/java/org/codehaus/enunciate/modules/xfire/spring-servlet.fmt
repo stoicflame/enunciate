@@ -89,6 +89,19 @@
           [/#if]
           </bean>
         </entry>
+        [#if gwtEnabled]
+
+        <entry key="/gwt/${endpointInterface.serviceName}">
+          <bean class="${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl">
+            <property name="serviceClass">
+              <value>${impl.qualifiedName}</value>
+            </property>
+            <property name="enunciateServiceFactory">
+              <ref bean="enunciate-interceptor-processor"/>
+            </property>
+          </bean>
+        </entry>
+        [/#if]
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

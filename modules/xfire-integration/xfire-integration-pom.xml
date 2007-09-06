@@ -55,6 +55,12 @@
       <version>@VERSION@</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-gwt</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
   </dependencies>
 
 </project>

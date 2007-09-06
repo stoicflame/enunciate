@@ -54,7 +54,7 @@
       <ul>
         <xsl:for-each select="/api-docs/rest/resources/resource">
           <xsl:sort select="@name"/>
-          <li><a href="rest_{@name}.html"><xsl:value-of select="@name"/></a></li>
+          <li><a href="rest_{translate(@name,'/','.')}.html"><xsl:value-of select="@name"/></a></li>
         </xsl:for-each>
       </ul>
     </xsl:if>
@@ -201,7 +201,7 @@
                   <ul>
                     <xsl:for-each select="/api-docs/rest/resources/resource">
                       <xsl:sort select="@name"/>
-                      <li><a href="rest_{@name}.html"><xsl:value-of select="@name"/></a></li>
+                      <li><a href="rest_{translate(@name,'/','.')}.html"><xsl:value-of select="@name"/></a></li>
                       <xsl:call-template name="rest-resource"/>
                     </xsl:for-each>
                   </ul>
@@ -636,7 +636,7 @@
 
   <!--The page for a REST resource.-->
   <xsl:template name="rest-resource">
-    <redirect:write file="{$output-dir}/rest_{@name}.html">
+    <redirect:write file="{$output-dir}/rest_{translate(@name,'/','.')}.html">
       <html>
 
         <head>

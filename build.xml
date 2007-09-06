@@ -23,6 +23,7 @@
   <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
+  <property name="modules.gwt.basedir" value="${enunciate.basedir}/modules/gwt"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
   <property name="modules.xfire-integration.basedir" value="${enunciate.basedir}/modules/xfire-integration"/>
 
@@ -35,6 +36,7 @@
     <ant dir="${modules.rest.basedir}" target="clean"/>
     <ant dir="${modules.xfire-client.basedir}" target="clean"/>
     <ant dir="${modules.docs.basedir}" target="clean"/>
+    <ant dir="${modules.gwt.basedir}" target="clean"/>
     <ant dir="${modules.xfire.basedir}" target="clean"/>
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
@@ -72,6 +74,7 @@
     <ant dir="${modules.rest.basedir}"/>
     <ant dir="${modules.xfire-client.basedir}"/>
     <ant dir="${modules.docs.basedir}"/>
+    <ant dir="${modules.gwt.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.xfire-integration.basedir}"/>
 
@@ -151,6 +154,9 @@
       <filterset refid="nav.filterset"/>
     </copy>
     <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.gwt.basedir}/target/module.html" tofile="${module.docs.dir}/module_gwt.html" failonerror="false" overwrite="true">
       <filterset refid="nav.filterset"/>
     </copy>
     <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false" overwrite="true">

@@ -21,7 +21,6 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.*;
@@ -547,11 +546,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     File jdk14Jar = new File(getBuildDir(), jarName);
-    enunciate.zip(getJdk14CompileDir(), jdk14Jar);
+    enunciate.zip(jdk14Jar, getJdk14CompileDir());
     enunciate.setProperty("client.jdk14.jar", jdk14Jar);
 
     File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
-    enunciate.zip(getJdk14GenerateDir(), jdk14Sources);
+    enunciate.zip(jdk14Sources, getJdk14GenerateDir());
     enunciate.setProperty("client.jdk14.sources", jdk14Sources);
 
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
@@ -642,11 +641,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.addArtifact(jdk14ArtifactBundle);
 
     File jdk15Jar = new File(getBuildDir(), jarName);
-    enunciate.zip(getJdk15CompileDir(), jdk15Jar);
+    enunciate.zip(jdk15Jar, getJdk15CompileDir());
     enunciate.setProperty("client.jdk15.jar", jdk15Jar);
 
     File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
-    enunciate.zip(getJdk15GenerateDir(), jdk15Sources);
+    enunciate.zip(jdk15Sources, getJdk15GenerateDir());
     enunciate.setProperty("client.jdk15.sources", jdk15Sources);
 
     //todo: generate the javadocs?

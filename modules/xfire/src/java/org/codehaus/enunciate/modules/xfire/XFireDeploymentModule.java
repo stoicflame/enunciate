@@ -306,6 +306,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.put("handlerInterceptors", this.handlerInterceptors);
     }
+    model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
     processTemplate(getSpringServletTemplateURL(), model);
     processTemplate(getWebXmlTemplateURL(), model);
 
@@ -345,12 +346,30 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("Required dependency on the JAXWS module was not found.  The generated request/response/fault beans are required.");
     }
 
+    info("Compiling the JAX-WS support classes found in %s...", jaxwsSources);
     Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
     //make sure we include all the wrappers generated for the rpc methods, too...
     jaxwsSourceFiles.addAll(enunciate.getJavaFiles(getJAXWSGenerateDir()));
     StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
     jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
     enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+
+    File gwtSources = (File) enunciate.getProperty("gwt.server.src.dir");
+    if (gwtSources != null) {
+      info("Copying the GWT client classes to %s...", compileDir);
+      File gwtClientCompileDir = (File) enunciate.getProperty("gwt.client.compile.dir");
+      if (gwtClientCompileDir == null) {
+        throw new EnunciateException("Required dependency on the GWT client classes not found.");
+      }
+      enunciate.copyDir(gwtClientCompileDir, compileDir);
+
+      info("Compiling the GWT support classes found in %s...", gwtSources);
+      Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
+      StringBuilder gwtClasspath = new StringBuilder(enunciate.getDefaultClasspath());
+      gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+      enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
+
+    }
 
     if (!this.copyResources.isEmpty()) {
       AntPathMatcher matcher = new AntPathMatcher();
@@ -517,7 +536,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     Enunciate enunciate = getEnunciate();
     info("Creating " + warFile.getAbsolutePath());
 
-    enunciate.zip(buildDir, warFile);
+    enunciate.zip(warFile, buildDir);
     enunciate.addArtifact(new FileArtifact(getName(), "xfire.war", warFile));
   }
 

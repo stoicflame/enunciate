@@ -275,7 +275,12 @@ public class RESTOperation {
       Collection collection;
       if ((collectionType.isInterface()) || (Modifier.isAbstract(collectionType.getModifiers()))) {
         if (Set.class.isAssignableFrom(collectionType)) {
-          collection = new TreeSet();
+          if (SortedSet.class.isAssignableFrom(collectionType)) {
+            collection = new TreeSet();
+          }
+          else {
+            collection = new HashSet();
+          }
         }
         else {
           collection = new ArrayList();
