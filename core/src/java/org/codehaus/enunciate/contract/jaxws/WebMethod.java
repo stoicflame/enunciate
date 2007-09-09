@@ -132,6 +132,17 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     this.messages = messages;
   }
 
+
+  @Override
+  public TypeMirror getReturnType() {
+    TypeMirror type = super.getReturnType();
+    MapType mapType = MapTypeUtil.findMapType(type);
+    if (mapType != null) {
+      type = mapType;
+    }
+    return type;
+  }
+
   /**
    * The web result of this web method.
    *

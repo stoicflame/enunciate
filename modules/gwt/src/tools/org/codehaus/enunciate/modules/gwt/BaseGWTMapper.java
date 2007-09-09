@@ -99,13 +99,15 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
       }
     }
 
+    context.objectMapped(jaxbObject, gwtObject);
+
     return gwtObject;
   }
 
   private XmlJavaTypeAdapter findTypeAdapter(PropertyDescriptor jaxbProperty) {
     XmlJavaTypeAdapter adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
 
-    if (adapterInfo == null) {
+    if ((adapterInfo == null) && (jaxbProperty.getWriteMethod() != null)) {
       adapterInfo = jaxbProperty.getWriteMethod().getAnnotation(XmlJavaTypeAdapter.class);
     }
 
@@ -114,7 +116,7 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
       Class<?> returnType = jaxbProperty.getReadMethod().getReturnType();
 
       XmlJavaTypeAdapter possibleAdapterInfo = pckg.getAnnotation(XmlJavaTypeAdapter.class);
-      if (returnType.equals(possibleAdapterInfo.type())) {
+      if ((possibleAdapterInfo != null) && (returnType.equals(possibleAdapterInfo.type()))) {
         adapterInfo = possibleAdapterInfo;
       }
       else if (pckg.isAnnotationPresent(XmlJavaTypeAdapters.class)) {
@@ -168,6 +170,8 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
       }
     }
 
+    context.objectMapped(gwtObject, jaxbObject);
+
     return jaxbObject;
   }
 
@@ -179,8 +183,8 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
    */
   public static String[] append(String[] args1, String... args2) {
     String[] allArgs = new String[args1.length + args2.length];
-    System.arraycopy(args1, 0, allArgs, 0, args1.length);
-    System.arraycopy(args2, 0, allArgs, args1.length - 1, args2.length);
+    System.arraycopy(args2, 0, allArgs, 0, args2.length);
+    System.arraycopy(args1, 0, allArgs, args2.length, args1.length);
     return allArgs;
   }
 

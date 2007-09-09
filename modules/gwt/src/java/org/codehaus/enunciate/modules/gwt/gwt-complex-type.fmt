@@ -66,9 +66,9 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   [/#if]
 [/#macro]
 [#macro propertyField property]
-  [#if !property.ref?exists && property.baseType.map?default(false)]
+  [#if property.accessorType.map?default(false)]
   /**
-   * @gwt.typeArgs <${classnameFor(property.baseType.keyType)},${classnameFor(property.baseType.valueType)}>
+   * @gwt.typeArgs <${classnameFor(property.accessorType.keyType)},${classnameFor(property.accessorType.valueType)}>
    */
   [#elseif property.accessorType.collection]
   /**

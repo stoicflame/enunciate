@@ -561,6 +561,7 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/com/google/gwt/gwt-servlet/1.4.59/gwt-servlet-1.4.59.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/gwtwidgets/gwt-widgets-server/0.1.4/gwt-widgets-server-0.1.4.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.9/spring-1.2.9.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

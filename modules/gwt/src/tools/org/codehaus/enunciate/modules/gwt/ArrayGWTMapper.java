@@ -24,35 +24,68 @@ import java.lang.reflect.Array;
 /**
  * @author Ryan Heaton
  */
-public class ArrayGWTMapper implements GWTMapper<Object[], Object[]> {
+public class ArrayGWTMapper implements GWTMapper {
 
-  private final CollectionGWTMapper collectionMapper;
+  private final Class itemClass;
+  private final GWTMapper itemMapper;
 
   public ArrayGWTMapper(GWTMapper itemMapper) {
-    this.collectionMapper = new CollectionGWTMapper(ArrayList.class, itemMapper);
+    this.itemMapper = itemMapper;
+    this.itemClass = null;
   }
 
-  public Object[] toGWT(Object[] jaxbObject, GWTMappingContext context) throws GWTMappingException {
+  public ArrayGWTMapper(GWTMapper itemMapper, Class itemClass) {
+    this.itemMapper = itemMapper;
+    this.itemClass = itemClass;
+  }
+
+  public Object toGWT(Object jaxbObject, GWTMappingContext context) throws GWTMappingException {
     if (jaxbObject == null) {
       return null;
     }
 
-    Collection gwtCollection = this.collectionMapper.toGWT(Arrays.asList(jaxbObject), context);
-    if (gwtCollection.isEmpty()) {
+    if (!jaxbObject.getClass().isArray()) {
+      throw new GWTMappingException("Expected an array, got " + jaxbObject);
+    }
+
+    int length = Array.getLength(jaxbObject);
+    if (length == 0) {
       return null;
     }
 
-    return gwtCollection.toArray((Object[]) Array.newInstance(gwtCollection.iterator().next().getClass(), gwtCollection.size()));
+    Object item = itemMapper.toGWT(Array.get(jaxbObject, 0), context);
+    Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
+    Array.set(resultArray, 0, item);
+    int i = 1;
+    while (length > i) {
+      item = itemMapper.toGWT(Array.get(jaxbObject, i), context);
+      Array.set(resultArray, i++, item);
+    }
+    return resultArray;
   }
 
-  public Object[] toJAXB(Object[] gwtObject, GWTMappingContext context) throws GWTMappingException {
+  public Object toJAXB(Object gwtObject, GWTMappingContext context) throws GWTMappingException {
     if (gwtObject == null) {
       return null;
     }
-    Collection jaxbCollection = this.collectionMapper.toJAXB(Arrays.asList(gwtObject), context);
-    if (jaxbCollection.isEmpty()) {
+
+    if (!gwtObject.getClass().isArray()) {
+      throw new GWTMappingException("Expected an array, got " + gwtObject);
+    }
+
+    int length = Array.getLength(gwtObject);
+    if (length == 0) {
       return null;
     }
-    return jaxbCollection.toArray((Object[]) Array.newInstance(jaxbCollection.iterator().next().getClass(), jaxbCollection.size()));
+
+    Object item = itemMapper.toJAXB(Array.get(gwtObject, 0), context);
+    Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
+    Array.set(resultArray, 0, item);
+    int i = 1;
+    while (length > i) {
+      item = itemMapper.toJAXB(Array.get(gwtObject, i), context);
+      Array.set(resultArray, i++, item);
+    }
+    return resultArray;
   }
 }
