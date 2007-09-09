@@ -108,7 +108,7 @@ public class GWTMapperIntrospector {
           return new MapGWTMapper((Class<Map>) jaxbClass, DefaultGWTMapper.INSTANCE, DefaultGWTMapper.INSTANCE);
         }
         else {
-          adapterInfo = adapterInfo == null ? (XmlJavaTypeAdapter) jaxbClass.getAnnotation(XmlJavaTypeAdapter.class) : null;
+          adapterInfo = adapterInfo == null ? (XmlJavaTypeAdapter) jaxbClass.getAnnotation(XmlJavaTypeAdapter.class) : adapterInfo;
 
           if (adapterInfo != null) {
             //if it's adapted, don't cache it.
@@ -151,12 +151,11 @@ public class GWTMapperIntrospector {
   }
 
   private static Type findAdaptingType(Class<? extends XmlAdapter> adapterClass) {
-    for (Type superInterface : adapterClass.getGenericInterfaces()) {
-      if ((superInterface instanceof ParameterizedType) &&
-         (((ParameterizedType) superInterface).getRawType() instanceof Class) &&
-         (XmlAdapter.class.isAssignableFrom((Class) ((ParameterizedType) superInterface).getRawType()))) {
-        return ((ParameterizedType) superInterface).getActualTypeArguments()[0];
-      }
+    Type superClass = adapterClass.getGenericSuperclass();
+    if ((superClass instanceof ParameterizedType) &&
+      (((ParameterizedType) superClass).getRawType() instanceof Class) &&
+      (XmlAdapter.class.isAssignableFrom((Class) ((ParameterizedType) superClass).getRawType()))) {
+      return ((ParameterizedType) superClass).getActualTypeArguments()[0];
     }
 
     if (XmlAdapter.class.isAssignableFrom(adapterClass.getSuperclass())) {

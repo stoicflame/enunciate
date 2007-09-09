@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.gwt.gwt;
+package org.codehaus.enunciate.modules.gwt;
 
-import org.codehaus.enunciate.modules.gwt.BaseGWTMapper;
-import org.codehaus.enunciate.modules.gwt.BeanOne;
-import org.codehaus.enunciate.modules.gwt.GWTBeanOne;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Date;
 
 /**
  * @author Ryan Heaton
  */
-public class BeanOneGWTMapper extends BaseGWTMapper {
+public class DateWrapperAdapter extends XmlAdapter<Date, DateWrapper> {
 
-  public BeanOneGWTMapper() {
-    super(BeanOne.class, GWTBeanOne.class, "property1", "property2", "property3", "property4", "property5", "property6", "property7", "property8", "property9");
+  public DateWrapper unmarshal(Date date) throws Exception {
+    return new DateWrapper(date);
+  }
+
+  public Date marshal(DateWrapper dateWrapper) throws Exception {
+    return dateWrapper.getMyDate();
   }
 }

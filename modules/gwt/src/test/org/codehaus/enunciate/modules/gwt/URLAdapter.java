@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.gwt.gwt;
+package org.codehaus.enunciate.modules.gwt;
 
-import org.codehaus.enunciate.modules.gwt.BaseGWTMapper;
-import org.codehaus.enunciate.modules.gwt.BeanOne;
-import org.codehaus.enunciate.modules.gwt.GWTBeanOne;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.net.URL;
+import java.net.URI;
 
 /**
  * @author Ryan Heaton
  */
-public class BeanOneGWTMapper extends BaseGWTMapper {
+public class URLAdapter extends XmlAdapter<URI, URL> {
 
-  public BeanOneGWTMapper() {
-    super(BeanOne.class, GWTBeanOne.class, "property1", "property2", "property3", "property4", "property5", "property6", "property7", "property8", "property9");
+  public URL unmarshal(URI uri) throws Exception {
+    return uri.toURL();
+  }
+
+  public URI marshal(URL url) throws Exception {
+    return url.toURI();
   }
 }

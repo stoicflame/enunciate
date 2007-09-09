@@ -30,6 +30,8 @@ public class GWTBeanOne {
   private GWTBeanOneDotTwo[] property5;
   private String property6;
   private Map property7;
+  private String property8;
+  private Date property9;
 
   public String getProperty1() {
     return property1;
@@ -86,5 +88,21 @@ public class GWTBeanOne {
 
   public void setProperty7(Map property7) {
     this.property7 = property7;
+  }
+
+  public String getProperty8() {
+    return property8;
+  }
+
+  public void setProperty8(String property8) {
+    this.property8 = property8;
+  }
+
+  public Date getProperty9() {
+    return property9;
+  }
+
+  public void setProperty9(Date property9) {
+    this.property9 = property9;
   }
 }

@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import java.util.*;
 import java.net.URI;
+import java.net.URL;
 
 /**
  * @author Ryan Heaton
@@ -66,6 +67,10 @@ public class TestBaseGWTMapper extends TestCase {
     map.put("two", new BeanOneMapValue(2L));
     map.put("three", new BeanOneMapValue(3L));
     jaxbObject.setProperty7(map);
+    URL enunciateURL = new URL("http://enunciate.codehaus.org/");
+    jaxbObject.setProperty8(enunciateURL);
+    Date date2 = new Date();
+    jaxbObject.setProperty9(new DateWrapper(date2));
 
     GWTBeanOne gwtBeanOne = (GWTBeanOne) mapper.toGWT(jaxbObject, context);
     assertEquals("value1", gwtBeanOne.getProperty1());
@@ -91,6 +96,8 @@ public class TestBaseGWTMapper extends TestCase {
     assertEquals(new Long(3), gwtMap.get("three").getProperty1());
     assertEquals(new Long(2), gwtMap.get("two").getProperty1());
     assertEquals(new Long(1), gwtMap.get("one").getProperty1());
+    assertEquals("http://enunciate.codehaus.org/", gwtBeanOne.getProperty8());
+    assertEquals(date2, gwtBeanOne.getProperty9());
 
     jaxbObject = (BeanOne) mapper.toJAXB(gwtBeanOne, context);
     assertEquals("value1", jaxbObject.getProperty1());
@@ -115,6 +122,8 @@ public class TestBaseGWTMapper extends TestCase {
     assertEquals(new Long(3), map.get("three").getProperty1());
     assertEquals(new Long(2), map.get("two").getProperty1());
     assertEquals(new Long(1), map.get("one").getProperty1());
+    assertEquals(enunciateURL, jaxbObject.getProperty8());
+    assertEquals(date2, jaxbObject.getProperty9().getMyDate());
   }
 
 }

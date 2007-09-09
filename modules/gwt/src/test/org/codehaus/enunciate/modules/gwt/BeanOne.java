@@ -16,8 +16,10 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Calendar;
 import java.util.Map;
+import java.net.URL;
 
 /**
  * @author Ryan Heaton
@@ -37,6 +39,8 @@ public class BeanOne {
   private BeanOneDotTwo[] property5;
   private BeanOneEnum property6;
   private Map<String, BeanOneMapValue> property7;
+  private URL property8;
+  private DateWrapper property9;
 
   public String getProperty1() {
     return property1;
@@ -92,5 +96,24 @@ public class BeanOne {
 
   public void setProperty7(Map<String, BeanOneMapValue> property7) {
     this.property7 = property7;
+  }
+
+  @XmlJavaTypeAdapter (
+    URLAdapter.class
+  )
+  public URL getProperty8() {
+    return property8;
+  }
+
+  public void setProperty8(URL property8) {
+    this.property8 = property8;
+  }
+
+  public DateWrapper getProperty9() {
+    return property9;
+  }
+
+  public void setProperty9(DateWrapper property9) {
+    this.property9 = property9;
   }
 }

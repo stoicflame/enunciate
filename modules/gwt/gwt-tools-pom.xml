@@ -14,7 +14,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.gwtwidgets</groupId>
+      <groupId>net.sf.gwt-widget</groupId>
       <artifactId>gwt-widgets-server</artifactId>
       <version>0.1.4</version>
     </dependency>

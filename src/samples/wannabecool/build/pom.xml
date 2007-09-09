@@ -14,6 +14,16 @@
       <url>https://maven-repository.dev.java.net/nonav/repository</url>
       <layout>legacy</layout>
     </repository>
+    <repository>
+      <!--repository for the gwt-user.jar and gwt-servlet.jars.-->
+      <id>gwt-maven</id>
+      <url>http://gwt-maven.googlecode.com/svn/trunk/mavenrepo</url>
+    </repository>
+    <repository>
+      <!--(hopefully temporary) repository for the gwt-widgets.jar and gwt-widgets-server.jars.-->
+      <id>enunciate-snapshot</id>
+      <url>http://snapshots.dist.codehaus.org/enunciate</url>
+    </repository>
   </repositories>
 
   <build>
