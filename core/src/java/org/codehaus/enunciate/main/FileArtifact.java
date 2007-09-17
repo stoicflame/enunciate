@@ -26,7 +26,7 @@ import java.io.IOException;
  */
 public class FileArtifact extends BaseArtifact {
 
-  private boolean bundled;
+  private boolean publicArtifact = true;
   private final File file;
   private String description;
 
@@ -101,20 +101,20 @@ public class FileArtifact extends BaseArtifact {
   }
 
   /**
-   * Whether this file artifact is bundled.
+   * Whether this file artifact is a public artifact.
    *
-   * @return Whether this file artifact is bundled.
+   * @return Whether this file artifact is a public artifact.
    */
-  public boolean isBundled() {
-    return bundled;
+  public boolean isPublic() {
+    return publicArtifact;
   }
 
   /**
-   * Whether this file artifact is bundled.
+   * Whether this file artifact is a public artifact.
    *
-   * @param bundled Whether this file artifact is bundled.
+   * @param bundled Whether this file artifact is a public artifact.
    */
-  public void setBundled(boolean bundled) {
-    this.bundled = bundled;
+  public void setPublic(boolean bundled) {
+    this.publicArtifact = bundled;
   }
 }

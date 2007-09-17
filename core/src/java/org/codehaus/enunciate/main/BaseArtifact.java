@@ -78,8 +78,8 @@ public abstract class BaseArtifact implements Artifact {
    *
    * @return This artifact is, by default, not bundled if it's an artifact bundle.
    */
-  public boolean isBundled() {
-    return !(this instanceof ArtifactBundle);
+  public boolean isPublic() {
+    return (this instanceof ArtifactBundle);
   }
 
   /**

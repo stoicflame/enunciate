@@ -62,7 +62,7 @@ public interface Artifact extends Comparable<Artifact> {
    *
    * @return Whether this artifact is bundled elsewhere.
    */
-  boolean isBundled();
+  boolean isPublic();
 
   /**
    * The list of dependencies for this artifact.

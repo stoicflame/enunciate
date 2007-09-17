@@ -468,7 +468,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
     for (Artifact artifact : enunciate.getArtifacts()) {
       if (((artifact instanceof NamedArtifact) && (includeDefaultDownloads)) || (explicitArtifacts.contains(artifact.getId()))) {
-        if (!artifact.isBundled()) {
+        if (artifact.isPublic()) {
           downloads.add(artifact);
         }
 

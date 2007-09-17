@@ -89,6 +89,7 @@ import java.util.*;
  *   <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
  *       If no jar name is specified, the name will be calculated from the enunciate label, or a default will
  *       be supplied.</li>
+ *   <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a download.  Default: <code>true</code>.</li>
  * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
@@ -102,6 +103,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String gwtModuleNamespace = null;
   private String gwtModuleName = null;
   private String clientJarName = null;
+  private boolean clientJarDownloadable = true;
   private final GWTRuleSet configurationRules;
 
   public GWTDeploymentModule() {
@@ -248,7 +250,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     File clientJar = new File(getBuildDir(), clientJarName);
-    enunciate.zip(clientJar, getClientSideGenerateDir(), getClientSideCompileDir());
+    enunciate.copyDir(getClientSideGenerateDir(), getClientSideCompileDir());
+    enunciate.zip(clientJar, getClientSideCompileDir());
     enunciate.setProperty("gwt.client.jar", clientJar);
 
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
@@ -258,7 +261,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     gwtUserDependency.setDescription("Base GWT classes.");
     gwtUserDependency.setGroupId("com.google.gwt");
     gwtUserDependency.setURL("http://code.google.com/webtoolkit/");
-    gwtUserDependency.setVersion("1.4.59");
+    gwtUserDependency.setVersion("1.4.60");
     clientDeps.add(gwtUserDependency);
 
     MavenDependency gwtWidgetsDependency = new MavenDependency();
@@ -276,11 +279,13 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     gwtClientArtifact.setDescription(readResource("client_library_description.html"));
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
     clientArtifact.setDescription("The binaries and sources for the GWT client library.");
-    clientArtifact.setBundled(true);
+    clientArtifact.setPublic(false);
     gwtClientArtifact.addArtifact(clientArtifact);
     gwtClientArtifact.setDependencies(clientDeps);
     enunciate.addArtifact(clientArtifact);
-    enunciate.addArtifact(gwtClientArtifact);
+    if (clientJarDownloadable) {
+      enunciate.addArtifact(gwtClientArtifact);
+    }
   }
 
   /**
@@ -433,5 +438,9 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       throw new IllegalArgumentException("The gwt module name must be of the form 'gwt.module.ns.ModuleName'");
     }
     this.gwtModuleNamespace = gwtModuleName.substring(0, lastDot);
+  }
+
+  public void setClientJarDownloadable(boolean clientJarDownloadable) {
+    this.clientJarDownloadable = clientJarDownloadable;
   }
 }

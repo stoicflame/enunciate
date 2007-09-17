@@ -32,6 +32,12 @@
     <servlet-name>spring</servlet-name>
     <url-pattern>${endpointInterface.soapAddressPath}</url-pattern>
   </servlet-mapping>
+          [#if gwtEnabled]
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/gwt/${endpointInterface.serviceName}</url-pattern>
+  </servlet-mapping>
+          [/#if]
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

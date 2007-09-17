@@ -480,7 +480,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     for (EndpointInterface ei : model.endpointInterfaces) {
       debug("Validating %s...", ei.getQualifiedName());
-      debug("Validating %s...", ei.getQualifiedName());
       validationResult.aggregate(validator.validateEndpointInterface(ei));
     }
 

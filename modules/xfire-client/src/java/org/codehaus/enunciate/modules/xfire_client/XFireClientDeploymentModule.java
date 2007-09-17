@@ -629,11 +629,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
     NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
     jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
-    jdk14BinariesJar.setBundled(true);
+    jdk14BinariesJar.setPublic(false);
     jdk14ArtifactBundle.addArtifact(jdk14BinariesJar);
     NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
     jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
-    jdk14SourcesJar.setBundled(true);
+    jdk14SourcesJar.setPublic(false);
     jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
     jdk14ArtifactBundle.setDependencies(clientDeps);
     enunciate.addArtifact(jdk14BinariesJar);
@@ -656,11 +656,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
     NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
     jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
-    jdk15BinariesJar.setBundled(true);
+    jdk15BinariesJar.setPublic(false);
     jdk15ArtifactBundle.addArtifact(jdk15BinariesJar);
     NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
     jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
-    jdk15SourcesJar.setBundled(true);
+    jdk15SourcesJar.setPublic(false);
     jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
     jdk15ArtifactBundle.setDependencies(clientDeps);
     enunciate.addArtifact(jdk15BinariesJar);

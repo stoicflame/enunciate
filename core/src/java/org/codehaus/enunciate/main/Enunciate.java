@@ -700,15 +700,17 @@ public class Enunciate {
         debug("Adding entry %s...", entry.getName());
         zipout.putNextEntry(entry);
 
-        FileInputStream in = new FileInputStream(file);
-        int len;
-        while ((len = in.read(buffer)) > 0) {
-          zipout.write(buffer, 0, len);
+        if (!file.isDirectory()) {
+          FileInputStream in = new FileInputStream(file);
+          int len;
+          while ((len = in.read(buffer)) > 0) {
+            zipout.write(buffer, 0, len);
+          }
+          in.close();
         }
 
         // Complete the entry
         zipout.closeEntry();
-        in.close();
       }
     }
 
@@ -745,11 +747,10 @@ public class Enunciate {
   protected void buildFileList(List<File> list, File... dirs) {
     for (File dir : dirs) {
       for (File file : dir.listFiles()) {
+        list.add(file);
+
         if (file.isDirectory()) {
           buildFileList(list, file);
-        }
-        else {
-          list.add(file);
         }
       }
     }

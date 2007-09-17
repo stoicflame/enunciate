@@ -28,7 +28,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class TextArtifact extends BaseArtifact {
 
-  private boolean bundled;
+  private boolean publicArtifact = true;
   private final String text;
 
   public TextArtifact(String module, String id, String text) {
@@ -77,20 +77,20 @@ public class TextArtifact extends BaseArtifact {
   }
 
   /**
-   * Whether this file artifact is bundled.
+   * Whether this file artifact is public.
    *
-   * @return Whether this file artifact is bundled.
+   * @return Whether this file artifact is public.
    */
-  public boolean isBundled() {
-    return bundled;
+  public boolean isPublic() {
+    return publicArtifact;
   }
 
   /**
-   * Whether this file artifact is bundled.
+   * Whether this file artifact is public.
    *
-   * @param bundled Whether this file artifact is bundled.
+   * @param bundled Whether this file artifact is public.
    */
-  public void setBundled(boolean bundled) {
-    this.bundled = bundled;
+  public void setPublic(boolean bundled) {
+    this.publicArtifact = bundled;
   }
 }

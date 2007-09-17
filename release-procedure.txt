@@ -13,7 +13,7 @@
     8a. Change the pom to point to the new version.
     8b. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy
     8c. svn ci
-9. Build the dist again using the live deploy build file. (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
+9. Build the dist again using the live deploy build file (make sure the dist build file includes any new modules). (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
 10. Build the src dist (e.g. "ant src-dist")
 11. Copy the dist and src dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
     11a. Make sure the links you have on the downloads page are correct.

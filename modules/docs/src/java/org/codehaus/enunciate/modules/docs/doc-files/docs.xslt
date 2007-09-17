@@ -702,7 +702,14 @@
 
                     <xsl:if test="@requiresResourceId='true'">
                       <p>
-                        This method requires a resource id on the URL (e.g. "<xsl:value-of select="translate(@type,'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>").
+                        This method requires a resource id on the URL.
+                        <xsl:choose>
+                          <xsl:when test="@type='read'">(e.g. "GET <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
+                          <xsl:when test="@type='create'">(e.g. "PUT <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
+                          <xsl:when test="@type='update'">(e.g. "POST <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
+                          <xsl:when test="@type='delete'">(e.g. "DELETE <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
+                          <xsl:otherwise></xsl:otherwise>
+                        </xsl:choose>
                       </p>
                     </xsl:if>
 
