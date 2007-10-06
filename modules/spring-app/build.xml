@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="deploy" name="spring-app" basedir=".">
+
+  <import file="../../build-module.xml"/>
+
+  <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule"/>
+
+</project>

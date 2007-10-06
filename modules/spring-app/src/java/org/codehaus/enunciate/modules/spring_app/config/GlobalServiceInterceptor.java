@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire.config;
+package org.codehaus.enunciate.modules.spring_app.config;
 
 /**
  * Config element specifying a service interceptor to add to each web service bean.

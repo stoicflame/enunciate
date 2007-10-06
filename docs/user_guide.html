@@ -130,7 +130,11 @@
         </li>
         <li>
           <h3><a href="module_xfire.html">xfire</a></h3>
-          <p>Builds and packages the war that will host the documentation and service the endpoints (using <a href="http://xfire.codehaus.org/">XFire</a>).</p>
+          <p>Generates support classes for deploying SOAP endpoints (using <a href="http://xfire.codehaus.org/">XFire</a>).</p>
+        </li>
+        <li>
+          <h3><a href="module_spring_app.html">spring-app</a></h3>
+          <p>Builds and packages the war that will host the documentation and service the endpoints (via <a href="http://www.springframework.org/">Spring</a>).</p>
         </li>
         <li>
           <h3><a href="module_xfire_client.html">xfire-client</a></h3>
@@ -163,7 +167,7 @@
         <li>
           <h3><a name="config_jaxb_import">jaxb-import</a></h3>
           <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
-          The 'classname' attribute of this element specified the FQN of an external class on which your API depends.</p>
+          The 'class' attribute of this element specified the FQN of an external class on which your API depends.</p>
         </li>
         <li>
           <h3><a name="config_deployment">deployment</a></h3>

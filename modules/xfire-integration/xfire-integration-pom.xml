@@ -51,6 +51,12 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-spring-app</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xfire-client</artifactId>
       <version>@VERSION@</version>
     </dependency>

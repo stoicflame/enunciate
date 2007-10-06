@@ -14,54 +14,54 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire.config;
+package org.codehaus.enunciate.modules.spring_app.config;
 
 import java.io.File;
 
 /**
- * Configuration element used to add spring configuration to the module.
- * 
+ * Configuration element used to specify a pattern of jars to exclude from the war.
+ *
  * @author Ryan Heaton
  */
-public class SpringImport {
+public class IncludeExcludeLibs {
 
-  private String file;
-  private String Uri;
+  private File file;
+  private String pattern;
 
   /**
-   * The spring file to import.
+   * The file to exclude.
    *
-   * @return The spring file to import.
+   * @return The file to exclude.
    */
-  public String getFile() {
+  public File getFile() {
     return file;
   }
 
   /**
-   * The spring file to import.
+   * The file to exclude.
    *
-   * @param file The spring file to import.
+   * @param file The file to exclude.
    */
-  public void setFile(String file) {
+  public void setFile(File file) {
     this.file = file;
   }
 
   /**
-   * Used to indicate a URI pointing to the the spring import.
+   * The matching pattern for the resources to copy.
    *
-   * @return The URI to the spring import.
+   * @return The matching pattern for the resources to copy.
    */
-  public String getUri() {
-    return Uri;
+  public String getPattern() {
+    return pattern;
   }
 
   /**
-   * The URI to the spring import.
+   * The matching pattern for the resources to copy.
    *
-   * @param uri The URI to the spring import.
+   * @param pattern The matching pattern for the resources to copy.
    */
-  public void setUri(String uri) {
-    this.Uri = uri;
+  public void setPattern(String pattern) {
+    this.pattern = pattern;
   }
 
 }

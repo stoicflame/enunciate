@@ -13,6 +13,7 @@
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="xfire-client" />
     <orderEntry type="library" name="gwt" level="project" />
+    <orderEntry type="library" name="spring-j2ee" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

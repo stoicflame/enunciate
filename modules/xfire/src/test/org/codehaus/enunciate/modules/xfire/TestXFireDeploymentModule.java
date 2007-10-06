@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.xfire;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.main.Enunciate;
@@ -53,12 +54,16 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
 
     Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setGenerateDir(enunciate.createTempDir());
-    module.init(enunciate);
+    try {
+      module.init(enunciate);
+      fail("should have required an enabled JAX-WS module");
+    }
+    catch (EnunciateException e) {
+      //fall through
+    }
     module.doFreemarkerGenerate();
 
-    assertEquals(4, processedTemplates.size());
-    assertTrue(processedTemplates.contains(module.getSpringServletTemplateURL()));
-    assertTrue(processedTemplates.contains(module.getWebXmlTemplateURL()));
+    assertEquals(2, processedTemplates.size());
     assertTrue(processedTemplates.contains(module.getRPCRequestBeanTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCResponseBeanTemplateURL()));
   }

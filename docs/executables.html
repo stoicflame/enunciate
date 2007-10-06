@@ -48,8 +48,8 @@
 
       <p>Each module exports its own set of artifacts. <a href="artifacts.html">Here's a quick reference</a> to the available artifacts.
       Refer to the <a href="modules.html">module documentation</a> to find more details on what each module does.  Most often, it's the
-      fully-packaged war exported by the <a href="module_xfire.html">XFire module</a>, so you'll want to export the artifact identified
-      by the id "xfire.war".</p>
+      fully-packaged war exported by the <a href="module_spring_app.html">spring app module</a>, so you'll want to export the artifact identified
+      by the id "spring.war.file".</p>
 
       <a name="ant"><div class="break">&nbsp;</div></a>
       <h1>Ant</h1>
@@ -166,13 +166,13 @@
 &lt;enunciate basedir="src/main/java"&gt;
   &lt;include name="**/*.java"/&gt;
   &lt;classpath refid="enunciate.classpath"/&gt;
-  &lt;export artifactId="xfire.war" destination="${tomcat.home}/webapps/myapp.war"/&gt;
+  &lt;export artifactId="spring.war.file" destination="${tomcat.home}/webapps/myapp.war"/&gt;
 &lt;/enunciate&gt;
 
 ...
       </code>
 
-      <p>Exports the fully-packaged, fully operational war (the artifact identified by the id "xfire.war") to
+      <p>Exports the fully-packaged, fully operational war (the artifact identified by the id "spring.war.file") to
       ${tomcat.home}/webapps/myapp.war, assuming ${enunciate.home} refers to the enunciate home directory.</p>
 
       <a name="maven"><div class="break">&nbsp;</div></a>
@@ -180,7 +180,7 @@
 
       <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
       the artifact is "maven-enunciate-plugin".  The Enunciate plugin supports a separate Maven 2 packaging named "enunciate-app".  The Maven 2 artifact that
-      is produced is by default the fully-documented, fully-operational war ("xfire.war"), but this can be configured.</p>
+      is produced is by default the fully-documented, fully-operational war ("spring.war.file"), but this can be configured.</p>
 
       <p>Note the following configuration parameters:</p>
 
@@ -228,7 +228,7 @@
         <tr>
           <td>warArtifactId</td>
           <td>String</td>
-          <td class="last">The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "xfire.war".</td>
+          <td class="last">The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "spring.war.file".</td>
         </tr>
         <tr>
           <td>warArtifactName</td>

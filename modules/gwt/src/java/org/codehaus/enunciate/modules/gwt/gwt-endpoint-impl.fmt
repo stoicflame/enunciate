@@ -18,12 +18,12 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
     try {
       [#if !webMethod.returnType.void]
         [#if !webMethod.returnType.primitive]
-        return (${classnameFor(webMethod.webResult)}) invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], ${param.simpleName}[/#list]);
+        return (${classnameFor(webMethod.webResult)}) invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], [#if param.type.array](Object) [/#if]${param.simpleName}[/#list]);
         [#else]
-        return [@unwrapIfPrimitive type=webMethod.returnType](([@primitiveWrapper type=webMethod.returnType/]) invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], ${param.simpleName}[/#list]))[/@unwrapIfPrimitive];
+        return [@unwrapIfPrimitive type=webMethod.returnType](([@primitiveWrapper type=webMethod.returnType/]) invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], [#if param.type.array](Object) [/#if]${param.simpleName}[/#list]))[/@unwrapIfPrimitive];
         [/#if]
       [#else]
-        invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], ${param.simpleName}[/#list]);
+        invokeOperation("${webMethod.operationName}"[#list webMethod.webParameters as param], [#if param.type.array](Object) [/#if]${param.simpleName}[/#list]);
       [/#if]
     }
       [#list webMethod.webFaults as fault]

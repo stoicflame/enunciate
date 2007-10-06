@@ -21,7 +21,6 @@ import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.util.MapType;
 
 import java.util.HashMap;
 
@@ -40,12 +39,7 @@ public class XFireValidator extends BaseValidator {
 
     EndpointInterface visited = visitedEndpoints.put(ei.getServiceName(), ei);
     if (visited != null) {
-      if (!visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
-        // todo: support multiple versions of web services.
-        result.addError(ei.getPosition(), "Enunciate doesn't support two endpoint interfaces with the same service name, " +
-          "even though they have different namespaces.  Future support for this is pending...");
-      }
-      else {
+      if (visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
         result.addError(ei.getPosition(), "Ummm... you already have a service named " + ei.getServiceName() + " at " +
           visited.getPosition() + ".  You need to disambiguate.");
       }

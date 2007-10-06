@@ -2,7 +2,8 @@
 
 <project default="test" name="xfire-integration" basedir=".">
 
-  <property name="build.dir" value="target/examples/full/classes/xfire-client/jdk14"/>
+  <property name="app.name" value="full"/>
+  <property name="build.dir" value="target/examples/${app.name}/classes/xfire-client/jdk14"/>
 
   <import file="../../build-module.xml"/>
 
@@ -33,7 +34,7 @@
   <import file="${container.test.support.file}"/>
 
   <target name="init-example-api">
-    <property name="example" value="full"/>
+    <property name="example" value="${app.name}"/>
     <property name="example.enunciate.xml" value="${basedir}/src/conf/enunciate.xml"/>
     <property name="enunciate.target" value="package"/>
   </target>
@@ -44,7 +45,7 @@
   <target name="compile-tests" depends="base.compile-tests">
     <javac destdir="${test.build.dir}" debug="true">
       <src>
-        <pathelement location="${enunciate.sample.src.dir}/full"/>
+        <pathelement location="${enunciate.sample.src.dir}/${app.name}"/>
       </src>
       <classpath refid="build.classpath"/>
     </javac>
@@ -54,7 +55,7 @@
     <antcall target="-init-container-tests" inheritall="true"/>
 
     <property name="container.port" value="8080"/>
-    <property name="container.test.context" value="full"/>
+    <property name="container.test.context" value="${app.name}"/>
     <property name="container.test.delay.time" value="5"/>
     <property name="container.test.delay.target" value="-delay-container-tests"/>
     <property name="stop.container.target" value="default-stop-container"/>
@@ -86,7 +87,7 @@
   <target name="default-stop-container"/>
 
   <target name="deploy-full-api">
-    <copy todir="${war.deploy.dir}" file="target/examples/full/package/xfire/full.war"/>
+    <copy todir="${war.deploy.dir}" file="target/examples/${app.name}/package/spring-app/${app.name}.war"/>
   </target>
 
   <target name="-delay-container-tests">

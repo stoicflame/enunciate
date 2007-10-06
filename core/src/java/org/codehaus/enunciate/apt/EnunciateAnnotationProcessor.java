@@ -29,6 +29,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.XmlTransient;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
@@ -291,10 +292,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       if (annotationDeclaration != null) {
         String fqn = annotationDeclaration.getQualifiedName();
         //exclude all XmlTransient types and all jaxws types.
-        if ("org.codehaus.enunciate.XmlTransient".equals(fqn)
+        if (XmlTransient.class.getName().equals(fqn)
           || "javax.xml.bind.annotation.XmlTransient".equals(fqn)
-          || (fqn.startsWith("javax.xml.ws")
-          || (fqn.startsWith("javax.jws")))) {
+          || fqn.startsWith("javax.xml.ws")
+          || fqn.startsWith("javax.jws")
+          || ((declaration.getPackage() != null) && (declaration.getPackage().getAnnotation(XmlTransient.class) != null))) {
           debug("%s isn't a potential schema type because of annotation %s.", declaration.getQualifiedName(), fqn);
           return false;
         }

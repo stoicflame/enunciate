@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire;
+package org.codehaus.enunciate.modules.spring_app;
 
-import org.springframework.aop.Advisor;
+import org.aopalliance.aop.Advice;
 
 /**
  * @author Ryan Heaton
  */
-public interface EnunciateServiceAdvisor extends Advisor {
+public interface EnunciateServiceAdvice extends Advice {
 }

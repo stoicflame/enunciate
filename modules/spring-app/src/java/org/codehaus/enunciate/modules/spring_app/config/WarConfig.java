@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire.config;
+package org.codehaus.enunciate.modules.spring_app.config;
+
+import org.codehaus.enunciate.EnunciateException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +31,10 @@ import java.net.MalformedURLException;
  */
 public class WarConfig {
 
-  private final List<String> warLibs = new ArrayList<String>();
-  private final List<ExcludeJars> excludeJars = new ArrayList<ExcludeJars>();
+  private boolean includeDefaultLibs = true;
+  private boolean exludeDefaultLibs = true;
+  private final List<IncludeExcludeLibs> excludeLibs = new ArrayList<IncludeExcludeLibs>();
+  private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
   private String name;
   private URL webXMLTransformURL;
   private String preBase;
@@ -55,21 +59,58 @@ public class WarConfig {
   }
 
   /**
-   * The list of libraries to include in the war.
+   * Whether to include the default libs.
    *
-   * @return The list of libraries to include in the war.
+   * @return Whether to include the default libs.
    */
-  public List<String> getWarLibs() {
-    return warLibs;
+  public boolean isIncludeDefaultLibs() {
+    return includeDefaultLibs;
+  }
+
+  /**
+   * Whether to include the default libs.
+   *
+   * @param includeDefaultLibs Whether to include the default libs.
+   */
+  public void setIncludeDefaultLibs(boolean includeDefaultLibs) {
+    this.includeDefaultLibs = includeDefaultLibs;
+  }
+
+  /**
+   * Whether to include the default libs.
+   *
+   * @return Whether to include the default libs.
+   */
+  public boolean isExludeDefaultLibs() {
+    return exludeDefaultLibs;
+  }
+
+  /**
+   * Whether to include the default libs.
+   *
+   * @param exludeDefaultLibs Whether to include the default libs.
+   */
+  public void setExludeDefaultLibs(boolean exludeDefaultLibs) {
+    this.exludeDefaultLibs = exludeDefaultLibs;
+  }
+
+  /**
+   * Add a war lib.
+   *
+   * @param warLib The war lib to add.
+   * @deprecated use "addIncludeJars"
+   */
+  public void addWarLib(WarLib warLib) throws EnunciateException {
+    throw new EnunciateException("The \"lib\" element has been replaced by the more flexible \"includeLibs\" element.  See the Enunciate docs for details.");
   }
 
   /**
    * Add a exclude jars.
    *
-   * @param excludeJars The exclude jars to add.
+   * @param excludeLibs The exclude jars to add.
    */
-  public void addExcludeJars(ExcludeJars excludeJars) {
-    this.excludeJars.add(excludeJars);
+  public void addExcludeLibs(IncludeExcludeLibs excludeLibs) {
+    this.excludeLibs.add(excludeLibs);
   }
 
   /**
@@ -77,8 +118,26 @@ public class WarConfig {
    *
    * @return The list of exclude jars.
    */
-  public List<ExcludeJars> getExcludeJars() {
-    return excludeJars;
+  public List<IncludeExcludeLibs> getExcludeLibs() {
+    return excludeLibs;
+  }
+
+  /**
+   * Add a include jars.
+   *
+   * @param includeLibs The include jars to add.
+   */
+  public void addIncludeLibs(IncludeExcludeLibs includeLibs) {
+    this.includeLibs.add(includeLibs);
+  }
+
+  /**
+   * Get the list of include jars.
+   *
+   * @return The list of include jars.
+   */
+  public List<IncludeExcludeLibs> getIncludeLibs() {
+    return includeLibs;
   }
 
   /**
@@ -106,15 +165,6 @@ public class WarConfig {
    */
   public void setWebXMLTransform(File stylesheet) throws MalformedURLException {
     this.webXMLTransformURL = stylesheet.toURL();
-  }
-
-  /**
-   * Add a war lib.
-   *
-   * @param warLib The war lib to add.
-   */
-  public void addWarLib(WarLib warLib) {
-    this.warLibs.add(warLib.getPath());
   }
 
   /**

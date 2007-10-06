@@ -21,6 +21,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="spring-j2ee" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

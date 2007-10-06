@@ -85,7 +85,7 @@ public class ${endpointInterface.simpleName} {
         callback.onResponse(([@primitiveWrapper type=webMethod.returnType/]) object);
       [/#if]
     [#else]
-        //do nothing (void return type);
+        callback.onSuccess();
     [/#if]
       }
 
@@ -117,6 +117,11 @@ public class ${endpointInterface.simpleName} {
       [#else]
     void onResponse([@primitiveWrapper type=webMethod.returnType/] response);
       [/#if]
+    [#else]
+    /**
+     * Called asynchronously on success of the call.
+     */
+    void onSuccess();
     [/#if]
 
     /**

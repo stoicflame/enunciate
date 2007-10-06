@@ -3,7 +3,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
 
-  <bean id="enunciate-interceptor-processor" class="org.codehaus.enunciate.modules.xfire.EnunciateGlobalInterceptorProcessor">
+  <bean id="enunciate-interceptor-processor" class="org.codehaus.enunciate.modules.spring_app.EnunciateGlobalInterceptorProcessor">
     [#if globalServiceInterceptors?exists]
       <property name="globalServiceInterceptors">
         <list>
@@ -48,7 +48,7 @@
 
     <property name="interceptors">
       <list>
-        <bean class="org.codehaus.enunciate.modules.xfire.HTTPRequestContextInterceptor"/>
+        <bean class="org.codehaus.enunciate.modules.spring_app.HTTPRequestContextInterceptor"/>
   [#if handlerInterceptors?exists]
     [#list handlerInterceptors as interceptor]
       [#if interceptor.interceptorClass?exists]

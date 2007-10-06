@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire;
+package org.codehaus.enunciate.modules.spring_app;
 
 import org.aopalliance.aop.Advice;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;

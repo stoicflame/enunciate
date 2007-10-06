@@ -25,6 +25,7 @@
   <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
   <property name="modules.gwt.basedir" value="${enunciate.basedir}/modules/gwt"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
+  <property name="modules.spring-app.basedir" value="${enunciate.basedir}/modules/spring-app"/>
   <property name="modules.xfire-integration.basedir" value="${enunciate.basedir}/modules/xfire-integration"/>
 
   <target name="clean">
@@ -38,6 +39,7 @@
     <ant dir="${modules.docs.basedir}" target="clean"/>
     <ant dir="${modules.gwt.basedir}" target="clean"/>
     <ant dir="${modules.xfire.basedir}" target="clean"/>
+    <ant dir="${modules.spring-app.basedir}" target="clean"/>
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
@@ -76,6 +78,7 @@
     <ant dir="${modules.docs.basedir}"/>
     <ant dir="${modules.gwt.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
+    <ant dir="${modules.spring-app.basedir}"/>
     <ant dir="${modules.xfire-integration.basedir}"/>
 
     <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>
@@ -160,6 +163,9 @@
       <filterset refid="nav.filterset"/>
     </copy>
     <copy file="${modules.xfire.basedir}/target/module.html" tofile="${module.docs.dir}/module_xfire.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.spring-app.basedir}/target/module.html" tofile="${module.docs.dir}/module_spring_app.html" failonerror="false" overwrite="true">
       <filterset refid="nav.filterset"/>
     </copy>
 
