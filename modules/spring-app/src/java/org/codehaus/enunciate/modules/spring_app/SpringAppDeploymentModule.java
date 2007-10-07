@@ -35,13 +35,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.jar.Manifest;
 
 /**
  * <h1>Spring App Module</h1>
@@ -123,6 +121,11 @@ import java.util.*;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;manifest/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute section="..." name="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/manifest/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/war&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;springImport file="..." uri="..."/&gt;
@@ -181,7 +184,14 @@ import java.util.*;
  * ship by default with the JDK and the jars that are known to be build-time-only jars for Enunciate.  You can specify additional jars that are to be
  * excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element supports either a
  * "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the file (or directory)
- * on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.</p>
+ * on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.  Furthermore, the
+ * "excludeLibs" element supports a "includeInManifest" attribute specifying whether the exclude should be listed in the "Class-Path" attribute of the manifest.
+ * By default excluded jars are not included in the manifest.</p>
+ * <p/>
+ * <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
+ * of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and
+ * a "section" attribute.  If no section is specified, the default section is assumed.  If there is no "Class-Path" attribute in the main section, one will be
+ * provided listing the jars on the classpath.</p>
  * <p/>
  * <h3>The "springImport" element</h3>
  * <p/>
@@ -491,10 +501,14 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     //if there are any excludes, filter them out here.
     boolean excludeDefaults = this.warConfig == null || this.warConfig.isExludeDefaultLibs();
+    List<String> manifestClasspath = new ArrayList<String>();
     Iterator<File> includeLibIt = includedLibs.iterator();
-    while (includeLibIt.hasNext()) {
+    INCLUDE_LOOP : while (includeLibIt.hasNext()) {
       File includedLib = includeLibIt.next();
-      if ((!excludeDefaults) || (!knownExclude(includedLib)) || (excludeLibs.size() > 0)) {
+      if (excludeDefaults && knownExclude(includedLib)) {
+        includeLibIt.remove();
+      }
+      else {
         for (IncludeExcludeLibs excludeJar : excludeLibs) {
           String pattern = excludeJar.getPattern();
           String absolutePath = includedLib.getAbsolutePath();
@@ -502,11 +516,16 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             //lob off the beginning "/" for Linux boxes.
             absolutePath = absolutePath.substring(1);
           }
-          if ((pattern != null) && (pathMatcher.isPattern(pattern)) && (pathMatcher.match(pattern, absolutePath))) {
+
+          boolean exclude = ((excludeJar.getFile() != null) && (excludeJar.getFile().equals(includedLib))) ||
+            ((pattern != null) && (pathMatcher.isPattern(pattern)) && (pathMatcher.match(pattern, absolutePath)));
+          if (exclude) {
             includeLibIt.remove();
-          }
-          else if ((excludeJar.getFile() != null) && (excludeJar.getFile().equals(includedLib))) {
-            includeLibIt.remove();
+            if ((excludeJar.isIncludeInManifest()) && (!includedLib.isDirectory())) {
+              //include it in the manifest anyway.
+              manifestClasspath.add(includedLib.getName());
+            }
+            continue INCLUDE_LOOP;
           }
         }
       }
@@ -520,8 +539,30 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       else {
         info("Including %s in WEB-INF/lib.", includedLib);
         enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
+        manifestClasspath.add(includedLib.getName());
       }
     }
+
+    // write the manifest file.
+    Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
+    if (!manifest.getMainAttributes().containsKey("Class-Path")) {
+      StringBuilder manifestClasspathValue = new StringBuilder();
+      Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
+      while (manifestClasspathIt.hasNext()) {
+        String entry = manifestClasspathIt.next();
+        manifestClasspathValue.append(entry);
+        if (manifestClasspathIt.hasNext()) {
+          manifestClasspathValue.append(" ");
+        }
+      }
+      manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
+    }
+    File metaInf = new File(buildDir, "META-INF");
+    metaInf.mkdirs();
+    FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
+    manifest.write(manifestFileOut);
+    manifestFileOut.flush();
+    manifestFileOut.close();
 
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 

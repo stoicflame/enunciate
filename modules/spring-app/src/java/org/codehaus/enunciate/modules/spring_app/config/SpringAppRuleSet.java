@@ -48,6 +48,11 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/war/includeLibs");
     digester.addSetNext("enunciate/modules/spring-app/war/includeLibs", "addIncludeLibs");
 
+    digester.addCallMethod("enunciate/modules/spring-app/war/manifest/attribute", "addManifestAttribute", 3);
+    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 0, "section");
+    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 1, "name");
+    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 2, "value");
+
     digester.addObjectCreate("enunciate/modules/spring-app/springImport", SpringImport.class);
     digester.addSetProperties("enunciate/modules/spring-app/springImport");
     digester.addSetNext("enunciate/modules/spring-app/springImport", "addSpringImport");

@@ -27,6 +27,7 @@ public class IncludeExcludeLibs {
 
   private File file;
   private String pattern;
+  private boolean includeInManifest = false;
 
   /**
    * The file to exclude.
@@ -64,4 +65,21 @@ public class IncludeExcludeLibs {
     this.pattern = pattern;
   }
 
+  /**
+   * Whether to include the jar in the manifest.
+   *
+   * @return Whether to include the jar in the manifest.
+   */
+  public boolean isIncludeInManifest() {
+    return includeInManifest;
+  }
+
+  /**
+   * Whether to include the jar in the manifest.
+   *
+   * @param includeInManifest Whether to include the jar in the manifest.
+   */
+  public void setIncludeInManifest(boolean includeInManifest) {
+    this.includeInManifest = includeInManifest;
+  }
 }

@@ -20,6 +20,8 @@ import org.codehaus.enunciate.EnunciateException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes;
 import java.io.File;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -39,6 +41,7 @@ public class WarConfig {
   private URL webXMLTransformURL;
   private String preBase;
   private String postBase;
+  private final Manifest manifest = getDefaultManifest();
 
   /**
    * The name of the war.
@@ -202,4 +205,48 @@ public class WarConfig {
   public void setPostBase(String postBase) {
     this.postBase = postBase;
   }
+
+  /**
+   * The manifest for this war.
+   *
+   * @return The manifest for this war.
+   */
+  public Manifest getManifest() {
+    return manifest;
+  }
+
+  /**
+   * Adds a manifest entry to this war's manifest.
+   *
+   * @param section The section.  If null, the main section is assumed.
+   * @param name The name of the attribute.
+   * @param value The value of the attribute.
+   */
+  public void addManifestAttribute(String section, String name, String value) {
+    Attributes attributes;
+    if (section == null) {
+      attributes = this.manifest.getMainAttributes();
+    }
+    else {
+      attributes = this.manifest.getAttributes(section);
+      if (attributes == null) {
+        attributes = new Attributes();
+        this.manifest.getEntries().put(section, attributes);
+      }
+    }
+    attributes.putValue(name, value);
+  }
+
+  /**
+   * Get the default manifest for a war file.
+   *
+   * @return The default manifest for a war file.
+   */
+  public static Manifest getDefaultManifest() {
+    Manifest manifest = new Manifest();
+    manifest.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
+    manifest.getMainAttributes().putValue("Created-By", "Enunciate");
+    return manifest;
+  }
+
 }

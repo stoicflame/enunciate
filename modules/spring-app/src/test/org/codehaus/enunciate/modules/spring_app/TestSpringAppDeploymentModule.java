@@ -27,6 +27,5 @@ public class TestSpringAppDeploymentModule extends TestCase {
    * tests nothing.
    */
   public void testNothing() throws Exception {
-
   }
 }
