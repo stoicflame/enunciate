@@ -344,7 +344,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     Enunciate enunciate = getEnunciate();
     File compileDir = getCompileDir();
-    enunciate.invokeJavac(enunciate.getDefaultClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
+    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
 
     File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
     if (jaxwsSources != null) {
@@ -358,7 +358,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       if (!jaxwsSourceFiles.isEmpty()) {
-        StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getDefaultClasspath());
+        StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
         jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
         enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
       }
@@ -381,7 +381,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
       info("Compiling the GWT support classes found in %s...", gwtSources);
       Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
-      StringBuilder gwtClasspath = new StringBuilder(enunciate.getDefaultClasspath());
+      StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
       gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
       enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
     }
@@ -447,12 +447,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     //prime the list of libs to include in the war with what's on the enunciate classpath.
     List<String> warLibs = new ArrayList<String>();
     if (this.warConfig == null || this.warConfig.isIncludeDefaultLibs()) {
-      String classpath = enunciate.getClasspath();
-      if (classpath == null) {
-        //no classpath set; just use the system classpath.
-        classpath = System.getProperty("java.class.path");
-      }
-      warLibs.addAll(Arrays.asList(classpath.split(File.pathSeparator)));
+      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
     }
     List<IncludeExcludeLibs> includeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getIncludeLibs()) : new ArrayList<IncludeExcludeLibs>();
     List<IncludeExcludeLibs> excludeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getExcludeLibs()) : new ArrayList<IncludeExcludeLibs>();

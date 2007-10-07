@@ -62,12 +62,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private RuntimeException re = null;
   private final Enunciate enunciate;
   private final String deploymentBaseURL;
+  private final String[] additionalApiClasses;
 
-  public EnunciateAnnotationProcessor() throws EnunciateException {
+  /**
+   * Package-private constructor for testing purposes.
+   */
+  EnunciateAnnotationProcessor() throws EnunciateException {
     this(new Enunciate(new String[0], new EnunciateConfiguration()));
   }
 
-  public EnunciateAnnotationProcessor(Enunciate enunciate) throws EnunciateException {
+  public EnunciateAnnotationProcessor(Enunciate enunciate, String... additionalApiClasses) throws EnunciateException {
     super(null);
 
     if (enunciate == null) {
@@ -89,6 +93,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       baseURL += ("/" + config.getLabel());
     }
     this.deploymentBaseURL = baseURL;
+    this.additionalApiClasses = additionalApiClasses;
   }
 
   @Override
@@ -129,6 +134,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
+    if (this.additionalApiClasses != null) {
+      for (String additionalApiClass : this.additionalApiClasses) {
+        TypeDeclaration declaration = env.getTypeDeclaration(additionalApiClass);
+        if (declaration != null) {
+          typeDeclarations.add(declaration);
+        }
+        else {
+          this.enunciate.warn("Unable to load type definition for additional API class '%s'.", additionalApiClass);
+        }
+      }
+    }
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -157,25 +173,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    //read in any JAXB import classes.
     EnunciateConfiguration config = this.enunciate.getConfig();
-    debug("Reading JAXB import classes...");
-    for (String jaxbClassImport : config.getJaxbClassImports()) {
-      TypeDeclaration typeDeclaration = env.getTypeDeclaration(jaxbClassImport);
-      if (typeDeclaration == null) {
-        throw new IllegalStateException("JAXB import class not found: " + jaxbClassImport);
-      }
-
-      if (!(typeDeclaration instanceof ClassDeclaration)) {
-        throw new IllegalStateException("Illegal JAXB import class (not a class): " + jaxbClassImport);
-      }
-
-      TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) typeDeclaration);
-      loadTypeDef(typeDef, model);
-    }
-
-    //todo: support jaxb package imports (use jaxb.index or ObjectFactory.class)
-
     //override any namespace prefix mappings as specified in the config.
     for (String ns : config.getNamespacesToPrefixes().keySet()) {
       String prefix = config.getNamespacesToPrefixes().get(ns);

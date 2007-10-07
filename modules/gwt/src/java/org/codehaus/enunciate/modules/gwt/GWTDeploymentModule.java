@@ -231,7 +231,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     info("Compiling the GWT client-side files...");
     Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-    enunciate.invokeJavac(enunciate.getDefaultClasspath(), getClientSideCompileDir(), Arrays.asList("-source", "1.4", "-g"), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getClientSideCompileDir(), Arrays.asList("-source", "1.4", "-g"), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     enunciate.setProperty("gwt.client.compile.dir", getClientSideCompileDir());
   }
 

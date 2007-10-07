@@ -52,8 +52,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
   private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
-  private final Set<String> jaxbPackageImports = new HashSet<String>();
-  private final Set<String> jaxbClassImports = new HashSet<String>();
+  private final List<APIImport> apiImports = new ArrayList<APIImport>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -274,43 +273,21 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
-   * Add a JAXB import to the configuration.  Either class or package must be specified, but not both.
+   * Add an API import to the configuration.
    *
-   * @param clazz The FQN of the class to import.
-   * @param pckg The FQN of the package to import.
+   * @param apiImport The API import to add to the configuration.
    */
-  public void addJAXBImport(String clazz, String pckg) {
-    if ((clazz != null) && (pckg != null)) {
-      throw new IllegalArgumentException("Either 'class' or 'package' must be specified on a JAXB import, but not both.");
-    }
-    else if (clazz != null) {
-      this.jaxbClassImports.add(clazz);
-    }
-    else if (pckg != null) {
-      throw new UnsupportedOperationException("Sorry, jaxb package imports aren't supported yet.  It's on the todo list.  For now, you'll have to import each class.");
-      //this.jaxbPackageImports.add(pckg);
-    }
-    else {
-      throw new IllegalArgumentException("Either 'class' or 'package' must be specified on a JAXB import (but not both).");
-    }
+  public void addAPIImport(APIImport apiImport) {
+    this.apiImports.add(apiImport);
   }
 
   /**
-   * The set of JAXB package imports specified.
+   * Get the list of API imports for this configuration.
    *
-   * @return The set of JAXB package imports specified.
+   * @return the list of API imports for this configuration.
    */
-  public Set<String> getJaxbPackageImports() {
-    return jaxbPackageImports;
-  }
-
-  /**
-   * The list of JAXB class imports specified.
-   *
-   * @return The list of JAXB class imports specified.
-   */
-  public Set<String> getJaxbClassImports() {
-    return jaxbClassImports;
+  public List<APIImport> getAPIImports() {
+    return apiImports;
   }
 
   /**
@@ -395,9 +372,18 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addSetNext("enunciate/validator", "setValidator");
 
     //allow for classes and packages to be imported for JAXB.
-    digester.addCallMethod("enunciate/jaxb-import", "addJAXBImport", 2);
-    digester.addCallParam("enunciate/jaxb-import", 0, "class");
-    digester.addCallParam("enunciate/jaxb-import", 1, "package");
+    digester.addObjectCreate("enunciate/api-import", APIImport.class);
+    digester.addSetProperties("enunciate/api-import",
+                              new String[] {"classname", "class", "seekSource"},
+                              new String[] {"classname", "classname", "seekSource"});
+    digester.addSetNext("enunciate/api-import", "addAPIImport");
+
+    //allow for classes and packages to be imported for JAXB.
+    digester.addObjectCreate("enunciate/jaxb-import", APIImport.class);
+    digester.addSetProperties("enunciate/jaxb-import",
+                              new String[] {"class"},
+                              new String[] {"classname"});
+    digester.addSetNext("enunciate/jaxb-import", "addAPIImport");
 
     //allow for the deployment configuration to be specified.
     digester.addSetProperties("enunciate/deployment",

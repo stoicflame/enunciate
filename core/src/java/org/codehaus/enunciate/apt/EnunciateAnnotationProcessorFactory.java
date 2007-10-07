@@ -18,11 +18,10 @@ package org.codehaus.enunciate.apt;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
 import net.sf.jelly.apt.ProcessorFactory;
 import net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.main.Enunciate;
 
 import java.io.IOException;
 import java.net.URL;
@@ -59,8 +58,8 @@ public class EnunciateAnnotationProcessorFactory extends ProcessorFactory {
 
   private final EnunciateAnnotationProcessor processor;
 
-  public EnunciateAnnotationProcessorFactory(Enunciate enunciate) throws EnunciateException {
-    this.processor = new EnunciateAnnotationProcessor(enunciate);
+  public EnunciateAnnotationProcessorFactory(Enunciate enunciate, String... additionalApiClasses) throws EnunciateException {
+    this.processor = new EnunciateAnnotationProcessor(enunciate, additionalApiClasses);
     this.round = 0; //todo: fix this in APT-Jelly.  What it really needs to do is listen to the rounds.
   }
 

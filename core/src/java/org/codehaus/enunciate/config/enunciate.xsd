@@ -12,6 +12,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="api-import" type="api-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
@@ -121,6 +122,18 @@
     </xs:annotation>
 
     <xs:attribute name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="api-import">
+    <xs:annotation>
+      <xs:documentation>
+        Set of additional api classes to be Enunciated.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="class" type="xs:string"/>
+    <xs:attribute name="package" type="xs:string"/>
+    <xs:attribute name="seekSource" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="modules">

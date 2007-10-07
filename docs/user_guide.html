@@ -165,9 +165,11 @@
           <p>The "label" attribute of the root element specifies a label for your Enunciate project.</p>
         </li>
         <li>
-          <h3><a name="config_jaxb_import">jaxb-import</a></h3>
+          <h3><a name="config_additional_classes">api-import</a></h3>
           <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
-          The 'class' attribute of this element specified the FQN of an external class on which your API depends.</p>
+          The 'class' attribute of this element specified the FQN of an external class on which your API depends. By default Enunciate will scan the classpath
+          for the source files that are associated with these additional classes.  If the sources are not found, Enunciate will not be able to take advantage
+          of source-specific information (e.g. documentation).  You can disable scanning for source files by setting the 'seekSource' attribute to false.</p>
         </li>
         <li>
           <h3><a name="config_deployment">deployment</a></h3>

@@ -19,12 +19,14 @@ package org.codehaus.enunciate.main;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.APIImport;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -273,7 +275,49 @@ public class Enunciate {
       setGenerateDir(genDir);
     }
 
-    invokeApt(getSourceFiles());
+    ArrayList<String> sourceFiles = new ArrayList<String>(Arrays.asList(getSourceFiles()));
+    ArrayList<String> additionalApiClasses = new ArrayList<String>();
+    if ((this.config != null) && (this.config.getAPIImports().size() > 0)) {
+      //handle the API imports.
+      List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateClasspath().split(File.pathSeparator)));
+      List<URL> classpathURLs = new ArrayList<URL>(classpath.size());
+      for (String pathItem : classpath) {
+        File pathFile = new File(pathItem);
+        if (pathFile.exists()) {
+          classpathURLs.add(pathFile.toURL());
+        }
+      }
+
+      File tempSourcesDir = createTempDir();
+      URLClassLoader loader = new URLClassLoader(classpathURLs.toArray(new URL[classpathURLs.size()]));
+      for (APIImport apiImport : this.config.getAPIImports()) {
+        String classname = apiImport.getClassname();
+        if (classname != null) {
+          URL source = null;
+          if (apiImport.isSeekSource()) {
+            source = loader.findResource(classname.replace('.', '/').concat(".java"));
+          }
+          if (source != null) {
+            //we have the source for the class.  Add it to the source list.
+            File srcFile = new File(tempSourcesDir, classname.replace('.', File.separatorChar).concat(".java"));
+            if (!srcFile.getParentFile().exists()) {
+              srcFile.getParentFile().mkdirs();
+            }
+            copyResource(source, srcFile);
+            sourceFiles.add(srcFile.getAbsolutePath());
+          }
+          else if (loader.findResource(classname.replace('.', '/').concat(".class")) != null) {
+            //no source found, just use the class.
+            additionalApiClasses.add(classname);
+          }
+          else {
+            throw new EnunciateException("API Import class '" + classname + "' not found in the Enunciate classpath.");
+          }
+        }
+      }
+    }
+
+    invokeApt(sourceFiles.toArray(new String[sourceFiles.size()]), additionalApiClasses.toArray(new String[additionalApiClasses.size()]));
   }
 
   /**
@@ -438,11 +482,11 @@ public class Enunciate {
   }
 
   /**
-   * The default classpath to use for javac and apt.
+   * The enunciate classpath to use for javac and apt.
    *
-   * @return The default classpath to use for javac and apt.
+   * @return The enunciate classpath to use for javac and apt.
    */
-  public String getDefaultClasspath() {
+  public String getEnunciateClasspath() {
     String classpath = getClasspath();
     if (classpath == null) {
       classpath = System.getProperty("java.class.path");
@@ -455,9 +499,9 @@ public class Enunciate {
    *
    * @param sourceFiles The source files.
    */
-  protected void invokeApt(String[] sourceFiles) throws IOException, EnunciateException {
+  protected void invokeApt(String[] sourceFiles, String... additionalApiClasses) throws IOException, EnunciateException {
     ArrayList<String> args = new ArrayList<String>();
-    String classpath = getDefaultClasspath();
+    String classpath = getEnunciateClasspath();
 
     args.add("-cp");
     args.add(classpath);
@@ -484,7 +528,7 @@ public class Enunciate {
       debug(message.toString());
     }
 
-    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this);
+    EnunciateAnnotationProcessorFactory apf = new EnunciateAnnotationProcessorFactory(this, additionalApiClasses);
     com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
     apf.throwAnyErrors();
   }
@@ -498,7 +542,7 @@ public class Enunciate {
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(File compileDir, String[] sourceFiles) throws EnunciateException {
-    String classpath = getDefaultClasspath();
+    String classpath = getEnunciateClasspath();
 
     invokeJavac(classpath, compileDir, sourceFiles);
   }
