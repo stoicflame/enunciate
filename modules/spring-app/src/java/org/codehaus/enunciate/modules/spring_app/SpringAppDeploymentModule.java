@@ -43,75 +43,79 @@ import java.util.jar.Manifest;
 
 /**
  * <h1>Spring App Module</h1>
- * <p/>
+ *
  * <p>The spring app deployment module produces the web app for hosting the API endpoints and documentation.</p>
- * <p/>
+ *
  * <p>The order of the spring app deployment module is 200, putting it after any of the other modules, including
  * the documentation deployment module.  The spring app deployment module maintains soft dependencies on the other
  * Enunciate modules.  If those modules are active, the spring app deployment modules will assemble their artifacts
  * into a <a href="http://www.springframework.org/">spring</a>-supported web application.</p>
- * <p/>
+ *
  * <ul>
  * <li><a href="#steps">steps</a></li>
  * <li><a href="#config">configuration</a></li>
  * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
- * <p/>
+ *
  * <h1><a name="steps">Steps</a></h1>
- * <p/>
+ *
  * <h3>generate</h3>
- * <p/>
+ *
  * <p>The "generate" step generates the deployment descriptors, and the <a href="http://www.springframework.org/">Spring</a>
  * configuration file.  Refer to <a href="#config">configuration</a> to learn how to customize the deployment
  * descriptors and the spring config file.</p>
- * <p/>
+ *
  * <h3>compile</h3>
- * <p/>
+ *
  * <p>The "compile" step compiles all API source files, including the source files that were generated from other modules
  * (e.g. JAX-WS module and XFire module).</p>
- * <p/>
+ *
  * <h3>build</h3>
- * <p/>
+ *
  * <p>The "build" step assembles all the generated artifacts, compiled classes, and deployment descriptors into an (expanded)
  * war directory.</p>
- * <p/>
+ *
  * <p>All classes compiled in the compile step are copied to the WEB-INF/classes directory.</p>
- * <p/>
+ *
  * <p>A set of libraries are copied to the WEB-INF/lib directory.  This set of libraries can be specified in the
  * <a href="#config">configuration file</a>.  Unless specified otherwise in the configuration file, the
  * libraries copied will be filtered from the classpath specified to Enunciate at compile-time.  The filtered libraries
  * are those libraries that are determined to be specific to running the Enunciate compile-time engine.  All other
  * libraries on the classpath are assumed to be dependencies for the API and are therefore copied to WEB-INF/lib.
  * (If a directory is found on the classpath, its contents are copied to WEB-INF/classes.)</p>
- * <p/>
+ *
  * <p>The web.xml file is copied to the WEB-INF directory.  A tranformation can be applied to the web.xml file before the copy,
  * if specified in the config, allowing you to apply your own servlet filters, etc.  <i>Take care to preserve the existing elements
  * when applying a transformation to the web.xml file, as losing data will result in missing or malfunctioning endpoints.</i></p>
- * <p/>
+ *
  * <p>The spring-servlet.xml file is generated and copied to the WEB-INF directory.  You can specify other spring config files that
  * will be copied (and imported by the spring-servlet.xml file) in the configuration.  This option allows you to specify spring AOP
  * interceptors and XFire in/out handlers to wrap your endpoints, if desired.</p>
- * <p/>
+ *
  * <p>Finally, the documentation (if found) is copied to the base of the web app directory.</p>
- * <p/>
+ *
  * <h3>package</h3>
- * <p/>
+ *
  * <p>The "package" step packages the expanded war and exports it.</p>
- * <p/>
+ *
  * <h1><a name="config">Configuration</a></h1>
- * <p/>
- * <p>The configuration for the XFire deployment module is specified by the "xfire" child element under the "modules" element
+ *
+ * <p>The configuration for the Spring App deployment module is specified by the "spring-app" child element under the "modules" element
  * of the enunciate configuration file.</p>
- * <p/>
+ *
  * <h3>Structure</h3>
- * <p/>
+ *
  * <p>The following example shows the structure of the configuration elements for this module.  Note that this shows only the structure.
  * Some configuration elements don't make sense when used together.</p>
- * <p/>
+ *
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app compileDebugInfo="[true | false]" defaultDependencyCheck="[none | objects | simple | all]" defaultAutowire="[no | byName | byType | constructor | autodetect]"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app compileDebugInfo="[true | false]"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contextLoaderListenerClass="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dispatcherServletClass="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultDependencyCheck="[none | objects | simple | all]"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultAutowire="[no | byName | byType | constructor | autodetect]"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..." preBase="..." postBase="..." includeDefaultLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
@@ -147,21 +151,25 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&lt;/modules&gt;
  * &lt;/enunciate&gt;
  * </code>
- * <p/>
+ *
  * <h3>attributes</h3>
- * <p/>
+ *
  * <ul>
  * <li>The "<b>compileDebugInfo</b>" attribute specifies that the compiled classes should be compiled with debug info.  The default is "true."</li>
+ * <li>The "<b>dispatcherServletClass</b>" attribute specifies that FQN of the class to use as the Spring dispatcher servlet.  The default is "org.springframework.web.servlet.DispatcherServlet".</li>
+ * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
  * <li>The "<b>defaultDependencyCheck</b>" attribute specifies that value of the "default-dependency-check" for the generated spring file.</li>
  * <li>The "<b>defaultAutowire</b>" attribute specifies that value of the "default-autowire" for the generated spring file.</li>
  * </ul>
- * <p/>
+ *
  * <h3>The "war" element</h3>
- * <p/>
+ *
  * <p>The "war" element is used to specify configuration for the assembly of the war.  It supports the following attributes:</p>
- * <p/>
+ *
  * <ul>
  * <li>The "<b>name</b>" attribute specifies the name of the war.  The default is the enunciate configuration label.</li>
+ * <li>The "<b>docsDir</b>" attribute specifies a different directory in the war for the documentation (including WSDL and schemas).  The default is the
+ * root directory of the war.</li>
  * <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
  * directory.  No tranformation will be applied if none is specified.</li>
  * <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
@@ -174,12 +182,12 @@ import java.util.jar.Manifest;
  * libs explicitly included by file (see below) will be included.</li>
  * <li>The "<b>excludeDefaultLibs</b>" attribute specifies whether Enunciate should perform its default filtering of known compile-time-only jars.</li>
  * </ul>
- * <p/>
+ *
  * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of directories on the classpath
  * will be copied to the "classes" directory).  You add a specific file to this list with the "file" attribute "includeLibs" element of the "war" element.
  * From this list, you can specify a set of files to include with the "pattern" attribute of the "includeLibs" element.  This is an ant-style pattern matcher
  * against the absolute path of the file (or directory).  By default all files are included.</p>
- * <p/>
+ *
  * <p>There is a set of known jars that by default will not be copied to the "lib" directory.  These include the jars that
  * ship by default with the JDK and the jars that are known to be build-time-only jars for Enunciate.  You can specify additional jars that are to be
  * excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element supports either a
@@ -187,78 +195,78 @@ import java.util.jar.Manifest;
  * on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.  Furthermore, the
  * "excludeLibs" element supports a "includeInManifest" attribute specifying whether the exclude should be listed in the "Class-Path" attribute of the manifest.
  * By default excluded jars are not included in the manifest.</p>
- * <p/>
+ *
  * <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
  * of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and
  * a "section" attribute.  If no section is specified, the default section is assumed.  If there is no "Class-Path" attribute in the main section, one will be
  * provided listing the jars on the classpath.</p>
- * <p/>
+ *
  * <h3>The "springImport" element</h3>
- * <p/>
+ *
  * <p>The "springImport" element is used to specify a spring configuration file that will be imported by the main
  * spring servlet config. It supports the following attributes:</p>
- * <p/>
+ *
  * <ul>
  * <li>The "file" attribute specifies the spring import file on the filesystem.  It will be copied to the WEB-INF directory.</li>
  * <li>The "uri" attribute specifies the URI to the spring import file.  The URI will not be resolved at compile-time, nor will anything be copied to the
  * WEB-INF directory. The value of this attribute will be used to reference the spring import file in the main config file.  This attribute is useful
  * to specify an import file on the classpath, e.g. "classpath:com/myco/spring/config.xml".</li>
  * </ul>
- * <p/>
+ *
  * <p>One use of specifying spring a import file is to wrap your endpoints with spring interceptors and/or XFire in/out/fault handlers.  This can be done
  * by simply declaring a bean that is an instance of your endpoint class.  This bean can be advised as needed, and if it implements
  * org.codehaus.xfire.handler.HandlerSupport (perhaps <a href="http://static.springframework.org/spring/docs/1.2.x/reference/aop.html#d0e4128">through the use
  * of a mixin</a>?), the in/out/fault handlers will be used for the XFire invocation of that endpoint.</p>
- * <p/>
+ *
  * <p>It's important to note that the type on which the bean context will be searched is the type of the endpoint <i>interface</i>, and then only if it exists.
  * If there are more than one beans that are assignable to the endpoint interface, the bean that is named the name of the service will be used.  Otherwise,
  * the deployment of your endpoint will fail.</p>
- * <p/>
+ *
  * <p>The same procedure can be used to specify the beans to use as REST endpoints, although the XFire in/out/fault handlers will be ignored.  In this case,
  * the bean context will be searched for each <i>REST interface</i> that the endpoint implements.  If there is a bean that implements that interface, it will
  * used instead of the default implementation.  If there is more than one, the bean that is named the same as the REST endpoint will be used.</p>
- * <p/>
+ *
  * <p>There also exists a mechanism to add certain AOP interceptors to all service endpoint beans.  Such interceptors are referred to as "global service
  * interceptors." This can be done by using the "globalServiceInterceptor" element (see below), or by simply creating an interceptor that implements
  * org.codehaus.enunciate.modules.spring_app.EnunciateServiceAdvice or org.codehaus.enunciate.modules.spring_app.EnunciateServiceAdvisor and declaring it in your
  * imported spring beans file.</p>
- * <p/>
+ *
  * <p>Each global interceptor has an order.  The default order is 0 (zero).  If a global service interceptor implements org.springframework.core.Ordered, the
  * order will be respected. As global service interceptors are added, it will be assigned a position in the chain according to it's order.  Interceptors
  * of the same order will be ordered together according to their position in the config file, with priority to those declared by the "globalServiceInterceptor"
  * element, then to instances of org.codehaus.enunciate.modules.spring_app.EnunciateServiceAdvice, then to instances of
  * org.codehaus.enunciate.modules.spring_app.EnunciateServiceAdvisor.</p>
- * <p/>
+ *
  * <p>For more information on spring bean configuration and interceptor advice, see
  * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
- * <p/>
+ *
  * <h3>The "globalServiceInterceptor" element</h3>
- * <p/>
+ *
  * <p>The "globalServiceInterceptor" element is used to specify a Spring interceptor (instance of org.aopalliance.aop.Advice or
  * org.springframework.aop.Advisor) that is to be injected on all service endpoint beans.</p>
- * <p/>
+ *
  * <ul>
  * <li>The "interceptorClass" attribute specified the class of the interceptor.</p>
  * <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
  * </ul>
- * <p/>
+ *
  * <h3>The "handlerInterceptor" element</h3>
- * <p/>
+ *
  * <p>The "handlerInterceptor" element is used to specify a Spring interceptor (instance of org.springframework.web.servlet.HandlerInterceptor)
  * that is to be injected on the handler mapping.</p>
- * <p/>
+ *
  * <ul>
  * <li>The "interceptorClass" attribute specifies the class of the interceptor.</p>
  * <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
  * </ul>
- * <p/>
+ *
  * <p>For more information on spring bean configuration and interceptor advice, see
  * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
- * <p/>
+ *
  * <h3>The "copyResources" element</h3>
- * <p/>
+ *
  * <p>The "copyResources" element is used to specify a pattern of resources to copy to the compile directory.  It supports the following attributes:</p>
- * <p/>
+ *
  * <ul>
  * <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
  * <li>The "<b>pattern</b>" attribute specifies an <a href="http://ant.apache.org/">Ant</a>-style
@@ -266,11 +274,11 @@ import java.util.jar.Manifest;
  * <a href="http://static.springframework.org/spring/docs/1.2.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
  * JavaDocs.</li>
  * </ul>
- * <p/>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
- * <p/>
+ *
  * <p>The spring app deployment module exports the following artifacts:</p>
- * <p/>
+ *
  * <ul>
  * <li>The "spring.app.dir" artifact is the (expanded) web app directory, exported during the build step.</li>
  * <li>The "spring.war.file" artifact is the packaged war, exported during the package step.</li>
@@ -288,9 +296,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private boolean compileDebugInfo = true;
   private String defaultAutowire = null;
   private String defaultDependencyCheck = null;
+  private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
+  private String dispatcherServletClass = "org.springframework.web.servlet.DispatcherServlet";
 
   /**
-   * @return "xfire"
+   * @return "spring-app"
    */
   @Override
   public String getName() {
@@ -298,7 +308,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "xfire-servlet.fmt"
+   * @return The URL to "spring-servlet.fmt"
    */
   protected URL getSpringServletTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("spring-servlet.fmt");
@@ -315,11 +325,13 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
 
-    //generate the xfire-servlet.xml
+    //generate the spring-servlet.xml
     model.setFileOutputDirectory(getConfigGenerateDir());
     model.put("springImports", getSpringImportURIs());
     model.put("defaultDependencyCheck", getDefaultDependencyCheck());
     model.put("defaultAutowire", getDefaultAutowire());
+    model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
+    model.put("springDispatcherServletClass", getDispatcherServletClass());
     if (!globalServiceInterceptors.isEmpty()) {
       for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
         if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
@@ -340,6 +352,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
     model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
     model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
+
+    String docsDir = "";
+    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+      docsDir = this.warConfig.getDocsDir().trim();
+      if ((!"".equals(docsDir)) && (!docsDir.endsWith("/"))) {
+        docsDir = docsDir + "/";
+      }
+    }
+    model.put("docsDir", docsDir);
 
     processTemplate(getSpringServletTemplateURL(), model);
     processTemplate(getWebXmlTemplateURL(), model);
@@ -476,7 +497,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     List<File> includedLibs = new ArrayList<File>();
     // Now get the files that are to be explicitly included.
     // If none are explicitly included, include all of them.
-    INCLUDE_LOOP: for (String warLib : warLibs) {
+    INCLUDE_LOOP:
+    for (String warLib : warLibs) {
       File libFile = new File(warLib);
       if (libFile.exists()) {
         if (includeLibs.isEmpty()) {
@@ -503,7 +525,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     boolean excludeDefaults = this.warConfig == null || this.warConfig.isExludeDefaultLibs();
     List<String> manifestClasspath = new ArrayList<String>();
     Iterator<File> includeLibIt = includedLibs.iterator();
-    INCLUDE_LOOP : while (includeLibIt.hasNext()) {
+    INCLUDE_LOOP:
+    while (includeLibIt.hasNext()) {
       File includedLib = includeLibIt.next();
       if (excludeDefaults && knownExclude(includedLib)) {
         includeLibIt.remove();
@@ -539,13 +562,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       else {
         info("Including %s in WEB-INF/lib.", includedLib);
         enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
-        manifestClasspath.add(includedLib.getName());
       }
     }
 
     // write the manifest file.
     Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
-    if (!manifest.getMainAttributes().containsKey("Class-Path")) {
+    if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
       StringBuilder manifestClasspathValue = new StringBuilder();
       Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
       while (manifestClasspathIt.hasNext()) {
@@ -600,7 +622,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     //now try to find the documentation and export it to the build directory...
     Artifact artifact = enunciate.findArtifact("docs");
     if (artifact != null) {
-      artifact.exportTo(buildDir, enunciate);
+      File docsDir = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+        docsDir = new File(buildDir, this.warConfig.getDocsDir());
+      }
+      artifact.exportTo(docsDir, enunciate);
     }
     else {
       warn("WARNING: No documentation artifact found!");
@@ -770,6 +796,42 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDefaultDependencyCheck(String defaultDependencyCheck) {
     this.defaultDependencyCheck = defaultDependencyCheck;
+  }
+
+  /**
+   * The class to use as the context loader listener.
+   *
+   * @return The class to use as the context loader listener.
+   */
+  public String getContextLoaderListenerClass() {
+    return contextLoaderListenerClass;
+  }
+
+  /**
+   * The class to use as the context loader listener.
+   *
+   * @param contextLoaderListenerClass The class to use as the context loader listener.
+   */
+  public void setContextLoaderListenerClass(String contextLoaderListenerClass) {
+    this.contextLoaderListenerClass = contextLoaderListenerClass;
+  }
+
+  /**
+   * The class to use as the dispatcher servlet.
+   *
+   * @return The class to use as the dispatcher servlet.
+   */
+  public String getDispatcherServletClass() {
+    return dispatcherServletClass;
+  }
+
+  /**
+   * The class to use as the dispatcher servlet.
+   *
+   * @param dispatcherServletClass The class to use as the dispatcher servlet.
+   */
+  public void setDispatcherServletClass(String dispatcherServletClass) {
+    this.dispatcherServletClass = dispatcherServletClass;
   }
 
   /**

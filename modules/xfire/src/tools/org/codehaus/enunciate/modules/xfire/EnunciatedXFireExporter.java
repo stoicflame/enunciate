@@ -26,6 +26,7 @@ import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.web.servlet.ModelAndView;
@@ -94,7 +95,7 @@ public class EnunciatedXFireExporter extends XFireExporter implements EnunciateS
       }
     }
 
-    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : this.ctx.getBeansOfType(serviceInterface);
+    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : BeanFactoryUtils.beansOfTypeIncludingAncestors(this.ctx, serviceInterface);
     if (serviceInterfaceBeans.size() > 0) {
       String serviceName = factory.createServiceName(serviceClass, annotation, annotation.getServiceName());
       if (serviceInterfaceBeans.containsKey(serviceName)) {

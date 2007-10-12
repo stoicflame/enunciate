@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.ClassUtils;
 
 import javax.jws.WebMethod;
@@ -124,7 +125,7 @@ public abstract class GWTEndpointImpl extends GWTSpringController implements Enu
       }
     }
 
-    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : this.ctx.getBeansOfType(serviceInterface);
+    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : BeanFactoryUtils.beansOfTypeIncludingAncestors(this.ctx, serviceInterface);
     if (serviceInterfaceBeans.size() > 0) {
       String serviceName = wsInfo.serviceName();
       if ((serviceName == null) || ("".equals(serviceName))) {

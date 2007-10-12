@@ -81,7 +81,7 @@ public class Enunciate {
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final HashMap<String, File> exports = new HashMap<String, File>();
-  private String[] sourceFiles;
+  private final List<String> sourceFiles = new ArrayList<String>();
 
   public static void main(String[] args) throws Exception {
     Main.main(args);
@@ -105,7 +105,7 @@ public class Enunciate {
       }
     }
 
-    this.sourceFiles = sourceFiles;
+    this.sourceFiles.addAll(Arrays.asList(sourceFiles));
   }
 
   /**
@@ -326,12 +326,12 @@ public class Enunciate {
    * @return The deployment modules that were loaded and initialized.
    */
   protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
-    if ((this.sourceFiles == null) || (this.sourceFiles.length == 0)) {
+    if ((this.sourceFiles == null) || (this.sourceFiles.isEmpty())) {
       throw new EnunciateException("No source files have been specified!");
     }
 
     if (isJavacCheck()) {
-      invokeJavac(createTempDir(), this.sourceFiles);
+      invokeJavac(createTempDir(), getSourceFiles());
     }
 
     if (this.config == null) {
@@ -404,6 +404,15 @@ public class Enunciate {
    * @return The source files.
    */
   public String[] getSourceFiles() {
+    return this.sourceFiles.toArray(new String[this.sourceFiles.size()]);
+  }
+
+  /**
+   * Modifiable list of the Enunciate source files.
+   *
+   * @return The modifiable list of enunciate source files.
+   */
+  public List<String> getSourceFileList() {
     return this.sourceFiles;
   }
 
@@ -498,6 +507,7 @@ public class Enunciate {
    * Invokes APT on the specified source files.
    *
    * @param sourceFiles The source files.
+   * @param additionalApiClasses The FQNs of additional classes (should be found on the Enunciate classpath) that comprise the API.
    */
   protected void invokeApt(String[] sourceFiles, String... additionalApiClasses) throws IOException, EnunciateException {
     ArrayList<String> args = new ArrayList<String>();

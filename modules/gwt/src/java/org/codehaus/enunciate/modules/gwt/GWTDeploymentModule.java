@@ -31,16 +31,21 @@ import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
+import org.codehaus.enunciate.modules.gwt.config.GWTApp;
+import org.codehaus.enunciate.modules.gwt.config.GWTAppModule;
+import org.codehaus.enunciate.modules.xfire_client.ClientLibraryArtifact;
+import org.codehaus.enunciate.modules.xfire_client.ClientPackageForMethod;
 import org.codehaus.enunciate.modules.xfire_client.CollectionTypeForMethod;
 import org.codehaus.enunciate.modules.xfire_client.ComponentTypeForMethod;
-import org.codehaus.enunciate.modules.xfire_client.ClientPackageForMethod;
-import org.codehaus.enunciate.modules.xfire_client.ClientLibraryArtifact;
-import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.Declaration;
 
 /**
  * <h1>GWT Module</h1>
@@ -52,9 +57,9 @@ import java.util.*;
  * by any other module.</p>
  *
  * <ul>
- *   <li><a href="#steps">steps</a></li>
- *   <li><a href="#config">configuration</a></li>
- *   <li><a href="#artifacts">artifacts</a></li>
+ * <li><a href="#steps">steps</a></li>
+ * <li><a href="#config">configuration</a></li>
+ * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
  * <h1><a name="steps">Steps</a></h1>
@@ -80,35 +85,55 @@ import java.util.*;
  * <i>disabled="false"</i> on the "gwt" element.  It also supports the following attributes:</p>
  *
  * <ul>
- *   <li>The "gwtModuleName" attribute <b>must</b> be supplied.  The GWT module name will also be used to
- *       determine the layout of the created module.  The module name must be of the form "com.mycompany.MyModuleName".
- *       In this example, "com.mycompany" will be the <i>module namespace</i> and all client code will be generated into
- *       a package named of the form [module namespace].client (e.g. "com.mycompany.client").  <i>Note: in order to provide
- *       a sensible mapping from service code to GWT client-side code, all service endpoints, faults, and JAXB beans must
- *       exist in a package that matches the module namespace, or a subpackage thereof</i></li>
- *   <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
- *       If no jar name is specified, the name will be calculated from the enunciate label, or a default will
- *       be supplied.</li>
- *   <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a download.  Default: <code>true</code>.</li>
+ * <li>The "gwtModuleName" attribute <b>must</b> be supplied.  The GWT module name will also be used to
+ * determine the layout of the created module.  The module name must be of the form "com.mycompany.MyModuleName".
+ * In this example, "com.mycompany" will be the <i>module namespace</i> and all client code will be generated into
+ * a package named of the form [module namespace].client (e.g. "com.mycompany.client").  By default, in order to provide
+ * a sensible mapping from service code to GWT client-side code, all service endpoints, faults, and JAXB beans must
+ * exist in a package that matches the module namespace, or a subpackage thereof.  Use the "enforceNamespaceConformance"
+ * attribute to loosen this requirement.</li>
+ * <li>The "enforceNamespaceConformance" attribute allows you to lift the requirement that all classes exist in a package
+ * that matches the module namespace.  If this is set to "false", the classes that do not match the module namespace will
+ * be subpackaged by the client namespace.  You may not like this because the package mapping might be ugly.  If your module
+ * namespace is "com.mycompany" and you have a class "org.othercompany.OtherClass", it will be mapped to a client-side class
+ * called "com.mycompany.client.org.othercompany.OtherClass".</li>
+ * <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
+ * If no jar name is specified, the name will be calculated from the enunciate label, or a default will
+ * be supplied.</li>
+ * <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a download.  Default: <code>true</code>.</li>
  * </ul>
+ *
+ * <h3>The "app" element</h3>
+ *
+ * <p>The GWT module also supports the development of GWT AJAX apps.  List your GWT modules apps with nested "app" elements by specifying the module
+ * name with the "module" attribute of the "app" element.  All GWT modules will be compiled into a single directory using the "[Module].gwt.xml"
+ * descriptor file.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
- * <p>The "gwt.client.jar" artifact is the packaged client-side GWT jar.</p>
+ * <ul>
+ * <li>The "gwt.client.jar" artifact is the packaged client-side GWT jar.</li>
+ * <li>The "gwt.client.src.dir" artifact is the directory where the client-side source code is generated.</li>
+ * <li>The "gwt.server.src.dir" artifact is the directory where the server-side source code is generated.</li>
+ * <li>The "gwt.app.dir" artifact is the directory to which the GWT AJAX apps are compiled.</li>
+ * </ul>
  *
  * @author Ryan Heaton
  */
 public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
-  private String gwtModuleNamespace = null;
-  private String gwtModuleName = null;
+  private boolean enforceNamespaceConformance = true;
+  private String rpcModuleNamespace = null;
+  private String rpcModuleName = null;
   private String clientJarName = null;
   private boolean clientJarDownloadable = true;
-  private final GWTRuleSet configurationRules;
+  private final List<GWTApp> gwtApps = new ArrayList<GWTApp>();
+  private final GWTRuleSet configurationRules = new GWTRuleSet();
+  private String gwtHome = System.getenv("GWT_HOME");
+  private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
+  private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
 
   public GWTDeploymentModule() {
-    this.configurationRules = new GWTRuleSet();
-
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
   }
 
@@ -120,21 +145,37 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     return "gwt";
   }
 
-
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (gwtModuleName == null) {
+    if (rpcModuleName == null) {
       throw new EnunciateException("You must specify a \"gwtModuleName\" for the GWT module.");
     }
-    if (gwtModuleNamespace == null) {
+    if (rpcModuleNamespace == null) {
       throw new EnunciateException("You must specify a \"gwtModuleName\" for the GWT module.");
     }
+
+    for (GWTApp gwtApp : gwtApps) {
+      String srcPath = gwtApp.getSrcDir();
+
+      if (srcPath == null) {
+        throw new EnunciateException("A source directory for the GWT app "
+          + ("".equals(gwtApp.getName()) ? "" : "'" + gwtApp.getName() + "' ")
+          + "must be supplied with the 'srcDir' attribute.");
+      }
+
+      File srcDir = enunciate.resolvePath(srcPath);
+      if (!srcDir.exists()) {
+        throw new EnunciateException("Source directory '" + srcDir.getAbsolutePath() + "' doesn't exist for the GWT app"
+          + ("".equals(gwtApp.getName()) ? "." : " '" + gwtApp.getName() + "'."));
+      }
+    }
+
   }
 
   @Override
-  public void doFreemarkerGenerate() throws IOException, TemplateException {
+  public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     //load the references to the templates....
     URL complexMapperTemplate = getTemplateURL("gwt-complex-type-mapper.fmt");
     URL simpleMapperTemplate = complexMapperTemplate;
@@ -150,7 +191,46 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     //set up the model, first allowing for jdk 14 compatability.
     EnunciateFreemarkerModel model = getModel();
-    Map<String, String> conversions = getClientPackageConversions();
+    Map<String, String> conversions = new HashMap<String, String>();
+    String clientNamespace = this.rpcModuleNamespace + ".client";
+    conversions.put(this.rpcModuleNamespace, clientNamespace);
+    if (!this.enforceNamespaceConformance) {
+      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!isGWTTransient(ei)) {
+            String pckg = ei.getPackage().getQualifiedName();
+            if (!conversions.containsKey(pckg)) {
+              conversions.put(pckg, pckg + "." + clientNamespace);
+            }
+            for (WebMethod webMethod : ei.getWebMethods()) {
+              for (WebFault webFault : webMethod.getWebFaults()) {
+                allFaults.add(webFault);
+              }
+            }
+          }
+        }
+      }
+      for (WebFault webFault : allFaults) {
+        if (!isGWTTransient(webFault)) {
+          String pckg = webFault.getPackage().getQualifiedName();
+          if (!conversions.containsKey(pckg)) {
+            conversions.put(pckg, pckg + "." + clientNamespace);
+          }
+        }
+      }
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if (!isGWTTransient(typeDefinition)) {
+            String pckg = typeDefinition.getPackage().getQualifiedName();
+            if (!conversions.containsKey(pckg)) {
+              conversions.put(pckg, pckg + "." + clientNamespace);
+            }
+          }
+        }
+      }
+    }
+
     ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
     ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
     CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
@@ -165,12 +245,14 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     info("Generating the GWT endpoints...");
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        model.put("endpointInterface", ei);
-        processTemplate(eiTemplate, model);
+        if (!isGWTTransient(ei)) {
+          model.put("endpointInterface", ei);
+          processTemplate(eiTemplate, model);
 
-        for (WebMethod webMethod : ei.getWebMethods()) {
-          for (WebFault webFault : webMethod.getWebFaults()) {
-            allFaults.add(webFault);
+          for (WebMethod webMethod : ei.getWebMethods()) {
+            for (WebFault webFault : webMethod.getWebFaults()) {
+              allFaults.add(webFault);
+            }
           }
         }
       }
@@ -178,20 +260,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     info("Generating the GWT faults...");
     for (WebFault webFault : allFaults) {
-      model.put("fault", webFault);
-      processTemplate(faultTemplate, model);
+      if (!isGWTTransient(webFault)) {
+        model.put("fault", webFault);
+        processTemplate(faultTemplate, model);
+      }
     }
 
     info("Generating the GWT types...");
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        model.put("type", typeDefinition);
-        URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-        processTemplate(template, model);
+        if (!isGWTTransient(typeDefinition)) {
+          model.put("type", typeDefinition);
+          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+          processTemplate(template, model);
+        }
       }
     }
 
-    model.put("gwtModuleName", this.gwtModuleName);
+    model.put("gwtModuleName", this.rpcModuleName);
     processTemplate(moduleXmlTemplate, model);
 
     model.setFileOutputDirectory(getServerSideGenerateDir());
@@ -199,15 +285,17 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     info("Generating the GWT endpoint implementations...");
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        model.put("endpointInterface", ei);
-        processTemplate(endpointImplTemplate, model);
+        if (!isGWTTransient(ei)) {
+          model.put("endpointInterface", ei);
+          processTemplate(endpointImplTemplate, model);
+        }
       }
     }
 
     info("Generating the GWT type mappers...");
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if (!typeDefinition.isEnum()) {
+        if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
           model.put("type", typeDefinition);
           URL template = typeDefinition.isSimple() ? simpleMapperTemplate : complexMapperTemplate;
           processTemplate(template, model);
@@ -217,12 +305,156 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     info("Generating the GWT fault mappers...");
     for (WebFault webFault : allFaults) {
-      model.put("fault", webFault);
-      processTemplate(faultMapperTemplate, model);
+      if (!isGWTTransient(webFault)) {
+        model.put("fault", webFault);
+        processTemplate(faultMapperTemplate, model);
+      }
     }
 
+    if (this.gwtApps.size() > 0) {
+      doGWTCompile();
+    }
+
+    enunciate.setProperty("gwt.client.src.dir", getClientSideGenerateDir());
+    enunciate.addArtifact(new FileArtifact(getName(), "gwt.client.src.dir", getClientSideGenerateDir()));
     enunciate.setProperty("gwt.server.src.dir", getServerSideGenerateDir());
     enunciate.addArtifact(new FileArtifact(getName(), "gwt.server.src.dir", getServerSideGenerateDir()));
+    enunciate.setProperty("gwt.app.dir", getAppGenerateDir());
+    enunciate.addArtifact(new FileArtifact(getName(), "gwt.app.dir", getAppGenerateDir()));
+  }
+
+  /**
+   * Invokes GWTCompile on the apps specified in the configuration file.
+   */
+  protected void doGWTCompile() throws EnunciateException, IOException {
+    if (this.gwtHome == null) {
+      throw new EnunciateException("To compile a GWT app you must specify the GWT home directory, either in configuration or by setting the GWT_HOME environment variable.");
+    }
+
+    File gwtHomeDir = new File(this.gwtHome);
+    if (!gwtHomeDir.exists()) {
+      throw new EnunciateException("GWT home not found ('" + gwtHomeDir.getAbsolutePath() + "').");
+    }
+
+    File gwtUserJar = new File(gwtHomeDir, "gwt-user.jar");
+    if (!gwtUserJar.exists()) {
+      warn("Unable to find %s. You may be GWT compile errors.", gwtUserJar.getAbsolutePath());
+    }
+
+    //now we have to find gwt-dev.jar.
+    //start by assuming linux...
+    File linuxDevJar = new File(gwtHomeDir, "gwt-dev-linux.jar");
+    File gwtDevJar = linuxDevJar;
+    if (!gwtDevJar.exists()) {
+      //linux not found. try mac...
+      File macDevJar = new File(gwtHomeDir, "gwt-dev-mac.jar");
+      gwtDevJar = macDevJar;
+
+      if (!gwtDevJar.exists()) {
+        //okay, we'll try windows if we have to...
+        File windowsDevJar = new File(gwtHomeDir, "gwt-dev-windows.jar");
+        gwtDevJar = windowsDevJar;
+
+        if (!gwtDevJar.exists()) {
+          throw new EnunciateException(String.format("Unable to find GWT dev jar. Looked for %s, %s, and %s.", linuxDevJar.getAbsolutePath(), macDevJar.getAbsolutePath(), windowsDevJar.getAbsolutePath()));
+        }
+      }
+    }
+
+    File javaBinDir = new File(System.getProperty("java.home"), "bin");
+    File javaExecutable = new File(javaBinDir, "java");
+    if (!javaExecutable.exists()) {
+      //append the "exe" for windows users.
+      javaExecutable = new File(javaBinDir, "java.exe");
+    }
+
+    String javaCommand = javaExecutable.getAbsolutePath();
+    if (!javaExecutable.exists()) {
+      warn("No java executable found in %s.  We'll just hope the environment is set up to execute 'java'...", javaBinDir.getAbsolutePath());
+      javaCommand = "java";
+    }
+
+    StringBuilder classpath = new StringBuilder(enunciate.getEnunciateClasspath());
+    //append the client-side gwt directory.
+    classpath.append(File.pathSeparatorChar).append(getClientSideGenerateDir().getAbsolutePath());
+    //append the gwt-user jar.
+    classpath.append(File.pathSeparatorChar).append(gwtUserJar.getAbsolutePath());
+    //append the gwt-dev jar.
+    classpath.append(File.pathSeparatorChar).append(gwtDevJar.getAbsolutePath());
+
+    //so here's the command:
+    //java [extra jvm args] -cp [classpath] [compilerClass] -style [style] -out [out] [moduleName]
+    List<String> jvmargs = getGwtCompileJVMArgs();
+    String[] commandArray = new String[jvmargs.size() + 9];
+    int argIndex = 0;
+    commandArray[argIndex++] = javaCommand;
+    while (argIndex - 1 < jvmargs.size()) {
+      String arg = jvmargs.get(argIndex - 1);
+      commandArray[argIndex++] = arg;
+    }
+    commandArray[argIndex++] = "-cp";
+    int classpathArgIndex = argIndex; //app-specific arg.
+    commandArray[argIndex++] = null;
+    commandArray[argIndex++] = getGwtCompilerClass();
+    commandArray[argIndex++] = "-style";
+    int styleArgIndex = argIndex;
+    commandArray[argIndex++] = null; //app-specific arg.
+    commandArray[argIndex++] = "-out";
+    int outArgIndex = argIndex;
+    commandArray[argIndex++] = null; //app-specific arg.
+    int moduleNameIndex = argIndex;
+    commandArray[argIndex] = null; //module-specific arg.
+
+    for (GWTApp gwtApp : gwtApps) {
+      String appName = gwtApp.getName();
+      File appSource = enunciate.resolvePath(gwtApp.getSrcDir());
+      commandArray[classpathArgIndex] = classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath();
+      String style = gwtApp.getJavascriptStyle().toString();
+      commandArray[styleArgIndex] = style;
+      File appDir = getAppGenerateDir(appName);
+      String out = appDir.getAbsolutePath();
+      commandArray[outArgIndex] = out;
+
+      for (GWTAppModule appModule : gwtApp.getModules()) {
+        String moduleName = appModule.getName();
+        commandArray[moduleNameIndex] = moduleName;
+        info("Executing GWTCompile for module '%s'...", moduleName);
+        if (enunciate.isDebug()) {
+          StringBuilder command = new StringBuilder();
+          for (String commandPiece : commandArray) {
+            command.append(' ').append(commandPiece);
+          }
+          debug("Executing GWTCompile for module %s with the command: %s", moduleName, command);
+        }
+        ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
+        processBuilder.directory(getGenerateDir());
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+        BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = procReader.readLine();
+        while (line != null) {
+          debug(line);
+          line = procReader.readLine();
+        }
+        int procCode;
+        try {
+          procCode = process.exitValue();
+        }
+        catch (IllegalThreadStateException e) {
+          warn("EOL reached in process input stream, but the process isn't finished.");
+          try {
+            procCode = process.waitFor();
+          }
+          catch (InterruptedException e1) {
+            throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
+          }
+        }
+
+        if (procCode != 0) {
+          throw new EnunciateException("GWT compile failed for module " + moduleName);
+        }
+      }
+    }
   }
 
   @Override
@@ -315,6 +547,26 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * Whether the given type declaration is GWT-transient.
+   *
+   * @param declaration The type declaration.
+   * @return Whether the given tyep declaration is GWT-transient.
+   */
+  protected boolean isGWTTransient(TypeDeclaration declaration) {
+    return isGWTTransient((Declaration) declaration) || isGWTTransient(declaration.getPackage());
+  }
+
+  /**
+   * Whether the given type declaration is GWT-transient.
+   *
+   * @param declaration The type declaration.
+   * @return Whether the given tyep declaration is GWT-transient.
+   */
+  protected boolean isGWTTransient(Declaration declaration) {
+    return declaration != null && declaration.getAnnotation(GWTTransient.class) != null;
+  }
+
+  /**
    * Get a template URL for the template of the given name.
    *
    * @param template The specified template.
@@ -352,6 +604,31 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The base generate dir for the gwt applications.
+   *
+   * @return The base generate dir for the gwt applications.
+   */
+  protected File getAppGenerateDir() {
+    return new File(getCompileDir(), "gwtapps");
+  }
+
+  /**
+   * The generate dir for the specified app.
+   *
+   * @param appName The app name.
+   * @return The generate dir for the specified app.
+   */
+  protected File getAppGenerateDir(String appName) {
+    File appsDir = getAppGenerateDir();
+    if ("".equals(appName)) {
+      return appsDir;
+    }
+    else {
+      return new File(appsDir, appName);
+    }
+  }
+
+  /**
    * The name of the client jar.
    *
    * @return The name of the client jar.
@@ -386,7 +663,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new GWTValidator(this.gwtModuleNamespace);
+    return new GWTValidator(this.rpcModuleNamespace, this.enforceNamespaceConformance);
   }
 
   @Override
@@ -404,43 +681,152 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The client package conversions.
+   * The generated RPC module name.
    *
-   * @return The client package conversions.
+   * @return The generated RPC module name.
    */
-  public Map<String, String> getClientPackageConversions() {
-    final String clientPackage = this.gwtModuleNamespace + ".client";
-    return new AbstractMap<String, String>() {
-      public Set<Entry<String, String>> entrySet() {
-        HashSet<Entry<String, String>> entrySet = new HashSet<Entry<String, String>>();
-        entrySet.add(new Entry<String, String>() {
-          public String getKey() {
-            return gwtModuleNamespace;
-          }
-
-          public String getValue() {
-            return clientPackage;
-          }
-
-          public String setValue(String value) {
-            throw new UnsupportedOperationException();
-          }
-        });
-        return entrySet;
-      }
-    };
+  public String getRpcModuleName() {
+    return rpcModuleName;
   }
 
+  /**
+   * The generated RPC module namespace.
+   *
+   * @return The generated RPC module namespace.
+   */
+  public String getRpcModuleNamespace() {
+    return rpcModuleNamespace;
+  }
+
+  /**
+   * The generated RPC module name.
+   *
+   * @param gwtModuleName The gwt module name.
+   * @deprecated Use {@link #setRpcModuleName(String)}
+   */
   public void setGwtModuleName(String gwtModuleName) {
-    this.gwtModuleName = gwtModuleName;
-    int lastDot = gwtModuleName.lastIndexOf('.');
+    setRpcModuleName(gwtModuleName);
+  }
+
+  /**
+   * The generated RPC module name.
+   *
+   * @param rpcModuleName The generated RPC module name.
+   */
+  public void setRpcModuleName(String rpcModuleName) {
+    this.rpcModuleName = rpcModuleName;
+    int lastDot = rpcModuleName.lastIndexOf('.');
     if (lastDot < 0) {
       throw new IllegalArgumentException("The gwt module name must be of the form 'gwt.module.ns.ModuleName'");
     }
-    this.gwtModuleNamespace = gwtModuleName.substring(0, lastDot);
+    this.rpcModuleNamespace = rpcModuleName.substring(0, lastDot);
   }
 
+  /**
+   * Whether the client jar is downloadable.
+   *
+   * @return Whether the client jar is downloadable.
+   */
+  public boolean isClientJarDownloadable() {
+    return clientJarDownloadable;
+  }
+
+  /**
+   * Whether the client jar is downloadable.
+   *
+   * @param clientJarDownloadable Whether the client jar is downloadable.
+   */
   public void setClientJarDownloadable(boolean clientJarDownloadable) {
     this.clientJarDownloadable = clientJarDownloadable;
+  }
+
+  /**
+   * Whether to enforce namespace conformace on the server-side classes.
+   *
+   * @return Whether to enforce namespace conformace on the server-side classes.
+   */
+  public boolean isEnforceNamespaceConformance() {
+    return enforceNamespaceConformance;
+  }
+
+  /**
+   * Whether to enforce namespace conformace on the server-side classes.
+   *
+   * @param enforceNamespaceConformance Whether to enforce namespace conformace on the server-side classes.
+   */
+  public void setEnforceNamespaceConformance(boolean enforceNamespaceConformance) {
+    this.enforceNamespaceConformance = enforceNamespaceConformance;
+  }
+
+  /**
+   * The gwt home directory
+   *
+   * @return The gwt home directory
+   */
+  public String getGwtHome() {
+    return gwtHome;
+  }
+
+  /**
+   * Set the path to the GWT home directory.
+   *
+   * @param gwtHome The gwt home directory
+   */
+  public void setGwtHome(String gwtHome) {
+    this.gwtHome = gwtHome;
+  }
+
+  /**
+   * Extra JVM args for the GWT compile.
+   *
+   * @return Extra JVM args for the GWT compile.
+   */
+  public List<String> getGwtCompileJVMArgs() {
+    return gwtCompileJVMArgs;
+  }
+
+  /**
+   * Extra JVM args for the GWT compile.
+   *
+   * @param arg Extra JVM args for the GWT compile.
+   */
+  public void addGwtCompileJVMArg(String arg) {
+    this.gwtCompileJVMArgs.add(arg);
+  }
+
+  /**
+   * The GWT compiler class.
+   *
+   * @return The GWT compiler class.
+   */
+  public String getGwtCompilerClass() {
+    return gwtCompilerClass;
+  }
+
+  /**
+   * The GWT compiler class.
+   *
+   * @param gwtCompilerClass The GWT compiler class.
+   */
+  public void setGwtCompilerClass(String gwtCompilerClass) {
+    this.gwtCompilerClass = gwtCompilerClass;
+  }
+
+  /**
+   * The gwt apps to compile.
+   *
+   * @return The gwt apps to compile.
+   */
+  public List<GWTApp> getGwtApps() {
+    return gwtApps;
+  }
+
+  /**
+   * Adds a gwt app to be compiled.
+   *
+   * @param gwtApp The gwt app to be compiled.
+   */
+  public void addGWTApp(GWTApp gwtApp) {
+    this.gwtApps.add(gwtApp);
   }
 }

@@ -37,6 +37,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
 }
 [/@file]
 [#macro propertyAccessors property]
+  [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
 
   /**
    * ${property.javaDoc.return?default(property.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
@@ -51,7 +52,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void set${property.simpleName?cap_first}(${classnameFor(property)} ${property.simpleName}) {
     this.${property.simpleName} = ${property.simpleName};
   }
-  [#if property.accessorType.map?default(false)]
+    [#if property.accessorType.map?default(false)]
 
   /**
    * Puts an entry into the ${property.simpleName} map.
@@ -63,17 +64,20 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
 
     this.${property.simpleName}.put(key, value);
   }
+    [/#if]
   [/#if]
 [/#macro]
 [#macro propertyField property]
-  [#if property.accessorType.map?default(false)]
+  [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
+    [#if property.accessorType.map?default(false)]
   /**
    * @gwt.typeArgs <${classnameFor(property.accessorType.keyType)},${classnameFor(property.accessorType.valueType)}>
    */
-  [#elseif property.accessorType.collection]
+    [#elseif property.accessorType.collection]
   /**
    * @gwt.typeArgs <${componentTypeFor(property.accessorType)}>
    */
-  [/#if]
+    [/#if]
   private ${classnameFor(property)} ${property.simpleName};
+  [/#if]
 [/#macro]

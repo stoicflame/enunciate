@@ -16,12 +16,12 @@
   </context-param>
 
   <listener>
-    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
   </listener>
 
   <servlet>
     <servlet-name>spring</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <servlet-class>${springDispatcherServletClass?default("org.springframework.web.servlet.DispatcherServlet")}</servlet-class>
   </servlet>
 
   [@forEachWsdl]

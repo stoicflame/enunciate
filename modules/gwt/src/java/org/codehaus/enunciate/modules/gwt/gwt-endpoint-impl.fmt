@@ -10,6 +10,7 @@ package ${endpointInterface.package.qualifiedName}.gwt;
 public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enunciate.modules.gwt.GWTEndpointImpl implements ${packageFor(endpointInterface)}.GWT${endpointInterface.simpleName} {
 
   [@forEachWebMethod endpointInterface=endpointInterface]
+    [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -40,6 +41,7 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
       }
     }
   }
+    [/#if]
   [/@forEachWebMethod]
 
 }

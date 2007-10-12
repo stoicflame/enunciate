@@ -21,6 +21,7 @@ import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 
@@ -133,7 +134,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
    */
   protected Object loadEndpointBean(Class endpointType, Class defaultImpl) throws BeansException {
     Object endpointBean;
-    Map endpointClassBeans = getApplicationContext().getBeansOfType(endpointType);
+    Map endpointClassBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), endpointType);
     if (endpointClassBeans.size() > 0) {
       RESTEndpoint annotation = (RESTEndpoint) endpointType.getAnnotation(RESTEndpoint.class);
       String endpointName = annotation == null ? "" : annotation.name();

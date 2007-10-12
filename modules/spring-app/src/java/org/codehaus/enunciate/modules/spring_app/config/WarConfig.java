@@ -41,6 +41,7 @@ public class WarConfig {
   private URL webXMLTransformURL;
   private String preBase;
   private String postBase;
+  private String docsDir;
   private final Manifest manifest = getDefaultManifest();
 
   /**
@@ -204,6 +205,24 @@ public class WarConfig {
    */
   public void setPostBase(String postBase) {
     this.postBase = postBase;
+  }
+
+  /**
+   * The directory in the war in which to expand the documentation (including the WSDLs and schemas).
+   *
+   * @return The directory in the war in which to expand the documentation (including the WSDLs and schemas).
+   */
+  public String getDocsDir() {
+    return docsDir;
+  }
+
+  /**
+   * The directory in the war in which to expand the documentation (including the WSDLs and schemas).
+   *
+   * @param docsDir The directory in the war in which to expand the documentation (including the WSDLs and schemas).
+   */
+  public void setDocsDir(String docsDir) {
+    this.docsDir = docsDir;
   }
 
   /**

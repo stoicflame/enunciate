@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Root annotation processor for enunciate.  Initializes the model and signals the modules to generate.
@@ -133,7 +134,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
 
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-    Collection<TypeDeclaration> typeDeclarations = env.getTypeDeclarations();
+    Collection<TypeDeclaration> typeDeclarations = new ArrayList<TypeDeclaration>(env.getTypeDeclarations());
     if (this.additionalApiClasses != null) {
       for (String additionalApiClass : this.additionalApiClasses) {
         TypeDeclaration declaration = env.getTypeDeclaration(additionalApiClass);

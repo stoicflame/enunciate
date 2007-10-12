@@ -79,7 +79,7 @@
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">
                 <property name="url">
-                  <value>/${wsdl.properties.filename}</value>
+                  <value>/${docsDir}${wsdl.properties.filename}</value>
                 </property>
                 <property name="contextRelative">
                   <value>true</value>

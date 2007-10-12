@@ -49,6 +49,7 @@
       </src>
       <classpath refid="build.classpath"/>
     </javac>
+    <copy file="target/examples/${app.name}/build/spring-app/META-INF/MANIFEST.MF" tofile="${test.build.dir}/war-manifest.mf" failonerror="true"/>
   </target>
 
   <target name="test" depends="enunciate-full-api, compile-tests">
