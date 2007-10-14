@@ -6,5 +6,15 @@
 
   <inherits name='com.google.gwt.user.User'/>
 
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+      [#list endpointInterface.endpointImplementations as impl]
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+  <servlet path="/gwt/${endpointInterface.serviceName}" class="${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl"/>
+
+        [/#if]
+      [/#list]
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
 </module>
 [/@file]

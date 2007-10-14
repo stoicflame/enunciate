@@ -8,13 +8,6 @@
 
 <web-app>
 
-  <context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>
-      classpath:org/codehaus/xfire/spring/xfire.xml
-    </param-value>
-  </context-param>
-
   <listener>
     <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
   </listener>
@@ -24,6 +17,25 @@
     <servlet-class>${springDispatcherServletClass?default("org.springframework.web.servlet.DispatcherServlet")}</servlet-class>
   </servlet>
 
+  [#if gwtEnabled]
+    [@forEachWsdl]
+      [@forEachEndpointInterface wsdl=wsdl]
+        [#list endpointInterface.endpointImplementations as impl]
+          [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+  <servlet>
+    <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
+    <servlet-class>${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl</servlet-class>
+    <init-param>
+      <param-name>serviceClass</param-name>
+      <param-value>${impl.qualifiedName}</param-value>
+    </init-param>
+  </servlet>
+
+          [/#if]
+        [/#list]
+      [/@forEachEndpointInterface]
+    [/@forEachWsdl]
+  [/#if]
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]
       [#list endpointInterface.endpointImplementations as impl]
@@ -32,18 +44,19 @@
     <servlet-name>spring</servlet-name>
     <url-pattern>${endpointInterface.soapAddressPath}</url-pattern>
   </servlet-mapping>
+
           [#if gwtEnabled]
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
+    <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
     <url-pattern>/gwt/${endpointInterface.serviceName}</url-pattern>
   </servlet-mapping>
+
           [/#if]
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
   [@forEachRESTNoun]
-
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
     <url-pattern>/rest/${noun}</url-pattern>
@@ -63,8 +76,8 @@
     <servlet-name>spring</servlet-name>
     <url-pattern>/json/${noun}/*</url-pattern>
   </servlet-mapping>
-  [/@forEachRESTNoun]
 
+  [/@forEachRESTNoun]
   <mime-mapping>
     <extension>wsdl</extension>
     <mime-type>text/xml</mime-type>

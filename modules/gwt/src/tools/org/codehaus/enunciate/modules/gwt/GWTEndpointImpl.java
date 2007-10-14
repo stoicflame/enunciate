@@ -16,20 +16,19 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
-import org.gwtwidgets.server.spring.GWTSpringController;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.servlet.ServletException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.InvocationTargetException;
@@ -38,16 +37,14 @@ import java.util.Map;
 import java.util.Collections;
 import java.util.ArrayList;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
 /**
  * @author Ryan Heaton
  */
-public abstract class GWTEndpointImpl extends GWTSpringController implements EnunciateServiceFactoryAware, ApplicationContextAware, InitializingBean {
+public abstract class GWTEndpointImpl extends RemoteServiceServlet {
 
   private final HashMap<String, Method> operationNames2Methods = new HashMap<String, Method>();
-
-  private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
-  private ApplicationContext ctx;
-  private Class serviceClass;
   private Object serviceBean;
 
   protected final Object invokeOperation(String operationName, Object... params) throws Exception {
@@ -101,14 +98,31 @@ public abstract class GWTEndpointImpl extends GWTSpringController implements Enu
     return returnValue;
   }
 
+
   /**
-   * Load the endpoint bean the conforms to the specified endpoint class.  And fill in the operation names-to-methods map.
+   * Load the endpoint bean the conforms to the specified endpoint class.  And fill in the
+   * operation names-to-methods map.
    */
-  public void afterPropertiesSet() throws Exception {
-    Class serviceInterface = this.serviceClass;
+  @Override
+  public final void init() throws ServletException {
+    // load the service class name from the init parameters.
+    String serviceClassName = getServletConfig().getInitParameter("serviceClass");
+    if (serviceClassName == null) {
+      throw new ServletException("Required servlet paramer 'serviceClass' is missing.");
+    }
+
+    Class serviceClass;
+    try {
+      serviceClass = ClassUtils.forName(serviceClassName);
+    }
+    catch (ClassNotFoundException e) {
+      throw new ServletException(e);
+    }
+
+    Class serviceInterface = serviceClass;
     WebService wsInfo = (WebService) serviceInterface.getAnnotation(WebService.class);
     if (wsInfo == null) {
-      throw new ApplicationContextException("Can't find the @javax.jws.WebService annotation on " + this.serviceClass.getName());
+      throw new ApplicationContextException("Can't find the @javax.jws.WebService annotation on " + serviceClassName);
     }
 
     String eiValue = wsInfo.endpointInterface();
@@ -125,7 +139,8 @@ public abstract class GWTEndpointImpl extends GWTSpringController implements Enu
       }
     }
 
-    Map serviceInterfaceBeans = serviceInterface == null ? Collections.EMPTY_MAP : BeanFactoryUtils.beansOfTypeIncludingAncestors(this.ctx, serviceInterface);
+    ApplicationContext applicationContext = loadAppContext();
+    Map serviceInterfaceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, serviceInterface);
     if (serviceInterfaceBeans.size() > 0) {
       String serviceName = wsInfo.serviceName();
       if ((serviceName == null) || ("".equals(serviceName))) {
@@ -151,15 +166,15 @@ public abstract class GWTEndpointImpl extends GWTSpringController implements Enu
     else {
       //try to instantiate the bean with the class...
       try {
-        serviceBean = this.serviceClass.newInstance();
+        serviceBean = serviceClass.newInstance();
       }
       catch (Exception e) {
-        throw new ApplicationContextException("Unable to create an instance of " + this.serviceClass.getName(), e);
+        throw new ApplicationContextException("Unable to create an instance of " + serviceClassName, e);
       }
     }
 
     if (serviceInterface.isInterface()) {
-      serviceBean = this.enunciateServiceFactory.getInstance(serviceBean, serviceInterface);
+      serviceBean = loadServiceFactory(applicationContext).getInstance(serviceBean, serviceInterface);
     }
 
     this.operationNames2Methods.clear();
@@ -176,21 +191,35 @@ public abstract class GWTEndpointImpl extends GWTSpringController implements Enu
   }
 
   /**
-   * Set the class used as the endpoint interface.
+   * Loads the app context for this servlet.
    *
-   * @param serviceClass the service class used as the endpoint interface.
+   * @return The app context for this servlet.
    */
-  public void setServiceClass(Class serviceClass) {
-    this.serviceClass = serviceClass;
+  protected ApplicationContext loadAppContext() {
+    return WebApplicationContextUtils.getWebApplicationContext(getServletContext());
   }
 
-  // Inherited.
-  public void setApplicationContext(ApplicationContext ctx) throws BeansException {
-    this.ctx = ctx;
+  /**
+   * Loads the service factory from the application context.
+   * @param applicationContext The app context.
+   * @return The service factory.
+   */
+  protected EnunciateServiceFactory loadServiceFactory(ApplicationContext applicationContext) throws ServletException {
+    EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
+    String serviceFactoryName = getServletConfig().getInitParameter("enunciateServiceFactoryBeanName");
+    if (serviceFactoryName != null) {
+      enunciateServiceFactory = (EnunciateServiceFactory) applicationContext.getBean(serviceFactoryName);
+    }
+    else {
+      Map factories = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, EnunciateServiceFactory.class);
+      if (factories.size() > 1) {
+        throw new ServletException("Unable to determine which enunciate service factory to use.  Please disambiguate with a 'enunciateServiceFactoryBeanName' servlet parameter.");
+      }
+      else if (factories.size() == 1) {
+        enunciateServiceFactory = (EnunciateServiceFactory) factories.values().iterator().next();
+      }
+    }
+    return enunciateServiceFactory;
   }
 
-  // Inherited.
-  public void setEnunciateServiceFactory(EnunciateServiceFactory factory) {
-    this.enunciateServiceFactory = factory;
-  }
 }

@@ -1,0 +1,30 @@
+[#ftl]
+[@file name="applicationContext.xml"]
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
+
+  <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
+  [#if springImports?exists]
+    [#list springImports as springImport]
+  <import resource="${springImport}"/>
+    [/#list]
+  [/#if]
+
+  <bean id="enunciateServiceFactory" class="org.codehaus.enunciate.modules.spring_app.EnunciateGlobalInterceptorProcessor">
+    [#if globalServiceInterceptors?exists]
+      <property name="globalServiceInterceptors">
+        <list>
+      [#list globalServiceInterceptors as interceptor]
+        [#if interceptor.interceptorClass?exists]
+          <bean class="${interceptor.interceptorClass}"/>
+        [#else]
+          <ref bean="${interceptor.beanName}"/>
+        [/#if]
+      [/#list]
+        </list>
+      </property>
+    [/#if]
+  </bean>
+
+</beans>
+[/@file]

@@ -315,6 +315,13 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * @return The URL to "spring-servlet.fmt"
+   */
+  protected URL getApplicationContextTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("applicationContext.xml.fmt");
+  }
+
+  /**
    * @return The URL to "web.xml.fmt"
    */
   protected URL getWebXmlTemplateURL() {
@@ -362,6 +369,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     }
     model.put("docsDir", docsDir);
 
+    processTemplate(getApplicationContextTemplateURL(), model);
     processTemplate(getSpringServletTemplateURL(), model);
     processTemplate(getWebXmlTemplateURL(), model);
   }
@@ -609,7 +617,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       enunciate.copyFile(webXML, destWebXML);
     }
 
-    //copy the spring servlet config from the build dir to the WEB-INF directory.
+    //copy the spring application context and servlet config from the build dir to the WEB-INF directory.
+    enunciate.copyFile(new File(xfireConfigDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.

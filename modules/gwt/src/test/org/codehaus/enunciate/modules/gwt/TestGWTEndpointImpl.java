@@ -18,12 +18,18 @@ package org.codehaus.enunciate.modules.gwt;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
+import org.codehaus.enunciate.service.EnunciateServiceFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import static org.easymock.EasyMock.*;
 
 import javax.xml.ws.Holder;
+import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
 import java.util.UUID;
 
 /**
@@ -36,25 +42,40 @@ public class TestGWTEndpointImpl extends TestCase {
    */
   public void testInvokeOperation() throws Exception {
     final Holder<Integer> counter = new Holder<Integer>(0);
-    GWTEndpointImpl impl = new GWTEndpointImpl() {};
-    impl.setServiceClass(BeansServiceImpl.class);
-    impl.setEnunciateServiceFactory(new DefaultEnunciateServiceFactory() {
+    final ServletConfig servletConfig = createMock(ServletConfig.class);
+    GWTEndpointImpl impl = new GWTEndpointImpl() {
+
       @Override
-      public Object getInstance(Object impl, Class... interfaces) {
-        ProxyFactory proxyFactory = new ProxyFactory(impl);
-        proxyFactory.setInterfaces(interfaces);
-        proxyFactory.addAdvice(new MethodInterceptor() {
-          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-            counter.value = counter.value + 1;
-            return methodInvocation.proceed();
-          }
-        });
-        return proxyFactory.getProxy();
+      public ServletConfig getServletConfig() {
+        return servletConfig;
       }
-    });
-    GenericApplicationContext ctx = new GenericApplicationContext();
-    impl.setApplicationContext(ctx);
-    impl.afterPropertiesSet();
+
+      @Override
+      protected ApplicationContext loadAppContext() {
+        return new GenericApplicationContext();
+      }
+
+      @Override
+      protected EnunciateServiceFactory loadServiceFactory(ApplicationContext applicationContext) throws ServletException {
+        return new DefaultEnunciateServiceFactory() {
+          @Override
+          public Object getInstance(Object impl, Class... interfaces) {
+            ProxyFactory proxyFactory = new ProxyFactory(impl);
+            proxyFactory.setInterfaces(interfaces);
+            proxyFactory.addAdvice(new MethodInterceptor() {
+              public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+                counter.value = counter.value + 1;
+                return methodInvocation.proceed();
+              }
+            });
+            return proxyFactory.getProxy();
+          }
+        };
+      }
+    };
+    expect(servletConfig.getInitParameter("serviceClass")).andReturn(BeansServiceImpl.class.getName());
+    replay(servletConfig);
+    impl.init();
     GWTBeanOneDotOne oneDotOne = new GWTBeanOneDotOne();
     String uuidValue = UUID.randomUUID().toString();
     oneDotOne.setProperty1(uuidValue);

@@ -3,29 +3,40 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
 
-  <bean id="enunciate-interceptor-processor" class="org.codehaus.enunciate.modules.spring_app.EnunciateGlobalInterceptorProcessor">
-    [#if globalServiceInterceptors?exists]
-      <property name="globalServiceInterceptors">
-        <list>
-      [#list globalServiceInterceptors as interceptor]
-        [#if interceptor.interceptorClass?exists]
-          <bean class="${interceptor.interceptorClass}"/>
-        [#else]
-          <ref bean="${interceptor.beanName}"/>
-        [/#if]
-      [/#list]
-        </list>
-      </property>
-    [/#if]
+  <!-- the soap service factory -->
+  <bean id="soapServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
+
+  <!-- the parent for all soap service endpoints -->
+  <bean id="soap-endpoint" abstract="true" class="org.codehaus.enunciate.modules.xfire.EnunciatedXFireExporter">
+    <property name="serviceFactory" ref="soapServiceFactory"/>
+    <property name="xfire" ref="xfire"/>
+    <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
   </bean>
 
-  <bean id="enunciate-rest-resource-factory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
-    <property name="enunciateServiceFactory">
-      <ref bean="enunciate-interceptor-processor"/>
-    </property>
+  <!-- the namespace-to-prefix map. -->
+  <bean id="namespaces2prefix" class="java.util.HashMap">
+    <constructor-arg>
+      <map>
+  [#list ns2prefix?keys as ns]
+    [#if ns?exists]
+        <entry key="${ns}" value="${ns2prefix[ns]}"/>
+    [/#if]
+  [/#list]
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <!-- the parent for all REST service endpoints -->
+  <bean id="rest-endpoint" abstract="true">
+    <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+  </bean>
+
+  <!-- the REST resource factory-->
+  <bean id="restResourceFactory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
+    <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
     <property name="endpointClasses">
       <list>
-        <!-- List of the REST endpoint bean classes -->
+        <!-- List the REST endpoint bean classes -->
   [@forEachRESTEndpoint]
     [#if endpoint.class]
         <value>${endpoint.qualifiedName}</value>
@@ -35,16 +46,9 @@
     </property>
   </bean>
 
-  [#if springImports?exists]
-    [#list springImports as springImport]
-  <import resource="${springImport}"/>
-    [/#list]
-  [/#if]
-
+  <!-- the handler mapping for the spring servlet. -->
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-    <property name="alwaysUseFullPath">
-      <value>true</value>
-    </property>
+    <property name="alwaysUseFullPath" value="true"/>
 
     <property name="interceptors">
       <list>
@@ -72,36 +76,17 @@
         [#--todo: what about eis with the same name, different namespace?--]
         <entry key="${endpointInterface.soapAddressPath}">
           <bean parent="soap-endpoint">
-            <property name="serviceClass">
-              <value>${impl.qualifiedName}</value>
-            </property>
+            <property name="serviceClass" value="${impl.qualifiedName}"/>
           [#if wsdl.properties.filename?exists]
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">
-                <property name="url">
-                  <value>/${docsDir}${wsdl.properties.filename}</value>
-                </property>
-                <property name="contextRelative">
-                  <value>true</value>
-                </property>
+                <property name="url" value="/${docsDir}${wsdl.properties.filename}"/>
+                <property name="contextRelative" value="true"/>
               </bean>
             </property>
           [/#if]
           </bean>
         </entry>
-          [#if gwtEnabled]
-
-        <entry key="/gwt/${endpointInterface.serviceName}">
-          <bean class="${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl">
-            <property name="serviceClass">
-              <value>${impl.qualifiedName}</value>
-            </property>
-            <property name="enunciateServiceFactory">
-              <ref bean="enunciate-interceptor-processor"/>
-            </property>
-          </bean>
-        </entry>
-          [/#if]
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]
@@ -111,9 +96,9 @@
         <entry key="/rest/${noun}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
-              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
-                <constructor-arg><value>${noun.name}</value></constructor-arg>
-                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${noun.name}"/>
+                <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
           </bean>
@@ -122,9 +107,9 @@
         <entry key="/rest/${noun}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
-              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
-                <constructor-arg><value>${noun.name}</value></constructor-arg>
-                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${noun.name}"/>
+                <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
           </bean>
@@ -133,9 +118,9 @@
         <entry key="/json/${noun}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
-              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
-                <constructor-arg><value>${noun.name}</value></constructor-arg>
-                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${noun.name}"/>
+                <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
           </bean>
@@ -144,9 +129,9 @@
         <entry key="/json/${noun}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
-              <bean factory-bean="enunciate-rest-resource-factory" factory-method="getRESTResource">
-                <constructor-arg><value>${noun.name}</value></constructor-arg>
-                <constructor-arg><value>${noun.context}</value></constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${noun.name}"/>
+                <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
           </bean>
@@ -154,39 +139,6 @@
   [/@forEachRESTNoun]
       </map>
     </property>
-
   </bean>
-
-  <!-- define the parent for all soap service endpoints -->
-  <bean id="soap-endpoint" abstract="true" class="org.codehaus.enunciate.modules.xfire.EnunciatedXFireExporter">
-    <property name="serviceFactory">
-      <ref bean="enunciatedServiceFactory"/>
-    </property>
-    <property name="xfire">
-      <ref bean="xfire"/>
-    </property>
-    <property name="enunciateServiceFactory">
-      <ref bean="enunciate-interceptor-processor"/>
-    </property>
-  </bean>
-
-  <bean id="enunciatedServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
-
-  <!-- define the parent for all xml-rest service endpoints -->
-  <bean id="rest-endpoint" abstract="true">
-    <property name="namespaces2Prefixes">
-      <map>
-  [#list ns2prefix?keys as ns]
-    [#if ns?exists]
-        <entry>
-          <key><value>${ns}</value></key>
-          <value>${ns2prefix[ns]}</value>
-        </entry>
-    [/#if]
-  [/#list]
-      </map>
-    </property>
-  </bean>
-
 </beans>
 [/@file]
