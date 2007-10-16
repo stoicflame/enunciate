@@ -14,9 +14,9 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sf.gwt-widget</groupId>
-      <artifactId>gwt-widgets-server</artifactId>
-      <version>0.1.4</version>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+      <version>1.4.60</version>
     </dependency>
 
     <dependency>

@@ -29,7 +29,7 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
     }
       [#list webMethod.webFaults as fault]
     catch (${classnameFor(fault)} e) {
-      throw (${classnameFor(fault)}) e;
+      throw e;
     }
       [/#list]
     catch (Exception e) {
@@ -43,6 +43,11 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
   }
     [/#if]
   [/@forEachWebMethod]
+
+  // Inherited.
+  protected Class getServiceClass() {
+    return ${endpointInterface.endpointImplementations[0].qualifiedName}.class;
+  }
 
 }
 [/@file]

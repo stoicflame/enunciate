@@ -341,6 +341,7 @@ jars for the purposes of Maven integration.
       <zipfileset dir="target" prefix="${dist.name}" includes="*.jar"/>
       <zipfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
       <zipfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
+      <zipfileset dir="src/samples/petclinic" prefix="${dist.name}/samples/petclinic"/>
     </zip>
 
     <!--create the tar.gz dist.-->
@@ -354,6 +355,7 @@ jars for the purposes of Maven integration.
       <tarfileset dir="target" prefix="${dist.name}" includes="*.jar"/>
       <tarfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
       <tarfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
+      <tarfileset dir="src/samples/petclinic" prefix="${dist.name}/samples/petclinic"/>
     </tar>
   </target>
 

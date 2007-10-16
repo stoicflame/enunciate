@@ -116,7 +116,10 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dispatcherServletClass="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultDependencyCheck="[none | objects | simple | all]"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultAutowire="[no | byName | byType | constructor | autodetect]"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..." preBase="..." postBase="..." includeDefaultLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docsDir="..." gwtAppDir="..."&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -170,6 +173,8 @@ import java.util.jar.Manifest;
  * <li>The "<b>name</b>" attribute specifies the name of the war.  The default is the enunciate configuration label.</li>
  * <li>The "<b>docsDir</b>" attribute specifies a different directory in the war for the documentation (including WSDL and schemas).  The default is the
  * root directory of the war.</li>
+ * <li>The "<b>gwtAppDir</b>" attribute specifies a different directory in the war for the GWT appliction(s).  The default is the
+ * root directory of the war.</li>
  * <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
  * directory.  No tranformation will be applied if none is specified.</li>
  * <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
@@ -178,23 +183,27 @@ import java.util.jar.Manifest;
  * the building war directory <i>before</i> it is provided with any Enunciate-specific files and directories.</li>
  * <li>The "<b>postBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
  * the building war directory <i>after</i> it is provided with any Enunciate-specific files and directories.</li>
- * <li>The "<b>includeDefaultLibs</b>" attribute specifies whether the detault set of libs (pulled from the classpath) should be used.  If "false" only the
- * libs explicitly included by file (see below) will be included.</li>
+ * <li>The "<b>includeClasspathLibs</b>" attribute specifies whether Enunciate will use the libraries from the classpath for applying the include/exclude
+ * filters.  If "false" only the libs explicitly included by file (see below) will be filtered.</li>
  * <li>The "<b>excludeDefaultLibs</b>" attribute specifies whether Enunciate should perform its default filtering of known compile-time-only jars.</li>
  * </ul>
  *
- * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of directories on the classpath
- * will be copied to the "classes" directory).  You add a specific file to this list with the "file" attribute "includeLibs" element of the "war" element.
- * From this list, you can specify a set of files to include with the "pattern" attribute of the "includeLibs" element.  This is an ant-style pattern matcher
- * against the absolute path of the file (or directory).  By default all files are included.</p>
+ * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of <i>directories</i> on the classpath
+ * will be copied to the "classes" directory).  You add a specific file to this list with the "file" attribute of the "includeLibs" element of the "war" element.</p>
  *
- * <p>There is a set of known jars that by default will not be copied to the "lib" directory.  These include the jars that
- * ship by default with the JDK and the jars that are known to be build-time-only jars for Enunciate.  You can specify additional jars that are to be
- * excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element supports either a
- * "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the file (or directory)
- * on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.  Furthermore, the
- * "excludeLibs" element supports a "includeInManifest" attribute specifying whether the exclude should be listed in the "Class-Path" attribute of the manifest.
- * By default excluded jars are not included in the manifest.</p>
+ * <p>Once the initial list of jars to be potentially copied is created, it is passed through an "include" filter that you may specify with nested "includeLibs"
+ * elements. For each of these elements, you can specify a set of files to include with the "pattern" attribute.  This is an
+ * ant-style pattern matcher against the absolute path of the file (or directory).  By default, all files are included.
+ *
+ * <p>Once the initial list is passed through the "include" filter, it will be passed through an "exclude" filter. There is a set of known jars that by default
+ * will not be copied to the "lib" directory.  These include the jars that ship by default with the JDK and the jars that are known to be build-time-only jars
+ * for Enunciate.  You can disable the default filter with the "excludeDefaultLibs" attribute of the "war" element. You can also specify additional jars that
+ * are to be excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element
+ * supports either a "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the
+ * file (or directory) on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.
+ * Furthermore, the "excludeLibs" element supports a "includeInManifest" attribute specifying whether the exclude should be listed in the "Class-Path"
+ * attribute of the manifest, even though they are excluded in the war.  The is useful if, for example, you're assembling an "ear" with multiple war files.
+ * By default, excluded jars are not included in the manifest.</p>
  *
  * <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
  * of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and
@@ -485,7 +494,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     //prime the list of libs to include in the war with what's on the enunciate classpath.
     List<String> warLibs = new ArrayList<String>();
-    if (this.warConfig == null || this.warConfig.isIncludeDefaultLibs()) {
+    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
       warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
     }
     List<IncludeExcludeLibs> includeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getIncludeLibs()) : new ArrayList<IncludeExcludeLibs>();
@@ -639,6 +648,18 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     }
     else {
       warn("WARNING: No documentation artifact found!");
+    }
+
+    File gwtAppDir = (File) enunciate.getProperty("gwt.app.dir");
+    if (gwtAppDir != null) {
+      File gwtAppDest = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getGwtAppDir() != null)) {
+        gwtAppDest = new File(buildDir, this.warConfig.getDocsDir());
+      }
+      enunciate.copyDir(gwtAppDir, gwtAppDest);
+    }
+    else {
+      info("No GWT application directory was found.  Skipping the copy...");
     }
 
     //extract a post base if specified.

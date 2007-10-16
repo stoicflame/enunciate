@@ -72,8 +72,12 @@ public class TestGWTEndpointImpl extends TestCase {
           }
         };
       }
+
+
+      protected Class getServiceClass() {
+        return BeansServiceImpl.class;
+      }
     };
-    expect(servletConfig.getInitParameter("serviceClass")).andReturn(BeansServiceImpl.class.getName());
     replay(servletConfig);
     impl.init();
     GWTBeanOneDotOne oneDotOne = new GWTBeanOneDotOne();

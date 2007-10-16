@@ -51,10 +51,18 @@ import com.sun.mirror.declaration.Declaration;
  * <h1>GWT Module</h1>
  *
  * <p>The GWT deployment module generates the server-side and client-side libraries used to support a
- * <a href="http://code.google.com/webtoolkit/">GWT RPC</a> API.</p>
+ * <a href="http://code.google.com/webtoolkit/">GWT RPC</a> API. There is also support for invoking the
+ * GWTCompiler to compile a set a GWT applications that can be included in the generated Enunciate web
+ * application.</p>
  *
  * <p>The order of the GWT deployment module is 0, as it doesn't depend on any artifacts exported
  * by any other module.</p>
+ *
+ * <p>This documentation is an overview of how to use Enunciate to build your GWT-RPC API and (optional)
+ * associated GWT application. The reader is redirected to the
+ * <a href="http://code.google.com/webtoolkit/">documentation for the GWT</a> for instructions on how to use GWT.
+ * You may also find the petclinic sample application useful as an illustration.  The sample petclinic application
+ * is included with the Enunciate distribution.</p>
  *
  * <ul>
  * <li><a href="#steps">steps</a></li>
@@ -66,12 +74,12 @@ import com.sun.mirror.declaration.Declaration;
  *
  * <h3>generate</h3>
  *
- * <p>The "generate" step is by far the most intensive and complex step in the execution of the GWT
- * module.  The "generate" step generates all source code for the GWT API.</p>
+ * <p>The "generate" step generates all source code for the GWT-RPC API.</p>
  *
  * <h3>compile</h3>
  *
- * <p>During the "compile" step, the GWT module compiles the code that was generated.</p>
+ * <p>During the "compile" step, the GWT module compiles the code that was generated. It is also during the "compile" step that
+ * the GWTCompiler is invoked on any GWT applications that were specified in the configuration.</p>
  *
  * <h3>build</h3>
  *
@@ -82,32 +90,113 @@ import com.sun.mirror.declaration.Declaration;
  * <p>The GWT module is configured by the "gwt" element under the "modules" element of the
  * enunciate configuration file.  <b>The GWT module is disabled by default because of the
  * added constraints applied to the service endpoints.</b>  To enable GWT, be sure to specify
- * <i>disabled="false"</i> on the "gwt" element.  It also supports the following attributes:</p>
+ * <i>disabled="false"</i> on the "gwt" element.</p>
+ *
+ * <p>The "gwt" element supports the following attributes:</p>
  *
  * <ul>
- * <li>The "gwtModuleName" attribute <b>must</b> be supplied.  The GWT module name will also be used to
+ * <li>The "rpcModuleName" attribute <b>must</b> be supplied.  The RPC module name will also be used to
  * determine the layout of the created module.  The module name must be of the form "com.mycompany.MyModuleName".
  * In this example, "com.mycompany" will be the <i>module namespace</i> and all client code will be generated into
  * a package named of the form [module namespace].client (e.g. "com.mycompany.client").  By default, in order to provide
  * a sensible mapping from service code to GWT client-side code, all service endpoints, faults, and JAXB beans must
  * exist in a package that matches the module namespace, or a subpackage thereof.  Use the "enforceNamespaceConformance"
  * attribute to loosen this requirement.</li>
- * <li>The "enforceNamespaceConformance" attribute allows you to lift the requirement that all classes exist in a package
+ * <li>The "enforceNamespaceConformance" attribute allows you to lift the requirement that all classes must exist in a package
  * that matches the module namespace.  If this is set to "false", the classes that do not match the module namespace will
- * be subpackaged by the client namespace.  You may not like this because the package mapping might be ugly.  If your module
- * namespace is "com.mycompany" and you have a class "org.othercompany.OtherClass", it will be mapped to a client-side class
- * called "com.mycompany.client.org.othercompany.OtherClass".</li>
+ * be subpackaged by the client namespace.  <i>NOTE: You may not like this because the package mapping might be ugly.</i>  For example,
+ * if your module namespace is "com.mycompany" and you have a class "org.othercompany.OtherClass", it will be mapped to a client-side GWT class
+ * named "com.mycompany.client.org.othercompany.OtherClass".</li>
  * <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
  * If no jar name is specified, the name will be calculated from the enunciate label, or a default will
  * be supplied.</li>
- * <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a download.  Default: <code>true</code>.</li>
+ * <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a
+ * download.  Default: <code>false</code>.</li>
+ * <li>The "gwtHome" attribute specifies the filesystem path to the Google Web Toolkit home directory.</li>
+ * <li>The "gwtCompilerClass" attribute specifies the FQN of the GWTCompiler.  Default: "com.google.gwt.dev.GWTCompiler".</li>
  * </ul>
  *
  * <h3>The "app" element</h3>
  *
- * <p>The GWT module also supports the development of GWT AJAX apps.  List your GWT modules apps with nested "app" elements by specifying the module
- * name with the "module" attribute of the "app" element.  All GWT modules will be compiled into a single directory using the "[Module].gwt.xml"
- * descriptor file.</p>
+ * <p>The GWT module supports the development of GWT AJAX apps.  Each app is comprised of a set of GWT modules that will be compiled into JavaScript.
+ * The "app" element supports the folowing attributes:</p>
+ *
+ * <ul>
+ * <li>The "name" attribute is the name of the GWT app.  Each app will be deployed into a subdirectory that matches its name.  By default,
+ * the name of the application is the empty string ("").  This means that the application will be deployed into the root directory.</li>
+ * <li>The "srcDir" attribute specifies the source directory for the application. This attribute is required.</li>
+ * <li>The "javascriptStyle" attribute specified the JavaScript style that is to be applied by the GWTCompiler.  Valid values are "OBF", "PRETTY",
+ * and "DETAILED". The default value is "OBF".</li>
+ * </ul>
+ *
+ * <p>Each "app" element may contain an arbitrary number of "module" child elements that specify the modules that are included in the app.
+ * The "module" element supports the following attributes:</p>
+ *
+ * <ul>
+ * <li>The "name" attribute specifies the name of the module. This is usually of the form "com.mycompany.MyModule" and it always has a corresponding
+ * ".gwt.xml" module file.</li>
+ * <li>The "outputDir" attribute specifies where the compiled module will be placed, relative to the application directory.  By default, the
+ * outputDir is the empty string (""), which means the compiled module will be placed at the root of the application directory.</li>
+ * </ul>
+ *
+ * <h3>The "gwtCompileJVMArg" element</h3>
+ *
+ * <p>The "gwtCompileJVMArg" element is used to specify additional JVM parameters that will be used when invoking GWTCompile.  It supports a single
+ * "value" attribute.</p>
+ *
+ * <h3>Example Configuration</h3>
+ *
+ * <p>As an example, consider the following configuration:</p>
+ *
+ * <code class="console">
+ * &lt;enunciate&gt;
+ * &nbsp;&nbsp;&lt;modules&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;gwt disabled="false"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rpcModuleName="com.mycompany.MyGWTRPCModule"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.4.60"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/mainapp"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyRootModule"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputPath="two"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.AnotherRootModule"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.MyModuleThree" outputPath="three"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/gwt&gt;
+ * &nbsp;&nbsp;&lt;/modules&gt;
+ * &lt;/enunciate&gt;
+ * </code>
+ *
+ * <p>The configuration enables the GWT Enunciate module and will publish the web service endpoints under the module name
+ * "com.mycompany.MyGWTRPCModule".</p>
+ *
+ * <p>There are also two GWT applications defined. The first is located at "src/main/mainapp". Since there is
+ * no "name" applied to this application, it will be generated into the root of the applications directory.  This
+ * first application has two GWT modules defined, the first named "com.mycompany.apps.main.MyRootModule" and the second
+ * named "com.mycompany.apps.main.MyModuleTwo".  "MyRootModule", since it has to output path defined, will be generated
+ * into the root of its application directory (which is the root of the main applications directory).  "MyModuleTwo", however,
+ * will be generated into the subdirectory "two".</p>
+ *
+ * <p>The second application, rooted at "src/main/anotherapp", is named "another", so it will be generated into the "another"
+ * subdirectory of the main applications directory.  It also has two modules, one named "com.mycompany.apps.another.AnotherRootModule",
+ * and another named "com.mycompany.apps.another.MyModuleThree".  "AnotherRootModule" will be generated into the root of its application
+ * directory ("another") and "MyModuleThree" will be generated into "another/three".</p>
+ *
+ * <p>All modules are defined by their associated ".gwt.xml" module definition files.  After the "compile" step of the GWT module, the
+ * main applications directory will look like this:</p>
+ *
+ * <code class="console">
+ * |--[output of com.mycompany.apps.main.MyRootModule]
+ * |--two
+ * |----[output of com.mycompany.apps.main.MyModuleTwo]
+ * |--another
+ * |----[output of com.mycompany.apps.another.AnotherRootModule]
+ * |----three
+ * |------[output of com.mycompany.apps.another.MyModuleThree]
+ * </code>
+ *
+ * <p>For a less contrived example, see the "petclinic" sample Enunciate project bundled with the Enunciate distribution.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -126,10 +215,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String rpcModuleNamespace = null;
   private String rpcModuleName = null;
   private String clientJarName = null;
-  private boolean clientJarDownloadable = true;
+  private boolean clientJarDownloadable = false;
   private final List<GWTApp> gwtApps = new ArrayList<GWTApp>();
   private final GWTRuleSet configurationRules = new GWTRuleSet();
-  private String gwtHome = System.getenv("GWT_HOME");
+  private String gwtHome = System.getProperty("gwt.home") == null ? System.getenv("GWT_HOME") : System.getProperty("gwt.home");
   private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
   private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
 
@@ -311,16 +400,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    if (this.gwtApps.size() > 0) {
-      doGWTCompile();
-    }
-
     enunciate.setProperty("gwt.client.src.dir", getClientSideGenerateDir());
     enunciate.addArtifact(new FileArtifact(getName(), "gwt.client.src.dir", getClientSideGenerateDir()));
     enunciate.setProperty("gwt.server.src.dir", getServerSideGenerateDir());
     enunciate.addArtifact(new FileArtifact(getName(), "gwt.server.src.dir", getServerSideGenerateDir()));
-    enunciate.setProperty("gwt.app.dir", getAppGenerateDir());
-    enunciate.addArtifact(new FileArtifact(getName(), "gwt.app.dir", getAppGenerateDir()));
   }
 
   /**
@@ -328,7 +411,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected void doGWTCompile() throws EnunciateException, IOException {
     if (this.gwtHome == null) {
-      throw new EnunciateException("To compile a GWT app you must specify the GWT home directory, either in configuration or by setting the GWT_HOME environment variable.");
+      throw new EnunciateException("To compile a GWT app you must specify the GWT home directory, either in configuration, by setting the GWT_HOME environment variable, or setting the 'gwt.home' system property.");
     }
 
     File gwtHomeDir = new File(this.gwtHome);
@@ -383,9 +466,9 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     classpath.append(File.pathSeparatorChar).append(gwtDevJar.getAbsolutePath());
 
     //so here's the command:
-    //java [extra jvm args] -cp [classpath] [compilerClass] -style [style] -out [out] [moduleName]
+    //java [extra jvm args] -cp [classpath] [compilerClass] -gen [gwt-gen-dir] -style [style] -out [out] [moduleName]
     List<String> jvmargs = getGwtCompileJVMArgs();
-    String[] commandArray = new String[jvmargs.size() + 9];
+    String[] commandArray = new String[jvmargs.size() + 11];
     int argIndex = 0;
     commandArray[argIndex++] = javaCommand;
     while (argIndex - 1 < jvmargs.size()) {
@@ -396,6 +479,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     int classpathArgIndex = argIndex; //app-specific arg.
     commandArray[argIndex++] = null;
     commandArray[argIndex++] = getGwtCompilerClass();
+    commandArray[argIndex++] = "-gen";
+    commandArray[argIndex++] = getGwtGenDir().getAbsolutePath();
     commandArray[argIndex++] = "-style";
     int styleArgIndex = argIndex;
     commandArray[argIndex++] = null; //app-specific arg.
@@ -433,33 +518,66 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line = procReader.readLine();
         while (line != null) {
-          debug(line);
+          info(line);
           line = procReader.readLine();
         }
         int procCode;
         try {
-          procCode = process.exitValue();
+          procCode = process.waitFor();
         }
-        catch (IllegalThreadStateException e) {
-          warn("EOL reached in process input stream, but the process isn't finished.");
-          try {
-            procCode = process.waitFor();
-          }
-          catch (InterruptedException e1) {
-            throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
-          }
+        catch (InterruptedException e1) {
+          throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
         }
 
         if (procCode != 0) {
           throw new EnunciateException("GWT compile failed for module " + moduleName);
         }
+
+        String outputPath = appModule.getOutputPath();
+        File moduleOutputDir = appDir;
+        if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
+          moduleOutputDir = new File(appDir, outputPath);
+        }
+        File moduleGenDir = new File(appDir, moduleName);
+        if (!moduleOutputDir.equals(moduleGenDir)) {
+          moduleOutputDir.mkdirs();
+          enunciate.copyDir(moduleGenDir, moduleOutputDir);
+          deleteDir(moduleGenDir);
+        }
       }
     }
+  }
+
+  /**
+   * Delete a directory on the filesystem.
+   *
+   * @param dir The directory to delete.
+   * @return Whether the directory was successfully deleted.
+   */
+  private boolean deleteDir(File dir) {
+    if (dir.exists()) {
+      File[] files = dir.listFiles();
+      for (File file : files) {
+        if (file.isDirectory()) {
+          deleteDir(file);
+        }
+        else {
+          file.delete();
+        }
+      }
+    }
+    return dir.delete();
   }
 
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
+
+    if (this.gwtApps.size() > 0) {
+      doGWTCompile();
+      enunciate.setProperty("gwt.app.dir", getAppGenerateDir());
+      enunciate.addArtifact(new FileArtifact(getName(), "gwt.app.dir", getAppGenerateDir()));
+    }
 
     info("Compiling the GWT client-side files...");
     Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
@@ -581,7 +699,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The generate directory for server-side GWT classes.
    */
-  protected File getServerSideGenerateDir() {
+  public File getServerSideGenerateDir() {
     return new File(getGenerateDir(), "server");
   }
 
@@ -590,8 +708,17 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The generate directory for client-side GWT classes.
    */
-  protected File getClientSideGenerateDir() {
+  public File getClientSideGenerateDir() {
     return new File(getGenerateDir(), "client");
+  }
+
+  /**
+   * The GWT gen directory.  (I still don't know what this is used for, exactly.)
+   *
+   * @return The GWT gen directory.
+   */
+  public File getGwtGenDir() {
+    return new File(getGenerateDir(), ".gwt-gen");
   }
 
   /**
@@ -599,7 +726,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The compile directory for client-side GWT classes.
    */
-  protected File getClientSideCompileDir() {
+  public File getClientSideCompileDir() {
     return new File(getCompileDir(), "client");
   }
 
@@ -608,7 +735,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The base generate dir for the gwt applications.
    */
-  protected File getAppGenerateDir() {
+  public File getAppGenerateDir() {
     return new File(getCompileDir(), "gwtapps");
   }
 

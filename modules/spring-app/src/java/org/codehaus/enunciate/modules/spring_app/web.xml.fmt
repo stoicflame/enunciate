@@ -20,19 +20,11 @@
   [#if gwtEnabled]
     [@forEachWsdl]
       [@forEachEndpointInterface wsdl=wsdl]
-        [#list endpointInterface.endpointImplementations as impl]
-          [#if impl.bindingType.soap11 || impl.bindingType.soap12]
   <servlet>
     <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
     <servlet-class>${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl</servlet-class>
-    <init-param>
-      <param-name>serviceClass</param-name>
-      <param-value>${impl.qualifiedName}</param-value>
-    </init-param>
   </servlet>
 
-          [/#if]
-        [/#list]
       [/@forEachEndpointInterface]
     [/@forEachWsdl]
   [/#if]
@@ -45,15 +37,15 @@
     <url-pattern>${endpointInterface.soapAddressPath}</url-pattern>
   </servlet-mapping>
 
-          [#if gwtEnabled]
+        [/#if]
+      [/#list]
+      [#if gwtEnabled]
   <servlet-mapping>
     <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
     <url-pattern>/gwt/${endpointInterface.serviceName}</url-pattern>
   </servlet-mapping>
 
-          [/#if]
-        [/#if]
-      [/#list]
+      [/#if]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
   [@forEachRESTNoun]

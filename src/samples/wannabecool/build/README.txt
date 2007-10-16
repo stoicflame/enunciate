@@ -11,7 +11,7 @@ the command line, these examples each do the same thing:
 1. Invoke Enunciate on all of the java source files in the "src/main/java"
    directory and with the config file src/main/java/enunciate.xml.
 2. Export the full-featured war to target/wannabecool.war. (Note: the maven
-   pom appends the version, i.e. target/wannabecool-1.1.war)
+   pom appends the version, i.e. target/wannabecool-1.5.war)
 3. Export the client-side jar for accessing the published remote API via
    JDK 1.5 to the file target/wannabecool-client.jar.
 
@@ -41,7 +41,9 @@ enunciate -f src/main/java/enunciate.xml\
  src/main/java/com/ifyouwannabecool/api/PersonaService.java\
  src/main/java/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
  src/main/java/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/main/java/com/ifyouwannabecool/domain/persona/package-info.java\
  src/main/java/com/ifyouwannabecool/domain/persona/Name.java\
  src/main/java/com/ifyouwannabecool/domain/persona/Persona.java\
+ src/main/java/com/ifyouwannabecool/domain/link/package-info.java\
  src/main/java/com/ifyouwannabecool/domain/link/Link.java\
  src/main/java/com/ifyouwannabecool/domain/link/SocialGroup.java

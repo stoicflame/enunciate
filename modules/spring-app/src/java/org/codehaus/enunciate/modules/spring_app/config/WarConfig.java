@@ -33,7 +33,7 @@ import java.net.MalformedURLException;
  */
 public class WarConfig {
 
-  private boolean includeDefaultLibs = true;
+  private boolean includeClasspathLibs = true;
   private boolean exludeDefaultLibs = true;
   private final List<IncludeExcludeLibs> excludeLibs = new ArrayList<IncludeExcludeLibs>();
   private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
@@ -42,6 +42,7 @@ public class WarConfig {
   private String preBase;
   private String postBase;
   private String docsDir;
+  private String gwtAppDir;
   private final Manifest manifest = getDefaultManifest();
 
   /**
@@ -67,17 +68,17 @@ public class WarConfig {
    *
    * @return Whether to include the default libs.
    */
-  public boolean isIncludeDefaultLibs() {
-    return includeDefaultLibs;
+  public boolean isIncludeClasspathLibs() {
+    return includeClasspathLibs;
   }
 
   /**
    * Whether to include the default libs.
    *
-   * @param includeDefaultLibs Whether to include the default libs.
+   * @param includeClasspathLibs Whether to include the default libs.
    */
-  public void setIncludeDefaultLibs(boolean includeDefaultLibs) {
-    this.includeDefaultLibs = includeDefaultLibs;
+  public void setIncludeClasspathLibs(boolean includeClasspathLibs) {
+    this.includeClasspathLibs = includeClasspathLibs;
   }
 
   /**
@@ -223,6 +224,24 @@ public class WarConfig {
    */
   public void setDocsDir(String docsDir) {
     this.docsDir = docsDir;
+  }
+
+  /**
+   * The directory in the war in which to expand the gwt app(s).
+   *
+   * @return The directory in the war in which to expand the gwt app(s).
+   */
+  public String getGwtAppDir() {
+    return gwtAppDir;
+  }
+
+  /**
+   * The directory in the war in which to expand the gwt app(s).
+   *
+   * @param gwtAppDir The directory in the war in which to expand the gwt app(s).
+   */
+  public void setGwtAppDir(String gwtAppDir) {
+    this.gwtAppDir = gwtAppDir;
   }
 
   /**

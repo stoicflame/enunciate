@@ -21,6 +21,7 @@ import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -105,24 +106,12 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
    */
   @Override
   public final void init() throws ServletException {
-    // load the service class name from the init parameters.
-    String serviceClassName = getServletConfig().getInitParameter("serviceClass");
-    if (serviceClassName == null) {
-      throw new ServletException("Required servlet paramer 'serviceClass' is missing.");
-    }
-
-    Class serviceClass;
-    try {
-      serviceClass = ClassUtils.forName(serviceClassName);
-    }
-    catch (ClassNotFoundException e) {
-      throw new ServletException(e);
-    }
-
+    // load the service class.
+    Class serviceClass = getServiceClass();
     Class serviceInterface = serviceClass;
     WebService wsInfo = (WebService) serviceInterface.getAnnotation(WebService.class);
     if (wsInfo == null) {
-      throw new ApplicationContextException("Can't find the @javax.jws.WebService annotation on " + serviceClassName);
+      throw new ApplicationContextException("Can't find the @javax.jws.WebService annotation on " + getServiceClass().getName());
     }
 
     String eiValue = wsInfo.endpointInterface();
@@ -169,7 +158,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
         serviceBean = serviceClass.newInstance();
       }
       catch (Exception e) {
-        throw new ApplicationContextException("Unable to create an instance of " + serviceClassName, e);
+        throw new ApplicationContextException("Unable to create an instance of " + getServiceClass().getName(), e);
       }
     }
 
@@ -196,7 +185,9 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
    * @return The app context for this servlet.
    */
   protected ApplicationContext loadAppContext() {
-    return WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+    WebApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+    //if spring isn't loaded (e.g. we're running from the GWT shell), just return an empty context.
+    return appContext == null ? new GenericApplicationContext() : appContext;
   }
 
   /**
@@ -221,5 +212,12 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
     }
     return enunciateServiceFactory;
   }
+
+  /**
+   * Get the class of the service implementation that will support this GWT endpoint.
+   *
+   * @return the class of the service implementation that will support this GWT endpoint.
+   */
+  protected abstract Class getServiceClass();
 
 }

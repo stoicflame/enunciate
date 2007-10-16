@@ -31,11 +31,13 @@ public class GWTRuleSet extends RuleSetBase {
     digester.addCallParam("enunciate/modules/gwt/gwtCompileJVMArg", 0, "value");
 
     digester.addObjectCreate("enunciate/modules/gwt/app", GWTApp.class);
-    digester.addSetProperties("enunciate/modules/gwt/app");
+    digester.addSetProperties("enunciate/modules/gwt/app",
+                              new String[] {"name", "javascriptStyle", "srcDir"},
+                              new String[] {"name", "javascriptStyleValue", "srcDir"} );
     digester.addSetNext("enunciate/modules/gwt/app", "addGWTApp");
 
     digester.addObjectCreate("enunciate/modules/gwt/app/module", GWTAppModule.class);
     digester.addSetProperties("enunciate/modules/gwt/app/module");
-    digester.addSetNext("enunciate/modules/gwt/app/module", "addGWTApp");
+    digester.addSetNext("enunciate/modules/gwt/app/module", "addModule");
   }
 }

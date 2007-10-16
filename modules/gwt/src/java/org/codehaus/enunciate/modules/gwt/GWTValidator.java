@@ -23,18 +23,12 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.jaxws.WebMethod;
-import org.codehaus.enunciate.contract.jaxws.WebParam;
-import org.codehaus.enunciate.contract.jaxws.WebFault;
+import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * The validator for the xfire-client module.
@@ -59,12 +53,12 @@ public class GWTValidator extends BaseValidator {
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
 
+    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
     if (!isGWTTransient(ei)) {
       if ((this.enforceNamespaceConformance) && (!ei.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
         result.addError(ei.getPosition(), String.format("The package of the endpoint interface, %s, must start with the GWT module namespace, %s.", ei.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
-      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
       for (WebMethod webMethod : ei.getWebMethods()) {
         if (!isGWTTransient(webMethod)) {
           if (!isSupported(webMethod.getWebResult())) {
@@ -80,15 +74,24 @@ public class GWTValidator extends BaseValidator {
         }
       }
 
-      for (WebFault fault : allFaults) {
-        if (!isGWTTransient(fault)) {
-          if ((this.enforceNamespaceConformance) && (!fault.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-            result.addError(fault.getPosition(), String.format("The package of the fault, %s, must start with the GWT module namespace, %s.", fault.getPackage().getQualifiedName(), gwtModuleNamespace));
-          }
+      if (ei.getEndpointImplementations().size() > 1) {
+        ArrayList<String> impls = new ArrayList<String>();
+        for (EndpointImplementation impl : ei.getEndpointImplementations()) {
+          impls.add(impl.getQualifiedName());
         }
+        result.addError(ei.getPosition(), "Sorry, GWT doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
+          "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
       }
     }
     
+    for (WebFault fault : allFaults) {
+      if (!isGWTTransient(fault)) {
+        if ((this.enforceNamespaceConformance) && (!fault.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
+          result.addError(fault.getPosition(), String.format("The package of the fault, %s, must start with the GWT module namespace, %s.", fault.getPackage().getQualifiedName(), gwtModuleNamespace));
+        }
+      }
+    }
+
     return result;
   }
 

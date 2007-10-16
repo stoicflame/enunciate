@@ -32,7 +32,7 @@
         The artifact identified by the id 'xfire.war' will be exported to
         a file called 'wannabecool.war' in the 'target' directory.
       -->
-      <export artifactId="xfire.war" destination="target/wannabecool.war"/>
+      <export artifactId="spring.war.file" destination="target/wannabecool.war"/>
 
       <!--
         The artifact identified by the id 'client.jdk15.library.binaries' will be exported to

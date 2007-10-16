@@ -50,6 +50,7 @@ public class EnunciateTask extends MatchingTask {
   private File compileDir;
   private File buildDir;
   private File packageDir;
+  private File gwtHome;
   private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
 
@@ -60,6 +61,10 @@ public class EnunciateTask extends MatchingTask {
   public void execute() throws BuildException {
     if (basedir == null) {
       throw new BuildException("A base directory must be specified.");
+    }
+
+    if (gwtHome != null) {
+      System.setProperty("gwt.home", this.gwtHome.getAbsolutePath());
     }
 
     DirectoryScanner scanner = getDirectoryScanner(basedir);
@@ -228,6 +233,15 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setTarget(String target) {
     this.target = Enunciate.Target.valueOf(target.toUpperCase());
+  }
+
+  /**
+   * The path to gwt home.
+   *
+   * @param gwtHome The path to gwt home.
+   */
+  public void setGwtHome(File gwtHome) {
+    this.gwtHome = gwtHome;
   }
 
   /**
