@@ -33,7 +33,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5-RC1</version>
         <extensions>true</extensions>
         <configuration>
           <configFile>enunciate.xml</configFile>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-top</artifactId>
-      <version>1.5-SNAPSHOT</version>
+      <version>1.5-RC1</version>
     </dependency>
     <dependency>
       <groupId>com.google.gwt</groupId>

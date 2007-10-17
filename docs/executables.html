@@ -203,22 +203,22 @@
         <tr>
           <td>generateDir</td>
           <td>File</td>
-          <td class="last">The directory to use for the "generate" step.</td>
+          <td class="last">The directory to use for the "generate" step.  Default: ${project.build.directory}/enunciate-generate</td>
         </tr>
         <tr>
           <td>compileDir</td>
           <td>File</td>
-          <td class="last">The directory to use for the "compile" step.</td>
+          <td class="last">The directory to use for the "compile" step.  Default: ${project.build.directory}/enunciate-compile</td>
         </tr>
         <tr>
           <td>buildDir</td>
           <td>File</td>
-          <td class="last">The directory to use for the "build" step.</td>
+          <td class="last">The directory to use for the "build" step.  Default: ${project.build.directory}/enunciate-build</td>
         </tr>
         <tr>
           <td>packageDir</td>
           <td>File</td>
-          <td class="last">The directory to use for the "package" step.</td>
+          <td class="last">The directory to use for the "package" step.  Default: ${project.build.directory}/enunciate-package</td>
         </tr>
         <tr>
           <td>outputDir</td>
@@ -229,6 +229,21 @@
           <td>exports</td>
           <td>Map</td>
           <td class="last">The map of Enunciate artifacts to export.  Map of artifact id to destination.</td>
+        </tr>
+        <tr>
+          <td>artifacts</td>
+          <td>list of 'artifact'</td>
+          <td class="last">The list of artifacts to attach to the project.  Each 'artifact' element supports a 'enunciateArtifactId', 'classifier', and 'artifactType'.  This means that the enunciate artifact identified by 'enunciateArtifatId' will be attached to the project with as an artifact of type 'artifactType' and a classifier 'classifier'.</td>
+        </tr>
+        <tr>
+          <td>addGWTSources</td>
+          <td>boolean</td>
+          <td class="last">Whether the gwt source files (generated client-side classes and apps) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
+        </tr>
+        <tr>
+          <td>gwtHome</td>
+          <td>String</td>
+          <td class="last">The path to the GWT home directory, in case you're developing GWT applications.</td>
         </tr>
         <tr>
           <td>warArtifactId</td>
@@ -264,7 +279,7 @@
   &lt;groupId&gt;com.ifyouwannabecool.war&lt;/groupId&gt;
   &lt;artifactId&gt;ifyouwannabecool&lt;/artifactId&gt;
   &lt;packaging&gt;enunciate-app&lt;/packaging&gt;
-  &lt;version&gt;1.4&lt;/version&gt;
+  &lt;version&gt;1.5-RC1&lt;/version&gt;
   &lt;name&gt;ifyouwannabecool&lt;/name&gt;
   &lt;url&gt;http://www.ifyouwannabecool.com&lt;/url&gt;
 
@@ -297,7 +312,7 @@
     &lt;dependency&gt;
       &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
       &lt;artifactId&gt;enunciate-top&lt;/artifactId&gt;
-      &lt;version&gt;1.4&lt;/version&gt;
+      &lt;version&gt;1.5-RC1&lt;/version&gt;
     &lt;/dependency&gt;
     &lt;dependency&gt;
       &lt;groupId&gt;junit&lt;/groupId&gt;
