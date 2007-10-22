@@ -16,29 +16,26 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
-import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
-import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
+import org.codehaus.enunciate.service.EnunciateServiceFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.servlet.ServletException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
-import java.util.ArrayList;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * @author Ryan Heaton

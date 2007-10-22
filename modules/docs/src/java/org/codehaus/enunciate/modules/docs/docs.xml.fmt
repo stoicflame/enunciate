@@ -14,93 +14,95 @@
 [/#if]
   <data>
 [@forEachSchema]
+  [#if (schema.typeDefinitions?size > 0) || (schema.globalElements?size > 0)]
     <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
-  [#list schema.typeDefinitions as type]
+    [#list schema.typeDefinitions as type]
         <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.superclass?exists && type.superclass.declaration.qualifiedName != "java.lang.Object"] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
-    [#if type.docValue?exists]
+      [#if type.docValue?exists]
           <documentation>
             <![CDATA[${type.docValue}]]>
           </documentation>
-    [/#if]
-    [#list type.javaDoc?keys as tag]
-      [#list type.javaDoc[tag] as tagValue]
+      [/#if]
+      [#list type.javaDoc?keys as tag]
+        [#list type.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+        [/#list]
       [/#list]
-    [/#list]
-    [#if type.attributes?size > 0]
+      [#if type.attributes?size > 0]
           <attributes>
-      [#list type.attributes as attribute]
+        [#list type.attributes as attribute]
             <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace?default("")}" typeName="${attribute.baseType.qname.localPart}">
               <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))}]]>
             </attribute>
-      [/#list]
+        [/#list]
           </attributes>
-    [/#if]
-    [#if type.elements?size > 0]
+      [/#if]
+      [#if type.elements?size > 0]
           <elements>
-      [#list type.elements as element]
+        [#list type.elements as element]
             <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-        [#if element.docValue?exists]
+          [#if element.docValue?exists]
               <documentation>
                 <![CDATA[${element.docValue}]]>
               </documentation>
-        [/#if]
-        [#list element.javaDoc?keys as tag]
-          [#list element.javaDoc[tag] as tagValue]
+          [/#if]
+          [#list element.javaDoc?keys as tag]
+            [#list element.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            [/#list]
           [/#list]
-        [/#list]
-        [#list element.choices as choice]
+          [#list element.choices as choice]
               <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if]/>
-        [/#list]
+          [/#list]
             </element>
-      [/#list]
+        [/#list]
           </elements>
-    [/#if]
-    [#if type.value?exists]
+      [/#if]
+      [#if type.value?exists]
           <value typeNamespace="${type.value.baseType.namespace?default("")}" typeName="${type.value.baseType.qname.localPart}">
             <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))}]]>
           </value>
-    [/#if]
-    [#if type.enum]
+      [/#if]
+      [#if type.enum]
           <values>
-      [#list type.delegate.enumConstants as item]
+        [#list type.delegate.enumConstants as item]
             <item value="${type.enumValues[item.simpleName]}">
-        [#if item.docValue?exists]
+          [#if item.docValue?exists]
               <documentation>
                  <![CDATA[${item.docValue}]]>
               </documentation>
-        [/#if]
-        [#list item.javaDoc?keys as tag]
-          [#list item.javaDoc[tag] as tagValue]
+          [/#if]
+          [#list item.javaDoc?keys as tag]
+            [#list item.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            [/#list]
           [/#list]
-        [/#list]
             </item>
-      [/#list]
+        [/#list]
           </values>
-    [/#if]
+      [/#if]
         </type>
-  [/#list]
+    [/#list]
       </types>
       <elements>
-  [#list schema.globalElements as element]
+    [#list schema.globalElements as element]
         <element name="${element.name}" type="${element.typeDefinition.qualifiedName}">
-    [#if element.docValue?exists]
+      [#if element.docValue?exists]
           <documentation>
             <![CDATA[${element.docValue}]]>
           </documentation>
-    [/#if]
-    [#list element.javaDoc?keys as tag]
-      [#list element.javaDoc[tag] as tagValue]
+      [/#if]
+      [#list element.javaDoc?keys as tag]
+        [#list element.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+        [/#list]
       [/#list]
-    [/#list]
         </element>
-  [/#list]
+    [/#list]
       </elements>
     </schema>
+  [/#if]
 [/@forEachSchema]
   </data>
   <soap>

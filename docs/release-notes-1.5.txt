@@ -1,0 +1,39 @@
+The Enunciate 1.5 release includes some changes to the module structure.  Most notably, a new spring-app
+module has been created by extracting the "application assembly" logic from the SOAP stack (XFire).  This
+allows for clearer boundaries between how the Web service application is assembled and underlying
+technologies that support it.  In the future, this will allow us to support alternate implementations
+(e.g. CXF, Axis 2) and additional implementations (e.g. AMF).
+
+For those of you who are migrating from 1.4 or earlier, you will need to make some minor adjustments to your
+configuration file:
+
+  1. All configuration that was applied to the "xfire" module has been moved to the "spring-app" module. For
+  example, what was this:
+
+  <enunciate>
+    <modules>
+      <xfire ...>
+        <war ...>
+          ...
+        </war>
+        ...
+      </xfire>
+    </modules>
+  </enunciate>
+
+  is now:
+
+  <enunciate>
+    <modules>
+      <spring-app ...>
+        <war ...>
+          ...
+        </war>
+        ...
+      </spring-app>
+    </modules>
+  </enunciate>
+
+  2. Support for the "lib" child element of the "war" element has been removed.  Use "includeLibs" instead.
+  3. The "excludeJars" child element of the "war" element has been renamed to "excludeLibs".
+  4. The "jaxb-import" child element of the "enunciate" element has been renamed to be "api-import".

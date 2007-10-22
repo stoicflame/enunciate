@@ -643,6 +643,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       File docsDir = buildDir;
       if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
         docsDir = new File(buildDir, this.warConfig.getDocsDir());
+        docsDir.mkdirs();
       }
       artifact.exportTo(docsDir, enunciate);
     }
