@@ -25,10 +25,7 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.rest.annotations.Noun;
-import org.codehaus.enunciate.rest.annotations.Verb;
-import org.codehaus.enunciate.rest.annotations.VerbType;
-import org.codehaus.enunciate.rest.annotations.NounContext;
+import org.codehaus.enunciate.rest.annotations.*;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import java.util.ArrayList;
@@ -46,6 +43,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final RESTParameter nounValue;
   private final Collection<RESTParameter> adjectives;
   private final Collection<RESTError> RESTErrors;
+  private final String jsonpParameter;
 
   public RESTMethod(MethodDeclaration delegate) {
     super(delegate);
@@ -100,6 +98,21 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     }
     
     this.noun = new RESTNoun(noun, nounContext);
+
+    String jsonpParameter = null;
+    JSONP jsonpInfo = getAnnotation(JSONP.class);
+    if (jsonpInfo == null) {
+      jsonpInfo = delegate.getDeclaringType().getAnnotation(JSONP.class);
+      if (jsonpInfo == null) {
+        jsonpInfo = delegate.getDeclaringType().getPackage().getAnnotation(JSONP.class);
+      }
+    }
+
+    if (jsonpInfo != null) {
+      jsonpParameter = jsonpInfo.paramName();
+    }
+
+    this.jsonpParameter = jsonpParameter;
   }
 
   /**
@@ -175,5 +188,14 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());
     }
+  }
+
+  /**
+   * The JSONP parameter name.
+   *
+   * @return The JSONP parameter name, or null if none.
+   */
+  public String getJSONPParameter() {
+    return jsonpParameter;
   }
 }

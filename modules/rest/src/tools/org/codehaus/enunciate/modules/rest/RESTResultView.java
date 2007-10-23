@@ -77,12 +77,22 @@ public class RESTResultView implements View {
   public void render(Map map, HttpServletRequest request, HttpServletResponse response) throws Exception {
     response.setStatus(HttpServletResponse.SC_OK);
     if (result != null) {
-      response.setContentType(String.format("%s;charset=%s", this.operation.getContentType(), this.operation.getCharset()));
+      response.setContentType(String.format("%s;charset=%s", getContentType(), this.operation.getCharset()));
       Marshaller marshaller = operation.getSerializationContext().createMarshaller();
       marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
       marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
       marshal(marshaller, request, response);
     }
+    response.flushBuffer();
+  }
+
+  /**
+   * Get the content type for this result view.
+   *
+   * @return The content type.
+   */
+  protected String getContentType() {
+    return this.operation.getContentType();
   }
 
   /**

@@ -185,6 +185,10 @@ public class DefaultValidator implements Validator {
           if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
             result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
           }
+
+          if (adjective.getAdjectiveName().equals(method.getJSONPParameter())) {
+            result.addError(adjective.getPosition(), "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
+          }
         }
 
         RESTParameter nounValue = method.getNounValue();

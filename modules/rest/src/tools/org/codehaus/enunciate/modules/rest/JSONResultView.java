@@ -21,6 +21,7 @@ import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletOutputStream;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.Map;
@@ -52,10 +53,31 @@ public class JSONResultView extends RESTResultView {
    */
   @Override
   protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    ServletOutputStream outStream = response.getOutputStream();
+    String callbackName = null;
+    String jsonpParameter = getOperation().getJSONPParameter();
+    if (jsonpParameter != null) {
+      callbackName = request.getParameter(jsonpParameter);
+      if ((callbackName != null) && (callbackName.trim().length() > 0)) {
+        outStream.print(callbackName);
+        outStream.print("(");
+      }
+      else {
+        callbackName = null;
+      }
+    }
     XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
-      new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(response.getOutputStream()) :
-      new BadgerFishXMLOutputFactory().createXMLStreamWriter(response.getOutputStream());
-    response.setContentType("application/json");
+      new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
+      new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
     marshaller.marshal(getResult(), streamWriter);
+    if (callbackName != null) {
+      outStream.print(")");
+    }
+  }
+
+
+  @Override
+  protected String getContentType() {
+    return "application/json";
   }
 }

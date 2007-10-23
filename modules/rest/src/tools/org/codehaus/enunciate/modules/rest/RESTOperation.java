@@ -48,6 +48,7 @@ public class RESTOperation {
   private final Class resultType;
   private final String contentType;
   private final String charset;
+  private final String JSONPParameter;
 
   /**
    * Construct a REST operation.
@@ -165,6 +166,18 @@ public class RESTOperation {
       returnType = null;
     }
 
+    String jsonpParameter = null;
+    JSONP jsonpInfo = method.getAnnotation(JSONP.class);
+    if (jsonpInfo == null) {
+      jsonpInfo = method.getDeclaringClass().getAnnotation(JSONP.class);
+      if (jsonpInfo == null) {
+        jsonpInfo = method.getDeclaringClass().getPackage().getAnnotation(JSONP.class);
+      }
+    }
+    if (jsonpInfo != null) {
+      jsonpParameter = jsonpInfo.paramName();
+    }
+
 
     this.properNounType = properNoun;
     this.properNounIndex = properNounIndex;
@@ -175,6 +188,7 @@ public class RESTOperation {
     this.resultType = returnType;
     this.contentType = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
     this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
+    this.JSONPParameter = jsonpParameter;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
@@ -412,5 +426,14 @@ public class RESTOperation {
    */
   public String getCharset() {
     return charset;
+  }
+
+  /**
+   * The JSONP parameter name for this operation.
+   *
+   * @return The JSONP parameter name for this operation, or null if none.
+   */
+  public String getJSONPParameter() {
+    return JSONPParameter;
   }
 }

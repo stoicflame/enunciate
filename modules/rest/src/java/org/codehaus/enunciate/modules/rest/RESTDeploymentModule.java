@@ -164,6 +164,12 @@ import java.io.IOException;
  * "mapped convention".  The badgerfish convention is also available by passing in the http request parameter named "badgerfish."  To learn
  * more about the difference between the two convensions, see the <a href="http://jettison.codehaus.org/User%27s+Guide">Jettison user's guide</a>.</p>
  *
+ * <h3>JSONP</h3>
+ *
+ * <p>You can tell Enunciate to enable a <a href="http://bob.pythonmac.org/archives/2005/12/05/remote-json-jsonp/">JSONP parameter</a> in a JSON request with
+ * the use of the <i>org.codehaus.enunciate.rest.annotations.JSONP</i> annotation. When this annotation is applied at the method, class, or package level, any
+ * JSON requests can supply a JSONP parameter.  The parameter name can be customized with the annotation.  The default value is "callback".</p>
+ *
  * <h1><a name="steps">Steps</a></h1>
  *
  * <p>There are no significant steps in the REST module.  </p>
