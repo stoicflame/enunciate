@@ -34,6 +34,10 @@
           <groupId>javax.xml.bind</groupId>
           <artifactId>jsr173_api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.xml</groupId>
+          <artifactId>jsr173</artifactId>
+        </exclusion>
       </exclusions>
       <scope>test</scope>
     </dependency>

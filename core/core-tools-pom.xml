@@ -21,13 +21,17 @@
           <groupId>javax.xml.bind</groupId>
           <artifactId>jsr173_api</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.xml</groupId>
+          <artifactId>jsr173</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
     <dependency>
-      <groupId>javax.jws</groupId>
-      <artifactId>jsr181-api</artifactId>
-      <version>1.0-MR1</version>
+      <groupId>xfire</groupId>
+      <artifactId>xfire-jsr181-api</artifactId>
+      <version>1.0-M1</version>
     </dependency>
 
     <dependency>

@@ -497,18 +497,19 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
       warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
     }
-    List<IncludeExcludeLibs> includeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getIncludeLibs()) : new ArrayList<IncludeExcludeLibs>();
-    List<IncludeExcludeLibs> excludeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getExcludeLibs()) : new ArrayList<IncludeExcludeLibs>();
-
-    //now add the lib files that are explicitly included.
-    Iterator<IncludeExcludeLibs> includeIt = includeLibs.iterator();
-    while (includeIt.hasNext()) {
-      IncludeExcludeLibs includeJar = includeIt.next();
-      if (includeJar.getFile() != null) {
-        warLibs.add(includeJar.getFile().getAbsolutePath());
-        includeIt.remove();
+    List<IncludeExcludeLibs> includePatterns = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getIncludeLibs()) : new ArrayList<IncludeExcludeLibs>();
+    List<IncludeExcludeLibs> includedFiles = new ArrayList<IncludeExcludeLibs>();
+    Iterator<IncludeExcludeLibs> includeLibsIt = includePatterns.iterator();
+    while (includeLibsIt.hasNext()) {
+      IncludeExcludeLibs el = includeLibsIt.next();
+      if (el.getFile() != null) {
+        includedFiles.add(el);
+      }
+      if (el.getPattern() == null) {
+        includeLibsIt.remove();
       }
     }
+    List<IncludeExcludeLibs> excludeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getExcludeLibs()) : new ArrayList<IncludeExcludeLibs>();
 
     AntPathMatcher pathMatcher = new AntPathMatcher();
     List<File> includedLibs = new ArrayList<File>();
@@ -518,11 +519,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     for (String warLib : warLibs) {
       File libFile = new File(warLib);
       if (libFile.exists()) {
-        if (includeLibs.isEmpty()) {
+        if (includePatterns.isEmpty()) {
           includedLibs.add(libFile);
         }
         else {
-          for (IncludeExcludeLibs includeJar : includeLibs) {
+          for (IncludeExcludeLibs includeJar : includePatterns) {
             String pattern = includeJar.getPattern();
             String absolutePath = libFile.getAbsolutePath();
             if (absolutePath.startsWith(File.separator)) {
@@ -539,7 +540,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     //if there are any excludes, filter them out here.
-    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExludeDefaultLibs();
+    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
     List<String> manifestClasspath = new ArrayList<String>();
     Iterator<File> includeLibIt = includedLibs.iterator();
     INCLUDE_LOOP:
@@ -568,6 +569,16 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             continue INCLUDE_LOOP;
           }
         }
+      }
+    }
+
+    //now add the lib files that are explicitly included.
+    Iterator<IncludeExcludeLibs> includeIt = includedFiles.iterator();
+    while (includeIt.hasNext()) {
+      IncludeExcludeLibs includeJar = includeIt.next();
+      if (includeJar.getFile() != null) {
+        warLibs.add(includeJar.getFile().getAbsolutePath());
+        includeIt.remove();
       }
     }
 

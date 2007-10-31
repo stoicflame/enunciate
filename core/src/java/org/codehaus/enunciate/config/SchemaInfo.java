@@ -217,6 +217,11 @@ public class SchemaInfo {
     //remove the obvious referenced namespace.
     referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema");
 
+    //consolidate the "" and the null:
+    if (referencedNamespaces.remove(null)) {
+      referencedNamespaces.add("");
+    }
+
     return referencedNamespaces;
   }
 

@@ -34,7 +34,7 @@ import java.net.MalformedURLException;
 public class WarConfig {
 
   private boolean includeClasspathLibs = true;
-  private boolean exludeDefaultLibs = true;
+  private boolean excludeDefaultLibs = true;
   private final List<IncludeExcludeLibs> excludeLibs = new ArrayList<IncludeExcludeLibs>();
   private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
   private String name;
@@ -82,21 +82,30 @@ public class WarConfig {
   }
 
   /**
-   * Whether to include the default libs.
+   * Whether to exclude the default libs.
    *
-   * @return Whether to include the default libs.
+   * @return Whether to exclude the default libs.
    */
-  public boolean isExludeDefaultLibs() {
-    return exludeDefaultLibs;
+  public boolean isExcludeDefaultLibs() {
+    return excludeDefaultLibs;
   }
 
   /**
-   * Whether to include the default libs.
+   * Whether to exclude the default libs.
    *
-   * @param exludeDefaultLibs Whether to include the default libs.
+   * @param excludeDefaultLibs Whether to exclude the default libs.
    */
-  public void setExludeDefaultLibs(boolean exludeDefaultLibs) {
-    this.exludeDefaultLibs = exludeDefaultLibs;
+  public void setExcludeDefaultLibs(boolean excludeDefaultLibs) {
+    this.excludeDefaultLibs = excludeDefaultLibs;
+  }
+
+  /**
+   * Whether to exclude the default libs. (Support for backwards-compatability to account for a typo).
+   *
+   * @param excludeDefaultLibs Whether to exclude the default libs.
+   */
+  public void setExludeDefaultLibs(boolean excludeDefaultLibs) {
+    this.excludeDefaultLibs = excludeDefaultLibs;
   }
 
   /**
