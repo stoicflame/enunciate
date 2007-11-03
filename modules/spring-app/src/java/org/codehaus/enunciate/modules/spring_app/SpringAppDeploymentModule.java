@@ -515,7 +515,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     List<File> includedLibs = new ArrayList<File>();
     // Now get the files that are to be explicitly included.
     // If none are explicitly included, include all of them.
-    INCLUDE_LOOP:
     for (String warLib : warLibs) {
       File libFile = new File(warLib);
       if (libFile.exists()) {
@@ -532,7 +531,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             }
             if ((pattern != null) && (pathMatcher.isPattern(pattern) && (pathMatcher.match(pattern, absolutePath)))) {
               includedLibs.add(libFile);
-              break INCLUDE_LOOP;
+              break;
             }
           }
         }
