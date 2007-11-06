@@ -34,13 +34,13 @@
 
   <target name="shapes" depends="compile-main, init-enunciate-shapes, enunciate-example-api"/>
 
-  <target name="init-enunciate-shapes">
+  <target name="init-enunciate-shapes" unless="skip.tests">
     <property name="enunciate.target" value="compile"/>
     <property name="example" value="schema"/>
     <property name="example.dir" value="${basedir}/src/samples/schema"/>
   </target>
 
-  <target name="compile-shapes" depends="get-test-classpath">
+  <target name="compile-shapes" depends="get-test-classpath" unless="skip.tests">
     <mkdir dir="${test.build.dir}"/>
     <javac destdir="${test.build.dir}" debug="true">
       <src>

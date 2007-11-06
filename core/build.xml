@@ -14,7 +14,10 @@
     </propertyset>
   </target>
 
-  <target name="install" description="install the main jar into the local repo." depends="base.install">
+  <target name="install" description="install the main jar into the local repo." depends="base.install, test-artifact-install"/>
+
+  <target name="test-artifact-install">
+    <mkdir dir="target/test-classes"/>
     <copy file="core-test-pom.xml" todir="target" failonerror="true">
       <filterset>
         <filter token="VERSION" value="${version}"/>

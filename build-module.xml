@@ -185,7 +185,7 @@
     </path>
   </target>
 
-  <target name="compile-tests" depends="get-test-classpath">
+  <target name="compile-tests" depends="get-test-classpath" unless="skip.tests">
     <mkdir dir="${test.build.dir}"/>
     <javac destdir="${test.build.dir}" debug="true">
       <src>
@@ -211,7 +211,7 @@
 
   <target name="test" description="run the test cases" depends="compile, get-test-sysprops, -test"/>
 
-  <target name="-test">
+  <target name="-test" unless="skip.tests">
     <mkdir dir="${test.report.dir}"/>
     <junit tempdir="target" printsummary="true" failureproperty="tests.failed" haltonerror="false" haltonfailure="false" fork="true">
       <classpath refid="test.classpath"/>
@@ -236,7 +236,7 @@
     <fail if="tests.failed">There were test failures.</fail>
   </target>
 
-  <target name="extract-module-docs" if="deployment.module.fqn" depends="get-build-classpath">
+  <target name="extract-module-docs" if="deployment.module.fqn" depends="get-build-classpath" unless="skip.tests">
     <pathconvert pathsep="&#34; &#34;" dirsep="${file.separator}" property="module.src.file.args">
       <path>
         <fileset dir="src">
@@ -291,7 +291,7 @@
     <delete dir="target"/>
   </target>
 
-  <target name="enunciate-example-api" depends="compile-main" description="enunciate an example api.">
+  <target name="enunciate-example-api" depends="compile-main" description="enunciate an example api." unless="skip.tests">
     <fail unless="enunciate.target">
       You must specify an enunciate target.
     </fail>

@@ -492,95 +492,103 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     //copy the compiled classes to WEB-INF/classes.
     enunciate.copyDir(getCompileDir(), webinfClasses);
 
-    //prime the list of libs to include in the war with what's on the enunciate classpath.
-    List<String> warLibs = new ArrayList<String>();
-    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
-      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
-    }
-    List<IncludeExcludeLibs> includePatterns = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getIncludeLibs()) : new ArrayList<IncludeExcludeLibs>();
-    List<IncludeExcludeLibs> includedFiles = new ArrayList<IncludeExcludeLibs>();
-    Iterator<IncludeExcludeLibs> includeLibsIt = includePatterns.iterator();
-    while (includeLibsIt.hasNext()) {
-      IncludeExcludeLibs el = includeLibsIt.next();
-      if (el.getFile() != null) {
-        includedFiles.add(el);
-      }
-      if (el.getPattern() == null) {
-        includeLibsIt.remove();
-      }
-    }
-    List<IncludeExcludeLibs> excludeLibs = this.warConfig != null ? new ArrayList<IncludeExcludeLibs>(this.warConfig.getExcludeLibs()) : new ArrayList<IncludeExcludeLibs>();
-
+    //initialize the include filters.
     AntPathMatcher pathMatcher = new AntPathMatcher();
-    List<File> includedLibs = new ArrayList<File>();
-    // Now get the files that are to be explicitly included.
-    // If none are explicitly included, include all of them.
-    for (String warLib : warLibs) {
-      File libFile = new File(warLib);
-      if (libFile.exists()) {
-        if (includePatterns.isEmpty()) {
-          includedLibs.add(libFile);
+    List<File> explicitIncludes = new ArrayList<File>();
+    List<String> includePatterns = new ArrayList<String>();
+    if (this.warConfig != null) {
+      for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
+        if (el.getFile() != null) {
+          //add explicit files to the include files list.
+          explicitIncludes.add(el.getFile());
         }
-        else {
-          for (IncludeExcludeLibs includeJar : includePatterns) {
-            String pattern = includeJar.getPattern();
-            String absolutePath = libFile.getAbsolutePath();
-            if (absolutePath.startsWith(File.separator)) {
-              //lob off the beginning "/" for Linux boxes.
-              absolutePath = absolutePath.substring(1);
-            }
-            if ((pattern != null) && (pathMatcher.isPattern(pattern) && (pathMatcher.match(pattern, absolutePath)))) {
-              includedLibs.add(libFile);
-              break;
-            }
+
+        if (el.getPattern() != null) {
+          if (pathMatcher.isPattern(el.getPattern())) {
+            //make sure that the includes pattern list only has patterns.
+            includePatterns.add(el.getPattern());
+          }
+          else {
+            info("Pattern '%s' is not a valid pattern, so it will not be applied.", el.getPattern());
           }
         }
       }
     }
+    
+    if (includePatterns.isEmpty()) {
+      //if no include patterns are specified, the implicit pattern is "**/*".
+      includePatterns.add("**/*");
+    }
 
-    //if there are any excludes, filter them out here.
-    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
-    List<String> manifestClasspath = new ArrayList<String>();
-    Iterator<File> includeLibIt = includedLibs.iterator();
-    INCLUDE_LOOP:
-    while (includeLibIt.hasNext()) {
-      File includedLib = includeLibIt.next();
-      if (excludeDefaults && knownExclude(includedLib)) {
-        includeLibIt.remove();
-      }
-      else {
-        for (IncludeExcludeLibs excludeJar : excludeLibs) {
-          String pattern = excludeJar.getPattern();
-          String absolutePath = includedLib.getAbsolutePath();
+    List<String> warLibs = new ArrayList<String>();
+    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
+      //prime the list of libs to include in the war with what's on the enunciate classpath.
+      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
+    }
+
+    // Apply the "in filter" (i.e. the filter that specifies the files to be included).
+    List<File> includedLibs = new ArrayList<File>();
+    for (String warLib : warLibs) {
+      File libFile = new File(warLib);
+      if (libFile.exists()) {
+        for (String includePattern : includePatterns) {
+          String absolutePath = libFile.getAbsolutePath();
           if (absolutePath.startsWith(File.separator)) {
             //lob off the beginning "/" for Linux boxes.
             absolutePath = absolutePath.substring(1);
           }
+          if (pathMatcher.match(includePattern, absolutePath)) {
+            includedLibs.add(libFile);
+            break;
+          }
+        }
+      }
+    }
 
-          boolean exclude = ((excludeJar.getFile() != null) && (excludeJar.getFile().equals(includedLib))) ||
-            ((pattern != null) && (pathMatcher.isPattern(pattern)) && (pathMatcher.match(pattern, absolutePath)));
-          if (exclude) {
-            includeLibIt.remove();
-            if ((excludeJar.isIncludeInManifest()) && (!includedLib.isDirectory())) {
-              //include it in the manifest anyway.
-              manifestClasspath.add(includedLib.getName());
+    //Now, with what's left, apply the "exclude filter".
+    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
+    List<String> manifestClasspath = new ArrayList<String>();
+    Iterator<File> toBeIncludedIt = includedLibs.iterator();
+    while (toBeIncludedIt.hasNext()) {
+      File toBeIncluded = toBeIncludedIt.next();
+      if (excludeDefaults && knownExclude(toBeIncluded)) {
+        toBeIncludedIt.remove();
+      }
+      else if (this.warConfig != null) {
+        for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
+          boolean exclude = false;
+          if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
+            exclude = true;
+          }
+          else if ((excludeLibs.getPattern() != null) && (pathMatcher.isPattern(excludeLibs.getPattern()))) {
+            String pattern = excludeLibs.getPattern();
+            String absolutePath = toBeIncluded.getAbsolutePath();
+            if (absolutePath.startsWith(File.separator)) {
+              //lob off the beginning "/" for Linux boxes.
+              absolutePath = absolutePath.substring(1);
             }
-            continue INCLUDE_LOOP;
+
+            if (pathMatcher.match(pattern, absolutePath)) {
+              exclude = true;
+            }
+          }
+
+          if (exclude) {
+            toBeIncludedIt.remove();
+            if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
+              //include it in the manifest anyway.
+              manifestClasspath.add(toBeIncluded.getName());
+            }
+            break;
           }
         }
       }
     }
 
     //now add the lib files that are explicitly included.
-    Iterator<IncludeExcludeLibs> includeIt = includedFiles.iterator();
-    while (includeIt.hasNext()) {
-      IncludeExcludeLibs includeJar = includeIt.next();
-      if (includeJar.getFile() != null) {
-        warLibs.add(includeJar.getFile().getAbsolutePath());
-        includeIt.remove();
-      }
-    }
+    includedLibs.addAll(explicitIncludes);
 
+    //now we've got the final list, copy the libs.
     for (File includedLib : includedLibs) {
       if (includedLib.isDirectory()) {
         info("Adding the contents of %s to WEB-INF/classes.", includedLib);

@@ -69,7 +69,7 @@
     </filterset>
   </target>
 
-  <target name="build" depends="init">
+  <target name="build-top" depends="init">
     <ant dir="${core.basedir}"/>
     <ant dir="${modules.xml.basedir}"/>
     <ant dir="${modules.jaxws.basedir}"/>
@@ -79,9 +79,14 @@
     <ant dir="${modules.gwt.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.spring-app.basedir}"/>
-    <ant dir="${modules.xfire-integration.basedir}"/>
+  </target>
 
-    <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>
+  <target name="integration-tests" unless="skip.tests">
+    <ant dir="${modules.xfire-integration.basedir}"/>    
+  </target>
+
+  <target name="build" depends="build-top, integration-tests">
+    <artifact:dependencies filesetId="dist.libs.fileset" pathId="dist.libs.path" pomRefId="top.pom" useScope="runtime"/>    
   </target>
 
   <target name="docs-resources-copy">

@@ -285,6 +285,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/modules/amf/amf.iml" filepath="$PROJECT_DIR$/modules/amf/amf.iml" />
       <module fileurl="file://$PROJECT_DIR$/base.iml" filepath="$PROJECT_DIR$/base.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/docs/docs.iml" filepath="$PROJECT_DIR$/modules/docs/docs.iml" />
