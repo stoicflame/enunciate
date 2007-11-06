@@ -494,6 +494,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     //initialize the include filters.
     AntPathMatcher pathMatcher = new AntPathMatcher();
+    pathMatcher.setPathSeparator(File.separator);
     List<File> explicitIncludes = new ArrayList<File>();
     List<String> includePatterns = new ArrayList<String>();
     if (this.warConfig != null) {
