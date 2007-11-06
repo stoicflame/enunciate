@@ -517,11 +517,13 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     
     if (includePatterns.isEmpty()) {
       //if no include patterns are specified, the implicit pattern is "**/*".
+      debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
       includePatterns.add("**/*");
     }
 
     List<String> warLibs = new ArrayList<String>();
     if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
+      debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
       //prime the list of libs to include in the war with what's on the enunciate classpath.
       warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
     }
@@ -538,6 +540,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             absolutePath = absolutePath.substring(1);
           }
           if (pathMatcher.match(includePattern, absolutePath)) {
+            debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
             includedLibs.add(libFile);
             break;
           }
@@ -559,6 +562,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
           boolean exclude = false;
           if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
             exclude = true;
+            debug("%s was explicitly excluded.", toBeIncluded);
           }
           else if ((excludeLibs.getPattern() != null) && (pathMatcher.isPattern(excludeLibs.getPattern()))) {
             String pattern = excludeLibs.getPattern();
@@ -570,6 +574,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
             if (pathMatcher.match(pattern, absolutePath)) {
               exclude = true;
+              debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
             }
           }
 
@@ -578,6 +583,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
               //include it in the manifest anyway.
               manifestClasspath.add(toBeIncluded.getName());
+              debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
             }
             break;
           }
@@ -893,92 +899,92 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     //instantiate a loader with this library only in its path...
     URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
     if (loader.findResource("META-INF/enunciate/preserve-in-war") != null) {
-      debug("%s will be included in the war because it contains the entry META-INF/enunciate/preserve-in-war.", file);
+      debug("%s is a known include because it contains the entry META-INF/enunciate/preserve-in-war.", file);
       //if a jar happens to have the enunciate "preserve-in-war" file, it is NOT excluded.
       return false;
     }
     else if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s will be excluded from the war because it appears to be tools.jar.", file);
+      debug("%s is a known exclude because it appears to be tools.jar.", file);
       //exclude tools.jar.
       return true;
     }
     else if (loader.findResource(net.sf.jelly.apt.Context.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s will be excluded from the war because it appears to be apt-jelly.", file);
+      debug("%s is a known exclude because it appears to be apt-jelly.", file);
       //exclude apt-jelly-core.jar
       return true;
     }
     else if (loader.findResource(net.sf.jelly.apt.freemarker.FreemarkerModel.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s will be excluded from the war because it appears to be the apt-jelly-freemarker libs.", file);
+      debug("%s is a known exclude because it appears to be the apt-jelly-freemarker libs.", file);
       //exclude apt-jelly-freemarker.jar
       return true;
     }
     else if (loader.findResource(freemarker.template.Configuration.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s will be excluded from the war because it appears to be the freemarker libs.", file);
+      debug("%s is a known exclude because it appears to be the freemarker libs.", file);
       //exclude freemarker.jar
       return true;
     }
     else if (loader.findResource(Enunciate.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s will be excluded from the war because it appears to be the enunciate core jar.", file);
+      debug("%s is a known exclude because it appears to be the enunciate core jar.", file);
       //exclude enunciate-core.jar
       return true;
     }
     else if (loader.findResource("javax/servlet/ServletContext.class") != null) {
-      debug("%s will be excluded from the war because it appears to be the servlet api.", file);
+      debug("%s is a known exclude because it appears to be the servlet api.", file);
       //exclude the servlet api.
       return true;
     }
     else if (loader.findResource("org/codehaus/enunciate/modules/xfire_client/EnunciatedClientSoapSerializerHandler.class") != null) {
-      debug("%s will be excluded from the war because it appears to be the enunciated xfire client tools jar.", file);
+      debug("%s is a known exclude because it appears to be the enunciated xfire client tools jar.", file);
       //exclude xfire-client-tools
       return true;
     }
     else if (loader.findResource("javax/swing/SwingBeanInfoBase.class") != null) {
-      debug("%s will be excluded from the war because it appears to be dt.jar.", file);
+      debug("%s is a known exclude because it appears to be dt.jar.", file);
       //exclude dt.jar
       return true;
     }
     else if (loader.findResource("HTMLConverter.class") != null) {
-      debug("%s will be excluded from the war because it appears to be htmlconverter.jar.", file);
+      debug("%s is a known exclude because it appears to be htmlconverter.jar.", file);
       return true;
     }
     else if (loader.findResource("sun/tools/jconsole/JConsole.class") != null) {
-      debug("%s will be excluded from the war because it appears to be jconsole.jar.", file);
+      debug("%s is a known exclude because it appears to be jconsole.jar.", file);
       return true;
     }
     else if (loader.findResource("sun/jvm/hotspot/debugger/Debugger.class") != null) {
-      debug("%s will be excluded from the war because it appears to be sa-jdi.jar.", file);
+      debug("%s is a known exclude because it appears to be sa-jdi.jar.", file);
       return true;
     }
     else if (loader.findResource("sun/io/ByteToCharDoubleByte.class") != null) {
-      debug("%s will be excluded from the war because it appears to be charsets.jar.", file);
+      debug("%s is a known exclude because it appears to be charsets.jar.", file);
       return true;
     }
     else if (loader.findResource("com/sun/deploy/ClientContainer.class") != null) {
-      debug("%s will be excluded from the war because it appears to be deploy.jar.", file);
+      debug("%s is a known exclude because it appears to be deploy.jar.", file);
       return true;
     }
     else if (loader.findResource("com/sun/javaws/Globals.class") != null) {
-      debug("%s will be excluded from the war because it appears to be javaws.jar.", file);
+      debug("%s is a known exclude because it appears to be javaws.jar.", file);
       return true;
     }
     else if (loader.findResource("javax/crypto/SecretKey.class") != null) {
-      debug("%s will be excluded from the war because it appears to be jce.jar.", file);
+      debug("%s is a known exclude because it appears to be jce.jar.", file);
       return true;
     }
     else if (loader.findResource("sun/net/www/protocol/https/HttpsClient.class") != null) {
-      debug("%s will be excluded from the war because it appears to be jsse.jar.", file);
+      debug("%s is a known exclude because it appears to be jsse.jar.", file);
       return true;
     }
     else if (loader.findResource("sun/plugin/JavaRunTime.class") != null) {
-      debug("%s will be excluded from the war because it appears to be plugin.jar.", file);
+      debug("%s is a known exclude because it appears to be plugin.jar.", file);
       return true;
     }
     else if (loader.findResource("com/sun/corba/se/impl/activation/ServerMain.class") != null) {
-      debug("%s will be excluded from the war because it appears to be rt.jar.", file);
+      debug("%s is a known exclude because it appears to be rt.jar.", file);
       return true;
     }
     else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
-      debug("%s will be excluded from the war because it appears to be an enunciate module.", file);
+      debug("%s is a known exclude because it appears to be an enunciate module.", file);
       //exclude by default any deployment module libraries.
       return true;
     }
