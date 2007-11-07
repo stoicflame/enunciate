@@ -504,13 +504,16 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
           explicitIncludes.add(el.getFile());
         }
 
-        if (el.getPattern() != null) {
-          if (pathMatcher.isPattern(el.getPattern())) {
+        String pattern = el.getPattern();
+        if (pattern != null) {
+          //normalize the pattern to the platform.
+          pattern = pattern.replace('/', File.separatorChar);
+          if (pathMatcher.isPattern(pattern)) {
             //make sure that the includes pattern list only has patterns.
-            includePatterns.add(el.getPattern());
+            includePatterns.add(pattern);
           }
           else {
-            info("Pattern '%s' is not a valid pattern, so it will not be applied.", el.getPattern());
+            info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
           }
         }
       }
@@ -565,17 +568,22 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             exclude = true;
             debug("%s was explicitly excluded.", toBeIncluded);
           }
-          else if ((excludeLibs.getPattern() != null) && (pathMatcher.isPattern(excludeLibs.getPattern()))) {
+          else {
             String pattern = excludeLibs.getPattern();
-            String absolutePath = toBeIncluded.getAbsolutePath();
-            if (absolutePath.startsWith(File.separator)) {
-              //lob off the beginning "/" for Linux boxes.
-              absolutePath = absolutePath.substring(1);
-            }
+            if (pattern != null) {
+              pattern = pattern.replace('/', File.separatorChar);
+              if (pathMatcher.isPattern(pattern)) {
+                String absolutePath = toBeIncluded.getAbsolutePath();
+                if (absolutePath.startsWith(File.separator)) {
+                  //lob off the beginning "/" for Linux boxes.
+                  absolutePath = absolutePath.substring(1);
+                }
 
-            if (pathMatcher.match(pattern, absolutePath)) {
-              exclude = true;
-              debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
+                if (pathMatcher.match(pattern, absolutePath)) {
+                  exclude = true;
+                  debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
+                }
+              }
             }
           }
 
