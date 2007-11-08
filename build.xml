@@ -47,7 +47,7 @@
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" loaderref="antlib.loader">
       <classpath>
         <fileset dir="${lib.dir}/build">
-          <include name="maven-artifact-ant-*.jar"/>
+          <include name="maven-ant-tasks-*.jar"/>
         </fileset>
       </classpath>
     </typedef>

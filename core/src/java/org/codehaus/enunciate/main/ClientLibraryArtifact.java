@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire_client;
+package org.codehaus.enunciate.main;
 
-import org.codehaus.enunciate.main.*;
-
-import java.io.File;
-import java.io.IOException;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * A client-side libarary artifact.

@@ -19,12 +19,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-xfire-client</artifactId>
-      <version>@VERSION@</version>
-    </dependency>
-
   </dependencies>
 
 </project>

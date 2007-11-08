@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire_client;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.PackageDeclaration;
@@ -27,6 +27,7 @@ import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -47,7 +48,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
 
   @Override
-  protected String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
+  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
     if (unwrapped instanceof Accessor) {
       return convert((Accessor) unwrapped);
     }
@@ -65,7 +66,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    * @param childElement The implicit child element.
    * @return The conversion.
    */
-  protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
+  public String convert(ImplicitChildElement childElement) throws TemplateModelException {
     TypeMirror elementType = childElement.getType();
     if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
       boolean isArray = elementType instanceof ArrayType;
@@ -87,7 +88,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    * @param accessor The accessor.
    * @return The accessor.
    */
-  protected String convert(Accessor accessor) throws TemplateModelException {
+  public String convert(Accessor accessor) throws TemplateModelException {
     TypeMirror accessorType = accessor.getAccessorType();
 
     if (accessor.isAdapted()) {
@@ -105,7 +106,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   }
 
   @Override
-  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
     boolean isArray = typeMirror instanceof ArrayType;
     String conversion = super.convert(typeMirror);
 
@@ -136,7 +137,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   }
 
   @Override
-  protected String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) {
     String convertedPackage;
     PackageDeclaration pckg = declaration.getPackage();
     if (pckg == null) {
@@ -150,7 +151,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   }
 
   @Override
-  protected String convert(PackageDeclaration packageDeclaration) {
+  public String convert(PackageDeclaration packageDeclaration) {
     throw new UnsupportedOperationException("packages don't have a client classname.");
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire_client;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
@@ -80,7 +80,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param unwrapped The unwrapped object to convert.
    * @return The conversion.
    */
-  protected String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
+  public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
     String conversion;
     if (unwrapped instanceof TypeMirror) {
       conversion = convert((TypeMirror) unwrapped);
@@ -104,7 +104,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @return The client-side package value for the type.
    * @throws TemplateModelException If the type mirror cannot be converted for some reason.
    */
-  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
     String conversion;
     if (typeMirror instanceof DeclaredType) {
       conversion = convert(((DeclaredType) typeMirror).getDeclaration());
@@ -124,7 +124,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param declaration The declaration.
    * @return The client-side package value for the declaration.
    */
-  protected String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) {
     return convert(declaration.getPackage());
   }
 
@@ -134,7 +134,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param packageDeclaration The package declaration.
    * @return The package declaration.
    */
-  protected String convert(PackageDeclaration packageDeclaration) {
+  public String convert(PackageDeclaration packageDeclaration) {
     return convert(packageDeclaration.getQualifiedName());
   }
 
@@ -144,7 +144,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param fqn The package to convert.
    * @return The converted package, or the original if no conversions were specified for this value.
    */
-  protected String convert(String fqn) {
+  public String convert(String fqn) {
     //todo: support for regular expressions or wildcards?
     for (String pkg : this.conversions.keySet()) {
       if (fqn.startsWith(pkg)) {

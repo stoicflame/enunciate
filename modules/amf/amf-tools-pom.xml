@@ -1,0 +1,44 @@
+<project>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>enunciate-amf-tools</artifactId>
+  <version>@VERSION@</version>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-core-tools</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+    </dependency>    
+
+    <dependency>
+      <groupId>org.graniteds</groupId>
+      <artifactId>graniteds</artifactId>
+      <version>0.4.0</version>
+
+      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+
+</project>

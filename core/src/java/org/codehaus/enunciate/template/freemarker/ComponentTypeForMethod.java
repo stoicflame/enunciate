@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire_client;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Converts the
+ * Gets the client-side component type for the specified classname.
  *
  * @author Ryan Heaton
  */
@@ -42,7 +42,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   }
 
   @Override
-  protected String convert(ImplicitChildElement childElement) throws TemplateModelException {
+  public String convert(ImplicitChildElement childElement) throws TemplateModelException {
     if ((childElement instanceof Adaptable) && (((Adaptable) childElement).isAdapted())) {
       //the adapting type is already unwrapped...
       return convert(((Adaptable) childElement).getAdapterType().getAdaptingType());
@@ -54,7 +54,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   }
 
   @Override
-  protected String convert(Accessor accessor) throws TemplateModelException {
+  public String convert(Accessor accessor) throws TemplateModelException {
     if (accessor.isAdapted()) {
       //if the type is adapted, the adapting type is already unwrapped.
       return convert(accessor.getAdapterType().getAdaptingType());
@@ -65,7 +65,7 @@ public class ComponentTypeForMethod extends ClientClassnameForMethod {
   }
 
   @Override
-  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
     if (typeMirror instanceof ArrayType) {
       TypeMirror componentType = ((ArrayType) typeMirror).getComponentType();
       if (!(componentType instanceof PrimitiveType) || (((PrimitiveType) componentType).getKind() != PrimitiveType.Kind.BYTE)) {

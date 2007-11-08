@@ -18,6 +18,10 @@ package org.codehaus.enunciate.modules.xfire_client;
 
 import freemarker.template.*;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;

@@ -22,6 +22,9 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 

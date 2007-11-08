@@ -2,7 +2,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-gwt</artifactId>
+  <artifactId>enunciate-amf</artifactId>
   <version>@VERSION@</version>
 
   <dependencies>
@@ -14,7 +14,7 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-gwt-tools</artifactId>
+      <artifactId>enunciate-amf-tools</artifactId>
       <version>@VERSION@</version>
     </dependency>
 
@@ -23,6 +23,15 @@
       <artifactId>enunciate-core-test</artifactId>
       <version>@VERSION@</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.graniteds</groupId>
+      <artifactId>graniteds</artifactId>
+      <version>0.4.0</version>
+
+      <!--and we have to declare it again because it's marked 'optional' in the tools pom.-->
+      <optional>true</optional>
     </dependency>
 
     <dependency>

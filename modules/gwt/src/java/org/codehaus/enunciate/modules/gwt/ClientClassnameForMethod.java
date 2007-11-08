@@ -28,19 +28,19 @@ import freemarker.template.TemplateModelException;
 /**
  * @author Ryan Heaton
  */
-public class ClientClassnameForMethod extends org.codehaus.enunciate.modules.xfire_client.ClientClassnameForMethod {
+public class ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
 
   public ClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
   }
 
   @Override
-  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
     return typeMirror instanceof EnumType ? String.class.getName() : super.convert(typeMirror);
   }
 
   @Override
-  protected String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) {
     return declaration instanceof EnumDeclaration ? String.class.getName() : super.convert(declaration);
   }
 }

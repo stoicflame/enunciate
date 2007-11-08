@@ -570,6 +570,20 @@
         <root url="file://$PROJECT_DIR$/../../tools/spring-framework-1.2.8/src" />
       </SOURCES>
     </library>
+    <library name="amf">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/graniteds/graniteds/0.4.0/graniteds-0.4.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/log4j/log4j/1.2.13/log4j-1.2.13.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/jdom/jdom/1.0/jdom-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../graniteds-src/core" />
+        <root url="file://$PROJECT_DIR$/../graniteds-src/hibernate" />
+        <root url="file://$PROJECT_DIR$/../graniteds-src/as3" />
+        <root url="file://$PROJECT_DIR$/../graniteds-src/generator" />
+      </SOURCES>
+    </library>
   </component>
   <component name="uidesigner-configuration">
     <option name="INSTRUMENT_CLASSES" value="true" />

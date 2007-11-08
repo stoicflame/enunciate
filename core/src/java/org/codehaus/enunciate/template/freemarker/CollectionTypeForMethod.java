@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire_client;
+package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
@@ -36,7 +36,7 @@ public class CollectionTypeForMethod extends ClientClassnameForMethod {
   }
 
   @Override
-  protected String convert(TypeMirror typeMirror) throws TemplateModelException {
+  public String convert(TypeMirror typeMirror) throws TemplateModelException {
     DecoratedTypeMirror decoratedMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
     if (decoratedMirror.isCollection()) {
       return convert(((DeclaredType) decoratedMirror).getDeclaration().getQualifiedName());

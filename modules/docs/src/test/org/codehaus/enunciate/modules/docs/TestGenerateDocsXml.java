@@ -23,8 +23,8 @@ import static org.codehaus.enunciate.InAPTTestCase.getSamplesDir;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.NamedFileArtifact;
+import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.xfire_client.ClientLibraryArtifact;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
