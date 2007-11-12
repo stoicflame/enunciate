@@ -1,0 +1,34 @@
+[#ftl]
+[@file name="granite-config.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE granite-config PUBLIC "-//Granite Data Services//DTD granite-config internal//EN"
+    "http://www.graniteds.org/public/dtd/0.4.0/granite-config.dtd">
+
+<granite-config>
+  <converter type="org.codehaus.enunciate.modules.amf.EnunciateConverter"/>
+  <externalizers>
+  [@forEachSchema]
+    [#list schema.typeDefinitions as type]
+      [#if !type.enum]
+    <externalizer type="${type.package.qualifiedName}.amf.${type.simpleName}Externalizer">
+      <include instanceof="${type.qualifiedName}" />
+    </externalizer>
+      [/#if]
+    [/#list]
+  [/@forEachSchema]
+    <externalizer type="org.granite.messaging.amf.io.util.externalizer.EnumExternalizer">
+      <include instanceof="java.lang.Enum" />
+    </externalizer>
+    <externalizer type="org.codehaus.enunciate.modules.amf.externalizers.DataHandlerExternalizer">
+      <include instanceof="javax.activation.DataHandler" />
+    </externalizer>
+    <externalizer type="org.codehaus.enunciate.modules.amf.externalizers.URIExternalizer">
+      <include instanceof="java.net.URI" />
+    </externalizer>
+    <externalizer type="org.codehaus.enunciate.modules.amf.externalizers.UUIDExternalizer">
+      <include instanceof="java.util.UUID" />
+    </externalizer>
+  </externalizers>
+</granite-config>
+[/@file]

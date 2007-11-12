@@ -17,37 +17,31 @@
 package org.codehaus.enunciate.modules.amf;
 
 import junit.framework.TestCase;
-import org.granite.messaging.amf.io.AMF3Serializer;
-import org.granite.messaging.amf.io.AMF3Deserializer;
-import org.granite.messaging.webapp.HttpGraniteContext;
-import org.granite.context.GraniteContext;
+import org.codehaus.enunciate.main.Enunciate;
+import static org.easymock.EasyMock.*;
 import org.granite.config.GraniteConfig;
 import org.granite.config.flex.ServicesConfig;
+import org.granite.messaging.amf.io.AMF3Deserializer;
+import org.granite.messaging.amf.io.AMF3Serializer;
+import org.granite.messaging.webapp.HttpGraniteContext;
 
-import java.io.ByteArrayOutputStream;
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
-import java.net.URI;
-
-import static org.easymock.EasyMock.*;
-import org.codehaus.enunciate.main.Enunciate;
-
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.xml.namespace.QName;
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 
 /**
  * @author Ryan Heaton
  */
-public class TestGeneratedExternalizerLogic extends TestCase {
+public class TestEnunciateExternalizer extends TestCase {
 
   /**
    * Tests the externalizer.

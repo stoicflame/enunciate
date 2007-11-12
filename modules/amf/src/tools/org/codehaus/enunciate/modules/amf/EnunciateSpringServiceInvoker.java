@@ -16,12 +16,19 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import org.granite.config.flex.Destination;
+import org.granite.messaging.service.ServiceException;
+import org.granite.messaging.service.ServiceInvoker;
+
 /**
+ * A service invoker for Enunciate.
+ *
  * @author Ryan Heaton
  */
-public class MyBeanExternalizer extends EnunciateExternalizer {
-  
-  public MyBeanExternalizer() {
-    super(MyBean.class, "property1", "property2", "property3", "property4", "property5", "property6", "bytes", "dataHandler", "object", "uri", "uuid", "myEnum");
+public class EnunciateSpringServiceInvoker extends ServiceInvoker<EnunciateSpringServiceFactory> {
+
+  protected EnunciateSpringServiceInvoker(Destination destination, EnunciateSpringServiceFactory factory, ServiceBean serviceBean) throws ServiceException {
+    super(destination, factory);
+    this.invokee = serviceBean;
   }
 }

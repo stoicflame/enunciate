@@ -17,11 +17,35 @@
 package org.codehaus.enunciate.modules.amf;
 
 /**
+ * Utility class for holding a service interface with its associated service bean.
+ *
  * @author Ryan Heaton
  */
-public class MyBeanExternalizer extends EnunciateExternalizer {
-  
-  public MyBeanExternalizer() {
-    super(MyBean.class, "property1", "property2", "property3", "property4", "property5", "property6", "bytes", "dataHandler", "object", "uri", "uuid", "myEnum");
+public class ServiceBean {
+
+  private final Class serviceInterface;
+  private final Object bean;
+
+  public ServiceBean(Class serviceInterface, Object bean) {
+    this.serviceInterface = serviceInterface;
+    this.bean = bean;
+  }
+
+  /**
+   * The service interface.
+   *
+   * @return The service interface.
+   */
+  public Class getServiceInterface() {
+    return serviceInterface;
+  }
+
+  /**
+   * The service bean.
+   *
+   * @return The service bean.
+   */
+  public Object getBean() {
+    return bean;
   }
 }

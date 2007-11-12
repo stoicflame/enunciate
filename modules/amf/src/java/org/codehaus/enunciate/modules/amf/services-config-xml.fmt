@@ -1,0 +1,45 @@
+[#ftl]
+[@file name="services-config.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+
+<services-config>
+[#--todo: this needs to move to the spring app module...--]
+  <services>
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+    <service id="Granite${endpointInterface.simpleName}" class="flex.messaging.services.RemotingService" messageTypes="flex.messaging.messages.RemotingMessage">
+      <destination id="${endpointInterface.simpleName}">
+        <channels>
+          <channel ref="${endpointInterface.simpleName}AMFChannel"/>
+        </channels>
+        <properties>
+          <factory>${endpointInterface.simpleName}AMFServiceFactory</factory>
+        </properties>
+      </destination>
+    </service>
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+  </services>
+
+  <factories>
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+    <factory id="${endpointInterface.simpleName}AMFServiceFactory" class="org.codehaus.enunciate.modules.amf.EnunciateSpringServiceFactory">
+      <properties>
+        <serviceClass>${endpointInterface.endpointImplementations[0].qualifiedName}</serviceClass>
+      </properties>
+    </factory>
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+  </factories>
+
+  <channels>
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+    <channel-definition id="${endpointInterface.simpleName}AMFChannel" class="mx.messaging.channels.AMFChannel">
+      <endpoint uri="http://{server.name}:{server.port}/{context.root}/amf/${endpointInterface.serviceName}" class="flex.messaging.endpoints.AMFEndpoint"/>
+    </channel-definition>
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+  </channels>
+</services-config>[/@file]

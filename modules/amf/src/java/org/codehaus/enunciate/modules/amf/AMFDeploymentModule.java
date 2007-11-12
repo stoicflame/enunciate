@@ -16,31 +16,29 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.jaxws.WebFault;
-import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.*;
+import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 import org.codehaus.enunciate.modules.amf.config.AMFApp;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
-
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.Declaration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
 
 /**
  * <h1>GWT Module</h1>
@@ -217,7 +215,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return "gwt"
+   * @return "amf"
    */
   @Override
   public String getName() {
@@ -249,37 +247,17 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     //load the references to the templates....
     URL externalizerTemplate = getTemplateURL("amf-type-externalizer.fmt");
-    URL faultExternalizerTemplate = getTemplateURL("amf-fault-externalizer.fmt");
-    URL moduleXmlTemplate = getTemplateURL("amf-module-xml.fmt");
+    URL graniteConfigTemplate = getTemplateURL("granite-config-xml.fmt");
 
-    URL faultTemplate = getTemplateURL("amf-fault.fmt");
-    URL typeTemplate = getTemplateURL("amf-complex-type.fmt");
-    URL enumTypeTemplate = getTemplateURL("amf-enum-type.fmt");
+    URL typeTemplate = getTemplateURL("as3-type.fmt");
+    URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
 
-    //set up the model, first allowing for jdk 14 compatability.
     EnunciateFreemarkerModel model = getModel();
     model.setFileOutputDirectory(getClientSideGenerateDir());
-
-    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        if (!isAMFTransient(ei)) {
-          for (WebMethod webMethod : ei.getWebMethods()) {
-            for (WebFault webFault : webMethod.getWebFaults()) {
-              allFaults.add(webFault);
-            }
-          }
-        }
-      }
-    }
-
-    info("Generating the ActionScript exceptions...");
-    for (WebFault webFault : allFaults) {
-      if (!isAMFTransient(webFault)) {
-        model.put("fault", webFault);
-        processTemplate(faultTemplate, model);
-      }
-    }
+    HashMap<String, String> conversions = new HashMap<String, String>();
+    //todo: accept client-side package mappings?
+    model.put("packageFor", new ClientPackageForMethod(conversions));
+    model.put("classnameFor", new ClientClassnameForMethod(conversions));
 
     info("Generating the ActionScript types...");
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
@@ -304,14 +282,11 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    info("Generating the GWT fault externalizers...");
-    for (WebFault webFault : allFaults) {
-      if (!isAMFTransient(webFault)) {
-        model.put("fault", webFault);
-        processTemplate(faultExternalizerTemplate, model);
-      }
-    }
+    model.setFileOutputDirectory(getXMLGenerateDir());
+    info("Generating the Granite configuration file.");
+    processTemplate(graniteConfigTemplate, model);
 
+    enunciate.setProperty("amf.xml.dir", getXMLGenerateDir());
     enunciate.setProperty("amf.client.src.dir", getClientSideGenerateDir());
     enunciate.addArtifact(new FileArtifact(getName(), "amf.client.src.dir", getClientSideGenerateDir()));
     enunciate.setProperty("amf.server.src.dir", getServerSideGenerateDir());
@@ -620,21 +595,12 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The GWT gen directory.  (I still don't know what this is used for, exactly.)
+   * Get the generate directory for XML configuration.
    *
-   * @return The GWT gen directory.
+   * @return The generate directory for the XML configuration.
    */
-  public File getGwtGenDir() {
-    return new File(getGenerateDir(), ".gwt-gen");
-  }
-
-  /**
-   * Get the compile directory for client-side GWT classes.
-   *
-   * @return The compile directory for client-side GWT classes.
-   */
-  public File getClientSideCompileDir() {
-    return new File(getCompileDir(), "client");
+  public File getXMLGenerateDir() {
+    return new File(getGenerateDir(), "xml");
   }
 
   /**
@@ -643,23 +609,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    * @return The base generate dir for the gwt applications.
    */
   public File getAppGenerateDir() {
-    return new File(getCompileDir(), "gwtapps");
-  }
-
-  /**
-   * The generate dir for the specified app.
-   *
-   * @param appName The app name.
-   * @return The generate dir for the specified app.
-   */
-  protected File getAppGenerateDir(String appName) {
-    File appsDir = getAppGenerateDir();
-    if ("".equals(appName)) {
-      return appsDir;
-    }
-    else {
-      return new File(appsDir, appName);
-    }
+    return new File(getCompileDir(), "flexapps");
   }
 
   /**
