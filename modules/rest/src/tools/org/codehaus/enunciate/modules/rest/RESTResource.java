@@ -18,8 +18,9 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
-import java.util.EnumMap;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.lang.reflect.Method;
 
 /**
@@ -34,8 +35,12 @@ import java.lang.reflect.Method;
  */
 public class RESTResource implements Comparable<RESTResource> {
 
+  private static final String CONTEXT_PARAM_PATTERN = "\\{([^\\}]+)\\}";
+
   private final String noun;
   private final String nounContext;
+  private final Pattern regexpPattern;
+  private final List<String> contextParameters;
   private final EnumMap<VerbType, RESTOperation> operations = new EnumMap<VerbType, RESTOperation>(VerbType.class);
 
   /**
@@ -55,6 +60,13 @@ public class RESTResource implements Comparable<RESTResource> {
   public RESTResource(String noun, String nounContext) {
     this.noun = noun;
     this.nounContext = nounContext;
+    contextParameters = new ArrayList<String>();
+    Matcher contextParameterMatcher = Pattern.compile(CONTEXT_PARAM_PATTERN).matcher(nounContext);
+    while (contextParameterMatcher.find()) {
+      contextParameters.add(contextParameterMatcher.group(1));
+    }
+
+    this.regexpPattern = Pattern.compile(nounContext.replaceAll(CONTEXT_PARAM_PATTERN, "([^/]+)") + "/" + noun + "/?(.*)$");
   }
 
   /**
@@ -77,6 +89,42 @@ public class RESTResource implements Comparable<RESTResource> {
    */
   public RESTOperation getOperation(VerbType verb) {
     return operations.get(verb);
+  }
+
+  /**
+   * Compile a regexp pattern to match a request for this resource.
+   *
+   * @return The pattern.
+   */
+  public Pattern compileRegexPattern() {
+    return regexpPattern;
+  }
+
+  /**
+   * Pulls out the values of the context parameters and proper noun into a map.  The value of the proper
+   * noun is put under the null key.
+   *
+   * @param requestContext The request context.
+   * @return The parameter values.
+   * @throws IllegalArgumentException If the pattern for this resource doesn't match.
+   */
+  public Map<String, String> getContextParameterAndProperNounValues(String requestContext) {
+    Matcher matcher = regexpPattern.matcher(requestContext);
+    if (!matcher.find()) {
+      throw new IllegalArgumentException();
+    }
+
+    Map<String, String> values = new HashMap<String, String>();
+    for (int i = 0; i < contextParameters.size(); i++) {
+      String parameterName = contextParameters.get(i);
+      values.put(parameterName, matcher.group(i + 1));
+    }
+    String properNounValue = matcher.group(contextParameters.size() + 1);
+    if ("".equals(properNounValue)) {
+      properNounValue = null;
+    }
+    values.put(null, properNounValue);
+    return values;
   }
 
   /**

@@ -41,6 +41,8 @@ public class RESTOperation {
   private final Map<String, Integer> adjectiveIndices;
   private final Map<String, Class> adjectiveTypes;
   private final Map<String, Boolean> adjectivesOptional;
+  private final Map<String, Integer> contextParameterIndices;
+  private final Map<String, Class> contextParameterTypes;
   private final int nounValueIndex;
   private final Class nounValueType;
   private final Boolean nounValueOptional;
@@ -71,6 +73,8 @@ public class RESTOperation {
     adjectiveTypes = new HashMap<String, Class>();
     adjectiveIndices = new HashMap<String, Integer>();
     adjectivesOptional = new HashMap<String, Boolean>();
+    contextParameterTypes = new HashMap<String, Class>();
+    contextParameterIndices = new HashMap<String, Integer>();
     Class[] parameterTypes = method.getParameterTypes();
     HashSet<Class> contextClasses = new HashSet<Class>();
     for (int i = 0; i < parameterTypes.length; i++) {
@@ -128,6 +132,13 @@ public class RESTOperation {
           else {
             throw new IllegalStateException("There are two proper nouns for method " + method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
+        }
+        else if (annotation instanceof ContextParameter) {
+          String contextParameterName = ((ContextParameter) annotation).value();
+          contextParameterTypes.put(contextParameterName, parameterType);
+          contextParameterIndices.put(contextParameterName, i);
+          isAdjective = false;
+          break;
         }
         else if (annotation instanceof Adjective) {
           adjectiveOptional = ((Adjective) annotation).optional();
@@ -233,7 +244,7 @@ public class RESTOperation {
    * @return The result of the invocation.  If the invocation has no return type (void), returns null.
    * @throws Exception if any problems occur.
    */
-  public Object invoke(Object properNoun, Map<String, Object> adjectives, Object nounValue) throws Exception {
+  public Object invoke(Object properNoun, Map<String, Object> contextParameters, Map<String, Object> adjectives, Object nounValue) throws Exception {
     Class[] parameterTypes = this.method.getParameterTypes();
     Object[] parameters = new Object[parameterTypes.length];
     if (properNounIndex > -1) {
@@ -263,6 +274,10 @@ public class RESTOperation {
       }
 
       parameters[index] = adjectiveValue;
+    }
+
+    for (String contextParameterName : contextParameterIndices.keySet()) {
+      parameters[contextParameterIndices.get(contextParameterName)] = contextParameters.get(contextParameterName);
     }
 
     try {
@@ -372,6 +387,15 @@ public class RESTOperation {
    */
   public Map<String, Class> getAdjectiveTypes() {
     return adjectiveTypes;
+  }
+
+  /**
+   * The context parameter types for this operation.
+   *
+   * @return The context parameter types for this operation.
+   */
+  public Map<String, Class> getContextParameterTypes() {
+    return contextParameterTypes;
   }
 
   /**

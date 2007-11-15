@@ -24,9 +24,13 @@ import org.codehaus.enunciate.rest.annotations.*;
 @RESTEndpoint
 public class MockRESTEndpoint {
 
-  @Noun ( "example" )
+  @Noun (
+    value = "example",
+    context = "/ctx/{uriParam1}/{otherParam}"
+
+  )
   @Verb ( VerbType.update )
-  public RootElementExample updateExample(@ProperNoun String properNoun, @NounValue RootElementExample example, int adjective1, String[] adjective2) {
+  public RootElementExample updateExample(@ProperNoun String properNoun, @NounValue RootElementExample example, int adjective1, String[] adjective2, @ContextParameter("uriParam1") String contextParameter1, @ContextParameter("otherParam") String contextParameter2) {
     if (!"id".equals(properNoun)) {
       throw new RuntimeException();
     }
@@ -40,6 +44,14 @@ public class MockRESTEndpoint {
     }
 
     if (!"value2".equals(adjective2[1])) {
+      throw new RuntimeException();
+    }
+
+    if (!"ctxValueOne".equals(contextParameter1)) {
+      throw new RuntimeException();
+    }
+
+    if (!"otherValue".equals(contextParameter2)) {
       throw new RuntimeException();
     }
 

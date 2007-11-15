@@ -100,8 +100,14 @@ import java.io.IOException;
  *
  * <p>A noun can be qualified by a noun context.  The noun context can be though of as a "grouping" of nouns.
  * Perhaps, as an admittedly contrived example, we were to have two separate resources for the noun "rectangle",
- * say "wide" and "tall". The "rectangle" those two contexts could be applied to qualify the different "rectangle"
+ * say "wide" and "tall". The "rectangle" those two contexts could be applied to qualifies the different "rectangle"
  * nouns.</p>
+ *
+ * <h3>Noun Context Parameters</h3>
+ *
+ * <p>A noun context parameter (or just "context parameter") is a parameter that is defined by the noun context. For example, if we wanted to identify
+ * a specific user of a specific group, we could identify the "group id" as a context parameter, the user as the noun, and the user id as the proper
+ * noun.</p>
  *
  * <h1><a name="constraints">Constraints</a></h1>
  *
@@ -115,6 +121,7 @@ import java.io.IOException;
  *   <li>Adjectives must be simple types, but there can be more than one value for a single adjective.</li>
  *   <li>The verbs "read" and "delete" cannot support a noun value.</li>
  *   <li>A noun value must be an xml root element (not just a complex type)</li>
+ *   <li>Noun context parameters must be simple types</li>
  * </ul>
  *
  * <h1><a name="java2rest">Mapping Java to a REST API</a></h1>
@@ -145,12 +152,17 @@ import java.io.IOException;
  * annotation at the level of the interface (or class) to specify the default context for all nouns that are defined by the methods
  * of the interface (or class).</p>
  *
+ * <p>To identify a context parameter, specify the name of the context parameter in braces ("{" and "}") in the noun context.  When context
+ * parameters are defined, Enunciate will look for a method parameter that is defined to be a context parameter with the same name.  If there is
+ * no context parameter defined by that name, the context parameter will be silently ignored. See below for how to define a method parameter
+ * as a context parameter.</p>
+ *
  * <h3>Java Method Parameters</h3>
  *
- * <p>A parameter to a method can be a proper noun, an adjective, or a noun value.  By default, a parameter is mapped
+ * <p>A parameter to a method can be a proper noun, an adjective, a context parameter, or a noun value.  By default, a parameter is mapped
  * as an adjective.  The name of the adjective by default is arg<i>i</i>, where <i>i</i> is the parameter index.  Parameters
  * can be customized with the <i>org.codehaus.enunciate.rest.annotations.Adjective</i>, <i>org.codehaus.enunciate.rest.annotations.NounValue</i>,
- * and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
+ * <i>org.codehaus.enunciate.rest.annotations.ContextParameter</i>, and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
  *
  * <h3>Exceptions</h3>
  *

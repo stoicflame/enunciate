@@ -16,6 +16,11 @@
 
 package org.codehaus.enunciate.contract.rest;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 /**
  * A REST noun, consisting of the noun name and context.
  *
@@ -23,8 +28,13 @@ package org.codehaus.enunciate.contract.rest;
  */
 public class RESTNoun {
 
+  private static final String CONTEXT_PARAM_PATTERN = "\\{([^\\}]+)\\}";
+
   private final String name;
   private final String context;
+  private final String canonicalContext;
+  private final String antPattern;
+  private final List<String> contextParameters;
 
   RESTNoun(String name, String context) {
     this.name = name;
@@ -35,6 +45,21 @@ public class RESTNoun {
       context = context.substring(0, context.length() - 1);
     }
     this.context = context;
+
+    contextParameters = new ArrayList<String>();
+    Matcher contextParameterMatcher = Pattern.compile(CONTEXT_PARAM_PATTERN).matcher(context);
+    while (contextParameterMatcher.find()) {
+      contextParameters.add(contextParameterMatcher.group(1));
+    }
+
+    this.antPattern = context.length() == 0 ? name : (context.replaceAll(CONTEXT_PARAM_PATTERN, "*") + "/" + name);
+
+    String canonicalContext = context;
+    for (int i = 0; i < contextParameters.size(); i++) {
+      String contextParameter = contextParameters.get(i);
+      canonicalContext = canonicalContext.replaceFirst("\\{" + contextParameter + "\\}", "{context-parameter-" + i + "}");
+    }
+    this.canonicalContext = canonicalContext;
   }
 
   /**
@@ -53,6 +78,24 @@ public class RESTNoun {
    */
   public String getContext() {
     return context;
+  }
+
+  /**
+   * The context parameters for this noun, in the order then appear in the context.
+   *
+   * @return The context parameters for this noun, in the order then appear in the context.
+   */
+  public List<String> getContextParameters() {
+    return contextParameters;
+  }
+
+  /**
+   * The ant pattern for this noun.
+   *
+   * @return The ant pattern for this noun.
+   */
+  public String getAntPattern() {
+    return antPattern;
   }
 
   @Override
@@ -76,11 +119,11 @@ public class RESTNoun {
     }
 
     RESTNoun restNoun = (RESTNoun) o;
-    return toString().equals(restNoun.toString());
+    return canonicalContext.equals(restNoun.canonicalContext);
   }
 
   @Override
   public int hashCode() {
-    return toString().hashCode();
+    return canonicalContext.hashCode();
   }
 }

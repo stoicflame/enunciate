@@ -28,8 +28,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.amf.config.AMFApp;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
@@ -206,9 +205,11 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
   private final List<AMFApp> flexApps = new ArrayList<AMFApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
-  private String flexSDKHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
   private final List<String> flexArgs = new ArrayList<String>();
+  private String flexSDKHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
   private String flexCompileCommand = "com.google.gwt.dev.GWTCompiler";
+  private String actionscriptBundleName = null;
+  private boolean actionscriptBundleDownloadable = true;
 
   public AMFDeploymentModule() {
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
@@ -248,6 +249,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     //load the references to the templates....
     URL externalizerTemplate = getTemplateURL("amf-type-externalizer.fmt");
     URL graniteConfigTemplate = getTemplateURL("granite-config-xml.fmt");
+    URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
 
     URL typeTemplate = getTemplateURL("as3-type.fmt");
     URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
@@ -283,8 +285,9 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     model.setFileOutputDirectory(getXMLGenerateDir());
-    info("Generating the Granite configuration file.");
+    info("Generating the configuration files.");
     processTemplate(graniteConfigTemplate, model);
+    processTemplate(servicesConfigTemplate, model);
 
     enunciate.setProperty("amf.xml.dir", getXMLGenerateDir());
     enunciate.setProperty("amf.client.src.dir", getClientSideGenerateDir());
@@ -469,55 +472,44 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected void doBuild() throws EnunciateException, IOException {
-//    Enunciate enunciate = getEnunciate();
-//    String clientJarName = getClientJarName();
-//
-//    if (clientJarName == null) {
-//      String label = "enunciate";
-//      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
-//        label = enunciate.getConfig().getLabel();
-//      }
-//
-//      clientJarName = label + "-gwt-client.jar";
-//    }
-//
-//    File clientJar = new File(getBuildDir(), clientJarName);
-//    enunciate.copyDir(getClientSideGenerateDir(), getClientSideCompileDir());
-//    enunciate.zip(clientJar, getClientSideCompileDir());
-//    enunciate.setProperty("gwt.client.jar", clientJar);
-//
-//    List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
-//    MavenDependency gwtUserDependency = new MavenDependency();
-//    gwtUserDependency.setId("gwt-user");
-//    gwtUserDependency.setArtifactType("jar");
-//    gwtUserDependency.setDescription("Base GWT classes.");
-//    gwtUserDependency.setGroupId("com.google.gwt");
-//    gwtUserDependency.setURL("http://code.google.com/webtoolkit/");
-//    gwtUserDependency.setVersion("1.4.60");
-//    clientDeps.add(gwtUserDependency);
-//
-//    MavenDependency gwtWidgetsDependency = new MavenDependency();
-//    gwtWidgetsDependency.setId("gwt-widgets");
-//    gwtWidgetsDependency.setArtifactType("jar");
-//    gwtWidgetsDependency.setDescription("GWT widget library.");
-//    gwtWidgetsDependency.setGroupId("org.gwtwidgets");
-//    gwtWidgetsDependency.setURL("http://gwt-widget.sourceforge.net/");
-//    gwtWidgetsDependency.setVersion("1.5.0");
-//    clientDeps.add(gwtWidgetsDependency);
-//
-//    ClientLibraryArtifact gwtClientArtifact = new ClientLibraryArtifact(getName(), "gwt.client.library", "GWT Client Library");
-//    gwtClientArtifact.setPlatform("JavaScript/GWT (Version 1.4.59)");
-//    //read in the description from file:
-//    gwtClientArtifact.setDescription(readResource("client_library_description.html"));
-//    NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
-//    clientArtifact.setDescription("The binaries and sources for the GWT client library.");
-//    clientArtifact.setPublic(false);
-//    gwtClientArtifact.addArtifact(clientArtifact);
-//    gwtClientArtifact.setDependencies(clientDeps);
-//    enunciate.addArtifact(clientArtifact);
-//    if (clientJarDownloadable) {
-//      enunciate.addArtifact(gwtClientArtifact);
-//    }
+    Enunciate enunciate = getEnunciate();
+    String as3BundleName = getActionscriptBundleName();
+
+    if (as3BundleName == null) {
+      String label = "enunciate";
+      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+        label = enunciate.getConfig().getLabel();
+      }
+
+      as3BundleName = label + "-actionscript-client.jar";
+    }
+
+    File as3Bundle = new File(getBuildDir(), as3BundleName);
+    enunciate.zip(as3Bundle, getClientSideGenerateDir());
+    enunciate.setProperty("as3.client.jar", as3Bundle);
+
+    List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
+    BaseArtifactDependency as3Dependency = new BaseArtifactDependency();
+    as3Dependency.setId("flex-sdk");
+    as3Dependency.setArtifactType("zip");
+    as3Dependency.setDescription("The flex SDK.");
+    as3Dependency.setURL("http://www.adobe.com/products/flex/");
+    as3Dependency.setVersion("2.0.1");
+    clientDeps.add(as3Dependency);
+
+    ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Bundle");
+    as3ClientArtifact.setPlatform("Adobe Flex");
+    //read in the description from file:
+    as3ClientArtifact.setDescription(readResource("client_library_description.html"));
+    NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.bundle", as3Bundle);
+    clientArtifact.setDescription("The ActionScript source files.");
+    clientArtifact.setPublic(false);
+    as3ClientArtifact.addArtifact(clientArtifact);
+    as3ClientArtifact.setDependencies(clientDeps);
+    enunciate.addArtifact(clientArtifact);
+    if (isActionscriptBundleDownloadable()) {
+      enunciate.addArtifact(as3ClientArtifact);
+    }
   }
 
   /**
@@ -716,5 +708,41 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addGWTApp(AMFApp gwtApp) {
     this.flexApps.add(gwtApp);
+  }
+
+  /**
+   * The name of the zip bundle for the generated ActionScript classes.
+   *
+   * @return The name of the zip bundle for the generated ActionScript classes.
+   */
+  public String getActionscriptBundleName() {
+    return actionscriptBundleName;
+  }
+
+  /**
+   * The name of the zip bundle for the generated ActionScript classes.
+   *
+   * @param actionscriptBundleName The name of the zip bundle for the generated ActionScript classes.
+   */
+  public void setActionscriptBundleName(String actionscriptBundleName) {
+    this.actionscriptBundleName = actionscriptBundleName;
+  }
+
+  /**
+   * Whether the actionscript bundle is downloadable.
+   *
+   * @return Whether the actionscript bundle is downloadable.
+   */
+  public boolean isActionscriptBundleDownloadable() {
+    return actionscriptBundleDownloadable;
+  }
+
+  /**
+   * Whether the actionscript bundle is downloadable.
+   *
+   * @param actionscriptBundleDownloadable Whether the actionscript bundle is downloadable.
+   */
+  public void setActionscriptBundleDownloadable(boolean actionscriptBundleDownloadable) {
+    this.actionscriptBundleDownloadable = actionscriptBundleDownloadable;
   }
 }

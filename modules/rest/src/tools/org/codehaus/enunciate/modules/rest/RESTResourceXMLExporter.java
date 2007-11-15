@@ -36,8 +36,6 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * An xml exporter for a REST resource.
@@ -47,7 +45,6 @@ import java.util.regex.Pattern;
 public class RESTResourceXMLExporter extends AbstractController {
 
   private final DocumentBuilder documentBuilder;
-  private Pattern urlPattern;
   private final RESTResource resource;
   private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
   private Map<String, String> ns2prefix;
@@ -72,10 +69,6 @@ public class RESTResourceXMLExporter extends AbstractController {
     if (resource == null) {
       throw new ApplicationContextException("A REST resource must be provided.");
     }
-
-    String noun = resource.getNoun();
-    String nounContext = resource.getNounContext();
-    this.urlPattern = Pattern.compile(nounContext + "/" + noun + "/?(.*)$");
 
     Set<VerbType> supportedVerbs = resource.getSupportedVerbs();
     String[] supportedMethods = new String[supportedVerbs.size()];
@@ -105,20 +98,6 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String properNoun;
-    Matcher matcher = urlPattern.matcher(request.getRequestURI());
-    if (matcher.find()) {
-      properNoun = matcher.group(1);
-
-      if ("".equals(properNoun)) {
-        properNoun = null;
-      }
-    }
-    else {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND, request.getRequestURI());
-      return null;
-    }
-
     String httpMethod = request.getMethod().toUpperCase();
     VerbType verb;
     if ("PUT".equals(httpMethod)) {
@@ -142,7 +121,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
 
     try {
-      return handleRESTOperation(properNoun, verb, request, response);
+      return handleRESTOperation(verb, request, response);
     }
     catch (Exception e) {
       if (this.exceptionHandler != null) {
@@ -157,13 +136,12 @@ public class RESTResourceXMLExporter extends AbstractController {
   /**
    * Handles a specific REST operation.
    *
-   * @param properNoun The proper noun, if supplied by the request.
    * @param verb The verb.
    * @param request The request.
    * @param response The response.
    * @return The model and view.
    */
-  protected ModelAndView handleRESTOperation(String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
     RESTOperation operation = resource.getOperation(verb);
     if (!isOperationAllowed(operation)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
@@ -175,21 +153,48 @@ public class RESTResourceXMLExporter extends AbstractController {
     Unmarshaller unmarshaller = operation.getSerializationContext().createUnmarshaller();
     unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
 
+    String requestContext = request.getRequestURI().substring(request.getContextPath().length());
+    Map<String, String> contextParameters;
+    try {
+      contextParameters = resource.getContextParameterAndProperNounValues(requestContext);
+    }
+    catch (IllegalArgumentException e) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, request.getRequestURI());
+      return null;
+    }
+
     Object properNounValue = null;
-    if (operation.getProperNounType() != null) {
-      if (properNoun != null) {
-        if (!String.class.isAssignableFrom(operation.getProperNounType())) {
-          Element element = document.createElement("unimportant");
-          element.appendChild(document.createTextNode(properNoun));
-          properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
-        }
-        else {
-          properNounValue = properNoun;
+    HashMap<String, Object> contextParameterValues = new HashMap<String, Object>();
+    for (Map.Entry<String, String> entry : contextParameters.entrySet()) {
+      if (entry.getKey() == null) {
+        if (operation.getProperNounType() != null) {
+          if (!String.class.isAssignableFrom(operation.getProperNounType())) {
+            Element element = document.createElement("unimportant");
+            element.appendChild(document.createTextNode(contextParameters.get(entry.getKey())));
+            properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
+          }
+          else {
+            properNounValue = contextParameters.get(entry.getKey());
+          }
         }
       }
-      else if (!operation.isProperNounOptional()) {
-        throw new MissingParameterException("A specific '" + resource.getNoun() + "' must be specified on the URL.");
+      else {
+        Class contextParameterType = operation.getContextParameterTypes().get(entry.getKey());
+        if (contextParameterType != null) {
+          if (!String.class.isAssignableFrom(contextParameterType)) {
+            Element element = document.createElement("unimportant");
+            element.appendChild(document.createTextNode(contextParameters.get(entry.getKey())));
+            contextParameterValues.put(entry.getKey(), unmarshaller.unmarshal(element, contextParameterType).getValue());
+          }
+          else {
+            contextParameterValues.put(entry.getKey(), contextParameters.get(entry.getKey()));
+          }
+        }
       }
+    }
+
+    if ((properNounValue == null) && (operation.isProperNounOptional() != null) && (!operation.isProperNounOptional())) {
+      throw new MissingParameterException("A specific '" + resource.getNoun() + "' must be specified on the URL.");
     }
 
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
@@ -245,7 +250,7 @@ public class RESTResourceXMLExporter extends AbstractController {
       }
     }
 
-    Object result = operation.invoke(properNounValue, adjectives, nounValue);
+    Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
     return new ModelAndView(createView(operation, result));
   }
 

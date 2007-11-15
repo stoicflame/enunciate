@@ -42,6 +42,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final RESTParameter properNoun;
   private final RESTParameter nounValue;
   private final Collection<RESTParameter> adjectives;
+  private final Collection<RESTParameter> contextParameters;
   private final Collection<RESTError> RESTErrors;
   private final String jsonpParameter;
 
@@ -51,12 +52,16 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     RESTParameter properNoun = null;
     RESTParameter nounValue = null;
     this.adjectives = new ArrayList<RESTParameter>();
+    this.contextParameters = new ArrayList<RESTParameter>();
     int parameterPosition = 0;
     for (ParameterDeclaration parameterDeclaration : getParameters()) {
       RESTParameter restParameter = new RESTParameter(parameterDeclaration, parameterPosition++);
       if (restParameter.isProperNoun()) {
         if (properNoun != null) {
           throw new ValidationException(properNoun.getPosition(), "REST method has more than one proper noun.  The other found at " + restParameter.getPosition());
+        }
+        else if (restParameter.isContextParam()) {
+          throw new ValidationException(restParameter.getPosition(), "A REST context parameter cannot also be a proper noun.");
         }
         
         properNoun = restParameter;
@@ -65,8 +70,14 @@ public class RESTMethod extends DecoratedMethodDeclaration {
         if (nounValue != null) {
           throw new ValidationException(nounValue.getPosition(), "REST method has more than one noun value.  The other found at " + restParameter.getPosition());
         }
+        else if (restParameter.isContextParam()) {
+          throw new ValidationException(restParameter.getPosition(), "A REST context parameter cannot also be the noun value.");
+        }
 
         nounValue = restParameter;
+      }
+      else if (restParameter.isContextParam()) {
+        contextParameters.add(restParameter);
       }
       else {
         adjectives.add(restParameter);
@@ -165,6 +176,15 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public Collection<RESTParameter> getAdjectives() {
     return adjectives;
+  }
+
+  /**
+   * The context parameters for this REST method.
+   *
+   * @return The context parameters for this REST method.
+   */
+  public Collection<RESTParameter> getContextParameters() {
+    return contextParameters;
   }
 
   /**

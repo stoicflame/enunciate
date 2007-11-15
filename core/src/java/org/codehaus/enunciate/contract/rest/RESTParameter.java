@@ -21,6 +21,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.rest.annotations.ProperNoun;
 import org.codehaus.enunciate.rest.annotations.Adjective;
 import org.codehaus.enunciate.rest.annotations.NounValue;
+import org.codehaus.enunciate.rest.annotations.ContextParameter;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
@@ -68,6 +69,15 @@ public class RESTParameter extends DecoratedParameterDeclaration {
   }
 
   /**
+   * Whether this REST parameter is a context parameter.
+   *
+   * @return Whether this REST parameter is a context parameter.
+   */
+  public boolean isContextParam() {
+    return getAnnotation(ContextParameter.class) != null;
+  }
+
+  /**
    * Whether this REST parameter is optional.
    *
    * @return Whether this REST parameter is optional.
@@ -78,6 +88,9 @@ public class RESTParameter extends DecoratedParameterDeclaration {
     }
     else if (isNounValue()) {
       return getAnnotation(NounValue.class).optional();
+    }
+    else if (isContextParam()) {
+      return false;
     }
     else if (getAnnotation(Adjective.class) != null) {
       return getAnnotation(Adjective.class).optional();
@@ -103,6 +116,19 @@ public class RESTParameter extends DecoratedParameterDeclaration {
     }
 
     return adjectiveName;
+  }
+
+  /**
+   * The name of the context parameter.
+   *
+   * @return The name of the context parameter.
+   */
+  public String getContextParameterName() {
+    if (!isContextParam()) {
+      throw new UnsupportedOperationException("Not a context parameter.");
+    }
+
+    return getAnnotation(ContextParameter.class).value();
   }
 
   /**

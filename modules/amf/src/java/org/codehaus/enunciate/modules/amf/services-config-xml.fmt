@@ -3,7 +3,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <services-config>
-[#--todo: this needs to move to the spring app module...--]
   <services>
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]

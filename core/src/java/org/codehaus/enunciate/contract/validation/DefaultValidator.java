@@ -191,6 +191,29 @@ public class DefaultValidator implements Validator {
           }
         }
 
+        HashSet<String> contextParameters = new HashSet<String>();
+        for (RESTParameter contextParam : method.getContextParameters()) {
+          if (!contextParameters.add(contextParam.getContextParameterName())) {
+            result.addError(contextParam.getPosition(), "Duplicate context parameter name '" + contextParam.getContextParameterName() + "'.");
+          }
+
+          if ((!contextParam.getXmlType().isSimple()) || (contextParam.isCollectionType())) {
+            result.addError(contextParam.getPosition(), "A context parameter must be of a simple xml type.");
+          }
+
+          boolean parameterFound = false;
+          for (String contextParameter : noun.getContextParameters()) {
+            if (contextParam.getContextParameterName().equals(contextParameter)) {
+              parameterFound = true;
+              break;
+            }
+          }
+
+          if (!parameterFound) {
+            result.addError(contextParam.getPosition(), "No context parameter named '" + contextParam.getContextParameterName() + "' is found in the context (" + noun.toString() + ")");
+          }
+        }
+
         RESTParameter nounValue = method.getNounValue();
         if (nounValue != null) {
           if ((verbList.contains(VerbType.read)) || (verbList.contains(VerbType.delete))) {

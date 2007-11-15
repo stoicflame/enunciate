@@ -19,10 +19,9 @@ package org.codehaus.enunciate.modules.rest;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
-import java.util.Map;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -206,7 +205,7 @@ public class TestRESTOperation extends TestCase {
     adjectives.put("arg1", "adjective1Value");
     adjectives.put("arg3", new Short[] {8, 7, 6});
     RootElementExample ex = new RootElementExample();
-    assertSame(ex, operation.invoke(null, adjectives, ex));
+    assertSame(ex, operation.invoke(null, new HashMap<String, Object>(), adjectives, ex));
   }
 
   /**
@@ -218,10 +217,10 @@ public class TestRESTOperation extends TestCase {
     adjectives.put("hi", new Float(1234.5));
     adjectives.put("ho", new Float(888.777));
     RootElementExample ex = new RootElementExample();
-    assertSame(ex, operation.invoke("properNounValue", adjectives, ex));
-    assertNull(operation.invoke(null, adjectives, ex));
+    assertSame(ex, operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex));
+    assertNull(operation.invoke(null, new HashMap<String, Object>(), adjectives, ex));
     adjectives.remove("hi");
-    Object differentEx = operation.invoke("properNounValue", adjectives, ex);
+    Object differentEx = operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex);
     assertNotNull(differentEx);
     assertFalse(differentEx == ex);
   }

@@ -29,9 +29,9 @@ import javax.xml.bind.JAXBContext;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * @author Ryan Heaton
@@ -39,94 +39,92 @@ import java.util.TreeSet;
 public class TestRESTResourceXMLExporter extends TestCase {
 
   /**
+   * simple tests for regexps
+   */
+  public void testRegexp() throws Exception {
+    Pattern urlPattern = Pattern.compile("/person/?(.*)$");
+    Matcher matcher = urlPattern.matcher("/persons/rest/person/1".substring("/persons".length()));
+    if (matcher.find()) {
+      assertEquals("1", matcher.group(1));
+    }
+
+    Pattern contextParamPattern = Pattern.compile("\\{([^\\}]+)\\}");
+    List<String> contextParams = new ArrayList<String>();
+    matcher = contextParamPattern.matcher("{context1}/{context2}/something/{special}");
+    while (matcher.find()) {
+      contextParams.add(matcher.group(1));
+    }
+    assertEquals(3, contextParams.size());
+    assertEquals("context1", contextParams.get(0));
+    assertEquals("context2", contextParams.get(1));
+    assertEquals("special", contextParams.get(2));
+
+  }
+
+  /**
    * Tests handling that the noun and proper noun are property extracted from the request.
    */
   public void testHandleRequestInternal() throws Exception {
     RESTResource restResource = new RESTResource("mynoun") {
-
       @Override
       public Set<VerbType> getSupportedVerbs() {
-        return new TreeSet(Arrays.asList(VerbType.values()));
+        return EnumSet.allOf(VerbType.class);
       }
     };
+    
     RESTResourceXMLExporter exporter = new RESTResourceXMLExporter(restResource) {
       @Override
-      protected ModelAndView handleRESTOperation(String properNoun, VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        request.setAttribute("properNoun", properNoun);
+      protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute("verb", verb);
         return null;
       }
-
-
     };
+
     exporter.setApplicationContext(new GenericApplicationContext());
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/subcontext/mynoun/mypropernoun");
     expect(request.getMethod()).andReturn("GET");
-    request.setAttribute("properNoun", "mypropernoun");
     request.setAttribute("verb", VerbType.read);
     replay(request, response);
     exporter.handleRequestInternal(request, response);
     verify(request, response);
 
     reset(request, response);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/some/nested/weird/context/subcontext/mynoun/mypropernoun");
     expect(request.getMethod()).andReturn("PUT");
-    request.setAttribute("properNoun", "mypropernoun");
     request.setAttribute("verb", VerbType.create);
     replay(request, response);
     exporter.handleRequestInternal(request, response);
     verify(request, response);
 
     reset(request, response);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/subcontext/mynoun/");
     expect(request.getMethod()).andReturn("POST");
-    request.setAttribute("properNoun", null);
     request.setAttribute("verb", VerbType.update);
     replay(request, response);
     exporter.handleRequestInternal(request, response);
     verify(request, response);
 
-    reset(request, response);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/subcontext/mynoun");
-    expect(request.getMethod()).andReturn("DELETE");
-    request.setAttribute("properNoun", null);
-    request.setAttribute("verb", VerbType.delete);
-    replay(request, response);
-    exporter.handleRequestInternal(request, response);
-    verify(request, response);
-
-    reset(request, response);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/subcontext/");
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/subcontext/");
-    response.sendError(HttpServletResponse.SC_NOT_FOUND, "http://localhost:8080/context/subcontext/");
-    replay(request, response);
-    exporter.handleRequestInternal(request, response);
-    verify(request, response);
-
-    reset(request, response);
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/some/really/strange/requst");
-    expect(request.getRequestURI()).andReturn("http://localhost:8080/context/some/really/strange/requst");
-    response.sendError(HttpServletResponse.SC_NOT_FOUND, "http://localhost:8080/context/some/really/strange/requst");
-    replay(request, response);
-    exporter.handleRequestInternal(request, response);
-    verify(request, response);
   }
 
   /**
    * tests the handleRESTOperation method.
    */
   public void testHandleRESTOperation() throws Exception {
+    final HashMap<String, String> paramValues = new HashMap<String, String>();
     RESTResource resource = new RESTResource("example") {
 
       @Override
       public Set<VerbType> getSupportedVerbs() {
-        return new TreeSet(Arrays.asList(VerbType.values()));
+        return EnumSet.allOf(VerbType.class);
+      }
+
+      @Override
+      public Map<String, String> getContextParameterAndProperNounValues(String requestContext) {
+        return paramValues;
       }
     };
-    resource.addOperation(VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class));
+
+    resource.addOperation(VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
     RESTResourceXMLExporter controller = new RESTResourceXMLExporter(resource);
     controller.setApplicationContext(new GenericApplicationContext());
 
@@ -134,10 +132,12 @@ public class TestRESTResourceXMLExporter extends TestCase {
     HttpServletResponse response = createMock(HttpServletResponse.class);
     response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + VerbType.create);
     replay(request, response);
-    controller.handleRESTOperation("example", VerbType.create, request, response);
+    controller.handleRESTOperation(VerbType.create, request, response);
     verify(request, response);
     reset(request, response);
 
+    expect(request.getRequestURI()).andReturn("/ctx/is/unimportant");
+    expect(request.getContextPath()).andReturn("");
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     context.createMarshaller().marshal(new RootElementExample(), bytes);
@@ -145,12 +145,17 @@ public class TestRESTResourceXMLExporter extends TestCase {
     expect(request.getParameterValues("arg3")).andReturn(new String[] {"value1", "value2"});
     expect(request.getInputStream()).andReturn(new ByteArrayServletInputStream(bytes.toByteArray()));
     replay(request, response);
-    ModelAndView modelAndView = controller.handleRESTOperation("id", VerbType.update, request, response);
+    paramValues.put(null, "id");
+    paramValues.put("uriParam1", "ctxValueOne");
+    paramValues.put("otherParam", "otherValue");
+    ModelAndView modelAndView = controller.handleRESTOperation(VerbType.update, request, response);
     verify(request, response);
     RESTResultView view = (RESTResultView) modelAndView.getView();
     assertNotNull(view.getResult());
     assertTrue(view.getResult() instanceof RootElementExample);
     reset(request, response);
+
+    //todo: add some tests...
   }
 
   private static class ByteArrayServletInputStream extends ServletInputStream {
