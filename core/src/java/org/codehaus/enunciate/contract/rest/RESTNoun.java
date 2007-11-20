@@ -32,7 +32,7 @@ public class RESTNoun {
 
   private final String name;
   private final String context;
-  private final String canonicalContext;
+  private final String canonicalForm;
   private final String antPattern;
   private final List<String> contextParameters;
 
@@ -59,7 +59,7 @@ public class RESTNoun {
       String contextParameter = contextParameters.get(i);
       canonicalContext = canonicalContext.replaceFirst("\\{" + contextParameter + "\\}", "{context-parameter-" + i + "}");
     }
-    this.canonicalContext = canonicalContext;
+    this.canonicalForm = canonicalContext + "/" + name;
   }
 
   /**
@@ -119,11 +119,11 @@ public class RESTNoun {
     }
 
     RESTNoun restNoun = (RESTNoun) o;
-    return canonicalContext.equals(restNoun.canonicalContext);
+    return canonicalForm.equals(restNoun.canonicalForm);
   }
 
   @Override
   public int hashCode() {
-    return canonicalContext.hashCode();
+    return canonicalForm.hashCode();
   }
 }

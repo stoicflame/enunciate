@@ -101,7 +101,7 @@
 
     <mkdir dir="${tools.build.dir}"/>
 
-    <javac destdir="${tools.build.dir}" debug="true" source="${tools.compiler}">
+    <javac destdir="${tools.build.dir}" debug="true" source="${tools.compiler}" target="${tools.compiler}">
       <src>
         <pathelement location="src/tools"/>
       </src>
@@ -152,7 +152,7 @@
 
   <target name="compile-main" description="compile the main code" depends="get-build-classpath, write-discovery-metadata">
     <mkdir dir="${build.dir}"/>
-    <javac destdir="${build.dir}" debug="true">
+    <javac destdir="${build.dir}" debug="true" source="1.5" target="1.5">
       <src>
         <pathelement location="src/java"/>
       </src>

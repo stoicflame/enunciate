@@ -84,6 +84,7 @@ public class TestRESTResourceXMLExporter extends TestCase {
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
+    expect(request.getHeader("X-HTTP-Method-Override")).andReturn(null);
     expect(request.getMethod()).andReturn("GET");
     request.setAttribute("verb", VerbType.read);
     replay(request, response);
@@ -91,6 +92,7 @@ public class TestRESTResourceXMLExporter extends TestCase {
     verify(request, response);
 
     reset(request, response);
+    expect(request.getHeader("X-HTTP-Method-Override")).andReturn(null);
     expect(request.getMethod()).andReturn("PUT");
     request.setAttribute("verb", VerbType.create);
     replay(request, response);
@@ -98,6 +100,7 @@ public class TestRESTResourceXMLExporter extends TestCase {
     verify(request, response);
 
     reset(request, response);
+    expect(request.getHeader("X-HTTP-Method-Override")).andReturn(null);
     expect(request.getMethod()).andReturn("POST");
     request.setAttribute("verb", VerbType.update);
     replay(request, response);

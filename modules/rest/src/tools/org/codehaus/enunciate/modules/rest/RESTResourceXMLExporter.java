@@ -98,7 +98,14 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String httpMethod = request.getMethod().toUpperCase();
+    String httpMethod = request.getHeader("X-HTTP-Method-Override");
+    if ((httpMethod == null) || ("".equals(httpMethod.trim()))) {
+      httpMethod = request.getMethod().toUpperCase();
+    }
+    else {
+      httpMethod = httpMethod.toUpperCase();
+    }
+
     VerbType verb;
     if ("PUT".equals(httpMethod)) {
       verb = VerbType.create;
