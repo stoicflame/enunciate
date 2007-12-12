@@ -20,12 +20,11 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
+import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
@@ -46,6 +45,7 @@ public class Element extends Accessor {
 
   private final XmlElement xmlElement;
   private final Collection<Element> choices;
+  private boolean isChoice = false;
 
   public Element(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef);
@@ -102,6 +102,7 @@ public class Element extends Accessor {
     this.xmlElement = xmlElement;
     this.choices = new ArrayList<Element>();
     this.choices.add(this);
+    this.isChoice = true;
   }
 
   // Inherited.
@@ -159,15 +160,46 @@ public class Element extends Accessor {
    */
   @Override
   public TypeMirror getAccessorType() {
+    TypeMirror specifiedType = null;
     try {
       if ((xmlElement != null) && (xmlElement.type() != XmlElement.DEFAULT.class)) {
         Class clazz = xmlElement.type();
-        return getAccessorType(clazz);
+        specifiedType = getAccessorType(clazz);
       }
     }
     catch (MirroredTypeException e) {
       // The mirrored type exception implies that the specified type is within the source base.
-      return TypeMirrorDecorator.decorate(e.getTypeMirror());
+      specifiedType = TypeMirrorDecorator.decorate(e.getTypeMirror());
+    }
+
+    if (specifiedType != null) {
+      if (!isChoice) {
+        DecoratedTypeMirror accessorType = (DecoratedTypeMirror) super.getAccessorType();
+
+        if (accessorType.isCollection()) {
+          AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+          Types types = ape.getTypeUtils();
+          if (specifiedType instanceof PrimitiveType) {
+            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
+          }
+          else {
+            specifiedType = types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) specifiedType).getDeclaration().getQualifiedName()));
+          }
+          specifiedType = TypeMirrorDecorator.decorate(types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) accessorType).getDeclaration().getQualifiedName()), specifiedType));
+        }
+        else if (accessorType.isArray()) {
+          Types types = Context.getCurrentEnvironment().getTypeUtils();
+          if (specifiedType instanceof PrimitiveType) {
+            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
+          }
+          else {
+            specifiedType = types.getDeclaredType(((DeclaredType) specifiedType).getDeclaration());
+          }
+          specifiedType = TypeMirrorDecorator.decorate(types.getArrayType(specifiedType));
+        }
+      }
+
+      return specifiedType;
     }
 
     return super.getAccessorType();

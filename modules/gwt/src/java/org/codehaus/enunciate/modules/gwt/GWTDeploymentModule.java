@@ -113,6 +113,9 @@ import com.sun.mirror.declaration.Declaration;
  * download.  Default: <code>false</code>.</li>
  * <li>The "gwtHome" attribute specifies the filesystem path to the Google Web Toolkit home directory.</li>
  * <li>The "gwtCompilerClass" attribute specifies the FQN of the GWTCompiler.  Default: "com.google.gwt.dev.GWTCompiler".</li>
+ * <li>The "enforceNoFieldAccessors" attribute specifies whether to enforce that a field accessor cannot be used for GWT mapping.
+ * <i>Note: whether this option is enabled or disabled, there currently MUST be a getter and setter for each accessor.  This option only
+ * disables the compile-time validation check.</i></li>
  * </ul>
  *
  * <h3>The "app" element</h3>
@@ -211,6 +214,7 @@ import com.sun.mirror.declaration.Declaration;
 public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean enforceNamespaceConformance = true;
+  private boolean enforceNoFieldAccessors = true;
   private String rpcModuleNamespace = null;
   private String rpcModuleName = null;
   private String clientJarName = null;
@@ -789,7 +793,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new GWTValidator(this.rpcModuleNamespace, this.enforceNamespaceConformance);
+    return new GWTValidator(this.rpcModuleNamespace, this.enforceNamespaceConformance, this.enforceNoFieldAccessors);
   }
 
   @Override
@@ -882,6 +886,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setEnforceNamespaceConformance(boolean enforceNamespaceConformance) {
     this.enforceNamespaceConformance = enforceNamespaceConformance;
+  }
+
+  /**
+   * Whether to enforce that field accessors can't be used.
+   *
+   * @return Whether to enforce that field accessors can't be used.
+   */
+  public boolean isEnforceNoFieldAccessors() {
+    return enforceNoFieldAccessors;
+  }
+
+  /**
+   * Whether to enforce that field accessors can't be used.
+   *
+   * @param enforceNoFieldAccessors Whether to enforce that field accessors can't be used.
+   */
+  public void setEnforceNoFieldAccessors(boolean enforceNoFieldAccessors) {
+    this.enforceNoFieldAccessors = enforceNoFieldAccessors;
   }
 
   /**

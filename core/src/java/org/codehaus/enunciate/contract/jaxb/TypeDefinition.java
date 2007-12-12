@@ -22,6 +22,7 @@ import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -375,6 +376,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public boolean isSimple() {
     return false;
+  }
+
+  /**
+   * Whether this type definition is a base object (i.e. a root of the object hierarchy).
+   *
+   * @return Whether this type definition is a base object
+   */
+  public boolean isBaseObject() {
+    return true;
   }
 
   /**

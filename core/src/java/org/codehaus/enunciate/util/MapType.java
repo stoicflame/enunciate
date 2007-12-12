@@ -74,4 +74,9 @@ public class MapType extends DecoratedInterfaceType {
   public boolean isMap() {
     return true;
   }
+
+  @Override
+  public boolean isCollection() {
+    return false;
+  }
 }

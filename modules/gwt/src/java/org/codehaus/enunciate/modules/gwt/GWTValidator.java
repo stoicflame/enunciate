@@ -37,16 +37,18 @@ import java.util.*;
  */
 public class GWTValidator extends BaseValidator {
 
+  private final boolean enforceNoFieldAccessors;
   private final boolean enforceNamespaceConformance;
   private final String gwtModuleNamespace;
   private final Set<String> unsupportedTypes = new HashSet<String>();
 
-  public GWTValidator(String gwtModuleNamespace, boolean enforceNamespaceConformance) {
+  public GWTValidator(String gwtModuleNamespace, boolean enforceNamespaceConformance, boolean enforceNoFieldAccessors) {
     this.gwtModuleNamespace = gwtModuleNamespace;
     unsupportedTypes.add(javax.xml.datatype.Duration.class.getName());
     unsupportedTypes.add(java.awt.Image.class.getName());
     unsupportedTypes.add(javax.xml.transform.Source.class.getName());
     this.enforceNamespaceConformance = enforceNamespaceConformance;
+    this.enforceNoFieldAccessors = enforceNoFieldAccessors;
   }
 
   @Override
@@ -109,7 +111,7 @@ public class GWTValidator extends BaseValidator {
 
       for (Attribute attribute : complexType.getAttributes()) {
         if (!isGWTTransient(attribute)) {
-          if (attribute.getDelegate() instanceof FieldDeclaration) {
+          if ((attribute.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
             result.addError(attribute.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 
@@ -121,7 +123,7 @@ public class GWTValidator extends BaseValidator {
 
       for (Element element : complexType.getElements()) {
         if (!isGWTTransient(element)) {
-          if (element.getDelegate() instanceof FieldDeclaration) {
+          if ((element.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
             result.addError(element.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 
@@ -134,7 +136,7 @@ public class GWTValidator extends BaseValidator {
       Value value = complexType.getValue();
       if (value != null) {
         if (!isGWTTransient(value)) {
-          if (value.getDelegate() instanceof FieldDeclaration) {
+          if ((value.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
             result.addError(value.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 

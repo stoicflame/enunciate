@@ -18,29 +18,64 @@ package org.codehaus.enunciate.modules.gwt;
 
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.EnumType;
+import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 
-import java.util.Map;
+import java.util.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
 
 import freemarker.template.TemplateModelException;
+
+import javax.activation.DataHandler;
+import javax.xml.namespace.QName;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @author Ryan Heaton
  */
 public class ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
 
+  private final Map<String, String> classConversions = new HashMap<String, String>();
+
   public ClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
+    setJdk15(false);
+    classConversions.put(BigDecimal.class.getName(), String.class.getName());
+    classConversions.put(BigInteger.class.getName(), String.class.getName());
+    classConversions.put(Calendar.class.getName(), Date.class.getName());
+    classConversions.put(DataHandler.class.getName(), "byte[]");
+    classConversions.put(QName.class.getName(), String.class.getName());
+    classConversions.put(URI.class.getName(), String.class.getName());
+    classConversions.put(UUID.class.getName(), String.class.getName());
+    classConversions.put(XMLGregorianCalendar.class.getName(), Date.class.getName());
   }
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    return typeMirror instanceof EnumType ? String.class.getName() : super.convert(typeMirror);
+    if (typeMirror instanceof DeclaredType) {
+      DeclaredType declaredType = ((DeclaredType) typeMirror);
+      String fqn = declaredType.getDeclaration().getQualifiedName();
+      if (classConversions.containsKey(fqn)) {
+        return classConversions.get(fqn);
+      }
+    }
+
+    if (typeMirror instanceof EnumType) {
+      return String.class.getName();
+    }
+
+    return super.convert(typeMirror);
   }
 
   @Override
   public String convert(TypeDeclaration declaration) {
+    if (classConversions.containsKey(declaration.getQualifiedName())) {
+      return classConversions.get(declaration.getQualifiedName());
+    }
+    
     return declaration instanceof EnumDeclaration ? String.class.getName() : super.convert(declaration);
   }
 }

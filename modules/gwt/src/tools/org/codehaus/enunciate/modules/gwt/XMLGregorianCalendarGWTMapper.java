@@ -17,7 +17,10 @@
 package org.codehaus.enunciate.modules.gwt;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.DatatypeConfigurationException;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * @author Ryan Heaton
@@ -33,6 +36,15 @@ public class XMLGregorianCalendarGWTMapper implements GWTMapper<XMLGregorianCale
       return null;
     }
 
-    throw new GWTMappingException("Cannot map from GWT to an instance of XMLGregorianCalendar.");
+    try {
+      GregorianCalendar gregorianCal = new GregorianCalendar();
+      gregorianCal.setTime(gwtObject);
+
+      DatatypeFactory factory = DatatypeFactory.newInstance();
+      return factory.newXMLGregorianCalendar(gregorianCal);
+    }
+    catch (DatatypeConfigurationException e) {
+      throw new GWTMappingException("Internal Error mapping from GWT to an instance of XMLGregorianCalendar: ", e);
+    }
   }
 }

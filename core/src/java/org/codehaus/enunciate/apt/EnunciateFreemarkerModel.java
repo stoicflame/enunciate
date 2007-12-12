@@ -35,6 +35,7 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
 
 import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
 import java.util.*;
 
@@ -380,6 +381,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @return The known type for the given declaration, or null if the XML type of the declaration is not known.
    */
   public XmlType getKnownType(TypeDeclaration declaration) {
+    if (declaration.getAnnotation(XmlTransient.class) != null) {
+      return KnownXmlType.ANY_TYPE;
+    }
+    
     return knownTypes.get(declaration.getQualifiedName());
   }
 

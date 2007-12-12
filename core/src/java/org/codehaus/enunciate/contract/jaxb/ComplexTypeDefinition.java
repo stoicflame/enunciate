@@ -100,6 +100,11 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
   }
 
   @Override
+  public boolean isBaseObject() {
+    return getBaseType().getQname().equals(KnownXmlType.ANY_TYPE.getQname());
+  }
+
+  @Override
   public ValidationResult accept(Validator validator) {
     return validator.validateComplexType(this);
   }

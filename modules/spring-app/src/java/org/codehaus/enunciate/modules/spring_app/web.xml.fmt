@@ -48,28 +48,16 @@
       [/#if]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
-  [@forEachRESTNoun]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/${noun}</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/${noun}/*</url-pattern>
+    <url-pattern>/json/*</url-pattern>
   </servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/json/${noun}</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/json/${noun}/*</url-pattern>
-  </servlet-mapping>
-
-  [/@forEachRESTNoun]
   <mime-mapping>
     <extension>wsdl</extension>
     <mime-type>text/xml</mime-type>

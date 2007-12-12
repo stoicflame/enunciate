@@ -27,7 +27,6 @@ import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,7 +44,6 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   public ClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
   }
-
 
   @Override
   public String convertUnwrappedObject(Object unwrapped) throws TemplateModelException {
