@@ -20,6 +20,8 @@ import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -206,6 +208,7 @@ public class RESTOperation {
     catch (JAXBException e) {
       throw new IllegalStateException(e);
     }
+
   }
 
   /**

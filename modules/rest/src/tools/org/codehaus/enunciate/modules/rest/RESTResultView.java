@@ -21,6 +21,8 @@ import org.springframework.web.servlet.View;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.PropertyException;
+import javax.xml.bind.JAXBException;
 import java.util.Map;
 
 /**
@@ -33,7 +35,7 @@ public class RESTResultView implements View {
   private final RESTOperation operation;
   private final Object result;
   private final Map<String, String> ns2prefix;
-  private final PrefixMapper prefixMapper;
+  private final Object prefixMapper;
 
   /**
    * Construct a view for the result of a REST operation.
@@ -45,7 +47,16 @@ public class RESTResultView implements View {
     this.operation = operation;
     this.result = result;
     this.ns2prefix = ns2prefix;
-    this.prefixMapper = new PrefixMapper(ns2prefix);
+    Object prefixMapper;
+    try {
+      //we want to support a prefix mapper, but don't want to break those on JDK 6 that don't have the prefix mapper on the classpath.
+      prefixMapper = Class.forName("org.codehaus.enunciate.modules.rest.PrefixMapper").getConstructor(Map.class).newInstance(ns2prefix);
+    }
+    catch (Exception e) {
+      prefixMapper = null;
+    }
+    
+    this.prefixMapper = prefixMapper;
   }
 
   /**
@@ -78,12 +89,28 @@ public class RESTResultView implements View {
     response.setStatus(HttpServletResponse.SC_OK);
     if (result != null) {
       response.setContentType(String.format("%s;charset=%s", getContentType(), this.operation.getCharset()));
-      Marshaller marshaller = operation.getSerializationContext().createMarshaller();
-      marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
-      marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
-      marshal(marshaller, request, response);
+      marshal(getMarshaller(), request, response);
     }
     response.flushBuffer();
+  }
+
+  /**
+   * Gets a marshaller instance.
+   *
+   * @return The marshaller.
+   */
+  protected Marshaller getMarshaller() throws JAXBException {
+    Marshaller marshaller = operation.getSerializationContext().createMarshaller();
+    marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
+    if (this.prefixMapper != null) {
+      try {
+        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
+      }
+      catch (PropertyException e) {
+        //fall through...
+      }
+    }
+    return marshaller;
   }
 
   /**

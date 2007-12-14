@@ -127,7 +127,7 @@
       <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
           [#if element.wrapped]
-        <${xs}:element name="${typeDef.wrapperName}">
+        <${xs}:element name="${element.wrapperName}">
             [#if element.docValue?exists]
           <${xs}:annotation>
             <${xs}:documentation>

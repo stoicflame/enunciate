@@ -212,7 +212,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   private boolean actionscriptBundleDownloadable = true;
 
   public AMFDeploymentModule() {
-    setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
+    setDisabled(true);//disable the AMF module by default because it adds unnecessary contraints on the API.
   }
 
   /**
