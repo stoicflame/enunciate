@@ -26,18 +26,20 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
+import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.amf.config.AMFApp;
+import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
+import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
+import org.codehaus.enunciate.modules.amf.config.License;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * <h1>GWT Module</h1>
@@ -203,13 +205,13 @@ import java.util.HashMap;
  */
 public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
-  private final List<AMFApp> flexApps = new ArrayList<AMFApp>();
+  private final List<FlexApp> flexApps = new ArrayList<FlexApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
-  private final List<String> flexArgs = new ArrayList<String>();
+
   private String flexSDKHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
-  private String flexCompileCommand = "com.google.gwt.dev.GWTCompiler";
-  private String actionscriptBundleName = null;
-  private boolean actionscriptBundleDownloadable = true;
+  private FlexCompilerConfig compilerConfig = new FlexCompilerConfig();
+  private String swcName;
+  private boolean swcDownloadable = false;
 
   public AMFDeploymentModule() {
     setDisabled(true);//disable the AMF module by default because it adds unnecessary contraints on the API.
@@ -227,19 +229,19 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    for (AMFApp amfApp : flexApps) {
-      String srcPath = amfApp.getSrcDir();
+    for (FlexApp flexApp : flexApps) {
+      if (flexApp.getName() == null) {
+        throw new EnunciateException("A flex app must have a name.");
+      }
 
+      String srcPath = flexApp.getSrcDir();
       if (srcPath == null) {
-        throw new EnunciateException("A source directory for the AMF app "
-          + ("".equals(amfApp.getName()) ? "" : "'" + amfApp.getName() + "' ")
-          + "must be supplied with the 'srcDir' attribute.");
+        throw new EnunciateException("A source directory for the flex app '" + flexApp.getName() + "' must be supplied with the 'srcDir' attribute.");
       }
 
       File srcDir = enunciate.resolvePath(srcPath);
       if (!srcDir.exists()) {
-        throw new EnunciateException("Source directory '" + srcDir.getAbsolutePath() + "' doesn't exist for the AMF app"
-          + ("".equals(amfApp.getName()) ? "." : " '" + amfApp.getName() + "'."));
+        throw new EnunciateException("Source directory for the flex app '" + flexApp.getName() + "' doesn't exist.");
       }
     }
   }
@@ -251,6 +253,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     URL graniteConfigTemplate = getTemplateURL("granite-config-xml.fmt");
     URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
 
+    URL endpointTemplate = getTemplateURL("as3-endpoint.fmt");
     URL typeTemplate = getTemplateURL("as3-type.fmt");
     URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
 
@@ -268,6 +271,15 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
           model.put("type", typeDefinition);
           URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
           processTemplate(template, model);
+        }
+      }
+    }
+
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        if (!isAMFTransient(ei)) {
+          model.put("endpointInterface", ei);
+          processTemplate(endpointTemplate, model);
         }
       }
     }
@@ -297,11 +309,11 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Invokes GWTCompile on the apps specified in the configuration file.
+   * Invokes the flex compiler on the apps specified in the configuration file.
    */
-  protected void doAMFCompile() throws EnunciateException, IOException {
+  protected void doFlexCompile() throws EnunciateException, IOException {
     if (this.flexSDKHome == null) {
-      throw new EnunciateException("To compile a flex app you must specify the GWT home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
+      throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
     }
 
     File flexHomeDir = new File(this.flexSDKHome);
@@ -309,184 +321,168 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("Flex home not found ('" + flexHomeDir.getAbsolutePath() + "').");
     }
 
-//    File gwtUserJar = new File(flexHomeDir, "gwt-user.jar");
-//    if (!gwtUserJar.exists()) {
-//      warn("Unable to find %s. There may be flex compile errors.", gwtUserJar.getAbsolutePath());
-//    }
-//
-//    //now we have to find gwt-dev.jar.
-//    //start by assuming linux...
-//    File linuxDevJar = new File(flexHomeDir, "gwt-dev-linux.jar");
-//    File gwtDevJar = linuxDevJar;
-//    if (!gwtDevJar.exists()) {
-//      //linux not found. try mac...
-//      File macDevJar = new File(flexHomeDir, "gwt-dev-mac.jar");
-//      gwtDevJar = macDevJar;
-//
-//      if (!gwtDevJar.exists()) {
-//        //okay, we'll try windows if we have to...
-//        File windowsDevJar = new File(flexHomeDir, "gwt-dev-windows.jar");
-//        gwtDevJar = windowsDevJar;
-//
-//        if (!gwtDevJar.exists()) {
-//          throw new EnunciateException(String.format("Unable to find GWT dev jar. Looked for %s, %s, and %s.", linuxDevJar.getAbsolutePath(), macDevJar.getAbsolutePath(), windowsDevJar.getAbsolutePath()));
-//        }
-//      }
-//    }
-//
-//    File javaBinDir = new File(System.getProperty("java.home"), "bin");
-//    File javaExecutable = new File(javaBinDir, "java");
-//    if (!javaExecutable.exists()) {
-//      //append the "exe" for windows users.
-//      javaExecutable = new File(javaBinDir, "java.exe");
-//    }
-//
-//    String javaCommand = javaExecutable.getAbsolutePath();
-//    if (!javaExecutable.exists()) {
-//      warn("No java executable found in %s.  We'll just hope the environment is set up to execute 'java'...", javaBinDir.getAbsolutePath());
-//      javaCommand = "java";
-//    }
-//
-//    StringBuilder classpath = new StringBuilder(enunciate.getEnunciateClasspath());
-//    //append the client-side gwt directory.
-//    classpath.append(File.pathSeparatorChar).append(getClientSideGenerateDir().getAbsolutePath());
-//    //append the gwt-user jar.
-//    classpath.append(File.pathSeparatorChar).append(gwtUserJar.getAbsolutePath());
-//    //append the gwt-dev jar.
-//    classpath.append(File.pathSeparatorChar).append(gwtDevJar.getAbsolutePath());
-//
-//    //so here's the command:
-//    //java [extra jvm args] -cp [classpath] [compilerClass] -gen [gwt-gen-dir] -style [style] -out [out] [moduleName]
-//    List<String> jvmargs = getFlexArgs();
-//    String[] commandArray = new String[jvmargs.size() + 11];
-//    int argIndex = 0;
-//    commandArray[argIndex++] = javaCommand;
-//    while (argIndex - 1 < jvmargs.size()) {
-//      String arg = jvmargs.get(argIndex - 1);
-//      commandArray[argIndex++] = arg;
-//    }
-//    commandArray[argIndex++] = "-cp";
-//    int classpathArgIndex = argIndex; //app-specific arg.
-//    commandArray[argIndex++] = null;
-//    commandArray[argIndex++] = getFlexCompileCommand();
-//    commandArray[argIndex++] = "-gen";
-//    commandArray[argIndex++] = getGwtGenDir().getAbsolutePath();
-//    commandArray[argIndex++] = "-style";
-//    int styleArgIndex = argIndex;
-//    commandArray[argIndex++] = null; //app-specific arg.
-//    commandArray[argIndex++] = "-out";
-//    int outArgIndex = argIndex;
-//    commandArray[argIndex++] = null; //app-specific arg.
-//    int moduleNameIndex = argIndex;
-//    commandArray[argIndex] = null; //module-specific arg.
-//
-//    for (GWTApp gwtApp : amfApps) {
-//      String appName = gwtApp.getName();
-//      File appSource = enunciate.resolvePath(gwtApp.getSrcDir());
-//      commandArray[classpathArgIndex] = classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath();
-//      String style = gwtApp.getJavascriptStyle().toString();
-//      commandArray[styleArgIndex] = style;
-//      File appDir = getAppGenerateDir(appName);
-//      String out = appDir.getAbsolutePath();
-//      commandArray[outArgIndex] = out;
-//
-//      for (GWTAppModule appModule : gwtApp.getModules()) {
-//        String moduleName = appModule.getName();
-//        commandArray[moduleNameIndex] = moduleName;
-//        info("Executing GWTCompile for module '%s'...", moduleName);
-//        if (enunciate.isDebug()) {
-//          StringBuilder command = new StringBuilder();
-//          for (String commandPiece : commandArray) {
-//            command.append(' ').append(commandPiece);
-//          }
-//          debug("Executing GWTCompile for module %s with the command: %s", moduleName, command);
-//        }
-//        ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
-//        processBuilder.directory(getGenerateDir());
-//        processBuilder.redirectErrorStream(true);
-//        Process process = processBuilder.start();
-//        BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//        String line = procReader.readLine();
-//        while (line != null) {
-//          info(line);
-//          line = procReader.readLine();
-//        }
-//        int procCode;
-//        try {
-//          procCode = process.waitFor();
-//        }
-//        catch (InterruptedException e1) {
-//          throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
-//        }
-//
-//        if (procCode != 0) {
-//          throw new EnunciateException("GWT compile failed for module " + moduleName);
-//        }
-//
-//        String outputPath = appModule.getOutputPath();
-//        File moduleOutputDir = appDir;
-//        if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
-//          moduleOutputDir = new File(appDir, outputPath);
-//        }
-//        File moduleGenDir = new File(appDir, moduleName);
-//        if (!moduleOutputDir.equals(moduleGenDir)) {
-//          moduleOutputDir.mkdirs();
-//          enunciate.copyDir(moduleGenDir, moduleOutputDir);
-//          deleteDir(moduleGenDir);
-//        }
-//      }
-//    }
-  }
-
-//  /**
-//   * Delete a directory on the filesystem.
-//   *
-//   * @param dir The directory to delete.
-//   * @return Whether the directory was successfully deleted.
-//   */
-//  private boolean deleteDir(File dir) {
-//    if (dir.exists()) {
-//      File[] files = dir.listFiles();
-//      for (File file : files) {
-//        if (file.isDirectory()) {
-//          deleteDir(file);
-//        }
-//        else {
-//          file.delete();
-//        }
-//      }
-//    }
-//    return dir.delete();
-//  }
-
-  @Override
-  protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
 
-    if (this.flexApps.size() > 0) {
-      doAMFCompile();
-      enunciate.setProperty("flex.app.dir", getAppGenerateDir());
-      enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getAppGenerateDir()));
+    File javaBinDir = new File(System.getProperty("java.home"), "bin");
+    File javaExecutable = new File(javaBinDir, "java");
+    if (!javaExecutable.exists()) {
+      //append the "exe" for windows users.
+      javaExecutable = new File(javaBinDir, "java.exe");
     }
-  }
 
-  @Override
-  protected void doBuild() throws EnunciateException, IOException {
-    Enunciate enunciate = getEnunciate();
-    String as3BundleName = getActionscriptBundleName();
+    String javaCommand = javaExecutable.getAbsolutePath();
+    if (!javaExecutable.exists()) {
+      warn("No java executable found in %s.  We'll just hope the environment is set up to execute 'java'...", javaBinDir.getAbsolutePath());
+      javaCommand = "java";
+    }
 
-    if (as3BundleName == null) {
+    int compileCommandIndex;
+    int outputFileIndex;
+    int sourcePathIndex;
+    int mainMxmlPathIndex;
+    List<String> commandLine = new ArrayList<String>();
+    int argIndex = 0;
+    commandLine.add(argIndex++, javaCommand);
+    for (String jvmarg : this.compilerConfig.getJVMArgs()) {
+      commandLine.add(argIndex++, jvmarg);
+    }
+    commandLine.add(argIndex++, "-cp");
+    File flexHomeLib = new File(flexHomeDir, "lib");
+    if (!flexHomeLib.exists()) {
+      throw new EnunciateException("File not found: " + flexHomeLib);
+    }
+    else {
+      StringBuilder builder = new StringBuilder();
+      Iterator<File> flexLibIt = Arrays.asList(flexHomeLib.listFiles()).iterator();
+      while (flexLibIt.hasNext()) {
+        File flexJar = flexLibIt.next();
+        if (flexJar.getAbsolutePath().endsWith("jar")) {
+          builder.append(flexJar.getAbsolutePath());
+          if (flexLibIt.hasNext()) {
+            builder.append(File.pathSeparatorChar);
+          }
+        }
+        else {
+          debug("File %s will not be included on the classpath because it's not a jar.", flexJar);
+        }
+      }
+      commandLine.add(argIndex++, builder.toString());
+    }
+
+    compileCommandIndex = argIndex;
+    commandLine.add(argIndex++, null);
+
+    commandLine.add(argIndex++, "-output");
+    outputFileIndex = argIndex;
+    commandLine.add(argIndex++, null);
+
+    if (compilerConfig.getFlexConfig() == null) {
+      compilerConfig.setFlexConfig(new File(new File(flexSDKHome, "frameworks"), "flex-config.xml"));
+    }
+
+    if (compilerConfig.getFlexConfig().exists()) {
+      commandLine.add(argIndex++, "-load-config");
+      commandLine.add(argIndex++, compilerConfig.getFlexConfig().getAbsolutePath());
+    }
+    else {
+      warn("Configured flex configuration file %s doesn't exist.  Ignoring...", compilerConfig.getFlexConfig());
+    }
+
+    if (compilerConfig.getContextRoot() == null) {
+      if (getEnunciate().getConfig().getLabel() != null) {
+        compilerConfig.setContextRoot("/" + getEnunciate().getConfig().getLabel());
+      }
+      else {
+        compilerConfig.setContextRoot("/enunciate");
+      }
+    }
+
+    commandLine.add(argIndex++, "-compiler.context-root");
+    commandLine.add(argIndex++, compilerConfig.getContextRoot());
+
+    if (compilerConfig.getLocale() != null) {
+      commandLine.add(argIndex++, "-compiler.locale");
+      commandLine.add(argIndex++, compilerConfig.getLocale());
+    }
+
+    if (compilerConfig.getLicenses().size() > 0) {
+      commandLine.add(argIndex++, "-licenses.license");
+      for (License license : compilerConfig.getLicenses()) {
+        commandLine.add(argIndex++, license.getProduct());
+        commandLine.add(argIndex++, license.getSerialNumber());
+      }
+    }
+
+    if (compilerConfig.getOptimize() != null && compilerConfig.getOptimize()) {
+      commandLine.add(argIndex++, "-compiler.optimize");
+    }
+
+    if (compilerConfig.getDebug() != null && compilerConfig.getDebug()) {
+      commandLine.add(argIndex++, "-compiler.debug=true");
+    }
+
+    if (compilerConfig.getProfile() != null && compilerConfig.getProfile()) {
+      commandLine.add(argIndex++, "-compiler.profile");
+    }
+
+    if (compilerConfig.getStrict() != null && compilerConfig.getStrict()) {
+      commandLine.add(argIndex++, "-compiler.strict");
+    }
+
+    if (compilerConfig.getUseNetwork() != null && compilerConfig.getUseNetwork()) {
+      commandLine.add(argIndex++, "-use-network");
+    }
+
+    if (compilerConfig.getWarnings() != null && compilerConfig.getWarnings()) {
+      commandLine.add(argIndex++, "-warnings");
+    }
+
+    if (compilerConfig.getIncremental() != null && compilerConfig.getIncremental()) {
+      commandLine.add(argIndex++, "-compiler.incremental");
+    }
+
+    if (compilerConfig.getShowActionscriptWarnings() != null && compilerConfig.getShowActionscriptWarnings()) {
+      commandLine.add(argIndex++, "-show-actionscript-warnings");
+    }
+
+    if (compilerConfig.getShowBindingWarnings() != null && compilerConfig.getShowBindingWarnings()) {
+      commandLine.add(argIndex++, "-show-binding-warnings");
+    }
+
+    if (compilerConfig.getShowDeprecationWarnings() != null && compilerConfig.getShowDeprecationWarnings()) {
+      commandLine.add(argIndex++, "-show-deprecation-warnings");
+    }
+
+    commandLine.add(argIndex++, "-compiler.services");
+    commandLine.add(argIndex++, new File(getXMLGenerateDir(), "services-config.xml").getAbsolutePath());
+
+    commandLine.add(argIndex++, "-source-path");
+    commandLine.add(argIndex++, getClientSideGenerateDir().getAbsolutePath());
+
+    String swcName = getSwcName();
+
+    if (swcName == null) {
       String label = "enunciate";
       if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
         label = enunciate.getConfig().getLabel();
       }
 
-      as3BundleName = label + "-actionscript-client.jar";
+      swcName = label + "-as3-client.swc";
     }
 
-    File as3Bundle = new File(getBuildDir(), as3BundleName);
-    enunciate.zip(as3Bundle, getClientSideGenerateDir());
-    enunciate.setProperty("as3.client.jar", as3Bundle);
+    File as3Bundle = new File(getSwcCompileDir(), swcName);
+    commandLine.set(compileCommandIndex, compilerConfig.getSwcCompileCommand());
+    commandLine.set(outputFileIndex, as3Bundle.getAbsolutePath());
+    info("Compiling %s for the client-side ActionScript classes...", as3Bundle.getAbsolutePath());
+    if (enunciate.isDebug()) {
+      StringBuilder command = new StringBuilder();
+      for (String commandPiece : commandLine) {
+        command.append(' ').append(commandPiece);
+      }
+      debug("Executing SWC compile for client-side actionscript with the command: %s", command);
+    }
+
+    enunciate.setProperty("as3.client.swc", as3Bundle);
 
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
     BaseArtifactDependency as3Dependency = new BaseArtifactDependency();
@@ -497,18 +493,91 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     as3Dependency.setVersion("2.0.1");
     clientDeps.add(as3Dependency);
 
-    ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Bundle");
+    ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client SWC");
     as3ClientArtifact.setPlatform("Adobe Flex");
     //read in the description from file:
     as3ClientArtifact.setDescription(readResource("client_library_description.html"));
-    NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.bundle", as3Bundle);
+    NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.swc", as3Bundle);
     clientArtifact.setDescription("The ActionScript source files.");
-    clientArtifact.setPublic(false);
+    clientArtifact.setPublic(isSwcDownloadable());
     as3ClientArtifact.addArtifact(clientArtifact);
     as3ClientArtifact.setDependencies(clientDeps);
     enunciate.addArtifact(clientArtifact);
-    if (isActionscriptBundleDownloadable()) {
+    if (isSwcDownloadable()) {
       enunciate.addArtifact(as3ClientArtifact);
+    }
+
+    commandLine.add(argIndex++, "-source-path");
+    sourcePathIndex = argIndex;
+    commandLine.add(argIndex++, null);
+
+    commandLine.add(argIndex++, "--");
+    mainMxmlPathIndex = argIndex;
+    commandLine.add(argIndex++, null);
+
+    commandLine.set(compileCommandIndex, compilerConfig.getFlexCompileCommand());
+
+    File outputDirectory = getSwfCompileDir();
+    debug("Creating output directory: " + outputDirectory);
+    outputDirectory.mkdirs();
+
+    for (FlexApp flexApp : flexApps) {
+      String mainMxmlPath = flexApp.getMainMxmlFile();
+      if (mainMxmlPath == null) {
+        throw new EnunciateException("A main MXML file for the flex app '" + flexApp.getName() + "' must be supplied with the 'mainMxmlFile' attribute.");
+      }
+
+      File mainMxmlFile = enunciate.resolvePath(mainMxmlPath);
+      if (!mainMxmlFile.exists()) {
+        throw new EnunciateException("Main MXML file for the flex app '" + flexApp.getName() + "' doesn't exist.");
+      }
+
+      String swfFile = new File(outputDirectory, flexApp.getName() + ".swf").getAbsolutePath();
+      commandLine.set(outputFileIndex, swfFile);
+      commandLine.set(sourcePathIndex, enunciate.resolvePath(flexApp.getSrcDir()).getAbsolutePath());
+      commandLine.set(mainMxmlPathIndex, enunciate.resolvePath(flexApp.getMainMxmlFile()).getAbsolutePath());
+
+      info("Compiling %s ...", swfFile);
+      if (enunciate.isDebug()) {
+        StringBuilder command = new StringBuilder();
+        for (String commandPiece : commandLine) {
+          command.append(' ').append(commandPiece);
+        }
+        debug("Executing flex compile for module %s with the command: %s", flexApp.getName(), command);
+      }
+
+      ProcessBuilder processBuilder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
+      processBuilder.directory(getSwfCompileDir());
+      processBuilder.redirectErrorStream(true);
+      Process process = processBuilder.start();
+      BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      String line = procReader.readLine();
+      while (line != null) {
+        info(line);
+        line = procReader.readLine();
+      }
+      int procCode;
+      try {
+        procCode = process.waitFor();
+      }
+      catch (InterruptedException e1) {
+        throw new EnunciateException("Unexpected inturruption of the Flex compile process.");
+      }
+
+      if (procCode != 0) {
+        throw new EnunciateException("Flex compile failed for module " + flexApp.getName());
+      }
+    }
+  }
+
+  @Override
+  protected void doCompile() throws EnunciateException, IOException {
+    Enunciate enunciate = getEnunciate();
+
+    if (this.flexApps.size() > 0) {
+      doFlexCompile();
+      enunciate.setProperty("flex.app.dir", getSwfCompileDir());
+      enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getSwfCompileDir()));
     }
   }
 
@@ -545,7 +614,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    * @return Whether the given tyep declaration is GWT-transient.
    */
   protected boolean isAMFTransient(TypeDeclaration declaration) {
-    return isAMFTransient(declaration) || isAMFTransient(declaration.getPackage());
+    return isAMFTransient((Declaration) declaration) || isAMFTransient(declaration.getPackage());
   }
 
   /**
@@ -596,18 +665,27 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The base generate dir for the gwt applications.
+   * The directory for the destination for the SWC.
    *
-   * @return The base generate dir for the gwt applications.
+   * @return The directory for the destination for the SWC.
    */
-  public File getAppGenerateDir() {
-    return new File(getCompileDir(), "flexapps");
+  public File getSwcCompileDir() {
+    return new File(getCompileDir(), "swc");
   }
 
   /**
-   * GWT configuration rule set.
+   * The directory for the destination for the SWF.
    *
-   * @return GWT configuration rule set.
+   * @return The directory for the destination for the SWF.
+   */
+  public File getSwfCompileDir() {
+    return new File(getCompileDir(), "swf");
+  }
+
+  /**
+   * AMF configuration rule set.
+   *
+   * @return AMF configuration rule set.
    */
   @Override
   public RuleSet getConfigurationRules() {
@@ -657,92 +735,74 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Extra JVM args for the GWT compile.
-   *
-   * @return Extra JVM args for the GWT compile.
-   */
-  public List<String> getFlexArgs() {
-    return flexArgs;
-  }
-
-  /**
-   * Extra JVM args for the GWT compile.
-   *
-   * @param arg Extra JVM args for the GWT compile.
-   */
-  public void addFlexCompileArg(String arg) {
-    this.flexArgs.add(arg);
-  }
-
-  /**
-   * The GWT compiler class.
-   *
-   * @return The GWT compiler class.
-   */
-  public String getFlexCompileCommand() {
-    return flexCompileCommand;
-  }
-
-  /**
-   * The GWT compiler class.
-   *
-   * @param flexCompileCommand The GWT compiler class.
-   */
-  public void setFlexCompileCommand(String flexCompileCommand) {
-    this.flexCompileCommand = flexCompileCommand;
-  }
-
-  /**
    * The gwt apps to compile.
    *
    * @return The gwt apps to compile.
    */
-  public List<AMFApp> getFlexApps() {
+  public List<FlexApp> getFlexApps() {
     return flexApps;
   }
 
   /**
-   * Adds a gwt app to be compiled.
+   * Adds a flex app to be compiled.
    *
-   * @param gwtApp The gwt app to be compiled.
+   * @param flexApp The flex app to be compiled.
    */
-  public void addGWTApp(AMFApp gwtApp) {
-    this.flexApps.add(gwtApp);
+  public void addFlexApp(FlexApp flexApp) {
+    this.flexApps.add(flexApp);
   }
 
   /**
-   * The name of the zip bundle for the generated ActionScript classes.
+   * The compiler configuration.
    *
-   * @return The name of the zip bundle for the generated ActionScript classes.
+   * @return The compiler configuration.
    */
-  public String getActionscriptBundleName() {
-    return actionscriptBundleName;
+  public FlexCompilerConfig getCompilerConfig() {
+    return compilerConfig;
   }
 
   /**
-   * The name of the zip bundle for the generated ActionScript classes.
+   * The compiler configuration.
    *
-   * @param actionscriptBundleName The name of the zip bundle for the generated ActionScript classes.
+   * @param compilerConfig The compiler configuration.
    */
-  public void setActionscriptBundleName(String actionscriptBundleName) {
-    this.actionscriptBundleName = actionscriptBundleName;
+  public void setCompilerConfig(FlexCompilerConfig compilerConfig) {
+    this.compilerConfig = compilerConfig;
   }
 
   /**
-   * Whether the actionscript bundle is downloadable.
+   * The name of the swc file.
    *
-   * @return Whether the actionscript bundle is downloadable.
+   * @return The name of the swc file.
    */
-  public boolean isActionscriptBundleDownloadable() {
-    return actionscriptBundleDownloadable;
+  public String getSwcName() {
+    return swcName;
   }
 
   /**
-   * Whether the actionscript bundle is downloadable.
+   * The name of the swc file.
    *
-   * @param actionscriptBundleDownloadable Whether the actionscript bundle is downloadable.
+   * @param swcName The name of the swc file.
    */
-  public void setActionscriptBundleDownloadable(boolean actionscriptBundleDownloadable) {
-    this.actionscriptBundleDownloadable = actionscriptBundleDownloadable;
+  public void setSwcName(String swcName) {
+    this.swcName = swcName;
+  }
+
+  /**
+   * Whether the swc is downloadable.
+   *
+   * @return Whether the swc is downloadable.
+   */
+  public boolean isSwcDownloadable() {
+    return swcDownloadable;
+  }
+
+  /**
+   * Whether the swc is downloadable.
+   *
+   * @param swcDownloadable Whether the swc is downloadable.
+   */
+  public void setSwcDownloadable(boolean swcDownloadable) {
+    this.swcDownloadable = swcDownloadable;
   }
 }

@@ -27,13 +27,22 @@ import org.apache.commons.digester.RuleSetBase;
 public class AMFRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
-    digester.addCallMethod("enunciate/modules/amf/gwtCompileJVMArg", "addGwtCompileJVMArg", 1);
-    digester.addCallParam("enunciate/modules/amf/gwtCompileJVMArg", 0, "value");
+    digester.addObjectCreate("enunciate/modules/amf/compiler", FlexCompilerConfig.class);
+    digester.addSetProperties("enunciate/modules/amf/compiler");
+    digester.addSetNext("enunciate/modules/amf/compiler", "setCompilerConfig");
 
-    digester.addObjectCreate("enunciate/modules/amf/app", AMFApp.class);
-    digester.addSetProperties("enunciate/modules/amf/app",
-                              new String[] {"name", "javascriptStyle", "srcDir"},
-                              new String[] {"name", "javascriptStyleValue", "srcDir"} );
-    digester.addSetNext("enunciate/modules/amf/app", "addGWTApp");
+    digester.addCallMethod("enunciate/modules/amf/compiler/JVMArg", "addJVMArg", 1);
+    digester.addCallParam("enunciate/modules/amf/compiler/JVMArg", 0, "value");
+
+    digester.addCallMethod("enunciate/modules/amf/compiler/arg", "addArg", 1);
+    digester.addCallParam("enunciate/modules/amf/compiler/arg", 0, "value");
+
+    digester.addObjectCreate("enunciate/modules/amf/compiler/license", License.class);
+    digester.addSetProperties("enunciate/modules/amf/compiler/license");
+    digester.addSetNext("enunciate/modules/amf/compiler/license", "addLicense");
+
+    digester.addObjectCreate("enunciate/modules/amf/app", FlexApp.class);
+    digester.addSetProperties("enunciate/modules/amf/app");
+    digester.addSetNext("enunciate/modules/amf/app", "addFlexApp");
   }
 }

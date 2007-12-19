@@ -119,7 +119,7 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docsDir="..." gwtAppDir="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docsDir="..." gwtAppDir="..." flexAppDir="..."&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -174,6 +174,8 @@ import java.util.jar.Manifest;
  * <li>The "<b>docsDir</b>" attribute specifies a different directory in the war for the documentation (including WSDL and schemas).  The default is the
  * root directory of the war.</li>
  * <li>The "<b>gwtAppDir</b>" attribute specifies a different directory in the war for the GWT appliction(s).  The default is the
+ * root directory of the war.</li>
+ * <li>The "<b>flexAppDir</b>" attribute specifies a different directory in the war for the flex appliction(s).  The default is the
  * root directory of the war.</li>
  * <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
  * directory.  No tranformation will be applied if none is specified.</li>
@@ -368,6 +370,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
     model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
     model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
+    model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
 
     String docsDir = "";
     if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
@@ -432,6 +435,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
       gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
       enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
+    }
+
+    File amfSources = (File) enunciate.getProperty("amf.server.src.dir");
+    if (amfSources != null) {
+      info("Compiling the AMF support classes found in %s...", amfSources);
+      Collection<String> amfSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(amfSources));
+      StringBuilder amfClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
+      amfClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+      enunciate.invokeJavac(amfClasspath.toString(), compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
     }
 
     if (!this.copyResources.isEmpty()) {
@@ -688,12 +700,46 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     if (gwtAppDir != null) {
       File gwtAppDest = buildDir;
       if ((this.warConfig != null) && (this.warConfig.getGwtAppDir() != null)) {
-        gwtAppDest = new File(buildDir, this.warConfig.getDocsDir());
+        gwtAppDest = new File(buildDir, this.warConfig.getGwtAppDir());
       }
       enunciate.copyDir(gwtAppDir, gwtAppDest);
     }
     else {
       info("No GWT application directory was found.  Skipping the copy...");
+    }
+
+    File amfXmlDir = (File) enunciate.getProperty("amf.xml.dir");
+    if (amfXmlDir != null) {
+      File graniteConfigFile = new File(amfXmlDir, "granite-config.xml");
+      if (graniteConfigFile.exists()) {
+        enunciate.copyFile(graniteConfigFile, new File(new File(webinf, "granite"), "granite-config.xml"));
+      }
+      else {
+        warn("No granite configuration file found.  Skipping the copy...");
+      }
+
+      File servicesConfigFile = new File(amfXmlDir, "services-config.xml");
+      if (servicesConfigFile.exists()) {
+        enunciate.copyFile(servicesConfigFile, new File(new File(webinf, "flex"), "services-config.xml"));
+      }
+      else {
+        warn("No services configuration file found.  Skipping the copy...");
+      }
+    }
+    else {
+      info("No AMF configuration directory was found.  Skipping the copy...");
+    }
+
+    File flexAppDir = (File) enunciate.getProperty("flex.app.dir");
+    if (flexAppDir != null) {
+      File flexAppDest = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getFlexAppDir() != null)) {
+        flexAppDest = new File(buildDir, this.warConfig.getFlexAppDir());
+      }
+      enunciate.copyDir(flexAppDir, flexAppDest);
+    }
+    else {
+      info("No FLEX application directory was found.  Skipping the copy...");
     }
 
     //extract a post base if specified.

@@ -12,6 +12,20 @@
     <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
   </listener>
 
+  [#if amfEnabled]
+  <filter>
+      <filter-name>AMFMessageFilter</filter-name>
+      <filter-class>org.granite.messaging.webapp.AMFMessageFilter</filter-class>
+  </filter>
+
+  [/#if]
+  [#if amfEnabled]
+  <filter-mapping>
+      <filter-name>AMFMessageFilter</filter-name>
+      <url-pattern>/amf/*</url-pattern>
+  </filter-mapping>
+
+  [/#if]
   <servlet>
     <servlet-name>spring</servlet-name>
     <servlet-class>${springDispatcherServletClass?default("org.springframework.web.servlet.DispatcherServlet")}</servlet-class>
@@ -27,6 +41,14 @@
 
       [/@forEachEndpointInterface]
     [/@forEachWsdl]
+  [/#if]
+  [#if amfEnabled]
+  <servlet>
+    <servlet-name>AMFMessageServlet</servlet-name>
+    <servlet-class>org.granite.messaging.webapp.AMFMessageServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   [/#if]
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]

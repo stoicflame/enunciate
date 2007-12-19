@@ -52,7 +52,7 @@ public class RESTResultView implements View {
       //we want to support a prefix mapper, but don't want to break those on JDK 6 that don't have the prefix mapper on the classpath.
       prefixMapper = Class.forName("org.codehaus.enunciate.modules.rest.PrefixMapper").getConstructor(Map.class).newInstance(ns2prefix);
     }
-    catch (Exception e) {
+    catch (Throwable e) {
       prefixMapper = null;
     }
     

@@ -34,6 +34,13 @@
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
       <version>1.4</version>
+      <exclusions>
+        <exclusion>
+          <!--We'll depend on enunciate's version of activation. Not Mail's.-->
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -46,12 +53,6 @@
       <groupId>wsdl4j</groupId>
       <artifactId>wsdl4j</artifactId>
       <version>1.5.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
     </dependency>
 
     <dependency>
@@ -131,9 +132,31 @@
           <groupId>org.codehaus.xfire</groupId>
           <artifactId>xfire-jibx</artifactId>
         </exclusion>
+        <exclusion>
+          <!--We'll depend on enunciate's version of activation. Not XFire's.-->
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <!--Starting with JDK 1.6, JAXB implementation and STaX is shipped with the JDK.-->
+      <activation>
+        <jdk>1.5-</jdk>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId>
+          <version>1.0.1</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
 
 </project>

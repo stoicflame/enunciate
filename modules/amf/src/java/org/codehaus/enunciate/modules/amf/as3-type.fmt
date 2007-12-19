@@ -13,7 +13,7 @@ package ${packageFor(type)} {
    * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [Bindable]
-  [RemoteClass(alias="${type.qualfiedName}")]
+  [RemoteClass(alias="${type.qualifiedName}")]
   public [#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements IExternalizable [/#if]{
 
   [#list type.attributes as attribute]

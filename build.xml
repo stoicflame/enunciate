@@ -23,6 +23,7 @@
   <property name="modules.rest.basedir" value="${enunciate.basedir}/modules/rest"/>
   <property name="modules.xfire-client.basedir" value="${enunciate.basedir}/modules/xfire-client"/>
   <property name="modules.docs.basedir" value="${enunciate.basedir}/modules/docs"/>
+  <property name="modules.amf.basedir" value="${enunciate.basedir}/modules/amf"/>
   <property name="modules.gwt.basedir" value="${enunciate.basedir}/modules/gwt"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
   <property name="modules.spring-app.basedir" value="${enunciate.basedir}/modules/spring-app"/>
@@ -37,6 +38,7 @@
     <ant dir="${modules.rest.basedir}" target="clean"/>
     <ant dir="${modules.xfire-client.basedir}" target="clean"/>
     <ant dir="${modules.docs.basedir}" target="clean"/>
+    <ant dir="${modules.amf.basedir}" target="clean"/>
     <ant dir="${modules.gwt.basedir}" target="clean"/>
     <ant dir="${modules.xfire.basedir}" target="clean"/>
     <ant dir="${modules.spring-app.basedir}" target="clean"/>
@@ -76,6 +78,7 @@
     <ant dir="${modules.rest.basedir}"/>
     <ant dir="${modules.xfire-client.basedir}"/>
     <ant dir="${modules.docs.basedir}"/>
+    <ant dir="${modules.amf.basedir}"/>
     <ant dir="${modules.gwt.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.spring-app.basedir}"/>
@@ -162,6 +165,9 @@
       <filterset refid="nav.filterset"/>
     </copy>
     <copy file="${modules.docs.basedir}/target/module.html" tofile="${module.docs.dir}/module_docs.html" failonerror="false" overwrite="true">
+      <filterset refid="nav.filterset"/>
+    </copy>
+    <copy file="${modules.amf.basedir}/target/module.html" tofile="${module.docs.dir}/module_amf.html" failonerror="false" overwrite="true">
       <filterset refid="nav.filterset"/>
     </copy>
     <copy file="${modules.gwt.basedir}/target/module.html" tofile="${module.docs.dir}/module_gwt.html" failonerror="false" overwrite="true">

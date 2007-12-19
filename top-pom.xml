@@ -60,6 +60,12 @@
       <version>@VERSION@</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-amf</artifactId>
+      <version>@VERSION@</version>
+    </dependency>
+
   </dependencies>
 
 </project>

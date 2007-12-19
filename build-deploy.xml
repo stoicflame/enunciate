@@ -34,6 +34,10 @@
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>
+    <ant dir="${modules.amf.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
     <ant dir="${modules.gwt.basedir}">
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>

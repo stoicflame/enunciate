@@ -21,23 +21,11 @@ package org.codehaus.enunciate.modules.amf.config;
  *
  * @author Ryan Heaton
  */
-public class AMFApp {
-
-  public enum JavaScriptStyle {
-
-    OBF,
-
-    OBFUSCATED,
-
-    PRETTY,
-
-    DETAILED
-
-  }
+public class FlexApp {
 
   private String name = "";
   private String srcDir;
-  private JavaScriptStyle javascriptStyle = JavaScriptStyle.OBF;
+  private String mainMxmlFile;
 
   /**
    * The name of this GWT app.
@@ -79,30 +67,20 @@ public class AMFApp {
   }
 
   /**
-   * The javascript style.
+   * The path to the main mxml file.
    *
-   * @return The javascript style.
+   * @return The path to the main mxml file.
    */
-  public JavaScriptStyle getJavascriptStyle() {
-    return javascriptStyle;
+  public String getMainMxmlFile() {
+    return mainMxmlFile;
   }
 
   /**
-   * The javascript style.
+   * The path to the main mxml file.
    *
-   * @param javascriptStyle The javascript style.
+   * @param mainMxmlFile The path to the main mxml file.
    */
-  public void setJavascriptStyle(JavaScriptStyle javascriptStyle) {
-    this.javascriptStyle = javascriptStyle;
+  public void setMainMxmlFile(String mainMxmlFile) {
+    this.mainMxmlFile = mainMxmlFile;
   }
-
-  /**
-   * The javascript style value.
-   *
-   * @param javascriptStyle The javascript style value.
-   */
-  public void setJavascriptStyleValue(String javascriptStyle) {
-    this.javascriptStyle = JavaScriptStyle.valueOf(javascriptStyle);
-  }
-
 }

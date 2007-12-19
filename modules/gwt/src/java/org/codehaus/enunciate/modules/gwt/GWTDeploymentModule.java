@@ -632,7 +632,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     gwtClientArtifact.setDescription(readResource("client_library_description.html"));
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
     clientArtifact.setDescription("The binaries and sources for the GWT client library.");
-    clientArtifact.setPublic(false);
+    clientArtifact.setPublic(clientJarDownloadable);
     gwtClientArtifact.addArtifact(clientArtifact);
     gwtClientArtifact.setDependencies(clientDeps);
     enunciate.addArtifact(clientArtifact);

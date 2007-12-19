@@ -36,9 +36,14 @@
       <artifactId>spring</artifactId>
       <version>1.2.9</version>
       <exclusions>
+        <!--We'll depend on enunciate's version of mail and activation. Not Spring's.-->
         <exclusion>
           <groupId>javax.mail</groupId>
           <artifactId>mail</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

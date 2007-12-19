@@ -13,22 +13,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>2.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jsr173_api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.xml</groupId>
-          <artifactId>jsr173</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.3</version>
@@ -39,17 +23,16 @@
       <artifactId>spring</artifactId>
       <version>1.2.9</version>
       <exclusions>
+        <!--We'll depend on enunciate's version of mail and activation. Not Spring's.-->
         <exclusion>
           <groupId>javax.mail</groupId>
           <artifactId>mail</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
       </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-      <version>1.0.1</version>
     </dependency>
 
     <dependency>
@@ -59,5 +42,41 @@
     </dependency>
 
   </dependencies>
+
+  <profiles>
+    <profile>
+      <!--Starting with JDK 1.6, JAXB implementation and STaX is shipped with the JDK.-->
+      <activation>
+        <jdk>1.5-</jdk>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+          <version>2.0</version>
+          <exclusions>
+            <exclusion>
+              <groupId>javax.xml.bind</groupId>
+              <artifactId>jsr173_api</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>javax.xml</groupId>
+              <artifactId>jsr173</artifactId>
+            </exclusion>
+            <exclusion>
+              <groupId>javax.activation</groupId>
+              <artifactId>activation</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+
+        <dependency>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId>
+          <version>1.0.1</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>

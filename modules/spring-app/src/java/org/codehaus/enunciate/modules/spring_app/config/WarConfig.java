@@ -43,6 +43,7 @@ public class WarConfig {
   private String postBase;
   private String docsDir;
   private String gwtAppDir;
+  private String flexAppDir;
   private final Manifest manifest = getDefaultManifest();
 
   /**
@@ -251,6 +252,24 @@ public class WarConfig {
    */
   public void setGwtAppDir(String gwtAppDir) {
     this.gwtAppDir = gwtAppDir;
+  }
+
+  /**
+   * The directory in the war in which to expand the flex app(s).
+   *
+   * @return The directory in the war in which to expand the flex app(s).
+   */
+  public String getFlexAppDir() {
+    return flexAppDir;
+  }
+
+  /**
+   * The directory in the war in which to expand the flex app(s).
+   *
+   * @param flexAppDir The directory in the war in which to expand the flex app(s).
+   */
+  public void setFlexAppDir(String flexAppDir) {
+    this.flexAppDir = flexAppDir;
   }
 
   /**

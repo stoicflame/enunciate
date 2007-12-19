@@ -3,11 +3,13 @@
   </h1>
 
   <p>
-    The ActionScript client bundle is a zip file containing the source files for the ActionScript classes that
+    The ActionScript client bundle is an SWC containing the source files for the ActionScript classes that
     can be used with <a href="http://www.adobe.com/products/flex/">Adobe Flex</a> to develop, for example, a
     <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> UI that interfaces with this public API. The ActionScript
     classes have been generated with an emphasis on usability, clarity, and type safety (inasmuch as ActionScript allows it).
-    All public data types have been generated along with the services that access them. This means that rather than
+    All public data types have been generated along with the services that access them. This means that rather than using
+    a standard RemoteObject, you can instantiate a service, register the appropriate events, and invoke the method.  The
+    service will fire the appropriate (strongly-typed) event that contains the response.
   </p>
 
   <p>
@@ -24,17 +26,21 @@
 PurchaseOrderService service =
   new PurchaseOrderService();
 
-//make the asynchronous remote call to read the purchase order...
-service.readPurchaseOrder("123456",
-  new PurchaseOrderService.ReadPurchaseOrderResponseCallback() {
-    onResponse(PurchaseOrder po) {
-      //handle the purchase order as needed...
-    }
+service.addEventListener("readPurchaseOrder",
+    doReadPurchaseOrder);
+service.addEventListener("fault", doFault);
 
-    onError(Throwable error) {
-      //handle the error as needed...
-    }
-});
+private function doFault(event:Event):void {
+  Alert.show("A fault occurred.");
+}
+
+private function doReadPurchaseOrder
+    (event:ReadPurchaseOrderResultEvent):void {
+  PurchaseOrder po = event.result;
+  //handle the purchase order that was returned.
+}
+
+//make the asynchronous remote call to
+//read the purchase order...
+service.readPurchaseOrder("123456");
   </code>
-
-  <p>You would then compile this code using the GWT.</p>
