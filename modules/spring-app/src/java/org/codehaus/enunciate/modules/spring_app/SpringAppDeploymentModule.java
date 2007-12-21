@@ -710,14 +710,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     File amfXmlDir = (File) enunciate.getProperty("amf.xml.dir");
     if (amfXmlDir != null) {
-      File graniteConfigFile = new File(amfXmlDir, "granite-config.xml");
-      if (graniteConfigFile.exists()) {
-        enunciate.copyFile(graniteConfigFile, new File(new File(webinf, "granite"), "granite-config.xml"));
-      }
-      else {
-        warn("No granite configuration file found.  Skipping the copy...");
-      }
-
       File servicesConfigFile = new File(amfXmlDir, "services-config.xml");
       if (servicesConfigFile.exists()) {
         enunciate.copyFile(servicesConfigFile, new File(new File(webinf, "flex"), "services-config.xml"));

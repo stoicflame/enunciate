@@ -14,14 +14,14 @@
 
   [#if amfEnabled]
   <filter>
-      <filter-name>AMFMessageFilter</filter-name>
-      <filter-class>org.granite.messaging.webapp.AMFMessageFilter</filter-class>
+      <filter-name>AMFApplicationContextFilter</filter-name>
+      <filter-class>org.codehaus.enunciate.modules.amf.ApplicationContextFilter</filter-class>
   </filter>
 
   [/#if]
   [#if amfEnabled]
   <filter-mapping>
-      <filter-name>AMFMessageFilter</filter-name>
+      <filter-name>AMFApplicationContextFilter</filter-name>
       <url-pattern>/amf/*</url-pattern>
   </filter-mapping>
 
@@ -44,9 +44,17 @@
   [/#if]
   [#if amfEnabled]
   <servlet>
-    <servlet-name>AMFMessageServlet</servlet-name>
-    <servlet-class>org.granite.messaging.webapp.AMFMessageServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
+      <servlet-name>AMFMessageServlet</servlet-name>
+      <servlet-class>flex.messaging.MessageBrokerServlet</servlet-class>
+      <init-param>
+          <param-name>services.configuration.file</param-name>
+          <param-value>/WEB-INF/flex/services-config.xml</param-value>
+      </init-param>
+      <init-param>
+          <param-name>flex.write.path</param-name>
+          <param-value>/WEB-INF/flex</param-value>
+      </init-param>
+      <load-on-startup>1</load-on-startup>
   </servlet>
 
   [/#if]
@@ -65,6 +73,13 @@
   <servlet-mapping>
     <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
     <url-pattern>/gwt/${endpointInterface.serviceName}</url-pattern>
+  </servlet-mapping>
+
+      [/#if]
+      [#if amfEnabled]
+  <servlet-mapping>
+      <servlet-name>AMFMessageServlet</servlet-name>
+      <url-pattern>/amf/${endpointInterface.serviceName}</url-pattern>
   </servlet-mapping>
 
       [/#if]

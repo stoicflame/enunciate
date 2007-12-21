@@ -23,19 +23,19 @@ import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
+import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
 import org.codehaus.enunciate.modules.amf.config.License;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 
 import java.io.*;
 import java.net.URL;
@@ -249,20 +249,55 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     //load the references to the templates....
-    URL externalizerTemplate = getTemplateURL("amf-type-externalizer.fmt");
-    URL graniteConfigTemplate = getTemplateURL("granite-config-xml.fmt");
-    URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
+    URL amfEndpointTemplate = getTemplateURL("amf-endpoint.fmt");
+    URL amfTypeTemplate = getTemplateURL("amf-type.fmt");
+    URL amfTypeMapperTemplate = getTemplateURL("amf-type-mapper.fmt");
+
+    EnunciateFreemarkerModel model = getModel();
+    model.setFileOutputDirectory(getServerSideGenerateDir());
+
+    HashMap<String, String> amfTypePackageConversions = new HashMap<String, String>();
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        if (!isAMFTransient(typeDefinition)) {
+          amfTypePackageConversions.put(typeDefinition.getPackage().getQualifiedName(), typeDefinition.getPackage().getQualifiedName() + ".amf");
+        }
+      }
+    }
+
+    info("Generating the AMF externalizable types and their associated mappers...");
+    model.put("classnameFor", new AMFClassnameForMethod(amfTypePackageConversions));
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        if (!isAMFTransient(typeDefinition)) {
+          model.put("type", typeDefinition);
+          processTemplate(amfTypeTemplate, model);
+          processTemplate(amfTypeMapperTemplate, model);
+        }
+      }
+    }
+
+    info("Generating the AMF endpoint beans...");
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        if (!isAMFTransient(ei)) {
+          model.put("endpointInterface", ei);
+          processTemplate(amfEndpointTemplate, model);
+        }
+      }
+    }
 
     URL endpointTemplate = getTemplateURL("as3-endpoint.fmt");
     URL typeTemplate = getTemplateURL("as3-type.fmt");
     URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
 
-    EnunciateFreemarkerModel model = getModel();
     model.setFileOutputDirectory(getClientSideGenerateDir());
     HashMap<String, String> conversions = new HashMap<String, String>();
     //todo: accept client-side package mappings?
     model.put("packageFor", new ClientPackageForMethod(conversions));
-    model.put("classnameFor", new ClientClassnameForMethod(conversions));
+    UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
+    model.put("classnameFor", classnameFor);
+    model.put("forEachAMFImport", new ForEachAMFImportTransform(null, classnameFor));
 
     info("Generating the ActionScript types...");
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
@@ -284,21 +319,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    model.setFileOutputDirectory(getServerSideGenerateDir());
-
-    info("Generating the AMF externalizers...");
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if ((!typeDefinition.isEnum()) && (!isAMFTransient(typeDefinition))) {
-          model.put("type", typeDefinition);
-          processTemplate(externalizerTemplate, model);
-        }
-      }
-    }
+    URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
 
     model.setFileOutputDirectory(getXMLGenerateDir());
     info("Generating the configuration files.");
-    processTemplate(graniteConfigTemplate, model);
     processTemplate(servicesConfigTemplate, model);
 
     enunciate.setProperty("amf.xml.dir", getXMLGenerateDir());

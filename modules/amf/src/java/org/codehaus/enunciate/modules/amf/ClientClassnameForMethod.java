@@ -25,6 +25,8 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
+import javax.xml.namespace.QName;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Date;
@@ -55,8 +57,10 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(Character.class.getName(), "String");
     classConversions.put(Date.class.getName(), "Date");
     classConversions.put(DataHandler.class.getName(), "flash.utils.ByteArray");
+    classConversions.put(QName.class.getName(), "String");
     classConversions.put(URI.class.getName(), "String");
     classConversions.put(UUID.class.getName(), "String");
+    classConversions.put(XMLGregorianCalendar.class.getName(), "Date");
   }
 
   @Override
@@ -96,7 +100,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       return "Array";
     }
     else if (decorated.isCollection()) {
-      return "mx.collection.ArrayCollection";
+      return "mx.collections.ArrayCollection";
     }
     else if (decorated.isInstanceOf("java.util.Map")) {
       return "Object";

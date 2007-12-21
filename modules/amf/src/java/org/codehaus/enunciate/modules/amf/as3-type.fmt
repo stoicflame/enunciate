@@ -8,13 +8,16 @@ package ${packageFor(type)} {
   import flash.utils.IExternalizable;
   import flash.utils.IDataOutput;
   import flash.utils.IDataInput;
-  
+  [@forEachAMFImport declaration=type]
+  import ${amfImport};
+  [/@forEachAMFImport]
+
   /**
    * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [Bindable]
-  [RemoteClass(alias="${type.qualifiedName}")]
-  public [#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements IExternalizable [/#if]{
+  [RemoteClass(alias="${type.package.qualifiedName}.amf.${type.simpleName}")]
+  public [#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [/#if]implements IExternalizable {
 
   [#list type.attributes as attribute]
     private var _${attribute.simpleName}:${classnameFor(attribute)};
@@ -41,6 +44,7 @@ package ${packageFor(type)} {
   [/#if]
 
     public [#if !baseobject]override [/#if]function writeExternal(output:IDataOutput):void {
+      [#if !baseobject]super.writeExternal(output);[/#if]
   [#list type.attributes as attribute]
       output.writeObject(_${attribute.simpleName});
   [/#list]
@@ -51,10 +55,10 @@ package ${packageFor(type)} {
       output.writeObject(_${element.simpleName});
     [/#list]
   [/#if]
-      [#if !baseobject]super.writeExternal(output);[/#if]
     }
 
     public [#if !baseobject]override [/#if]function readExternal(input:IDataInput):void {
+      [#if !baseobject]super.readExternal(input);[/#if]
   [#list type.attributes as attribute]
       _${attribute.simpleName} = input.readObject() as ${classnameFor(attribute)};
   [/#list]
@@ -65,7 +69,6 @@ package ${packageFor(type)} {
       _${element.simpleName} = input.readObject() as ${classnameFor(element)};
     [/#list]
   [/#if]
-      [#if !baseobject]super.readExternal(input);[/#if]
     }
   }
 }

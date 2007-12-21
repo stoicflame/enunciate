@@ -334,4 +334,9 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   public AdapterType getAdapterType() {
     return this.adapterType;
   }
+
+  @Override
+  public boolean isVoid() {
+    return ((DecoratedTypeMirror) delegate).isVoid();
+  }
 }

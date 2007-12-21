@@ -8,6 +8,10 @@ package ${endpointInterface.package.qualifiedName} {
   import mx.rpc.remoting.RemoteObject;
   import mx.rpc.events.ResultEvent;
   import mx.rpc.events.FaultEvent;
+  [@forEachAMFImport declaration=endpointInterface]
+  import ${amfImport};
+  [/@forEachAMFImport]
+  import ${endpointInterface.qualifiedName}.*;
 
   /**
    * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
@@ -63,7 +67,7 @@ package ${endpointInterface.package.qualifiedName} {
     }
 
     private function handle${webMethod.simpleName?cap_first}Result(event:ResultEvent):void {
-      dispatchEvent(new ${endpointInterface.qualifiedName}.${webMethod.operationName?cap_first}ResultEvent([#if !webMethod.returnType.void]${classnameFor(webMethod.webResult)}(event.result)[/#if]));
+      dispatchEvent(new ${webMethod.operationName?cap_first}ResultEvent([#if !webMethod.returnType.void]${classnameFor(webMethod.webResult)}(event.result)[/#if]));
     }
       [/#if]
     [/@forEachWebMethod]
@@ -78,6 +82,9 @@ package ${endpointInterface.package.qualifiedName} {
 package ${endpointInterface.qualifiedName} {
 
   import flash.events.Event;
+  [@forEachAMFImport declaration=webMethod]
+  import ${amfImport};
+  [/@forEachAMFImport]
 
   /**
    * Event triggered when a response is recieved.

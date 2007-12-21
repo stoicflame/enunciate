@@ -56,6 +56,24 @@
       <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>blazeds</groupId>
+      <artifactId>flex-messaging-core</artifactId>
+      <version>1.0-beta1</version>
+
+      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>blazeds</groupId>
+      <artifactId>flex-messaging-remoting</artifactId>
+      <version>1.0-beta1</version>
+
+      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
 </project>

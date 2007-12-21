@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.gwt;
+package org.codehaus.enunciate.modules.amf;
 
 import java.lang.reflect.Array;
 
 /**
  * @author Ryan Heaton
  */
-public class ArrayGWTMapper implements GWTMapper {
+public class ArrayAMFMapper implements AMFMapper {
 
   private final Class itemClass;
-  private final GWTMapper itemMapper;
+  private final AMFMapper itemMapper;
 
-  public ArrayGWTMapper(GWTMapper itemMapper) {
+  public ArrayAMFMapper(AMFMapper itemMapper) {
     this.itemMapper = itemMapper;
     this.itemClass = null;
   }
 
-  public ArrayGWTMapper(GWTMapper itemMapper, Class itemClass) {
+  public ArrayAMFMapper(AMFMapper itemMapper, Class itemClass) {
     this.itemMapper = itemMapper;
     this.itemClass = itemClass;
   }
 
-  public Object toGWT(Object jaxbObject, GWTMappingContext context) throws GWTMappingException {
+  public Object toAMF(Object jaxbObject, AMFMappingContext context) throws AMFMappingException {
     if (jaxbObject == null) {
       return null;
     }
 
     if (!jaxbObject.getClass().isArray()) {
-      throw new GWTMappingException("Expected an array, got " + jaxbObject);
+      throw new AMFMappingException("Expected an array, got " + jaxbObject);
     }
 
     int length = Array.getLength(jaxbObject);
@@ -50,37 +50,37 @@ public class ArrayGWTMapper implements GWTMapper {
       return null;
     }
 
-    Object item = itemMapper.toGWT(Array.get(jaxbObject, 0), context);
+    Object item = itemMapper.toAMF(Array.get(jaxbObject, 0), context);
     Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
     Array.set(resultArray, 0, item);
     int i = 1;
     while (length > i) {
-      item = itemMapper.toGWT(Array.get(jaxbObject, i), context);
+      item = itemMapper.toAMF(Array.get(jaxbObject, i), context);
       Array.set(resultArray, i++, item);
     }
     return resultArray;
   }
 
-  public Object toJAXB(Object gwtObject, GWTMappingContext context) throws GWTMappingException {
-    if (gwtObject == null) {
+  public Object toJAXB(Object amfObject, AMFMappingContext context) throws AMFMappingException {
+    if (amfObject == null) {
       return null;
     }
 
-    if (!gwtObject.getClass().isArray()) {
-      throw new GWTMappingException("Expected an array, got " + gwtObject);
+    if (!amfObject.getClass().isArray()) {
+      throw new AMFMappingException("Expected an array, got " + amfObject);
     }
 
-    int length = Array.getLength(gwtObject);
+    int length = Array.getLength(amfObject);
     if (length == 0) {
       return null;
     }
 
-    Object item = itemMapper.toJAXB(Array.get(gwtObject, 0), context);
+    Object item = itemMapper.toJAXB(Array.get(amfObject, 0), context);
     Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
     Array.set(resultArray, 0, item);
     int i = 1;
     while (length > i) {
-      item = itemMapper.toJAXB(Array.get(gwtObject, i), context);
+      item = itemMapper.toJAXB(Array.get(amfObject, i), context);
       Array.set(resultArray, i++, item);
     }
     return resultArray;

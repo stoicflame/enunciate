@@ -269,16 +269,14 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     //load the references to the templates....
-    URL complexMapperTemplate = getTemplateURL("gwt-complex-type-mapper.fmt");
-    URL simpleMapperTemplate = complexMapperTemplate;
+    URL typeMapperTemplate = getTemplateURL("gwt-type-mapper.fmt");
     URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
     URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
 
     URL eiTemplate = getTemplateURL("gwt-endpoint-interface.fmt");
     URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
     URL faultTemplate = getTemplateURL("gwt-fault.fmt");
-    URL complexTypeTemplate = getTemplateURL("gwt-complex-type.fmt");
-    URL simpleTypeTemplate = complexTypeTemplate;
+    URL typeTemplate = getTemplateURL("gwt-type.fmt");
     URL enumTypeTemplate = getTemplateURL("gwt-enum-type.fmt");
 
     //set up the model, first allowing for jdk 14 compatability.
@@ -363,7 +361,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (!isGWTTransient(typeDefinition)) {
           model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
           processTemplate(template, model);
         }
       }
@@ -389,8 +387,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
           model.put("type", typeDefinition);
-          URL template = typeDefinition.isSimple() ? simpleMapperTemplate : complexMapperTemplate;
-          processTemplate(template, model);
+          processTemplate(typeMapperTemplate, model);
         }
       }
     }
