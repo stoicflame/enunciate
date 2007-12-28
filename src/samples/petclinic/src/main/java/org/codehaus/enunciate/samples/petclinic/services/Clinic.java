@@ -1,6 +1,7 @@
 package org.codehaus.enunciate.samples.petclinic.services;
 
 import org.codehaus.enunciate.samples.petclinic.schema.*;
+import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.Collection;
   targetNamespace = "http://enunciate.codehaus.org/services",
   serviceName = "clinic"
 )
+@RESTEndpoint
 public interface Clinic {
 
   /**
@@ -50,7 +52,9 @@ public interface Clinic {
    * @param id the id to search for
    * @return the <code>Owner</code> if found
    */
-  Owner loadOwner(int id) throws PetClinicException;
+  @Noun ("owner")
+  @Verb ( VerbType.read )
+  Owner loadOwner(@ProperNoun (optional=false) int id) throws PetClinicException;
 
   /**
    * Retrieve a <code>Pet</code> from the datastore by id.

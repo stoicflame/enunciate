@@ -26,15 +26,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.graniteds</groupId>
-      <artifactId>graniteds</artifactId>
-      <version>0.4.0</version>
-
-      <!--and we have to declare it again because it's marked 'optional' in the tools pom.-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <version>2.2</version>

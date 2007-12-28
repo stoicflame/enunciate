@@ -17,7 +17,7 @@
 package org.codehaus.enunciate.modules.amf.config;
 
 /**
- * Configuration element for a GWT app.
+ * Configuration element for a Flex app.
  *
  * @author Ryan Heaton
  */
@@ -28,22 +28,22 @@ public class FlexApp {
   private String mainMxmlFile;
 
   /**
-   * The name of this GWT app.
+   * The name of this Flex app.
    *
-   * @return The name of this GWT app.
+   * @return The name of this Flex app.
    */
   public String getName() {
     return name;
   }
 
   /**
-   * The name of this GWT app.
+   * The name of this Flex app.
    *
-   * @param name The name of this GWT app.
+   * @param name The name of this Flex app.
    */
   public void setName(String name) {
     if (name == null) {
-      throw new IllegalArgumentException("A name must be specified for a GWT app, even if it's the empty string.");
+      throw new IllegalArgumentException("A name must be specified for a Flex app.");
     }
     this.name = name;
   }

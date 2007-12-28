@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" creationComplete="initApp()">
+  <mx:Script><![CDATA[
+     import mx.controls.Alert;
+     import mx.rpc.events.FaultEvent;
+     import mx.rpc.events.ResultEvent;
+     import mx.rpc.remoting.RemoteObject;
+     import org.codehaus.enunciate.samples.petclinic.schema.Vet;
+     import org.codehaus.enunciate.samples.petclinic.schema.Specialty;
+     import org.codehaus.enunciate.samples.petclinic.services.Clinic;
+     import org.codehaus.enunciate.samples.petclinic.services.Clinic.GetVetsResultEvent;
+
+     var clinic:Clinic = new Clinic();
+
+     private function initApp():void {
+        clinic.addEventListener("fault", myFaultHandler);
+        clinic.addEventListener("getVets", myEventHandler);
+     }
+
+     private function myFaultHandler(event:FaultEvent):void {
+       Alert.show(event.fault.message);
+     }
+
+     private function myEventHandler(event:GetVetsResultEvent):void {
+       dg.dataProvider = event.result;
+     }
+
+  ]]></mx:Script>
+
+  <mx:DataGrid id="dg" width="100%" height="100%"/>
+
+  <mx:Button label="Get Data" click="clinic.getVets()"/>
+
+</mx:Application>

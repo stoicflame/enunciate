@@ -9,35 +9,14 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-gwt-home</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireProperty>
-                  <property>gwt.home</property>
-                  <message>You must specify a 'gwt.home' property.  Try 'mvn -Dgwt.home=/path/to/gwt/home'.</message>
-                </requireProperty>
-              </rules>
-              <fail>true</fail>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.5</version>
+        <version>1.6-SNAPSHOT</version>
         <extensions>true</extensions>
         <configuration>
           <configFile>enunciate.xml</configFile>
           <gwtHome>${gwt.home}</gwtHome>
+          <flexHome>${flex.home}</flexHome>
         </configuration>
       </plugin>
       <plugin>
@@ -51,8 +30,27 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-top</artifactId>
-      <version>1.5</version>
+      <version>1.6-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-core</artifactId>
+      <version>1.0-beta1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-remoting</artifactId>
+      <version>1.0-beta1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-common</artifactId>
+      <version>1.0-beta1</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>

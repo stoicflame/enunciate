@@ -49,31 +49,38 @@
     </dependency>
 
     <dependency>
-      <groupId>org.graniteds</groupId>
-      <artifactId>graniteds</artifactId>
-      <version>0.4.0</version>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-core</artifactId>
+      <version>1.0-beta1</version>
 
-      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
       <optional>true</optional>
     </dependency>
 
     <dependency>
-      <groupId>blazeds</groupId>
-      <artifactId>flex-messaging-core</artifactId>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-remoting</artifactId>
       <version>1.0-beta1</version>
 
-      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
       <optional>true</optional>
     </dependency>
 
     <dependency>
-      <groupId>blazeds</groupId>
-      <artifactId>flex-messaging-remoting</artifactId>
+      <groupId>com.adobe.flex</groupId>
+      <artifactId>blazeds-common</artifactId>
       <version>1.0-beta1</version>
 
-      <!--optional here only because it's not in a maven repo yet users have to install it manually.-->
+      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>backport-util-concurrent</groupId>
+      <artifactId>backport-util-concurrent</artifactId>
+      <version>3.1</version>
+    </dependency>
+
   </dependencies>
 
 </project>

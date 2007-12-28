@@ -123,6 +123,7 @@ public class PetClinicApp implements EntryPoint, HistoryListener {
     list.addComponent(Info.init());
     list.addComponent(Vets.init());
     list.addComponent(Owners.init());
+    list.addComponent(FlashVets.init());
   }
 
   private void showInfo() {

@@ -8,6 +8,7 @@ package ${endpointInterface.package.qualifiedName} {
   import mx.rpc.remoting.RemoteObject;
   import mx.rpc.events.ResultEvent;
   import mx.rpc.events.FaultEvent;
+  import flash.net.registerClassAlias;
   [@forEachAMFImport declaration=endpointInterface]
   import ${amfImport};
   [/@forEachAMFImport]
@@ -58,6 +59,21 @@ package ${endpointInterface.package.qualifiedName} {
      * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
      */
     public function ${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}:${classnameFor(param)}[#if param_has_next], [/#if][/#list]):void {
+      [#if webMethod.returnType.map?default(false)]
+        [#if webMethod.returnType.keyType.declared && as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]?exists]
+      //register the type for the key type of the key-value pairs that are returned.
+      registerClassAlias("${webMethod.returnType.keyType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]});
+        [/#if]
+        [#if webMethod.returnType.valueType.declared && as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]?exists]
+      //register the type for the value type of the key-value pairs that are returned.
+      registerClassAlias("${webMethod.returnType.valueType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]});
+        [/#if]
+      [#elseif webMethod.returnType.collection || webMethod.returnType.array]
+        [#if as3Aliases[componentTypeFor(webMethod.returnType)]?exists]
+      //register the item type of the collection that is returned.
+      registerClassAlias("${componentTypeFor(webMethod.returnType)}", ${as3Aliases[componentTypeFor(webMethod.returnType)]});
+        [/#if]
+      [/#if]
       var ro:RemoteObject = new RemoteObject();
       ro.requestTimeout = _requestTimeout;
       ro.destination = "${endpointInterface.simpleName}";

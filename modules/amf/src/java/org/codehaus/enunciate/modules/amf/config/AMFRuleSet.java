@@ -20,7 +20,7 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 
 /**
- * Rules for the configuration of the gwt module.
+ * Rules for the configuration of the amf module.
  *
  * @author Ryan Heaton
  */

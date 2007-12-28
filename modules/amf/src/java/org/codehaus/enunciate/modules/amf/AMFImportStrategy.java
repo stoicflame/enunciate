@@ -20,15 +20,22 @@ import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMemberDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Attribute;
 import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.Value;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
+import org.codehaus.enunciate.util.MapType;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 
 /**
  * Strategy for looping through the (unique) AMF imports for a given declaration.  If a {@link org.codehaus.enunciate.contract.jaxws.WebMethod},
@@ -55,29 +62,37 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
         for (WebMethod webMethod : ((EndpointInterface) declaration).getWebMethods()) {
           for (WebParam webParam : webMethod.getWebParameters()) {
             imports.add(classnameFor.convert(webParam));
+            addComponentTypes(webParam.getType(), imports);
           }
 
-          WebResult webResult = webMethod.getWebResult();
-          if (!webResult.isVoid()) {
-            imports.add(classnameFor.convert((ImplicitChildElement) webResult));
+          DecoratedTypeMirror returnType = (DecoratedTypeMirror) webMethod.getReturnType();
+          if (!returnType.isVoid()) {
+            imports.add(classnameFor.convert((ImplicitChildElement) webMethod.getWebResult()));
+            addComponentTypes(returnType, imports);
           }
         }
       }
       else if (declaration instanceof TypeDefinition) {
         for (Attribute attribute : ((TypeDefinition) declaration).getAttributes()) {
           imports.add(classnameFor.convert(attribute));
+          addComponentTypes(attribute.getAccessorType(), imports);
         }
         for (Element element : ((TypeDefinition) declaration).getElements()) {
           imports.add(classnameFor.convert(element));
+          addComponentTypes(element.getAccessorType(), imports);
         }
-        if (((TypeDefinition) declaration).getValue() != null) {
-          imports.add(classnameFor.convert(((TypeDefinition) declaration).getValue()));
+        Value value = ((TypeDefinition) declaration).getValue();
+        if (value != null) {
+          imports.add(classnameFor.convert(value));
+          addComponentTypes(value.getAccessorType(), imports);
         }
       }
       else if (declaration instanceof WebMethod) {
-        WebResult webResult = ((WebMethod) declaration).getWebResult();
-        if (!webResult.isVoid()) {
-          imports.add(classnameFor.convert((ImplicitChildElement) webResult));
+        WebMethod webMethod = (WebMethod) declaration;
+        DecoratedTypeMirror returnType = (DecoratedTypeMirror) webMethod.getReturnType();
+        if (!returnType.isVoid()) {
+          imports.add(classnameFor.convert((ImplicitChildElement) webMethod.getWebResult()));
+          addComponentTypes(returnType, imports);
         }
       }
       else {
@@ -98,6 +113,30 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
     }
 
     return imports.iterator();
+  }
+
+  /**
+   * Add the component types of the given type mirror to the given set of imports.
+   *
+   * @param type The type.
+   * @param imports The imports.
+   */
+  protected void addComponentTypes(TypeMirror type, Set<String> imports) throws TemplateModelException {
+    if (type instanceof MapType) {
+      MapType mapType = ((MapType) type);
+      imports.add(classnameFor.convert(mapType.getKeyType()));
+      imports.add(classnameFor.convert(mapType.getValueType()));
+    }
+    else if (((DecoratedTypeMirror) type).isCollection()) {
+      DeclaredType declaredType = (DeclaredType) type;
+      Iterator<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments().iterator();
+      if (actualTypeArguments.hasNext()) {
+        imports.add(classnameFor.convert(actualTypeArguments.next()));
+      }
+    }
+    else if (((DecoratedTypeMirror) type).isArray()) {
+      imports.add(classnameFor.convert(((ArrayType) type).getComponentType()));
+    }
   }
 
   @Override

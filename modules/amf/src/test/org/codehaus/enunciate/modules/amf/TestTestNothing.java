@@ -16,12 +16,15 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import junit.framework.TestCase;
+
 /**
  * @author Ryan Heaton
  */
-public class MyBeanExternalizer extends EnunciateExternalizer {
-  
-  public MyBeanExternalizer() {
-    super(MyBean.class, "property1", "property2", "property3", "property4", "property5", "property6", "bytes", "dataHandler", "object", "uri", "uuid", "myEnum");
+public class TestTestNothing extends TestCase {
+
+  public void testNothing() throws Exception {
+    //no tests; how embarrassing :(
   }
+
 }

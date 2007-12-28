@@ -248,19 +248,25 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("You must specify a \"gwtModuleName\" for the GWT module.");
     }
 
-    for (GWTApp gwtApp : gwtApps) {
-      String srcPath = gwtApp.getSrcDir();
-
-      if (srcPath == null) {
-        throw new EnunciateException("A source directory for the GWT app "
-          + ("".equals(gwtApp.getName()) ? "" : "'" + gwtApp.getName() + "' ")
-          + "must be supplied with the 'srcDir' attribute.");
+    if (gwtApps.size() > 0) {
+      if (this.gwtHome == null) {
+        throw new EnunciateException("To compile a GWT app you must specify the GWT home directory, either in configuration, by setting the GWT_HOME environment variable, or setting the 'gwt.home' system property.");
       }
 
-      File srcDir = enunciate.resolvePath(srcPath);
-      if (!srcDir.exists()) {
-        throw new EnunciateException("Source directory '" + srcDir.getAbsolutePath() + "' doesn't exist for the GWT app"
-          + ("".equals(gwtApp.getName()) ? "." : " '" + gwtApp.getName() + "'."));
+      for (GWTApp gwtApp : gwtApps) {
+        String srcPath = gwtApp.getSrcDir();
+
+        if (srcPath == null) {
+          throw new EnunciateException("A source directory for the GWT app "
+            + ("".equals(gwtApp.getName()) ? "" : "'" + gwtApp.getName() + "' ")
+            + "must be supplied with the 'srcDir' attribute.");
+        }
+
+        File srcDir = enunciate.resolvePath(srcPath);
+        if (!srcDir.exists()) {
+          throw new EnunciateException("Source directory '" + srcDir.getAbsolutePath() + "' doesn't exist for the GWT app"
+            + ("".equals(gwtApp.getName()) ? "." : " '" + gwtApp.getName() + "'."));
+        }
       }
     }
 

@@ -36,27 +36,33 @@ import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
 import org.codehaus.enunciate.modules.amf.config.License;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
 
 /**
- * <h1>GWT Module</h1>
+ * <h1>AMF Module</h1>
  *
- * <p>The GWT deployment module generates the server-side and client-side libraries used to support a
- * <a href="http://code.google.com/webtoolkit/">GWT RPC</a> API. There is also support for invoking the
- * GWTCompiler to compile a set a GWT applications that can be included in the generated Enunciate web
- * application.</p>
+ * <p>The AMF deployment module generates the server-side and client-side libraries used to support an
+ * <a href="http://en.wikipedia.org/wiki/Action_Message_Format">Action Message Format</a> API. The client-side
+ * library is a set of <a href="http://en.wikipedia.org/wiki/Actionscript">ActionScript</a> classes that are
+ * type-safe wrappers around the ActionScript remoting API that are designed to add clarity and to be easy
+ * to consume for Flex development.  Furthermore, the server-side support classes add an extra degree of security to
+ * your Data Services by ensuring that only your public methods are made available for invocation via AMF. There is
+ * also support for invoking the <a href="http://en.wikipedia.org/wiki/Adobe_Flex">Adobe Flex</a> compiler to compile
+ * a set of <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> applications that can be added to your
+ * Enunciate-generated web application.</p> 
  *
- * <p>The order of the GWT deployment module is 0, as it doesn't depend on any artifacts exported
- * by any other module.</p>
+ * <p>The AMF API leverages the <a href="http://labs.adobe.com/technologies/blazeds/">Blaze DS</a> package that was recently made
+ * available as an open source product by Adobe. To use the AMF module, you will have to have the
+ * <a href="http://www.adobe.com/products/flex/sdk/">Flex SDK</a> installed.</p>
  *
- * <p>This documentation is an overview of how to use Enunciate to build your GWT-RPC API and (optional)
- * associated GWT application. The reader is redirected to the
- * <a href="http://code.google.com/webtoolkit/">documentation for the GWT</a> for instructions on how to use GWT.
- * You may also find the petclinic sample application useful as an illustration.  The sample petclinic application
- * is included with the Enunciate distribution.</p>
+ * <p>This documentation is an overview of how to use Enunciate to build your Flex Data Services (AMF API) and associated Flash
+ * application(s). The reader is redirected to the <a href="http://www.adobe.com/products/flex/">documentation for Flex</a> for
+ * instructions on how to use Flex. You may also find the petclinic sample application useful as an illustration.  The sample
+ * petclinic application is included with the Enunciate distribution.</p>
  *
  * <ul>
  * <li><a href="#steps">steps</a></li>
@@ -68,75 +74,75 @@ import java.util.*;
  *
  * <h3>generate</h3>
  *
- * <p>The "generate" step generates all source code for the GWT-RPC API.</p>
+ * <p>The "generate" step generates all source code for the AMF API. This includes server-side support classes and client-side
+ * ActionScript classes that can be used to access the API via AMF.</p>
  *
  * <h3>compile</h3>
  *
- * <p>During the "compile" step, the GWT module compiles the code that was generated. It is also during the "compile" step that
- * the GWTCompiler is invoked on any GWT applications that were specified in the configuration.</p>
- *
- * <h3>build</h3>
- *
- * <p>The "build" step assembles the client-side GWT jar.</p>
+ * <p>During the "compile" step, the AMF module compiles the code that was generated. The generated client-side ActionScript
+ * classes are compiled into an SWC file that is made available as an Enunciate artifact.  The SWC file can also be made
+ * available as a download from the deployed web application (see the configuration). It is also during the "compile" step that
+ * the Flex compiler is invoked on any Flex applications that are specified in the configuration.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>The GWT module is configured by the "gwt" element under the "modules" element of the
- * enunciate configuration file.  <b>The GWT module is disabled by default because of the
- * added constraints applied to the service endpoints.</b>  To enable GWT, be sure to specify
- * <i>disabled="false"</i> on the "gwt" element.</p>
+ * <p>The AMF module is configured by the "amf" element under the "modules" element of the enunciate configuration file.  <b>The
+ * AMF module is disabled by default because of the added constraints applied to the service endpoints and because of the additional
+ * dependencies required by the module.</b>  To enable AMF, be sure to specify <i>disabled="false"</i> on the "amf" element.</p>
  *
- * <p>The "gwt" element supports the following attributes:</p>
+ * <p>The "amf" element supports the following attributes:</p>
  *
  * <ul>
- * <li>The "rpcModuleName" attribute <b>must</b> be supplied.  The RPC module name will also be used to
- * determine the layout of the created module.  The module name must be of the form "com.mycompany.MyModuleName".
- * In this example, "com.mycompany" will be the <i>module namespace</i> and all client code will be generated into
- * a package named of the form [module namespace].client (e.g. "com.mycompany.client").  By default, in order to provide
- * a sensible mapping from service code to GWT client-side code, all service endpoints, faults, and JAXB beans must
- * exist in a package that matches the module namespace, or a subpackage thereof.  Use the "enforceNamespaceConformance"
- * attribute to loosen this requirement.</li>
- * <li>The "enforceNamespaceConformance" attribute allows you to lift the requirement that all classes must exist in a package
- * that matches the module namespace.  If this is set to "false", the classes that do not match the module namespace will
- * be subpackaged by the client namespace.  <i>NOTE: You may not like this because the package mapping might be ugly.</i>  For example,
- * if your module namespace is "com.mycompany" and you have a class "org.othercompany.OtherClass", it will be mapped to a client-side GWT class
- * named "com.mycompany.client.org.othercompany.OtherClass".</li>
- * <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
- * If no jar name is specified, the name will be calculated from the enunciate label, or a default will
- * be supplied.</li>
- * <li>The "clientJarDownloadable" attribute specifies whether the GWT client-side jar should be included as a
- * download.  Default: <code>false</code>.</li>
- * <li>The "gwtHome" attribute specifies the filesystem path to the Google Web Toolkit home directory.</li>
- * <li>The "gwtCompilerClass" attribute specifies the FQN of the GWTCompiler.  Default: "com.google.gwt.dev.GWTCompiler".</li>
+ * <li>The "flexSDKHome" attribute <b>must</b> be supplied. It is the path to the directory where the Flex SDK is installed.</li>
+ * <li>The "swcName" attribute specifies the name of the compiled SWC. By default, the name is determined by the Enunciate
+ * project label (see the main configuration docs).</li>
+ * <li>The "swcDownloadable" attribute specifies whether the generated SWC is to be made available as a download from the
+ * generated web application.  Default: "false".</li>
+ * </ul>
+ *
+ * <h3>The "compiler" element</h3>
+ *
+ * <p>The "compiler" element under the "amf" element is used to configure the compiler that will be used to compile the SWC
+ * and the Flex applications. It supports the following attributes, associated directly to the Flex compiler options.  For details,
+ * see the documentation for the Flex compiler.</p>
+ *
+ * <ul>
+ *  <li><b>contextRoot</b> (default: the Enunciate project label)</li>
+ *  <li><b>flexConfig</b> (default: "$FLEX_SDK_HOME/frameworks/flex-config.xml")</li>
+ *  <li><b>locale</b> (default: unspecified)</li>
+ *  <li><b>optimize</b> (boolean, default: unspecified)</li>
+ *  <li><b>debug</b> (boolean, default: unspecified)</li>
+ *  <li><b>profile</b> (boolean, default: unspecified)</li>
+ *  <li><b>strict</b> (boolean, default: unspecified)</li>
+ *  <li><b>useNetwork</b> (boolean, default: unspecified)</li>
+ *  <li><b>incremental</b> (boolean, default: unspecified)</li>
+ *  <li><b>warnings</b> (boolean, default: unspecified)</li>
+ *  <li><b>showActionscriptWarnings</b> (boolean, default: unspecified)</li>
+ *  <li><b>showBindingWarnings</b> (boolean, default: unspecified)</li>
+ *  <li><b>showDeprecationWarnings</b> (boolean, default: unspecified)</li>
+ *  <li><b>flexCompileCommand</b> (default "flex2.tools.Compiler")</li>
+ *  <li><b>swcCompileCommand</b> (default "flex2.tools.Compc")</li>
+ * </ul>
+ *
+ * <p>The "compiler" element also supports the following subelements:</p>
+ *
+ * <ul>
+ *   <li>"JVMArg" (additional JVM arguments, passed in order to the JVM used to invoke the compiler)</li>
+ *   <li>"arg" (additional compiler arguments, passed in order to the compiler)</li>
+ *   <li>"license" (supports attributes "product" and "serialNumber")</li>
  * </ul>
  *
  * <h3>The "app" element</h3>
  *
- * <p>The GWT module supports the development of GWT AJAX apps.  Each app is comprised of a set of GWT modules that will be compiled into JavaScript.
+ * <p>The AMF module supports the development of Flex apps that can be compiled and packaged with the generated Enunciate app.
  * The "app" element supports the folowing attributes:</p>
  *
  * <ul>
- * <li>The "name" attribute is the name of the GWT app.  Each app will be deployed into a subdirectory that matches its name.  By default,
- * the name of the application is the empty string ("").  This means that the application will be deployed into the root directory.</li>
+ * <li>The "name" attribute is the name of the Flex app.  This attribute is required.</li>
  * <li>The "srcDir" attribute specifies the source directory for the application. This attribute is required.</li>
- * <li>The "javascriptStyle" attribute specified the JavaScript style that is to be applied by the GWTCompiler.  Valid values are "OBF", "PRETTY",
- * and "DETAILED". The default value is "OBF".</li>
+ * <li>The "mainMxmlFile" attribute specifies the main mxml file for the app.  This attribute is required. The path to this file is resolved
+ * relative to the enunciate.xml file (not to the "srcDir" attribute of the app).</li>
  * </ul>
- *
- * <p>Each "app" element may contain an arbitrary number of "module" child elements that specify the modules that are included in the app.
- * The "module" element supports the following attributes:</p>
- *
- * <ul>
- * <li>The "name" attribute specifies the name of the module. This is usually of the form "com.mycompany.MyModule" and it always has a corresponding
- * ".gwt.xml" module file.</li>
- * <li>The "outputDir" attribute specifies where the compiled module will be placed, relative to the application directory.  By default, the
- * outputDir is the empty string (""), which means the compiled module will be placed at the root of the application directory.</li>
- * </ul>
- *
- * <h3>The "gwtCompileJVMArg" element</h3>
- *
- * <p>The "gwtCompileJVMArg" element is used to specify additional JVM parameters that will be used when invoking GWTCompile.  It supports a single
- * "value" attribute.</p>
  *
  * <h3>Example Configuration</h3>
  *
@@ -145,60 +151,35 @@ import java.util.*;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;gwt disabled="false"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rpcModuleName="com.mycompany.MyGWTRPCModule"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.4.60"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/mainapp"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyRootModule"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputPath="two"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.AnotherRootModule"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.MyModuleThree" outputPath="three"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;amf disabled="false" swcName="mycompany-amf.swc"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flexSDKHome="/home/myusername/tools/flex-sdk-2"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/flexapp" name="main" mainMxmlFile="src/main/flexapp/com/mycompany/main.mxml"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another" mainMxmlFile="src/main/anotherapp/com/mycompany/another.mxml"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/gwt&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/amf&gt;
  * &nbsp;&nbsp;&lt;/modules&gt;
  * &lt;/enunciate&gt;
  * </code>
  *
- * <p>The configuration enables the GWT Enunciate module and will publish the web service endpoints under the module name
- * "com.mycompany.MyGWTRPCModule".</p>
+ * <p>This configuration enables the AMF module and gives a specific name to the compiled SWC for the client-side ActionScript classes.</p>
  *
- * <p>There are also two GWT applications defined. The first is located at "src/main/mainapp". Since there is
- * no "name" applied to this application, it will be generated into the root of the applications directory.  This
- * first application has two GWT modules defined, the first named "com.mycompany.apps.main.MyRootModule" and the second
- * named "com.mycompany.apps.main.MyModuleTwo".  "MyRootModule", since it has to output path defined, will be generated
- * into the root of its application directory (which is the root of the main applications directory).  "MyModuleTwo", however,
- * will be generated into the subdirectory "two".</p>
+ * <p>There also two Flex applications defined. The first is located at "src/main/flexapp". The name of this app is "main". The MXML
+ * file that defines this app sits at "src/main/flexapp/com/mycompany/main.mxml", relative to the enunciate configuration file. The
+ * second application, rooted at "src/main/anotherapp", is named "another". The mxml file that defines this application sits at
+ * "src/main/anotherapp/com/mycompany/another.mxml".</p>
  *
- * <p>The second application, rooted at "src/main/anotherapp", is named "another", so it will be generated into the "another"
- * subdirectory of the main applications directory.  It also has two modules, one named "com.mycompany.apps.another.AnotherRootModule",
- * and another named "com.mycompany.apps.another.MyModuleThree".  "AnotherRootModule" will be generated into the root of its application
- * directory ("another") and "MyModuleThree" will be generated into "another/three".</p>
- *
- * <p>All modules are defined by their associated ".gwt.xml" module definition files.  After the "compile" step of the GWT module, the
- * main applications directory will look like this:</p>
- *
- * <code class="console">
- * |--[output of com.mycompany.apps.main.MyRootModule]
- * |--two
- * |----[output of com.mycompany.apps.main.MyModuleTwo]
- * |--another
- * |----[output of com.mycompany.apps.another.AnotherRootModule]
- * |----three
- * |------[output of com.mycompany.apps.another.MyModuleThree]
- * </code>
+ * <p>After the "compile" step of the AMF module, assuming everything compiles correctly, there will be two Flash applications, "main.swf" and "another.swf",
+ * that sit in the applications directory (see "artifacts" below).</p>
  *
  * <p>For a less contrived example, see the "petclinic" sample Enunciate project bundled with the Enunciate distribution.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <ul>
- * <li>The "gwt.client.jar" artifact is the packaged client-side GWT jar.</li>
- * <li>The "gwt.client.src.dir" artifact is the directory where the client-side source code is generated.</li>
- * <li>The "gwt.server.src.dir" artifact is the directory where the server-side source code is generated.</li>
- * <li>The "gwt.app.dir" artifact is the directory to which the GWT AJAX apps are compiled.</li>
+ * <li>The "amf.client.src.dir" artifact is the directory where the client-side source code is generated.</li>
+ * <li>The "amf.server.src.dir" artifact is the directory where the server-side source code is generated.</li>
+ * <li>The "as3.client.swc" artifact is the packaged client-side ActionScript SWC.</li>
+ * <li>The "flex.app.dir" artifact is the directory to which the Flex apps are compiled.</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -229,6 +210,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
+    if (this.flexSDKHome == null) {
+      throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
+    }
+
     for (FlexApp flexApp : flexApps) {
       if (flexApp.getName() == null) {
         throw new EnunciateException("A flex app must have a name.");
@@ -257,9 +242,11 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     model.setFileOutputDirectory(getServerSideGenerateDir());
 
     HashMap<String, String> amfTypePackageConversions = new HashMap<String, String>();
+    HashMap<String, String> as3Aliases = new HashMap<String, String>();
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (!isAMFTransient(typeDefinition)) {
+          as3Aliases.put(typeDefinition.getQualifiedName(), typeDefinition.getSimpleName());
           amfTypePackageConversions.put(typeDefinition.getPackage().getQualifiedName(), typeDefinition.getPackage().getQualifiedName() + ".amf");
         }
       }
@@ -297,7 +284,9 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     model.put("packageFor", new ClientPackageForMethod(conversions));
     UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
     model.put("classnameFor", classnameFor);
+    model.put("componentTypeFor", new ComponentTypeForMethod(conversions));
     model.put("forEachAMFImport", new ForEachAMFImportTransform(null, classnameFor));
+    model.put("as3Aliases", as3Aliases);
 
     info("Generating the ActionScript types...");
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
@@ -632,20 +621,20 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Whether the given type declaration is GWT-transient.
+   * Whether the given type declaration is AMF-transient.
    *
    * @param declaration The type declaration.
-   * @return Whether the given tyep declaration is GWT-transient.
+   * @return Whether the given tyep declaration is AMF-transient.
    */
   protected boolean isAMFTransient(TypeDeclaration declaration) {
     return isAMFTransient((Declaration) declaration) || isAMFTransient(declaration.getPackage());
   }
 
   /**
-   * Whether the given type declaration is GWT-transient.
+   * Whether the given type declaration is AMF-transient.
    *
    * @param declaration The type declaration.
-   * @return Whether the given tyep declaration is GWT-transient.
+   * @return Whether the given tyep declaration is AMF-transient.
    */
   protected boolean isAMFTransient(Declaration declaration) {
     return declaration != null && declaration.getAnnotation(AMFTransient.class) != null;
@@ -662,18 +651,18 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Get the generate directory for server-side GWT classes.
+   * Get the generate directory for server-side AMF classes.
    *
-   * @return The generate directory for server-side GWT classes.
+   * @return The generate directory for server-side AMF classes.
    */
   public File getServerSideGenerateDir() {
     return new File(getGenerateDir(), "server");
   }
 
   /**
-   * Get the generate directory for client-side GWT classes.
+   * Get the generate directory for client-side AMF classes.
    *
-   * @return The generate directory for client-side GWT classes.
+   * @return The generate directory for client-side AMF classes.
    */
   public File getClientSideGenerateDir() {
     return new File(getGenerateDir(), "client");
@@ -717,9 +706,9 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * GWT validator.
+   * AMF validator.
    *
-   * @return GWT validator.
+   * @return AMF validator.
    */
   @Override
   public Validator getValidator() {
@@ -741,27 +730,27 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The gwt home directory
+   * The amf home directory
    *
-   * @return The gwt home directory
+   * @return The amf home directory
    */
   public String getFlexSDKHome() {
     return flexSDKHome;
   }
 
   /**
-   * Set the path to the GWT home directory.
+   * Set the path to the AMF home directory.
    *
-   * @param flexSDKHome The gwt home directory
+   * @param flexSDKHome The amf home directory
    */
   public void setFlexSDKHome(String flexSDKHome) {
     this.flexSDKHome = flexSDKHome;
   }
 
   /**
-   * The gwt apps to compile.
+   * The amf apps to compile.
    *
-   * @return The gwt apps to compile.
+   * @return The amf apps to compile.
    */
   public List<FlexApp> getFlexApps() {
     return flexApps;

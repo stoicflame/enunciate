@@ -20,7 +20,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="amf" level="project" />
     <orderEntry type="library" name="spring-j2ee" level="project" />
     <orderEntryProperties />
   </component>
