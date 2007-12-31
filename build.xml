@@ -6,6 +6,7 @@
   <property name="dist.name" value="enunciate-${version}"/>
   <property name="full.jar.name" value="enunciate-full-${version}.jar"/>
   <property name="top.jar.name" value="enunciate-top-${version}.jar"/>
+  <property name="rt.jar.name" value="enunciate-rt-${version}.jar"/>
 
   <!--global references to other modules-->
   <dirname file="${ant.file.all}" property="enunciate.basedir"/>
@@ -60,7 +61,14 @@
       </filterset>
     </copy>
 
+    <copy file="rt-pom.xml" todir="target" failonerror="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+
     <artifact:pom id="top.pom" file="target/top-pom.xml"/>
+    <artifact:pom id="rt.pom" file="target/rt-pom.xml"/>
 
     <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
     <loadfile srcfile="${static.docs.dir}/sidenav.include.html" property="sidenav"/>
@@ -283,8 +291,21 @@ jars for the purposes of Maven integration.
       <fileset dir="target/top-jar"/>
     </jar>
 
+    <mkdir dir="target/rt-jar"/>
+    <echo file="target/rt-jar/README.txt">
+Empty jar for the sole purpose of consolidating the reference to all known Enunciate
+jars for the purposes of Maven integration.
+    </echo>
+    <jar destfile="target/${rt.jar.name}">
+      <fileset dir="target/rt-jar"/>
+    </jar>
+
     <artifact:install file="target/${top.jar.name}">
       <pom refid="top.pom"/>
+    </artifact:install>
+
+    <artifact:install file="target/${rt.jar.name}">
+      <pom refid="rt.pom"/>
     </artifact:install>
   </target>
 

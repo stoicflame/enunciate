@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate.samples.petclinic</groupId>
   <artifactId>petclinic</artifactId>
-  <packaging>enunciate-app</packaging>
+  <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
 
   <build>
@@ -12,11 +12,25 @@
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
         <version>1.6-SNAPSHOT</version>
-        <extensions>true</extensions>
         <configuration>
           <configFile>enunciate.xml</configFile>
           <gwtHome>${gwt.home}</gwtHome>
           <flexHome>${flex.home}</flexHome>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
         </configuration>
       </plugin>
       <plugin>
@@ -29,7 +43,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-top</artifactId>
+      <artifactId>enunciate-rt</artifactId>
       <version>1.6-SNAPSHOT</version>
     </dependency>
 

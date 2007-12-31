@@ -33,6 +33,7 @@ public class BasicDeploymentModule implements DeploymentModule {
 
   protected Enunciate enunciate;
   private boolean disabled;
+  private File specifiedBuildDir = null;
 
   /**
    * @return "basic"
@@ -172,7 +173,16 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return The build directory for this module.
    */
   public File getBuildDir() {
-    return new File(getEnunciate().getBuildDir(), getName());
+    return this.specifiedBuildDir == null ? new File(getEnunciate().getBuildDir(), getName()) : this.specifiedBuildDir;
+  }
+
+  /**
+   * Set the build dir for this module.
+   *
+   * @param buildDir The build dir for this module.
+   */
+  public void setBuildDir(File buildDir) {
+    this.specifiedBuildDir = buildDir;
   }
 
   /**

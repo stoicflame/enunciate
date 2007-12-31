@@ -163,6 +163,12 @@ import java.util.jar.Manifest;
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
  * <li>The "<b>defaultDependencyCheck</b>" attribute specifies that value of the "default-dependency-check" for the generated spring file.</li>
  * <li>The "<b>defaultAutowire</b>" attribute specifies that value of the "default-autowire" for the generated spring file.</li>
+ * <li>The "<b>doCompile</b>" attribute specifies whether this module should take on the responsibility of compiling the server-side classes.  This may not be
+ * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
+ * <li>The "<b>doLibCopy</b>" attribute specifies whether this module should take on the responsibility of copying libraries to WEB-INF/lib.  This may not be
+ * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
+ * <li>The "<b>doPackage</b>" attribute specifies whether this module should take on the responsibility of packaging (zipping) up the war.  This may not be
+ * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -309,6 +315,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private String defaultDependencyCheck = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
   private String dispatcherServletClass = "org.springframework.web.servlet.DispatcherServlet";
+  private boolean doCompile = true;
+  private boolean doLibCopy = true;
+  private boolean doPackage = true;
 
   /**
    * @return "spring-app"
@@ -388,13 +397,18 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected void doCompile() throws EnunciateException, IOException {
+    if (!isDoCompile()) {
+      info("Compilation has been disabled.  No server-side classes will be compiled, nor will any resources be copied.");
+      return;
+    }
+
     ArrayList<String> javacAdditionalArgs = new ArrayList<String>();
     if (compileDebugInfo) {
       javacAdditionalArgs.add("-g");
     }
 
     Enunciate enunciate = getEnunciate();
-    File compileDir = getCompileDir();
+    final File compileDir = getCompileDir();
     enunciate.invokeJavac(enunciate.getEnunciateClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
 
     File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
@@ -502,151 +516,158 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     File webinfLib = new File(webinf, "lib");
 
     //copy the compiled classes to WEB-INF/classes.
-    enunciate.copyDir(getCompileDir(), webinfClasses);
-
-    //initialize the include filters.
-    AntPathMatcher pathMatcher = new AntPathMatcher();
-    pathMatcher.setPathSeparator(File.separator);
-    List<File> explicitIncludes = new ArrayList<File>();
-    List<String> includePatterns = new ArrayList<String>();
-    if (this.warConfig != null) {
-      for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
-        if (el.getFile() != null) {
-          //add explicit files to the include files list.
-          explicitIncludes.add(el.getFile());
-        }
-
-        String pattern = el.getPattern();
-        if (pattern != null) {
-          //normalize the pattern to the platform.
-          pattern = pattern.replace('/', File.separatorChar);
-          if (pathMatcher.isPattern(pattern)) {
-            //make sure that the includes pattern list only has patterns.
-            includePatterns.add(pattern);
-          }
-          else {
-            info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
-          }
-        }
-      }
-    }
-    
-    if (includePatterns.isEmpty()) {
-      //if no include patterns are specified, the implicit pattern is "**/*".
-      debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
-      includePatterns.add("**/*");
+    if (isDoCompile()) {
+      enunciate.copyDir(getCompileDir(), webinfClasses);
     }
 
-    List<String> warLibs = new ArrayList<String>();
-    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
-      debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
-      //prime the list of libs to include in the war with what's on the enunciate classpath.
-      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
-    }
-
-    // Apply the "in filter" (i.e. the filter that specifies the files to be included).
-    List<File> includedLibs = new ArrayList<File>();
-    for (String warLib : warLibs) {
-      File libFile = new File(warLib);
-      if (libFile.exists()) {
-        for (String includePattern : includePatterns) {
-          String absolutePath = libFile.getAbsolutePath();
-          if (absolutePath.startsWith(File.separator)) {
-            //lob off the beginning "/" for Linux boxes.
-            absolutePath = absolutePath.substring(1);
+    if (isDoLibCopy()) {
+      //initialize the include filters.
+      AntPathMatcher pathMatcher = new AntPathMatcher();
+      pathMatcher.setPathSeparator(File.separator);
+      List<File> explicitIncludes = new ArrayList<File>();
+      List<String> includePatterns = new ArrayList<String>();
+      if (this.warConfig != null) {
+        for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
+          if (el.getFile() != null) {
+            //add explicit files to the include files list.
+            explicitIncludes.add(el.getFile());
           }
-          if (pathMatcher.match(includePattern, absolutePath)) {
-            debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
-            includedLibs.add(libFile);
-            break;
+
+          String pattern = el.getPattern();
+          if (pattern != null) {
+            //normalize the pattern to the platform.
+            pattern = pattern.replace('/', File.separatorChar);
+            if (pathMatcher.isPattern(pattern)) {
+              //make sure that the includes pattern list only has patterns.
+              includePatterns.add(pattern);
+            }
+            else {
+              info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
+            }
           }
         }
       }
-    }
 
-    //Now, with what's left, apply the "exclude filter".
-    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
-    List<String> manifestClasspath = new ArrayList<String>();
-    Iterator<File> toBeIncludedIt = includedLibs.iterator();
-    while (toBeIncludedIt.hasNext()) {
-      File toBeIncluded = toBeIncludedIt.next();
-      if (excludeDefaults && knownExclude(toBeIncluded)) {
-        toBeIncludedIt.remove();
+      if (includePatterns.isEmpty()) {
+        //if no include patterns are specified, the implicit pattern is "**/*".
+        debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
+        includePatterns.add("**/*");
       }
-      else if (this.warConfig != null) {
-        for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
-          boolean exclude = false;
-          if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
-            exclude = true;
-            debug("%s was explicitly excluded.", toBeIncluded);
-          }
-          else {
-            String pattern = excludeLibs.getPattern();
-            if (pattern != null) {
-              pattern = pattern.replace('/', File.separatorChar);
-              if (pathMatcher.isPattern(pattern)) {
-                String absolutePath = toBeIncluded.getAbsolutePath();
-                if (absolutePath.startsWith(File.separator)) {
-                  //lob off the beginning "/" for Linux boxes.
-                  absolutePath = absolutePath.substring(1);
-                }
 
-                if (pathMatcher.match(pattern, absolutePath)) {
-                  exclude = true;
-                  debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
+      List<String> warLibs = new ArrayList<String>();
+      if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
+        debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
+        //prime the list of libs to include in the war with what's on the enunciate classpath.
+        warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
+      }
+
+      // Apply the "in filter" (i.e. the filter that specifies the files to be included).
+      List<File> includedLibs = new ArrayList<File>();
+      for (String warLib : warLibs) {
+        File libFile = new File(warLib);
+        if (libFile.exists()) {
+          for (String includePattern : includePatterns) {
+            String absolutePath = libFile.getAbsolutePath();
+            if (absolutePath.startsWith(File.separator)) {
+              //lob off the beginning "/" for Linux boxes.
+              absolutePath = absolutePath.substring(1);
+            }
+            if (pathMatcher.match(includePattern, absolutePath)) {
+              debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
+              includedLibs.add(libFile);
+              break;
+            }
+          }
+        }
+      }
+
+      //Now, with what's left, apply the "exclude filter".
+      boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
+      List<String> manifestClasspath = new ArrayList<String>();
+      Iterator<File> toBeIncludedIt = includedLibs.iterator();
+      while (toBeIncludedIt.hasNext()) {
+        File toBeIncluded = toBeIncludedIt.next();
+        if (excludeDefaults && knownExclude(toBeIncluded)) {
+          toBeIncludedIt.remove();
+        }
+        else if (this.warConfig != null) {
+          for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
+            boolean exclude = false;
+            if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
+              exclude = true;
+              debug("%s was explicitly excluded.", toBeIncluded);
+            }
+            else {
+              String pattern = excludeLibs.getPattern();
+              if (pattern != null) {
+                pattern = pattern.replace('/', File.separatorChar);
+                if (pathMatcher.isPattern(pattern)) {
+                  String absolutePath = toBeIncluded.getAbsolutePath();
+                  if (absolutePath.startsWith(File.separator)) {
+                    //lob off the beginning "/" for Linux boxes.
+                    absolutePath = absolutePath.substring(1);
+                  }
+
+                  if (pathMatcher.match(pattern, absolutePath)) {
+                    exclude = true;
+                    debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
+                  }
                 }
               }
             }
-          }
 
-          if (exclude) {
-            toBeIncludedIt.remove();
-            if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
-              //include it in the manifest anyway.
-              manifestClasspath.add(toBeIncluded.getName());
-              debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
+            if (exclude) {
+              toBeIncludedIt.remove();
+              if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
+                //include it in the manifest anyway.
+                manifestClasspath.add(toBeIncluded.getName());
+                debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
+              }
+              break;
             }
-            break;
           }
         }
       }
-    }
 
-    //now add the lib files that are explicitly included.
-    includedLibs.addAll(explicitIncludes);
+      //now add the lib files that are explicitly included.
+      includedLibs.addAll(explicitIncludes);
 
-    //now we've got the final list, copy the libs.
-    for (File includedLib : includedLibs) {
-      if (includedLib.isDirectory()) {
-        info("Adding the contents of %s to WEB-INF/classes.", includedLib);
-        enunciate.copyDir(includedLib, webinfClasses);
-      }
-      else {
-        info("Including %s in WEB-INF/lib.", includedLib);
-        enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
-      }
-    }
-
-    // write the manifest file.
-    Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
-    if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
-      StringBuilder manifestClasspathValue = new StringBuilder();
-      Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
-      while (manifestClasspathIt.hasNext()) {
-        String entry = manifestClasspathIt.next();
-        manifestClasspathValue.append(entry);
-        if (manifestClasspathIt.hasNext()) {
-          manifestClasspathValue.append(" ");
+      //now we've got the final list, copy the libs.
+      for (File includedLib : includedLibs) {
+        if (includedLib.isDirectory()) {
+          info("Adding the contents of %s to WEB-INF/classes.", includedLib);
+          enunciate.copyDir(includedLib, webinfClasses);
+        }
+        else {
+          info("Including %s in WEB-INF/lib.", includedLib);
+          enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
         }
       }
-      manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
+
+      // write the manifest file.
+      Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
+      if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
+        StringBuilder manifestClasspathValue = new StringBuilder();
+        Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
+        while (manifestClasspathIt.hasNext()) {
+          String entry = manifestClasspathIt.next();
+          manifestClasspathValue.append(entry);
+          if (manifestClasspathIt.hasNext()) {
+            manifestClasspathValue.append(" ");
+          }
+        }
+        manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
+      }
+      File metaInf = new File(buildDir, "META-INF");
+      metaInf.mkdirs();
+      FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
+      manifest.write(manifestFileOut);
+      manifestFileOut.flush();
+      manifestFileOut.close();
     }
-    File metaInf = new File(buildDir, "META-INF");
-    metaInf.mkdirs();
-    FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
-    manifest.write(manifestFileOut);
-    manifestFileOut.flush();
-    manifestFileOut.close();
+    else {
+      info("Lib copy has been disabled.  No libs will be copied, nor no manifest written.");
+    }
 
     //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
 
@@ -753,18 +774,23 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   protected void doPackage() throws EnunciateException, IOException {
-    File buildDir = getBuildDir();
-    File warFile = getWarFile();
+    if (isDoPackage()) {
+      File buildDir = getBuildDir();
+      File warFile = getWarFile();
 
-    if (!warFile.getParentFile().exists()) {
-      warFile.getParentFile().mkdirs();
+      if (!warFile.getParentFile().exists()) {
+        warFile.getParentFile().mkdirs();
+      }
+
+      Enunciate enunciate = getEnunciate();
+      info("Creating %s", warFile.getAbsolutePath());
+
+      enunciate.zip(warFile, buildDir);
+      enunciate.addArtifact(new FileArtifact(getName(), "spring.war.file", warFile));
     }
-
-    Enunciate enunciate = getEnunciate();
-    info("Creating %s", warFile.getAbsolutePath());
-
-    enunciate.zip(warFile, buildDir);
-    enunciate.addArtifact(new FileArtifact(getName(), "spring.war.file", warFile));
+    else {
+      info("Packaging has been disabled.  No packaging will be performed.");
+    }
   }
 
   /**
@@ -934,6 +960,60 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDispatcherServletClass(String dispatcherServletClass) {
     this.dispatcherServletClass = dispatcherServletClass;
+  }
+
+  /**
+   * whether this module should take on the responsibility of compiling the server-side classes.
+   *
+   * @return whether this module should take on the responsibility of compiling the server-side classes
+   */
+  public boolean isDoCompile() {
+    return doCompile;
+  }
+
+  /**
+   * whether this module should take on the responsibility of compiling the server-side classes
+   *
+   * @param doCompile whether this module should take on the responsibility of compiling the server-side classes
+   */
+  public void setDoCompile(boolean doCompile) {
+    this.doCompile = doCompile;
+  }
+
+  /**
+   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib.
+   *
+   * @return whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   */
+  public boolean isDoLibCopy() {
+    return doLibCopy;
+  }
+
+  /**
+   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   *
+   * @param doLibCopy whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   */
+  public void setDoLibCopy(boolean doLibCopy) {
+    this.doLibCopy = doLibCopy;
+  }
+
+  /**
+   * whether this module should take on the responsibility of packaging (zipping) up the war
+   *
+   * @return whether this module should take on the responsibility of packaging (zipping) up the war
+   */
+  public boolean isDoPackage() {
+    return doPackage;
+  }
+
+  /**
+   * whether this module should take on the responsibility of packaging (zipping) up the war
+   *
+   * @param doPackage whether this module should take on the responsibility of packaging (zipping) up the war
+   */
+  public void setDoPackage(boolean doPackage) {
+    this.doPackage = doPackage;
   }
 
   /**

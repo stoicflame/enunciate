@@ -4,23 +4,28 @@
     1c. Make sure you've also updated the version in the executables.html page.
     1d. Make sure you're also updated the version maven plugin in the sample pom.
 2. Update the version in build.properties.
-3. Make sure the dist builds as expected (e.g. "ant dist")
-4. svn ci
-5. mount the maven repo (e.g. "mount /home/heatonra/mnt/enunciate/m2")
-6. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
-7. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
-8. Publish the maven plugin pointing to the new version.
-    8a. Change the pom to point to the new version.
-    8b. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy
-    8c. svn ci
-9. Build the dist again using the live deploy build file (make sure the dist build file includes any new modules). (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
-10. Build the src dist (e.g. "ant src-dist")
-11. Copy the dist and src dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
-    11a. Make sure the links you have on the downloads page are correct.
-12. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
-13. Make your announcements.
-    13a. Codehaus news
-    13b. Java.net
-    13c. Webcohesion?
-    13d. Mailing lists.
-14. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+3. Make sure you're building with Java 5 (e.g. "export JAVA_HOME=/home/heatonra/tools/jdk1.5.0_11")
+4. Make sure the dist builds as expected (e.g. "ant dist")
+    4a. Make sure the dist build file includes any new modules.
+    4b. Make sure the top pom includes any new modules.
+    4c. Make sure the rt pom includes any new modules.
+5. svn ci
+6. mount the maven repo (e.g. "mount /home/heatonra/mnt/enunciate/m2")
+7. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
+8. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
+9. Publish the maven plugin pointing to the new version.
+    9a. Change the pom to point to the new version.
+    9b. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy
+    9c. svn ci
+10. Build the dist again using the live deploy build file. (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
+11. Build the src dist (e.g. "ant src-dist")
+12. Copy the dist and src dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
+    12a. Make sure the links you have on the downloads page are correct.
+13. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
+14. Make your announcements.
+    14a. Codehaus news
+    14b. Java.net
+    14c. Webcohesion?
+    14d. Mailing lists.
+    14e. Serverside.com?
+15. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.

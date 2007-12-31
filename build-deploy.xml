@@ -63,6 +63,10 @@
       <pom refid="top.pom"/>
       <remoteRepository refid="deploy.repo"/>
     </artifact:deploy>
+    <artifact:deploy file="target/${rt.jar.name}">
+      <pom refid="rt.pom"/>
+      <remoteRepository refid="deploy.repo"/>
+    </artifact:deploy>
   </target>
 
 </project>
