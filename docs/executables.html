@@ -184,8 +184,10 @@
       <h1>Maven</h1>
 
       <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
-      the artifact is "maven-enunciate-plugin".  The Enunciate plugin supports a separate Maven 2 packaging named "enunciate-app".  The Maven 2 artifact that
-      is produced is by default the fully-documented, fully-operational war ("spring.war.file"), but this can be configured.</p>
+      the artifact is "maven-enunciate-plugin". There are actually two ways to use the Maven Enunciate plugin.  The first is by attaching a standard goal
+      named "assemble" to a phase in the build lifecycle. The second is by simply leveraging the "enunciate-app" packaging. Both methods provide the same result.
+      The former is for use with the Maven "war" packaging and leverages the Maven War plugin to package up the war. The latter uses Enunciate's internal
+      mechanisms to build and package the war.</p>
 
       <p>Note the following configuration parameters:</p>
 
@@ -241,24 +243,34 @@
           <td class="last">Whether the gwt source files (generated client-side classes and apps) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
         </tr>
         <tr>
+          <td>addActionscriptSources</td>
+          <td>boolean</td>
+          <td class="last">Whether the actionscript source files (generated client-side classes and services) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
+        </tr>
+        <tr>
           <td>gwtHome</td>
           <td>String</td>
           <td class="last">The path to the GWT home directory, in case you're developing GWT applications.</td>
         </tr>
         <tr>
+          <td>flexHome</td>
+          <td>String</td>
+          <td class="last">The path to the Flex home directory, in case you're developing Flex applications.</td>
+        </tr>
+        <tr>
           <td>warArtifactId</td>
           <td>String</td>
-          <td class="last">The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "spring.war.file".</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "spring.war.file".</td>
         </tr>
         <tr>
           <td>warArtifactName</td>
           <td>String</td>
-          <td class="last">The name of the primary Maven 2 artifact.  Defaults to the name of the Maven 2 project.</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the primary Maven 2 artifact.  Defaults to the name of the Maven 2 project.</td>
         </tr>
         <tr>
           <td>warArtifactClassifier</td>
           <td>String</td>
-          <td class="last">The name of the classifier for the primary Maven 2 artifact (no default supplied).</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the classifier for the primary Maven 2 artifact (no default supplied).</td>
         </tr>
       </table>
 
@@ -268,18 +280,13 @@
       pom directory.  The JDK 1.4 client library jar (identified by artifact id "client.jdk14.library.binaries") is exported to "target/client.jar" during
       the "package" phase.  Resources are copied and tests are run as usual with the Maven build lifecycle.</p>
 
-      <p>NOTE: While most dependencies can be found in the <a href="http://repo1.maven.org/maven2/">standard Maven 2 repository</a>, some dependencies are
-      only provided by Sun via <a href="https://maven-repository.dev.java.net/">the repository at java.net</a>, so make sure it's declared as a repository
-      somewhere (whether it be in the pom or in the settings.xml file). You may also want to consider referencing the
-      <a href="http://repository.codehaus.org/">codehaus repository</a>.</p>
-
       <code>
 &lt;project ...&gt;
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
   &lt;groupId&gt;com.ifyouwannabecool.war&lt;/groupId&gt;
   &lt;artifactId&gt;ifyouwannabecool&lt;/artifactId&gt;
-  &lt;packaging&gt;enunciate-app&lt;/packaging&gt;
-  &lt;version&gt;1.5&lt;/version&gt;
+  &lt;packaging&gt;war&lt;/packaging&gt;
+  &lt;version&gt;1.6&lt;/version&gt;
   &lt;name&gt;ifyouwannabecool&lt;/name&gt;
   &lt;url&gt;http://www.ifyouwannabecool.com&lt;/url&gt;
 
@@ -296,13 +303,27 @@
       &lt;plugin&gt;
         &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
         &lt;artifactId&gt;maven-enunciate-plugin&lt;/artifactId&gt;
-        &lt;extensions&gt;true&lt;/extensions&gt;
 
         &lt;configuration&gt;
           &lt;configFile&gt;path/to/enunciate.xml&lt;/configFile&gt;
           &lt;exports&gt;
             &lt;client.jdk14.library.binaries&gt;client.jar&lt;/client.jdk14.library.binaries&gt;
           &lt;/exports&gt;
+        &lt;/configuration&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;assemble&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;source&gt;1.5&lt;/source&gt;
+          &lt;target&gt;1.5&lt;/target&gt;
         &lt;/configuration&gt;
       &lt;/plugin&gt;
     &lt;/plugins&gt;
@@ -311,8 +332,8 @@
   &lt;dependencies&gt;
     &lt;dependency&gt;
       &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
-      &lt;artifactId&gt;enunciate-top&lt;/artifactId&gt;
-      &lt;version&gt;1.5&lt;/version&gt;
+      &lt;artifactId&gt;enunciate-rt&lt;/artifactId&gt;
+      &lt;version&gt;1.6&lt;/version&gt;
     &lt;/dependency&gt;
     &lt;dependency&gt;
       &lt;groupId&gt;junit&lt;/groupId&gt;

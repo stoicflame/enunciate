@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ifyouwannabecool.api</groupId>
   <artifactId>wannabecool</artifactId>
-  <packaging>enunciate-app</packaging>
+  <packaging>war</packaging>
   <version>1.0</version>
   <name>ifyouwannabecool</name>
   <url>http://www.ifyouwannabecool.com</url>
@@ -21,13 +21,27 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.5</version>
-        <extensions>true</extensions>
+        <version>1.6</version>
 
         <configuration>
           <exports>
             <client.jdk14.library.binaries>wannabecool-client.jar</client.jdk14.library.binaries>
           </exports>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
         </configuration>
       </plugin>
     </plugins>
@@ -36,8 +50,8 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-top</artifactId>
-      <version>1.5</version>
+      <artifactId>enunciate-rt</artifactId>
+      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
