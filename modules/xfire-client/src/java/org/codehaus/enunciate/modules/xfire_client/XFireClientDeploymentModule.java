@@ -16,12 +16,12 @@
 
 package org.codehaus.enunciate.modules.xfire_client;
 
+import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.*;
+import net.sf.jelly.apt.decorations.JavaDoc;
+import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
+import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
-import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
-import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -34,10 +34,10 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.xfire_client.config.XFireClientRuleSet;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
-import net.sf.jelly.apt.decorations.JavaDoc;
-import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
-import org.apache.commons.digester.RuleSet;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.xfire.annotations.HandlerChainAnnotation;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -190,7 +190,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.setFileOutputDirectory(getCommonJdkGenerateDir());
     generatedAnnotations = new ExplicitWebAnnotations();
     generatedTypeList = new ArrayList<String>();
-    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
 
     // Process the annotations, the request/response beans, and gather the set of web faults
     // for each endpoint interface.
@@ -223,7 +223,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
               generatedTypeList.add(getBeanName(classnameFor, outputMessage.getResponseBeanName()));
             }
             else if (webMessage instanceof WebFault) {
-              allFaults.add((WebFault) webMessage);
+              WebFault fault = (WebFault) webMessage;
+              allFaults.put(fault.getQualifiedName(), fault);
             }
           }
 
@@ -233,7 +234,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     //gather the annotation information and process the possible beans for each web fault.
-    for (WebFault webFault : allFaults) {
+    for (WebFault webFault : allFaults.values()) {
       String faultClass = classnameFor.convert(webFault);
       boolean implicit = webFault.isImplicitSchemaElement();
       String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
@@ -288,7 +289,15 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    for (WebFault webFault : allFaults) {
+    for (WebFault webFault : allFaults.values()) {
+      ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+      if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+        model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+      }
+      else {
+        model.remove("superFault");
+      }
+
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
     }
@@ -317,7 +326,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    for (WebFault webFault : allFaults) {
+    for (WebFault webFault : allFaults.values()) {
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
     }

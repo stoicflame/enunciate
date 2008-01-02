@@ -208,10 +208,10 @@ import java.util.jar.Manifest;
  * for Enunciate.  You can disable the default filter with the "excludeDefaultLibs" attribute of the "war" element. You can also specify additional jars that
  * are to be excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element
  * supports either a "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the
- * file (or directory) on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem.
- * Furthermore, the "excludeLibs" element supports a "includeInManifest" attribute specifying whether the exclude should be listed in the "Class-Path"
- * attribute of the manifest, even though they are excluded in the war.  The is useful if, for example, you're assembling an "ear" with multiple war files.
- * By default, excluded jars are not included in the manifest.</p>
+ * file (or directory) on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem
+ * (relative paths are resolved relative to the configuration file). Furthermore, the "excludeLibs" element supports a "includeInManifest" attribute specifying
+ * whether the exclude should be listed in the "Class-Path" attribute of the manifest, even though they are excluded in the war.  The is useful if, for example,
+ * you're assembling an "ear" with multiple war files. By default, excluded jars are not included in the manifest.</p>
  *
  * <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
  * of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and

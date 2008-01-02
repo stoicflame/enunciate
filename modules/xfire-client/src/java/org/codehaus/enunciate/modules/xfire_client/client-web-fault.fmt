@@ -7,7 +7,7 @@ package ${packageFor(fault)};
 /**
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public class ${fault.simpleName} extends Exception {
+public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(superFault)}[#else]Exception[/#if] {
   [#if !fault.implicitSchemaElement]
     [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
 
@@ -34,8 +34,16 @@ public class ${fault.simpleName} extends Exception {
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
     [#assign beanfqn=(beanPackage + "." + simpleBeanName)/]
+  protected ${fault.simpleName}() {
+    super();
+  }
+
+  protected ${fault.simpleName}(String message) {
+    super(message);
+  }
 
   public ${fault.simpleName}(${beanfqn} faultInfo) {
+    super();
     init(faultInfo);
   }
 
