@@ -275,44 +275,63 @@ public class Enunciate {
       setGenerateDir(genDir);
     }
 
-    ArrayList<String> sourceFiles = new ArrayList<String>(Arrays.asList(getSourceFiles()));
-    ArrayList<String> additionalApiClasses = new ArrayList<String>();
+    //handle the API imports/exports.
+    List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateClasspath().split(File.pathSeparator)));
+    List<URL> classpathURLs = new ArrayList<URL>(classpath.size());
+    for (String pathItem : classpath) {
+      File pathFile = new File(pathItem);
+      if (pathFile.exists()) {
+        classpathURLs.add(pathFile.toURL());
+      }
+    }
+
+    final URLClassLoader loader = new URLClassLoader(classpathURLs.toArray(new URL[classpathURLs.size()]));
+
+    Map<String, Boolean> imports2seekSource = new HashMap<String, Boolean>();
+    Enumeration<URL> exportResources = loader.getResources("META-INF/enunciate/api-exports");
+    while (exportResources.hasMoreElements()) {
+      URL url = exportResources.nextElement();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+      String line = reader.readLine();
+      info("Importing class %s, which was automatically imported from %s...", line, url);
+      while (line != null) {
+        imports2seekSource.put(line, true);
+      }
+    }
+
     if ((this.config != null) && (this.config.getAPIImports().size() > 0)) {
-      //handle the API imports.
-      List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateClasspath().split(File.pathSeparator)));
-      List<URL> classpathURLs = new ArrayList<URL>(classpath.size());
-      for (String pathItem : classpath) {
-        File pathFile = new File(pathItem);
-        if (pathFile.exists()) {
-          classpathURLs.add(pathFile.toURL());
+      for (APIImport apiImport : this.config.getAPIImports()) {
+        if (apiImport.getClassname() != null) {
+          info("Importing explicitly-imported class %s...", apiImport.getClassname());
+          imports2seekSource.put(apiImport.getClassname(), apiImport.isSeekSource());
         }
       }
+    }
 
+    ArrayList<String> sourceFiles = new ArrayList<String>(Arrays.asList(getSourceFiles()));
+    ArrayList<String> additionalApiClasses = new ArrayList<String>();
+    if (!imports2seekSource.isEmpty()) {
       File tempSourcesDir = createTempDir();
-      URLClassLoader loader = new URLClassLoader(classpathURLs.toArray(new URL[classpathURLs.size()]));
-      for (APIImport apiImport : this.config.getAPIImports()) {
-        String classname = apiImport.getClassname();
-        if (classname != null) {
-          URL source = null;
-          if (apiImport.isSeekSource()) {
-            source = loader.findResource(classname.replace('.', '/').concat(".java"));
+      for (String classname : imports2seekSource.keySet()) {
+        URL source = null;
+        if (imports2seekSource.get(classname)) {
+          source = loader.findResource(classname.replace('.', '/').concat(".java"));
+        }
+        if (source != null) {
+          //we have the source for the class.  Add it to the source list.
+          File srcFile = new File(tempSourcesDir, classname.replace('.', File.separatorChar).concat(".java"));
+          if (!srcFile.getParentFile().exists()) {
+            srcFile.getParentFile().mkdirs();
           }
-          if (source != null) {
-            //we have the source for the class.  Add it to the source list.
-            File srcFile = new File(tempSourcesDir, classname.replace('.', File.separatorChar).concat(".java"));
-            if (!srcFile.getParentFile().exists()) {
-              srcFile.getParentFile().mkdirs();
-            }
-            copyResource(source, srcFile);
-            sourceFiles.add(srcFile.getAbsolutePath());
-          }
-          else if (loader.findResource(classname.replace('.', '/').concat(".class")) != null) {
-            //no source found, just use the class.
-            additionalApiClasses.add(classname);
-          }
-          else {
-            throw new EnunciateException("API Import class '" + classname + "' not found in the Enunciate classpath.");
-          }
+          copyResource(source, srcFile);
+          sourceFiles.add(srcFile.getAbsolutePath());
+        }
+        else if (loader.findResource(classname.replace('.', '/').concat(".class")) != null) {
+          //no source found, just use the class.
+          additionalApiClasses.add(classname);
+        }
+        else {
+          warn("API Import class '%s' not found in the Enunciate classpath.  It will not be imported.", classname);
         }
       }
     }

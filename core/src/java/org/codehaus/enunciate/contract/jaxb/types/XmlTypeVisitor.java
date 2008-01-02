@@ -125,8 +125,8 @@ class XmlTypeVisitor implements TypeVisitor {
       this.xmlType = xmlType;
       if (xmlType == null) {
         this.errorMessage = "Unknown xml type for class: " + classType +
-          ".  If this is a class that is already compiled, you probably need to specify an 'api-import' " +
-          "element in the configuration file. See the user guide for details.";
+          ".  If this is a class that is already compiled, you either need to specify an 'api-import' " +
+          "element in the configuration file, or your class needs to be explicitly exported. See the user guide for details.";
       }
     }
   }
