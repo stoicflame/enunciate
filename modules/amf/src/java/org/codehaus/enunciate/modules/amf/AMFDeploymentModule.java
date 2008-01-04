@@ -93,7 +93,7 @@ import java.util.*;
  * <p>The "amf" element supports the following attributes:</p>
  *
  * <ul>
- * <li>The "flexSDKHome" attribute <b>must</b> be supplied. It is the path to the directory where the Flex SDK is installed.</li>
+ * <li>The "flexHome" attribute <b>must</b> be supplied. It is the path to the directory where the Flex SDK is installed.</li>
  * <li>The "swcName" attribute specifies the name of the compiled SWC. By default, the name is determined by the Enunciate
  * project label (see the main configuration docs).</li>
  * <li>The "swcDownloadable" attribute specifies whether the generated SWC is to be made available as a download from the
@@ -152,7 +152,7 @@ import java.util.*;
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;amf disabled="false" swcName="mycompany-amf.swc"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flexSDKHome="/home/myusername/tools/flex-sdk-2"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flexHome="/home/myusername/tools/flex-sdk-2"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/flexapp" name="main" mainMxmlFile="src/main/flexapp/com/mycompany/main.mxml"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another" mainMxmlFile="src/main/anotherapp/com/mycompany/another.mxml"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -189,7 +189,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   private final List<FlexApp> flexApps = new ArrayList<FlexApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
 
-  private String flexSDKHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
+  private String flexHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
   private FlexCompilerConfig compilerConfig = new FlexCompilerConfig();
   private String swcName;
   private boolean swcDownloadable = false;
@@ -210,7 +210,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (this.flexSDKHome == null) {
+    if (this.flexHome == null) {
       throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
     }
 
@@ -325,11 +325,11 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    * Invokes the flex compiler on the apps specified in the configuration file.
    */
   protected void doFlexCompile() throws EnunciateException, IOException {
-    if (this.flexSDKHome == null) {
+    if (this.flexHome == null) {
       throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
     }
 
-    File flexHomeDir = new File(this.flexSDKHome);
+    File flexHomeDir = new File(this.flexHome);
     if (!flexHomeDir.exists()) {
       throw new EnunciateException("Flex home not found ('" + flexHomeDir.getAbsolutePath() + "').");
     }
@@ -390,7 +390,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     commandLine.add(argIndex++, null);
 
     if (compilerConfig.getFlexConfig() == null) {
-      compilerConfig.setFlexConfig(new File(new File(flexSDKHome, "frameworks"), "flex-config.xml"));
+      compilerConfig.setFlexConfig(new File(new File(flexHome, "frameworks"), "flex-config.xml"));
     }
 
     if (compilerConfig.getFlexConfig().exists()) {
@@ -734,17 +734,17 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The amf home directory
    */
-  public String getFlexSDKHome() {
-    return flexSDKHome;
+  public String getFlexHome() {
+    return flexHome;
   }
 
   /**
    * Set the path to the AMF home directory.
    *
-   * @param flexSDKHome The amf home directory
+   * @param flexHome The amf home directory
    */
-  public void setFlexSDKHome(String flexSDKHome) {
-    this.flexSDKHome = flexSDKHome;
+  public void setFlexHome(String flexHome) {
+    this.flexHome = flexHome;
   }
 
   /**

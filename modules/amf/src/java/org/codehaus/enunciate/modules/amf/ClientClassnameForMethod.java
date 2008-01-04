@@ -105,6 +105,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     else if (decorated.isInstanceOf("java.util.Map")) {
       return "Object";
     }
+    else if (decorated.isEnum()) {
+      return "String";
+    }
     else if (decorated.isDeclared()) {
       DeclaredType declaredType = ((DeclaredType) decorated);
       String fqn = declaredType.getDeclaration().getQualifiedName();

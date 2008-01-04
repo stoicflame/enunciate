@@ -229,6 +229,18 @@ public class DefaultValidator implements Validator {
             result.addError(nounValue.getPosition(), "An optional noun value parameter cannot be a primitive type.");
           }
         }
+
+        DecoratedTypeMirror returnType = ((DecoratedTypeMirror) method.getReturnType());
+        if (!returnType.isVoid()) {
+          boolean isRootElement = false;
+          if (method.getReturnType() instanceof DeclaredType) {
+            isRootElement = ((DeclaredType) method.getReturnType()).getDeclaration().getAnnotation(XmlRootElement.class) != null;
+          }
+
+          if (!isRootElement) {
+            result.addError(method.getPosition(), "REST operation results must be xml root elements. " + method.getReturnType() + " is not annotated with @XmlRootElement.");
+          }
+        }
       }
     }
 
