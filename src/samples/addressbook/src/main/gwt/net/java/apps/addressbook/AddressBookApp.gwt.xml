@@ -1,0 +1,12 @@
+<module>
+
+  <!--inherit from the main GWT client-side library.-->
+  <inherits name='com.google.gwt.user.User'/>
+
+  <!--inherit from our Enunciate-generated GWT-RPC client-side code.-->
+  <inherits name='net.java.ws.addressbook.AddressBookGWT'/>
+
+  <!--define the entry point for the address book app.-->
+  <entry-point class='net.java.apps.addressbook.client.AddressBookApp'/>
+
+</module>

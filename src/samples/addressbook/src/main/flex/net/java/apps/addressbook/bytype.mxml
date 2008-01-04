@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" creationComplete="initApp()">
+  <mx:Script><![CDATA[
+     import mx.controls.Alert;
+     import mx.rpc.events.FaultEvent;
+     import mx.rpc.events.ResultEvent;
+     import mx.rpc.remoting.RemoteObject;
+     import net.java.ws.addressbook.services.AddressBook;
+     import net.java.ws.addressbook.services.AddressBook.FindContactsByTypeResultEvent;
+     import net.java.ws.addressbook.domain.ContactType;
+     import net.java.ws.addressbook.domain.ContactList;
+     import net.java.ws.addressbook.domain.Contact;
+
+     //instantiate our address book service.
+     var book:AddressBook = new AddressBook();
+
+     //array of contact types; used to popluate the combo box.
+     [Bindable]
+     public var contactTypes: Array = [ ContactType.friend, ContactType.family, ContactType.professional ];
+
+     private function initApp():void {
+       //initialize our address book with our event listeners.
+        book.addEventListener("fault", myFaultHandler);
+        book.addEventListener("findContactsByType", myEventHandler);
+     }
+
+     private function myFaultHandler(event:FaultEvent):void {
+       //if a fault occurs, display a fault message.
+       Alert.show(event.fault.message);
+     }
+
+     private function myEventHandler(event:FindContactsByTypeResultEvent):void {
+       //the event listener is a strongly-typed listener for the findContactsByType method.
+       dg.dataProvider = event.result.contacts;
+     }
+
+  ]]></mx:Script>
+
+  <mx:DataGrid id="dg" width="100%" height="100%"/>
+
+  <mx:ComboBox id="ct" dataProvider="{contactTypes}"/>
+
+  <mx:Button label="Find By Type" click="book.findContactsByType(ct.selectedItem as String)"/>
+
+</mx:Application>
