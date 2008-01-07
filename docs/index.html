@@ -32,10 +32,10 @@
     <div class="content">
 
       <div class="sidenews">
-        <p><b>Enunciate 1.5 Released!</b></p>
-        <p>Enunciate 1.5 provides a significantly enhanced experience for writing GWT applications. It also adds a few enhancements for
-          customizing the war and consuming already-compiled classes. There have been some changes to the configuration. For details, see
-          the release notes.</p>
+        <p><b>Enunciate 1.6 Released!</b></p>
+        <p>Enunciate 1.6 provides support for publishing your endpoints via <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>. Enunciate
+          will also generate the strongly-typed client-side ActionScript classes that can be used by Flex developers to access the AMF endpoints. Release 1.6
+          also adds a <a href="executables.html#maven">new Maven 2 build goal</a> for tighter Maven 2 integration, and (of course) a good set of bug fixes and enhancements.</p>
         <p><a href="downloads.html">Click here</a> to download.</p>
       </div>
 
@@ -53,7 +53,8 @@
       <ul>
         <li>Full user documentation</li>
         <li>Consolidated, annotated WSDL(s) referencing a common set of schemas</li>
-        <li>The same endpoint(s) published via SOAP, REST, JSON, and <a href="http://code.google.com/webtoolkit/">GWT-RPC</a></li>
+        <li>The same endpoint(s) published via SOAP, REST, JSON, <a href="http://code.google.com/webtoolkit/">GWT-RPC</a>, and <a
+          href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a></li>
         <li>Client-side libraries for download</li>
         <li>Etc.</li>
       </ul>
@@ -109,15 +110,20 @@
           </p>
         </li>
         <li>
-          <h3>Multiple Endpoints: SOAP, REST, JSON, GWT-RPC, etc.</h3>
+          <h3>Multiple Endpoints: SOAP, REST, JSON, GWT-RPC, AMF, etc.</h3>
           <p>Enunciate will publish your endpoint class as a <b>SOAP endpoint</b> as defined by the JAX-WS annotations (powered by <a
             href="http://xfire.codehaus.org/">XFire</a>).  By supplying additional metadata, the same endpoint class will be published
             as a <b>XML REST endpoint</b> at a different URL.  Furthermore, certain REST endpoints will be automatically available as JSON
             endpoints at yet another URL. See the <a href="module_rest.html">REST module documentation</a> for more information.
           </p>
           <p>
-            Also, by enabling the <a href="module_gwt.html">GWT module</a>, your endpoints will be published via
+            By enabling the <a href="module_gwt.html">GWT module</a>, your endpoints will be published via
             <a href="http://code.google.com/webtoolkit/">GWT-RPC</a> along with the client-side GWT code for invoking those endpoints via AJAX.
+          </p>
+          <p>
+            By enabling the <a href="module_amf.html">AMF module</a>, your endpoints will be published via
+            <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a> and client-side ActionScript classes will be generated for Flex developers.
+            Enunciate will even compile your Flex application, according to the configuration.
           </p>
         </li>
         <li>

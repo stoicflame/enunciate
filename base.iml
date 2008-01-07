@@ -5,8 +5,12 @@
     <output url="file://$MODULE_DIR$/target/ide-classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/samples/addressbook/src/main/flex" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/samples/addressbook/src/main/gwt" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/samples/addressbook/src/main/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/samples/basic" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/samples/full" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/samples/petclinic/src/main/flex-apps" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/samples/petclinic/src/main/gwt-apps" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/samples/petclinic/src/main/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/samples/wannabecool/step4" isTestSource="true" />

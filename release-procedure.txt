@@ -13,11 +13,11 @@
 6. mount the maven repo (e.g. "mount /home/heatonra/mnt/enunciate/m2")
 7. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
 8. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
-9. Publish the maven plugin pointing to the new version.
-    9a. Change the pom to point to the new version.
-    9b. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy
-    9c. svn ci
-10. Build the dist again using the live deploy build file. (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
+9. Build the dist again using the live deploy build file. (e.g. "ant -Ddeploy.repo.url=file:///home/heatonra/mnt/enunciate/m2 -f build-deploy.xml deploy")
+10. Publish the maven plugin pointing to the new version.
+    10a. Change the pom to point to the new version.
+    10b. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy
+    10c. svn ci
 11. Build the src dist (e.g. "ant src-dist")
 12. Copy the dist and src dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
     12a. Make sure the links you have on the downloads page are correct.

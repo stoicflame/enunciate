@@ -61,8 +61,8 @@ import java.util.*;
  *
  * <p>This documentation is an overview of how to use Enunciate to build your Flex Data Services (AMF API) and associated Flash
  * application(s). The reader is redirected to the <a href="http://www.adobe.com/products/flex/">documentation for Flex</a> for
- * instructions on how to use Flex. You may also find the petclinic sample application useful as an illustration.  The sample
- * petclinic application is included with the Enunciate distribution.</p>
+ * instructions on how to use Flex. There are also two sample applications you may find useful, petclinic and addressbook, that you
+ * will find bundled with the Enunciate distribution.</p>
  *
  * <ul>
  * <li><a href="#steps">steps</a></li>

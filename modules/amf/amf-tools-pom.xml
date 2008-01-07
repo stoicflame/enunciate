@@ -49,30 +49,32 @@
     </dependency>
 
     <dependency>
-      <groupId>com.adobe.flex</groupId>
-      <artifactId>blazeds-core</artifactId>
-      <version>1.0-beta1</version>
-
-      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>com.adobe.flex</groupId>
-      <artifactId>blazeds-remoting</artifactId>
-      <version>1.0-beta1</version>
-
-      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>com.adobe.flex</groupId>
+      <groupId>com.adobe.blazeds</groupId>
       <artifactId>blazeds-common</artifactId>
       <version>1.0-beta1</version>
+    </dependency>
 
-      <!--optional here only because it's not in a maven repo yet; users have to install it manually.-->
-      <optional>true</optional>
+    <dependency>
+      <groupId>com.adobe.blazeds</groupId>
+      <artifactId>blazeds-core</artifactId>
+      <version>1.0-beta1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.adobe.blazeds</groupId>
+      <artifactId>blazeds-remoting</artifactId>
+      <version>1.0-beta1</version>
+      <exclusions>
+        <!--There was a bug in the original maven upload of blazeds-remoting, necessitating these exclusions.-->
+        <exclusion>
+          <groupId>com.adoble.flex</groupId>
+          <artifactId>blazeds-common</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.adoble.flex</groupId>
+          <artifactId>blazeds-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
