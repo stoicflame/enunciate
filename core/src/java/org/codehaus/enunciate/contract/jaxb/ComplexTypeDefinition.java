@@ -101,7 +101,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isBaseObject() {
-    return getBaseType().getQname().equals(KnownXmlType.ANY_TYPE.getQname());
+    return getSuperclass().getDeclaration() == null || Object.class.getName().equals(getSuperclass().getDeclaration().getQualifiedName());
   }
 
   @Override
