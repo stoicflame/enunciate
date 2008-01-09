@@ -2,7 +2,7 @@
     1a. Make sure you've updated the insert sidebox on the index page.
     1b. Make sure you've updated the downloads page to reflect where the new files will be.
     1c. Make sure you've also updated the version in the executables.html page.
-    1d. Make sure you're also updated the version maven plugin in the sample pom.
+    1d. Make sure you're also updated the version maven plugin in the sample poms.
 2. Update the version in build.properties.
 3. Make sure you're building with Java 5 (e.g. "export JAVA_HOME=/home/heatonra/tools/jdk1.5.0_11")
 4. Make sure the dist builds as expected (e.g. "ant dist")
