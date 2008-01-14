@@ -358,14 +358,21 @@ public class Enunciate {
     }
 
     List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
+    initModules(deploymentModules);
+    return deploymentModules;
+  }
 
+  /**
+   * Initialize each module.
+   *
+   * @param deploymentModules The deployment modules.
+   */
+  protected void initModules(List<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
     info("\n\nInitializing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("Initializing module %s.", deploymentModule.getName());
       deploymentModule.init(this);
     }
-
-    return deploymentModules;
   }
 
   /**
