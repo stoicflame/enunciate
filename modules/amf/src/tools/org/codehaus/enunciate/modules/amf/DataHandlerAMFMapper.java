@@ -17,8 +17,8 @@
 package org.codehaus.enunciate.modules.amf;
 
 import javax.activation.DataHandler;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import javax.activation.DataSource;
+import java.io.*;
 
 /**
  * @author Ryan Heaton
@@ -42,11 +42,27 @@ public class DataHandlerAMFMapper implements AMFMapper<DataHandler, byte[]> {
     return out.toByteArray();
   }
 
-  public DataHandler toJAXB(byte[] amfObject, AMFMappingContext context) throws AMFMappingException {
+  public DataHandler toJAXB(final byte[] amfObject, AMFMappingContext context) throws AMFMappingException {
     if (amfObject == null) {
       return null;
     }
 
-    throw new AMFMappingException("Can't convert from a byte[] to a data handler.");
+    return new DataHandler(new DataSource() {
+      public InputStream getInputStream() throws IOException {
+        return new ByteArrayInputStream(amfObject);
+      }
+
+      public OutputStream getOutputStream() throws IOException {
+        throw new IOException();
+      }
+
+      public String getContentType() {
+        return "application/octet-stream";
+      }
+
+      public String getName() {
+        return "";
+      }
+    });
   }
 }

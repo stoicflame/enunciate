@@ -27,7 +27,9 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.rest.annotations.*;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
+import javax.activation.DataHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -194,6 +196,15 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public Collection<RESTError> getRESTErrors() {
     return RESTErrors;
+  }
+
+  /**
+   * Whether the return type from this REST method is XML.
+   *
+   * @return Whether the return type from this REST method is XML.
+   */
+  public boolean isCustomType() {
+    return ((DecoratedTypeMirror) getReturnType()).isInstanceOf(DataHandler.class.getName());
   }
 
   /**

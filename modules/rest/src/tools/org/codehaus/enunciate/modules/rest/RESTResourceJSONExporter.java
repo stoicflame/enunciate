@@ -19,7 +19,6 @@ package org.codehaus.enunciate.modules.rest;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,7 +65,7 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   }
 
   @Override
-  protected View createView(RESTOperation operation, Object result) {
+  protected RESTResultView createRESTView(RESTOperation operation, Object result) {
     return new JSONResultView(operation, result, getNamespaces2Prefixes());
   }
 

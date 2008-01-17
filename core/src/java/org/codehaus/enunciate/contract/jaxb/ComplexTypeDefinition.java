@@ -74,7 +74,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
    */
   public ContentType getContentType() {
     if (!getElements().isEmpty()) {
-      if (KnownXmlType.ANY_TYPE.getQname().equals(getBaseType().getQname())) {
+      if (isBaseObject()) {
         return ContentType.IMPLIED;
       }
       else {

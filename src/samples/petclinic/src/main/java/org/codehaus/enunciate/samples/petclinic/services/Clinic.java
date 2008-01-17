@@ -4,6 +4,7 @@ import org.codehaus.enunciate.samples.petclinic.schema.*;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
+import javax.activation.DataHandler;
 import java.util.Collection;
 
 /**
@@ -21,6 +22,40 @@ import java.util.Collection;
 )
 @RESTEndpoint
 public interface Clinic {
+
+  /**
+   * Get a photo of a vet by id.
+   *
+   * @param id The vet id.
+   * @return The photo (raw data) of the vet.
+   */
+  @Noun ( "vetpix" )
+  @Verb ( VerbType.read )
+  DataHandler getVetPhoto(@ProperNoun Integer id) throws PetClinicException;
+
+  /**
+   * Get the brochure for the clinic in the specified format.
+   *
+   * @param format The format.
+   * @return The brochure.
+   */
+  @Noun ( "brochure" )
+  @Verb ( VerbType.read )
+  ClinicBrochure getClinicBrochure(@Adjective( name = "format" ) BrochureFormat format) throws PetClinicException;
+
+  /**
+   * Get the brochure for the specified animal in the specified format.
+   *
+   * @param animalType The animal type.
+   * @param format The format.
+   * @return The brochure.
+   */
+  @Noun (
+    value = "brochure",
+    context = "{animalType}"
+  )
+  @Verb ( VerbType.read )
+  AnimalBrochure getAnimalBrochure(@ContextParameter ( "animalType" ) String animalType, @Adjective( name = "format" ) BrochureFormat format) throws PetClinicException;
 
   /**
    * Retrieve all <code>Vet</code>s from the datastore.

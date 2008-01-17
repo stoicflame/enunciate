@@ -518,6 +518,7 @@
 
     <xs:simpleContent>
       <xs:extension base="xs:string">
+        <xs:attribute name="custom" type="xs:boolean"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
       </xs:extension>

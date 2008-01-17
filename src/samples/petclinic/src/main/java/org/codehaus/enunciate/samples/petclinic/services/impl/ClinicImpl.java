@@ -2,11 +2,17 @@ package org.codehaus.enunciate.samples.petclinic.services.impl;
 
 import org.codehaus.enunciate.samples.petclinic.services.Clinic;
 import org.codehaus.enunciate.samples.petclinic.services.PetClinicException;
+import org.codehaus.enunciate.samples.petclinic.services.BrochureFormat;
 import org.codehaus.enunciate.samples.petclinic.schema.*;
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
+import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
+import javax.activation.DataHandler;
+import javax.mail.util.ByteArrayDataSource;
 import java.util.*;
+import java.net.URL;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * @author Ryan Heaton
@@ -111,6 +117,94 @@ public class ClinicImpl implements Clinic {
       storePet(pet);
     }
 
+  }
+
+  public DataHandler getVetPhoto(Integer id) throws PetClinicException {
+    URL vetPicture = getClass().getResource("vet" + String.valueOf(id) + ".jpg");
+    if (vetPicture == null) {
+      throw new NotFoundException("The picture for vet " + id + " was not found.");
+    }
+    else {
+      return new DataHandler(vetPicture);
+    }
+  }
+
+  public ClinicBrochure getClinicBrochure(BrochureFormat format) throws PetClinicException {
+    if (format == null) {
+      format = BrochureFormat.pdf;
+    }
+
+    Map<String, String> metaData = new HashMap<String, String>();
+    metaData.put("Header1", "Value1");
+    metaData.put("Header2", "Value2");
+
+    InputStream data;
+    final String contentType;
+    switch (format) {
+      case html:
+        data = getClass().getResourceAsStream("clinic-brochure.html");
+        contentType = "text/html";
+        break;
+      case txt:
+        data = getClass().getResourceAsStream("clinic-brochure.txt");
+        contentType = "text/plain";
+        break;
+      case pdf:
+        data = getClass().getResourceAsStream("clinic-brochure.pdf");
+        contentType = "application/pdf";
+        break;
+      default:
+        throw new PetClinicException("Unknown brochure format: " + format);
+    }
+
+    ClinicBrochure brochure = new ClinicBrochure();
+    brochure.setMetaData(metaData);
+    try {
+      brochure.setData(new DataHandler(new ByteArrayDataSource(data, contentType)));
+    }
+    catch (IOException e) {
+      throw new PetClinicException(e.getMessage());
+    }
+    return brochure;
+  }
+
+  public AnimalBrochure getAnimalBrochure(String animalType, BrochureFormat format) throws PetClinicException {
+    if (format == null) {
+      format = BrochureFormat.pdf;
+    }
+
+    if (animalType == null) {
+      throw new PetClinicException("animal type must be specified.");
+    }
+
+    animalType = animalType.trim();
+    if (animalType.length() == 0) {
+      throw new PetClinicException("animal type must be specified.");
+    }
+
+    InputStream data = getClass().getResourceAsStream(animalType + "-brochure." + format);
+    if (data == null) {
+      throw new NotFoundException("A brochure for animal " + animalType + " in format " + format + " was not found.");
+    }
+    String contentType;
+    switch (format) {
+      case html:
+        contentType = "text/html";
+        break;
+      case txt:
+        contentType = "text/plain";
+        break;
+      case pdf:
+        contentType = "application/pdf";
+        break;
+      default:
+        throw new PetClinicException("Unknown brochure format: " + format);
+    }
+
+    AnimalBrochure brochure = new AnimalBrochure();
+    brochure.setContentType(contentType);
+    brochure.setContent(data);
+    return brochure;
   }
 
   public Collection<Vet> getVets() throws PetClinicException {

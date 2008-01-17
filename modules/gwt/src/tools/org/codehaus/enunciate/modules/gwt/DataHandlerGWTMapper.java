@@ -17,8 +17,8 @@
 package org.codehaus.enunciate.modules.gwt;
 
 import javax.activation.DataHandler;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import javax.activation.DataSource;
+import java.io.*;
 
 /**
  * @author Ryan Heaton
@@ -42,11 +42,27 @@ public class DataHandlerGWTMapper implements GWTMapper<DataHandler, byte[]> {
     return out.toByteArray();
   }
 
-  public DataHandler toJAXB(byte[] gwtObject, GWTMappingContext context) throws GWTMappingException {
+  public DataHandler toJAXB(final byte[] gwtObject, GWTMappingContext context) throws GWTMappingException {
     if (gwtObject == null) {
       return null;
     }
 
-    throw new GWTMappingException("Can't convert from a byte[] to a data handler.");
+    return new DataHandler(new DataSource() {
+      public InputStream getInputStream() throws IOException {
+        return new ByteArrayInputStream(gwtObject);
+      }
+
+      public OutputStream getOutputStream() throws IOException {
+        throw new IOException();
+      }
+
+      public String getContentType() {
+        return "application/octet-stream";
+      }
+
+      public String getName() {
+        return "";
+      }
+    });
   }
 }

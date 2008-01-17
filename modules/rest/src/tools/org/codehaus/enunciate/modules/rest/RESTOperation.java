@@ -23,9 +23,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.activation.DataHandler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.awt.*;
+import java.io.InputStream;
 
 /**
  * A REST operation.
@@ -53,6 +56,11 @@ public class RESTOperation {
   private final String contentType;
   private final String charset;
   private final String JSONPParameter;
+
+  private final boolean wrapsPayload;
+  private final Method payloadBodyMethod;
+  private final Method payloadContentTypeMethod;
+  private final Method payloadHeadersMethod;
 
   /**
    * Construct a REST operation.
@@ -167,16 +175,74 @@ public class RESTOperation {
       }
     }
 
-    Class returnType = method.getReturnType();
-    if (!Void.TYPE.equals(returnType)) {
-      if (!returnType.isAnnotationPresent(XmlRootElement.class)) {
-        throw new IllegalStateException("REST operation results must be xml root elements.  Invalid return type for method " +
+    boolean wrapsPayload = false;
+    Method payloadBodyMethod = null;
+    Method payloadContentTypeMethod = null;
+    Method payloadHeadersMethod = null;
+    Class returnType = null;
+    if (!Void.TYPE.equals(method.getReturnType())) {
+      returnType = method.getReturnType();
+
+      if (returnType.isAnnotationPresent(RESTPayload.class)) {
+        //load the payload methods if its a payload.
+        wrapsPayload = true;
+        for (Method payloadMethod : returnType.getMethods()) {
+          if (payloadMethod.isAnnotationPresent(RESTPayloadBody.class)) {
+            if (payloadBodyMethod != null) {
+              throw new IllegalStateException("There may only be one payload body method on a REST payload.");
+            }
+            else {
+              if (payloadMethod.getParameterTypes().length > 0) {
+                throw new IllegalStateException("A payload body method must have no parameters.");
+              }
+
+              Class bodyType = payloadMethod.getReturnType();
+              if (byte[].class.isAssignableFrom(bodyType) || InputStream.class.isAssignableFrom(bodyType) || DataHandler.class.isAssignableFrom(bodyType)) {
+                payloadBodyMethod = payloadMethod;
+              }
+              else {
+                throw new IllegalStateException("A payload body must be of type byte[], javax.activation.DataHandler, or java.io.InputStream.");
+              }
+            }
+          }
+
+          if (payloadMethod.isAnnotationPresent(RESTPayloadContentType.class)) {
+            if (payloadContentTypeMethod != null) {
+              throw new IllegalStateException("There may only be one payload content type method on a REST payload.");
+            }
+            else if (payloadMethod.getParameterTypes().length > 0) {
+              throw new IllegalStateException("A payload content type method must have no parameters.");
+            }
+            else if (!String.class.isAssignableFrom(payloadMethod.getReturnType())) {
+              throw new IllegalStateException("The payload content type method must return a string.");
+            }
+            else {
+              payloadContentTypeMethod = payloadMethod;
+            }
+          }
+
+          if (payloadMethod.isAnnotationPresent(RESTPayloadHeaders.class)) {
+            if (payloadHeadersMethod != null) {
+              throw new IllegalStateException("There may only be one payload headers method on a REST payload.");
+            }
+            else if (payloadMethod.getParameterTypes().length > 0) {
+              throw new IllegalStateException("A payload headers method must have no parameters.");
+            }
+            else if (!Map.class.isAssignableFrom(payloadMethod.getReturnType())) {
+              throw new IllegalStateException("The payload headers method must return a map.");
+            }
+            else {
+              payloadHeadersMethod = payloadMethod;
+            }
+          }
+        }
+      }
+      else if (!returnType.isAnnotationPresent(XmlRootElement.class) && (!DataHandler.class.isAssignableFrom(returnType))) {
+        throw new IllegalStateException("REST operation results must be xml root elements, REST payloads or instances of javax.activation.DataHandler.  Invalid return type for method " +
           method.getDeclaringClass() + "." + method.getName() + ".");
       }
+
       contextClasses.add(returnType);
-    }
-    else {
-      returnType = null;
     }
 
     String jsonpParameter = null;
@@ -191,7 +257,6 @@ public class RESTOperation {
       jsonpParameter = jsonpInfo.paramName();
     }
 
-
     this.properNounType = properNoun;
     this.properNounIndex = properNounIndex;
     this.properNounOptional = properNounOptional;
@@ -202,13 +267,16 @@ public class RESTOperation {
     this.contentType = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
     this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
     this.JSONPParameter = jsonpParameter;
+    this.wrapsPayload = wrapsPayload;
+    this.payloadBodyMethod = payloadBodyMethod;
+    this.payloadContentTypeMethod = payloadContentTypeMethod;
+    this.payloadHeadersMethod = payloadHeadersMethod;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
     catch (JAXBException e) {
       throw new IllegalStateException(e);
     }
-
   }
 
   /**
@@ -462,5 +530,41 @@ public class RESTOperation {
    */
   public String getJSONPParameter() {
     return JSONPParameter;
+  }
+
+  /**
+   * Whether this operation wraps a payload.
+   *
+   * @return Whether this operation wraps a payload.
+   */
+  public boolean isWrapsPayload() {
+    return wrapsPayload;
+  }
+
+  /**
+   * The method to use to get the payload body.
+   *
+   * @return The method to use to get the payload body.
+   */
+  public Method getPayloadBodyMethod() {
+    return payloadBodyMethod;
+  }
+
+  /**
+   * The method to use to get the payload content type.
+   *
+   * @return The method to use to get the payload content type.
+   */
+  public Method getPayloadContentTypeMethod() {
+    return payloadContentTypeMethod;
+  }
+
+  /**
+   * The method to use to get the payload content type.
+   *
+   * @return The method to use to get the payload content type.
+   */
+  public Method getPayloadHeadersMethod() {
+    return payloadHeadersMethod;
   }
 }

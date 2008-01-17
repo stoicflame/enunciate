@@ -188,9 +188,15 @@
           </inValue>
       [/#if]
       [#if !method.returnType.void]
-          <outValue typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name}">
+        [#if !method.customType]
+          <outValue custom="false" typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name}">
             <![CDATA[${method.returnType.docValue?default("")}]]>
           </outValue>
+        [#else]
+          <outValue custom="true">
+            <![CDATA[${method.returnType.docValue?default("")}]]>
+          </outValue>
+        [/#if]
       [/#if]
       [#list method.thrownTypes as error]
           <error code="${method.RESTErrors[error_index].errorCode}">

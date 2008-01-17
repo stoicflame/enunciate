@@ -32,6 +32,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.activation.DataHandler;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
@@ -262,13 +263,32 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   /**
-   * Create the view for the specified operation and result.
+   * Create the REST view for the specified operation and result.
    *
    * @param operation The operation.
    * @param result The result.
    * @return The view.
    */
   protected View createView(RESTOperation operation, Object result) {
+    if (result instanceof DataHandler) {
+      return new DataHandlerView((DataHandler) result);
+    }
+    else if (operation.isWrapsPayload()) {
+      return new RESTPayloadView(operation, result);
+    }
+    else {
+      return createRESTView(operation, result);
+    }
+  }
+
+  /**
+   * Create the REST view for the specified operation and result.
+   *
+   * @param operation The operation.
+   * @param result The result.
+   * @return The view.
+   */
+  protected RESTResultView createRESTView(RESTOperation operation, Object result) {
     return new RESTResultView(operation, result, getNamespaces2Prefixes());
   }
 

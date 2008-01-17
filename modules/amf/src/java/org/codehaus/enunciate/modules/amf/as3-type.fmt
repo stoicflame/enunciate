@@ -21,6 +21,60 @@ package ${packageFor(type)} {
   public [#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [/#if]implements IExternalizable {
 
   [#list type.attributes as attribute]
+    [#if attribute.accessorType.map?default(false)]
+      [#if attribute.accessorType.keyType.declared && as3Aliases[attribute.accessorType.keyType.declaration.qualifiedName]?exists]
+      //register the type for the key type of the key-value pairs for the "${attribute.simpleName}" property.
+      registerClassAlias("${attribute.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[attribute.accessorType.keyType.declaration.qualifiedName]});
+      [/#if]
+      [#if attribute.accessorType.valueType.declared && as3Aliases[attribute.accessorType.valueType.declaration.qualifiedName]?exists]
+      //register the type for the value type of the key-value pairs for the "${attribute.simpleName}" property.
+      registerClassAlias("${attribute.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[attribute.accessorType.valueType.declaration.qualifiedName]});
+      [/#if]
+    [#elseif attribute.accessorType.collection || attribute.accessorType.array]
+      [#if as3Aliases[componentTypeFor(attribute.accessorType)]?exists]
+      //register the item type of the collection for the "${attribute.simpleName}" property.
+      registerClassAlias("${componentTypeFor(attribute.accessorType)}", ${as3Aliases[componentTypeFor(attribute.accessorType)]});
+      [/#if]
+    [/#if]
+  [/#list]
+  [#if type.value?exists]
+    [#if type.value.accessorType.map?default(false)]
+      [#if type.value.accessorType.keyType.declared && as3Aliases[type.value.accessorType.keyType.declaration.qualifiedName]?exists]
+      //register the type for the key type of the key-value pairs for the "${type.value.simpleName}" property.
+      registerClassAlias("${type.value.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[type.value.accessorType.keyType.declaration.qualifiedName]});
+      [/#if]
+      [#if type.value.accessorType.valueType.declared && as3Aliases[type.value.accessorType.valueType.declaration.qualifiedName]?exists]
+      //register the type for the value type of the key-value pairs for the "${type.value.simpleName}" property.
+      registerClassAlias("${type.value.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[type.value.accessorType.valueType.declaration.qualifiedName]});
+      [/#if]
+    [#elseif type.value.accessorType.collection || type.value.accessorType.array]
+      [#if as3Aliases[componentTypeFor(type.value.accessorType)]?exists]
+      //register the item type of the collection for the "${type.value.simpleName}" property.
+      registerClassAlias("${componentTypeFor(type.value.accessorType)}", ${as3Aliases[componentTypeFor(type.value.accessorType)]});
+      [/#if]
+    [/#if]
+  [#else]
+    [#list type.elements as element]
+      [#if element.accessorType.map?default(false)]
+        [#if element.accessorType.keyType.declared && as3Aliases[element.accessorType.keyType.declaration.qualifiedName]?exists]
+      //register the type for the key type of the key-value pairs for the "${element.simpleName}" property.
+      registerClassAlias("${element.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[element.accessorType.keyType.declaration.qualifiedName]});
+        [/#if]
+        [#if element.accessorType.valueType.declared && as3Aliases[element.accessorType.valueType.declaration.qualifiedName]?exists]
+      //register the type for the value type of the key-value pairs for the "${element.simpleName}" property.
+      registerClassAlias("${element.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[element.accessorType.valueType.declaration.qualifiedName]});
+        [/#if]
+    [#elseif element.accessorType.collection || element.accessorType.array]
+        [#if as3Aliases[componentTypeFor(element.accessorType)]?exists]
+      //register the item type of the collection for the "${element.simpleName}" property.
+      registerClassAlias("${componentTypeFor(element.accessorType)}", ${as3Aliases[componentTypeFor(element.accessorType)]});
+        [/#if]
+      [/#if]
+    [/#list]
+  [/#if]
+
+
+  [#list type.attributes as attribute]
     private var _${attribute.simpleName}:${classnameFor(attribute)};
   [/#list]
   [#if type.value?exists]
@@ -61,57 +115,12 @@ package ${packageFor(type)} {
     public [#if !baseobject]override [/#if]function readExternal(input:IDataInput):void {
       [#if !baseobject]super.readExternal(input);[/#if]
   [#list type.attributes as attribute]
-    [#if attribute.accessorType.map?default(false)]
-      [#if attribute.accessorType.keyType.declared && as3Aliases[attribute.accessorType.keyType.declaration.qualifiedName]?exists]
-      //register the type for the key type of the key-value pairs for the "${attribute.simpleName}" property.
-      registerClassAlias("${attribute.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[attribute.accessorType.keyType.declaration.qualifiedName]});
-      [/#if]
-      [#if attribute.accessorType.valueType.declared && as3Aliases[attribute.accessorType.valueType.declaration.qualifiedName]?exists]
-      //register the type for the value type of the key-value pairs for the "${attribute.simpleName}" property.
-      registerClassAlias("${attribute.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[attribute.accessorType.valueType.declaration.qualifiedName]});
-      [/#if]
-    [#elseif attribute.accessorType.collection || attribute.accessorType.array]
-      [#if as3Aliases[componentTypeFor(attribute.accessorType)]?exists]
-      //register the item type of the collection for the "${attribute.simpleName}" property.
-      registerClassAlias("${componentTypeFor(attribute.accessorType)}", ${as3Aliases[componentTypeFor(attribute.accessorType)]});
-      [/#if]
-    [/#if]
       _${attribute.simpleName} = input.readObject() as ${classnameFor(attribute)};
   [/#list]
   [#if type.value?exists]
-    [#if type.value.accessorType.map?default(false)]
-      [#if type.value.accessorType.keyType.declared && as3Aliases[type.value.accessorType.keyType.declaration.qualifiedName]?exists]
-      //register the type for the key type of the key-value pairs for the "${type.value.simpleName}" property.
-      registerClassAlias("${type.value.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[type.value.accessorType.keyType.declaration.qualifiedName]});
-      [/#if]
-      [#if type.value.accessorType.valueType.declared && as3Aliases[type.value.accessorType.valueType.declaration.qualifiedName]?exists]
-      //register the type for the value type of the key-value pairs for the "${type.value.simpleName}" property.
-      registerClassAlias("${type.value.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[type.value.accessorType.valueType.declaration.qualifiedName]});
-      [/#if]
-    [#elseif type.value.accessorType.collection || type.value.accessorType.array]
-      [#if as3Aliases[componentTypeFor(type.value.accessorType)]?exists]
-      //register the item type of the collection for the "${type.value.simpleName}" property.
-      registerClassAlias("${componentTypeFor(type.value.accessorType)}", ${as3Aliases[componentTypeFor(type.value.accessorType)]});
-      [/#if]
-    [/#if]
       _${value.simpleName} = input.readObject() as ${classnameFor(value)};
   [#else]
     [#list type.elements as element]
-      [#if element.accessorType.map?default(false)]
-        [#if element.accessorType.keyType.declared && as3Aliases[element.accessorType.keyType.declaration.qualifiedName]?exists]
-      //register the type for the key type of the key-value pairs for the "${element.simpleName}" property.
-      registerClassAlias("${element.accessorType.keyType.declaration.qualifiedName}", ${as3Aliases[element.accessorType.keyType.declaration.qualifiedName]});
-        [/#if]
-        [#if element.accessorType.valueType.declared && as3Aliases[element.accessorType.valueType.declaration.qualifiedName]?exists]
-      //register the type for the value type of the key-value pairs for the "${element.simpleName}" property.
-      registerClassAlias("${element.accessorType.valueType.declaration.qualifiedName}", ${as3Aliases[element.accessorType.valueType.declaration.qualifiedName]});
-        [/#if]
-    [#elseif element.accessorType.collection || element.accessorType.array]
-        [#if as3Aliases[componentTypeFor(element.accessorType)]?exists]
-      //register the item type of the collection for the "${element.simpleName}" property.
-      registerClassAlias("${componentTypeFor(element.accessorType)}", ${as3Aliases[componentTypeFor(element.accessorType)]});
-        [/#if]
-      [/#if]
       _${element.simpleName} = input.readObject() as ${classnameFor(element)};
     [/#list]
   [/#if]

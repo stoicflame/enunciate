@@ -83,7 +83,7 @@ public class XmlClassType implements XmlType {
    * @return This type is simple if its type definition is simple.
    */
   public boolean isSimple() {
-    return this.typeDef.isSimple();
+    return this.typeDef.isSimple() || this.typeDef.isEnum();
   }
 
   /**

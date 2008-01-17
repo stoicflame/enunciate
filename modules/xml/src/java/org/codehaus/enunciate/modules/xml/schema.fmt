@@ -119,11 +119,11 @@
     [#--complex type with complex content.--]
     [#if typeDef.contentType.complex]
       [#--if it's not implied, we need to declare the extension--]
-      [#if !typeDef.contentType.implied]
+      [#if !typeDef.baseObject]
   <${xs}:complexContent>
     <${xs}:extension base="${typeDef.baseType.qname}">
       [/#if]
-      [#if !typeDef.contentType.empty || typeDef.attributes?size > 0]
+      [#if !typeDef.contentType.empty]
       <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
           [#if element.wrapped]
@@ -242,7 +242,7 @@
     [#if typeDef.contentType.simple]
     </${xs}:extension>
   </${xs}:simpleContent>
-    [#elseif !typeDef.contentType.implied]
+    [#elseif !typeDef.baseObject]
     </${xs}:extension>
   </${xs}:complexContent>
     [/#if]

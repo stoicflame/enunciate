@@ -109,6 +109,12 @@ import java.io.IOException;
  * a specific user of a specific group, we could identify the "group id" as a context parameter, the user as the noun, and the user id as the proper
  * noun.</p>
  *
+ * <h3>REST Payloads and Responses of Other Content Types</h3>
+ *
+ * <p>It is often necessary to provide REST resources of custom content types along with the XML responses. We define these resources as REST payloads.
+ * A REST payload consists of the resource, it's content type (MIME type), and an optional set of metadata (i.e. HTTP headers) that are associated with
+ * the resource.</p>
+ *
  * <h1><a name="constraints">Constraints</a></h1>
  *
  * <p>Enunciate uses J2EE and JAXB 2.0 to map a REST model onto HTTP.  In order to do that definitively, Enunciate
@@ -121,6 +127,7 @@ import java.io.IOException;
  *   <li>Adjectives must be simple types, but there can be more than one value for a single adjective.</li>
  *   <li>The verbs "read" and "delete" cannot support a noun value.</li>
  *   <li>A noun value must be an xml root element (not just a complex type)</li>
+ *   <li>A return type must be either a root element or a REST payload.</li>
  *   <li>Noun context parameters must be simple types</li>
  * </ul>
  *
@@ -156,6 +163,27 @@ import java.io.IOException;
  * parameters are defined, Enunciate will look for a method parameter that is defined to be a context parameter with the same name.  If there is
  * no context parameter defined by that name, the context parameter will be silently ignored. See below for how to define a method parameter
  * as a context parameter.</p>
+ *
+ * <h3>Java Return Types</h3>
+ *
+ * <p>The return type of the Java method determines the content type (MIME type) of a REST resource.  By default, Enunciate will attempt serialize the return
+ * value of a method using JAXB.  Thus the default requirement that return types must be XML root elements, since otherwise JAXB wouldn't know the name of the outer
+ * root XML element. The default content type of a JAXB response is "text/xml" for XML requests and "application/json" for JSON requests.  You can use the
+ * org.codehaus.enunciate.rest.annotations.ContentType annotation to specify a different content type for the XML requests (e.g. "application/atom+xml").</p>
+ *
+ * <p>However, Enunciate also supports REST payloads and resources of different content types. One way you can do this is by defining the Java method to return
+ * javax.activation.DataHandler, which defines its own payload and content type.  The other way of doing this is by defining a custom "REST payload" object that
+ * has its own methods for returning the payload, content type, and metadata (HTTP headers). The class of a REST payload object is annotated with the
+ * org.codehaus.enunciate.rest.annotations.RESTPayload annotation.  Such a class <i>must</i> define a single no-argument method that returns either byte[],
+ * javax.activation.DataHandler, or java.io.InputStream and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadBody. This method will
+ * return the payload body.</p>
+ *
+ * <p>The default content type of REST payloads is "applicaiton/octet-stream".  This can be customized by defining a single no-argument method on the payload
+ * object that returns a String and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadContentType. If the Java return type is
+ * javax.activation.DataHandler instead of a REST payload object, then the content type defined by the data handler is used.</p>
+ *
+ * <p>You may also define a no-argument method on the REST payload object that returns an instance of java.util.Map and is annotated with
+ * org.codehaus.enunciate.rest.annotations.RESTPayloadHeaders that will define a set of HTTP headers that will be set in the HTTP response.</p>
  *
  * <h3>Java Method Parameters</h3>
  *
