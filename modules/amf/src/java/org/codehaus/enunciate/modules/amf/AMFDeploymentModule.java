@@ -434,20 +434,12 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       commandLine.add(argIndex++, "-compiler.debug=true");
     }
 
-    if (compilerConfig.getProfile() != null && compilerConfig.getProfile()) {
-      commandLine.add(argIndex++, "-compiler.profile");
-    }
-
     if (compilerConfig.getStrict() != null && compilerConfig.getStrict()) {
       commandLine.add(argIndex++, "-compiler.strict");
     }
 
     if (compilerConfig.getUseNetwork() != null && compilerConfig.getUseNetwork()) {
       commandLine.add(argIndex++, "-use-network");
-    }
-
-    if (compilerConfig.getWarnings() != null && compilerConfig.getWarnings()) {
-      commandLine.add(argIndex++, "-warnings");
     }
 
     if (compilerConfig.getIncremental() != null && compilerConfig.getIncremental()) {
@@ -469,8 +461,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     commandLine.add(argIndex++, "-compiler.services");
     commandLine.add(argIndex++, new File(getXMLGenerateDir(), "services-config.xml").getAbsolutePath());
 
-    commandLine.add(argIndex++, "-source-path");
-    commandLine.add(argIndex++, getClientSideGenerateDir().getAbsolutePath());
+    commandLine.add(argIndex, "-include-sources");
+    commandLine.add(argIndex + 1, getClientSideGenerateDir().getAbsolutePath());
 
     String swcName = getSwcName();
 
@@ -494,6 +486,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       }
       debug("Executing SWC compile for client-side actionscript with the command: %s", command);
     }
+
+    compileSwc(commandLine);
 
     enunciate.setProperty("as3.client.swc", as3Bundle);
 
@@ -519,6 +513,23 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     if (isSwcDownloadable()) {
       enunciate.addArtifact(as3ClientArtifact);
     }
+
+    //swc is compiled
+    while (commandLine.size() > argIndex) {
+      //remove the compc-specific options...
+      commandLine.remove(argIndex);
+    }
+
+    if (compilerConfig.getProfile() != null && compilerConfig.getProfile()) {
+      commandLine.add(argIndex++, "-compiler.profile");
+    }
+
+    if (compilerConfig.getWarnings() != null && compilerConfig.getWarnings()) {
+      commandLine.add(argIndex++, "-warnings");
+    }
+
+    commandLine.add(argIndex++, "-source-path");
+    commandLine.add(argIndex++, getClientSideGenerateDir().getAbsolutePath());
 
     commandLine.add(argIndex++, "-source-path");
     sourcePathIndex = argIndex;
@@ -580,6 +591,36 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       if (procCode != 0) {
         throw new EnunciateException("Flex compile failed for module " + flexApp.getName());
       }
+    }
+  }
+
+  /**
+   * Compiles the SWC.
+   *
+   * @param commandLine The command line.
+   */
+  protected void compileSwc(List<String> commandLine) throws IOException, EnunciateException {
+    ProcessBuilder processBuilder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
+    getSwcCompileDir().mkdirs();
+    processBuilder.directory(getSwcCompileDir());
+    processBuilder.redirectErrorStream(true);
+    Process process = processBuilder.start();
+    BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    String line = procReader.readLine();
+    while (line != null) {
+      info(line);
+      line = procReader.readLine();
+    }
+    int procCode;
+    try {
+      procCode = process.waitFor();
+    }
+    catch (InterruptedException e1) {
+      throw new EnunciateException("Unexpected inturruption of the Flex compile process.");
+    }
+
+    if (procCode != 0) {
+      throw new EnunciateException("SWC compile failed.");
     }
   }
 

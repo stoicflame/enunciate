@@ -327,6 +327,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     for (WebFault webFault : allFaults.values()) {
+      ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+      if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+        model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+      }
+      else {
+        model.remove("superFault");
+      }
+
       model.put("fault", webFault);
       processTemplate(faultTemplate, model);
     }

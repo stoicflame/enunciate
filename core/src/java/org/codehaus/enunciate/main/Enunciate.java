@@ -805,6 +805,10 @@ public class Enunciate {
    * @return The resolved file.
    */
   public File resolvePath(String filePath) {
+    if (File.separatorChar != '/') {
+      filePath = filePath.replace('/', File.separatorChar); //normalize on the forward slash...
+    }
+
     File downloadFile = new File(filePath);
 
     if (!downloadFile.isAbsolute()) {
