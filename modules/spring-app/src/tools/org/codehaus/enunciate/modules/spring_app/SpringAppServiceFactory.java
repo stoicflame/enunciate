@@ -28,6 +28,7 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,10 +39,10 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class EnunciateGlobalInterceptorProcessor extends ApplicationObjectSupport implements EnunciateServiceFactory {
+public class SpringAppServiceFactory extends ApplicationObjectSupport implements EnunciateServiceFactory {
 
   private final List<Object> globalServiceInterceptors = new ArrayList<Object>();
-
+  private final Map<String, List<Object>> serviceSpecificInterceptors = new HashMap<String, List<Object>>();
 
   @Override
   protected void initApplicationContext() throws BeansException {
@@ -56,7 +57,6 @@ public class EnunciateGlobalInterceptorProcessor extends ApplicationObjectSuppor
     for (Object advisor : advisorBeans.values()) {
       addGlobalInterceptor(advisor);
     }
-
   }
 
   /**
@@ -68,6 +68,16 @@ public class EnunciateGlobalInterceptorProcessor extends ApplicationObjectSuppor
     for (Object globalServiceInterceptor : globalServiceInterceptors) {
       addGlobalInterceptor(globalServiceInterceptor);
     }
+  }
+
+  /**
+   * Map of service interface classnames to ordered list of interceptors.
+   *
+   * @param serviceSpecificInterceptors Map of service interface classnames to ordered list of interceptors.
+   */
+  public void setServiceSpecificInterceptors(Map<String, List<Object>> serviceSpecificInterceptors) {
+    this.serviceSpecificInterceptors.clear();
+    this.serviceSpecificInterceptors.putAll(serviceSpecificInterceptors);
   }
 
   /**
@@ -112,20 +122,28 @@ public class EnunciateGlobalInterceptorProcessor extends ApplicationObjectSuppor
 
   // Inherited.
   public Object getInstance(Object impl, Class... interfaces) {
-    if (globalServiceInterceptors.size() > 0) {
+    ArrayList<Object> interceptors = new ArrayList<Object>(this.globalServiceInterceptors);
+
+    for (Class iface : interfaces) {
+      if (this.serviceSpecificInterceptors.get(iface.getName()) != null) {
+        interceptors.addAll(this.serviceSpecificInterceptors.get(iface.getName()));
+      }
+    }
+
+    if (interceptors.size() > 0) {
       ProxyFactory proxyFactory = new ProxyFactory(impl);
       proxyFactory.setInterfaces(interfaces);
 
-      for (Object globalServiceInterceptor : globalServiceInterceptors) {
-        if (globalServiceInterceptor instanceof Advice) {
-          proxyFactory.addAdvice((Advice) globalServiceInterceptor);
+      for (Object interceptor : interceptors) {
+        if (interceptor instanceof Advice) {
+          proxyFactory.addAdvice((Advice) interceptor);
         }
-        else if (globalServiceInterceptor instanceof Advisor) {
-          proxyFactory.addAdvisor((Advisor) globalServiceInterceptor);
+        else if (interceptor instanceof Advisor) {
+          proxyFactory.addAdvisor((Advisor) interceptor);
         }
         else {
           throw new ApplicationContextException("Attempt to inject an interceptor that is neither advice nor an advisor (class: "
-            + globalServiceInterceptor.getClass() + ").");
+            + interceptor.getClass() + ").");
         }
       }
 

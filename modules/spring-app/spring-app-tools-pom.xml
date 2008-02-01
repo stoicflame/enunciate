@@ -35,6 +35,30 @@
       </exclusions>
     </dependency>
 
+    <dependency>
+      <groupId>org.acegisecurity</groupId>
+      <artifactId>acegi-security</artifactId>
+      <version>1.0.6</version>
+      <exclusions>
+        <!--we'll depend on enunciate's version of these artifacts.-->
+        <exclusion>
+          <groupId>org.acegisecurity</groupId>
+          <artifactId>acegi-security</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-aop</artifactId>
+        </exclusion>
+      </exclusions>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>annotations-api</artifactId>
+      <version>6.0.14</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
 </project>

@@ -335,7 +335,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return Whether the declaration is a REST endpoint.
    */
   public boolean isRESTEndpoint(TypeDeclaration declaration) {
-    return ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class) != null));
+    return ((declaration.getAnnotation(XmlTransient.class) == null)
+      && (declaration instanceof ClassDeclaration) && (declaration.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class) != null));
   }
 
   /**
@@ -343,7 +344,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   public boolean isEndpointInterface(TypeDeclaration declaration) {
     WebService ws = declaration.getAnnotation(WebService.class);
-    return (ws != null) && ((declaration instanceof InterfaceDeclaration)
+    return (declaration.getAnnotation(XmlTransient.class) == null)
+      &&  (ws != null) && ((declaration instanceof InterfaceDeclaration)
       //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
       || (ws.endpointInterface() == null) || ("".equals(ws.endpointInterface())));
   }

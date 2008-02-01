@@ -24,6 +24,12 @@
       <version>@VERSION@</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>annotations-api</artifactId>
+      <version>6.0.14</version>
+    </dependency>
   </dependencies>
 
 </project>

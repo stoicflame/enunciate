@@ -296,6 +296,7 @@ public class Enunciate {
       info("Importing class %s, which was automatically imported from %s...", line, url);
       while (line != null) {
         imports2seekSource.put(line, true);
+        line = reader.readLine();
       }
     }
 

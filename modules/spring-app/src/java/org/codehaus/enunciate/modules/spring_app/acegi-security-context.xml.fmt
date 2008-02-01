@@ -1,0 +1,187 @@
+[#ftl]
+[@file name="spring-security-context.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="filterChainProxy" class="org.acegisecurity.util.FilterChainProxy">
+    <property name="filterInvocationDefinitionSource">
+      <value><![CDATA[
+				PATTERN_TYPE_APACHE_ANT
+				/**=loadHttpSessionIdentity,handleLogoutRequest,handleDigestHTTPAuth,handleBasicHTTPAuth,handleFormBasedAuth,initJ2EESecurityContext,loadRememberMeIdentity,loadAnonymousIdentity,translateExceptions
+			]]></value>
+    </property>
+  </bean>
+
+  <bean id="loadHttpSessionIdentity" class="org.acegisecurity.context.HttpSessionContextIntegrationFilter"/>
+
+  [#-- logout filter, but only for HTTP form-based requests --]
+  <bean id="handleLogoutRequest" class="org.acegisecurity.ui.logout.LogoutFilter">
+    <constructor-arg value="/index.jsp"/>
+    <!-- URL redirected to after logout -->
+    <constructor-arg>
+      <list>
+        <ref bean="rememberMeServices"/>
+        <bean class="org.acegisecurity.ui.logout.SecurityContextLogoutHandler"/>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  [#--todo: service-level logout handler--]
+  [#--todo: service-level login handler--]
+
+  [#--Handles HTTP digest auth.--]
+  <bean id="handleDigestHTTPAuth" class="org.acegisecurity.ui.digestauth.DigestProcessingFilter">
+    <property name="userDetailsService" ref="userDetailsService"/>
+    <property name="authenticationEntryPoint">
+      <bean class="org.acegisecurity.ui.digestauth.DigestProcessingFilterEntryPoint">
+        <property name="realmName" value="${httpAuthRealmName}"/>
+        <property name="key" value="${hashKey}"/>
+        <property name="nonceValiditySeconds" nonceValiditySeconds="${httpAuthRealmName}"/>
+      </bean>
+    </property>
+  </bean>
+
+  [#--Handles HTTP basic auth.--]
+  <bean id="handleBasicHTTPAuth" class="org.acegisecurity.ui.basicauth.BasicProcessingFilter">
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationEntryPoint">
+      <bean class="org.acegisecurity.ui.basicauth.BasicProcessingFilterEntryPoint">
+        <property name="realmName" value="${httpAuthRealmName}"/>
+      </bean>
+    </property>
+  </bean>
+
+  [#-- This one's only for HTTP form-based authentication.
+    Only useful for form-based requests.
+    could also be useful to authenticate for openId --]
+  <bean id="handleFormBasedAuth" class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilter">
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="authenticationFailureUrl" value="/acegilogin.jsp?login_error=1"/>
+    <property name="defaultTargetUrl" value="/"/>
+    <property name="filterProcessesUrl" value="/j_acegi_security_check"/>
+    <property name="rememberMeServices" ref="rememberMeServices"/>
+  </bean>
+
+  [#--to add j2ee-specific security context info to an HttpServletRequest.
+  Also, if a user is redirected to a login page from a previous request,
+  this will reset that saved request information after login.--]
+  <bean id="initJ2EESecurityContext" class="org.acegisecurity.wrapper.SecurityContextHolderAwareRequestFilter"/>
+
+  [#--loads the remember-me identity from a long-term remember-me cookie value.--]
+  <bean id="loadRememberMeIdentity" class="org.acegisecurity.ui.rememberme.RememberMeProcessingFilter">
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="rememberMeServices" ref="rememberMeServices"/>
+  </bean>
+
+  [#--anonymous user loading--]
+  <bean id="loadAnonymousIdentity" class="org.acegisecurity.providers.anonymous.AnonymousProcessingFilter">
+    <property name="key" value="changeThis"/>
+    <property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS"/>
+  </bean>
+
+  [#--handles a failed login and access denied responses.--]
+  <bean id="translateExceptions" class="org.acegisecurity.ui.ExceptionTranslationFilter">
+    <property name="authenticationEntryPoint">
+      <bean class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+        <property name="loginFormUrl" value="/acegilogin.jsp"/>
+        <property name="forceHttps" value="false"/>
+      </bean>
+    </property>
+    <property name="accessDeniedHandler">
+      <bean class="org.acegisecurity.ui.AccessDeniedHandlerImpl">
+        <property name="errorPage" value="/accessDenied.jsp"/>
+      </bean>
+    </property>
+  </bean>
+
+  [#--locks down URIs to certain roles--]
+  [#--
+  todo: uncomment to enable resource-level filtering
+  <bean id="filterInvocationInterceptor" class="org.acegisecurity.intercept.web.FilterSecurityInterceptor">
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="accessDecisionManager">
+      <bean class="org.acegisecurity.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="false"/>
+        <property name="decisionVoters">
+          <list>
+            <bean class="org.acegisecurity.vote.RoleVoter"/>
+            <bean class="org.acegisecurity.vote.AuthenticatedVoter"/>
+          </list>
+        </property>
+      </bean>
+    </property>
+    <property name="objectDefinitionSource">
+      <value><![CDATA[
+				CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+				PATTERN_TYPE_APACHE_ANT
+				/secure/extreme/**=ROLE_SUPERVISOR
+				/secure/**=IS_AUTHENTICATED_REMEMBERED
+				/**=IS_AUTHENTICATED_ANONYMOUSLY
+			]]></value>
+    </property>
+  </bean>
+  --]
+
+  [#--used to load a user using a remember-me token--]
+  <bean id="rememberMeServices" class="org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices">
+    <property name="userDetailsService" ref="userDetailsService"/>
+    <property name="key" value="${hashKey}"/>
+  </bean>
+
+  [#--authenticates the user via dao, anonymous, or remember me token--]
+  <bean id="authenticationManager" class="org.acegisecurity.providers.ProviderManager">
+    <property name="providers">
+      <list>
+        <ref local="daoAuthenticationProvider"/>
+        <bean class="org.acegisecurity.providers.anonymous.AnonymousAuthenticationProvider">
+          <property name="key" value="${hashKey}"/>
+        </bean>
+        <bean class="org.acegisecurity.providers.rememberme.RememberMeAuthenticationProvider">
+          <property name="key" value="${hashKey}"/>
+        </bean>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="daoAuthenticationProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+    <property name="userDetailsService" ref="userDetailsService"/>
+  </bean>
+
+  <!-- UserDetailsService is the most commonly frequently Acegi Security interface implemented by end users -->
+  [#--todo: support a custom userDetailsService--]
+  <bean id="userDetailsService" class="org.acegisecurity.userdetails.memory.InMemoryDaoImpl">
+    <property name="userProperties">
+      <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="location" value="/WEB-INF/users.properties"/>
+      </bean>
+    </property>
+  </bean>
+
+  [#--definition of the service method interceptor that will ensure secured methods are secured.--]
+  <bean id="serviceMethodSecurityInterceptor" class="org.acegisecurity.intercept.method.aopalliance.MethodSecurityInterceptor">
+    <property name="authenticationManager" ref="authenticationManager"/>
+    <property name="accessDecisionManager">
+      <bean class="org.acegisecurity.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="false"/>
+        <property name="decisionVoters">
+          <list>
+            <bean class="org.codehaus.enunciate.modules.spring_app.JSR250Voter"/>
+          </list>
+        </property>
+      </bean>
+    </property>
+    <property name="objectDefinitionSource">
+      <bean class="org.acegisecurity.intercept.method.MethodDefinitionAttributes">
+        <property name="attributes">
+          <bean class="org.codehaus.enunciate.modules.spring_app.JSR250SecurityAnnotationAttributes"/>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+  <!-- This bean is optional; it isn't used by any other bean as it only listens and logs -->
+  <bean id="loggerListener" class="org.acegisecurity.event.authentication.LoggerListener"/>
+
+</beans>
+[/@file]

@@ -48,7 +48,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     this.conversions = new LinkedHashMap<String, String>();
     TreeSet<String> keys = new TreeSet<String>(new Comparator<String>() {
       public int compare(String package1, String package2) {
-        return package2.length() - package1.length();
+        return package2.length() == package1.length() ? package1.compareTo(package2) : package2.length() - package1.length();
       }
     });
     keys.addAll(conversions.keySet());

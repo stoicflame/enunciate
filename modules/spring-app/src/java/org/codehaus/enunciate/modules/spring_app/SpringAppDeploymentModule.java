@@ -318,6 +318,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private boolean doCompile = true;
   private boolean doLibCopy = true;
   private boolean doPackage = true;
+  private boolean enableSecurity = false;
 
   /**
    * @return "spring-app"
@@ -389,6 +390,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     model.put("docsDir", docsDir);
+
+    //spring security configuration:
+    Map<String, SecurityOptions> webResourceSecurity = new HashMap<String, SecurityOptions>();
+    model.put("securityEnabled", isEnableSecurity());
+    model.put("webResourceSecurity", webResourceSecurity);
+    model.put("hasSecureMethod", new HasSecureMethod());
 
     processTemplate(getApplicationContextTemplateURL(), model);
     processTemplate(getSpringServletTemplateURL(), model);
@@ -1014,6 +1021,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDoPackage(boolean doPackage) {
     this.doPackage = doPackage;
+  }
+
+  /**
+   * Whether to enable security.
+   *
+   * @return Whether to enable security.
+   */
+  public boolean isEnableSecurity() {
+    return enableSecurity;
+  }
+
+  /**
+   * Whether to enable security.
+   *
+   * @param enableSecurity Whether to enable security.
+   */
+  public void setEnableSecurity(boolean enableSecurity) {
+    this.enableSecurity = enableSecurity;
   }
 
   /**
