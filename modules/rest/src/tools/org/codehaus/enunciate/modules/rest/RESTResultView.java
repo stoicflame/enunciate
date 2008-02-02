@@ -30,10 +30,10 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class RESTResultView implements View {
+public class RESTResultView<R> implements View {
 
   private final RESTOperation operation;
-  private final Object result;
+  private final R result;
   private final Map<String, String> ns2prefix;
   private final Object prefixMapper;
 
@@ -42,8 +42,9 @@ public class RESTResultView implements View {
    *
    * @param operation The operation.
    * @param result The result.
+   * @param ns2prefix The namespace-to-prefix map.
    */
-  public RESTResultView(RESTOperation operation, Object result, Map<String, String> ns2prefix) {
+  public RESTResultView(RESTOperation operation, R result, Map<String, String> ns2prefix) {
     this.operation = operation;
     this.result = result;
     this.ns2prefix = ns2prefix;
@@ -73,7 +74,7 @@ public class RESTResultView implements View {
    *
    * @return The result of invoking the operation.
    */
-  public Object getResult() {
+  public R getResult() {
     return result;
   }
 
@@ -126,6 +127,7 @@ public class RESTResultView implements View {
    * Does the marshalling operation.
    *
    * @param marshaller The marshaller to use.
+   * @param request The request.
    * @param response The response.
    */
   protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {

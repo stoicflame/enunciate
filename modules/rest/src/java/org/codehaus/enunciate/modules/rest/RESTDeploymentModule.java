@@ -185,6 +185,12 @@ import java.io.IOException;
  * <p>You may also define a no-argument method on the REST payload object that returns an instance of java.util.Map and is annotated with
  * org.codehaus.enunciate.rest.annotations.RESTPayloadHeaders that will define a set of HTTP headers that will be set in the HTTP response.</p>
  *
+ * <p>REST Payloads will be converted to JSON if the payload body is determined to be XML.  You can hint that a REST payload body will always return XML with
+ * the xml() value on the @RESTPayload annotation.  Alternatively, you can specify a no-argument method of a boolean return type that is annotated with
+ * @org.codehaus.enunciate.rest.annotations.RESTPayloadXMLHint that will hint at whether the payload body returns XML.  Otherwise, if there is no hint, an
+ * attempt to interpret the content type (mime type) to determine whether it implies XML will be made.  If Enunciate is unable to determine whether the payload
+ * is XML, it will not attempt to convert it to JSON.</p>
+ *
  * <h3>Java Method Parameters</h3>
  *
  * <p>A parameter to a method can be a proper noun, an adjective, a context parameter, or a noun value.  By default, a parameter is mapped

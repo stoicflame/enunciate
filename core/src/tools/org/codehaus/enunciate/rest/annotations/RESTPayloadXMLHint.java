@@ -22,14 +22,13 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Indicates an object that represents a REST payload.
+ * Annotates a method on a {@link org.codehaus.enunciate.rest.annotations.RESTPayload} to indicate
+ * that the method returns a hint as to whether the payload is XML. The method is required to return
+ * a boolean.
  *
  * @author Ryan Heaton
  */
 @Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.TYPE} )
-public @interface RESTPayload {
-
-  boolean xml() default false;
-  
+@Target ( {ElementType.METHOD} )
+public @interface RESTPayloadXMLHint {
 }

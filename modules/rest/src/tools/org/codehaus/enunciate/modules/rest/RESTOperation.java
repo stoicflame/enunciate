@@ -58,9 +58,11 @@ public class RESTOperation {
   private final String JSONPParameter;
 
   private final boolean wrapsPayload;
+  private final boolean wrapsXMLPayload;
   private final Method payloadBodyMethod;
   private final Method payloadContentTypeMethod;
   private final Method payloadHeadersMethod;
+  private final Method payloadXMLHintMethod;
 
   /**
    * Construct a REST operation.
@@ -176,9 +178,11 @@ public class RESTOperation {
     }
 
     boolean wrapsPayload = false;
+    boolean wrapsXMLPayload = false;
     Method payloadBodyMethod = null;
     Method payloadContentTypeMethod = null;
     Method payloadHeadersMethod = null;
+    Method payloadXMLHintMethod = null;
     Class returnType = null;
     if (!Void.TYPE.equals(method.getReturnType())) {
       returnType = method.getReturnType();
@@ -186,6 +190,7 @@ public class RESTOperation {
       if (returnType.isAnnotationPresent(RESTPayload.class)) {
         //load the payload methods if its a payload.
         wrapsPayload = true;
+        wrapsXMLPayload = ((RESTPayload)returnType.getAnnotation(RESTPayload.class)).xml();
         for (Method payloadMethod : returnType.getMethods()) {
           if (payloadMethod.isAnnotationPresent(RESTPayloadBody.class)) {
             if (payloadBodyMethod != null) {
@@ -235,6 +240,21 @@ public class RESTOperation {
               payloadHeadersMethod = payloadMethod;
             }
           }
+
+          if (payloadMethod.isAnnotationPresent(RESTPayloadXMLHint.class)) {
+            if (payloadHeadersMethod != null) {
+              throw new IllegalStateException("There may only be one payload XML hint method on a REST payload.");
+            }
+            else if (payloadMethod.getParameterTypes().length > 0) {
+              throw new IllegalStateException("A payload XML hint method must have no parameters.");
+            }
+            else if ((Boolean.TYPE.equals(payloadMethod.getReturnType())) || (Boolean.class.equals(payloadMethod.getReturnType()))) {
+              payloadXMLHintMethod = payloadMethod;
+            }
+            else {
+              throw new IllegalStateException("The payload headers method must return a map.");
+            }
+          }
         }
       }
       else if (!returnType.isAnnotationPresent(XmlRootElement.class) && (!DataHandler.class.isAssignableFrom(returnType))) {
@@ -268,9 +288,11 @@ public class RESTOperation {
     this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
     this.JSONPParameter = jsonpParameter;
     this.wrapsPayload = wrapsPayload;
+    this.wrapsXMLPayload = wrapsXMLPayload;
     this.payloadBodyMethod = payloadBodyMethod;
     this.payloadContentTypeMethod = payloadContentTypeMethod;
     this.payloadHeadersMethod = payloadHeadersMethod;
+    this.payloadXMLHintMethod = payloadXMLHintMethod;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
@@ -515,6 +537,15 @@ public class RESTOperation {
   }
 
   /**
+   * The method supporting this operation.
+   *
+   * @return The method supporting this operation.
+   */
+  public Method getMethod() {
+    return method;
+  }
+
+  /**
    * The character set of this REST operation.
    *
    * @return The character set of this REST operation.
@@ -542,6 +573,15 @@ public class RESTOperation {
   }
 
   /**
+   * Whether this operation wraps an XML payload.
+   *
+   * @return Whether this operation wraps an XML payload.
+   */
+  public boolean isWrapsXMLPayload() {
+    return wrapsXMLPayload;
+  }
+
+  /**
    * The method to use to get the payload body.
    *
    * @return The method to use to get the payload body.
@@ -557,6 +597,15 @@ public class RESTOperation {
    */
   public Method getPayloadContentTypeMethod() {
     return payloadContentTypeMethod;
+  }
+
+  /**
+   * The method to use to get the payload xml hint.
+   *
+   * @return The method to use to get the payload xml hint.
+   */
+  public Method getPayloadXmlHintMethod() {
+    return payloadXMLHintMethod;
   }
 
   /**

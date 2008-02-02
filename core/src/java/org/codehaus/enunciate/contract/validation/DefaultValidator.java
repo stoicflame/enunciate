@@ -243,6 +243,7 @@ public class DefaultValidator implements Validator {
               MethodDeclaration payloadBodyMethod = null;
               MethodDeclaration payloadContentTypeMethod = null;
               MethodDeclaration payloadHeadersMethod = null;
+              MethodDeclaration payloadXMLHintMethod = null;
               for (MethodDeclaration payloadMethod : declaration.getMethods()) {
                 if (payloadMethod.getAnnotation(RESTPayloadBody.class) != null) {
                   if (payloadBodyMethod != null) {
@@ -301,6 +302,24 @@ public class DefaultValidator implements Validator {
                     }
                     else {
                       payloadHeadersMethod = payloadMethod;
+                    }
+                  }
+                }
+
+                if (payloadMethod.getAnnotation(RESTPayloadXMLHint.class) != null) {
+                  if (payloadXMLHintMethod != null) {
+                    result.addError(payloadMethod.getPosition(), "There may only be one payload XML hint method.");
+                  }
+                  else if (payloadMethod.getParameters().size() > 0) {
+                    result.addError(payloadMethod.getPosition(), "A payload XML hint method must have no parameters.");
+                  }
+                  else {
+                    DecoratedTypeMirror payloadXMLHintReturnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(payloadMethod.getReturnType());
+                    if (!payloadXMLHintReturnType.isPrimitive() && !payloadXMLHintReturnType.isInstanceOf(Boolean.class.getName())) {
+                      result.addError(payloadMethod.getPosition(), "A payload XML hint method must return a boolean.");
+                    }
+                    else {
+                      payloadXMLHintMethod = payloadMethod;
                     }
                   }
                 }

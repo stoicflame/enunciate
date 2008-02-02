@@ -22,6 +22,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.activation.DataHandler;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A controller for the JSON API.
@@ -62,6 +64,41 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   @Override
   protected boolean isOperationAllowed(RESTOperation operation) {
     return super.isOperationAllowed(operation) && operation.getVerb() == VerbType.read;
+  }
+
+  @Override
+  protected RESTResultView createDataHandlerView(RESTOperation operation, DataHandler dataHandler) {
+    boolean xml = operation.isWrapsXMLPayload() || (dataHandler != null && String.valueOf(dataHandler.getContentType()).toLowerCase().contains("xml"));
+    return xml ? new JSONDataHandlerView(operation, dataHandler, getNamespaces2Prefixes()) : super.createDataHandlerView(operation, dataHandler);
+  }
+
+  @Override
+  protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
+    //todo: you've got to create another annotation @RESTPayloadIsXML
+    //todo: you've got to document the new annotation and the xml() value of RESTOperation
+    boolean xml = operation.isWrapsXMLPayload();
+
+    if (operation.getPayloadXmlHintMethod() != null) {
+      try {
+        Boolean xmlHintResult = (Boolean) operation.getPayloadXmlHintMethod().invoke(result);
+        xml |= xmlHintResult != null && xmlHintResult;
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    if (operation.getPayloadContentTypeMethod() != null) {
+      try {
+        String contentType = (String) operation.getPayloadContentTypeMethod().invoke(result);
+        xml |= contentType != null && contentType.toLowerCase().contains("xml");
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return xml ? new JSONPayloadView(operation, result, getNamespaces2Prefixes()) : super.createPayloadView(operation, result);
   }
 
   @Override

@@ -16,11 +16,11 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.servlet.View;
-
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBException;
 import java.util.Map;
 
 /**
@@ -28,20 +28,26 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class DataHandlerView implements View {
+public class DataHandlerView extends RESTResultView<DataHandler> {
 
-  private final DataHandler dataHandler;
-
-  public DataHandlerView(DataHandler dataHandler) {
-    this.dataHandler = dataHandler;
+  public DataHandlerView(RESTOperation operation, DataHandler dataHandler, Map<String, String> ns2prefix) {
+    super(operation, dataHandler, ns2prefix);
   }
 
-  public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    response.setStatus(HttpServletResponse.SC_OK);
-    if (dataHandler != null) {
-      response.setContentType(this.dataHandler.getContentType());
-      this.dataHandler.writeTo(response.getOutputStream());
+  @Override
+  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (getResult() != null) {
+      getResult().writeTo(response.getOutputStream());
     }
-    response.flushBuffer();
+  }
+
+  @Override
+  protected String getContentType() {
+    return getResult() != null && getResult().getContentType() != null ? getResult().getContentType() : "application/octet-stream";
+  }
+
+  @Override
+  protected Marshaller getMarshaller() throws JAXBException {
+    return null;
   }
 }

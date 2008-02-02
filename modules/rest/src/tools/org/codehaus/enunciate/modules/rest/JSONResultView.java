@@ -23,15 +23,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletOutputStream;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 import java.util.Map;
+import java.io.IOException;
 
 /**
  * A JSON view of a REST result.
  *
  * @author Ryan Heaton
  */
-public class JSONResultView extends RESTResultView {
+public class JSONResultView<R> extends RESTResultView<R> {
 
   /**
    * Construct a view for the result of a REST operation.
@@ -40,7 +43,7 @@ public class JSONResultView extends RESTResultView {
    * @param result    The result.
    * @param ns2prefix The map of namespaces to prefixes.
    */
-  public JSONResultView(RESTOperation operation, Object result, Map<String, String> ns2prefix) {
+  public JSONResultView(RESTOperation operation, R result, Map<String, String> ns2prefix) {
     super(operation, result, ns2prefix);
   }
 
@@ -66,13 +69,19 @@ public class JSONResultView extends RESTResultView {
         callbackName = null;
       }
     }
+    
+    marshalToStream(marshaller, request, outStream);
+
+    if (callbackName != null) {
+      outStream.print(")");
+    }
+  }
+
+  protected void marshalToStream(Marshaller marshaller, HttpServletRequest request, ServletOutputStream outStream) throws XMLStreamException, IOException, JAXBException {
     XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
       new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
       new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
     marshaller.marshal(getResult(), streamWriter);
-    if (callbackName != null) {
-      outStream.print(")");
-    }
   }
 
 

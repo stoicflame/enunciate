@@ -162,6 +162,9 @@
   &lt;fileset dir="${enunciate.home}"&gt;
     &lt;include name="enunciate-full-*.jar"/&gt;
   &lt;/fileset&gt;
+  &lt;fileset dir="${java.home}"&gt;
+    &lt;include name="lib/tools.jar"/&gt;
+  &lt;/fileset&gt;
 &lt;/path&gt;
 
 &lt;taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask"&gt;
@@ -178,7 +181,8 @@
       </code>
 
       <p>Exports the fully-packaged, fully operational war (the artifact identified by the id "spring.war.file") to
-      ${tomcat.home}/webapps/myapp.war, assuming ${enunciate.home} refers to the enunciate home directory.</p>
+      ${tomcat.home}/webapps/myapp.war, assuming ${enunciate.home} refers to the enunciate home directory. <u>Note
+      that it's important to include $JAVA_HOME/lib/tools.jar on the classpath when invoking Enunciate.</u></p>
 
       <a name="maven"><div class="break">&nbsp;</div></a>
       <h1>Maven</h1>

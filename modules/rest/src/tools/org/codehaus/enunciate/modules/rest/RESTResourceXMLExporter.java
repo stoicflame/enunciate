@@ -271,14 +271,36 @@ public class RESTResourceXMLExporter extends AbstractController {
    */
   protected View createView(RESTOperation operation, Object result) {
     if (result instanceof DataHandler) {
-      return new DataHandlerView((DataHandler) result);
+      return createDataHandlerView(operation, (DataHandler) result);
     }
     else if (operation.isWrapsPayload()) {
-      return new RESTPayloadView(operation, result);
+      return createPayloadView(operation, result);
     }
     else {
       return createRESTView(operation, result);
     }
+  }
+
+  /**
+   * Create the data handler view for the specified data handler.
+   *
+   * @param operation The operation.
+   * @param dataHandler The data handler.
+   * @return The data handler.
+   */
+  protected RESTResultView createDataHandlerView(RESTOperation operation, DataHandler dataHandler) {
+    return new DataHandlerView(operation, dataHandler, getNamespaces2Prefixes());
+  }
+
+  /**
+   * Create the REST payload view for the specified operation and result.
+   *
+   * @param operation The operation.
+   * @param result The result of the invocation of the operation.
+   * @return The payload view.
+   */
+  protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
+    return new RESTPayloadView(operation, result, getNamespaces2Prefixes());
   }
 
   /**
