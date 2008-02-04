@@ -370,6 +370,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       model.setVariable("title", this.title);
     }
 
+    model.setVariable("baseAddress", model.getBaseDeploymentAddress());
+    model.setVariable("restResourcePath", new RestResourcePathMethod());
+    model.setVariable("jsonResourcePath", new JsonResourcePathMethod());
+
     processTemplate(getDocsTemplateURL(), model);
   }
 

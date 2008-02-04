@@ -255,7 +255,7 @@ Template library for WSDL.
 --]
 [#macro processSOAPServicePort endpointInterface]
     <port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
-      <${soap}:address location="${endpointInterface.soapAddressLocation}"/>
+      <${soap}:address location="${soapAddressLocation(endpointInterface)}"/>
     </port>
 [/#macro]
 

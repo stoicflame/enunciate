@@ -48,6 +48,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
   private String defaultSoapSubcontext = "/soap/";
+  private String defaultRestSubcontext = "/rest/";
+  private String defaultJsonSubcontext = "/json/";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -242,6 +244,74 @@ public class EnunciateConfiguration implements ErrorHandler {
     }
 
     this.defaultSoapSubcontext = defaultSoapSubcontext;
+  }
+
+  /**
+   * The default rest context.
+   *
+   * @return The default rest context.
+   */
+  public String getDefaultRestSubcontext() {
+    return defaultRestSubcontext;
+  }
+
+  /**
+   * The default rest context.
+   *
+   * @param defaultRestSubcontext The default rest context.
+   */
+  public void setDefaultRestSubcontext(String defaultRestSubcontext) {
+    if (defaultRestSubcontext == null) {
+      throw new IllegalArgumentException("The default REST context must not be null.");
+    }
+
+    if ("".equals(defaultRestSubcontext)) {
+      throw new IllegalArgumentException("The default REST context must not be the emtpy string.");
+    }
+
+    if (!defaultRestSubcontext.startsWith("/")) {
+      defaultRestSubcontext = "/" + defaultRestSubcontext;
+    }
+
+    if (!defaultRestSubcontext.endsWith("/")) {
+      defaultRestSubcontext = defaultRestSubcontext + "/";
+    }
+
+    this.defaultRestSubcontext = defaultRestSubcontext;
+  }
+
+  /**
+   * The default json context.
+   *
+   * @return The default json context.
+   */
+  public String getDefaultJsonSubcontext() {
+    return defaultJsonSubcontext;
+  }
+
+  /**
+   * The default json context.
+   *
+   * @param defaultJsonSubcontext The default json context.
+   */
+  public void setDefaultJsonSubcontext(String defaultJsonSubcontext) {
+    if (defaultJsonSubcontext == null) {
+      throw new IllegalArgumentException("The default JSON context must not be null.");
+    }
+
+    if ("".equals(defaultJsonSubcontext)) {
+      throw new IllegalArgumentException("The default JSON context must not be the emtpy string.");
+    }
+
+    if (!defaultJsonSubcontext.startsWith("/")) {
+      defaultJsonSubcontext = "/" + defaultJsonSubcontext;
+    }
+
+    if (!defaultJsonSubcontext.endsWith("/")) {
+      defaultJsonSubcontext = defaultJsonSubcontext + "/";
+    }
+
+    this.defaultJsonSubcontext = defaultJsonSubcontext;
   }
 
   /**

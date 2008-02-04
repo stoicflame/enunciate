@@ -40,6 +40,7 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
   //todo: support versioning a REST endpoint.
 
   private final Collection<RESTMethod> RESTMethods;
+  private String baseURL;
 
   public RESTEndpoint(ClassDeclaration delegate) {
     super(delegate);
@@ -87,6 +88,24 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
    */
   public Collection<RESTMethod> getRESTMethods() {
     return RESTMethods;
+  }
+
+  /**
+   * The base URL for REST endpoints.
+   *
+   * @return The base URL for REST endpoints.
+   */
+  public String getBaseURL() {
+    return baseURL;
+  }
+
+  /**
+   * The base URL for REST endpoints.
+   *
+   * @param baseURL The base URL for REST endpoints.
+   */
+  public void setBaseURL(String baseURL) {
+    this.baseURL = baseURL;
   }
 
   /**

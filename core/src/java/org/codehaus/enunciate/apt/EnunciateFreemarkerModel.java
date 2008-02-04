@@ -22,6 +22,7 @@ import com.sun.mirror.type.DeclaredType;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.Schema;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -57,6 +58,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
   private File fileOutputDirectory = null;
+  private String baseDeploymentAddress = null;
+  private EnunciateConfiguration enunciateConfig = null;
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
@@ -442,5 +445,41 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void setFileOutputDirectory(File fileOutputDirectory) {
     this.fileOutputDirectory = fileOutputDirectory;
+  }
+
+  /**
+   * The base deployment address for the Enunciate application.
+   *
+   * @return The base deployment address for the Enunciate application.
+   */
+  public String getBaseDeploymentAddress() {
+    return baseDeploymentAddress;
+  }
+
+  /**
+   * The base deployment address for the Enunciate application.
+   *
+   * @param baseDeploymentAddress The base deployment address for the Enunciate application.
+   */
+  public void setBaseDeploymentAddress(String baseDeploymentAddress) {
+    this.baseDeploymentAddress = baseDeploymentAddress;
+  }
+
+  /**
+   * The enunciate configuration.
+   *
+   * @return The enunciate configuration.
+   */
+  public EnunciateConfiguration getEnunciateConfig() {
+    return enunciateConfig;
+  }
+
+  /**
+   * The enunciate configuration.
+   *
+   * @param enunciateConfig The enunciate configuration.
+   */
+  public void setEnunciateConfig(EnunciateConfiguration enunciateConfig) {
+    this.enunciateConfig = enunciateConfig;
   }
 }

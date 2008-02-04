@@ -18,7 +18,7 @@
     <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
       <types>
     [#list schema.typeDefinitions as type]
-        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if type.superclass?exists && type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
+        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
       [#if type.docValue?exists]
           <documentation>
             <![CDATA[${type.docValue}]]>
@@ -158,10 +158,11 @@
 [/@forEachWsdl]
     </wsdls>
   </soap>
-  <rest>
+  <rest baseAddress="${baseAddress}">
     <resources>
 [#list nouns2methods?values as methodList]
-      <resource name="${(methodList?first).noun}">
+  [#assign noun=(methodList?first).noun]
+      <resource name="${noun}" xmlPath="${restResourcePath(noun)}" jsonPath="${jsonResourcePath(noun)}">
   [#list methodList as method]
     [#list method.verbs as verb]
         <operation type="${verb}" requiresResourceId="${method.properNoun?exists?string}">

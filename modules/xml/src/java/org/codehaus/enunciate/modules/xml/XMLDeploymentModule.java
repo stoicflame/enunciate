@@ -27,6 +27,7 @@ import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
 import org.codehaus.enunciate.modules.xml.config.XMLRuleSet;
 import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.template.freemarker.SoapAddressLocationMethod;
 import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
@@ -197,6 +198,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     model.put("prefix", new PrefixMethod());
+    model.put("soapAddressLocation", new SoapAddressLocationMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     processTemplate(getTemplateURL(), model);

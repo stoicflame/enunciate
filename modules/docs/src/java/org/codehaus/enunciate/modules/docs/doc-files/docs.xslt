@@ -685,6 +685,24 @@
                         </li>
                       </xsl:for-each>
                     </ul>
+
+                    <h2>Mount Points</h2>
+
+                    <p>The following URLs are examples of where this resource is mounted <xsl:if test="contains(../../@baseAddress, 'localhost:8080')">(you may need to change the host, port, and application context)</xsl:if>:</p>
+
+                    <table>
+                      <tr>
+                        <td>XML:</td>
+                        <td><a href="{concat(../../@baseAddress, @xmlPath)}"><xsl:value-of select="concat(../../@baseAddress, @xmlPath)"/></a></td>
+                      </tr>
+                      <tr>
+                        <td>*JSON:</td>
+                        <td><a href="{concat(../../@baseAddress, @jsonPath)}"><xsl:value-of select="concat(../../@baseAddress, @jsonPath)"/></a></td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">*JSON endpoints are mounted read-only.</td>
+                      </tr>
+                    </table>
                   </xsl:if>
 
                 </div>
@@ -704,10 +722,10 @@
                       <p>
                         This method requires a resource id on the URL.
                         <xsl:choose>
-                          <xsl:when test="@type='read'">(e.g. "GET <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
-                          <xsl:when test="@type='create'">(e.g. "PUT <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
-                          <xsl:when test="@type='update'">(e.g. "POST <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
-                          <xsl:when test="@type='delete'">(e.g. "DELETE <xsl:value-of select="concat('/context/', ../@name, '/[id-goes-here]')"/>".)</xsl:when>
+                          <xsl:when test="@type='read'">(e.g. "GET <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
+                          <xsl:when test="@type='create'">(e.g. "PUT <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
+                          <xsl:when test="@type='update'">(e.g. "POST <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
+                          <xsl:when test="@type='delete'">(e.g. "DELETE <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
                           <xsl:otherwise></xsl:otherwise>
                         </xsl:choose>
                       </p>

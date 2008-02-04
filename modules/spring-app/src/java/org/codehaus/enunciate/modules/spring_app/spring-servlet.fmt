@@ -74,7 +74,7 @@
 
         <!-- mapping for the SOAP endpoint for ${endpointInterface.serviceName} -->
         [#--todo: what about eis with the same name, different namespace?--]
-        <entry key="${endpointInterface.soapAddressPath}">
+        <entry key="${soapAddressPath(endpointInterface)}">
           <bean parent="soap-endpoint">
             <property name="serviceClass" value="${impl.qualifiedName}"/>
           [#if wsdl.properties.filename?exists]
@@ -93,7 +93,7 @@
   [/@forEachWsdl]
 
   [@forEachRESTNoun]
-        <entry key="/rest/${noun.antPattern}">
+        <entry key="/${restSubcontext}/${noun.antPattern}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -104,7 +104,7 @@
           </bean>
         </entry>
 
-        <entry key="/rest/${noun.antPattern}/**">
+        <entry key="/${restSubcontext}/${noun.antPattern}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -115,7 +115,7 @@
           </bean>
         </entry>
 
-        <entry key="/json/${noun.antPattern}">
+        <entry key="/${jsonSubcontext}/${noun.antPattern}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -126,7 +126,7 @@
           </bean>
         </entry>
 
-        <entry key="/json/${noun.antPattern}/**">
+        <entry key="/${jsonSubcontext}/${noun.antPattern}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">

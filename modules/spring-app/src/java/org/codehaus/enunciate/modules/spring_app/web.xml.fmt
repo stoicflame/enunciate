@@ -82,7 +82,7 @@
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>${endpointInterface.soapAddressPath}</url-pattern>
+    <url-pattern>${soapAddressPath(endpointInterface)}</url-pattern>
   </servlet-mapping>
 
         [/#if]
@@ -105,12 +105,12 @@
   [/@forEachWsdl]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>${restSubcontext}*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>/json/*</url-pattern>
+    <url-pattern>${jsonSubcontext}*</url-pattern>
   </servlet-mapping>
 
   <mime-mapping>

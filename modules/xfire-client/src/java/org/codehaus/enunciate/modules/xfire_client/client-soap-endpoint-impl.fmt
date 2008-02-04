@@ -18,10 +18,10 @@ public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServic
   private final ${endpointInterface.simpleName} proxy;
 
   /**
-   * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${endpointInterface.soapAddressLocation}").
+   * Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${soapAddressLocation(endpointInterface)}").
    */
   public ${endpointInterface.simpleName}Impl() {
-    this("${endpointInterface.soapAddressLocation}");
+    this("${soapAddressLocation(endpointInterface)}");
   }
 
   /**

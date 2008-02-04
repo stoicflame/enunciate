@@ -34,10 +34,7 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.xfire_client.config.XFireClientRuleSet;
-import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
-import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.xfire.annotations.HandlerChainAnnotation;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -167,7 +164,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     URL jdk14EnumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
     URL jdk15EnumTypeTemplate = getTemplateURL("client-jdk15-enum-type.fmt");
 
-
     //set up the model, first allowing for jdk 14 compatability.
     EnunciateFreemarkerModel model = getModel();
     Map<String, String> conversions = getClientPackageConversions();
@@ -178,6 +174,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     model.put("classnameFor", classnameFor);
     model.put("componentTypeFor", componentTypeFor);
     model.put("collectionTypeFor", collectionTypeFor);
+    model.put("soapAddressLocation", new SoapAddressLocationMethod());
 
     String uuid = this.uuid;
     model.put("uuid", uuid);

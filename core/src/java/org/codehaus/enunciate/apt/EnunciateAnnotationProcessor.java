@@ -62,7 +62,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   private IOException ioe = null;
   private RuntimeException re = null;
   private final Enunciate enunciate;
-  private final String deploymentBaseURL;
   private final String[] additionalApiClasses;
 
   /**
@@ -83,17 +82,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     this.enunciate = enunciate;
-
-    EnunciateConfiguration config = this.enunciate.getConfig();
-    String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
-    if (config.getDeploymentContext() != null) {
-      baseURL += config.getDeploymentContext();
-    }
-    else if ((config.getLabel() != null) && (!"".equals(config.getLabel()))) {
-      //we don't have a default context set, so we'll just guess that it's the project label.
-      baseURL += ("/" + config.getLabel());
-    }
-    this.deploymentBaseURL = baseURL;
     this.additionalApiClasses = additionalApiClasses;
   }
 
@@ -154,8 +142,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
-          endpointInterface.setSoapAddressBase(this.deploymentBaseURL);
-          endpointInterface.setSoapAddressPath(getSoapAddressPath(endpointInterface));
           model.add(endpointInterface);
         }
 
@@ -182,24 +168,20 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       debug("Replaced namespace prefix %s with %s for namespace %s as specified in the config.", old, prefix, ns);
     }
 
+    String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
+    if (config.getDeploymentContext() != null) {
+      baseURL += config.getDeploymentContext();
+    }
+    else if ((config.getLabel() != null) && (!"".equals(config.getLabel()))) {
+      //we don't have a default context set, so we'll just guess that it's the project label.
+      baseURL += ("/" + config.getLabel());
+    }
+    model.setBaseDeploymentAddress(baseURL);
+    model.setEnunciateConfig(config);
+
     validate(model);
 
     return model;
-  }
-
-  /**
-   * Get the soap address path for the specified endpoint interface.
-   *
-   * @param endpointInterface The endpoint interface for which to get the soap address path.
-   * @return The soap address path for the endpoint interface.
-   */
-  protected String getSoapAddressPath(EndpointInterface endpointInterface) {
-    EnunciateConfiguration config = this.enunciate.getConfig();
-    String path = config.getDefaultSoapSubcontext() + endpointInterface.getServiceName();
-    if (config.getSoapServices2Paths().containsKey(endpointInterface.getServiceName())) {
-      path = config.getSoapServices2Paths().get(endpointInterface.getServiceName());
-    }
-    return path;
   }
 
   /**

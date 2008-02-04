@@ -410,6 +410,7 @@
     <xs:sequence>
       <xs:element name="resources" type="resources" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
+    <xs:attribute name="baseAddress" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="resources">
@@ -434,6 +435,9 @@
     <xs:sequence>
       <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="xmlPath" type="xs:string"/>
+    <xs:attribute name="jsonPath" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="operation">

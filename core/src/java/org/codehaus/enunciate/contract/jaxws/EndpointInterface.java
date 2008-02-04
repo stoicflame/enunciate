@@ -38,8 +38,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
   private final Collection<EndpointImplementation> impls;
-  private String soapAddressBase;
-  private String soapAddressPath;
 
   public EndpointInterface(TypeDeclaration delegate) {
     super(delegate);
@@ -281,51 +279,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     }
 
     return style;
-  }
-
-  /**
-   * Get the soap address base for this endpoint.
-   *
-   * @return The soap address base for this endpoint.
-   */
-  public String getSoapAddressBase() {
-    return soapAddressBase;
-  }
-
-  /**
-   * The soap address base for this endpoint.
-   *
-   * @param soapAddressBase The soap address base for this endpoint.
-   */
-  public void setSoapAddressBase(String soapAddressBase) {
-    this.soapAddressBase = soapAddressBase;
-  }
-
-  /**
-   * The soap address path for this endpoint.
-   *
-   * @return The soap address path for this endpoint.
-   */
-  public String getSoapAddressPath() {
-    return soapAddressPath;
-  }
-
-  /**
-   * The soap address path for this endpoint.
-   *
-   * @param soapAddressPath The soap address path for this endpoint.
-   */
-  public void setSoapAddressPath(String soapAddressPath) {
-    this.soapAddressPath = soapAddressPath;
-  }
-
-  /**
-   * The soap address location of this endpoint.
-   *
-   * @return The soap address location of this endpoint.
-   */
-  public String getSoapAddressLocation() {
-    return getSoapAddressBase() + getSoapAddressPath();
   }
 
   // Inherited.

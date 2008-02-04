@@ -20,6 +20,7 @@ import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.SoapAddressPathMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Artifact;
@@ -360,6 +361,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     model.put("defaultAutowire", getDefaultAutowire());
     model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
     model.put("springDispatcherServletClass", getDispatcherServletClass());
+    model.put("soapAddressPath", new SoapAddressPathMethod());
+    model.put("restSubcontext", model.getEnunciateConfig().getDefaultRestSubcontext());
+    model.put("jsonSubcontext", model.getEnunciateConfig().getDefaultJsonSubcontext());
     if (!globalServiceInterceptors.isEmpty()) {
       for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
         if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
