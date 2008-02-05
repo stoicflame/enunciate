@@ -78,20 +78,30 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
     //todo: you've got to document the new annotation and the xml() value of RESTOperation
     boolean xml = operation.isWrapsXMLPayload();
 
-    if (operation.getPayloadXmlHintMethod() != null) {
+    if (!xml && operation.getPayloadXmlHintMethod() != null) {
       try {
         Boolean xmlHintResult = (Boolean) operation.getPayloadXmlHintMethod().invoke(result);
-        xml |= xmlHintResult != null && xmlHintResult;
+        xml = xmlHintResult != null && xmlHintResult;
       }
       catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
 
-    if (operation.getPayloadContentTypeMethod() != null) {
+    if (!xml && operation.getPayloadContentTypeMethod() != null) {
       try {
         String contentType = (String) operation.getPayloadContentTypeMethod().invoke(result);
-        xml |= contentType != null && contentType.toLowerCase().contains("xml");
+        xml = contentType != null && contentType.toLowerCase().contains("xml");
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    if (!xml && operation.getPayloadBodyMethod() != null) {
+      try {
+        Object body = operation.getPayloadBodyMethod().invoke(result);
+        xml = ((body instanceof DataHandler) && (String.valueOf(((DataHandler)body).getContentType()).toLowerCase().contains("xml")));
       }
       catch (Exception e) {
         throw new RuntimeException(e);

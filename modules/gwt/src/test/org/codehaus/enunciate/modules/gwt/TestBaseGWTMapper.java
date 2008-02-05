@@ -32,7 +32,7 @@ public class TestBaseGWTMapper extends TestCase {
    */
   public void testBasicMappings() throws Exception {
     GWTMappingContext context = new GWTMappingContext();
-    GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(BeanOne.class, null);
+    GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(BeanOne.class, null, null);
     BeanOne jaxbObject = new BeanOne();
     jaxbObject.setProperty1("value1");
     jaxbObject.setProperty2(987654);

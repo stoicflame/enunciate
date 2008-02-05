@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import javax.xml.bind.annotation.XmlElement;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
@@ -91,7 +92,7 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
       }
 
       XmlJavaTypeAdapter adapterInfo = findTypeAdapter(jaxbProperty);
-      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(getter.getGenericReturnType(), adapterInfo);
+      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(getter.getGenericReturnType(), adapterInfo, findXmlElement(jaxbProperty));
       try {
         gwtProperty.getWriteMethod().invoke(gwtObject, mapper.toGWT(propertyValue, context));
       }
@@ -131,6 +132,16 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
     return adapterInfo;
   }
 
+  private XmlElement findXmlElement(PropertyDescriptor property){
+    XmlElement xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+
+    if ((xmlElement == null) && (property.getWriteMethod() != null)) {
+      xmlElement = property.getWriteMethod().getAnnotation(XmlElement.class);
+    }
+
+    return xmlElement;
+  }
+
   public J toJAXB(G gwtObject, GWTMappingContext context) throws GWTMappingException {
     if (context.getMappedObjects().containsKey(gwtObject)) {
       return (J) context.getMappedObjects().get(gwtObject);
@@ -160,7 +171,7 @@ public abstract class BaseGWTMapper<J, G> implements GWTMapper<J, G> {
         continue;
       }
 
-      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty));
+      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       try {
         jaxbProperty.getWriteMethod().invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }

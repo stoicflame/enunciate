@@ -21,6 +21,7 @@ import javax.xml.namespace.QName;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -47,11 +48,12 @@ public class GWTMapperIntrospector {
     MAPPERS.put(XMLGregorianCalendar.class, new XMLGregorianCalendarGWTMapper());
   }
 
-  public static GWTMapper getGWTMapper(Type jaxbType, XmlJavaTypeAdapter adapterInfo) {
+  public static GWTMapper getGWTMapper(Type jaxbType, XmlJavaTypeAdapter adapterInfo, XmlElement elementInfo) {
     if (jaxbType == null) {
       jaxbType = Object.class;
     }
     
+    Class specifiedType = ((elementInfo != null) && (elementInfo.type() != null) && (elementInfo.type() != XmlElement.DEFAULT.class)) ? elementInfo.type() : null;
     GWTMapper mapper;
     if (MAPPERS.containsKey(jaxbType)) {
       mapper = MAPPERS.get(jaxbType);
@@ -69,56 +71,68 @@ public class GWTMapperIntrospector {
               keyType = typeArgs[0];
               valueType = typeArgs[1];
             }
-            mapper = new MapGWTMapper((Class<Map>) rawType, getGWTMapper(keyType, adapterInfo), getGWTMapper(valueType, adapterInfo));
+            mapper = new MapGWTMapper((Class<Map>) rawType, getGWTMapper(keyType, adapterInfo, null), getGWTMapper(valueType, adapterInfo, null));
           }
           else if (Collection.class.isAssignableFrom((Class) rawType)) {
             Type itemType = Object.class;
             Type[] typeArgs = ((ParameterizedType) jaxbType).getActualTypeArguments();
-            if ((typeArgs != null) && (typeArgs.length == 1)) {
+            //the type can be specified via annotation in this case...
+            if (specifiedType != null) {
+              itemType = specifiedType;
+            }
+            else if ((typeArgs != null) && (typeArgs.length == 1)) {
               itemType = typeArgs[0];
             }
-            mapper = new CollectionGWTMapper((Class<Collection>) rawType, getGWTMapper(itemType, adapterInfo));
+            mapper = new CollectionGWTMapper((Class<Collection>) rawType, getGWTMapper(itemType, adapterInfo, null));
           }
           else {
-            mapper = getGWTMapper(rawType, adapterInfo);
+            mapper = getGWTMapper(rawType, adapterInfo, elementInfo);
           }
         }
         else {
-          mapper = getGWTMapper(rawType, adapterInfo);
+          mapper = getGWTMapper(rawType, adapterInfo, elementInfo);
         }
       }
       else if (jaxbType instanceof GenericArrayType) {
-        mapper = new ArrayGWTMapper(getGWTMapper(((GenericArrayType) jaxbType).getGenericComponentType(), adapterInfo));
+        mapper = new ArrayGWTMapper(getGWTMapper(((GenericArrayType) jaxbType).getGenericComponentType(), adapterInfo, elementInfo));
       }
       else if (jaxbType instanceof TypeVariable) {
-        mapper = getGWTMapper(((TypeVariable) jaxbType).getBounds()[0], adapterInfo);
+        mapper = getGWTMapper(((TypeVariable) jaxbType).getBounds()[0], adapterInfo, elementInfo);
       }
       else if (jaxbType instanceof WildcardType) {
-        mapper = getGWTMapper(((WildcardType) jaxbType).getUpperBounds()[0], adapterInfo);
+        mapper = getGWTMapper(((WildcardType) jaxbType).getUpperBounds()[0], adapterInfo, elementInfo);
       }
       else if (jaxbType instanceof Class) {
         Class jaxbClass = ((Class) jaxbType);
         if (jaxbClass.isArray()) {
-          return jaxbClass.getComponentType().isPrimitive() ? DefaultGWTMapper.INSTANCE : new ArrayGWTMapper(getGWTMapper(jaxbClass.getComponentType(), adapterInfo));
+          mapper = jaxbClass.getComponentType().isPrimitive() ? DefaultGWTMapper.INSTANCE : new ArrayGWTMapper(getGWTMapper(jaxbClass.getComponentType(), adapterInfo, elementInfo));
         }
         else if (Collection.class.isAssignableFrom(jaxbClass)) {
-          return new CollectionGWTMapper((Class<? extends Collection>) jaxbClass, DefaultGWTMapper.INSTANCE);
+          if (specifiedType != null) {
+            mapper = new CollectionGWTMapper((Class<? extends Collection>) jaxbClass, getGWTMapper(specifiedType, adapterInfo, null));
+          }
+          else {
+            mapper = new CollectionGWTMapper((Class<? extends Collection>) jaxbClass, DefaultGWTMapper.INSTANCE);
+          }
         }
         else if (Map.class.isAssignableFrom(jaxbClass)) {
-          return new MapGWTMapper((Class<Map>) jaxbClass, DefaultGWTMapper.INSTANCE, DefaultGWTMapper.INSTANCE);
+          mapper = new MapGWTMapper((Class<Map>) jaxbClass, DefaultGWTMapper.INSTANCE, DefaultGWTMapper.INSTANCE);
         }
         else {
           adapterInfo = adapterInfo == null ? (XmlJavaTypeAdapter) jaxbClass.getAnnotation(XmlJavaTypeAdapter.class) : adapterInfo;
 
           if (adapterInfo != null) {
-            //if it's adapted, don't cache it.
-            GWTMapper adaptingMapper = getGWTMapper(findAdaptingType(adapterInfo.value()), null);
+            GWTMapper adaptingMapper = getGWTMapper(findAdaptingType(adapterInfo.value()), null, null);
             try {
+              //if it's adapted, don't cache it (return it directly).
               return new AdaptingGWTMapper(adapterInfo.value().newInstance(), adaptingMapper);
             }
             catch (Exception e) {
               throw new GWTMappingException(e);
             }
+          }
+          else if (specifiedType != null) {
+            mapper = getGWTMapper(specifiedType, null, null);
           }
           else if (Enum.class.isAssignableFrom(jaxbClass)) {
             mapper = new EnumGWTMapper(jaxbClass);
@@ -143,9 +157,10 @@ public class GWTMapperIntrospector {
         mapper = DefaultGWTMapper.INSTANCE;
       }
 
-      MAPPERS.put(jaxbType, mapper);
+      if (specifiedType == null) { //only cache if the type isn't specified.
+        MAPPERS.put(jaxbType, mapper);
+      }
     }
-
 
     return mapper;
   }

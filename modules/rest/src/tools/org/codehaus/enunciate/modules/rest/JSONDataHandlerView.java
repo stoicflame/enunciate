@@ -72,13 +72,16 @@ public class JSONDataHandlerView extends JSONResultView<DataHandler> {
           Attribute attribute = (Attribute) event;
           QName attributeName = attribute.getName();
           String attributeValue = attribute.getValue();
-          streamWriter.writeAttribute(attributeName.getPrefix(), attributeName.getNamespaceURI(), attributeName.getLocalPart(), attributeValue);
+          streamWriter.writeAttribute(attributeName.getNamespaceURI(), attributeName.getLocalPart(), attributeValue);
           break;
         case XMLStreamConstants.CDATA:
           streamWriter.writeCData(event.asCharacters().getData());
           break;
         case XMLStreamConstants.CHARACTERS:
-          streamWriter.writeCharacters(event.asCharacters().getData());
+          String trimmedData = event.asCharacters().getData().trim();
+          if (trimmedData.length() > 0) {
+            streamWriter.writeCharacters(trimmedData);
+          }
           break;
         case XMLStreamConstants.COMMENT:
           streamWriter.writeComment(((Comment)event).getText());
@@ -109,7 +112,7 @@ public class JSONDataHandlerView extends JSONResultView<DataHandler> {
           break;
         case XMLStreamConstants.START_ELEMENT:
           QName qName = event.asStartElement().getName();
-          streamWriter.writeStartElement(qName.getPrefix(), qName.getNamespaceURI(), qName.getLocalPart());
+          streamWriter.writeStartElement(qName.getNamespaceURI(), qName.getLocalPart());
           break;
       }
     }

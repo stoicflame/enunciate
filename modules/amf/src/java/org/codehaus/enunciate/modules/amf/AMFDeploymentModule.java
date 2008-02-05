@@ -241,15 +241,29 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
     model.setFileOutputDirectory(getServerSideGenerateDir());
 
-    HashMap<String, String> amfTypePackageConversions = new HashMap<String, String>();
+    TreeSet<String> packages = new TreeSet<String>(new Comparator<String>() {
+      public int compare(String package1, String package2) {
+        int comparison = package1.length() - package2.length();
+        if (comparison == 0) {
+          return package1.compareTo(package2);
+        }
+        return comparison;
+      }
+    });
+
     HashMap<String, String> as3Aliases = new HashMap<String, String>();
     for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
       for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
         if (!isAMFTransient(typeDefinition)) {
           as3Aliases.put(typeDefinition.getQualifiedName(), typeDefinition.getSimpleName());
-          amfTypePackageConversions.put(typeDefinition.getPackage().getQualifiedName(), typeDefinition.getPackage().getQualifiedName() + ".amf");
+          packages.add(typeDefinition.getPackage().getQualifiedName());
         }
       }
+    }
+
+    LinkedHashMap<String, String> amfTypePackageConversions = new LinkedHashMap<String, String>();
+    for (String pckg : packages) {
+      amfTypePackageConversions.put(pckg, pckg + ".amf");
     }
 
     info("Generating the AMF externalizable types and their associated mappers...");
@@ -628,10 +642,12 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
 
-    if (this.flexApps.size() > 0) {
+    if (isSwcDownloadable() || this.flexApps.size() > 0) {
       doFlexCompile();
-      enunciate.setProperty("flex.app.dir", getSwfCompileDir());
-      enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getSwfCompileDir()));
+      if (this.flexApps.size() > 0) {
+        enunciate.setProperty("flex.app.dir", getSwfCompileDir());
+        enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getSwfCompileDir()));
+      }
     }
   }
 

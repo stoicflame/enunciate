@@ -35,26 +35,20 @@ import java.util.*;
  */
 public class ClientPackageForMethod implements TemplateMethodModelEx {
 
-  private final LinkedHashMap<String, String> conversions;
+  private final TreeMap<String, String> conversions;
 
   /**
    * @param conversions The conversions.
    */
   public ClientPackageForMethod(Map<String, String> conversions) {
-    if (conversions == null) {
-      conversions = new LinkedHashMap<String, String>();
-    }
-
-    this.conversions = new LinkedHashMap<String, String>();
-    TreeSet<String> keys = new TreeSet<String>(new Comparator<String>() {
+    this.conversions = new TreeMap<String, String>(new Comparator<String>() {
       public int compare(String package1, String package2) {
         return package2.length() == package1.length() ? package1.compareTo(package2) : package2.length() - package1.length();
       }
     });
-    keys.addAll(conversions.keySet());
 
-    for (String key : keys) {
-      this.conversions.put(key, conversions.get(key));
+    if (conversions != null) {
+      this.conversions.putAll(conversions);
     }
   }
 
@@ -146,12 +140,17 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    */
   public String convert(String fqn) {
     //todo: support for regular expressions or wildcards?
+    if (this.conversions.containsKey(fqn)) {
+      return this.conversions.get(fqn);
+    }
+
     for (String pkg : this.conversions.keySet()) {
       if (fqn.startsWith(pkg)) {
         String conversion = conversions.get(pkg);
         return conversion + fqn.substring(pkg.length());
       }
     }
+
     return fqn;
   }
 

@@ -59,7 +59,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
 
     Object[] mappedParams = new Object[paramTypes.length];
     for (int i = 0; i < paramTypes.length; i++) {
-      mappedParams[i] = GWTMapperIntrospector.getGWTMapper(paramTypes[i], null).toJAXB(params[i], mappingContext);
+      mappedParams[i] = GWTMapperIntrospector.getGWTMapper(paramTypes[i], null, null).toJAXB(params[i], mappingContext);
     }
 
     Object returnValue;
@@ -77,7 +77,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
       for (int i = 0; i < method.getExceptionTypes().length; i++) {
         Class exceptionType = method.getExceptionTypes()[i];
         if (exceptionType.isInstance(targetException)) {
-          throw (Exception) GWTMapperIntrospector.getGWTMapper(exceptionType, null).toGWT(targetException, mappingContext);
+          throw (Exception) GWTMapperIntrospector.getGWTMapper(exceptionType, null, null).toGWT(targetException, mappingContext);
         }
       }
 
@@ -90,7 +90,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
     }
 
     if (method.getReturnType() != Void.TYPE) {
-      returnValue = GWTMapperIntrospector.getGWTMapper(method.getGenericReturnType(), null).toGWT(returnValue, mappingContext);
+      returnValue = GWTMapperIntrospector.getGWTMapper(method.getGenericReturnType(), null, null).toGWT(returnValue, mappingContext);
     }
     
     return returnValue;

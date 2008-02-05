@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.amf;
 
 import org.springframework.beans.BeanUtils;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.beans.PropertyDescriptor;
@@ -91,7 +92,8 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
       }
 
       XmlJavaTypeAdapter adapterInfo = findTypeAdapter(jaxbProperty);
-      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(getter.getGenericReturnType(), adapterInfo);
+      XmlElement xmlElement = findXmlElement(jaxbProperty);
+      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(getter.getGenericReturnType(), adapterInfo, xmlElement);
       try {
         amfProperty.getWriteMethod().invoke(amfObject, mapper.toAMF(propertyValue, context));
       }
@@ -131,6 +133,16 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     return adapterInfo;
   }
 
+  private XmlElement findXmlElement(PropertyDescriptor property){
+    XmlElement xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+
+    if ((xmlElement == null) && (property.getWriteMethod() != null)) {
+      xmlElement = property.getWriteMethod().getAnnotation(XmlElement.class);
+    }
+
+    return xmlElement;
+  }
+
   public J toJAXB(G amfObject, AMFMappingContext context) throws AMFMappingException {
     if (context.getMappedObjects().containsKey(amfObject)) {
       return (J) context.getMappedObjects().get(amfObject);
@@ -160,7 +172,7 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
         continue;
       }
 
-      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty));
+      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       try {
         jaxbProperty.getWriteMethod().invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }

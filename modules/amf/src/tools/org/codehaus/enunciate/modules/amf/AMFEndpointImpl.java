@@ -85,7 +85,7 @@ public abstract class AMFEndpointImpl {
 
     Object[] mappedParams = new Object[paramTypes.length];
     for (int i = 0; i < paramTypes.length; i++) {
-      mappedParams[i] = AMFMapperIntrospector.getAMFMapper(paramTypes[i], null).toJAXB(params[i], mappingContext);
+      mappedParams[i] = AMFMapperIntrospector.getAMFMapper(paramTypes[i], null, null).toJAXB(params[i], mappingContext);
     }
 
     Object returnValue;
@@ -103,7 +103,7 @@ public abstract class AMFEndpointImpl {
       for (int i = 0; i < method.getExceptionTypes().length; i++) {
         Class exceptionType = method.getExceptionTypes()[i];
         if (exceptionType.isInstance(targetException)) {
-          throw (Exception) AMFMapperIntrospector.getAMFMapper(exceptionType, null).toAMF(targetException, mappingContext);
+          throw (Exception) AMFMapperIntrospector.getAMFMapper(exceptionType, null, null).toAMF(targetException, mappingContext);
         }
       }
 
@@ -116,7 +116,7 @@ public abstract class AMFEndpointImpl {
     }
 
     if (method.getReturnType() != Void.TYPE) {
-      returnValue = AMFMapperIntrospector.getAMFMapper(method.getGenericReturnType(), null).toAMF(returnValue, mappingContext);
+      returnValue = AMFMapperIntrospector.getAMFMapper(method.getGenericReturnType(), null, null).toAMF(returnValue, mappingContext);
     }
 
     return returnValue;
