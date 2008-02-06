@@ -224,9 +224,11 @@ public class DefaultValidator implements Validator {
             result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
           }
 
-          XmlType nounValueType = nounValue.getXmlType();
-          if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
-            result.addError(nounValue.getPosition(), "A noun value must be a JAXB 2.0 root element.");
+          if (!isDataHandler((DecoratedTypeMirror) nounValue.getType())) {
+            XmlType nounValueType = nounValue.getXmlType();
+            if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
+              result.addError(nounValue.getPosition(), "A noun value must be either a JAXB 2.0 root element or javax.activation.DataHandler.");
+            }
           }
 
           if ((nounValue.isOptional()) && (nounValue.getType() instanceof PrimitiveType)) {
@@ -344,6 +346,12 @@ public class DefaultValidator implements Validator {
     }
 
     return result;
+  }
+
+  private boolean isDataHandler(DecoratedTypeMirror type) {
+    return type.isDeclared()
+      && ((DeclaredType) type).getDeclaration() != null
+      && "javax.activation.DataHandler".equals(((DeclaredType) type).getDeclaration().getQualifiedName());
   }
 
   public ValidationResult validateWebMethod(WebMethod webMethod) {

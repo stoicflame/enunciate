@@ -42,7 +42,7 @@ public class RESTPayloadView extends RESTResultView {
   public RESTPayloadView(RESTOperation operation, Object payload, Map<String, String> ns2prefix) {
     super(operation, payload, ns2prefix);
     try {
-      this.payloadBody = operation.getPayloadBodyMethod().invoke(payload);
+      this.payloadBody = operation.getPayloadDeliveryMethod().invoke(payload);
     }
     catch (Exception e) {
       throw new RuntimeException(e);

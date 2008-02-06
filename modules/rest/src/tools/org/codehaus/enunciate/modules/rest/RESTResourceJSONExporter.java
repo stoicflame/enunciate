@@ -23,7 +23,6 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.activation.DataHandler;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A controller for the JSON API.
@@ -68,7 +67,7 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
   @Override
   protected RESTResultView createDataHandlerView(RESTOperation operation, DataHandler dataHandler) {
-    boolean xml = operation.isWrapsXMLPayload() || (dataHandler != null && String.valueOf(dataHandler.getContentType()).toLowerCase().contains("xml"));
+    boolean xml = operation.isDeliversXMLPayload() || (dataHandler != null && String.valueOf(dataHandler.getContentType()).toLowerCase().contains("xml"));
     return xml ? new JSONDataHandlerView(operation, dataHandler, getNamespaces2Prefixes()) : super.createDataHandlerView(operation, dataHandler);
   }
 
@@ -76,7 +75,7 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
     //todo: you've got to create another annotation @RESTPayloadIsXML
     //todo: you've got to document the new annotation and the xml() value of RESTOperation
-    boolean xml = operation.isWrapsXMLPayload();
+    boolean xml = operation.isDeliversXMLPayload();
 
     if (!xml && operation.getPayloadXmlHintMethod() != null) {
       try {
@@ -98,9 +97,9 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
       }
     }
 
-    if (!xml && operation.getPayloadBodyMethod() != null) {
+    if (!xml && operation.getPayloadDeliveryMethod() != null) {
       try {
-        Object body = operation.getPayloadBodyMethod().invoke(result);
+        Object body = operation.getPayloadDeliveryMethod().invoke(result);
         xml = ((body instanceof DataHandler) && (String.valueOf(((DataHandler)body).getContentType()).toLowerCase().contains("xml")));
       }
       catch (Exception e) {

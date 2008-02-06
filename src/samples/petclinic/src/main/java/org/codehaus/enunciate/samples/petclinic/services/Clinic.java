@@ -2,6 +2,7 @@ package org.codehaus.enunciate.samples.petclinic.services;
 
 import org.codehaus.enunciate.samples.petclinic.schema.*;
 import org.codehaus.enunciate.rest.annotations.*;
+import org.codehaus.enunciate.modules.gwt.GWTTransient;
 
 import javax.jws.WebService;
 import javax.activation.DataHandler;
@@ -31,7 +32,19 @@ public interface Clinic {
    */
   @Noun ( "vetpix" )
   @Verb ( VerbType.read )
-  DataHandler getVetPhoto(@ProperNoun Integer id) throws PetClinicException;
+  @GWTTransient
+  DataHandler getVetPhoto(@ProperNoun Integer id) throws PetClinicException, PictureException;
+
+  /**
+   * Sets a specific vet photo.
+   *
+   * @param dataHandler The data handler for the photo.
+   * @param id The id of the vet for which to store a picture.
+   */
+  @Noun ( "vetpix" )
+  @Verb ( VerbType.create )
+  @GWTTransient
+  void storeVetPhoto(@NounValue DataHandler dataHandler, @ProperNoun( optional = false ) Integer id) throws PetClinicException, PictureException;
 
   /**
    * Get the brochure for the clinic in the specified format.

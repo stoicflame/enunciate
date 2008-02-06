@@ -28,6 +28,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.DeclaredType;
 
 /**
  * A parameter declaration decorated as a REST parameter.  A REST parameter is one and only one of the following:
@@ -153,6 +154,17 @@ public class RESTParameter extends DecoratedParameterDeclaration {
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), e.getMessage());
     }
+  }
+
+  /**
+   * Whether the type of this REST parameter is custom.
+   *
+   * @return Whether the type of this REST parameter is custom.
+   */
+  public boolean isCustomType() {
+    return (getType() instanceof DeclaredType)
+      && (((DeclaredType) getType()).getDeclaration() != null)
+      && (((DeclaredType) getType()).getDeclaration().getQualifiedName().equals("javax.activation.DataHandler"));
   }
 
 }

@@ -33,10 +33,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * An xml exporter for a REST resource.
@@ -95,7 +99,7 @@ public class RESTResourceXMLExporter extends AbstractController {
       supportedMethods[i++] = method;
     }
     this.supportedMethods = supportedMethods;
-    super.setSupportedMethods(new String[] { "GET", "PUT", "POST", "DELETE" });
+    super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -144,12 +148,12 @@ public class RESTResourceXMLExporter extends AbstractController {
   /**
    * Handles a specific REST operation.
    *
-   * @param verb The verb.
-   * @param request The request.
+   * @param verb     The verb.
+   * @param request  The request.
    * @param response The response.
    * @return The model and view.
    */
-  protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  protected ModelAndView handleRESTOperation(VerbType verb, final HttpServletRequest request, HttpServletResponse response) throws Exception {
     RESTOperation operation = resource.getOperation(verb);
     if (!isOperationAllowed(operation)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
@@ -246,14 +250,19 @@ public class RESTResourceXMLExporter extends AbstractController {
 
     Object nounValue = null;
     if (operation.getNounValueType() != null) {
-      try {
-        //if the operation has a noun value type, unmarshall it from the body....
-        nounValue = unmarshaller.unmarshal(request.getInputStream());
+      if (operation.getNounValueType().equals(DataHandler.class)) {
+        nounValue = new DataHandler(new ServletRequestDataSource(request));
       }
-      catch (Exception e) {
-        //if we can't unmarshal the noun value, continue if the noun value is optional.
-        if (!operation.isNounValueOptional()) {
-          throw e;
+      else {
+        try {
+          //if the operation has a noun value type, unmarshall it from the body....
+          nounValue = unmarshaller.unmarshal(request.getInputStream());
+        }
+        catch (Exception e) {
+          //if we can't unmarshal the noun value, continue if the noun value is optional.
+          if (!operation.isNounValueOptional()) {
+            throw e;
+          }
         }
       }
     }
@@ -266,14 +275,14 @@ public class RESTResourceXMLExporter extends AbstractController {
    * Create the REST view for the specified operation and result.
    *
    * @param operation The operation.
-   * @param result The result.
+   * @param result    The result.
    * @return The view.
    */
   protected View createView(RESTOperation operation, Object result) {
     if (result instanceof DataHandler) {
       return createDataHandlerView(operation, (DataHandler) result);
     }
-    else if (operation.isWrapsPayload()) {
+    else if (operation.isDeliversPayload()) {
       return createPayloadView(operation, result);
     }
     else {
@@ -284,7 +293,7 @@ public class RESTResourceXMLExporter extends AbstractController {
   /**
    * Create the data handler view for the specified data handler.
    *
-   * @param operation The operation.
+   * @param operation   The operation.
    * @param dataHandler The data handler.
    * @return The data handler.
    */
@@ -296,7 +305,7 @@ public class RESTResourceXMLExporter extends AbstractController {
    * Create the REST payload view for the specified operation and result.
    *
    * @param operation The operation.
-   * @param result The result of the invocation of the operation.
+   * @param result    The result of the invocation of the operation.
    * @return The payload view.
    */
   protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
@@ -307,7 +316,7 @@ public class RESTResourceXMLExporter extends AbstractController {
    * Create the REST view for the specified operation and result.
    *
    * @param operation The operation.
-   * @param result The result.
+   * @param result    The result.
    * @return The view.
    */
   protected RESTResultView createRESTView(RESTOperation operation, Object result) {
@@ -340,5 +349,35 @@ public class RESTResourceXMLExporter extends AbstractController {
    */
   public Map<String, String> getNamespaces2Prefixes() {
     return this.ns2prefix;
+  }
+
+  /**
+   * A data source for a servlet request.
+   */
+  private static class ServletRequestDataSource implements DataSource {
+    private final HttpServletRequest request;
+
+    /**
+     * @param request The servlet request.
+     */
+    public ServletRequestDataSource(HttpServletRequest request) {
+      this.request = request;
+    }
+
+    public InputStream getInputStream() throws IOException {
+      return this.request.getInputStream();
+    }
+
+    public OutputStream getOutputStream() throws IOException {
+      throw new IOException();
+    }
+
+    public String getContentType() {
+      return request.getContentType();
+    }
+
+    public String getName() {
+      return "";
+    }
   }
 }

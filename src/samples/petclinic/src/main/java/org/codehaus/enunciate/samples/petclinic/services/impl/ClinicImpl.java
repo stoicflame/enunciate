@@ -1,18 +1,19 @@
 package org.codehaus.enunciate.samples.petclinic.services.impl;
 
+import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
+import org.codehaus.enunciate.samples.petclinic.schema.*;
+import org.codehaus.enunciate.samples.petclinic.services.BrochureFormat;
 import org.codehaus.enunciate.samples.petclinic.services.Clinic;
 import org.codehaus.enunciate.samples.petclinic.services.PetClinicException;
-import org.codehaus.enunciate.samples.petclinic.services.BrochureFormat;
-import org.codehaus.enunciate.samples.petclinic.schema.*;
-import org.codehaus.enunciate.rest.annotations.*;
+import org.codehaus.enunciate.samples.petclinic.services.PictureException;
 
-import javax.jws.WebService;
 import javax.activation.DataHandler;
+import javax.jws.WebService;
 import javax.mail.util.ByteArrayDataSource;
-import java.util.*;
-import java.net.URL;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -23,12 +24,13 @@ import java.io.IOException;
 @RESTEndpoint
 public class ClinicImpl implements Clinic {
 
+  private final HashMap<Integer, byte[]> vetPhotos;
   private final HashMap<Integer, Vet> vets;
   private final HashMap<Integer, PetType> petTypes;
   private final HashMap<Integer, Owner> owners;
   private final HashMap<Integer, Pet> pets;
 
-  public ClinicImpl() throws PetClinicException {
+  public ClinicImpl() throws PetClinicException, IOException {
     petTypes = new HashMap<Integer, PetType>();
     vets = new HashMap<Integer, Vet>();
     owners = new HashMap<Integer, Owner>();
@@ -117,15 +119,48 @@ public class ClinicImpl implements Clinic {
       storePet(pet);
     }
 
+    vetPhotos = new HashMap<Integer,byte[]>();
+    for (int i = 1; i <= 3; i++) {
+      InputStream stream = getClass().getResourceAsStream("vet" + String.valueOf(i) + ".jpg");
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+      int len;
+      while ((len = stream.read(buffer)) > 0) {
+        out.write(buffer, 0, len);
+      }
+      vetPhotos.put(i, out.toByteArray());
+    }
+
   }
 
   public DataHandler getVetPhoto(Integer id) throws PetClinicException {
-    URL vetPicture = getClass().getResource("vet" + String.valueOf(id) + ".jpg");
+    byte[] vetPicture = vetPhotos.get(id);
     if (vetPicture == null) {
       throw new NotFoundException("The picture for vet " + id + " was not found.");
     }
     else {
-      return new DataHandler(vetPicture);
+      return new DataHandler(new ByteArrayDataSource(vetPicture, "image/jpg"));
+    }
+  }
+
+  public void storeVetPhoto(DataHandler dataHandler, Integer id) throws PetClinicException, PictureException {
+    String contentType = dataHandler.getContentType().toLowerCase();
+    if (!contentType.startsWith("image/jpg") && !(contentType.startsWith("image/jpeg"))) {
+      throw new PictureException("Only JPEG images are accepted.");
+    }
+
+    try {
+      InputStream stream = dataHandler.getInputStream();
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
+      int len;
+      while ((len = stream.read(buffer)) > 0) {
+        out.write(buffer, 0, len);
+      }
+      vetPhotos.put(id, out.toByteArray());
+    }
+    catch (IOException e) {
+      throw new PetClinicException(e.getMessage());
     }
   }
 

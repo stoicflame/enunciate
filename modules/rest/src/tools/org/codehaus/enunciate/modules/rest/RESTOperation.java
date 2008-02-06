@@ -18,17 +18,14 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.rest.annotations.*;
 
+import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.activation.DataHandler;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.awt.*;
-import java.io.InputStream;
 
 /**
  * A REST operation.
@@ -57,9 +54,9 @@ public class RESTOperation {
   private final String charset;
   private final String JSONPParameter;
 
-  private final boolean wrapsPayload;
-  private final boolean wrapsXMLPayload;
-  private final Method payloadBodyMethod;
+  private final boolean deliversPayload;
+  private final boolean deliversXMLPayload;
+  private final Method payloadDeliveryMethod;
   private final Method payloadContentTypeMethod;
   private final Method payloadHeadersMethod;
   private final Method payloadXMLHintMethod;
@@ -122,9 +119,9 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof NounValue) {
-          if (!parameterType.isAnnotationPresent(XmlRootElement.class)) {
-            throw new IllegalStateException("Noun values must be XML root elements.  Invalid noun value for parameter " + i + " of method " +
-              method.getDeclaringClass().getName() + "." + method.getName() + ".");
+          if ((!parameterType.isAnnotationPresent(XmlRootElement.class)) && (!parameterType.equals(DataHandler.class))) {
+            throw new IllegalStateException("Noun values must be either XML root elements or javax.activation.DataHandler.  Invalid noun value for parameter " + i + " of method " +
+              method.getDeclaringClass().getName() + "." + method.getName() + ": " + parameterType.getName() + ".");
           }
           else if (nounValue == null) {
             if (((NounValue) annotation).optional()) {
@@ -177,9 +174,9 @@ public class RESTOperation {
       }
     }
 
-    boolean wrapsPayload = false;
-    boolean wrapsXMLPayload = false;
-    Method payloadBodyMethod = null;
+    boolean deliversPayload = false;
+    boolean deliversXMLPayload = false;
+    Method payloadDeliveryMethod = null;
     Method payloadContentTypeMethod = null;
     Method payloadHeadersMethod = null;
     Method payloadXMLHintMethod = null;
@@ -189,11 +186,11 @@ public class RESTOperation {
 
       if (returnType.isAnnotationPresent(RESTPayload.class)) {
         //load the payload methods if its a payload.
-        wrapsPayload = true;
-        wrapsXMLPayload = ((RESTPayload)returnType.getAnnotation(RESTPayload.class)).xml();
+        deliversPayload = true;
+        deliversXMLPayload = ((RESTPayload)returnType.getAnnotation(RESTPayload.class)).xml();
         for (Method payloadMethod : returnType.getMethods()) {
           if (payloadMethod.isAnnotationPresent(RESTPayloadBody.class)) {
-            if (payloadBodyMethod != null) {
+            if (payloadDeliveryMethod != null) {
               throw new IllegalStateException("There may only be one payload body method on a REST payload.");
             }
             else {
@@ -203,7 +200,7 @@ public class RESTOperation {
 
               Class bodyType = payloadMethod.getReturnType();
               if (byte[].class.isAssignableFrom(bodyType) || InputStream.class.isAssignableFrom(bodyType) || DataHandler.class.isAssignableFrom(bodyType)) {
-                payloadBodyMethod = payloadMethod;
+                payloadDeliveryMethod = payloadMethod;
               }
               else {
                 throw new IllegalStateException("A payload body must be of type byte[], javax.activation.DataHandler, or java.io.InputStream.");
@@ -287,9 +284,9 @@ public class RESTOperation {
     this.contentType = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
     this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
     this.JSONPParameter = jsonpParameter;
-    this.wrapsPayload = wrapsPayload;
-    this.wrapsXMLPayload = wrapsXMLPayload;
-    this.payloadBodyMethod = payloadBodyMethod;
+    this.deliversPayload = deliversPayload;
+    this.deliversXMLPayload = deliversXMLPayload;
+    this.payloadDeliveryMethod = payloadDeliveryMethod;
     this.payloadContentTypeMethod = payloadContentTypeMethod;
     this.payloadHeadersMethod = payloadHeadersMethod;
     this.payloadXMLHintMethod = payloadXMLHintMethod;
@@ -568,8 +565,8 @@ public class RESTOperation {
    *
    * @return Whether this operation wraps a payload.
    */
-  public boolean isWrapsPayload() {
-    return wrapsPayload;
+  public boolean isDeliversPayload() {
+    return deliversPayload;
   }
 
   /**
@@ -577,8 +574,8 @@ public class RESTOperation {
    *
    * @return Whether this operation wraps an XML payload.
    */
-  public boolean isWrapsXMLPayload() {
-    return wrapsXMLPayload;
+  public boolean isDeliversXMLPayload() {
+    return deliversXMLPayload;
   }
 
   /**
@@ -586,8 +583,8 @@ public class RESTOperation {
    *
    * @return The method to use to get the payload body.
    */
-  public Method getPayloadBodyMethod() {
-    return payloadBodyMethod;
+  public Method getPayloadDeliveryMethod() {
+    return payloadDeliveryMethod;
   }
 
   /**

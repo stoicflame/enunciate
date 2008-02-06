@@ -96,6 +96,9 @@ import java.io.IOException;
  * &lt;circle color="red"/&gt;
  * </code>
  *
+ * <p>It is also important to note that noun values (request payloads) don't necessarily have to be XML; they can
+ * be of any custom content type.</p>
+ *
  * <h3>Noun Context</h3>
  *
  * <p>A noun can be qualified by a noun context.  The noun context can be though of as a "grouping" of nouns.
@@ -109,7 +112,7 @@ import java.io.IOException;
  * a specific user of a specific group, we could identify the "group id" as a context parameter, the user as the noun, and the user id as the proper
  * noun.</p>
  *
- * <h3>REST Payloads and Responses of Other Content Types</h3>
+ * <h3>REST Payloads and Custom Content Types</h3>
  *
  * <p>It is often necessary to provide REST resources of custom content types along with the XML responses. We define these resources as REST payloads.
  * A REST payload consists of the resource, it's content type (MIME type), and an optional set of metadata (i.e. HTTP headers) that are associated with
@@ -187,7 +190,7 @@ import java.io.IOException;
  *
  * <p>REST Payloads will be converted to JSON if the payload body is determined to be XML.  You can hint that a REST payload body will always return XML with
  * the xml() value on the @RESTPayload annotation.  Alternatively, you can specify a no-argument method of a boolean return type that is annotated with
- * @org.codehaus.enunciate.rest.annotations.RESTPayloadXMLHint that will hint at whether the payload body returns XML.  Otherwise, if there is no hint, an
+ * org.codehaus.enunciate.rest.annotations.RESTPayloadXMLHint that will hint at whether the payload body returns XML.  Otherwise, if there is no hint, an
  * attempt to interpret the content type (mime type) to determine whether it implies XML will be made.  If Enunciate is unable to determine whether the payload
  * is XML, it will not attempt to convert it to JSON.</p>
  *
@@ -197,6 +200,11 @@ import java.io.IOException;
  * as an adjective.  The name of the adjective by default is arg<i>i</i>, where <i>i</i> is the parameter index.  Parameters
  * can be customized with the <i>org.codehaus.enunciate.rest.annotations.Adjective</i>, <i>org.codehaus.enunciate.rest.annotations.NounValue</i>,
  * <i>org.codehaus.enunciate.rest.annotations.ContextParameter</i>, and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
+ *
+ * <p>A parameter that is identified as a noun value is usually required to have a type that is an XML root element (i.e. a class annotated with
+ * javax.xml.bind.annotation.XmlRootElement.  There is a single exception to this rule: a noun value parameter type can also be javax.activation.DataHandler.
+ * In the case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handle
+ * to the InputStream of the request payload.</p>
  *
  * <h3>Exceptions</h3>
  *

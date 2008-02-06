@@ -184,9 +184,15 @@
           </parameter>
       [/#list]
       [#if method.nounValue?exists]
-          <inValue typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name}">
+        [#if !method.nounValue.customType]
+          <inValue custom="false" typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name}">
             <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
           </inValue>
+        [#else]
+          <inValue custom="true">
+            <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
+          </inValue>
+        [/#if]
       [/#if]
       [#if !method.returnType.void]
         [#if !method.customType]
