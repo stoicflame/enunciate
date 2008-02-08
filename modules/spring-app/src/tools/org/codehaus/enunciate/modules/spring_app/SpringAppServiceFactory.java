@@ -22,6 +22,7 @@ import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
@@ -48,12 +49,12 @@ public class SpringAppServiceFactory extends ApplicationObjectSupport implements
   protected void initApplicationContext() throws BeansException {
     ApplicationContext ctx = getApplicationContext();
 
-    Map adviceBeans = ctx.getBeansOfType(EnunciateServiceAdvice.class);
+    Map adviceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, EnunciateServiceAdvice.class);
     for (Object advice : adviceBeans.values()) {
       addGlobalInterceptor(advice);
     }
 
-    Map advisorBeans = ctx.getBeansOfType(EnunciateServiceAdvisor.class);
+    Map advisorBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, EnunciateServiceAdvisor.class);
     for (Object advisor : advisorBeans.values()) {
       addGlobalInterceptor(advisor);
     }

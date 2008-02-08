@@ -20,6 +20,7 @@ import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.template.freemarker.SoapAddressPathMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -29,6 +30,7 @@ import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
+import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
 import org.springframework.util.AntPathMatcher;
 import sun.misc.Service;
 
@@ -320,6 +322,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private boolean doLibCopy = true;
   private boolean doPackage = true;
   private boolean enableSecurity = false;
+  private SecurityConfig securityConfig = new SecurityConfig();
 
   /**
    * @return "spring-app"
@@ -341,6 +344,13 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected URL getApplicationContextTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("applicationContext.xml.fmt");
+  }
+
+  /**
+   * @return The URL to "acegi-security-context.fmt"
+   */
+  protected URL getSecurityTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("acegi-security-context.xml.fmt");
   }
 
   /**
@@ -396,14 +406,29 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     model.put("docsDir", docsDir);
 
     //spring security configuration:
-    Map<String, SecurityOptions> webResourceSecurity = new HashMap<String, SecurityOptions>();
     model.put("securityEnabled", isEnableSecurity());
-    model.put("webResourceSecurity", webResourceSecurity);
     model.put("hasSecureMethod", new HasSecureMethod());
+    SecurityConfig securityConfig = getSecurityConfig();
+    if (securityConfig.getRealmName() == null) {
+      String realmName = "Generic Enunciate Application Realm";
+      EnunciateConfiguration enunciateConfig = enunciate.getConfig();
+      if (enunciateConfig.getDescription() != null) {
+        realmName = enunciateConfig.getDescription();
+      }
+      securityConfig.setRealmName(realmName);
+    }
+
+    if (securityConfig.getKey() == null) {
+      securityConfig.setKey(String.valueOf(System.currentTimeMillis()));
+    }
+    model.put("securityConfig", securityConfig);
 
     processTemplate(getApplicationContextTemplateURL(), model);
     processTemplate(getSpringServletTemplateURL(), model);
     processTemplate(getWebXmlTemplateURL(), model);
+    if (isEnableSecurity()) {
+      processTemplate(getSecurityTemplateURL(), model);
+    }
   }
 
   @Override
@@ -706,6 +731,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     //copy the spring application context and servlet config from the build dir to the WEB-INF directory.
     enunciate.copyFile(new File(xfireConfigDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
+    if (isEnableSecurity()) {
+      enunciate.copyFile(new File(xfireConfigDir, "spring-security-context.xml"), new File(webinf, "acegi-security-context.xml"));
+    }
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.
       if (springImport.getFile() != null) {
@@ -1043,6 +1071,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setEnableSecurity(boolean enableSecurity) {
     this.enableSecurity = enableSecurity;
+  }
+
+  /**
+   * The spring security configuration.
+   *
+   * @return The spring security configuration.
+   */
+  public SecurityConfig getSecurityConfig() {
+    return securityConfig;
+  }
+
+  /**
+   * The spring security configuration.
+   *
+   * @param securityConfig The spring security configuration.
+   */
+  public void setSecurityConfig(SecurityConfig securityConfig) {
+    this.securityConfig = securityConfig;
   }
 
   /**

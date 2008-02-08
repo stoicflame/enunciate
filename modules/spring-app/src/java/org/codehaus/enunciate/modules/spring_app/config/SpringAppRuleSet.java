@@ -18,6 +18,9 @@ package org.codehaus.enunciate.modules.spring_app.config;
 
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
+import org.codehaus.enunciate.modules.spring_app.config.security.*;
+
+import java.util.List;
 
 /**
  * Rules for the configuration of the XFire client module.
@@ -68,6 +71,60 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/spring-app/handlerInterceptor", HandlerInterceptor.class);
     digester.addSetProperties("enunciate/modules/spring-app/handlerInterceptor");
     digester.addSetNext("enunciate/modules/spring-app/handlerInterceptor", "addHandlerInterceptor");
+
+    //security configuration.
+    digester.addObjectCreate("enunciate/modules/spring-app/security", SecurityConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security");
+    digester.addSetNext("enunciate/modules/spring-app/security", "setSecurityConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/anonymous", AnonymousConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/anonymous");
+    digester.addSetNext("enunciate/modules/spring-app/security/anonymous", "setAnonymousConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/basicAuth", BasicAuthConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/basicAuth");
+    digester.addSetNext("enunciate/modules/spring-app/security/basicAuth", "setBasicAuthConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/digestAuth", DigestAuthConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/digestAuth");
+    digester.addSetNext("enunciate/modules/spring-app/security/digestAuth", "setDigestAuthConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/formBasedLogin", FormBasedLoginConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/formBasedLogin");
+    digester.addSetNext("enunciate/modules/spring-app/security/formBasedLogin", "setFormBasedLoginConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/formBasedLogout", FormBasedLogoutConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/formBasedLogout");
+    digester.addSetNext("enunciate/modules/spring-app/security/formBasedLogout", "setFormBasedLogoutConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/rememberMe", RememberMeConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/rememberMe");
+    digester.addSetNext("enunciate/modules/spring-app/security/rememberMe", "setRememberMeConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/onAuthenticationFailed", EntryPointConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/onAuthenticationFailed");
+    digester.addSetNext("enunciate/modules/spring-app/security/onAuthenticationFailed", "setOnAuthenticationFailed");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint");
+    digester.addSetNext("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint", "setEntryPoint");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/onAccessDenied", EntryPointConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied");
+    digester.addSetNext("enunciate/modules/spring-app/security/onAccessDenied", "setOnAccessDenied");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/onAccessDenied/entryPoint", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied/entryPoint");
+    digester.addSetNext("enunciate/modules/spring-app/security/onAccessDenied/entryPoint", "setEntryPoint");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/provider", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/provider");
+    digester.addSetNext("enunciate/modules/spring-app/security/provider", "addAdditionalAuthenticationProvider");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/userDetailsService", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/userDetailsService");
+    digester.addSetNext("enunciate/modules/spring-app/security/userDetailsService", "setUserDetailsService");
+
   }
 
 }
