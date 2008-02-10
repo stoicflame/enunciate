@@ -29,6 +29,15 @@
   <!-- the parent for all REST service endpoints -->
   <bean id="rest-endpoint" abstract="true">
     <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+  [#if securityEnabled]
+    <property name="exceptionHandler">
+      <bean class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
+        <constructor-arg>
+          <bean class="org.codehaus.enunciate.modules.rest.RESTExceptionHandler"/>
+        </constructor-arg>
+      </bean>
+    </property>
+  [/#if]
   </bean>
 
   <!-- the REST resource factory-->

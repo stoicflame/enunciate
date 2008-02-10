@@ -102,6 +102,14 @@ public class RESTResourceXMLExporter extends AbstractController {
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
+  public HandlerExceptionResolver getExceptionHandler() {
+    return exceptionHandler;
+  }
+
+  public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
+    this.exceptionHandler = exceptionHandler;
+  }
+
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String httpMethod = request.getHeader("X-HTTP-Method-Override");
     if ((httpMethod == null) || ("".equals(httpMethod.trim()))) {
