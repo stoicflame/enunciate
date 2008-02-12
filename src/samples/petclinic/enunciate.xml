@@ -9,5 +9,11 @@
     <amf disabled="true">
       <app srcDir="src/main/flex-apps" name="vets" mainMxmlFile="src/main/flex-apps/org/codehaus/enunciate/samples/petclinic/flex/vets.mxml"/>
     </amf>
+    <spring-app enableSecurity="true">
+      <springImport file="other-beans.xml"/>
+      <security>
+        <userDetailsService beanName="userDetailsService"/>
+      </security>
+    </spring-app>
   </modules>
 </enunciate>

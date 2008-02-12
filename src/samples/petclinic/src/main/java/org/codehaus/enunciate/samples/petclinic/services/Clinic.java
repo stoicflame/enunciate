@@ -6,6 +6,8 @@ import org.codehaus.enunciate.modules.gwt.GWTTransient;
 
 import javax.jws.WebService;
 import javax.activation.DataHandler;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import java.util.Collection;
 
 /**
@@ -22,6 +24,7 @@ import java.util.Collection;
   serviceName = "clinic"
 )
 @RESTEndpoint
+@PermitAll
 public interface Clinic {
 
   /**
@@ -33,6 +36,7 @@ public interface Clinic {
   @Noun ( "vetpix" )
   @Verb ( VerbType.read )
   @GWTTransient
+  @RolesAllowed( "ADMIN" )
   DataHandler getVetPhoto(@ProperNoun Integer id) throws PetClinicException, PictureException;
 
   /**
@@ -54,6 +58,7 @@ public interface Clinic {
    */
   @Noun ( "brochure" )
   @Verb ( VerbType.read )
+  @RolesAllowed("USER")
   ClinicBrochure getClinicBrochure(@Adjective( name = "format" ) BrochureFormat format) throws PetClinicException;
 
   /**

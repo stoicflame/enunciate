@@ -52,5 +52,17 @@
       <artifactId>gwt-user</artifactId>
       <version>1.4.60</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.acegisecurity</groupId>
+      <artifactId>acegi-security</artifactId>
+      <version>1.0.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>annotations-api</artifactId>
+      <version>6.0.14</version>
+    </dependency>
   </dependencies>
 </project>
