@@ -429,7 +429,7 @@ import java.util.jar.Manifest;
  *   <li>The "enableRememberMeToken" attribute is used to enable Acegi to set a remember-me token as a cookie in the HTTP response which can be used to
  *       "remember" the identity for a specified time.  Default: "false". Remember-me services can be configured with the "rememberMeConfig" child element
  *       (see below).</li>
- *   <li>The "loadAnonymousIdentity" attribute is used to enable Acegi to load an anonymous identity if no authentication is provided.  Default: "false". The
+ *   <li>The "loadAnonymousIdentity" attribute is used to enable Acegi to load an anonymous identity if no authentication is provided.  Default: "true". The
  *       anonymous identity loading behavior can be configured with the "anonymousConfig" child element (see below).</li>
  *   <li>The "enableBasicHTTPAuth" attribute is used to enable HTTP Basic Authentication.  Default: "true". HTTP Basic Auth can be configured with the
  *       "basicAuthConfig" child element (see below).</li>

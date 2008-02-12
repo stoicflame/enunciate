@@ -14,7 +14,7 @@ public class SecurityConfig {
   private boolean enableFormBasedLogout = false;
   private boolean persistIdentityAcrossHttpSession = false;
   private boolean enableRememberMeToken = false;
-  private boolean loadAnonymousIdentity = false;
+  private boolean loadAnonymousIdentity = true;
   private boolean enableBasicHTTPAuth = true;
   private boolean enableDigestHTTPAuth = false;
   private boolean initJ2EESecurityContext = true;

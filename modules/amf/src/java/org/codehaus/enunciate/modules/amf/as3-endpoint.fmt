@@ -98,7 +98,7 @@ package ${endpointInterface.package.qualifiedName} {
 package ${endpointInterface.qualifiedName} {
 
   import flash.events.Event;
-  [@forEachAMFImport declaration=webMethod]
+  [@forEachAMFImport declaration=webMethod includeComponentTypes=false]
   import ${amfImport};
   [/@forEachAMFImport]
 

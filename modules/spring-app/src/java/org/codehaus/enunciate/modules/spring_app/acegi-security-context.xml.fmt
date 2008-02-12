@@ -254,6 +254,7 @@
         </property>
       </bean>
     </property>
+    <property name="rejectPublicInvocations" value="false"/>
   </bean>
 
   <bean id="loginLogoutHelper" class="org.codehaus.enunciate.modules.spring_app.LoginLogoutHelperImpl">

@@ -50,6 +50,7 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
   private String var = "amfImport";
   private DecoratedMemberDeclaration declaration;
   private final ClientClassnameForMethod classnameFor;
+  private boolean includeComponentTypes = true;
 
   public AMFImportStrategy(ClientClassnameForMethod classnameFor) {
     this.classnameFor = classnameFor;
@@ -122,20 +123,22 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
    * @param imports The imports.
    */
   protected void addComponentTypes(TypeMirror type, Set<String> imports) throws TemplateModelException {
-    if (type instanceof MapType) {
-      MapType mapType = ((MapType) type);
-      imports.add(classnameFor.convert(mapType.getKeyType()));
-      imports.add(classnameFor.convert(mapType.getValueType()));
-    }
-    else if (((DecoratedTypeMirror) type).isCollection()) {
-      DeclaredType declaredType = (DeclaredType) type;
-      Iterator<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments().iterator();
-      if (actualTypeArguments.hasNext()) {
-        imports.add(classnameFor.convert(actualTypeArguments.next()));
+    if (includeComponentTypes) {
+      if (type instanceof MapType) {
+        MapType mapType = ((MapType) type);
+        imports.add(classnameFor.convert(mapType.getKeyType()));
+        imports.add(classnameFor.convert(mapType.getValueType()));
       }
-    }
-    else if (((DecoratedTypeMirror) type).isArray()) {
-      imports.add(classnameFor.convert(((ArrayType) type).getComponentType()));
+      else if (((DecoratedTypeMirror) type).isCollection()) {
+        DeclaredType declaredType = (DeclaredType) type;
+        Iterator<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments().iterator();
+        if (actualTypeArguments.hasNext()) {
+          imports.add(classnameFor.convert(actualTypeArguments.next()));
+        }
+      }
+      else if (((DecoratedTypeMirror) type).isArray()) {
+        imports.add(classnameFor.convert(((ArrayType) type).getComponentType()));
+      }
     }
   }
 
@@ -182,5 +185,23 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
    */
   public void setDeclaration(DecoratedMemberDeclaration declaration) {
     this.declaration = declaration;
+  }
+
+  /**
+   * Whether to add the component types of a collection or map.
+   *
+   * @return Whether to add the component types of a collection or map.
+   */
+  public boolean isIncludeComponentTypes() {
+    return includeComponentTypes;
+  }
+
+  /**
+   * Whether to add the component types of a collection or map.
+   *
+   * @param includeComponentTypes Whether to add the component types of a collection or map.
+   */
+  public void setIncludeComponentTypes(boolean includeComponentTypes) {
+    this.includeComponentTypes = includeComponentTypes;
   }
 }

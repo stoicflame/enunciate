@@ -15,7 +15,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if] {
+  public ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${fault.qualifiedName}[#if fault_has_next], [/#if][/#list][/#if] {
     try {
       [#if !webMethod.returnType.void]
         [#if !webMethod.returnType.primitive]
@@ -28,7 +28,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
       [/#if]
     }
       [#list webMethod.webFaults as fault]
-    catch (${classnameFor(fault)} e) {
+    catch (${fault.qualifiedName} e) {
       throw e;
     }
       [/#list]
