@@ -121,6 +121,10 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security/provider");
     digester.addSetNext("enunciate/modules/spring-app/security/provider", "addAdditionalAuthenticationProvider");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/security/filter", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/filter");
+    digester.addSetNext("enunciate/modules/spring-app/security/filter", "addAdditionalAuthenticationFilter");
+
     digester.addObjectCreate("enunciate/modules/spring-app/security/userDetailsService", BeanReference.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/userDetailsService");
     digester.addSetNext("enunciate/modules/spring-app/security/userDetailsService", "setUserDetailsService");

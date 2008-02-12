@@ -8,7 +8,7 @@
     <property name="filterInvocationDefinitionSource">
       <value><![CDATA[
 				PATTERN_TYPE_APACHE_ANT
-				/**=[#if securityConfig.persistIdentityAcrossHttpSession]loadHttpSessionIdentity,[/#if][#if securityConfig.enableFormBasedLogout]handleLogoutRequest,[/#if][#if securityConfig.enableDigestHTTPAuth]handleDigestHTTPAuth,[/#if][#if securityConfig.enableBasicHTTPAuth]handleBasicHTTPAuth,[/#if][#if securityConfig.enableFormBasedLogin]handleFormBasedAuth,[/#if][#if securityConfig.initJ2EESecurityContext]initJ2EESecurityContext,[/#if][#if securityConfig.enableRememberMeToken]loadRememberMeIdentity,[/#if][#if securityConfig.loadAnonymousIdentity]loadAnonymousIdentity,[/#if]translateExceptions
+				/**=[#if securityConfig.persistIdentityAcrossHttpSession]loadHttpSessionIdentity,[/#if][#if securityConfig.enableFormBasedLogout]handleLogoutRequest,[/#if][#if securityConfig.additionalAuthenticationFilters?exists][#list securityConfig.additionalAuthenticationFilters as filter][#if filter.beanName?exists]${filter.beanName},[#elseif filter.className?exists]${filter.className},[/#if][/#list][/#if][#if securityConfig.enableDigestHTTPAuth]handleDigestHTTPAuth,[/#if][#if securityConfig.enableBasicHTTPAuth]handleBasicHTTPAuth,[/#if][#if securityConfig.enableFormBasedLogin]handleFormBasedAuth,[/#if][#if securityConfig.initJ2EESecurityContext]initJ2EESecurityContext,[/#if][#if securityConfig.enableRememberMeToken]loadRememberMeIdentity,[/#if][#if securityConfig.loadAnonymousIdentity]loadAnonymousIdentity,[/#if]translateExceptions
 			]]></value>
     </property>
   </bean>
@@ -27,6 +27,14 @@
     </constructor-arg>
     <property name="filterProcessesUrl" value="${securityConfig.formBasedLogoutConfig.url}"/>
   </bean>
+
+  [#if securityConfig.additionalAuthenticationFilters?exists]
+    [#list securityConfig.additionalAuthenticationFilters as filter]
+      [#if filter.className?exists]
+  <bean id="${filter.className}" class="${filter.className}"/>
+      [/#if]
+    [/#list]
+  [/#if]
 
   [#--Handles HTTP digest auth.--]
   <bean id="handleDigestHTTPAuth" class="org.acegisecurity.ui.digestauth.DigestProcessingFilter">
@@ -121,13 +129,13 @@
     </property>
   [#elseif securityConfig.onAccessDenied?exists && securityConfig.onAccessDenied.useEntryPoint?exists]
     [#if securityConfig.onAccessDenied.useEntryPoint.beanName?exists]
-    <property name="authenticationEntryPoint" ref="${securityConfig.onAccessDenied.useEntryPoint.beanName}"/>
+    <property name="accessDeniedHandler" ref="${securityConfig.onAccessDenied.useEntryPoint.beanName}"/>
     [#elseif securityConfig.onAccessDenied.useEntryPoint.className?exists]
-    <property name="authenticationEntryPoint">
+    <property name="accessDeniedHandler">
       <bean class="${securityConfig.onAccessDenied.useEntryPoint.className}"/>
     </property>
     [#else]
-    <property name="authenticationEntryPoint">
+    <property name="accessDeniedHandler">
       <bean class="org.codehaus.enunciate.modules.spring_app.BasicAccessDeniedHandler"/>
     </property>
     [/#if]
@@ -169,7 +177,17 @@
   [#--used to load a user using a remember-me token--]
   <bean id="rememberMeServices" class="org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices">
     <property name="userDetailsService" ref="localUserDetailsService"/>
+    [#if securityConfig.rememberMeConfig?exists]
     <property name="key" value="${securityConfig.rememberMeConfig.key?default(securityConfig.key)}"/>
+      [#if securityConfig.rememberMeConfig.tokenValiditySeconds?exists]
+    <property name="tokenValiditySeconds" value="${securityConfig.rememberMeConfig.tokenValiditySeconds}"/>
+      [/#if]
+      [#if securityConfig.rememberMeConfig.cookieName?exists]
+    <property name="tokenValiditySeconds" value="${securityConfig.rememberMeConfig.cookieName}"/>
+      [/#if]
+    [#else]
+    <property name="key" value="${securityConfig.key}"/>
+    [/#if]
   </bean>
 
   [#--authenticates the user via dao, anonymous, or remember me token--]
@@ -210,10 +228,10 @@
     [#elseif securityConfig.userDetailsService.className?exists]
   <bean id="localUserDetailsService" class="${securityConfig.userDetailsService.className}"/>
     [#else]
-  <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.EmptyUserDetailsService"/>
+  <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.DelegatingUserDetailsService"/>
     [/#if]
   [#else]
-  <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.EmptyUserDetailsService"/>
+  <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.DelegatingUserDetailsService"/>
   [/#if]
 
   [#--definition of the service method interceptor that will ensure secured methods are secured.--]
@@ -221,7 +239,7 @@
     <property name="authenticationManager" ref="authenticationManager"/>
     <property name="accessDecisionManager">
       <bean class="org.acegisecurity.vote.AffirmativeBased">
-        <property name="allowIfAllAbstainDecisions" value="false"/>
+        <property name="allowIfAllAbstainDecisions" value="true"/>
         <property name="decisionVoters">
           <list>
             <bean class="org.codehaus.enunciate.modules.spring_app.JSR250Voter"/>

@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.spring_app;
 
 import com.sun.mirror.declaration.MethodDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -61,6 +62,13 @@ public class HasSecureMethod implements TemplateMethodModelEx {
     }
     else {
       throw new TemplateModelException("The hasSecureMethod method must be either an EndpointInterface or a RESTEndpoint.  Not " + object.getClass().getName());
+    }
+
+    TypeDeclaration declaration = (TypeDeclaration) object;
+    if ((declaration.getAnnotation(RolesAllowed.class) != null) ||
+      (declaration.getAnnotation(PermitAll.class) != null) ||
+      (declaration.getAnnotation(DenyAll.class) != null)) {
+      return true;
     }
 
     for (MethodDeclaration method : methods) {

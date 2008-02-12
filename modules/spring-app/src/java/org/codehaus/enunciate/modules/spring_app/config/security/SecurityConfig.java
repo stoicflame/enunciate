@@ -14,7 +14,7 @@ public class SecurityConfig {
   private boolean enableFormBasedLogout = false;
   private boolean persistIdentityAcrossHttpSession = false;
   private boolean enableRememberMeToken = false;
-  private boolean loadAnonymousIdentity = true;
+  private boolean loadAnonymousIdentity = false;
   private boolean enableBasicHTTPAuth = true;
   private boolean enableDigestHTTPAuth = false;
   private boolean initJ2EESecurityContext = true;
@@ -31,6 +31,7 @@ public class SecurityConfig {
 
   private BeanReference userDetailsService;
   private List<BeanReference> additionalAuthenticationProviders;
+  private List<BeanReference> additionalAuthenticationFilters;
 
   //global defaults
   private String key;
@@ -335,6 +336,37 @@ public class SecurityConfig {
     }
 
     this.additionalAuthenticationProviders.add(additionalAuthenticationProvider);
+  }
+
+  /**
+   * Any additional authentication service filters.
+   *
+   * @return Any additional authentication service filters.
+   */
+  public List<BeanReference> getAdditionalAuthenticationFilters() {
+    return additionalAuthenticationFilters;
+  }
+
+  /**
+   * Any additional authentication service filters.
+   *
+   * @param additionalAuthenticationFilters Any additional authentication service filters.
+   */
+  public void setAdditionalAuthenticationFilters(List<BeanReference> additionalAuthenticationFilters) {
+    this.additionalAuthenticationFilters = additionalAuthenticationFilters;
+  }
+
+  /**
+   * Add an additional authentication filter.
+   *
+   * @param additionalAuthenticationFilter The additional authentication filter.
+   */
+  public void addAdditionalAuthenticationFilter(BeanReference additionalAuthenticationFilter) {
+    if (this.additionalAuthenticationFilters == null) {
+      this.additionalAuthenticationFilters = new ArrayList<BeanReference>();
+    }
+
+    this.additionalAuthenticationFilters.add(additionalAuthenticationFilter);
   }
 
   /**

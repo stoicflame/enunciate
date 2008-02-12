@@ -32,6 +32,10 @@ p,cite,code,ul {
 	font-size: 1.2em;
 	padding-bottom: 1.2em;
 }
+ul ul {
+  padding-bottom: 0;
+  font-size:1em;
+}
 h1,h2,h3 {
 	color: #654;
 }
@@ -45,7 +49,7 @@ h2 {
 	font-size: 1.3em;
 }
 h3 {
-  padding-top: 1px;
+  padding-top: 2px;
 	font-size: 1.2em;
 }
 code {
