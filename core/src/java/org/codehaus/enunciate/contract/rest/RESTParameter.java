@@ -29,6 +29,10 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.ArrayType;
+
+import java.util.Collection;
 
 /**
  * A parameter declaration decorated as a REST parameter.  A REST parameter is one and only one of the following:
@@ -162,9 +166,26 @@ public class RESTParameter extends DecoratedParameterDeclaration {
    * @return Whether the type of this REST parameter is custom.
    */
   public boolean isCustomType() {
-    return (getType() instanceof DeclaredType)
-      && (((DeclaredType) getType()).getDeclaration() != null)
-      && (((DeclaredType) getType()).getDeclaration().getQualifiedName().equals("javax.activation.DataHandler"));
+    return isDataHandler((DecoratedTypeMirror) getType()) || isDataHandlers((DecoratedTypeMirror) getType());
+  }
+
+  private boolean isDataHandler(DecoratedTypeMirror type) {
+    return type.isDeclared()
+      && ((DeclaredType) type).getDeclaration() != null
+      && "javax.activation.DataHandler".equals(((DeclaredType) type).getDeclaration().getQualifiedName());
+  }
+
+  private boolean isDataHandlers(DecoratedTypeMirror type) {
+    if (type.isCollection()) {
+      Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
+      if ((typeArgs != null) && (typeArgs.size() == 1)) {
+        return isDataHandler((DecoratedTypeMirror) typeArgs.iterator().next());
+      }
+    }
+    else if (type.isArray()) {
+      return isDataHandler((DecoratedTypeMirror) ((ArrayType) type).getComponentType());
+    }
+    return false;
   }
 
 }

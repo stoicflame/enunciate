@@ -202,9 +202,16 @@ import java.io.IOException;
  * <i>org.codehaus.enunciate.rest.annotations.ContextParameter</i>, and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
  *
  * <p>A parameter that is identified as a noun value is usually required to have a type that is an XML root element (i.e. a class annotated with
- * javax.xml.bind.annotation.XmlRootElement.  There is a single exception to this rule: a noun value parameter type can also be javax.activation.DataHandler.
- * In the case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handle
- * to the InputStream of the request payload.</p>
+ * javax.xml.bind.annotation.XmlRootElement.  There is an exception to this rule: a noun value parameter type can be javax.activation.DataHandler or an array/collection of javax.activation.DataHandler.
+ * In the case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handler
+ * to the InputStream of the request payload. The DataSource of the DataHandler will be an instance of <a href="api/org/codehaus/enunciate/modules/rest/RESTRequestDataSource.html">org.codehaus.enunciate.modules.rest.RESTRequestDataSource</a>.
+ * In the case of an array/collection of javax.activation.DataHandler, the REST method will be considered able to handle a multipart file upload as defined
+ * in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>. However, in order for a REST request to be able to be parsed as a multipart file upload,
+ * an instance of <a href="api/org/codehaus/enunciate/modules/rest/MultipartResolverFactory.html">org.codehaus.enunciate.modules.rest.MultipartResolverFactory</a>
+ * must be supplied. The default instance, <a href="api/org/codehaus/enunciate/modules/rest/CommonsMultipartResolverFactory.html">org.codehaus.enunciate.modules.rest.CommonsMultipartResolverFactory</a>,
+ * will quietly fail (i.e. the request won't be parsed into a multipart request) unless the necessary <a href="http://commons.apache.org/fileupload/">Commons-FileUpload</a>
+ * ibraries are found on the classpath. Alternatively, you may also supply your own MultipartResolverFactory in the spring application context. In the case of
+ * a multipart file upload request, the DataSource of the DataHandler will be an instance of <a href="api/org/codehaus/enunciate/modules/rest/MultipartFileDataSource.html">org.codehaus.enunciate.modules.rest.MultipartFileDataSource</a>.</p>
  *
  * <h3>Exceptions</h3>
  *

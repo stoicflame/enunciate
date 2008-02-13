@@ -224,10 +224,11 @@ public class DefaultValidator implements Validator {
             result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
           }
 
-          if (!isDataHandler((DecoratedTypeMirror) nounValue.getType())) {
+          DecoratedTypeMirror decoratedNounValueType = (DecoratedTypeMirror) nounValue.getType();
+          if (!isDataHandler(decoratedNounValueType) && !isDataHandlers(decoratedNounValueType)) {
             XmlType nounValueType = nounValue.getXmlType();
             if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
-              result.addError(nounValue.getPosition(), "A noun value must be either a JAXB 2.0 root element or javax.activation.DataHandler.");
+              result.addError(nounValue.getPosition(), "A noun value must be either a JAXB 2.0 root element, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.");
             }
           }
 
@@ -352,6 +353,19 @@ public class DefaultValidator implements Validator {
     return type.isDeclared()
       && ((DeclaredType) type).getDeclaration() != null
       && "javax.activation.DataHandler".equals(((DeclaredType) type).getDeclaration().getQualifiedName());
+  }
+
+  private boolean isDataHandlers(DecoratedTypeMirror type) {
+    if (type.isCollection()) {
+      Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
+      if ((typeArgs != null) && (typeArgs.size() == 1)) {
+        return isDataHandler((DecoratedTypeMirror) typeArgs.iterator().next());
+      }
+    }
+    else if (type.isArray()) {
+      return isDataHandler((DecoratedTypeMirror) ((ArrayType) type).getComponentType());
+    }
+    return false;
   }
 
   public ValidationResult validateWebMethod(WebMethod webMethod) {

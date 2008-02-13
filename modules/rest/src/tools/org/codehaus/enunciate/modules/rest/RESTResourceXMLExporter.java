@@ -18,29 +18,28 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.springframework.web.context.WebApplicationContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.*;
 
 /**
  * An xml exporter for a REST resource.
@@ -54,6 +53,7 @@ public class RESTResourceXMLExporter extends AbstractController {
   private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
   private Map<String, String> ns2prefix;
   private String[] supportedMethods;
+  private MultipartResolverFactory multipartResolverFactory;
 
   public RESTResourceXMLExporter(RESTResource resource) {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -99,6 +99,18 @@ public class RESTResourceXMLExporter extends AbstractController {
       supportedMethods[i++] = method;
     }
     this.supportedMethods = supportedMethods;
+    Map resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MultipartResolverFactory.class);
+    if (resolverBeans.size() > 0) {
+      //todo: add a configuration element to specify which one to use.
+      this.multipartResolverFactory = (MultipartResolverFactory) resolverBeans.values().iterator().next();
+    }
+    else {
+      CommonsMultipartResolverFactory resolverFactory = new CommonsMultipartResolverFactory();
+      if (getApplicationContext() instanceof WebApplicationContext) {
+        resolverFactory.setServletContext(getServletContext());
+      }
+      this.multipartResolverFactory = resolverFactory;
+    }
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
@@ -161,11 +173,16 @@ public class RESTResourceXMLExporter extends AbstractController {
    * @param response The response.
    * @return The model and view.
    */
-  protected ModelAndView handleRESTOperation(VerbType verb, final HttpServletRequest request, HttpServletResponse response) throws Exception {
+  protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
     RESTOperation operation = resource.getOperation(verb);
     if (!isOperationAllowed(operation)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
       return null;
+    }
+
+    MultipartResolver multipartResolver = (this.multipartResolverFactory != null) ? this.multipartResolverFactory.getMultipartResolver(resource.getNounContext(), resource.getNoun(), verb) : null;
+    if (multipartResolver != null && multipartResolver.isMultipart(request)) {
+      request = multipartResolver.resolveMultipart(request);
     }
 
     Document document = documentBuilder.newDocument();
@@ -258,8 +275,28 @@ public class RESTResourceXMLExporter extends AbstractController {
 
     Object nounValue = null;
     if (operation.getNounValueType() != null) {
-      if (operation.getNounValueType().equals(DataHandler.class)) {
-        nounValue = new DataHandler(new ServletRequestDataSource(request));
+      Class type1 = operation.getNounValueType();
+      if ((operation.getNounValueType().equals(DataHandler.class)) || ((type1.isArray() && type1.getComponentType().equals(DataHandler.class)))) {
+        ArrayList<DataHandler> dataHandlers = new ArrayList<DataHandler>();
+        if (request instanceof MultipartHttpServletRequest) {
+          Collection<MultipartFile> multipartFiles = (Collection<MultipartFile>) ((MultipartHttpServletRequest) request).getFileMap().values();
+          for (MultipartFile multipartFile : multipartFiles) {
+            dataHandlers.add(new DataHandler(new MultipartFileDataSource(multipartFile)));
+          }
+        }
+        else {
+          dataHandlers.add(new DataHandler(new RESTRequestDataSource(request, resource.getNounContext() + resource.getNoun())));
+        }
+
+        if (operation.getNounValueType().equals(DataHandler.class)) {
+          nounValue = dataHandlers.get(0);
+        }
+        else {
+          Class type = operation.getNounValueType();
+          if ((type.isArray() && type.getComponentType().equals(DataHandler.class))) {
+            nounValue = dataHandlers.toArray(new DataHandler[dataHandlers.size()]);
+          }
+        }
       }
       else {
         try {
@@ -359,33 +396,4 @@ public class RESTResourceXMLExporter extends AbstractController {
     return this.ns2prefix;
   }
 
-  /**
-   * A data source for a servlet request.
-   */
-  private static class ServletRequestDataSource implements DataSource {
-    private final HttpServletRequest request;
-
-    /**
-     * @param request The servlet request.
-     */
-    public ServletRequestDataSource(HttpServletRequest request) {
-      this.request = request;
-    }
-
-    public InputStream getInputStream() throws IOException {
-      return this.request.getInputStream();
-    }
-
-    public OutputStream getOutputStream() throws IOException {
-      throw new IOException();
-    }
-
-    public String getContentType() {
-      return request.getContentType();
-    }
-
-    public String getName() {
-      return "";
-    }
-  }
 }

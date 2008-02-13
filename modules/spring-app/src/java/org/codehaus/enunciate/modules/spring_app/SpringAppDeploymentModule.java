@@ -121,6 +121,7 @@ import java.util.jar.Manifest;
  *     <li><a href="#security_annotations">Security Annotations</a></li>
  *     <li><a href="#security_user_details">User Details Service</a></li>
  *     <li><a href="#config_security">The "security" configuration element</a></li>
+ *     <li><a href="#security_login_logout">Login and Logout API Methods</a></li>
  *   </ul>
  * </li>
  * </ul>
@@ -538,6 +539,19 @@ import java.util.jar.Manifest;
  * authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. An
  * authentication provider implements the <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/AuthenticationProvider.html">org.acegisecurity.providers.AuthenticationProvider</a> interface. You can provide any number of additional
  * authentication providers to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/x509/X509AuthenticationProvider.html">X509AuthenticationProvider</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/ldap/LdapAuthenticationProvider.html">LdapAuthenticationProvider</a>, etc.).</p>
+ *
+ * <h3><a name="security_login_logout">Login and Logout API Methods</a></h3>
+ *
+ * <p>You may be interested in implementing "login" and "logout" Web service API methods. To do this:</p>
+ *
+ * <ol>
+ *   <li>Create an endpoint interface the implements org.codehaus.enunciate.modules.spring_app.LoginLogoutProvider</li>
+ *   <li>Create your login and logout API methods on your interface.</li>
+ *   <li>Delegate the login and logout method calls to the supplied org.codehaus.enunciate.modules.spring_app.LoginLogoutHelper</li>
+ * </ol>
+ *
+ * <p>This will put/remove the identity in the current Acegi security context.  (Note that if you want this identity to persist across the HTTP session, make sure
+ * that "persistIdentityAcrossHttpSession" on the security config is set to "true".)</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *

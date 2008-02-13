@@ -119,8 +119,9 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof NounValue) {
-          if ((!parameterType.isAnnotationPresent(XmlRootElement.class)) && (!parameterType.equals(DataHandler.class))) {
-            throw new IllegalStateException("Noun values must be either XML root elements or javax.activation.DataHandler.  Invalid noun value for parameter " + i + " of method " +
+          if ((!parameterType.isAnnotationPresent(XmlRootElement.class)) && (!parameterType.equals(DataHandler.class)) &&
+              (!(parameterType.isArray() && parameterType.getComponentType().equals(DataHandler.class)))) {
+            throw new IllegalStateException("Noun values must be either XML root elements, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.  Invalid noun value for parameter " + i + " of method " +
               method.getDeclaringClass().getName() + "." + method.getName() + ": " + parameterType.getName() + ".");
           }
           else if (nounValue == null) {
@@ -184,10 +185,10 @@ public class RESTOperation {
     if (!Void.TYPE.equals(method.getReturnType())) {
       returnType = method.getReturnType();
 
-      if (returnType.isAnnotationPresent(RESTPayload.class)) {
+      if (returnType.isAnnotationPresent(org.codehaus.enunciate.rest.annotations.RESTPayload.class)) {
         //load the payload methods if its a payload.
         deliversPayload = true;
-        deliversXMLPayload = ((RESTPayload)returnType.getAnnotation(RESTPayload.class)).xml();
+        deliversXMLPayload = ((org.codehaus.enunciate.rest.annotations.RESTPayload)returnType.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTPayload.class)).xml();
         for (Method payloadMethod : returnType.getMethods()) {
           if (payloadMethod.isAnnotationPresent(RESTPayloadBody.class)) {
             if (payloadDeliveryMethod != null) {
@@ -342,6 +343,21 @@ public class RESTOperation {
     }
 
     if (nounValueIndex > -1) {
+      if ((nounValue != null) && (Collection.class.isAssignableFrom(parameterTypes[nounValueIndex]))) {
+        //convert the noun value back into a collection...
+        Object[] values;
+        try {
+          values = (Object[]) nounValue;
+        }
+        catch (ClassCastException e) {
+          throw new IllegalArgumentException("Noun value should be an array...");
+        }
+
+        Collection collection = newCollectionInstance(parameterTypes[nounValueIndex]);
+        collection.addAll(Arrays.asList(values));
+        nounValue = collection;
+      }
+      
       parameters[nounValueIndex] = nounValue;
     }
 
