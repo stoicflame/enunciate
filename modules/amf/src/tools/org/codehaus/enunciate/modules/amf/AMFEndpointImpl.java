@@ -16,24 +16,23 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import flex.messaging.security.SecurityException;
+import flex.messaging.util.PropertyStringResourceLoader;
+import org.codehaus.enunciate.service.*;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.ClassUtils;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.BeansException;
-import org.codehaus.enunciate.service.EnunciateServiceFactory;
-import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
-import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
 
 /**
  * Base class for an AMF endpoint.
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 public abstract class AMFEndpointImpl extends ApplicationObjectSupport implements EnunciateServiceFactoryAware {
 
   private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
+  private SecurityExceptionChecker securityChecker = new DefaultSecurityExceptionChecker();
   private final HashMap<String, Method> operationNames2Methods = new HashMap<String, Method>();
   private Object serviceBean;
 
@@ -126,7 +126,7 @@ public abstract class AMFEndpointImpl extends ApplicationObjectSupport implement
     if (serviceInterface.isInterface()) {
       serviceBean = enunciateServiceFactory.getInstance(serviceBean, serviceInterface);
     }
-    
+
     return serviceBean;
   }
 
@@ -135,7 +135,7 @@ public abstract class AMFEndpointImpl extends ApplicationObjectSupport implement
    * JAX-WS service bean.  The result will be transformed into an AMF object before being returned.
    *
    * @param operationName The operation name.
-   * @param params The (AMF) parameters.
+   * @param params        The (AMF) parameters.
    * @return The (AMF) result of the invocation.
    */
   protected final Object invokeOperation(String operationName, Object... params) throws Exception {
@@ -174,10 +174,17 @@ public abstract class AMFEndpointImpl extends ApplicationObjectSupport implement
     }
     catch (InvocationTargetException e) {
       Throwable targetException = e.getTargetException();
-      for (int i = 0; i < method.getExceptionTypes().length; i++) {
-        Class exceptionType = method.getExceptionTypes()[i];
-        if (exceptionType.isInstance(targetException)) {
-          throw (Exception) AMFMapperIntrospector.getAMFMapper(targetException.getClass(), exceptionType).toAMF(targetException, mappingContext);
+      if ((securityChecker.isAuthenticationFailed(targetException)) || (securityChecker.isAccessDenied(targetException))) {
+        flex.messaging.security.SecurityException se = new SecurityException(new PropertyStringResourceLoader("flex.messaging.vendors"));
+        se.setMessage(targetException.getMessage());
+        throw se;
+      }
+      else {
+        for (int i = 0; i < method.getExceptionTypes().length; i++) {
+          Class exceptionType = method.getExceptionTypes()[i];
+          if (exceptionType.isInstance(targetException)) {
+            throw (Exception) AMFMapperIntrospector.getAMFMapper(targetException.getClass(), exceptionType).toAMF(targetException, mappingContext);
+          }
         }
       }
 
@@ -210,5 +217,14 @@ public abstract class AMFEndpointImpl extends ApplicationObjectSupport implement
    */
   public void setEnunciateServiceFactory(EnunciateServiceFactory enunciateServiceFactory) {
     this.enunciateServiceFactory = enunciateServiceFactory;
+  }
+
+  /**
+   * Set the security checker for this endpoint.
+   *
+   * @param securityChecker The security checker.
+   */
+  public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
+    this.securityChecker = securityChecker;
   }
 }

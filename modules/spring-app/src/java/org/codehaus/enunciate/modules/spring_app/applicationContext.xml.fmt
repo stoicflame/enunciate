@@ -52,6 +52,9 @@
 
   <bean id="${endpointInterface.serviceName}-amf" class="${endpointInterface.package.qualifiedName}.amf.AMF${endpointInterface.simpleName}">
     <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
+          [#if securityEnabled]
+    <property name="securityChecker" ref="securityChecker"/>
+          [/#if]
   </bean>
         [/#if]
       [/@forEachEndpointInterface]

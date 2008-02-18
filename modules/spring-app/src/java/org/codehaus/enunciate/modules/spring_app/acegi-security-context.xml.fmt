@@ -273,5 +273,7 @@
   <!-- This bean is optional; it isn't used by any other bean as it only listens and logs -->
   <bean id="loggerListener" class="org.acegisecurity.event.authentication.LoggerListener"/>
 
+  <bean id="securityChecker" class="org.codehaus.enunciate.modules.spring_app.SpringSecurityExceptionChecker"/>
+
 </beans>
 [/@file]

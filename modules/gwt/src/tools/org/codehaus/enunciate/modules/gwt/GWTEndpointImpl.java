@@ -19,6 +19,8 @@ package org.codehaus.enunciate.modules.gwt;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import org.codehaus.enunciate.service.SecurityExceptionChecker;
+import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -44,6 +46,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
 
   private final HashMap<String, Method> operationNames2Methods = new HashMap<String, Method>();
   private Object serviceBean;
+  private SecurityExceptionChecker securityChecker;
 
   protected final Object invokeOperation(String operationName, Object... params) throws Exception {
     Method method = this.operationNames2Methods.get(operationName);
@@ -149,7 +152,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
         //panic: can't determine the service bean to use.
         ArrayList beanNames = new ArrayList(serviceInterfaceBeans.keySet());
         throw new ApplicationContextException("There are more than one beans of type " + serviceInterface.getName() +
-          " in the application context " + beanNames + ".  Cannot determine which one to use to handle the soap requests.  " +
+          " in the application context " + beanNames + ".  Cannot determine which one to use to handle the gwt requests.  " +
           "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the service (\"" + serviceName + "\").");
       }
     }
@@ -178,6 +181,28 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
 
       this.operationNames2Methods.put(operationName, method);
     }
+
+    this.securityChecker = loadSecurityChecker(applicationContext);
+  }
+
+  /**
+   * Loads the security exception checker for this endoint.
+   *
+   * @return the security exception checker for this endoint.
+   */
+  protected SecurityExceptionChecker loadSecurityChecker(ApplicationContext applicationContext) {
+    SecurityExceptionChecker checker = new DefaultSecurityExceptionChecker();
+    String securityCheckerBeanName = getServletConfig().getInitParameter("securityCheckerBeanName");
+    if (securityCheckerBeanName != null) {
+      checker = (SecurityExceptionChecker) applicationContext.getBean(securityCheckerBeanName);
+    }
+    else {
+      Map checkers = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, SecurityExceptionChecker.class);
+      if (checkers.size() == 1) {
+        checker = (SecurityExceptionChecker) checkers.values().iterator().next();
+      }
+    }
+    return checker;
   }
 
   /**
@@ -212,6 +237,17 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
       }
     }
     return enunciateServiceFactory;
+  }
+
+  @Override
+  protected void doUnexpectedFailure(Throwable throwable) {
+    if ((securityChecker.isAuthenticationFailed(throwable)) || (securityChecker.isAccessDenied(throwable))) {
+      //todo: handle the security exception?
+      super.doUnexpectedFailure(throwable);
+    }
+    else {
+      super.doUnexpectedFailure(throwable);
+    }
   }
 
   /**
