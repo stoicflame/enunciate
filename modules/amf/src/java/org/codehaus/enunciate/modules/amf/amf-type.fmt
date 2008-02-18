@@ -8,8 +8,12 @@ package ${type.package.qualifiedName}.amf;
 /**
  * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Externalizable [/#if]{
+public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements java.io.Externalizable, org.codehaus.enunciate.modules.amf.AMFMapperAware [/#if]{
 
+  [#if !type.abstract]
+  private static org.codehaus.enunciate.modules.amf.AMFMapper AMF_MAPPER = new ${type.package.qualifiedName}.amf.${type.simpleName}AMFMapper();
+
+  [/#if]
   [#list type.attributes as attribute]
 [@propertyField property=attribute/]
   [/#list]
@@ -61,6 +65,12 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
     [/#list]
   [/#if]
   }
+  [#if !type.abstract]
+
+  public org.codehaus.enunciate.modules.amf.AMFMapper loadAMFMapper() {
+    return AMF_MAPPER;
+  }
+  [/#if]
 }
 [/@file]
 [#macro propertyAccessors property]

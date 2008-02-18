@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 /**
  * @author Ryan Heaton
  */
-public class QNameAMFMapper implements AMFMapper<QName, String> {
+public class QNameAMFMapper implements CustomAMFMapper<QName, String> {
 
   public String toAMF(QName jaxbObject, AMFMappingContext context) throws AMFMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class QNameAMFMapper implements AMFMapper<QName, String> {
 
   public QName toJAXB(String amfObject, AMFMappingContext context) throws AMFMappingException {
     return amfObject == null ? null : QName.valueOf(amfObject);
+  }
+
+  public Class<? extends QName> getJaxbClass() {
+    return QName.class;
+  }
+
+  public Class<? extends String> getAmfClass() {
+    return String.class;
   }
 }

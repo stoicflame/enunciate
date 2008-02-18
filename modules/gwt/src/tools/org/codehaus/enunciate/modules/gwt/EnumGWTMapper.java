@@ -19,7 +19,7 @@ package org.codehaus.enunciate.modules.gwt;
 /**
  * @author Ryan Heaton
  */
-public class EnumGWTMapper implements GWTMapper<Enum, String> {
+public class EnumGWTMapper implements CustomGWTMapper<Enum, String> {
 
   private final Class<Enum> enumClass;
 
@@ -33,5 +33,13 @@ public class EnumGWTMapper implements GWTMapper<Enum, String> {
 
   public Enum toJAXB(String gwtObject, GWTMappingContext context) throws GWTMappingException {
     return Enum.valueOf(enumClass, gwtObject);
+  }
+
+  public Class<? extends Enum> getJaxbClass() {
+    return this.enumClass;
+  }
+
+  public Class<? extends String> getGwtClass() {
+    return String.class;
   }
 }

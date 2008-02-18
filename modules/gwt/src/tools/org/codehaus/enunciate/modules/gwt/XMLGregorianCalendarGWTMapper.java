@@ -25,7 +25,7 @@ import java.util.GregorianCalendar;
 /**
  * @author Ryan Heaton
  */
-public class XMLGregorianCalendarGWTMapper implements GWTMapper<XMLGregorianCalendar, Date> {
+public class XMLGregorianCalendarGWTMapper implements CustomGWTMapper<XMLGregorianCalendar, Date> {
 
   public Date toGWT(XMLGregorianCalendar jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.toGregorianCalendar().getTime();
@@ -46,5 +46,13 @@ public class XMLGregorianCalendarGWTMapper implements GWTMapper<XMLGregorianCale
     catch (DatatypeConfigurationException e) {
       throw new GWTMappingException("Internal Error mapping from GWT to an instance of XMLGregorianCalendar: ", e);
     }
+  }
+
+  public Class<? extends XMLGregorianCalendar> getJaxbClass() {
+    return XMLGregorianCalendar.class;
+  }
+
+  public Class<? extends Date> getGwtClass() {
+    return Date.class;
   }
 }

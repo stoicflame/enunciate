@@ -29,10 +29,21 @@ public class AMFMappingContext {
 
   private final Map<Object, Object> mappedObjects = new IdentityHashMap<Object, Object>();
 
+  /**
+   * Get all the objects that have already been mapped.
+   *
+   * @return The objects that have been mapped.
+   */
   public Map<Object, Object> getMappedObjects() {
     return Collections.unmodifiableMap(mappedObjects);
   }
 
+  /**
+   * Identify an object as being mapped.
+   *
+   * @param from The object mapped from.
+   * @param to The object mapped to.
+   */
   public void objectMapped(Object from, Object to) {
     this.mappedObjects.put(from, to);
   }

@@ -19,16 +19,22 @@ package org.codehaus.enunciate.modules.amf;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
+ * AMF mapper that applies an XmlAdapter before mapping to an AMF object.
+ *
  * @author Ryan Heaton
  */
-public class AdaptingAMFMapper implements AMFMapper {
+public class AdaptingAMFMapper implements CustomAMFMapper {
 
   private final XmlAdapter adapter;
   private final AMFMapper adaptingMapper;
+  private final Class jaxbClass;
+  private final Class amfClass;
 
-  public AdaptingAMFMapper(XmlAdapter adapter, AMFMapper adaptingMapper) {
+  public AdaptingAMFMapper(XmlAdapter adapter, AMFMapper adaptingMapper, Class jaxbClass, Class amfClass) {
     this.adapter = adapter;
     this.adaptingMapper = adaptingMapper;
+    this.jaxbClass = jaxbClass;
+    this.amfClass = amfClass;
   }
 
   public Object toAMF(Object jaxbObject, AMFMappingContext context) throws AMFMappingException {
@@ -47,5 +53,13 @@ public class AdaptingAMFMapper implements AMFMapper {
     catch (Exception e) {
       throw new AMFMappingException(e);
     }
+  }
+
+  public Class getJaxbClass() {
+    return this.jaxbClass;
+  }
+
+  public Class getAmfClass() {
+    return this.amfClass;
   }
 }

@@ -21,7 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * A mapping context for mapping GWT contexts.
+ * A mapping context for mapping GWT objects.
  *
  * @author Ryan Heaton
  */

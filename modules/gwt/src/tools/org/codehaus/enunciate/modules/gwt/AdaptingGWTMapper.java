@@ -19,16 +19,22 @@ package org.codehaus.enunciate.modules.gwt;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
+ * GWT mapper that applies an XmlAdapter before mapping to an GWT object.
+ *
  * @author Ryan Heaton
  */
-public class AdaptingGWTMapper implements GWTMapper {
+public class AdaptingGWTMapper implements CustomGWTMapper {
 
   private final XmlAdapter adapter;
   private final GWTMapper adaptingMapper;
+  private final Class jaxbClass;
+  private final Class gwtClass;
 
-  public AdaptingGWTMapper(XmlAdapter adapter, GWTMapper adaptingMapper) {
+  public AdaptingGWTMapper(XmlAdapter adapter, GWTMapper adaptingMapper, Class jaxbClass, Class gwtClass) {
     this.adapter = adapter;
     this.adaptingMapper = adaptingMapper;
+    this.jaxbClass = jaxbClass;
+    this.gwtClass = gwtClass;
   }
 
   public Object toGWT(Object jaxbObject, GWTMappingContext context) throws GWTMappingException {
@@ -47,5 +53,13 @@ public class AdaptingGWTMapper implements GWTMapper {
     catch (Exception e) {
       throw new GWTMappingException(e);
     }
+  }
+
+  public Class getJaxbClass() {
+    return this.jaxbClass;
+  }
+
+  public Class getGwtClass() {
+    return this.gwtClass;
   }
 }

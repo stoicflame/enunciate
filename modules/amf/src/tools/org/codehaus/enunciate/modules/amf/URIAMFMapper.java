@@ -21,7 +21,7 @@ import java.net.URI;
 /**
  * @author Ryan Heaton
  */
-public class URIAMFMapper implements AMFMapper<URI, String> {
+public class URIAMFMapper implements CustomAMFMapper<URI, String> {
 
   public String toAMF(URI jaxbObject, AMFMappingContext context) throws AMFMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class URIAMFMapper implements AMFMapper<URI, String> {
 
   public URI toJAXB(String amfObject, AMFMappingContext context) throws AMFMappingException {
     return amfObject == null ? null : URI.create(amfObject);
+  }
+
+  public Class<? extends URI> getJaxbClass() {
+    return URI.class;
+  }
+
+  public Class<? extends String> getAmfClass() {
+    return String.class;
   }
 }

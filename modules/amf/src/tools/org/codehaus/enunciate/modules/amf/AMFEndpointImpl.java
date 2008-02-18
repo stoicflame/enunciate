@@ -17,7 +17,14 @@
 package org.codehaus.enunciate.modules.amf;
 
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.ClassUtils;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.BeansException;
+import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
+import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -25,16 +32,24 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
 
 /**
+ * Base class for an AMF endpoint.
+ *
  * @author Ryan Heaton
  */
-public abstract class AMFEndpointImpl {
+public abstract class AMFEndpointImpl extends ApplicationObjectSupport implements EnunciateServiceFactoryAware {
 
+  private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
   private final HashMap<String, Method> operationNames2Methods = new HashMap<String, Method>();
   private Object serviceBean;
 
-  protected AMFEndpointImpl() {
+  @Override
+  protected void initApplicationContext() throws BeansException {
+    super.initApplicationContext();
+
     // load the service class.
     Class serviceClass = getServiceClass();
     Class serviceInterface = serviceClass;
@@ -57,7 +72,7 @@ public abstract class AMFEndpointImpl {
       }
     }
 
-    this.serviceBean = ApplicationContextFilter.loadServiceBean(serviceClass, serviceInterface);
+    this.serviceBean = loadServiceBean(serviceClass, serviceInterface);
     this.operationNames2Methods.clear();
 
     for (Method method : serviceInterface.getMethods()) {
@@ -71,6 +86,58 @@ public abstract class AMFEndpointImpl {
     }
   }
 
+  protected Object loadServiceBean(Class serviceClass, Class serviceInterface) {
+    Object serviceBean;
+
+    WebService wsInfo = (WebService) serviceClass.getAnnotation(WebService.class);
+    Map serviceInterfaceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), serviceInterface);
+    if (serviceInterfaceBeans.size() > 0) {
+      String serviceName = wsInfo.serviceName();
+      if ((serviceName == null) || ("".equals(serviceName))) {
+        serviceName = serviceInterface.getSimpleName() + "Service";
+      }
+
+      if (serviceInterfaceBeans.containsKey(serviceName)) {
+        //first attempt will be to load the bean identified by the service name:
+        serviceBean = serviceInterfaceBeans.get(serviceName);
+      }
+      else if (serviceInterfaceBeans.size() == 1) {
+        // not there; use the only one if it exists...
+        serviceBean = serviceInterfaceBeans.values().iterator().next();
+      }
+      else {
+        //panic: can't determine the service bean to use.
+        ArrayList beanNames = new ArrayList(serviceInterfaceBeans.keySet());
+        throw new ApplicationContextException("There are more than one beans of type " + serviceInterface.getName() +
+          " in the application context " + beanNames + ".  Cannot determine which one to use to handle the soap requests.  " +
+          "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the service (\"" + serviceName + "\").");
+      }
+    }
+    else {
+      //try to instantiate the bean with the class...
+      try {
+        serviceBean = serviceClass.newInstance();
+      }
+      catch (Exception e) {
+        throw new ApplicationContextException("Unable to create an instance of " + serviceClass.getName(), e);
+      }
+    }
+
+    if (serviceInterface.isInterface()) {
+      serviceBean = enunciateServiceFactory.getInstance(serviceBean, serviceInterface);
+    }
+    
+    return serviceBean;
+  }
+
+  /**
+   * Invoke an operation on the underlying service bean. This will transform each of its AMF object parameters to JAXB object parameters and then invoke the
+   * JAX-WS service bean.  The result will be transformed into an AMF object before being returned.
+   *
+   * @param operationName The operation name.
+   * @param params The (AMF) parameters.
+   * @return The (AMF) result of the invocation.
+   */
   protected final Object invokeOperation(String operationName, Object... params) throws Exception {
     Method method = this.operationNames2Methods.get(operationName);
     if (method == null) {
@@ -85,7 +152,14 @@ public abstract class AMFEndpointImpl {
 
     Object[] mappedParams = new Object[paramTypes.length];
     for (int i = 0; i < paramTypes.length; i++) {
-      mappedParams[i] = AMFMapperIntrospector.getAMFMapper(paramTypes[i], null, null).toJAXB(params[i], mappingContext);
+      AMFMapper mapper;
+      if (params[i] instanceof AMFMapperAware) {
+        mapper = ((AMFMapperAware) params[i]).loadAMFMapper();
+      }
+      else {
+        mapper = AMFMapperIntrospector.getAMFMapper(paramTypes[i]);
+      }
+      mappedParams[i] = mapper.toJAXB(params[i], mappingContext);
     }
 
     Object returnValue;
@@ -103,7 +177,7 @@ public abstract class AMFEndpointImpl {
       for (int i = 0; i < method.getExceptionTypes().length; i++) {
         Class exceptionType = method.getExceptionTypes()[i];
         if (exceptionType.isInstance(targetException)) {
-          throw (Exception) AMFMapperIntrospector.getAMFMapper(exceptionType, null, null).toAMF(targetException, mappingContext);
+          throw (Exception) AMFMapperIntrospector.getAMFMapper(targetException.getClass(), exceptionType).toAMF(targetException, mappingContext);
         }
       }
 
@@ -116,7 +190,7 @@ public abstract class AMFEndpointImpl {
     }
 
     if (method.getReturnType() != Void.TYPE) {
-      returnValue = AMFMapperIntrospector.getAMFMapper(method.getGenericReturnType(), null, null).toAMF(returnValue, mappingContext);
+      returnValue = AMFMapperIntrospector.getAMFMapper(returnValue != null ? returnValue.getClass() : null, method.getGenericReturnType()).toAMF(returnValue, mappingContext);
     }
 
     return returnValue;
@@ -129,4 +203,12 @@ public abstract class AMFEndpointImpl {
    */
   protected abstract Class getServiceClass();
 
+  /**
+   * Set the enunciate service factory to use.
+   *
+   * @param enunciateServiceFactory The enunciate service factory.
+   */
+  public void setEnunciateServiceFactory(EnunciateServiceFactory enunciateServiceFactory) {
+    this.enunciateServiceFactory = enunciateServiceFactory;
+  }
 }

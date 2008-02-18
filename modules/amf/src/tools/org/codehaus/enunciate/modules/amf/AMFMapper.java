@@ -17,8 +17,7 @@
 package org.codehaus.enunciate.modules.amf;
 
 /**
- * Maps JAXB objects to AMF objects, and vice-versa.  If a mapper exists for a certain JAXB class, it is assumed to
- * exist in the "amf" package relative to the JAXB class package, same name with "AMFMapper" appended to the class name.
+ * Maps JAXB objects to AMF objects, and vice-versa.
  *
  * @author Ryan Heaton
  */

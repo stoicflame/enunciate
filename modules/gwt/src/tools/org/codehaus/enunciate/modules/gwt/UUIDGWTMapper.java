@@ -21,7 +21,7 @@ import java.util.UUID;
 /**
  * @author Ryan Heaton
  */
-public class UUIDGWTMapper implements GWTMapper<UUID, String> {
+public class UUIDGWTMapper implements CustomGWTMapper<UUID, String> {
 
   public String toGWT(UUID jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class UUIDGWTMapper implements GWTMapper<UUID, String> {
 
   public UUID toJAXB(String gwtObject, GWTMappingContext context) throws GWTMappingException {
     return gwtObject == null ? null : UUID.fromString(gwtObject);
+  }
+
+  public Class<? extends UUID> getJaxbClass() {
+    return UUID.class;
+  }
+
+  public Class<? extends String> getGwtClass() {
+    return String.class;
   }
 }

@@ -23,24 +23,10 @@
   </filter>
 
   [/#if]
-  [#if amfEnabled]
-  <filter>
-      <filter-name>AMFApplicationContextFilter</filter-name>
-      <filter-class>org.codehaus.enunciate.modules.amf.ApplicationContextFilter</filter-class>
-  </filter>
-
-  [/#if]
   [#if securityEnabled]
   <filter-mapping>
     <filter-name>spring-security</filter-name>
     <url-pattern>/*</url-pattern>
-  </filter-mapping>
-
-  [/#if]
-  [#if amfEnabled]
-  <filter-mapping>
-    <filter-name>AMFApplicationContextFilter</filter-name>
-    <url-pattern>/amf/*</url-pattern>
   </filter-mapping>
 
   [/#if]

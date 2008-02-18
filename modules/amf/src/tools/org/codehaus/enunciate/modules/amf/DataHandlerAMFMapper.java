@@ -23,7 +23,7 @@ import java.io.*;
 /**
  * @author Ryan Heaton
  */
-public class DataHandlerAMFMapper implements AMFMapper<DataHandler, byte[]> {
+public class DataHandlerAMFMapper implements CustomAMFMapper<DataHandler, byte[]> {
 
   public byte[] toAMF(DataHandler jaxbObject, AMFMappingContext context) throws AMFMappingException {
     if (jaxbObject == null) {
@@ -64,5 +64,13 @@ public class DataHandlerAMFMapper implements AMFMapper<DataHandler, byte[]> {
         return "";
       }
     });
+  }
+
+  public Class<? extends DataHandler> getJaxbClass() {
+    return DataHandler.class;
+  }
+
+  public Class<? extends byte[]> getAmfClass() {
+    return byte[].class;
   }
 }

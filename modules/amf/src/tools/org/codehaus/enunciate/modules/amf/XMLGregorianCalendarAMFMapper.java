@@ -25,7 +25,7 @@ import java.util.GregorianCalendar;
 /**
  * @author Ryan Heaton
  */
-public class XMLGregorianCalendarAMFMapper implements AMFMapper<XMLGregorianCalendar, Date> {
+public class XMLGregorianCalendarAMFMapper implements CustomAMFMapper<XMLGregorianCalendar, Date> {
 
   public Date toAMF(XMLGregorianCalendar jaxbObject, AMFMappingContext context) throws AMFMappingException {
     return jaxbObject == null ? null : jaxbObject.toGregorianCalendar().getTime();
@@ -46,5 +46,13 @@ public class XMLGregorianCalendarAMFMapper implements AMFMapper<XMLGregorianCale
     catch (DatatypeConfigurationException e) {
       throw new AMFMappingException("Internal Error mapping from AMF to an instance of XMLGregorianCalendar: ", e);
     }
+  }
+
+  public Class<? extends XMLGregorianCalendar> getJaxbClass() {
+    return XMLGregorianCalendar.class;
+  }
+
+  public Class<? extends Date> getAmfClass() {
+    return Date.class;
   }
 }

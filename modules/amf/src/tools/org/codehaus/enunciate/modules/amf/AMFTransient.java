@@ -16,10 +16,17 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 /**
  * Marker interface for marking something as AMF-transient.
- * 
+ *
  * @author Ryan Heaton
  */
+@Retention ( RetentionPolicy.RUNTIME )
+@Target ( { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE} )
 public @interface AMFTransient {
 }

@@ -21,7 +21,7 @@ import java.math.BigInteger;
 /**
  * @author Ryan Heaton
  */
-public class BigIntegerGWTMapper implements GWTMapper<BigInteger, String> {
+public class BigIntegerGWTMapper implements CustomGWTMapper<BigInteger, String> {
 
   public String toGWT(BigInteger jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class BigIntegerGWTMapper implements GWTMapper<BigInteger, String> {
 
   public BigInteger toJAXB(String gwtObject, GWTMappingContext context) throws GWTMappingException {
     return gwtObject == null ? null : new BigInteger(gwtObject);
+  }
+
+  public Class<? extends BigInteger> getJaxbClass() {
+    return BigInteger.class;
+  }
+
+  public Class<? extends String> getGwtClass() {
+    return String.class;
   }
 }

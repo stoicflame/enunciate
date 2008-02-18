@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 /**
  * @author Ryan Heaton
  */
-public class QNameGWTMapper implements GWTMapper<QName, String> {
+public class QNameGWTMapper implements CustomGWTMapper<QName, String> {
 
   public String toGWT(QName jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class QNameGWTMapper implements GWTMapper<QName, String> {
 
   public QName toJAXB(String gwtObject, GWTMappingContext context) throws GWTMappingException {
     return gwtObject == null ? null : QName.valueOf(gwtObject);
+  }
+
+  public Class<? extends QName> getJaxbClass() {
+    return QName.class;
+  }
+
+  public Class<? extends String> getGwtClass() {
+    return String.class;
   }
 }

@@ -16,24 +16,34 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 
 /**
  * @author Ryan Heaton
  */
-public class ArrayGWTMapper implements GWTMapper {
+public class ArrayGWTMapper implements CustomGWTMapper {
 
-  private final Class itemClass;
-  private final GWTMapper itemMapper;
+  private final Type declaredComponentType;
+  private final Class jaxbItemClass;
+  private final Class gwtItemClass;
+  private final XmlJavaTypeAdapter adapterInfo;
+  private final XmlElement elementInfo;
 
-  public ArrayGWTMapper(GWTMapper itemMapper) {
-    this.itemMapper = itemMapper;
-    this.itemClass = null;
-  }
-
-  public ArrayGWTMapper(GWTMapper itemMapper, Class itemClass) {
-    this.itemMapper = itemMapper;
-    this.itemClass = itemClass;
+  public ArrayGWTMapper(Type declaredComponentType, XmlJavaTypeAdapter adapterInfo, XmlElement elementInfo) {
+    this.declaredComponentType = declaredComponentType;
+    this.adapterInfo = adapterInfo;
+    this.elementInfo = elementInfo;
+    this.jaxbItemClass = GWTMapperIntrospector.narrowType(this.declaredComponentType);
+    GWTMapper defaultMapper = GWTMapperIntrospector.getGWTMapper(this.declaredComponentType, adapterInfo, elementInfo);
+    if (defaultMapper instanceof CustomGWTMapper) {
+      this.gwtItemClass = ((CustomGWTMapper) defaultMapper).getGwtClass();
+    }
+    else {
+      this.gwtItemClass = this.jaxbItemClass;
+    }
   }
 
   public Object toGWT(Object jaxbObject, GWTMappingContext context) throws GWTMappingException {
@@ -41,24 +51,23 @@ public class ArrayGWTMapper implements GWTMapper {
       return null;
     }
 
-    if (!jaxbObject.getClass().isArray()) {
-      throw new GWTMappingException("Expected an array, got " + jaxbObject);
+    Object[] jaxbArray = (Object[]) jaxbObject;
+    Object[] gwtArray = (Object[]) Array.newInstance(this.gwtItemClass, jaxbArray.length);
+    for (int i = 0; i < jaxbArray.length; i++) {
+      Object jaxbItem = jaxbArray[i];
+      Object gwtItem;
+      if (jaxbItem == null) {
+        gwtItem = null;
+      }
+      else {
+        GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapper(jaxbItem.getClass(), this.declaredComponentType, this.adapterInfo, this.elementInfo);
+        gwtItem = itemMapper.toGWT(jaxbItem, context);
+      }
+
+      gwtArray[i] = gwtItem;
     }
 
-    int length = Array.getLength(jaxbObject);
-    if (length == 0) {
-      return null;
-    }
-
-    Object item = itemMapper.toGWT(Array.get(jaxbObject, 0), context);
-    Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
-    Array.set(resultArray, 0, item);
-    int i = 1;
-    while (length > i) {
-      item = itemMapper.toGWT(Array.get(jaxbObject, i), context);
-      Array.set(resultArray, i++, item);
-    }
-    return resultArray;
+    return gwtArray;
   }
 
   public Object toJAXB(Object gwtObject, GWTMappingContext context) throws GWTMappingException {
@@ -66,23 +75,33 @@ public class ArrayGWTMapper implements GWTMapper {
       return null;
     }
 
-    if (!gwtObject.getClass().isArray()) {
-      throw new GWTMappingException("Expected an array, got " + gwtObject);
+    Object[] gwtArray = (Object[]) gwtObject;
+    Object[] jaxbArray = (Object[]) Array.newInstance(this.jaxbItemClass, gwtArray.length);
+    for (int i = 0; i < gwtArray.length; i++) {
+      Object gwtItem = gwtArray[i];
+      Object jaxbItem;
+      if (gwtItem == null) {
+        jaxbItem = null;
+      }
+      else {
+        GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(gwtItem);
+        if (itemMapper == null) {
+          itemMapper = GWTMapperIntrospector.getGWTMapper(this.declaredComponentType, this.adapterInfo, this.elementInfo);
+        }
+        jaxbItem = itemMapper.toJAXB(gwtItem, context);
+      }
+
+      jaxbArray[i] = jaxbItem;
     }
 
-    int length = Array.getLength(gwtObject);
-    if (length == 0) {
-      return null;
-    }
+    return jaxbArray;
+  }
 
-    Object item = itemMapper.toJAXB(Array.get(gwtObject, 0), context);
-    Object resultArray = Array.newInstance(this.itemClass == null ? item.getClass() : this.itemClass, length);
-    Array.set(resultArray, 0, item);
-    int i = 1;
-    while (length > i) {
-      item = itemMapper.toJAXB(Array.get(gwtObject, i), context);
-      Array.set(resultArray, i++, item);
-    }
-    return resultArray;
+  public Class getJaxbClass() {
+    return Array.newInstance(this.jaxbItemClass, 0).getClass();
+  }
+
+  public Class getGwtClass() {
+    return Array.newInstance(this.gwtItemClass, 0).getClass();
   }
 }

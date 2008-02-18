@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * @author Ryan Heaton
  */
-public class CalendarGWTMapper implements GWTMapper<Calendar, Date> {
+public class CalendarGWTMapper implements CustomGWTMapper<Calendar, Date> {
 
   public Date toGWT(Calendar jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.getTime();
@@ -36,5 +36,13 @@ public class CalendarGWTMapper implements GWTMapper<Calendar, Date> {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(gwtObject);
     return calendar;
+  }
+
+  public Class<? extends Calendar> getJaxbClass() {
+    return Calendar.class;
+  }
+
+  public Class<? extends Date> getGwtClass() {
+    return Date.class;
   }
 }

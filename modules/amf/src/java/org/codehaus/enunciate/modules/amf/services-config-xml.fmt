@@ -15,7 +15,8 @@
           <channel ref="${endpointInterface.simpleName}AMFChannel"/>
         </channels>
         <properties>
-          <source>${endpointInterface.package.qualifiedName}.amf.AMF${endpointInterface.simpleName}</source>
+          <factory>spring</factory>
+          <source>${endpointInterface.serviceName}-amf</source>
         </properties>
       </destination>
     [/@forEachEndpointInterface]
@@ -32,5 +33,9 @@
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
   </channels>
+
+  <factories>
+    <factory id="spring" class="org.codehaus.enunciate.modules.amf.SpringFactory"/>
+  </factories>
 </services-config>
 [/@file]

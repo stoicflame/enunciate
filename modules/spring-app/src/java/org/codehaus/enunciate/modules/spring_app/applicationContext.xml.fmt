@@ -45,6 +45,17 @@
     </property>
     [/#if]
   </bean>
+  [#if amfEnabled]
+    [@forEachWsdl]
+      [@forEachEndpointInterface wsdl=wsdl]
+        [#if !endpointInterface.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
 
+  <bean id="${endpointInterface.serviceName}-amf" class="${endpointInterface.package.qualifiedName}.amf.AMF${endpointInterface.simpleName}">
+    <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
+  </bean>
+        [/#if]
+      [/@forEachEndpointInterface]
+    [/@forEachWsdl]
+  [/#if]
 </beans>
 [/@file]

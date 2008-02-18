@@ -21,7 +21,7 @@ import java.net.URI;
 /**
  * @author Ryan Heaton
  */
-public class URIGWTMapper implements GWTMapper<URI, String> {
+public class URIGWTMapper implements CustomGWTMapper<URI, String> {
 
   public String toGWT(URI jaxbObject, GWTMappingContext context) throws GWTMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class URIGWTMapper implements GWTMapper<URI, String> {
 
   public URI toJAXB(String gwtObject, GWTMappingContext context) throws GWTMappingException {
     return gwtObject == null ? null : URI.create(gwtObject);
+  }
+
+  public Class<? extends URI> getJaxbClass() {
+    return URI.class;
+  }
+
+  public Class<? extends String> getGwtClass() {
+    return String.class;
   }
 }

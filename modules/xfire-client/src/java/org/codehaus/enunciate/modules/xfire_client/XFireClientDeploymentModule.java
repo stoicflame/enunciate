@@ -563,11 +563,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       jarName = label + "-client.jar";
     }
 
-    File jdk14Jar = new File(getBuildDir(), jarName);
+    File jdk14Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4.jar"));
     enunciate.zip(jdk14Jar, getJdk14CompileDir());
     enunciate.setProperty("client.jdk14.jar", jdk14Jar);
 
-    File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
+    File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-src.jar"));
     enunciate.zip(jdk14Sources, getJdk14GenerateDir());
     enunciate.setProperty("client.jdk14.sources", jdk14Sources);
 
@@ -658,11 +658,11 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.addArtifact(jdk14SourcesJar);
     enunciate.addArtifact(jdk14ArtifactBundle);
 
-    File jdk15Jar = new File(getBuildDir(), jarName);
+    File jdk15Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5.jar"));
     enunciate.zip(jdk15Jar, getJdk15CompileDir());
     enunciate.setProperty("client.jdk15.jar", jdk15Jar);
 
-    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
+    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-src.jar"));
     enunciate.zip(jdk15Sources, getJdk15GenerateDir());
     enunciate.setProperty("client.jdk15.sources", jdk15Sources);
 

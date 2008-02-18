@@ -74,15 +74,19 @@ public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
         }
       }
       else if (declaration instanceof TypeDefinition) {
-        for (Attribute attribute : ((TypeDefinition) declaration).getAttributes()) {
+        TypeDefinition typeDef = (TypeDefinition) declaration;
+        if (!typeDef.isBaseObject()) {
+          imports.add(classnameFor.convert(typeDef.getSuperclass()));
+        }
+        for (Attribute attribute : typeDef.getAttributes()) {
           imports.add(classnameFor.convert(attribute));
           addComponentTypes(attribute.getAccessorType(), imports);
         }
-        for (Element element : ((TypeDefinition) declaration).getElements()) {
+        for (Element element : typeDef.getElements()) {
           imports.add(classnameFor.convert(element));
           addComponentTypes(element.getAccessorType(), imports);
         }
-        Value value = ((TypeDefinition) declaration).getValue();
+        Value value = typeDef.getValue();
         if (value != null) {
           imports.add(classnameFor.convert(value));
           addComponentTypes(value.getAccessorType(), imports);

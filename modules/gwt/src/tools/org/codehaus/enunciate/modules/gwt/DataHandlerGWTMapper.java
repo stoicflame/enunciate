@@ -23,7 +23,7 @@ import java.io.*;
 /**
  * @author Ryan Heaton
  */
-public class DataHandlerGWTMapper implements GWTMapper<DataHandler, byte[]> {
+public class DataHandlerGWTMapper implements CustomGWTMapper<DataHandler, byte[]> {
 
   public byte[] toGWT(DataHandler jaxbObject, GWTMappingContext context) throws GWTMappingException {
     if (jaxbObject == null) {
@@ -64,5 +64,13 @@ public class DataHandlerGWTMapper implements GWTMapper<DataHandler, byte[]> {
         return "";
       }
     });
+  }
+
+  public Class<? extends DataHandler> getJaxbClass() {
+    return DataHandler.class;
+  }
+
+  public Class<? extends byte[]> getGwtClass() {
+    return byte[].class;
   }
 }

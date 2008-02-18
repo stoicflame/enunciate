@@ -21,7 +21,7 @@ import java.util.UUID;
 /**
  * @author Ryan Heaton
  */
-public class UUIDAMFMapper implements AMFMapper<UUID, String> {
+public class UUIDAMFMapper implements CustomAMFMapper<UUID, String> {
 
   public String toAMF(UUID jaxbObject, AMFMappingContext context) throws AMFMappingException {
     return jaxbObject == null ? null : jaxbObject.toString();
@@ -29,5 +29,13 @@ public class UUIDAMFMapper implements AMFMapper<UUID, String> {
 
   public UUID toJAXB(String amfObject, AMFMappingContext context) throws AMFMappingException {
     return amfObject == null ? null : UUID.fromString(amfObject);
+  }
+
+  public Class<? extends UUID> getJaxbClass() {
+    return UUID.class;
+  }
+
+  public Class<? extends String> getAmfClass() {
+    return String.class;
   }
 }

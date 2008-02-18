@@ -16,8 +16,11 @@
 
 package org.codehaus.enunciate.modules.amf;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 /**
  * @author Ryan Heaton
@@ -25,11 +28,15 @@ import java.lang.reflect.Modifier;
 public class CollectionAMFMapper implements AMFMapper<Collection, Collection> {
 
   private final Class<? extends Collection> collectionType;
-  private final AMFMapper itemMapper;
+  private final Type defaultItemType;
+  private final XmlJavaTypeAdapter adapterInfo;
+  private final XmlElement elementInfo;
 
-  public CollectionAMFMapper(Class<? extends Collection> collectionType, AMFMapper itemMapper) {
+  public CollectionAMFMapper(Class<? extends Collection> collectionType, Type defaultItemType, XmlJavaTypeAdapter adapterInfo, XmlElement elementInfo) {
     this.collectionType = collectionType;
-    this.itemMapper = itemMapper;
+    this.defaultItemType = defaultItemType;
+    this.adapterInfo = adapterInfo;
+    this.elementInfo = elementInfo;
   }
 
   public Collection toAMF(Collection jaxbObject, AMFMappingContext context) throws AMFMappingException {
@@ -39,6 +46,7 @@ public class CollectionAMFMapper implements AMFMapper<Collection, Collection> {
 
     Collection collection = CollectionAMFMapper.newCollectionInstance(collectionType);
     for (Object item : jaxbObject) {
+      AMFMapper itemMapper = AMFMapperIntrospector.getAMFMapper(item == null ? null : item.getClass(), this.defaultItemType, this.adapterInfo, this.elementInfo);
       collection.add(itemMapper.toAMF(item, context));
     }
     return collection;
@@ -51,6 +59,7 @@ public class CollectionAMFMapper implements AMFMapper<Collection, Collection> {
 
     Collection collection = CollectionAMFMapper.newCollectionInstance(collectionType);
     for (Object item : amfObject) {
+      AMFMapper itemMapper = item instanceof AMFMapperAware ? ((AMFMapperAware) item).loadAMFMapper() : AMFMapperIntrospector.getAMFMapper(this.defaultItemType, this.adapterInfo, this.elementInfo);
       collection.add(itemMapper.toJAXB(item, context));
     }
     return collection;

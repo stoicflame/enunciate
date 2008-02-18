@@ -27,6 +27,6 @@ import java.lang.annotation.ElementType;
  * @author Ryan Heaton
  */
 @Retention ( RetentionPolicy.RUNTIME )
-@Target ( { ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE} )
+@Target ( { ElementType.FIELD, ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE} )
 public @interface GWTTransient {
 }

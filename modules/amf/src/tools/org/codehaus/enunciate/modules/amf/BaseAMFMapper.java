@@ -25,17 +25,26 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 /**
- * Default implementation of a AMFMapper.
+ * Base implementation of an AMFMapper. If a custom mapper exists for a certain JAXB class, it is assumed to
+ * exist in the "amf" package relative to the JAXB class package, same name, with "AMFMapper" appended to the
+ * class name. Since it's generated, it will likely extend this base mapper class.
  *
  * @author Ryan Heaton
  */
-public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
+public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
 
   private final Class<J> jaxbClass;
   private final Class<G> amfClass;
   private final String[] properties;
   private final PropertyDescriptor[][] jaxbProperties2amfProperties;
 
+  /**
+   * Construct a base AMF mapper.
+   *
+   * @param jaxbClass The JAXB class to map.
+   * @param amfClass The AMF class to map.
+   * @param properties The properties of the JAXB class that will be mapped to corresponding properties of the AMF class.
+   */
   protected BaseAMFMapper(Class<J> jaxbClass, Class<G> amfClass, String... properties) {
     this.jaxbClass = jaxbClass;
     this.amfClass = amfClass;
@@ -61,6 +70,13 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     }
   }
 
+  /**
+   * Map a JAXB object to an AMF object.
+   *
+   * @param jaxbObject The JAXB object.
+   * @param context The mapping context.
+   * @return The mapped AMF object.
+   */
   public G toAMF(J jaxbObject, AMFMappingContext context) throws AMFMappingException {
     if (context.getMappedObjects().containsKey(jaxbObject)) {
       return (G) context.getMappedObjects().get(jaxbObject);
@@ -93,7 +109,7 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
 
       XmlJavaTypeAdapter adapterInfo = findTypeAdapter(jaxbProperty);
       XmlElement xmlElement = findXmlElement(jaxbProperty);
-      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(getter.getGenericReturnType(), adapterInfo, xmlElement);
+      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(propertyValue.getClass(), getter.getGenericReturnType(), adapterInfo, xmlElement);
       try {
         amfProperty.getWriteMethod().invoke(amfObject, mapper.toAMF(propertyValue, context));
       }
@@ -105,6 +121,12 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     return amfObject;
   }
 
+  /**
+   * Find the type adapter for the specified JAXB property.
+   *
+   * @param jaxbProperty The JAXB property for which to find a type adapter.
+   * @return The type adapter, or null if none was found.
+   */
   private XmlJavaTypeAdapter findTypeAdapter(PropertyDescriptor jaxbProperty) {
     XmlJavaTypeAdapter adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
 
@@ -133,6 +155,12 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     return adapterInfo;
   }
 
+  /**
+   * Find the xml element metadata for a specified JAXB property.
+   *
+   * @param property The JAXB property for which to find the xml element metadata.
+   * @return The xml element metadata, or null if none found.
+   */
   private XmlElement findXmlElement(PropertyDescriptor property){
     XmlElement xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
 
@@ -143,6 +171,13 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     return xmlElement;
   }
 
+  /**
+   * Map an AMF object to a JAXB object.
+   *
+   * @param amfObject The AMF object to map.
+   * @param context The mapping context.
+   * @return The JAXB object.
+   */
   public J toJAXB(G amfObject, AMFMappingContext context) throws AMFMappingException {
     if (context.getMappedObjects().containsKey(amfObject)) {
       return (J) context.getMappedObjects().get(amfObject);
@@ -172,7 +207,14 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
         continue;
       }
 
-      AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
+      AMFMapper mapper;
+      if (propertyValue instanceof AMFMapperAware) {
+        mapper = ((AMFMapperAware) propertyValue).loadAMFMapper();
+      }
+      else {
+        mapper = AMFMapperIntrospector.getAMFMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
+      }
+      
       try {
         jaxbProperty.getWriteMethod().invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }
@@ -199,4 +241,21 @@ public abstract class BaseAMFMapper<J, G> implements AMFMapper<J, G> {
     return allArgs;
   }
 
+  /**
+   * The JAXB class applicable to this mapper.
+   *
+   * @return The JAXB class applicable to this mapper.
+   */
+  public Class<J> getJaxbClass() {
+    return jaxbClass;
+  }
+
+  /**
+   * The AMF class applicable to this mapper.
+   *
+   * @return The AMF class applicable to this mapper.
+   */
+  public Class<G> getAmfClass() {
+    return amfClass;
+  }
 }

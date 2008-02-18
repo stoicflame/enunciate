@@ -20,6 +20,17 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="spring-j2ee" level="project" />
+    <orderEntry type="module-library">
+      <library name="blazeds">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-common/1.0-beta1/blazeds-common-1.0-beta1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-remoting/1.0-beta1/blazeds-remoting-1.0-beta1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-core/1.0-beta1/blazeds-core-1.0-beta1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

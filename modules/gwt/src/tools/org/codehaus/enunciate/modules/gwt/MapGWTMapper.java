@@ -16,9 +16,11 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
-import java.util.Map;
-import java.util.HashMap;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -26,13 +28,15 @@ import java.lang.reflect.Modifier;
 public class MapGWTMapper implements GWTMapper<Map, Map> {
 
   private final Class<Map> mapType;
-  private final GWTMapper keyMapper;
-  private final GWTMapper valueMapper;
+  private final Type keyType;
+  private final Type valueType;
+  private final XmlJavaTypeAdapter adapterInfo;
 
-  public MapGWTMapper(Class<Map> mapType, GWTMapper keyMapper, GWTMapper valueMapper) {
+  public MapGWTMapper(Class<Map> mapType, Type keyType, Type valueType, XmlJavaTypeAdapter adapterInfo) {
     this.mapType = mapType;
-    this.keyMapper = keyMapper;
-    this.valueMapper = valueMapper;
+    this.keyType = keyType;
+    this.valueType = valueType;
+    this.adapterInfo = adapterInfo;
   }
 
   public Map toGWT(Map jaxbObject, GWTMappingContext context) throws GWTMappingException {
@@ -40,9 +44,13 @@ public class MapGWTMapper implements GWTMapper<Map, Map> {
       return null;
     }
 
-    Map map = getMapType(this.mapType);
-    for (Object key : jaxbObject.keySet()) {
-      map.put(this.keyMapper.toGWT(key, context), this.valueMapper.toGWT(jaxbObject.get(key), context));
+    Map map = getMapInstance(this.mapType);
+    for (Object entry : jaxbObject.entrySet()) {
+      Object jaxbKey = ((Map.Entry) entry).getKey();
+      Object jaxbValue = ((Map.Entry) entry).getValue();
+      Object gwtKey = GWTMapperIntrospector.getGWTMapper(jaxbKey == null ? null : jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toGWT(jaxbKey, context);
+      Object gwtValue = GWTMapperIntrospector.getGWTMapper(jaxbValue == null ? null : jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toGWT(jaxbValue, context);
+      map.put(gwtKey, gwtValue);
     }
     return map;
   }
@@ -52,14 +60,26 @@ public class MapGWTMapper implements GWTMapper<Map, Map> {
       return null;
     }
 
-    Map map = getMapType(this.mapType);
-    for (Object key : gwtObject.keySet()) {
-      map.put(this.keyMapper.toJAXB(key, context), this.valueMapper.toJAXB(gwtObject.get(key), context));
+    Map map = MapGWTMapper.getMapInstance(this.mapType);
+    for (Object entry : gwtObject.entrySet()) {
+      Object gwtKey = ((Map.Entry) entry).getKey();
+      Object gwtValue = ((Map.Entry) entry).getValue();
+      GWTMapper keyMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(gwtKey);
+      if (keyMapper == null) {
+        keyMapper = GWTMapperIntrospector.getGWTMapper(this.keyType, this.adapterInfo, null);
+      }
+      GWTMapper valueMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(gwtValue);
+      if (valueMapper == null) {
+        valueMapper = GWTMapperIntrospector.getGWTMapper(this.valueType, this.adapterInfo, null);
+      }
+      Object jaxbKey = keyMapper.toJAXB(gwtKey, context);
+      Object jaxbValue = valueMapper.toJAXB(gwtValue, context);
+      map.put(jaxbKey, jaxbValue);
     }
     return map;
   }
 
-  public static Map getMapType(Class<Map> mapType) {
+  public static Map getMapInstance(Class<Map> mapType) {
     Map map;
     if ((mapType.isInterface()) || (Modifier.isAbstract(mapType.getModifiers()))) {
       map = new HashMap();

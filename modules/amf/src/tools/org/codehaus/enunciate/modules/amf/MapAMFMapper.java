@@ -16,9 +16,11 @@
 
 package org.codehaus.enunciate.modules.amf;
 
-import java.util.Map;
-import java.util.HashMap;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -26,13 +28,15 @@ import java.lang.reflect.Modifier;
 public class MapAMFMapper implements AMFMapper<Map, Map> {
 
   private final Class<Map> mapType;
-  private final AMFMapper keyMapper;
-  private final AMFMapper valueMapper;
+  private final Type keyType;
+  private final Type valueType;
+  private final XmlJavaTypeAdapter adapterInfo;
 
-  public MapAMFMapper(Class<Map> mapType, AMFMapper keyMapper, AMFMapper valueMapper) {
+  public MapAMFMapper(Class<Map> mapType, Type keyType, Type valueType, XmlJavaTypeAdapter adapterInfo) {
     this.mapType = mapType;
-    this.keyMapper = keyMapper;
-    this.valueMapper = valueMapper;
+    this.keyType = keyType;
+    this.valueType = valueType;
+    this.adapterInfo = adapterInfo;
   }
 
   public Map toAMF(Map jaxbObject, AMFMappingContext context) throws AMFMappingException {
@@ -40,9 +44,13 @@ public class MapAMFMapper implements AMFMapper<Map, Map> {
       return null;
     }
 
-    Map map = MapAMFMapper.getMapType(this.mapType);
-    for (Object key : jaxbObject.keySet()) {
-      map.put(this.keyMapper.toAMF(key, context), this.valueMapper.toAMF(jaxbObject.get(key), context));
+    Map map = getMapInstance(this.mapType);
+    for (Object entry : jaxbObject.entrySet()) {
+      Object jaxbKey = ((Map.Entry) entry).getKey();
+      Object jaxbValue = ((Map.Entry) entry).getValue();
+      Object amfKey = AMFMapperIntrospector.getAMFMapper(jaxbKey == null ? null : jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toAMF(jaxbKey, context);
+      Object amfValue = AMFMapperIntrospector.getAMFMapper(jaxbValue == null ? null : jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toAMF(jaxbValue, context);
+      map.put(amfKey, amfValue);
     }
     return map;
   }
@@ -52,14 +60,20 @@ public class MapAMFMapper implements AMFMapper<Map, Map> {
       return null;
     }
 
-    Map map = MapAMFMapper.getMapType(this.mapType);
-    for (Object key : amfObject.keySet()) {
-      map.put(this.keyMapper.toJAXB(key, context), this.valueMapper.toJAXB(amfObject.get(key), context));
+    Map map = MapAMFMapper.getMapInstance(this.mapType);
+    for (Object entry : amfObject.entrySet()) {
+      Object amfKey = ((Map.Entry) entry).getKey();
+      Object amfValue = ((Map.Entry) entry).getValue();
+      AMFMapper keyMapper = amfKey instanceof AMFMapperAware ? ((AMFMapperAware) amfKey).loadAMFMapper() : AMFMapperIntrospector.getAMFMapper(this.keyType, this.adapterInfo, null);
+      AMFMapper valueMapper = amfValue instanceof AMFMapperAware ? ((AMFMapperAware) amfValue).loadAMFMapper() : AMFMapperIntrospector.getAMFMapper(this.valueType, this.adapterInfo, null);
+      Object jaxbKey = keyMapper.toJAXB(amfKey, context);
+      Object jaxbValue = valueMapper.toJAXB(amfValue, context);
+      map.put(jaxbKey, jaxbValue);
     }
     return map;
   }
 
-  public static Map getMapType(Class<Map> mapType) {
+  public static Map getMapInstance(Class<Map> mapType) {
     Map map;
     if ((mapType.isInterface()) || (Modifier.isAbstract(mapType.getModifiers()))) {
       map = new HashMap();

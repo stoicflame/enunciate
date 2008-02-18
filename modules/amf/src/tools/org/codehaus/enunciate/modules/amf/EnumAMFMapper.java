@@ -19,7 +19,7 @@ package org.codehaus.enunciate.modules.amf;
 /**
  * @author Ryan Heaton
  */
-public class EnumAMFMapper implements AMFMapper<Enum, String> {
+public class EnumAMFMapper implements CustomAMFMapper<Enum, String> {
 
   private final Class<Enum> enumClass;
 
@@ -33,5 +33,13 @@ public class EnumAMFMapper implements AMFMapper<Enum, String> {
 
   public Enum toJAXB(String amfObject, AMFMappingContext context) throws AMFMappingException {
     return Enum.valueOf(enumClass, amfObject);
+  }
+
+  public Class<? extends Enum> getJaxbClass() {
+    return this.enumClass;
+  }
+
+  public Class<? extends String> getAmfClass() {
+    return String.class;
   }
 }

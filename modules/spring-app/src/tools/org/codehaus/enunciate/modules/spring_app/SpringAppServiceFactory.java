@@ -34,9 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Ensures that objects that are {@link EnunciateServiceFactoryAware} are
- * injected with the correct service factory that will handle the necessary
- * interceptor support.
+ * Spring implementation of {@link EnunciateServiceFactory}.
  *
  * @author Ryan Heaton
  */

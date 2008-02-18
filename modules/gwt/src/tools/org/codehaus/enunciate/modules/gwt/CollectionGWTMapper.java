@@ -16,8 +16,11 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 /**
  * @author Ryan Heaton
@@ -25,11 +28,15 @@ import java.lang.reflect.Modifier;
 public class CollectionGWTMapper implements GWTMapper<Collection, Collection> {
 
   private final Class<? extends Collection> collectionType;
-  private final GWTMapper itemMapper;
+  private final Type defaultItemType;
+  private final XmlJavaTypeAdapter adapterInfo;
+  private final XmlElement elementInfo;
 
-  public CollectionGWTMapper(Class<? extends Collection> collectionType, GWTMapper itemMapper) {
+  public CollectionGWTMapper(Class<? extends Collection> collectionType, Type defaultItemType, XmlJavaTypeAdapter adapterInfo, XmlElement elementInfo) {
     this.collectionType = collectionType;
-    this.itemMapper = itemMapper;
+    this.defaultItemType = defaultItemType;
+    this.adapterInfo = adapterInfo;
+    this.elementInfo = elementInfo;
   }
 
   public Collection toGWT(Collection jaxbObject, GWTMappingContext context) throws GWTMappingException {
@@ -37,8 +44,9 @@ public class CollectionGWTMapper implements GWTMapper<Collection, Collection> {
       return null;
     }
 
-    Collection collection = newCollectionInstance(collectionType);
+    Collection collection = CollectionGWTMapper.newCollectionInstance(collectionType);
     for (Object item : jaxbObject) {
+      GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapper(item == null ? null : item.getClass(), this.defaultItemType, this.adapterInfo, this.elementInfo);
       collection.add(itemMapper.toGWT(item, context));
     }
     return collection;
@@ -49,8 +57,12 @@ public class CollectionGWTMapper implements GWTMapper<Collection, Collection> {
       return null;
     }
 
-    Collection collection = newCollectionInstance(collectionType);
+    Collection collection = CollectionGWTMapper.newCollectionInstance(collectionType);
     for (Object item : gwtObject) {
+      GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(item);
+      if (itemMapper == null) {
+        itemMapper = GWTMapperIntrospector.getGWTMapper(this.defaultItemType, this.adapterInfo, this.elementInfo);
+      }
       collection.add(itemMapper.toJAXB(item, context));
     }
     return collection;
