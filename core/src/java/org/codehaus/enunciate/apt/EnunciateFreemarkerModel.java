@@ -90,6 +90,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownNamespaces.put("http://schemas.xmlsoap.org/wsdl/soap/", "soap");
     knownNamespaces.put("http://schemas.xmlsoap.org/soap/encoding/", "soapenc");
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xs");
+    knownNamespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
     knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
 
     return knownNamespaces;

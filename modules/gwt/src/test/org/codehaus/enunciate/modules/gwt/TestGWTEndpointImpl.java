@@ -19,6 +19,8 @@ package org.codehaus.enunciate.modules.gwt;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
 import org.codehaus.enunciate.service.EnunciateServiceFactory;
+import org.codehaus.enunciate.service.SecurityExceptionChecker;
+import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.ApplicationContext;
@@ -76,6 +78,11 @@ public class TestGWTEndpointImpl extends TestCase {
 
       protected Class getServiceClass() {
         return BeansServiceImpl.class;
+      }
+
+      @Override
+      protected SecurityExceptionChecker loadSecurityChecker(ApplicationContext applicationContext) {
+        return new DefaultSecurityExceptionChecker();
       }
     };
     replay(servletConfig);

@@ -27,10 +27,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 import java.net.URI;
 
 /**
@@ -61,6 +58,8 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(URI.class.getName(), "String");
     classConversions.put(UUID.class.getName(), "String");
     classConversions.put(XMLGregorianCalendar.class.getName(), "Date");
+    classConversions.put(Calendar.class.getName(), "Date");
+    classConversions.put(Object.class.getName(), "Object");
   }
 
   @Override
