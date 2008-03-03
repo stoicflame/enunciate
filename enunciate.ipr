@@ -286,6 +286,7 @@
       <module fileurl="file://$PROJECT_DIR$/modules/jaxws/jaxws.iml" filepath="$PROJECT_DIR$/modules/jaxws/jaxws.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/rest/rest.iml" filepath="$PROJECT_DIR$/modules/rest/rest.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/spring-app/spring-app.iml" filepath="$PROJECT_DIR$/modules/spring-app/spring-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modules/test-integration/test-integration.iml" filepath="$PROJECT_DIR$/modules/test-integration/test-integration.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/xfire/xfire.iml" filepath="$PROJECT_DIR$/modules/xfire/xfire.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/xfire-client/xfire-client.iml" filepath="$PROJECT_DIR$/modules/xfire-client/xfire-client.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/xfire-integration/xfire-integration.iml" filepath="$PROJECT_DIR$/modules/xfire-integration/xfire-integration.iml" />

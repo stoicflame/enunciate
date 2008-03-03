@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.server;
+package org.codehaus.enunciate.test.integration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.codehaus.enunciate.server.util.FileUtil;
+import org.codehaus.enunciate.test.integration.util.FileUtil;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 

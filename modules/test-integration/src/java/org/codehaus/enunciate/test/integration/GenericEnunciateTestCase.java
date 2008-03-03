@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.server;
+package org.codehaus.enunciate.test.integration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +23,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import org.codehaus.enunciate.server.util.JSONObjectJXPathHandler;
+import org.codehaus.enunciate.test.integration.util.JSONObjectJXPathHandler;
 
 /**
  * Extends GenericWebServerTestCase to provide web service-specific testing.

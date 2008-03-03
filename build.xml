@@ -28,6 +28,7 @@
   <property name="modules.gwt.basedir" value="${enunciate.basedir}/modules/gwt"/>
   <property name="modules.xfire.basedir" value="${enunciate.basedir}/modules/xfire"/>
   <property name="modules.spring-app.basedir" value="${enunciate.basedir}/modules/spring-app"/>
+  <property name="modules.test-integration.basedir" value="${enunciate.basedir}/modules/test-integration"/>
   <property name="modules.xfire-integration.basedir" value="${enunciate.basedir}/modules/xfire-integration"/>
 
   <target name="clean">
@@ -43,6 +44,7 @@
     <ant dir="${modules.gwt.basedir}" target="clean"/>
     <ant dir="${modules.xfire.basedir}" target="clean"/>
     <ant dir="${modules.spring-app.basedir}" target="clean"/>
+    <ant dir="${modules.test-integration.basedir}" target="clean"/>
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
 
@@ -90,6 +92,7 @@
     <ant dir="${modules.gwt.basedir}"/>
     <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.spring-app.basedir}"/>
+    <ant dir="${modules.test-integration.basedir}"/>
   </target>
 
   <target name="integration-tests" unless="skip.tests">
@@ -274,6 +277,7 @@
       <zipgroupfileset dir="${enunciate.basedir}">
         <include name="core/target/*.jar"/>
         <include name="modules/*/target/*.jar"/>
+        <exclude name="modules/test-integration/target/*.jar"/>
         <exclude name="modules/xfire-integration/target/*.jar"/>
       </zipgroupfileset>
 

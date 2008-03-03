@@ -33,7 +33,10 @@ public class BasicDeploymentModule implements DeploymentModule {
 
   protected Enunciate enunciate;
   private boolean disabled;
+  private File specifiedGenerateDir = null;
+  private File specifiedCompileDir = null;
   private File specifiedBuildDir = null;
+  private File specifiedPackageDir = null;
 
   /**
    * @return "basic"
@@ -155,7 +158,16 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return The generate directory for this module.
    */
   public File getGenerateDir() {
-    return new File(getEnunciate().getGenerateDir(), getName());
+    return this.specifiedGenerateDir == null ? new File(getEnunciate().getGenerateDir(), getName()) : this.specifiedGenerateDir;
+  }
+
+  /**
+   * Set the generate dir for this module.
+   *
+   * @param generateDir The generate dir for this module.
+   */
+  public void setGenerateDir(File generateDir) {
+    this.specifiedGenerateDir = generateDir;
   }
 
   /**
@@ -164,7 +176,16 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return The compile directory for this module.
    */
   public File getCompileDir() {
-    return new File(getEnunciate().getCompileDir(), getName());
+    return this.specifiedCompileDir == null ? new File(getEnunciate().getCompileDir(), getName()) : this.specifiedCompileDir;
+  }
+
+  /**
+   * Set the compile dir for this module.
+   *
+   * @param compileDir The compile dir for this module.
+   */
+  public void setCompileDir(File compileDir) {
+    this.specifiedCompileDir = compileDir;
   }
 
   /**
@@ -191,7 +212,16 @@ public class BasicDeploymentModule implements DeploymentModule {
    * @return The package directory for this module.
    */
   public File getPackageDir() {
-    return new File(getEnunciate().getPackageDir(), getName());
+    return this.specifiedPackageDir == null ? new File(getEnunciate().getPackageDir(), getName()) : this.specifiedPackageDir;
+  }
+
+  /**
+   * Set the package dir for this module.
+   *
+   * @param packageDir The package dir for this module.
+   */
+  public void setPackageDir(File packageDir) {
+    this.specifiedPackageDir = packageDir;
   }
 
   /**

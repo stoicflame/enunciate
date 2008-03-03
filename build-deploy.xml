@@ -50,6 +50,10 @@
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>
+    <ant dir="${modules.test-integration.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
     <ant dir="${modules.xfire-integration.basedir}">
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>

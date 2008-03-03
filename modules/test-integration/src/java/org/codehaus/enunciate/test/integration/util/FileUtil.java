@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.server.util;
+package org.codehaus.enunciate.test.integration.util;
 
 import java.io.File;
 import java.io.FileInputStream;

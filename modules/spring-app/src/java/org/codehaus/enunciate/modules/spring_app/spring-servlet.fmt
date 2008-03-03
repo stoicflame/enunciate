@@ -102,7 +102,7 @@
   [/@forEachWsdl]
 
   [@forEachRESTNoun]
-        <entry key="/${restSubcontext}/${noun.antPattern}">
+        <entry key="${restSubcontext}${noun.antPattern}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -113,7 +113,7 @@
           </bean>
         </entry>
 
-        <entry key="/${restSubcontext}/${noun.antPattern}/**">
+        <entry key="${restSubcontext}${noun.antPattern}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -124,7 +124,7 @@
           </bean>
         </entry>
 
-        <entry key="/${jsonSubcontext}/${noun.antPattern}">
+        <entry key="${jsonSubcontext}${noun.antPattern}">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
@@ -135,7 +135,7 @@
           </bean>
         </entry>
 
-        <entry key="/${jsonSubcontext}/${noun.antPattern}/**">
+        <entry key="${jsonSubcontext}${noun.antPattern}/**">
           <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
