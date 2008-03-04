@@ -5,8 +5,17 @@
   <artifactId>petclinic</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
-
   <build>
+   	<outputDirectory>target/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+  	<testResources>
+  		<testResource>
+  			<filtering>true</filtering>
+  			<directory>src/test/resources</directory>
+  			<includes>
+  				<include>jetty.properties</include>
+  			</includes>
+  		</testResource>
+  	</testResources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
@@ -36,10 +45,16 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
+        <configuration>
+        	<contextPath>${project.build.finalName}</contextPath>
+        	<webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+        	<systemProperties>
+        		<systemProperty><name>jetty.port</name><value>8080</value></systemProperty>
+        	</systemProperties>
+        </configuration>
       </plugin>
     </plugins>
   </build>
-
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
@@ -64,5 +79,80 @@
       <artifactId>annotations-api</artifactId>
       <version>6.0.14</version>
     </dependency>
+    
+    <!-- added to support integration test classes -->
+    
+	<dependency>
+		<groupId>org.codehaus.enunciate</groupId>
+		<artifactId>enunciate-test-integration</artifactId>
+		<version>1.7-SNAPSHOT</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>jdom</groupId>
+		<artifactId>jdom</artifactId>
+		<version>1.0</version>
+		<scope>compile</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.json</groupId>
+		<artifactId>json</artifactId>
+		<version>20070829</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>commons-jxpath</groupId>
+		<artifactId>commons-jxpath</artifactId>
+		<version>1.2</version>
+		<scope>test</scope>
+		<exclusions>
+			<exclusion>
+				<!-- avoid servlet 2.3 NoSuchMethodError: ServletResponse.resetBuffer() -->
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-web</artifactId>
+		<version>1.2.9</version>
+		<scope>test</scope>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.2</version>
+		<scope>test</scope>
+	</dependency>
   </dependencies>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>codehaus.org</id>
+			<url>http://repository.codehaus.org</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>snapshots.codehaus.org</id>
+			<url>http://snapshots.repository.codehaus.org/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+	<repositories>
+		<repository>
+	        <id>codeHaus</id>
+	        <url>http://repository.codehaus.org/</url>
+	        <snapshots>
+				<enabled>true</enabled>
+	        </snapshots>
+		</repository>
+		<repository>
+	        <id>codeHausSnapshot</id>
+	        <url>http://snapshots.repository.codehaus.org/</url>
+	        <snapshots>
+	        	<enabled>true</enabled>
+	        </snapshots>
+		</repository>
+	</repositories>
 </project>
