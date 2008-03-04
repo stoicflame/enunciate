@@ -45,9 +45,9 @@ public class PetclinicIntegrationTest extends GenericEnunciateTestCase {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		GenericEnunciateTestCase.setUpBeforeClass();
-		Object obj = GenericEnunciateTestCase.getWebContextBean("clinic");
+		//Object obj = GenericEnunciateTestCase.getWebContextBean("clinic");
 		//ClinicImpl serviceImpl = (ClinicImpl)obj;
-		logger.info("found ClinicDefault in WebContext: " + obj);
+		//logger.info("found ClinicDefault in WebContext: " + obj);
 		// serviceImpl.setExampleManager( new ExampleManagerMock());
 	}
 
