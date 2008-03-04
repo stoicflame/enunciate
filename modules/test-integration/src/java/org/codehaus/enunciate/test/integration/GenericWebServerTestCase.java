@@ -153,7 +153,7 @@ abstract public class GenericWebServerTestCase {
 			throw new IllegalStateException(
 					"Required 'context' property not found in " + jettyPropertiesPath);
 		}
-		String webappDir = properties.getProperty("webapp.home", webappHome.getAbsolutePath());
+		String webappDir = properties.getProperty("webapp.home", (webappHome == null) ? null : webappHome.getAbsolutePath());
 		if (webappDir == null) {
 			throw new IllegalStateException(
 					"Required 'webapp.home' property not found in " + jettyPropertiesPath);
