@@ -93,7 +93,7 @@ public class ClinicImpl implements Clinic {
     }
     for (int i = 0; i < 20; i++) {
       Owner owner = new Owner();
-      owner.setId(owner.hashCode());
+      owner.setId(i+1); //owner.hashCode());
       owner.setFirstName(firstNames[firstNameIndex]);
       firstNameIndex = (firstNameIndex + 1) % firstNames.length;
       owner.setLastName(lastNames[lastNameIndex]);
