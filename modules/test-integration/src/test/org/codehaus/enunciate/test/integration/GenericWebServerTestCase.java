@@ -119,7 +119,9 @@ abstract public class GenericWebServerTestCase {
 		if (httpClient == null) {
 			loadAndVerifyJettyProperties();
 			jettyServer = new Server(specifiedPort);
-			jettyServer.addHandler(new WebAppContext(webappHome.getAbsolutePath(), relativeContext));
+			WebAppContext context = new WebAppContext(webappHome.getAbsolutePath(), relativeContext);
+			context.setParentLoaderPriority(true);
+			jettyServer.addHandler(context);
 			//org.mortbay.log.Log.getLog().setDebugEnabled(false); // TODO too verbose
 			jettyServer.start();
 			actualPort = jettyServer.getConnectors()[0].getLocalPort();
