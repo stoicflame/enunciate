@@ -472,6 +472,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       commandLine.add(argIndex++, "-show-deprecation-warnings");
     }
 
+    for (String arg : this.compilerConfig.getArgs()) {
+      commandLine.add(argIndex++, arg);
+    }
+
     commandLine.add(argIndex++, "-compiler.services");
     commandLine.add(argIndex++, new File(getXMLGenerateDir(), "services-config.xml").getAbsolutePath());
 

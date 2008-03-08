@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.amf;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.EnumType;
+import com.sun.mirror.type.ArrayType;
 import freemarker.template.TemplateModelException;
 
 import java.util.Map;
@@ -34,7 +35,11 @@ public class AMFClassnameForMethod extends org.codehaus.enunciate.template.freem
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    if (typeMirror instanceof PrimitiveType) {
+    if ((typeMirror instanceof ArrayType) && (((ArrayType) typeMirror).getComponentType() instanceof PrimitiveType)) {
+      //special case for primitive arrays.
+      return super.convert(((ArrayType) typeMirror).getComponentType()) + "[]";
+    }
+    else if (typeMirror instanceof PrimitiveType) {
       //convert each primitive type to its wrapper class for reading/wring to ObjectInputStream.
       switch (((PrimitiveType) typeMirror).getKind()) {
         case BOOLEAN:

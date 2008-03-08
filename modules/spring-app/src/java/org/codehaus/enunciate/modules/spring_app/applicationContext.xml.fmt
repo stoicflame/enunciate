@@ -19,7 +19,7 @@
         <list>
       [#list globalServiceInterceptors as interceptor]
         [#if interceptor.interceptorClass?exists]
-        <bean class="${interceptor.interceptorClass}"/>
+        <bean class="${interceptor.interceptorClass.name}"/>
         [#else]
         <ref bean="${interceptor.beanName}"/>
         [/#if]

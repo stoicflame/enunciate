@@ -29,7 +29,6 @@
     <fail message="The main source code must exist in the ${basedir}/src/java directory." unless="main.src.exists"/>
 
     <available property="main.test.src.exists" file="src/test"/>
-    <fail message="The main test code must exist in the ${basedir}/src/test directory." unless="main.test.src.exists"/>
 
     <available property="tools.exists" file="src/tools"/>
 
