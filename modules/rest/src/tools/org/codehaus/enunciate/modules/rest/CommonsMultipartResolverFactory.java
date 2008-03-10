@@ -1,10 +1,11 @@
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.context.ServletContextAware;
 import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.multipart.MultipartResolver;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Single-instance factory for an instance of org.springframework.web.multipart.commons.CommonsMultipartResolver if Commons Fileupload isn't on the classpath,
@@ -32,6 +33,10 @@ public class CommonsMultipartResolverFactory implements MultipartResolverFactory
     if (resolver != null) {
       ((ServletContextAware) resolver).setServletContext(servletContext);
     }
+  }
+
+  public boolean isMultipart(HttpServletRequest request) {
+    return resolver != null && resolver.isMultipart(request);
   }
 
   public MultipartResolver getMultipartResolver(String nounContext, String noun, VerbType verb) {

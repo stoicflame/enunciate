@@ -1,0 +1,19 @@
+<enunciate>
+  <modules>
+    <gwt disabled="false"
+         rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">
+      <app srcDir="src/main/gwt-apps" javascriptStyle="PRETTY">
+        <module name="org.codehaus.enunciate.samples.petclinic.app.PetClinicApp"/>
+      </app>
+    </gwt>
+    <amf disabled="true">
+      <app srcDir="src/main/flex-apps" name="vets" mainMxmlFile="src/main/flex-apps/org/codehaus/enunciate/samples/petclinic/flex/vets.mxml"/>
+    </amf>
+    <spring-app enableSecurity="true">
+      <springImport file="other-beans.xml"/>
+      <security>
+        <userDetailsService beanName="userDetailsService"/>
+      </security>
+    </spring-app>
+  </modules>
+</enunciate>

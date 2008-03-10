@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="userDetailsService" class="org.acegisecurity.userdetails.memory.InMemoryDaoImpl">
+    <property name="userMap">
+      <value>
+        marissa=koala,USER,ADMIN
+        dianne=emu,USER
+        scott=wombat,USER
+        peter=opal,disabled,USER
+      </value>
+    </property>
+  </bean>
+
+</beans>

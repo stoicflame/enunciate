@@ -180,9 +180,12 @@ public class RESTResourceXMLExporter extends AbstractController {
       return null;
     }
 
-    MultipartResolver multipartResolver = (this.multipartResolverFactory != null) ? this.multipartResolverFactory.getMultipartResolver(resource.getNounContext(), resource.getNoun(), verb) : null;
-    if (multipartResolver != null && multipartResolver.isMultipart(request)) {
-      request = multipartResolver.resolveMultipart(request);
+    boolean isMultipart = this.multipartResolverFactory != null && this.multipartResolverFactory.isMultipart(request);
+    if (isMultipart) {
+      MultipartResolver multipartResolver = this.multipartResolverFactory.getMultipartResolver(resource.getNounContext(), resource.getNoun(), verb);
+      if (multipartResolver != null && multipartResolver.isMultipart(request)) {
+        request = multipartResolver.resolveMultipart(request);
+      }
     }
 
     Document document = documentBuilder.newDocument();
