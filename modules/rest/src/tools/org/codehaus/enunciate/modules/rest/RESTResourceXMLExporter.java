@@ -28,6 +28,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.FieldError;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -241,36 +245,62 @@ public class RESTResourceXMLExporter extends AbstractController {
     for (String adjective : operation.getAdjectiveTypes().keySet()) {
       Object adjectiveValue = null;
 
-      String[] parameterValues = request.getParameterValues(adjective);
-      if ((parameterValues != null) && (parameterValues.length > 0)) {
-        Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
-        Class componentType = adjectiveType;
-        if (adjectiveType.isArray()) {
-          componentType = adjectiveType.getComponentType();
-        }
-        Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
+      if (!operation.getComplexAdjectives().contains(adjective)) {
+        //not complex, map it.
+        String[] parameterValues = request.getParameterValues(adjective);
+        if ((parameterValues != null) && (parameterValues.length > 0)) {
+          Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
+          Class componentType = adjectiveType;
+          if (adjectiveType.isArray()) {
+            componentType = adjectiveType.getComponentType();
+          }
+          Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
 
-        for (int i = 0; i < parameterValues.length; i++) {
-          if (!String.class.isAssignableFrom(componentType)) {
-            Element element = document.createElement("unimportant");
-            element.appendChild(document.createTextNode(parameterValues[i]));
-            Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
+          for (int i = 0; i < parameterValues.length; i++) {
+            if (!String.class.isAssignableFrom(componentType)) {
+              Element element = document.createElement("unimportant");
+              element.appendChild(document.createTextNode(parameterValues[i]));
+              Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
+            }
+            else {
+              Array.set(adjectiveValues, i, parameterValues[i]);
+            }
+          }
+
+          if (adjectiveType.isArray()) {
+            adjectiveValue = adjectiveValues;
           }
           else {
-            Array.set(adjectiveValues, i, parameterValues[i]);
+            adjectiveValue = Array.get(adjectiveValues, 0);
           }
         }
 
-        if (adjectiveType.isArray()) {
-          adjectiveValue = adjectiveValues;
-        }
-        else {
-          adjectiveValue = Array.get(adjectiveValues, 0);
+        if ((adjectiveValue == null) && (!operation.getAdjectivesOptional().get(adjective))) {
+          throw new MissingParameterException("Missing request parameter: " + adjective);
         }
       }
+      else {
+        //use spring's binding to map the complex adjective to the request parameters.
+        try {
+          adjectiveValue = operation.getAdjectiveTypes().get(adjective).newInstance();
+        }
+        catch (Throwable e) {
+          throw new IllegalArgumentException("A complex adjective must have a simple, no-arg constructor. Invalid type: " + operation.getAdjectiveTypes().get(adjective));
+        }
 
-      if ((adjectiveValue == null) && (!operation.getAdjectivesOptional().get(adjective))) {
-        throw new MissingParameterException("Missing request parameter: " + adjective);
+        ServletRequestDataBinder binder = new ServletRequestDataBinder(adjectiveValue, adjective);
+        binder.setIgnoreUnknownFields(true);
+        binder.bind(request);
+        BindException errors = binder.getErrors();
+        if ((errors != null) && (errors.getAllErrors() != null) && (!errors.getAllErrors().isEmpty())) {
+          ObjectError firstError = (ObjectError) errors.getAllErrors().get(0);
+          String message = "Invalid parameter.";
+          if (firstError instanceof FieldError) {
+            message = String.format("Invalid parameter value: %s", ((FieldError) firstError).getRejectedValue());
+          }
+          response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
+          return null;
+        }
       }
 
       adjectives.put(adjective, adjectiveValue);

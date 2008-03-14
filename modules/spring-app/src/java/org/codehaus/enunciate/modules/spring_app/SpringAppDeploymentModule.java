@@ -545,6 +545,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       enunciate.invokeJavac(amfClasspath.toString(), compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
     }
 
+    File restParamterNames = (File) enunciate.getProperty("rest.parameter.names");
+    if (restParamterNames != null) {
+      enunciate.copyFile(restParamterNames, new File(compileDir, "enunciate-rest-parameter-names.properties"));
+    }
+
     if (!this.copyResources.isEmpty()) {
       AntPathMatcher matcher = new AntPathMatcher();
       for (CopyResources copyResource : this.copyResources) {

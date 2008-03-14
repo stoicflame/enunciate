@@ -17,10 +17,16 @@
 package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
+import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.main.NamedFileArtifact;
 
 import java.io.IOException;
+import java.io.File;
+import java.net.URL;
+
+import freemarker.template.TemplateException;
 
 /**
  * <h1>REST Module</h1>
@@ -181,7 +187,7 @@ import java.io.IOException;
  * javax.activation.DataHandler, or java.io.InputStream and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadBody. This method will
  * return the payload body.</p>
  *
- * <p>The default content type of REST payloads is "applicaiton/octet-stream".  This can be customized by defining a single no-argument method on the payload
+ * <p>The default content type of REST payloads is "application/octet-stream".  This can be customized by defining a single no-argument method on the payload
  * object that returns a String and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadContentType. If the Java return type is
  * javax.activation.DataHandler instead of a REST payload object, then the content type defined by the data handler is used.</p>
  *
@@ -197,21 +203,33 @@ import java.io.IOException;
  * <h3>Java Method Parameters</h3>
  *
  * <p>A parameter to a method can be a proper noun, an adjective, a context parameter, or a noun value.  By default, a parameter is mapped
- * as an adjective.  The name of the adjective by default is arg<i>i</i>, where <i>i</i> is the parameter index.  Parameters
+ * as an adjective.  The name of the adjective by default is the name of the parameter.  Parameters
  * can be customized with the <i>org.codehaus.enunciate.rest.annotations.Adjective</i>, <i>org.codehaus.enunciate.rest.annotations.NounValue</i>,
  * <i>org.codehaus.enunciate.rest.annotations.ContextParameter</i>, and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
  *
+ * <p><u>Complex Adjectives</u></p>
+ *
+ * <p>There may be cases where a REST request may accept a large number of adjectives (HTTP parameters).  If this is the case, the corresponding Java method
+ * could start to get unwieldy because of the number of parameters on the method.  To address this inconvenience, Enunciate supports the concept of a
+ * "complex adjective".  An adjective is marked as complex with by setting "complex=true" on the @Adjective annotation.  The type of a complex adjective is
+ * expected to be a simple bean with an accessible no-arg constructor. In the case of a complex adjective the properties of the bean of a complex adjective
+ * define the names and types of the adjectives.</p>
+ *
+ * <p><u>Noun Value Types</u></p>
+ *
  * <p>A parameter that is identified as a noun value is usually required to have a type that is an XML root element (i.e. a class annotated with
- * javax.xml.bind.annotation.XmlRootElement.  There is an exception to this rule: a noun value parameter type can be javax.activation.DataHandler or an array/collection of javax.activation.DataHandler.
- * In the case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handler
- * to the InputStream of the request payload. The DataSource of the DataHandler will be an instance of <a href="api/org/codehaus/enunciate/modules/rest/RESTRequestDataSource.html">org.codehaus.enunciate.modules.rest.RESTRequestDataSource</a>.
+ * javax.xml.bind.annotation.XmlRootElement).  There is an exception to this rule: a noun value parameter type can be javax.activation.DataHandler
+ * or an array/collection of javax.activation.DataHandler. In the case of javax.activation.DataHandler, the request payload is considered to be of
+ * a "custom type" and the DataHandler will become a handler to the InputStream of the request payload. The DataSource of the DataHandler will be
+ * an instance of <a href="api/org/codehaus/enunciate/modules/rest/RESTRequestDataSource.html">org.codehaus.enunciate.modules.rest.RESTRequestDataSource</a>.
  * In the case of an array/collection of javax.activation.DataHandler, the REST method will be considered able to handle a multipart file upload as defined
  * in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>. However, in order for a REST request to be able to be parsed as a multipart file upload,
  * an instance of <a href="api/org/codehaus/enunciate/modules/rest/MultipartResolverFactory.html">org.codehaus.enunciate.modules.rest.MultipartResolverFactory</a>
  * must be supplied. The default instance, <a href="api/org/codehaus/enunciate/modules/rest/CommonsMultipartResolverFactory.html">org.codehaus.enunciate.modules.rest.CommonsMultipartResolverFactory</a>,
  * will quietly fail (i.e. the request won't be parsed into a multipart request) unless the necessary <a href="http://commons.apache.org/fileupload/">Commons-FileUpload</a>
  * libraries are found on the classpath. Alternatively, you may also supply your own MultipartResolverFactory in the spring application context. In the case of
- * a multipart file upload request, the DataSource of the DataHandler will be an instance of <a href="api/org/codehaus/enunciate/modules/rest/MultipartFileDataSource.html">org.codehaus.enunciate.modules.rest.MultipartFileDataSource</a>.</p>
+ * a multipart file upload request, the DataSource of the DataHandler will be an instance of
+ * <a href="api/org/codehaus/enunciate/modules/rest/MultipartFileDataSource.html">org.codehaus.enunciate.modules.rest.MultipartFileDataSource</a>.</p>
  *
  * <h3>Exceptions</h3>
  *
@@ -246,7 +264,7 @@ import java.io.IOException;
  * @author Ryan Heaton
  * @docFileName module_rest.html
  */
-public class RESTDeploymentModule extends BasicDeploymentModule {
+public class RESTDeploymentModule extends FreemarkerDeploymentModule {
 
   /**
    * @return "rest"
@@ -264,10 +282,15 @@ public class RESTDeploymentModule extends BasicDeploymentModule {
     return new RESTValidator();
   }
 
-  @Override
-  protected void doGenerate() throws EnunciateException, IOException {
-    //todo: export the parameter names.  But if you do this, you have to come up with a way to support overloaded methods...
-    //todo: export the namespace prefixes for Jettison export.
-    super.doGenerate();
+  /**
+   * @return The URL to "spring-servlet.fmt"
+   */
+  protected URL getProperyNamesTemplateURL() {
+    return RESTDeploymentModule.class.getResource("enunciate-rest-parameter-names.properties.fmt");
+  }
+
+  public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
+    processTemplate(getProperyNamesTemplateURL(), getModel());
+    enunciate.setProperty("rest.parameter.names", new File(getGenerateDir(), "enunciate-rest-parameter-names.properties"));
   }
 }

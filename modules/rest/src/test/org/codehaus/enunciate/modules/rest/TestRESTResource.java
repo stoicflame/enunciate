@@ -16,14 +16,13 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import static org.easymock.EasyMock.*;
-import org.codehaus.enunciate.rest.annotations.VerbType;
-
 import junit.framework.TestCase;
 
-import java.util.Set;
-import java.util.EnumSet;
 import java.util.Map;
+import java.util.Properties;
+import java.lang.reflect.Method;
+
+import org.codehaus.enunciate.rest.annotations.VerbType;
 
 /**
  * @author Ryan Heaton
@@ -128,6 +127,43 @@ public class TestRESTResource extends TestCase {
 //    exporter.handleRequestInternal(request, response);
 //    verify(request, response);
 
+  }
+
+  /**
+   * test addOperation
+   */
+  public void testAddOperation() throws Exception {
+    final Properties props = new Properties();
+    props.put("mynoun/read", "one,two,three,four");
+    props.put("mycontext/mynoun/read", "five,six,seven,eight");
+
+    RESTResource resource = new RESTResource("mynoun", "") {
+      @Override
+      protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+        assertEquals(4, parameterNames.length);
+        assertEquals("one", parameterNames[0]);
+        assertEquals("four", parameterNames[3]);
+        props.put("1", "done");
+        return null;
+      }
+    };
+    resource.setParamterNames(props);
+    resource.addOperation(VerbType.read, null, null);
+    assertNotNull(props.get("1"));
+
+    resource = new RESTResource("mynoun", "/mycontext/") {
+      @Override
+      protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+        assertEquals(4, parameterNames.length);
+        assertEquals("five", parameterNames[0]);
+        assertEquals("eight", parameterNames[3]);
+        props.put("2", "done");
+        return null;
+      }
+    };
+    resource.setParamterNames(props);
+    resource.addOperation(VerbType.read, null, null);
+    assertNotNull(props.get("2"));
   }
 
 }

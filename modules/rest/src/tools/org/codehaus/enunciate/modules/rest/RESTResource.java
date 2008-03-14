@@ -42,6 +42,7 @@ public class RESTResource implements Comparable<RESTResource> {
   private final Pattern regexpPattern;
   private final List<String> contextParameters;
   private final EnumMap<VerbType, RESTOperation> operations = new EnumMap<VerbType, RESTOperation>(VerbType.class);
+  private Properties paramterNames;
 
   /**
    * Construct a REST resource for the specified noun, assuming the empty context.
@@ -78,7 +79,50 @@ public class RESTResource implements Comparable<RESTResource> {
    * @return Whether the operation was successfully added.  (false if the specified verb was already added).
    */
   public boolean addOperation(VerbType verb, Object endpoint, Method method) {
-    return !operations.containsKey(verb) && operations.put(verb, new RESTOperation(verb, endpoint, method)) == null;
+    if (operations.containsKey(verb)) {
+      return false;
+    }
+    else {
+      String[] parameterNames = null;
+      if (getParamterNames() != null) {
+        String parameterList = (String) getParamterNames().get(getCanonicalReference(verb));
+        if (parameterList != null) {
+          parameterNames = parameterList.split(",");
+        }
+      }
+
+      RESTOperation operation = createOperation(verb, endpoint, method, parameterNames);
+      return operations.put(verb, operation) == null;
+    }
+  }
+
+  protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+    return new RESTOperation(verb, endpoint, method, parameterNames);
+  }
+
+  /**
+   * Get a canonical reference to the specified verb for this resource.
+   *
+   * @param verb The verb.
+   * @return The reference.
+   */
+  protected String getCanonicalReference(VerbType verb) {
+    String context = getNounContext();
+    if (context.startsWith("/")) {
+      context = context.substring(1);
+    }
+    if (context.endsWith("/")) {
+      context = context.substring(0, context.length() - 1);
+    }
+
+    StringBuilder canonicalForm = new StringBuilder(context);
+    if (context.length() > 0) {
+      canonicalForm.append('/');
+    }
+
+    canonicalForm.append(getNoun()).append('/').append(verb);
+    String canonicalReference = canonicalForm.toString();
+    return canonicalReference;
   }
 
   /**
@@ -162,6 +206,24 @@ public class RESTResource implements Comparable<RESTResource> {
    */
   public int compareTo(RESTResource other) {
     return this.noun.compareTo(other.noun);
+  }
+
+  /**
+   * The paramter names.
+   *
+   * @return The paramter names.
+   */
+  public Properties getParamterNames() {
+    return paramterNames;
+  }
+
+  /**
+   * The paramter names.
+   *
+   * @param paramterNames The paramter names.
+   */
+  public void setParamterNames(Properties paramterNames) {
+    this.paramterNames = paramterNames;
   }
 
   @Override

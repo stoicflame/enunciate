@@ -43,6 +43,7 @@ public class RESTOperation {
   private final Map<String, Integer> adjectiveIndices;
   private final Map<String, Class> adjectiveTypes;
   private final Map<String, Boolean> adjectivesOptional;
+  private final List<String> complexAdjectives;
   private final Map<String, Integer> contextParameterIndices;
   private final Map<String, Class> contextParameterTypes;
   private final int nounValueIndex;
@@ -67,8 +68,9 @@ public class RESTOperation {
    * @param verb     The verb for the operation.
    * @param endpoint The REST endpoint.
    * @param method   The method.
+   * @param parameterNames The parameter names.
    */
-  protected RESTOperation(VerbType verb, Object endpoint, Method method) {
+  protected RESTOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
     this.verb = verb;
     this.endpoint = endpoint;
     this.method = method;
@@ -82,6 +84,7 @@ public class RESTOperation {
     adjectiveTypes = new HashMap<String, Class>();
     adjectiveIndices = new HashMap<String, Integer>();
     adjectivesOptional = new HashMap<String, Boolean>();
+    complexAdjectives = new ArrayList<String>();
     contextParameterTypes = new HashMap<String, Class>();
     contextParameterIndices = new HashMap<String, Integer>();
     Class[] parameterTypes = method.getParameterTypes();
@@ -91,7 +94,11 @@ public class RESTOperation {
 
       boolean isAdjective = true;
       String adjectiveName = "arg" + i;
+      if ((parameterNames != null) && (parameterNames.length > i) && (parameterNames[i] != null)) {
+        adjectiveName = parameterNames[i];
+      }
       boolean adjectiveOptional = !parameterType.isPrimitive();
+      boolean adjectiveComplex = false;
       Annotation[] parameterAnnotations = method.getParameterAnnotations()[i];
       for (Annotation annotation : parameterAnnotations) {
         if (annotation instanceof ProperNoun) {
@@ -151,12 +158,19 @@ public class RESTOperation {
           break;
         }
         else if (annotation instanceof Adjective) {
-          adjectiveOptional = ((Adjective) annotation).optional();
+          Adjective adjectiveInfo = (Adjective) annotation;
+          adjectiveOptional = adjectiveInfo.optional();
           if (adjectiveOptional && parameterType.isPrimitive()) {
             throw new IllegalStateException("An optional adjective cannot be a primitive type for method " +
               method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
-          adjectiveName = ((Adjective) annotation).name();
+
+          if (!"##default".equals(adjectiveInfo.name())) {
+            adjectiveName = adjectiveInfo.name();
+          }
+
+          adjectiveComplex = adjectiveInfo.complex();
+
           break;
         }
       }
@@ -165,6 +179,9 @@ public class RESTOperation {
         this.adjectiveTypes.put(adjectiveName, parameterType);
         this.adjectiveIndices.put(adjectiveName, i);
         this.adjectivesOptional.put(adjectiveName, adjectiveOptional);
+        if (adjectiveComplex) {
+          this.complexAdjectives.add(adjectiveName);
+        }
       }
 
       if (parameterType.isArray()) {
@@ -493,6 +510,15 @@ public class RESTOperation {
    */
   public Map<String, Class> getAdjectiveTypes() {
     return adjectiveTypes;
+  }
+
+  /**
+   * List of adjectives that are complex.
+   *
+   * @return List of adjectives that are complex.
+   */
+  public List<String> getComplexAdjectives() {
+    return complexAdjectives;
   }
 
   /**

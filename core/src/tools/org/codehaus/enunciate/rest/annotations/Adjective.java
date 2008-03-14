@@ -36,7 +36,7 @@ public @interface Adjective {
    *
    * @return The name of the adjective.
    */
-  String name();
+  String name() default "##default";
 
   /**
    * Whether the noun value is optional.
@@ -44,5 +44,12 @@ public @interface Adjective {
    * @return Whether the noun value is optional.
    */
   boolean optional() default true;
+
+  /**
+   * Whether the adjective is complex.
+   *
+   * @return Whether the adjective is complex.
+   */
+  boolean complex() default false;
 
 }

@@ -83,6 +83,16 @@ public class RESTParameter extends DecoratedParameterDeclaration {
   }
 
   /**
+   * Whether this REST parameter is a complex adjective.
+   *
+   * @return Whether this REST parameter is a complex adjective.
+   */
+  public boolean isComplexAdjective() {
+    Adjective adjectiveInfo = getAnnotation(Adjective.class);
+    return adjectiveInfo != null && adjectiveInfo.complex();
+  }
+
+  /**
    * Whether this REST parameter is optional.
    *
    * @return Whether this REST parameter is optional.
@@ -113,10 +123,10 @@ public class RESTParameter extends DecoratedParameterDeclaration {
    * @return The name of the adjective.
    */
   public String getAdjectiveName() {
-    String adjectiveName = "arg" + parameterPosition;
+    String adjectiveName = getSimpleName();
 
     Adjective adjectiveInfo = getAnnotation(Adjective.class);
-    if (adjectiveInfo != null) {
+    if ((adjectiveInfo != null) && (!"##default".equals(adjectiveInfo.name()))) {
       adjectiveName = adjectiveInfo.name();
     }
 

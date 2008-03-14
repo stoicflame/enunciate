@@ -28,6 +28,7 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * A factory for REST resources.
@@ -49,6 +50,14 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
   protected void initApplicationContext() throws BeansException {
     super.initApplicationContext();
 
+    Properties restParameterNames = new Properties();
+    try {
+      restParameterNames.load(getApplicationContext().getResource("classpath:/enunciate-rest-parameter-names.properties").getInputStream());
+    }
+    catch (Exception e) {
+      //fall through... no parameter names found.
+    }
+    
     Map<Class, Object> class2instances = new HashMap<Class, Object>();
     if (endpointClasses != null) {
       for (Class endpointClass : endpointClasses) {
@@ -78,6 +87,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
               RESTResource resource = getRESTResource(noun, context);
               if (resource == null) {
                 resource = new RESTResource(noun, context);
+                resource.setParamterNames(restParameterNames);
                 RESTResources.add(resource);
               }
 

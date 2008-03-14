@@ -182,16 +182,18 @@ public class DefaultValidator implements Validator {
             result.addError(adjective.getPosition(), "Duplicate adjective name '" + adjective.getAdjectiveName() + "'.");
           }
 
-          if (!adjective.getXmlType().isSimple()) {
-            result.addError(adjective.getPosition(), "An adjective must either be of simple xml type, or of a collection (or array) of simple xml types.");
-          }
+          if (!adjective.isComplexAdjective()) {
+            if (!adjective.getXmlType().isSimple()) {
+              result.addError(adjective.getPosition(), "An adjective must either be of simple xml type, or of a collection (or array) of simple xml types.");
+            }
 
-          if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
-            result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
-          }
+            if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
+              result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
+            }
 
-          if (adjective.getAdjectiveName().equals(method.getJSONPParameter())) {
-            result.addError(adjective.getPosition(), "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
+            if (adjective.getAdjectiveName().equals(method.getJSONPParameter())) {
+              result.addError(adjective.getPosition(), "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
+            }
           }
         }
 
