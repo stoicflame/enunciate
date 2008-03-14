@@ -59,7 +59,7 @@ import java.util.jar.Manifest;
  * <ul>
  * <li><a href="#steps">steps</a></li>
  * <li><a href="#config">application configuration</a></li>
- * <li><a href="#security">secuirty configuration</a></li>
+ * <li><a href="module_spring_app_security.html">security configuration</a></li>
  * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
@@ -74,7 +74,7 @@ import java.util.jar.Manifest;
  * <h3>compile</h3>
  *
  * <p>The "compile" step compiles all API source files, including the source files that were generated from other modules
- * (e.g. JAX-WS module and XFire module).</p>
+ * (e.g. JAX-WS module, XFire module, GWT module, AMF module, etc.).</p>
  *
  * <h3>build</h3>
  *
@@ -96,9 +96,12 @@ import java.util.jar.Manifest;
  *
  * <p>The spring-servlet.xml file is generated and copied to the WEB-INF directory.  You can specify other spring config files that
  * will be copied (and imported by the spring-servlet.xml file) in the configuration.  This option allows you to specify spring AOP
- * interceptors and XFire in/out handlers to wrap your endpoints, if desired.</p>
+ * interceptors and XFire in/out handlers to wrap your endpoints, if desired. Additional spring configuration for security is also
+ * copied.</p>
  *
- * <p>Finally, the documentation (if found) is copied to the base of the web app directory.</p>
+ * <p>The documentation (if found) is copied to the configured location.</p>
+ *
+ * <p>The other modules application are copied to the configured location.  This includes GWT apps and Flex apps.</p>
  *
  * <h3>package</h3>
  *
@@ -118,12 +121,12 @@ import java.util.jar.Manifest;
  *     <li><a href="#config_copyResources">The "copyResources" element</a></li>
  *   </ul>
  * </li>
- * <li><a href="#security">Spring Application Security</a><br/>
+ * <li><a href="module_spring_app_security.html">Spring Application Security</a><br/>
  *   <ul>
- *     <li><a href="#security_annotations">Security Annotations</a></li>
- *     <li><a href="#security_user_details">User Details Service</a></li>
- *     <li><a href="#config_security">The "security" configuration element</a></li>
- *     <li><a href="#security_login_logout">Login and Logout API Methods</a></li>
+ *     <li><a href="module_spring_app_security.html#security_annotations">Security Annotations</a></li>
+ *     <li><a href="module_spring_app_security.html#security_user_details">User Details Service</a></li>
+ *     <li><a href="module_spring_app_security.html#security_config">The "security" configuration element</a></li>
+ *     <li><a href="module_spring_app_security.html#security_login_logout">Login and Logout API Methods</a></li>
  *   </ul>
  * </li>
  * </ul>
@@ -134,7 +137,8 @@ import java.util.jar.Manifest;
  * <h3><a name="config_structure">Structure</a></h3>
  *
  * <p>The following example shows the structure of the configuration elements for this module.  Note that this shows only the structure.
- * Some configuration elements don't make sense when used together.</p>
+ * Some configuration elements don't make sense when used together. For more information about the security configuration, see
+ * <a href="module_spring_app_security.html">Spring Application Security</a>.</p>
  *
  * <code class="console">
  * &lt;enunciate&gt;
@@ -179,42 +183,8 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;copyResources dir="..." pattern="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security enableFormBasedLogin="[true|false]" enableFormBasedLogout="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;persistIdentityAcrossHttpSession="[true|false]" enableRememberMeToken="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadAnonymousIdentity="[true|false]" enableBasicHTTPAuth="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enableDigestHTTPAuth="[true|false]" initJ2EESecurityContext="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key="..." realmName="..."&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;userDetailsService beanName="..." className="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;anonymousConfig key="..." userId="..." roles="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;basicAuthConfig realmName="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;digestAuthConfig key="..." realmName="..." nonceValiditySeconds="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formBasedLoginConfig url="..." redirectOnSuccessUrl="..." redirectOnFailureUrl="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formBasedLogoutConfig url="..." redirectOnSuccessUrl="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;rememberMeConfig key="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;onAuthenticationFailed redirectTo="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;useEntryPoint beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/onAuthenticationFailed&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;onAccessDenied redirectTo="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;useEntryPoint beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/onAccessDenied&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security ...&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/security&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/spring-app&gt;
@@ -225,9 +195,9 @@ import java.util.jar.Manifest;
  * <h3><a name="config_attributes">attributes</a></h3>
  *
  * <ul>
- * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="#security">security</a> should be enabled.  The default is "false."</li>
+ * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="module_spring_app_security.html">security</a> should be enabled.  The default is "false."</li>
  * <li>The "<b>compileDebugInfo</b>" attribute specifies that the compiled classes should be compiled with debug info.  The default is "true."</li>
- * <li>The "<b>dispatcherServletClass</b>" attribute specifies that FQN of the class to use as the Spring dispatcher servlet.  The default is "org.springframework.web.servlet.DispatcherServlet".</li>
+ * <li>The "<b>dispatcherServletClass</b>" attribute specifies the FQN of the class to use as the Spring dispatcher servlet.  The default is "org.springframework.web.servlet.DispatcherServlet".</li>
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
  * <li>The "<b>defaultDependencyCheck</b>" attribute specifies that value of the "default-dependency-check" for the generated spring file.</li>
  * <li>The "<b>defaultAutowire</b>" attribute specifies that value of the "default-autowire" for the generated spring file.</li>
@@ -361,199 +331,6 @@ import java.util.jar.Manifest;
  * <a href="http://static.springframework.org/spring/docs/1.2.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
  * JavaDocs.</li>
  * </ul>
- *
- * <h3><a name="security">Spring Application Security</a></h3>
- *
- * <p>Enunciate provides a mechanism for securing your Web service API by leveraging the capabilities of <a href="http://www.acegisecurity.org/">Acegi</a>
- * (soon to be known as Spring Security).</p>
- *
- * <p>Acegi provides a variety of different ways to secure a Spring application.  These include:</p>
- *
- * <ul>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#basic">HTTP basic authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#digest">HTTP digest authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#form">Form-based login</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#remember-me">Remember-me token</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#x509">X509 Authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#ldap">LDAP Authentication</a></li>
- *  <li>Etc.</li>
- * </ul>
- *
- * <p>In addition to the authentication mechanisms listed above, Acegi provides other security features for a Spring-based web application.  These include:</p>
- *
- * <ul>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#anonymous">Anonymous identity loading</a></li>
- *   <li>Identity persistence across the HTTP Session</li>
- *   <li>Integration with the standard J2EE security context</li>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#secure-objects">Secure objects</a></li>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#runas">Run-as authentication replacement</a></li>
- * </ul>
- *
- * <p>Security, by nature, is very complex.  Enunciate attempts to provide an intuitive configuration mechanism for the most common security cases, but also
- * provides a means to enable a more advanced security policy.</p>
- *
- * <p>Enunciate will secure your Web service API according to the configuration you provide in the Enunciate configuration file and
- * via annotations on your service endpoints. <i>Note that security will not be enabled unless the "enableSecurity" attribute is set to "true" on the "spring-app"
- * element of the configuration file.</i></p>
- *
- * <h3><a name="security_annotations">Security Annotations</a></h3>
- *
- * <p>Web service endpoints are secured via the <a href="http://jcp.org/en/jsr/detail?id=250">JSR-250</a>-defined security annotations: javax.annotation.security.RolesAllowed,
- * javax.annotation.security.PermitAll, and javax.annotation.security.DenyAll.  These annotations can be applied to your endpoint interface methods to specify
- * the user roles that are allowed to access these methods and resources. In accordance with the JSR-250 specifiction, these annotations can be applied
- * at either the class-or-interface-level or at the method-level, with the roles granted at the method-level overriding those granted at the
- * class-or-interface-level.</p>
- *
- * <p>If no security annotations are applied to a method nor to its endpoint interface, then no security policy will be applied to the method an access will be
- * open to all users.</p>
- *
- * <h3><a name="security_user_details">User Details Service</a></h3>
- *
- * <p>In order for a security policy to be implemented, Acegi must know how to load a user and have access to that user's roles and credentials. You must define
- * in instance of org.acegisecurity.userdetails.UserDetailsService in your own spring bean definition file and <a href="#config_springImport">import that
- * file into the spring application context</a>.  Alternatively, you may define a class that implements org.acegisecurity.userdetails.UserDetailsService and
- * specify that class with the "userDetailsService" child element of the "security" element in the Enunciate configuration file (see below).</p>
- *
- * <h3><a name="config_security">The "security" configuration element</a></h3>
- *
- * <p>By default, Enunciate will use Acegi to secure your Web service endpoints via HTTP Basic Authentication using your
- * <a href="#security_user_details">UserDetailsService</a> and your <a href="#security_annotations">security annotations</a>. You can customize the security
- * mechanism that is used by using the "security" child element of the "spring_app" element in the Enunciate configuration file.</p>
- *
- * <p>The "security" element supports the following attributes:</p>
- *
- * <ul>
- *   <li>The "enableFormBasedLogin" attribute is used to enable a form-based login endpoint (for example, a browser-submitted form). Default: "false".
- *       This endpoint can be configured with the "formBasedLoginConfig" child element (see below).</li>
- *   <li>The "enableFormBasedLogout" attribute is used to enable a form-based logout endpoint (for example, a browser-submitted form). Default: "false".
- *       This endpoint can be configured with the "formBasedLogoutConfig" child element (see below).</li>
- *   <li>The "persistIdentityAcrossHttpSession" attribute is used to specify whether the identity (established upon authentication) is to be persisted across
- *       the HTTP session. Default: "false".</li>
- *   <li>The "enableRememberMeToken" attribute is used to enable Acegi to set a remember-me token as a cookie in the HTTP response which can be used to
- *       "remember" the identity for a specified time.  Default: "false". Remember-me services can be configured with the "rememberMeConfig" child element
- *       (see below).</li>
- *   <li>The "loadAnonymousIdentity" attribute is used to enable Acegi to load an anonymous identity if no authentication is provided.  Default: "true". The
- *       anonymous identity loading behavior can be configured with the "anonymousConfig" child element (see below).</li>
- *   <li>The "enableBasicHTTPAuth" attribute is used to enable HTTP Basic Authentication.  Default: "true". HTTP Basic Auth can be configured with the
- *       "basicAuthConfig" child element (see below).</li>
- *   <li>The "enableDigestHTTPAuth" attribute is used to enable HTTP Digest Authentication.  Default: "false". HTTP Digest Auth can be configured with the
- *       "digestAuthConfig" child element (see below).</li>
- *   <li>The "initJ2EESecurityContext" attribute is used to enable Acegi to initialize the J2EE security context with the attributes of the current identity.
- *       Default: "true".</li>
- *   <li>The "key" attribute is used to specify the default security key that is to be used as necessary for security hashes. etc. If not supplied, a random
- *       default will be provided.</li>
- *   <li>The "realmName" attribute is used to specify the default realm name to be used for the authentication mechanisms that require it (e.g. HTTP Basic Auth,
- *       HTTP Digest Auth). The default value is "Generic Enunciate Application Realm".</li> 
- * </ul>
- *
- * <p>The "security" element also supports a number of child elements that can be used to further configure the Web service security mechanism.</p>
- *
- * <p><u>userDetailsService</u></p>
- *
- * <p>The "userDetailsService" child element is used to specify the implementation of <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/userdetails/UserDetailsService.html">org.acegisecurity.userdetails.UserDetailsService</a> to use for loading a
- * user. This element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * user details service.  The "className" attribute is used to specify the fully-qualified class name of the implementation of UserDetailsService to use.</p>
- *
- * <p><u>onAuthenticationFailed</u></p>
- *
- * <p>The "onAuthenticationFailed" child element is used to specify the action to take if authentication fails. This element supports a "redirectTo" attribute
- * that will specify that the request is to be redirected to the given URL. The "onAuthenticationFailed" element also supports a child element, "useEntryPoint",
- * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
- * authentcation entry point must implement <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/AuthenticationEntryPoint.html">org.acegisecurity.ui.AuthenticationEntryPoint</a>.</p>
- *
- * <p>The default action Enunciate takes if authentication fails depends on the security configuration.  If HTTP Digest Auth is enabled, the action is to
- * commence digest authentication.  Otherwise, if HTTP Basic Auth is enabled, the default action is to commence basic authentication.  Otherwise, the default
- * action is simply to issue an HTTP 401 (Unauthenticated) error.</p>
- *
- * <p><u>onAccessDenied</u></p>
- *
- * <p>The "onAccessDenied" child element is used to specify the action to take if access is denied. This element supports a "redirectTo" attribute
- * that will specify that the request is to be redirected to the given URL. The "onAccessDenied" element also supports a child element, "useEntryPoint",
- * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
- * authentcation entry point must implement <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/AccessDeniedHandler.html">org.acegisecurity.ui.AccessDeniedHandler</a>.</p>
- *
- * <p>The default action Enunciate takes if access is denied is simply to issue an HTTP 403 (Forbidden) error.</p>
- *
- * <p><u>anonymousConfig</u></p>
- *
- * <p>The "anonymousConfig" child element is used to configure the anonymous identity processing.  The "userId" attribute specifies the id of the anonymous user.
- * The default value is "anonymous".  The "roles" attribute is used to specify the (comma-separated) roles that are applied to the anonymous identity.
- * The default value is "ANONYMOUS".  The "key" attribute specified the anonymous authentication key. If no key is supplied, the key supplied in the general
- * security configuration will be used.</p>
- *
- * <p>For more information about anonymous identity loading, see For more information, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/anonymous/AnonymousProcessingFilter.html">org.acegisecurity.providers.anonymous.AnonymousProcessingFilter</a>.</p>
- *
- * <p><u>basicAuthConfig</u></p>
- *
- * <p>The "basicAuthConfig" child element is used to configure HTTP Basic Auth.  The "realmName" attribute specifies the authentication realm name. The default
- * value is the realm name of the general security configuration.</p>
- *
- * <p>For more information about basic authentication configuration, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/basicauth/BasicProcessingFilter.html">org.acegisecurity.ui.basicauth.BasicProcessingFilter</a>.</p>
- *
- * <p><u>digestAuthConfig</u></p>
- *
- * <p>The "digestAuthConfig" child element is used to configure HTTP Digest Auth.  The "realmName" attribute specifies the authentication realm name. The default
- * value is the realm name of the general security configuration. The "key" attribute is the security key used to encrypt the digest.  The default is the
- * key configured in the general security configuration.  The "nonceValiditySeconds" attribute specifies how long the digest nonce is valid.  The default is
- * 300 seconds.</p>
- *
- * <p>For more information about digest authentication configuration, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/digestauth/DigestProcessingFilter.html">org.acegisecurity.ui.digestauth.DigestProcessingFilter</a>.</p>
- *
- * <p><u>formBasedLoginConfig</u></p>
- *
- * <p>The "formBasedLoginConfig" child element is used to configure the form-based login endpoint.  The "url" attribute specifies the URL where the form-based
- * login will be mounted.  The default is "/form/login".  The "redirectOnSuccessUrl" specifies the URL to which a successful login will be redirected. The
- * default value is "/".  The "redirectOnFailureUrl" specifies the URL to which an unsuccessful login will be redirected.  The default value is "/".</p>
- *
- * <p>For more information about the form-based login endpoint, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/webapp/AuthenticationProcessingFilter.html">org.acegisecurity.ui.webapp.AuthenticationProcessingFilter</a>.</p>
- *
- * <p><u>formBasedLogoutConfig</u></p>
- *
- * <p>The "formBasedLogoutConfig" child element is used to configure the form-based logout endpoint.  The "url" attribute specifies the URL where the form-based
- * logout will be mounted.  The default is "/form/logout".  The "redirectOnSuccessUrl" specifies the URL to which a successful logout will be redirected. The
- * default value is "/".</p>
- *
- * <p>For more information about the form-based logout endpoint, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/logout/LogoutFilter.html">org.acegisecurity.ui.logout.LogoutFilter</a>.</p>
- *
- * <p><u>rememberMeConfig</u></p>
- *
- * <p>The "rememberMeConfig" child element is used to configure the remember-me identity processing.  The "key" attribute specifies the security key that will
- * be used to encode the remember-me token.  The default value is the key supplied in the general security configuration.  The "cookieName" is the name of
- * the cookie that will hold the remember-me token. The default value is "ACEGI_SECURITY_HASHED_REMEMBER_ME_COOKIE".  The "tokenValiditySeconds" attribute specifies how long the remember-me token will
- * be valid.  The default value is 14 days.</p>
- *
- * <p>For more information about remember-me identity processing, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/rememberme/TokenBasedRememberMeServices.html">org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
- *
- * <p><u>filter</u></p>
- *
- * <p>The "filter" child element specifies another security filter to be applied to provide securit services. The "filter"
- * element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * security filter.  The "className" attribute is used to specify the fully-qualified class name of the security filter to use. A
- * security filter implements the javax.servlet.Filter interface. You can provide any number of additional
- * security filters to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/x509/X509ProcessingFilter.html">X509ProcessingFilter</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/siteminder/SiteminderAuthenticationProvider.html">SiteminderAuthenticationProcessingFilter</a>, etc.).</p>
- *
- * <p><u>provider</u></p>
- *
- * <p>The "provider" child element specifies another Acegi authentication provider that is to be used to provide authentication services. The "provider"
- * element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. An
- * authentication provider implements the <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/AuthenticationProvider.html">org.acegisecurity.providers.AuthenticationProvider</a> interface. You can provide any number of additional
- * authentication providers to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/x509/X509AuthenticationProvider.html">X509AuthenticationProvider</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/ldap/LdapAuthenticationProvider.html">LdapAuthenticationProvider</a>, etc.).</p>
- *
- * <h3><a name="security_login_logout">Login and Logout API Methods</a></h3>
- *
- * <p>You may be interested in implementing "login" and "logout" Web service API methods. To do this:</p>
- *
- * <ol>
- *   <li>Create an endpoint interface the implements org.codehaus.enunciate.modules.spring_app.LoginLogoutProvider</li>
- *   <li>Create your login and logout API methods on your interface.</li>
- *   <li>Delegate the login and logout method calls to the supplied org.codehaus.enunciate.modules.spring_app.LoginLogoutHelper</li>
- * </ol>
- *
- * <p>This will put/remove the identity in the current Acegi security context.  (Note that if you want this identity to persist across the HTTP session, make sure
- * that "persistIdentityAcrossHttpSession" on the security config is set to "true".)</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -806,6 +583,73 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
+
+    copyPreBase();
+
+    info("Building the expanded WAR in %s", buildDir);
+
+    if (isDoCompile()) {
+      //copy the compiled classes to WEB-INF/classes.
+      File webinf = new File(buildDir, "WEB-INF");
+      File webinfClasses = new File(webinf, "classes");
+      enunciate.copyDir(getCompileDir(), webinfClasses);
+    }
+
+    if (isDoLibCopy()) {
+      doLibCopy();
+    }
+    else {
+      info("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
+    }
+
+    copyWebXml();
+
+    copySpringConfig();
+
+    copyDocs();
+
+    copyGwtApps();
+
+    copyAmfConfig();
+
+    copyFlexApps();
+
+    if (isEnableSecurity()) {
+      createSecurityUI();
+    }
+
+    copyPostBase();
+
+    //export the expanded application directory.
+    enunciate.addArtifact(new FileArtifact(getName(), "spring.app.dir", buildDir));
+  }
+
+  /**
+   * Copy the post base.
+   */
+  protected void copyPostBase() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    //extract a post base if specified.
+    if ((this.warConfig != null) && (this.warConfig.getPostBase() != null)) {
+      File postBase = enunciate.resolvePath(this.warConfig.getPostBase());
+      if (postBase.isDirectory()) {
+        info("Copying postBase directory %s to %s...", postBase, buildDir);
+        enunciate.copyDir(postBase, buildDir);
+      }
+      else {
+        info("Extracting postBase zip file %s to %s...", postBase, buildDir);
+        enunciate.extractBase(new FileInputStream(postBase), buildDir);
+      }
+    }
+  }
+
+  /**
+   * Copy the pre base.
+   */
+  protected void copyPreBase() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
     if ((this.warConfig != null) && (this.warConfig.getPreBase() != null)) {
       File preBase = enunciate.resolvePath(this.warConfig.getPreBase());
       if (preBase.isDirectory()) {
@@ -817,172 +661,206 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         enunciate.extractBase(new FileInputStream(preBase), buildDir);
       }
     }
+  }
 
-    info("Building the expanded WAR in %s", buildDir);
+  /**
+   * Create the UI pages for security as needed (e.g. login page).
+   */
+  protected void createSecurityUI() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
     File webinf = new File(buildDir, "WEB-INF");
-    File webinfClasses = new File(webinf, "classes");
-    File webinfLib = new File(webinf, "lib");
+    File jspDir = new File(webinf, "jsp");
+    jspDir.mkdirs();
+    if (getSecurityConfig().isEnableFormBasedLogin()) {
+      //form-based login is enabled; we'll use the login page.
+      File loginPageFile = null;
+      FormBasedLoginConfig formBasedLoginConfig = getSecurityConfig().getFormBasedLoginConfig();
+      if (formBasedLoginConfig != null) {
+        if (formBasedLoginConfig.getLoginPageFile() != null) {
+          loginPageFile = enunciate.resolvePath(formBasedLoginConfig.getLoginPageFile());
+        }
+      }
 
-    //copy the compiled classes to WEB-INF/classes.
-    if (isDoCompile()) {
-      enunciate.copyDir(getCompileDir(), webinfClasses);
+      if (loginPageFile != null) {
+        enunciate.copyFile(loginPageFile, new File(jspDir, "login.jsp"));
+      }
+      else {
+        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/login.jsp", new File(jspDir, "login.jsp"));
+      }
     }
 
-    if (isDoLibCopy()) {
-      //initialize the include filters.
-      AntPathMatcher pathMatcher = new AntPathMatcher();
-      pathMatcher.setPathSeparator(File.separator);
-      List<File> explicitIncludes = new ArrayList<File>();
-      List<String> includePatterns = new ArrayList<String>();
-      if (this.warConfig != null) {
-        for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
-          if (el.getFile() != null) {
-            //add explicit files to the include files list.
-            explicitIncludes.add(el.getFile());
-          }
+    if (getSecurityConfig().isEnableOAuth()) {
+      OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
 
-          String pattern = el.getPattern();
-          if (pattern != null) {
-            //normalize the pattern to the platform.
-            pattern = pattern.replace('/', File.separatorChar);
-            if (pathMatcher.isPattern(pattern)) {
-              //make sure that the includes pattern list only has patterns.
-              includePatterns.add(pattern);
-            }
-            else {
-              info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
-            }
-          }
+      //copy the OAuth information page.
+      File infoPageFile = null;
+      if (oauthConfig != null) {
+        if (oauthConfig.getInfoPageFile() != null) {
+          infoPageFile = enunciate.resolvePath(oauthConfig.getInfoPageFile());
         }
       }
 
-      if (includePatterns.isEmpty()) {
-        //if no include patterns are specified, the implicit pattern is "**/*".
-        debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
-        includePatterns.add("**/*");
+      if (infoPageFile != null) {
+        enunciate.copyFile(infoPageFile, new File(jspDir, "oauth_info.jsp"));
+      }
+      else {
+        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/oauth.jsp", new File(jspDir, "oauth_info.jsp"));
       }
 
-      List<String> warLibs = new ArrayList<String>();
-      if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
-        debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
-        //prime the list of libs to include in the war with what's on the enunciate classpath.
-        warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
-      }
-
-      // Apply the "in filter" (i.e. the filter that specifies the files to be included).
-      List<File> includedLibs = new ArrayList<File>();
-      for (String warLib : warLibs) {
-        File libFile = new File(warLib);
-        if (libFile.exists()) {
-          for (String includePattern : includePatterns) {
-            String absolutePath = libFile.getAbsolutePath();
-            if (absolutePath.startsWith(File.separator)) {
-              //lob off the beginning "/" for Linux boxes.
-              absolutePath = absolutePath.substring(1);
-            }
-            if (pathMatcher.match(includePattern, absolutePath)) {
-              debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
-              includedLibs.add(libFile);
-              break;
-            }
-          }
+      //copy the OAuth access confirmation page.
+      File confirmAccessPageFile = null;
+      if (oauthConfig != null) {
+        if (oauthConfig.getConfirmAccessPageFile() != null) {
+          confirmAccessPageFile = enunciate.resolvePath(oauthConfig.getConfirmAccessPageFile());
         }
       }
 
-      //Now, with what's left, apply the "exclude filter".
-      boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
-      List<String> manifestClasspath = new ArrayList<String>();
-      Iterator<File> toBeIncludedIt = includedLibs.iterator();
-      while (toBeIncludedIt.hasNext()) {
-        File toBeIncluded = toBeIncludedIt.next();
-        if (excludeDefaults && knownExclude(toBeIncluded)) {
-          toBeIncludedIt.remove();
-        }
-        else if (this.warConfig != null) {
-          for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
-            boolean exclude = false;
-            if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
-              exclude = true;
-              debug("%s was explicitly excluded.", toBeIncluded);
-            }
-            else {
-              String pattern = excludeLibs.getPattern();
-              if (pattern != null) {
-                pattern = pattern.replace('/', File.separatorChar);
-                if (pathMatcher.isPattern(pattern)) {
-                  String absolutePath = toBeIncluded.getAbsolutePath();
-                  if (absolutePath.startsWith(File.separator)) {
-                    //lob off the beginning "/" for Linux boxes.
-                    absolutePath = absolutePath.substring(1);
-                  }
+      if (confirmAccessPageFile != null) {
+        enunciate.copyFile(confirmAccessPageFile, new File(jspDir, "confirm_access.jsp"));
+      }
+      else {
+        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/confirm_access.jsp", new File(jspDir, "confirm_access.jsp"));
+      }
 
-                  if (pathMatcher.match(pattern, absolutePath)) {
-                    exclude = true;
-                    debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
-                  }
-                }
-              }
-            }
-
-            if (exclude) {
-              toBeIncludedIt.remove();
-              if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
-                //include it in the manifest anyway.
-                manifestClasspath.add(toBeIncluded.getName());
-                debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
-              }
-              break;
-            }
-          }
+      //copy the OAuth access confirmed page.
+      File accessConfirmedPageFile = null;
+      if (oauthConfig != null) {
+        if (oauthConfig.getAccessConfirmedPageFile() != null) {
+          accessConfirmedPageFile = enunciate.resolvePath(oauthConfig.getAccessConfirmedPageFile());
         }
       }
 
-      //now add the lib files that are explicitly included.
-      includedLibs.addAll(explicitIncludes);
-
-      //now we've got the final list, copy the libs.
-      for (File includedLib : includedLibs) {
-        if (includedLib.isDirectory()) {
-          info("Adding the contents of %s to WEB-INF/classes.", includedLib);
-          enunciate.copyDir(includedLib, webinfClasses);
-        }
-        else {
-          info("Including %s in WEB-INF/lib.", includedLib);
-          enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
-        }
+      if (accessConfirmedPageFile != null) {
+        enunciate.copyFile(accessConfirmedPageFile, new File(jspDir, "access_confirmed.jsp"));
       }
-
-      // write the manifest file.
-      Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
-      if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
-        StringBuilder manifestClasspathValue = new StringBuilder();
-        Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
-        while (manifestClasspathIt.hasNext()) {
-          String entry = manifestClasspathIt.next();
-          manifestClasspathValue.append(entry);
-          if (manifestClasspathIt.hasNext()) {
-            manifestClasspathValue.append(" ");
-          }
-        }
-        manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
+      else {
+        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/access_confirmed.jsp", new File(jspDir, "access_confirmed.jsp"));
       }
-      File metaInf = new File(buildDir, "META-INF");
-      metaInf.mkdirs();
-      FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
-      manifest.write(manifestFileOut);
-      manifestFileOut.flush();
-      manifestFileOut.close();
+    }
+  }
+
+  /**
+   * Copy any flex apps.
+   */
+  protected void copyFlexApps() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File flexAppDir = (File) enunciate.getProperty("flex.app.dir");
+    if (flexAppDir != null) {
+      File flexAppDest = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getFlexAppDir() != null)) {
+        flexAppDest = new File(buildDir, this.warConfig.getFlexAppDir());
+      }
+      enunciate.copyDir(flexAppDir, flexAppDest);
     }
     else {
-      info("Lib copy has been disabled.  No libs will be copied, nor no manifest written.");
+      info("No FLEX application directory was found.  Skipping the copy...");
+    }
+  }
+
+  /**
+   * Copy the AMF configuration.
+   */
+  protected void copyAmfConfig() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File webinf = new File(buildDir, "WEB-INF");
+    File amfXmlDir = (File) enunciate.getProperty("amf.xml.dir");
+    if (amfXmlDir != null) {
+      File servicesConfigFile = new File(amfXmlDir, "services-config.xml");
+      if (servicesConfigFile.exists()) {
+        enunciate.copyFile(servicesConfigFile, new File(new File(webinf, "flex"), "services-config.xml"));
+      }
+      else {
+        warn("No services configuration file found.  Skipping the copy...");
+      }
+    }
+    else {
+      info("No AMF configuration directory was found.  Skipping the copy...");
+    }
+  }
+
+  /**
+   * Copy the GWT apps.
+   */
+  protected void copyGwtApps() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File gwtAppDir = (File) enunciate.getProperty("gwt.app.dir");
+    if (gwtAppDir != null) {
+      File gwtAppDest = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getGwtAppDir() != null)) {
+        gwtAppDest = new File(buildDir, this.warConfig.getGwtAppDir());
+      }
+      enunciate.copyDir(gwtAppDir, gwtAppDest);
+    }
+    else {
+      info("No GWT application directory was found.  Skipping the copy...");
+    }
+  }
+
+  /**
+   * Copy the documentation.
+   *
+   * @throws IOException
+   */
+  protected void copyDocs() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    Artifact artifact = enunciate.findArtifact("docs");
+    if (artifact != null) {
+      File docsDir = buildDir;
+      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+        docsDir = new File(buildDir, this.warConfig.getDocsDir());
+        docsDir.mkdirs();
+      }
+
+      artifact.exportTo(docsDir, enunciate);
+    }
+    else {
+      warn("WARNING: No documentation artifact found!");
+    }
+  }
+
+  /**
+   * Copy the spring application context and servlet config from the build dir to the WEB-INF directory.
+   */
+  protected void copySpringConfig() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File webinf = new File(buildDir, "WEB-INF");
+    File configDir = getConfigGenerateDir();
+    enunciate.copyFile(new File(configDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
+    enunciate.copyFile(new File(configDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
+    if (isEnableSecurity()) {
+      enunciate.copyFile(new File(configDir, "spring-security-context.xml"), new File(webinf, "spring-security-context.xml"));
+
+      if (getSecurityConfig().isEnableOAuth()) {
+        enunciate.copyFile(new File(configDir, "spring-security-oauth-context.xml"), new File(webinf, "spring-security-oauth-context.xml"));
+      }
     }
 
-    //todo: assert that the necessary jars (spring, xfire, commons-whatever, etc.) are there?
+    for (SpringImport springImport : springImports) {
+      //copy the extra spring import files to the WEB-INF directory to be imported.
+      if (springImport.getFile() != null) {
+        File importFile = enunciate.resolvePath(springImport.getFile());
+        enunciate.copyFile(importFile, new File(webinf, importFile.getName()));
+      }
+    }
+  }
 
-    //put the web.xml in WEB-INF.  Pass it through a stylesheet, if specified.
-    File xfireConfigDir = getConfigGenerateDir();
-    File webXML = new File(xfireConfigDir, "web.xml");
+  /**
+   * Copies web.xml to WEB-INF. Pass it through a stylesheet, if specified.
+   */
+  protected void copyWebXml() throws IOException, EnunciateException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File webinf = new File(buildDir, "WEB-INF");
+    File configDir = getConfigGenerateDir();
+    File webXML = new File(configDir, "web.xml");
     File destWebXML = new File(webinf, "web.xml");
+
     if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
       URL transformURL = this.warConfig.getWebXMLTransformURL();
       info("web.xml transform has been specified as %s.", transformURL);
@@ -999,166 +877,163 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     else {
       enunciate.copyFile(webXML, destWebXML);
     }
+  }
 
-    //copy the spring application context and servlet config from the build dir to the WEB-INF directory.
-    enunciate.copyFile(new File(xfireConfigDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
-    enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
-    if (isEnableSecurity()) {
-      enunciate.copyFile(new File(xfireConfigDir, "spring-security-context.xml"), new File(webinf, "spring-security-context.xml"));
+  /**
+   * Copies the classpath elements to WEB-INF.
+   *
+   * @throws IOException
+   */
+  protected void doLibCopy() throws IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    File webinf = new File(buildDir, "WEB-INF");
+    File webinfClasses = new File(webinf, "classes");
+    File webinfLib = new File(webinf, "lib");
 
-      if (getSecurityConfig().isEnableOAuth()) {
-        enunciate.copyFile(new File(xfireConfigDir, "spring-security-oauth-context.xml"), new File(webinf, "spring-security-oauth-context.xml"));
+    //initialize the include filters.
+    AntPathMatcher pathMatcher = new AntPathMatcher();
+    pathMatcher.setPathSeparator(File.separator);
+    List<File> explicitIncludes = new ArrayList<File>();
+    List<String> includePatterns = new ArrayList<String>();
+    if (this.warConfig != null) {
+      for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
+        if (el.getFile() != null) {
+          //add explicit files to the include files list.
+          explicitIncludes.add(el.getFile());
+        }
+
+        String pattern = el.getPattern();
+        if (pattern != null) {
+          //normalize the pattern to the platform.
+          pattern = pattern.replace('/', File.separatorChar);
+          if (pathMatcher.isPattern(pattern)) {
+            //make sure that the includes pattern list only has patterns.
+            includePatterns.add(pattern);
+          }
+          else {
+            info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
+          }
+        }
       }
     }
-    for (SpringImport springImport : springImports) {
-      //copy the extra spring import files to the WEB-INF directory to be imported.
-      if (springImport.getFile() != null) {
-        File importFile = enunciate.resolvePath(springImport.getFile());
-        enunciate.copyFile(importFile, new File(webinf, importFile.getName()));
+
+    if (includePatterns.isEmpty()) {
+      //if no include patterns are specified, the implicit pattern is "**/*".
+      debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
+      includePatterns.add("**/*");
+    }
+
+    List<String> warLibs = new ArrayList<String>();
+    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
+      debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
+      //prime the list of libs to include in the war with what's on the enunciate classpath.
+      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
+    }
+
+    // Apply the "in filter" (i.e. the filter that specifies the files to be included).
+    List<File> includedLibs = new ArrayList<File>();
+    for (String warLib : warLibs) {
+      File libFile = new File(warLib);
+      if (libFile.exists()) {
+        for (String includePattern : includePatterns) {
+          String absolutePath = libFile.getAbsolutePath();
+          if (absolutePath.startsWith(File.separator)) {
+            //lob off the beginning "/" for Linux boxes.
+            absolutePath = absolutePath.substring(1);
+          }
+          if (pathMatcher.match(includePattern, absolutePath)) {
+            debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
+            includedLibs.add(libFile);
+            break;
+          }
+        }
       }
     }
 
-    //find the docs dir.
-    File docsDir = buildDir;
-    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-      docsDir = new File(buildDir, this.warConfig.getDocsDir());
-      docsDir.mkdirs();
-    }
-
-    //now try to find the documentation and export it to the build directory...
-    Artifact artifact = enunciate.findArtifact("docs");
-    if (artifact != null) {
-      artifact.exportTo(docsDir, enunciate);
-    }
-    else {
-      warn("WARNING: No documentation artifact found!");
-    }
-
-    File gwtAppDir = (File) enunciate.getProperty("gwt.app.dir");
-    if (gwtAppDir != null) {
-      File gwtAppDest = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getGwtAppDir() != null)) {
-        gwtAppDest = new File(buildDir, this.warConfig.getGwtAppDir());
+    //Now, with what's left, apply the "exclude filter".
+    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
+    List<String> manifestClasspath = new ArrayList<String>();
+    Iterator<File> toBeIncludedIt = includedLibs.iterator();
+    while (toBeIncludedIt.hasNext()) {
+      File toBeIncluded = toBeIncludedIt.next();
+      if (excludeDefaults && knownExclude(toBeIncluded)) {
+        toBeIncludedIt.remove();
       }
-      enunciate.copyDir(gwtAppDir, gwtAppDest);
-    }
-    else {
-      info("No GWT application directory was found.  Skipping the copy...");
+      else if (this.warConfig != null) {
+        for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
+          boolean exclude = false;
+          if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
+            exclude = true;
+            debug("%s was explicitly excluded.", toBeIncluded);
+          }
+          else {
+            String pattern = excludeLibs.getPattern();
+            if (pattern != null) {
+              pattern = pattern.replace('/', File.separatorChar);
+              if (pathMatcher.isPattern(pattern)) {
+                String absolutePath = toBeIncluded.getAbsolutePath();
+                if (absolutePath.startsWith(File.separator)) {
+                  //lob off the beginning "/" for Linux boxes.
+                  absolutePath = absolutePath.substring(1);
+                }
+
+                if (pathMatcher.match(pattern, absolutePath)) {
+                  exclude = true;
+                  debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
+                }
+              }
+            }
+          }
+
+          if (exclude) {
+            toBeIncludedIt.remove();
+            if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
+              //include it in the manifest anyway.
+              manifestClasspath.add(toBeIncluded.getName());
+              debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
+            }
+            break;
+          }
+        }
+      }
     }
 
-    File amfXmlDir = (File) enunciate.getProperty("amf.xml.dir");
-    if (amfXmlDir != null) {
-      File servicesConfigFile = new File(amfXmlDir, "services-config.xml");
-      if (servicesConfigFile.exists()) {
-        enunciate.copyFile(servicesConfigFile, new File(new File(webinf, "flex"), "services-config.xml"));
+    //now add the lib files that are explicitly included.
+    includedLibs.addAll(explicitIncludes);
+
+    //now we've got the final list, copy the libs.
+    for (File includedLib : includedLibs) {
+      if (includedLib.isDirectory()) {
+        info("Adding the contents of %s to WEB-INF/classes.", includedLib);
+        enunciate.copyDir(includedLib, webinfClasses);
       }
       else {
-        warn("No services configuration file found.  Skipping the copy...");
-      }
-    }
-    else {
-      info("No AMF configuration directory was found.  Skipping the copy...");
-    }
-
-    File flexAppDir = (File) enunciate.getProperty("flex.app.dir");
-    if (flexAppDir != null) {
-      File flexAppDest = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getFlexAppDir() != null)) {
-        flexAppDest = new File(buildDir, this.warConfig.getFlexAppDir());
-      }
-      enunciate.copyDir(flexAppDir, flexAppDest);
-    }
-    else {
-      info("No FLEX application directory was found.  Skipping the copy...");
-    }
-
-    //set up the security UI pages if needed.
-    if (isEnableSecurity()) {
-      File jspDir = new File(webinf, "jsp");
-      jspDir.mkdirs();
-      if (getSecurityConfig().isEnableFormBasedLogin()) {
-        //form-based login is enabled; we'll use the login page.
-        File loginPageFile = null;
-        FormBasedLoginConfig formBasedLoginConfig = getSecurityConfig().getFormBasedLoginConfig();
-        if (formBasedLoginConfig != null) {
-          if (formBasedLoginConfig.getLoginPageFile() != null) {
-            loginPageFile = enunciate.resolvePath(formBasedLoginConfig.getLoginPageFile());
-          }
-        }
-
-        if (loginPageFile != null) {
-          enunciate.copyFile(loginPageFile, new File(jspDir, "login.jsp"));
-        }
-        else {
-          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/login.jsp", new File(jspDir, "login.jsp"));
-        }
-      }
-
-      if (getSecurityConfig().isEnableOAuth()) {
-        OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
-
-        //copy the OAuth information page.
-        File infoPageFile = null;
-        if (oauthConfig != null) {
-          if (oauthConfig.getInfoPageFile() != null) {
-            infoPageFile = enunciate.resolvePath(oauthConfig.getInfoPageFile());
-          }
-        }
-
-        if (infoPageFile != null) {
-          enunciate.copyFile(infoPageFile, new File(jspDir, "oauth_info.jsp"));
-        }
-        else {
-          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/oauth.jsp", new File(jspDir, "oauth_info.jsp"));
-        }
-
-        //copy the OAuth access confirmation page.
-        File confirmAccessPageFile = null;
-        if (oauthConfig != null) {
-          if (oauthConfig.getConfirmAccessPageFile() != null) {
-            confirmAccessPageFile = enunciate.resolvePath(oauthConfig.getConfirmAccessPageFile());
-          }
-        }
-
-        if (confirmAccessPageFile != null) {
-          enunciate.copyFile(confirmAccessPageFile, new File(jspDir, "confirm_access.jsp"));
-        }
-        else {
-          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/confirm_access.jsp", new File(jspDir, "confirm_access.jsp"));
-        }
-
-        //copy the OAuth access confirmed page.
-        File accessConfirmedPageFile = null;
-        if (oauthConfig != null) {
-          if (oauthConfig.getAccessConfirmedPageFile() != null) {
-            accessConfirmedPageFile = enunciate.resolvePath(oauthConfig.getAccessConfirmedPageFile());
-          }
-        }
-
-        if (accessConfirmedPageFile != null) {
-          enunciate.copyFile(accessConfirmedPageFile, new File(jspDir, "access_confirmed.jsp"));
-        }
-        else {
-          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/access_confirmed.jsp", new File(jspDir, "access_confirmed.jsp"));
-        }
+        info("Including %s in WEB-INF/lib.", includedLib);
+        enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
       }
     }
 
-    //extract a post base if specified.
-    if ((this.warConfig != null) && (this.warConfig.getPostBase() != null)) {
-      File postBase = enunciate.resolvePath(this.warConfig.getPostBase());
-      if (postBase.isDirectory()) {
-        info("Copying postBase directory %s to %s...", postBase, buildDir);
-        enunciate.copyDir(postBase, buildDir);
+    // write the manifest file.
+    Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
+    if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
+      StringBuilder manifestClasspathValue = new StringBuilder();
+      Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
+      while (manifestClasspathIt.hasNext()) {
+        String entry = manifestClasspathIt.next();
+        manifestClasspathValue.append(entry);
+        if (manifestClasspathIt.hasNext()) {
+          manifestClasspathValue.append(" ");
+        }
       }
-      else {
-        info("Extracting postBase zip file %s to %s...", postBase, buildDir);
-        enunciate.extractBase(new FileInputStream(postBase), buildDir);
-      }
+      manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
     }
-
-    //export the expanded application directory.
-    enunciate.addArtifact(new FileArtifact(getName(), "spring.app.dir", buildDir));
+    File metaInf = new File(buildDir, "META-INF");
+    metaInf.mkdirs();
+    FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
+    manifest.write(manifestFileOut);
+    manifestFileOut.flush();
+    manifestFileOut.close();
   }
 
   @Override
