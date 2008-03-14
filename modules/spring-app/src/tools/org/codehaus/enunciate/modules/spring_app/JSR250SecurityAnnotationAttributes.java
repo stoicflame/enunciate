@@ -76,7 +76,7 @@ public class JSR250SecurityAnnotationAttributes implements org.springframework.m
               attributes.add(JSR250SecurityConfig.PERMIT_ALL_ATTRIBUTE);
             }
             else {
-              rolesAllowed = targetMethod.getAnnotation(RolesAllowed.class);
+              rolesAllowed = targetMethod.getDeclaringClass().getAnnotation(RolesAllowed.class);
               if (rolesAllowed != null) {
                 for (String role : rolesAllowed.value()) {
                   attributes.add(new JSR250SecurityConfig(role));

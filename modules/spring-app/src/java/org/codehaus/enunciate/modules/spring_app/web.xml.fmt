@@ -1,17 +1,15 @@
 [#ftl]
 [@file name="web.xml"]
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<!DOCTYPE web-app PUBLIC
-	"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-	"http://java.sun.com/dtd/web-app_2_3.dtd">
-
+<?xml version="1.0" encoding="UTF-8"?>
 <web-app>
 
-  <listener>
-    <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
-  </listener>
-
+  [#if securityEnabled]
+  <context-param>
+    <param-name>formLoginURL</param-name>
+    <param-value>${securityConfig.formBasedLoginConfig.url}</param-value>
+  </context-param>
+  
+  [/#if]
   [#if securityEnabled]
   <filter>
     <filter-name>spring-security</filter-name>
@@ -30,6 +28,10 @@
   </filter-mapping>
 
   [/#if]
+  <listener>
+    <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
+  </listener>
+
   <servlet>
     <servlet-name>spring</servlet-name>
     <servlet-class>${springDispatcherServletClass?default("org.springframework.web.servlet.DispatcherServlet")}</servlet-class>
@@ -99,6 +101,30 @@
     <url-pattern>${jsonSubcontext}*</url-pattern>
   </servlet-mapping>
 
+  [#if securityEnabled && securityConfig.enableFormBasedLogin]
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>${securityConfig.formBasedLoginConfig.loginPageURL}</url-pattern>
+  </servlet-mapping>
+
+  [/#if]
+  [#if securityEnabled && securityConfig.enableOAuth]
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>${securityConfig.OAuthConfig.infoURL}</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>${securityConfig.OAuthConfig.accessConfirmationURL}</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>${securityConfig.OAuthConfig.accessConfirmedURL}</url-pattern>
+  </servlet-mapping>
+
+  [/#if]
   <mime-mapping>
     <extension>wsdl</extension>
     <mime-type>text/xml</mime-type>

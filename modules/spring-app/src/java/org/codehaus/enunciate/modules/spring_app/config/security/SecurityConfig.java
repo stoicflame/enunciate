@@ -18,6 +18,7 @@ public class SecurityConfig {
   private boolean enableBasicHTTPAuth = true;
   private boolean enableDigestHTTPAuth = false;
   private boolean initJ2EESecurityContext = true;
+  private boolean enableOAuth = false;
 
   private AnonymousConfig anonymousConfig = new AnonymousConfig();
   private BasicAuthConfig basicAuthConfig = new BasicAuthConfig();
@@ -25,6 +26,7 @@ public class SecurityConfig {
   private FormBasedLoginConfig formBasedLoginConfig = new FormBasedLoginConfig();
   private FormBasedLogoutConfig formBasedLogoutConfig = new FormBasedLogoutConfig();
   private RememberMeConfig rememberMeConfig = new RememberMeConfig();
+  private OAuthConfig OAuthConfig = new OAuthConfig();
 
   private EntryPointConfig onAuthenticationFailed;
   private EntryPointConfig onAccessDenied;
@@ -182,6 +184,24 @@ public class SecurityConfig {
   }
 
   /**
+   * Whether to enable OAuth provider support.
+   *
+   * @return Whether to enable OAuth provider support.
+   */
+  public boolean isEnableOAuth() {
+    return enableOAuth;
+  }
+
+  /**
+   * Whether to enable OAuth provider support.
+   *
+   * @param enableOAuth Whether to enable OAuth provider support.
+   */
+  public void setEnableOAuth(boolean enableOAuth) {
+    this.enableOAuth = enableOAuth;
+  }
+
+  /**
    * Configuration for anonymous user processing.
    *
    * @return Configuration for anonymous user processing.
@@ -287,6 +307,24 @@ public class SecurityConfig {
    */
   public void setRememberMeConfig(RememberMeConfig rememberMeConfig) {
     this.rememberMeConfig = rememberMeConfig;
+  }
+
+  /**
+   * Configuration for OAuth.
+   *
+   * @return Configuration for OAuth.
+   */
+  public OAuthConfig getOAuthConfig() {
+    return OAuthConfig;
+  }
+
+  /**
+   * Configuration for OAuth.
+   *
+   * @param OAuthConfig Configuration for OAuth.
+   */
+  public void setOAuthConfig(OAuthConfig OAuthConfig) {
+    this.OAuthConfig = OAuthConfig;
   }
 
   /**

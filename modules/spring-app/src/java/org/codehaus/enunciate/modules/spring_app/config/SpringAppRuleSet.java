@@ -85,6 +85,18 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security/basicAuth");
     digester.addSetNext("enunciate/modules/spring-app/security/basicAuth", "setBasicAuthConfig");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/security/oauth", OAuthConfig.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/oauth");
+    digester.addSetNext("enunciate/modules/spring-app/security/oauth", "setOAuthConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/oauth/tokenServices", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/oauth/tokenServices");
+    digester.addSetNext("enunciate/modules/spring-app/security/oauth/tokenServices", "setTokenServices");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/oauth/consumerDetailsService", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/oauth/consumerDetailsService");
+    digester.addSetNext("enunciate/modules/spring-app/security/oauth/consumerDetailsService", "setConsumerDetailsService");
+
     digester.addObjectCreate("enunciate/modules/spring-app/security/digestAuth", DigestAuthConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/digestAuth");
     digester.addSetNext("enunciate/modules/spring-app/security/digestAuth", "setDigestAuthConfig");

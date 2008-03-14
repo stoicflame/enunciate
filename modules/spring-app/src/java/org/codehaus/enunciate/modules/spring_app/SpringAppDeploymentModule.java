@@ -31,6 +31,8 @@ import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
 import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
+import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
+import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
 import org.springframework.util.AntPathMatcher;
 import sun.misc.Service;
 
@@ -608,7 +610,14 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    * @return The URL to "acegi-security-context.fmt"
    */
   protected URL getSecurityTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("acegi-security-context.xml.fmt");
+    return SpringAppDeploymentModule.class.getResource("spring-security-context.xml.fmt");
+  }
+
+  /**
+   * @return The URL to "acegi-security-context.fmt"
+   */
+  protected URL getOAuthTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("spring-security-oauth-context.xml.fmt");
   }
 
   /**
@@ -686,6 +695,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     processTemplate(getWebXmlTemplateURL(), model);
     if (isEnableSecurity()) {
       processTemplate(getSecurityTemplateURL(), model);
+
+      if (getSecurityConfig().isEnableOAuth()) {
+        processTemplate(getOAuthTemplateURL(), model);
+      }
     }
   }
 
@@ -990,7 +1003,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.copyFile(new File(xfireConfigDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
     enunciate.copyFile(new File(xfireConfigDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
     if (isEnableSecurity()) {
-      enunciate.copyFile(new File(xfireConfigDir, "spring-security-context.xml"), new File(webinf, "acegi-security-context.xml"));
+      enunciate.copyFile(new File(xfireConfigDir, "spring-security-context.xml"), new File(webinf, "spring-security-context.xml"));
+
+      if (getSecurityConfig().isEnableOAuth()) {
+        enunciate.copyFile(new File(xfireConfigDir, "spring-security-oauth-context.xml"), new File(webinf, "spring-security-oauth-context.xml"));
+      }
     }
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.
@@ -1000,14 +1017,16 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
+    //find the docs dir.
+    File docsDir = buildDir;
+    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+      docsDir = new File(buildDir, this.warConfig.getDocsDir());
+      docsDir.mkdirs();
+    }
+
     //now try to find the documentation and export it to the build directory...
     Artifact artifact = enunciate.findArtifact("docs");
     if (artifact != null) {
-      File docsDir = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-        docsDir = new File(buildDir, this.warConfig.getDocsDir());
-        docsDir.mkdirs();
-      }
       artifact.exportTo(docsDir, enunciate);
     }
     else {
@@ -1050,6 +1069,78 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     }
     else {
       info("No FLEX application directory was found.  Skipping the copy...");
+    }
+
+    //set up the security UI pages if needed.
+    if (isEnableSecurity()) {
+      File jspDir = new File(webinf, "jsp");
+      jspDir.mkdirs();
+      if (getSecurityConfig().isEnableFormBasedLogin()) {
+        //form-based login is enabled; we'll use the login page.
+        File loginPageFile = null;
+        FormBasedLoginConfig formBasedLoginConfig = getSecurityConfig().getFormBasedLoginConfig();
+        if (formBasedLoginConfig != null) {
+          if (formBasedLoginConfig.getLoginPageFile() != null) {
+            loginPageFile = enunciate.resolvePath(formBasedLoginConfig.getLoginPageFile());
+          }
+        }
+
+        if (loginPageFile != null) {
+          enunciate.copyFile(loginPageFile, new File(jspDir, "login.jsp"));
+        }
+        else {
+          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/login.jsp", new File(jspDir, "login.jsp"));
+        }
+      }
+
+      if (getSecurityConfig().isEnableOAuth()) {
+        OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
+
+        //copy the OAuth information page.
+        File infoPageFile = null;
+        if (oauthConfig != null) {
+          if (oauthConfig.getInfoPageFile() != null) {
+            infoPageFile = enunciate.resolvePath(oauthConfig.getInfoPageFile());
+          }
+        }
+
+        if (infoPageFile != null) {
+          enunciate.copyFile(infoPageFile, new File(jspDir, "oauth_info.jsp"));
+        }
+        else {
+          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/oauth.jsp", new File(jspDir, "oauth_info.jsp"));
+        }
+
+        //copy the OAuth access confirmation page.
+        File confirmAccessPageFile = null;
+        if (oauthConfig != null) {
+          if (oauthConfig.getConfirmAccessPageFile() != null) {
+            confirmAccessPageFile = enunciate.resolvePath(oauthConfig.getConfirmAccessPageFile());
+          }
+        }
+
+        if (confirmAccessPageFile != null) {
+          enunciate.copyFile(confirmAccessPageFile, new File(jspDir, "confirm_access.jsp"));
+        }
+        else {
+          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/confirm_access.jsp", new File(jspDir, "confirm_access.jsp"));
+        }
+
+        //copy the OAuth access confirmed page.
+        File accessConfirmedPageFile = null;
+        if (oauthConfig != null) {
+          if (oauthConfig.getAccessConfirmedPageFile() != null) {
+            accessConfirmedPageFile = enunciate.resolvePath(oauthConfig.getAccessConfirmedPageFile());
+          }
+        }
+
+        if (accessConfirmedPageFile != null) {
+          enunciate.copyFile(accessConfirmedPageFile, new File(jspDir, "access_confirmed.jsp"));
+        }
+        else {
+          enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/access_confirmed.jsp", new File(jspDir, "access_confirmed.jsp"));
+        }
+      }
     }
 
     //extract a post base if specified.

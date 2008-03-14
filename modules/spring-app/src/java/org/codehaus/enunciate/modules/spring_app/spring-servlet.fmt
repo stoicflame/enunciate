@@ -146,6 +146,75 @@
           </bean>
         </entry>
   [/@forEachRESTNoun]
+  [#if securityEnabled && securityConfig.enableFormBasedLogin]
+
+        <entry key="${securityConfig.formBasedLoginConfig.loginPageURL}">
+          <bean class="org.codehaus.enunciate.modules.spring_app.StaticModelViewController">
+            <property name="view">
+              <bean class="org.springframework.web.servlet.view.JstlView">
+                <property name="url" value="/WEB-INF/jsp/login.jsp"/>
+              </bean>
+            </property>
+            <property name="model">
+              <map>
+                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="formLoginURL" value="${securityConfig.formBasedLoginConfig.url}"/>
+              </map>
+            </property>
+          </bean>
+        </entry>
+  [/#if]
+  [#if securityEnabled && securityConfig.enableOAuth]
+
+        <entry key="${securityConfig.OAuthConfig.accessConfirmationURL}">
+          <bean class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessController">
+            <property name="view">
+              <bean class="org.springframework.web.servlet.view.JstlView">
+                <property name="url" value="/WEB-INF/jsp/confirm_access.jsp"/>
+              </bean>
+            </property>
+            <property name="model">
+              <map>
+                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="grantAccessURL" value="${securityConfig.OAuthConfig.grantAccessURL}"/>
+              </map>
+            </property>
+          </bean>
+        </entry>
+
+        <entry key="${securityConfig.OAuthConfig.accessConfirmedURL}">
+          <bean class="org.codehaus.enunciate.modules.spring_app.StaticModelViewController">
+            <property name="view">
+              <bean class="org.springframework.web.servlet.view.JstlView">
+                <property name="url" value="/WEB-INF/jsp/access_confirmed.jsp"/>
+              </bean>
+            </property>
+            <property name="model">
+              <map>
+                <entry key="cssURL" value="${docsDir}default.css"/>
+              </map>
+            </property>
+          </bean>
+        </entry>
+
+        <entry key="${securityConfig.OAuthConfig.infoURL}">
+          <bean class="org.codehaus.enunciate.modules.spring_app.StaticModelViewController">
+            <property name="view">
+              <bean class="org.springframework.web.servlet.view.JstlView">
+                <property name="url" value="/WEB-INF/jsp/oauth_info.jsp"/>
+              </bean>
+            </property>
+            <property name="model">
+              <map>
+                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="request_token_url" value="${securityConfig.OAuthConfig.requestTokenURL}"/>
+                <entry key="access_token_url" value="${securityConfig.OAuthConfig.accessTokenURL}"/>
+                <entry key="confirm_access_url" value="${securityConfig.OAuthConfig.accessConfirmationURL}"/>
+              </map>
+            </property>
+          </bean>
+        </entry>
+  [/#if]
       </map>
     </property>
   </bean>

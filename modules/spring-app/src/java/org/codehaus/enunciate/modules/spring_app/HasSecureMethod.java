@@ -16,22 +16,20 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
+import com.sun.mirror.declaration.AnnotationMirror;
+import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-
-import java.util.Collection;
-import java.util.List;
-
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.DenyAll;
-import javax.annotation.security.RolesAllowed;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Gets the qualified package name for a package or type.
@@ -39,6 +37,22 @@ import javax.annotation.security.RolesAllowed;
  * @author Ryan Heaton
  */
 public class HasSecureMethod implements TemplateMethodModelEx {
+
+  private final List<String> securityAnnotations;
+
+  public HasSecureMethod() {
+    this("javax.annotation.security.RolesAllowed",
+         "javax.annotation.security.PermitAll",
+         "javax.annotation.security.DenyAll",
+         "org.springframework.security.oauth.provider.attributes.ConsumerRolesAllowed",
+         "org.springframework.security.oauth.provider.attributes.ConsumerKeysAllowed",
+         "org.springframework.security.oauth.provider.attributes.PermitAllConsumers",
+         "org.springframework.security.oauth.provider.attributes.DenyAllConsumers");
+  }
+
+  public HasSecureMethod(String... securityAnnotations) {
+    this.securityAnnotations = Arrays.asList(securityAnnotations);
+  }
 
   /**
    * Gets the client-side package for the type, type declaration, package, or their string values.
@@ -64,18 +78,30 @@ public class HasSecureMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The hasSecureMethod method must be either an EndpointInterface or a RESTEndpoint.  Not " + object.getClass().getName());
     }
 
-    TypeDeclaration declaration = (TypeDeclaration) object;
-    if ((declaration.getAnnotation(RolesAllowed.class) != null) ||
-      (declaration.getAnnotation(PermitAll.class) != null) ||
-      (declaration.getAnnotation(DenyAll.class) != null)) {
-      return true;
+    TypeDeclaration typeDeclaration = (TypeDeclaration) object;
+    for (AnnotationMirror annotationMirror : typeDeclaration.getAnnotationMirrors()) {
+      AnnotationTypeDeclaration annotationDeclaration = annotationMirror.getAnnotationType().getDeclaration();
+      if (annotationDeclaration != null) {
+        String fqn = annotationDeclaration.getQualifiedName();
+        for (String securityAnnotation : securityAnnotations) {
+          if (fqn.equals(securityAnnotation)) {
+            return true;
+          }
+        }
+      }
     }
 
-    for (MethodDeclaration method : methods) {
-      if ((method.getAnnotation(RolesAllowed.class) != null) ||
-        (method.getAnnotation(PermitAll.class) != null) ||
-        (method.getAnnotation(DenyAll.class) != null)) {
-        return true;
+    for (MethodDeclaration methodDeclaration : methods) {
+      for (AnnotationMirror annotationMirror : methodDeclaration.getAnnotationMirrors()) {
+        AnnotationTypeDeclaration annotationDeclaration = annotationMirror.getAnnotationType().getDeclaration();
+        if (annotationDeclaration != null) {
+          String fqn = annotationDeclaration.getQualifiedName();
+          for (String securityAnnotation : securityAnnotations) {
+            if (fqn.equals(securityAnnotation)) {
+              return true;
+            }
+          }
+        }
       }
     }
 

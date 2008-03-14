@@ -9,7 +9,9 @@ public class FormBasedLoginConfig {
 
   private String url = "/form/login";
   private String redirectOnSuccessUrl = "/";
-  private String redirectOnFailureUrl = "/";
+  private String redirectOnFailureUrl = "/login.jsp";
+  private String loginPageURL = "login.jsp";
+  private String loginPageFile;
 
   /**
    * The URL of the form-based login endpoint.
@@ -63,5 +65,41 @@ public class FormBasedLoginConfig {
    */
   public void setRedirectOnFailureUrl(String redirectOnFailureUrl) {
     this.redirectOnFailureUrl = redirectOnFailureUrl;
+  }
+
+  /**
+   * The URL of the login page.
+   *
+   * @return The URL of the login page.
+   */
+  public String getLoginPageURL() {
+    return loginPageURL;
+  }
+
+  /**
+   * The URL of the login page.
+   *
+   * @param loginPageURL The URL of the login page.
+   */
+  public void setLoginPageURL(String loginPageURL) {
+    this.loginPageURL = loginPageURL;
+  }
+
+  /**
+   * File to be used as the login page.
+   *
+   * @return File to be used as the login page.
+   */
+  public String getLoginPageFile() {
+    return loginPageFile;
+  }
+
+  /**
+   * File to be used as the login page.
+   *
+   * @param loginPageFile File to be used as the login page.
+   */
+  public void setLoginPageFile(String loginPageFile) {
+    this.loginPageFile = loginPageFile;
   }
 }

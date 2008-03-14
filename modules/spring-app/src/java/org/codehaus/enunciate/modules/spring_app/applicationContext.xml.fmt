@@ -1,11 +1,12 @@
 [#ftl]
 [@file name="applicationContext.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
 
   <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
   [#if securityEnabled]
-  <import resource="acegi-security-context.xml"/>
+  <import resource="spring-security-context.xml"/>
   [/#if]
   [#if springImports?exists]
     [#list springImports as springImport]

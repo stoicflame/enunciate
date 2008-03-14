@@ -67,6 +67,11 @@ h1,h2,h3 {
 .deprecated {
   color: red;
 }
+.errortext {
+  color: red;
+  padding: 6px 12px;
+  font-variant:small-caps;
+}
 
 /* structure */
 .container {
@@ -197,4 +202,30 @@ h1,h2,h3 {
 .footer a:hover {
 	color: #06F;
 	text-decoration: underline;
+}
+
+/* widecontent (content with no sidenav) */
+.widecontent {
+	background: #FFF;
+	border: 1px solid #EEE;
+	color: #666;
+	font-size: 1.1em;
+	margin: 0 auto;
+	padding: 6px;
+	width: 720px;
+}
+.widecontent a {
+	color: #36C;
+	text-decoration: none;
+}
+.widecontent a:hover {
+	color: #06F;
+	text-decoration: underline;
+}
+.widecontent h1 {
+  padding: 6px 12px;
+  text-decoration:underline;
+}
+.widecontent form {
+  padding: 6px 12px;
 }
