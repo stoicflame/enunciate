@@ -244,6 +244,7 @@ import java.io.IOException;
  * <p>The REST deployment module exports no artifacts.</p>
  *
  * @author Ryan Heaton
+ * @docFileName module_rest.html
  */
 public class RESTDeploymentModule extends BasicDeploymentModule {
 

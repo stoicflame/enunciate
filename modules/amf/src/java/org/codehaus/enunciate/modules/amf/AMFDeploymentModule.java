@@ -183,6 +183,7 @@ import java.util.*;
  * </ul>
  *
  * @author Ryan Heaton
+ * @docFileName module_amf.html
  */
 public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 

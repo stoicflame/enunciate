@@ -63,6 +63,7 @@ import java.net.URL;
  * </ul>
  *
  * @author Ryan Heaton
+ * @docFileName module_xfire.html
  */
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 

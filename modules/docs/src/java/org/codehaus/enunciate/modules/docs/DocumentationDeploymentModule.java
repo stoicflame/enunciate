@@ -144,6 +144,7 @@ import java.util.*;
  * The artifact id is "docs", and it is exported during the "build" step.
  *
  * @author Ryan Heaton
+ * @docFileName module_docs.html
  */
 public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 

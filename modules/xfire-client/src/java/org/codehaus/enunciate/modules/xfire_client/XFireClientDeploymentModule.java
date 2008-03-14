@@ -122,6 +122,7 @@ import java.util.*;
  * </ul>
  *
  * @author Ryan Heaton
+ * @docFileName module_xfire_client.html
  */
 public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 

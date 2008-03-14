@@ -244,7 +244,8 @@
         </fileset>
       </path>
     </pathconvert>
-    <dirname property="apt.output.dir" file="target/any.txt"/>
+    <mkdir dir="target/docs"/>
+    <dirname property="apt.output.dir" file="target/docs/any.txt"/>
 
     <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
       <classpath location="${java.home}/../lib/tools.jar"/>
@@ -255,7 +256,6 @@
       <arg value="-nocompile"/>
       <arg line="-factory net.sf.jelly.apt.freemarker.FreemarkerProcessorFactory"/>
       <arg value="-Atemplate=${enunciate.basedir}/docs/module.docs.fmt"/>
-      <arg value="-AEnunciateModuleFQN=${deployment.module.fqn}"/>
       <arg line="&#34;${module.src.file.args}&#34;"/>
     </java>
   </target>

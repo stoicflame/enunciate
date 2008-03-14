@@ -61,6 +61,7 @@ import java.util.TreeSet;
  * <p>The jaxws deployment module exports its source directory under artifact id "<b>jaxws.src.dir</b>" during the generate step.</p>
  * 
  * @author Ryan Heaton
+ * @docFileName module_jaxws.html
  */
 public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
 

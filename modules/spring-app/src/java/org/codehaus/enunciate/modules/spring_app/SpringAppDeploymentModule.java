@@ -565,6 +565,7 @@ import java.util.jar.Manifest;
  * </ul>
  *
  * @author Ryan Heaton
+ * @docFileName module_spring_app.html
  */
 public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 

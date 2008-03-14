@@ -210,6 +210,7 @@ import com.sun.mirror.declaration.Declaration;
  * </ul>
  *
  * @author Ryan Heaton
+ * @docFileName module_gwt.html
  */
 public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 

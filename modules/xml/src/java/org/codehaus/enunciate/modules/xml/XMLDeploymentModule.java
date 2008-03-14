@@ -96,6 +96,7 @@ import java.util.Map;
  * file appended with ".wsdl" (for wsdls) and ".xsd" (for schemas).</p>
  *
  * @author Ryan Heaton
+ * @docFileName module_xml.html
  */
 public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
