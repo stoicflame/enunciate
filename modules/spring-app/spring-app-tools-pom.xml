@@ -64,6 +64,7 @@
           <artifactId>acegi-security</artifactId>
         </exclusion>
       </exclusions>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
