@@ -17,8 +17,6 @@ import javax.xml.namespace.QName;
 
 /**
  * Logic for reading and writing an instance of ${classname} to an xml stream.
- *
- * @author Ryan Heaton
  */
 public class ${type.simpleName}XFireType extends Type {
 

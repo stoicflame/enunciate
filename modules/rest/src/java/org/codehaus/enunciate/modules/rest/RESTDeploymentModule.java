@@ -16,17 +16,14 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.modules.BasicDeploymentModule;
-import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.main.NamedFileArtifact;
-
-import java.io.IOException;
-import java.io.File;
-import java.net.URL;
-
 import freemarker.template.TemplateException;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * <h1>REST Module</h1>
@@ -290,7 +287,13 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
-    processTemplate(getProperyNamesTemplateURL(), getModel());
-    enunciate.setProperty("rest.parameter.names", new File(getGenerateDir(), "enunciate-rest-parameter-names.properties"));
+    File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
+    if (!enunciate.isUpToDateWithSources(paramNameFile)) {
+      processTemplate(getProperyNamesTemplateURL(), getModel());
+    }
+    else {
+      info("Skipping generation of REST parameter names as everything appears up-to-date...");
+    }
+    enunciate.setProperty("rest.parameter.names", paramNameFile);
   }
 }

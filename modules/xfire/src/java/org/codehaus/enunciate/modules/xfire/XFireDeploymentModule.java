@@ -100,28 +100,42 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
+    if (!isUpToDate()) {
+      EnunciateFreemarkerModel model = getModel();
 
-    //generate the rpc request/response beans.
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        for (WebMethod webMethod : ei.getWebMethods()) {
-          for (WebMessage webMessage : webMethod.getMessages()) {
-            if (webMessage instanceof RPCInputMessage) {
-              model.put("message", webMessage);
-              processTemplate(getRPCRequestBeanTemplateURL(), model);
-            }
-            else if (webMessage instanceof RPCOutputMessage) {
-              model.put("message", webMessage);
-              processTemplate(getRPCResponseBeanTemplateURL(), model);
+      //generate the rpc request/response beans.
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          for (WebMethod webMethod : ei.getWebMethods()) {
+            for (WebMessage webMessage : webMethod.getMessages()) {
+              if (webMessage instanceof RPCInputMessage) {
+                model.put("message", webMessage);
+                processTemplate(getRPCRequestBeanTemplateURL(), model);
+              }
+              else if (webMessage instanceof RPCOutputMessage) {
+                model.put("message", webMessage);
+                processTemplate(getRPCResponseBeanTemplateURL(), model);
+              }
             }
           }
         }
       }
     }
+    else {
+      info("Skipping generation of XFire support classes as everything appears up-to-date....");
+    }
 
     getEnunciate().setProperty("xfire-server.src.dir", getGenerateDir());
     getEnunciate().addArtifact(new FileArtifact(getName(), "xfire-server.src.dir", getGenerateDir()));
+  }
+
+  /**
+   * Whether the generated sources are up-to-date.
+   *
+   * @return Whether the generated sources are up-to-date.
+   */
+  protected boolean isUpToDate() {
+    return enunciate.isUpToDateWithSources(getGenerateDir());
   }
 
   @Override

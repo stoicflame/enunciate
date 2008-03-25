@@ -202,14 +202,20 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.put("soapAddressLocation", new SoapAddressLocationMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
-    processTemplate(getTemplateURL(), model);
+    boolean upToDate = isUpToDate(artifactDir);
+    if (!upToDate) {
+      processTemplate(getTemplateURL(), model);
+    }
+    else {
+      info("Skipping generation of XML files since everything appears up-to-date...");
+    }
 
     for (WsdlInfo wsdl : ns2wsdl.values()) {
       String file = (String) wsdl.getProperty("filename");
       File wsdlFile = new File(artifactDir, file);
       wsdl.setProperty("file", wsdlFile);
 
-      if (prettyPrint) {
+      if (!upToDate && prettyPrint) {
         prettyPrint(wsdlFile);
       }
 
@@ -223,11 +229,11 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       File schemaFile = new File(artifactDir, file);
       schemaInfo.setProperty("file", schemaFile);
 
-      if (prettyPrint) {
+      if (!upToDate && prettyPrint) {
         prettyPrint(schemaFile);
       }
 
-      if (validateSchemas) {
+      if (!upToDate && validateSchemas) {
         //todo: write some logic to validate the schemas.
       }
 
@@ -235,6 +241,16 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       schemaArtifact.setDescription("Schema file for namespace " + schemaInfo.getNamespace());
       getEnunciate().addArtifact(schemaArtifact);
     }
+  }
+
+  /**
+   * Whether the artifact directory is up-to-date.
+   *
+   * @param artifactDir The artifact directory.
+   * @return Whether the artifact directory is up-to-date.
+   */
+  protected boolean isUpToDate(File artifactDir) {
+    return enunciate.isUpToDateWithSources(artifactDir);
   }
 
   /**

@@ -34,6 +34,7 @@ import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +73,11 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
         }
 
         templateLedger.put(templateURL, ++count);
+      }
+
+      @Override
+      protected boolean isUpToDate(File commonJdkGenerateDir, File jdk14GenerateDir, File jdk15GenerateDir) {
+        return false;
       }
     };
 

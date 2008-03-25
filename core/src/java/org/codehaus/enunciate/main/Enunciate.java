@@ -824,6 +824,102 @@ public class Enunciate {
   }
 
   /**
+   * Determines whether a destination file is newer than a source file. If a source file
+   * is a directory, its timestamp is the timestamp of the latest file.  If a destination file
+   * is a directory, its timestamp is the timestamp of the earliest file.
+   *
+   * @param sourceFile The source file.
+   * @param destFile The destination file.
+   * @return Whether the destination file is up-to-date.
+   */
+  public boolean isUpToDate(File sourceFile, File destFile) {
+    if ((sourceFile == null) || (!sourceFile.exists())) {
+      return true;
+    }
+    else if (!sourceFile.isDirectory()) {
+      return isUpToDate(Arrays.asList(sourceFile), destFile);
+    }
+    else {
+      List<File> sourceFiles = new ArrayList<File>();
+      buildFileList(sourceFiles, sourceFile);
+      return isUpToDate(sourceFiles, destFile);
+    }
+  }
+
+  /**
+   * Whether all files in the specified directory are newer than all the source files.
+   *
+   * @param destDir The directory.
+   * @return Whether the destination directory is up-to-date.
+   */
+  public boolean isUpToDateWithSources(File destDir) {
+    List<File> sources = new ArrayList<File>();
+    for (String source : getSourceFiles()) {
+      File sourceFile = new File(source);
+      if (sourceFile.exists()) {
+        sources.add(sourceFile);
+      }
+    }
+
+    return isUpToDate(sources, destDir);
+  }
+
+  /**
+   * Whether a given destination file is newer than all the specified source files. If the destination
+   * file is a directory its timestamp is the timestamp of the earliest-modified file.
+   *
+   * @param sourceFiles The specified source files.
+   * @param destFile The destination file.
+   * @return Whether the destination file is up-to-date.
+   */
+  protected boolean isUpToDate(List<File> sourceFiles, File destFile) {
+    List<File> destFiles;
+    if ((sourceFiles == null) || (sourceFiles.isEmpty())) {
+      return true;
+    }
+    else if ((destFile == null) || (!destFile.exists())) {
+      return false;
+    }
+    else if (!destFile.isDirectory()) {
+      destFiles = Arrays.asList(destFile);
+    }
+    else {
+      destFiles = new ArrayList<File>();
+      buildFileList(destFiles, destFile);
+    }
+
+    return !destFiles.isEmpty() && getLatestTimestamp(sourceFiles) < getEarliestTimestamp(destFiles);
+  }
+
+  /**
+   * Get the latest timestamp of the specified files.
+   *
+   * @param files The files.
+   * @return The latest timestamp.
+   */
+  protected long getLatestTimestamp(List<File> files) {
+    long timestamp = -1;
+    for (File file : files) {
+      timestamp = Math.max(timestamp, file.lastModified());
+    }
+    return timestamp;
+  }
+
+  /**
+   * Get the earliest timestamp of the specified files.
+   *
+   * @param files The files.
+   * @return The earliest timestamp.
+   */
+  protected long getEarliestTimestamp(List<File> files) {
+    long timestamp = Long.MAX_VALUE;
+    for (File file : files) {
+      timestamp = Math.min(timestamp, file.lastModified());
+    }
+    return timestamp;
+  }
+
+  /**
    * Adds all files in specified directories to a list.
    *
    * @param list The list.

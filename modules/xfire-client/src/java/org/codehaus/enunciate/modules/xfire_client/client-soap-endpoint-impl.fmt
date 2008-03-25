@@ -10,8 +10,6 @@ import org.codehaus.enunciate.modules.xfire_client.EnunciatedSOAPWebServiceImpl;
 
 /**
  * Implementation of the {@link ${endpointInterface.simpleName}}.
- *
- * @author Ryan Heaton
  */
 public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServiceImpl implements ${endpointInterface.simpleName} {
 

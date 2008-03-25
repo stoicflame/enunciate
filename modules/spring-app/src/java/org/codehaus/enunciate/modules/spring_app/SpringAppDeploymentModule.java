@@ -113,21 +113,21 @@ import java.util.jar.Manifest;
  * <li><a href="#config_structure">structure</a></li>
  * <li><a href="#config_attributes">attributes</a></li>
  * <li>elements<br/>
- *   <ul>
- *     <li><a href="#config_war_element">The "war" element</a></li>
- *     <li><a href="#config_springImport">The "springImport" element</a></li>
- *     <li><a href="#config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></li>
- *     <li><a href="#config_handlerInterceptor">The "handlerInterceptor" element</a></li>
- *     <li><a href="#config_copyResources">The "copyResources" element</a></li>
- *   </ul>
+ * <ul>
+ * <li><a href="#config_war_element">The "war" element</a></li>
+ * <li><a href="#config_springImport">The "springImport" element</a></li>
+ * <li><a href="#config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></li>
+ * <li><a href="#config_handlerInterceptor">The "handlerInterceptor" element</a></li>
+ * <li><a href="#config_copyResources">The "copyResources" element</a></li>
+ * </ul>
  * </li>
  * <li><a href="module_spring_app_security.html">Spring Application Security</a><br/>
- *   <ul>
- *     <li><a href="module_spring_app_security.html#security_annotations">Security Annotations</a></li>
- *     <li><a href="module_spring_app_security.html#security_user_details">User Details Service</a></li>
- *     <li><a href="module_spring_app_security.html#security_config">The "security" configuration element</a></li>
- *     <li><a href="module_spring_app_security.html#security_login_logout">Login and Logout API Methods</a></li>
- *   </ul>
+ * <ul>
+ * <li><a href="module_spring_app_security.html#security_annotations">Security Annotations</a></li>
+ * <li><a href="module_spring_app_security.html#security_user_details">User Details Service</a></li>
+ * <li><a href="module_spring_app_security.html#security_config">The "security" configuration element</a></li>
+ * <li><a href="module_spring_app_security.html#security_login_logout">Login and Logout API Methods</a></li>
+ * </ul>
  * </li>
  * </ul>
  *
@@ -407,76 +407,81 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
+    if (!enunciate.isUpToDateWithSources(getConfigGenerateDir())) {
+      EnunciateFreemarkerModel model = getModel();
 
-    //generate the spring-servlet.xml
-    model.setFileOutputDirectory(getConfigGenerateDir());
-    model.put("springImports", getSpringImportURIs());
-    model.put("defaultDependencyCheck", getDefaultDependencyCheck());
-    model.put("defaultAutowire", getDefaultAutowire());
-    model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
-    model.put("springDispatcherServletClass", getDispatcherServletClass());
-    model.put("soapAddressPath", new SoapAddressPathMethod());
-    model.put("restSubcontext", model.getEnunciateConfig().getDefaultRestSubcontext());
-    model.put("jsonSubcontext", model.getEnunciateConfig().getDefaultJsonSubcontext());
-    if (!globalServiceInterceptors.isEmpty()) {
-      for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
-        if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
-          throw new IllegalStateException("A global interceptor must have either a bean name or a class set.");
+      //generate the spring-servlet.xml
+      model.setFileOutputDirectory(getConfigGenerateDir());
+      model.put("springImports", getSpringImportURIs());
+      model.put("defaultDependencyCheck", getDefaultDependencyCheck());
+      model.put("defaultAutowire", getDefaultAutowire());
+      model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
+      model.put("springDispatcherServletClass", getDispatcherServletClass());
+      model.put("soapAddressPath", new SoapAddressPathMethod());
+      model.put("restSubcontext", model.getEnunciateConfig().getDefaultRestSubcontext());
+      model.put("jsonSubcontext", model.getEnunciateConfig().getDefaultJsonSubcontext());
+      if (!globalServiceInterceptors.isEmpty()) {
+        for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
+          if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
+            throw new IllegalStateException("A global interceptor must have either a bean name or a class set.");
+          }
+        }
+        model.put("globalServiceInterceptors", this.globalServiceInterceptors);
+      }
+      if (!handlerInterceptors.isEmpty()) {
+        for (HandlerInterceptor interceptor : this.handlerInterceptors) {
+          if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
+            throw new IllegalStateException("A handler interceptor must have either a bean name or a class set.");
+          }
+        }
+        model.put("handlerInterceptors", this.handlerInterceptors);
+      }
+
+      model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
+      model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
+      model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
+      model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
+
+      String docsDir = "";
+      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+        docsDir = this.warConfig.getDocsDir().trim();
+        if ((!"".equals(docsDir)) && (!docsDir.endsWith("/"))) {
+          docsDir = docsDir + "/";
         }
       }
-      model.put("globalServiceInterceptors", this.globalServiceInterceptors);
-    }
-    if (!handlerInterceptors.isEmpty()) {
-      for (HandlerInterceptor interceptor : this.handlerInterceptors) {
-        if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
-          throw new IllegalStateException("A handler interceptor must have either a bean name or a class set.");
+      model.put("docsDir", docsDir);
+
+      //spring security configuration:
+      model.put("securityEnabled", isEnableSecurity());
+      model.put("hasSecureMethod", new HasSecureMethod());
+      SecurityConfig securityConfig = getSecurityConfig();
+      if (securityConfig.getRealmName() == null) {
+        String realmName = "Generic Enunciate Application Realm";
+        EnunciateConfiguration enunciateConfig = enunciate.getConfig();
+        if (enunciateConfig.getDescription() != null) {
+          realmName = enunciateConfig.getDescription();
+        }
+        securityConfig.setRealmName(realmName);
+      }
+
+      if (securityConfig.getKey() == null) {
+        securityConfig.setKey(String.valueOf(System.currentTimeMillis()));
+      }
+      model.put("securityConfig", securityConfig);
+
+      processTemplate(getApplicationContextTemplateURL(), model);
+      processTemplate(getSpringServletTemplateURL(), model);
+      processTemplate(getWebXmlTemplateURL(), model);
+      if (isEnableSecurity()) {
+        processTemplate(getSecurityTemplateURL(), model);
+
+        if (getSecurityConfig().isEnableOAuth()) {
+          processTemplate(getOAuthTemplateURL(), model);
         }
       }
-      model.put("handlerInterceptors", this.handlerInterceptors);
     }
-
-    model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
-    model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
-    model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
-    model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
-
-    String docsDir = "";
-    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-      docsDir = this.warConfig.getDocsDir().trim();
-      if ((!"".equals(docsDir)) && (!docsDir.endsWith("/"))) {
-        docsDir = docsDir + "/";
-      }
-    }
-    model.put("docsDir", docsDir);
-
-    //spring security configuration:
-    model.put("securityEnabled", isEnableSecurity());
-    model.put("hasSecureMethod", new HasSecureMethod());
-    SecurityConfig securityConfig = getSecurityConfig();
-    if (securityConfig.getRealmName() == null) {
-      String realmName = "Generic Enunciate Application Realm";
-      EnunciateConfiguration enunciateConfig = enunciate.getConfig();
-      if (enunciateConfig.getDescription() != null) {
-        realmName = enunciateConfig.getDescription();
-      }
-      securityConfig.setRealmName(realmName);
-    }
-
-    if (securityConfig.getKey() == null) {
-      securityConfig.setKey(String.valueOf(System.currentTimeMillis()));
-    }
-    model.put("securityConfig", securityConfig);
-
-    processTemplate(getApplicationContextTemplateURL(), model);
-    processTemplate(getSpringServletTemplateURL(), model);
-    processTemplate(getWebXmlTemplateURL(), model);
-    if (isEnableSecurity()) {
-      processTemplate(getSecurityTemplateURL(), model);
-
-      if (getSecurityConfig().isEnableOAuth()) {
-        processTemplate(getOAuthTemplateURL(), model);
-      }
+    else {
+      info("Skipping generation of spring config files as everything appears up-to-date...");
     }
   }
 
@@ -494,93 +499,98 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     Enunciate enunciate = getEnunciate();
     final File compileDir = getCompileDir();
-    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
+    if (!enunciate.isUpToDateWithSources(compileDir)) {
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
 
-    File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
-    if (jaxwsSources != null) {
-      info("Compiling the JAX-WS support classes found in %s...", jaxwsSources);
-      Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
+      File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
+      if (jaxwsSources != null) {
+        info("Compiling the JAX-WS support classes found in %s...", jaxwsSources);
+        Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
 
-      File xfireSources = (File) enunciate.getProperty("xfire-server.src.dir");
-      if (xfireSources != null) {
-        //make sure we include all the wrappers generated for the rpc methods, too...
-        jaxwsSourceFiles.addAll(enunciate.getJavaFiles(xfireSources));
-      }
+        File xfireSources = (File) enunciate.getProperty("xfire-server.src.dir");
+        if (xfireSources != null) {
+          //make sure we include all the wrappers generated for the rpc methods, too...
+          jaxwsSourceFiles.addAll(enunciate.getJavaFiles(xfireSources));
+        }
 
-      if (!jaxwsSourceFiles.isEmpty()) {
-        StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-        jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-        enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+        if (!jaxwsSourceFiles.isEmpty()) {
+          StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
+          jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+          enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+        }
+        else {
+          info("No JAX-WS source files have been found to compile.");
+        }
       }
       else {
-        info("No JAX-WS source files have been found to compile.");
+        info("No JAX-WS source directory has been found.  SOAP services disabled.");
+      }
+
+      File gwtSources = (File) enunciate.getProperty("gwt.server.src.dir");
+      if (gwtSources != null) {
+        info("Copying the GWT client classes to %s...", compileDir);
+        File gwtClientCompileDir = (File) enunciate.getProperty("gwt.client.compile.dir");
+        if (gwtClientCompileDir == null) {
+          throw new EnunciateException("Required dependency on the GWT client classes not found.");
+        }
+        enunciate.copyDir(gwtClientCompileDir, compileDir);
+
+        info("Compiling the GWT support classes found in %s...", gwtSources);
+        Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
+        StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
+        gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+        enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
+      }
+
+      File amfSources = (File) enunciate.getProperty("amf.server.src.dir");
+      if (amfSources != null) {
+        info("Compiling the AMF support classes found in %s...", amfSources);
+        Collection<String> amfSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(amfSources));
+        StringBuilder amfClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
+        amfClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
+        enunciate.invokeJavac(amfClasspath.toString(), compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
+      }
+
+      File restParamterNames = (File) enunciate.getProperty("rest.parameter.names");
+      if (restParamterNames != null) {
+        enunciate.copyFile(restParamterNames, new File(compileDir, "enunciate-rest-parameter-names.properties"));
+      }
+
+      if (!this.copyResources.isEmpty()) {
+        AntPathMatcher matcher = new AntPathMatcher();
+        for (CopyResources copyResource : this.copyResources) {
+          String pattern = copyResource.getPattern();
+          if (pattern == null) {
+            throw new EnunciateException("A pattern must be specified for copying resources.");
+          }
+
+          if (!matcher.isPattern(pattern)) {
+            warn("'%s' is not a valid pattern.  Resources NOT copied!", pattern);
+            continue;
+          }
+
+          File basedir;
+          if (copyResource.getDir() == null) {
+            File configFile = enunciate.getConfigFile();
+            if (configFile != null) {
+              basedir = configFile.getAbsoluteFile().getParentFile();
+            }
+            else {
+              basedir = new File(System.getProperty("user.dir"));
+            }
+          }
+          else {
+            basedir = enunciate.resolvePath(copyResource.getDir());
+          }
+
+          for (String file : enunciate.getFiles(basedir, new PatternFileFilter(basedir, pattern, matcher))) {
+            enunciate.copyFile(new File(file), basedir, compileDir);
+          }
+        }
       }
     }
     else {
-      info("No JAX-WS source directory has been found.  SOAP services disabled.");
-    }
-
-    File gwtSources = (File) enunciate.getProperty("gwt.server.src.dir");
-    if (gwtSources != null) {
-      info("Copying the GWT client classes to %s...", compileDir);
-      File gwtClientCompileDir = (File) enunciate.getProperty("gwt.client.compile.dir");
-      if (gwtClientCompileDir == null) {
-        throw new EnunciateException("Required dependency on the GWT client classes not found.");
-      }
-      enunciate.copyDir(gwtClientCompileDir, compileDir);
-
-      info("Compiling the GWT support classes found in %s...", gwtSources);
-      Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
-      StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-      gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-      enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
-    }
-
-    File amfSources = (File) enunciate.getProperty("amf.server.src.dir");
-    if (amfSources != null) {
-      info("Compiling the AMF support classes found in %s...", amfSources);
-      Collection<String> amfSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(amfSources));
-      StringBuilder amfClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-      amfClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-      enunciate.invokeJavac(amfClasspath.toString(), compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
-    }
-
-    File restParamterNames = (File) enunciate.getProperty("rest.parameter.names");
-    if (restParamterNames != null) {
-      enunciate.copyFile(restParamterNames, new File(compileDir, "enunciate-rest-parameter-names.properties"));
-    }
-
-    if (!this.copyResources.isEmpty()) {
-      AntPathMatcher matcher = new AntPathMatcher();
-      for (CopyResources copyResource : this.copyResources) {
-        String pattern = copyResource.getPattern();
-        if (pattern == null) {
-          throw new EnunciateException("A pattern must be specified for copying resources.");
-        }
-
-        if (!matcher.isPattern(pattern)) {
-          warn("'%s' is not a valid pattern.  Resources NOT copied!", pattern);
-          continue;
-        }
-
-        File basedir;
-        if (copyResource.getDir() == null) {
-          File configFile = enunciate.getConfigFile();
-          if (configFile != null) {
-            basedir = configFile.getAbsoluteFile().getParentFile();
-          }
-          else {
-            basedir = new File(System.getProperty("user.dir"));
-          }
-        }
-        else {
-          basedir = enunciate.resolvePath(copyResource.getDir());
-        }
-
-        for (String file : enunciate.getFiles(basedir, new PatternFileFilter(basedir, pattern, matcher))) {
-          enunciate.copyFile(new File(file), basedir, compileDir);
-        }
-      }
+      info("Skipping compilation as everything appears up-to-date...");
     }
   }
 
@@ -589,41 +599,46 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
 
-    copyPreBase();
+    if (!enunciate.isUpToDateWithSources(buildDir)) {
+      copyPreBase();
 
-    info("Building the expanded WAR in %s", buildDir);
+      info("Building the expanded WAR in %s", buildDir);
 
-    if (isDoCompile()) {
-      //copy the compiled classes to WEB-INF/classes.
-      File webinf = new File(buildDir, "WEB-INF");
-      File webinfClasses = new File(webinf, "classes");
-      enunciate.copyDir(getCompileDir(), webinfClasses);
-    }
+      if (isDoCompile()) {
+        //copy the compiled classes to WEB-INF/classes.
+        File webinf = new File(buildDir, "WEB-INF");
+        File webinfClasses = new File(webinf, "classes");
+        enunciate.copyDir(getCompileDir(), webinfClasses);
+      }
 
-    if (isDoLibCopy()) {
-      doLibCopy();
+      if (isDoLibCopy()) {
+        doLibCopy();
+      }
+      else {
+        info("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
+      }
+
+      copyWebXml();
+
+      copySpringConfig();
+
+      copyDocs();
+
+      copyGwtApps();
+
+      copyAmfConfig();
+
+      copyFlexApps();
+
+      if (isEnableSecurity()) {
+        createSecurityUI();
+      }
+
+      copyPostBase();
     }
     else {
-      info("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
+      info("Skipping the build of the expanded war as everything appears up-to-date...");
     }
-
-    copyWebXml();
-
-    copySpringConfig();
-
-    copyDocs();
-
-    copyGwtApps();
-
-    copyAmfConfig();
-
-    copyFlexApps();
-
-    if (isEnableSecurity()) {
-      createSecurityUI();
-    }
-
-    copyPostBase();
 
     //export the expanded application directory.
     enunciate.addArtifact(new FileArtifact(getName(), "spring.app.dir", buildDir));
@@ -1046,15 +1061,21 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     if (isDoPackage()) {
       File buildDir = getBuildDir();
       File warFile = getWarFile();
+      Enunciate enunciate = getEnunciate();
 
-      if (!warFile.getParentFile().exists()) {
-        warFile.getParentFile().mkdirs();
+      if (!enunciate.isUpToDate(buildDir, warFile)) {
+        if (!warFile.getParentFile().exists()) {
+          warFile.getParentFile().mkdirs();
+        }
+
+        info("Creating %s", warFile.getAbsolutePath());
+
+        enunciate.zip(warFile, buildDir);
+      }
+      else {
+        info("Skipping war file creation as everything appears up-to-date...");
       }
 
-      Enunciate enunciate = getEnunciate();
-      info("Creating %s", warFile.getAbsolutePath());
-
-      enunciate.zip(warFile, buildDir);
       enunciate.addArtifact(new FileArtifact(getName(), "spring.war.file", warFile));
     }
     else {

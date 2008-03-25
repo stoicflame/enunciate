@@ -53,7 +53,7 @@ import java.util.*;
  * your Data Services by ensuring that only your public methods are made available for invocation via AMF. There is
  * also support for invoking the <a href="http://en.wikipedia.org/wiki/Adobe_Flex">Adobe Flex</a> compiler to compile
  * a set of <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> applications that can be added to your
- * Enunciate-generated web application.</p> 
+ * Enunciate-generated web application.</p>
  *
  * <p>The AMF API leverages the <a href="http://labs.adobe.com/technologies/blazeds/">Blaze DS</a> package that was recently made
  * available as an open source product by Adobe. To use the AMF module, you will have to have the
@@ -107,29 +107,29 @@ import java.util.*;
  * see the documentation for the Flex compiler.</p>
  *
  * <ul>
- *  <li><b>contextRoot</b> (default: the Enunciate project label)</li>
- *  <li><b>flexConfig</b> (default: "$FLEX_SDK_HOME/frameworks/flex-config.xml")</li>
- *  <li><b>locale</b> (default: unspecified)</li>
- *  <li><b>optimize</b> (boolean, default: unspecified)</li>
- *  <li><b>debug</b> (boolean, default: unspecified)</li>
- *  <li><b>profile</b> (boolean, default: unspecified)</li>
- *  <li><b>strict</b> (boolean, default: unspecified)</li>
- *  <li><b>useNetwork</b> (boolean, default: unspecified)</li>
- *  <li><b>incremental</b> (boolean, default: unspecified)</li>
- *  <li><b>warnings</b> (boolean, default: unspecified)</li>
- *  <li><b>showActionscriptWarnings</b> (boolean, default: unspecified)</li>
- *  <li><b>showBindingWarnings</b> (boolean, default: unspecified)</li>
- *  <li><b>showDeprecationWarnings</b> (boolean, default: unspecified)</li>
- *  <li><b>flexCompileCommand</b> (default "flex2.tools.Compiler")</li>
- *  <li><b>swcCompileCommand</b> (default "flex2.tools.Compc")</li>
+ * <li><b>contextRoot</b> (default: the Enunciate project label)</li>
+ * <li><b>flexConfig</b> (default: "$FLEX_SDK_HOME/frameworks/flex-config.xml")</li>
+ * <li><b>locale</b> (default: unspecified)</li>
+ * <li><b>optimize</b> (boolean, default: unspecified)</li>
+ * <li><b>debug</b> (boolean, default: unspecified)</li>
+ * <li><b>profile</b> (boolean, default: unspecified)</li>
+ * <li><b>strict</b> (boolean, default: unspecified)</li>
+ * <li><b>useNetwork</b> (boolean, default: unspecified)</li>
+ * <li><b>incremental</b> (boolean, default: unspecified)</li>
+ * <li><b>warnings</b> (boolean, default: unspecified)</li>
+ * <li><b>showActionscriptWarnings</b> (boolean, default: unspecified)</li>
+ * <li><b>showBindingWarnings</b> (boolean, default: unspecified)</li>
+ * <li><b>showDeprecationWarnings</b> (boolean, default: unspecified)</li>
+ * <li><b>flexCompileCommand</b> (default "flex2.tools.Compiler")</li>
+ * <li><b>swcCompileCommand</b> (default "flex2.tools.Compc")</li>
  * </ul>
  *
  * <p>The "compiler" element also supports the following subelements:</p>
  *
  * <ul>
- *   <li>"JVMArg" (additional JVM arguments, passed in order to the JVM used to invoke the compiler)</li>
- *   <li>"arg" (additional compiler arguments, passed in order to the compiler)</li>
- *   <li>"license" (supports attributes "product" and "serialNumber")</li>
+ * <li>"JVMArg" (additional JVM arguments, passed in order to the JVM used to invoke the compiler)</li>
+ * <li>"arg" (additional compiler arguments, passed in order to the compiler)</li>
+ * <li>"license" (supports attributes "product" and "serialNumber")</li>
  * </ul>
  *
  * <h3>The "app" element</h3>
@@ -234,106 +234,119 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
-    //load the references to the templates....
-    URL amfEndpointTemplate = getTemplateURL("amf-endpoint.fmt");
-    URL amfTypeTemplate = getTemplateURL("amf-type.fmt");
-    URL amfTypeMapperTemplate = getTemplateURL("amf-type-mapper.fmt");
+    File serverGenerateDir = getServerSideGenerateDir();
+    File clientGenerateDir = getClientSideGenerateDir();
+    File xmlGenerateDir = getXMLGenerateDir();
 
-    EnunciateFreemarkerModel model = getModel();
-    model.setFileOutputDirectory(getServerSideGenerateDir());
+    Enunciate enunciate = getEnunciate();
+    if (!enunciate.isUpToDateWithSources(serverGenerateDir) ||
+        !enunciate.isUpToDateWithSources(clientGenerateDir) ||
+        !enunciate.isUpToDateWithSources(xmlGenerateDir)) {
 
-    TreeSet<String> packages = new TreeSet<String>(new Comparator<String>() {
-      public int compare(String package1, String package2) {
-        int comparison = package1.length() - package2.length();
-        if (comparison == 0) {
-          return package1.compareTo(package2);
+      //load the references to the templates....
+      URL amfEndpointTemplate = getTemplateURL("amf-endpoint.fmt");
+      URL amfTypeTemplate = getTemplateURL("amf-type.fmt");
+      URL amfTypeMapperTemplate = getTemplateURL("amf-type-mapper.fmt");
+
+      EnunciateFreemarkerModel model = getModel();
+      model.setFileOutputDirectory(serverGenerateDir);
+
+      TreeSet<String> packages = new TreeSet<String>(new Comparator<String>() {
+        public int compare(String package1, String package2) {
+          int comparison = package1.length() - package2.length();
+          if (comparison == 0) {
+            return package1.compareTo(package2);
+          }
+          return comparison;
         }
-        return comparison;
-      }
-    });
+      });
 
-    HashMap<String, String> as3Aliases = new HashMap<String, String>();
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if (!isAMFTransient(typeDefinition)) {
-          as3Aliases.put(typeDefinition.getQualifiedName(), typeDefinition.getSimpleName());
-          packages.add(typeDefinition.getPackage().getQualifiedName());
-        }
-      }
-    }
-
-    LinkedHashMap<String, String> amfTypePackageConversions = new LinkedHashMap<String, String>();
-    for (String pckg : packages) {
-      amfTypePackageConversions.put(pckg, pckg + ".amf");
-    }
-
-    info("Generating the AMF externalizable types and their associated mappers...");
-    model.put("classnameFor", new AMFClassnameForMethod(amfTypePackageConversions));
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if (!isAMFTransient(typeDefinition)) {
-          model.put("type", typeDefinition);
-          processTemplate(amfTypeTemplate, model);
-          processTemplate(amfTypeMapperTemplate, model);
+      HashMap<String, String> as3Aliases = new HashMap<String, String>();
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if (!isAMFTransient(typeDefinition)) {
+            as3Aliases.put(typeDefinition.getQualifiedName(), typeDefinition.getSimpleName());
+            packages.add(typeDefinition.getPackage().getQualifiedName());
+          }
         }
       }
-    }
 
-    info("Generating the AMF endpoint beans...");
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        if (!isAMFTransient(ei)) {
-          model.put("endpointInterface", ei);
-          processTemplate(amfEndpointTemplate, model);
+      LinkedHashMap<String, String> amfTypePackageConversions = new LinkedHashMap<String, String>();
+      for (String pckg : packages) {
+        amfTypePackageConversions.put(pckg, pckg + ".amf");
+      }
+
+      info("Generating the AMF externalizable types and their associated mappers...");
+      model.put("classnameFor", new AMFClassnameForMethod(amfTypePackageConversions));
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if (!isAMFTransient(typeDefinition)) {
+            model.put("type", typeDefinition);
+            processTemplate(amfTypeTemplate, model);
+            processTemplate(amfTypeMapperTemplate, model);
+          }
         }
       }
-    }
 
-    URL endpointTemplate = getTemplateURL("as3-endpoint.fmt");
-    URL typeTemplate = getTemplateURL("as3-type.fmt");
-    URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
-
-    model.setFileOutputDirectory(getClientSideGenerateDir());
-    HashMap<String, String> conversions = new HashMap<String, String>();
-    //todo: accept client-side package mappings?
-    model.put("packageFor", new ClientPackageForMethod(conversions));
-    UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
-    model.put("classnameFor", classnameFor);
-    model.put("componentTypeFor", new ComponentTypeForMethod(conversions));
-    model.put("forEachAMFImport", new ForEachAMFImportTransform(null, classnameFor));
-    model.put("as3Aliases", as3Aliases);
-
-    info("Generating the ActionScript types...");
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if (!isAMFTransient(typeDefinition)) {
-          model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
-          processTemplate(template, model);
+      info("Generating the AMF endpoint beans...");
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!isAMFTransient(ei)) {
+            model.put("endpointInterface", ei);
+            processTemplate(amfEndpointTemplate, model);
+          }
         }
       }
-    }
 
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        if (!isAMFTransient(ei)) {
-          model.put("endpointInterface", ei);
-          processTemplate(endpointTemplate, model);
+      URL endpointTemplate = getTemplateURL("as3-endpoint.fmt");
+      URL typeTemplate = getTemplateURL("as3-type.fmt");
+      URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
+
+      model.setFileOutputDirectory(clientGenerateDir);
+      HashMap<String, String> conversions = new HashMap<String, String>();
+      //todo: accept client-side package mappings?
+      model.put("packageFor", new ClientPackageForMethod(conversions));
+      UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
+      model.put("classnameFor", classnameFor);
+      model.put("componentTypeFor", new ComponentTypeForMethod(conversions));
+      model.put("forEachAMFImport", new ForEachAMFImportTransform(null, classnameFor));
+      model.put("as3Aliases", as3Aliases);
+
+      info("Generating the ActionScript types...");
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if (!isAMFTransient(typeDefinition)) {
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
+            processTemplate(template, model);
+          }
         }
       }
+
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!isAMFTransient(ei)) {
+            model.put("endpointInterface", ei);
+            processTemplate(endpointTemplate, model);
+          }
+        }
+      }
+
+      URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
+
+      model.setFileOutputDirectory(xmlGenerateDir);
+      info("Generating the configuration files.");
+      processTemplate(servicesConfigTemplate, model);
+    }
+    else {
+      info("Skipping generation of AMF support as everything appears up-to-date...");
     }
 
-    URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
-
-    model.setFileOutputDirectory(getXMLGenerateDir());
-    info("Generating the configuration files.");
-    processTemplate(servicesConfigTemplate, model);
-
-    enunciate.setProperty("amf.xml.dir", getXMLGenerateDir());
-    enunciate.setProperty("amf.client.src.dir", getClientSideGenerateDir());
-    enunciate.addArtifact(new FileArtifact(getName(), "amf.client.src.dir", getClientSideGenerateDir()));
-    enunciate.setProperty("amf.server.src.dir", getServerSideGenerateDir());
-    enunciate.addArtifact(new FileArtifact(getName(), "amf.server.src.dir", getServerSideGenerateDir()));
+    this.enunciate.setProperty("amf.xml.dir", xmlGenerateDir);
+    this.enunciate.setProperty("amf.client.src.dir", clientGenerateDir);
+    this.enunciate.addArtifact(new FileArtifact(getName(), "amf.client.src.dir", clientGenerateDir));
+    this.enunciate.setProperty("amf.server.src.dir", serverGenerateDir);
+    this.enunciate.addArtifact(new FileArtifact(getName(), "amf.server.src.dir", serverGenerateDir));
   }
 
   /**
@@ -478,10 +491,12 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     commandLine.add(argIndex++, "-compiler.services");
-    commandLine.add(argIndex++, new File(getXMLGenerateDir(), "services-config.xml").getAbsolutePath());
+    File xmlGenerateDir = getXMLGenerateDir();
+    commandLine.add(argIndex++, new File(xmlGenerateDir, "services-config.xml").getAbsolutePath());
 
     commandLine.add(argIndex, "-include-sources");
-    commandLine.add(argIndex + 1, getClientSideGenerateDir().getAbsolutePath());
+    File clientSideGenerateDir = getClientSideGenerateDir();
+    commandLine.add(argIndex + 1, clientSideGenerateDir.getAbsolutePath());
 
     String swcName = getSwcName();
 
@@ -494,19 +509,28 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       swcName = label + "-as3-client.swc";
     }
 
-    File as3Bundle = new File(getSwcCompileDir(), swcName);
-    commandLine.set(compileCommandIndex, compilerConfig.getSwcCompileCommand());
-    commandLine.set(outputFileIndex, as3Bundle.getAbsolutePath());
-    info("Compiling %s for the client-side ActionScript classes...", as3Bundle.getAbsolutePath());
-    if (enunciate.isDebug()) {
-      StringBuilder command = new StringBuilder();
-      for (String commandPiece : commandLine) {
-        command.append(' ').append(commandPiece);
+    File swcCompileDir = getSwcCompileDir();
+    File as3Bundle = new File(swcCompileDir, swcName);
+    boolean swcUpToDate = as3Bundle.exists() &&
+      enunciate.isUpToDate(xmlGenerateDir, swcCompileDir) &&
+      enunciate.isUpToDate(clientSideGenerateDir, swcCompileDir);
+    
+    if (!swcUpToDate) {
+      commandLine.set(compileCommandIndex, compilerConfig.getSwcCompileCommand());
+      commandLine.set(outputFileIndex, as3Bundle.getAbsolutePath());
+      info("Compiling %s for the client-side ActionScript classes...", as3Bundle.getAbsolutePath());
+      if (enunciate.isDebug()) {
+        StringBuilder command = new StringBuilder();
+        for (String commandPiece : commandLine) {
+          command.append(' ').append(commandPiece);
+        }
+        debug("Executing SWC compile for client-side actionscript with the command: %s", command);
       }
-      debug("Executing SWC compile for client-side actionscript with the command: %s", command);
+      compileSwc(commandLine);
     }
-
-    compileSwc(commandLine);
+    else {
+      info("Skipping compilation of %s as everything appears up-to-date...", as3Bundle.getAbsolutePath());
+    }
 
     enunciate.setProperty("as3.client.swc", as3Bundle);
 
@@ -548,7 +572,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     commandLine.add(argIndex++, "-source-path");
-    commandLine.add(argIndex++, getClientSideGenerateDir().getAbsolutePath());
+    commandLine.add(argIndex++, clientSideGenerateDir.getAbsolutePath());
 
     commandLine.add(argIndex++, "-source-path");
     sourcePathIndex = argIndex;
@@ -575,40 +599,52 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
         throw new EnunciateException("Main MXML file for the flex app '" + flexApp.getName() + "' doesn't exist.");
       }
 
-      String swfFile = new File(outputDirectory, flexApp.getName() + ".swf").getAbsolutePath();
-      commandLine.set(outputFileIndex, swfFile);
-      commandLine.set(sourcePathIndex, enunciate.resolvePath(flexApp.getSrcDir()).getAbsolutePath());
-      commandLine.set(mainMxmlPathIndex, enunciate.resolvePath(flexApp.getMainMxmlFile()).getAbsolutePath());
+      File swfFile = new File(outputDirectory, flexApp.getName() + ".swf");
+      File appSrcDir = enunciate.resolvePath(flexApp.getSrcDir());
+      String swfFilePath = swfFile.getAbsolutePath();
 
-      info("Compiling %s ...", swfFile);
-      if (enunciate.isDebug()) {
-        StringBuilder command = new StringBuilder();
-        for (String commandPiece : commandLine) {
-          command.append(' ').append(commandPiece);
+      boolean swfUpToDate = swfFile.exists()
+        && mainMxmlFile.lastModified() < swfFile.lastModified()
+        && enunciate.isUpToDate(appSrcDir, swfFile);
+      
+      if (!swfUpToDate) {
+        commandLine.set(outputFileIndex, swfFilePath);
+        commandLine.set(mainMxmlPathIndex, mainMxmlFile.getAbsolutePath());
+        commandLine.set(sourcePathIndex, appSrcDir.getAbsolutePath());
+
+        info("Compiling %s ...", swfFilePath);
+        if (enunciate.isDebug()) {
+          StringBuilder command = new StringBuilder();
+          for (String commandPiece : commandLine) {
+            command.append(' ').append(commandPiece);
+          }
+          debug("Executing flex compile for module %s with the command: %s", flexApp.getName(), command);
         }
-        debug("Executing flex compile for module %s with the command: %s", flexApp.getName(), command);
-      }
 
-      ProcessBuilder processBuilder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
-      processBuilder.directory(getSwfCompileDir());
-      processBuilder.redirectErrorStream(true);
-      Process process = processBuilder.start();
-      BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      String line = procReader.readLine();
-      while (line != null) {
-        info(line);
-        line = procReader.readLine();
-      }
-      int procCode;
-      try {
-        procCode = process.waitFor();
-      }
-      catch (InterruptedException e1) {
-        throw new EnunciateException("Unexpected inturruption of the Flex compile process.");
-      }
+        ProcessBuilder processBuilder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
+        processBuilder.directory(getSwfCompileDir());
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+        BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = procReader.readLine();
+        while (line != null) {
+          info(line);
+          line = procReader.readLine();
+        }
+        int procCode;
+        try {
+          procCode = process.waitFor();
+        }
+        catch (InterruptedException e1) {
+          throw new EnunciateException("Unexpected inturruption of the Flex compile process.");
+        }
 
-      if (procCode != 0) {
-        throw new EnunciateException("Flex compile failed for module " + flexApp.getName());
+        if (procCode != 0) {
+          throw new EnunciateException("Flex compile failed for module " + flexApp.getName());
+        }
+      }
+      else {
+        info("Skipping compilation of %s as everything appears up-to-date...", swfFilePath);
       }
     }
   }

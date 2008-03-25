@@ -18,8 +18,6 @@ import javax.xml.namespace.QName;
 
 /**
  * Logic for reading and writing an instance of ${classname} to an xml stream.
- *
- * @author Ryan Heaton
  */
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName}XFireType [#if !baseobject]extends ${classnameFor(type.superclass)}XFireType [#else]extends Type [/#if]implements EnunciatedType {
 

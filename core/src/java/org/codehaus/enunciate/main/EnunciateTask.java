@@ -51,6 +51,7 @@ public class EnunciateTask extends MatchingTask {
   private File buildDir;
   private File packageDir;
   private File gwtHome;
+  private File flexHome;
   private Enunciate.Target target;
   private final ArrayList<Export> exports = new ArrayList<Export>();
 
@@ -65,6 +66,10 @@ public class EnunciateTask extends MatchingTask {
 
     if (gwtHome != null) {
       System.setProperty("gwt.home", this.gwtHome.getAbsolutePath());
+    }
+
+    if (flexHome != null) {
+      System.setProperty("flex.home", this.flexHome.getAbsolutePath());
     }
 
     DirectoryScanner scanner = getDirectoryScanner(basedir);
@@ -242,6 +247,15 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setGwtHome(File gwtHome) {
     this.gwtHome = gwtHome;
+  }
+
+  /**
+   * The path to flex home.
+   *
+   * @param flexHome The path to flex home.
+   */
+  public void setFlexHome(File flexHome) {
+    this.flexHome = flexHome;
   }
 
   /**

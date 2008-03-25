@@ -68,6 +68,11 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
         int count = counts.get(templateURL) == null ? 1 : counts.get(templateURL) + 1;
         counts.put(templateURL, count);
       }
+
+      @Override
+      protected boolean isUpToDate(File genDir) {
+        return false;
+      }
     };
     module.init(enunciate);
     module.doFreemarkerGenerate();

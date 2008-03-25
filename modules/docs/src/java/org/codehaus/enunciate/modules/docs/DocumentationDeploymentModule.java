@@ -349,40 +349,50 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    * The generate logic builds the XML documentation structure for the enunciated API.
    */
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
-    if (this.splashPackage != null) {
-      PackageDeclaration packageDeclaration = Context.getCurrentEnvironment().getPackage(this.splashPackage);
-      if (packageDeclaration != null) {
-        info("Including documentation for package %s as the splash documentation.", this.splashPackage);
-        model.setVariable("apiDoc", new DecoratedPackageDeclaration(packageDeclaration).getJavaDoc());
+    if (!getEnunciate().isUpToDateWithSources(getGenerateDir())) {
+      EnunciateFreemarkerModel model = getModel();
+      if (this.splashPackage != null) {
+        PackageDeclaration packageDeclaration = Context.getCurrentEnvironment().getPackage(this.splashPackage);
+        if (packageDeclaration != null) {
+          info("Including documentation for package %s as the splash documentation.", this.splashPackage);
+          model.setVariable("apiDoc", new DecoratedPackageDeclaration(packageDeclaration).getJavaDoc());
+        }
+        else {
+          warn("Splash package %s not found.  No splash documentation included.", this.splashPackage);
+        }
       }
-      else {
-        warn("Splash package %s not found.  No splash documentation included.", this.splashPackage);
+
+      if (this.copyright != null) {
+        debug("Documentation copyright: %s", this.copyright);
+        model.setVariable("copyright", this.copyright);
       }
+
+      if (this.title != null) {
+        debug("Documentation title: %s", this.title);
+        model.setVariable("title", this.title);
+      }
+
+      model.setVariable("baseAddress", model.getBaseDeploymentAddress());
+      model.setVariable("restResourcePath", new RestResourcePathMethod());
+      model.setVariable("jsonResourcePath", new JsonResourcePathMethod());
+
+      processTemplate(getDocsTemplateURL(), model);
     }
-
-    if (this.copyright != null) {
-      debug("Documentation copyright: %s", this.copyright);
-      model.setVariable("copyright", this.copyright);
+    else {
+      info("Skipping documentation source generation as everything appears up-to-date...");
     }
-
-    if (this.title != null) {
-      debug("Documentation title: %s", this.title);
-      model.setVariable("title", this.title);
-    }
-
-    model.setVariable("baseAddress", model.getBaseDeploymentAddress());
-    model.setVariable("restResourcePath", new RestResourcePathMethod());
-    model.setVariable("jsonResourcePath", new JsonResourcePathMethod());
-
-    processTemplate(getDocsTemplateURL(), model);
   }
 
   @Override
   protected void doBuild() throws EnunciateException, IOException {
-    buildBase();
-    generateDownloadsXML();
-    doXSLT();
+    if (!getEnunciate().isUpToDateWithSources(getBuildDir())) {
+      buildBase();
+      generateDownloadsXML();
+      doXSLT();
+    }
+    else {
+      info("Skipping build of documentation as everything appears up-to-date...");
+    }
 
     //export the generated documentation as an artifact.
     getEnunciate().addArtifact(new FileArtifact(getName(), "docs", getBuildDir()));

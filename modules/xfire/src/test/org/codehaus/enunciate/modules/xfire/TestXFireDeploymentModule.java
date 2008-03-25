@@ -50,6 +50,11 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
       public void processTemplate(URL templateURL, Object model) throws IOException, TemplateException {
         processedTemplates.add(templateURL);
       }
+
+      @Override
+      protected boolean isUpToDate() {
+        return false;
+      }
     };
 
     Enunciate enunciate = new Enunciate(new String[0]);

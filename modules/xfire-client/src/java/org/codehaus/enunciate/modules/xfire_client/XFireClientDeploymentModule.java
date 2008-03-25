@@ -149,201 +149,223 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    //load the references to the templates....
-    URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
-    URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
-    URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
+    File commonJdkGenerateDir = getCommonJdkGenerateDir();
+    File jdk14GenerateDir = getJdk14GenerateDir();
+    File jdk15GenerateDir = getJdk15GenerateDir();
 
-    URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
-    URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
-    URL faultTemplate = getTemplateURL("client-web-fault.fmt");
-    URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
-    URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
-    URL faultBeanTemplate = getTemplateURL("client-fault-bean.fmt");
-    URL requestBeanTemplate = getTemplateURL("client-request-bean.fmt");
-    URL responseBeanTemplate = getTemplateURL("client-response-bean.fmt");
-    URL jdk14EnumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
-    URL jdk15EnumTypeTemplate = getTemplateURL("client-jdk15-enum-type.fmt");
+    boolean upToDate = isUpToDate(commonJdkGenerateDir, jdk14GenerateDir, jdk15GenerateDir);
+    if (!upToDate) {
+      //load the references to the templates....
+      URL xfireEnumTemplate = getTemplateURL("xfire-enum-type.fmt");
+      URL xfireSimpleTemplate = getTemplateURL("xfire-simple-type.fmt");
+      URL xfireComplexTemplate = getTemplateURL("xfire-complex-type.fmt");
 
-    //set up the model, first allowing for jdk 14 compatability.
-    EnunciateFreemarkerModel model = getModel();
-    Map<String, String> conversions = getClientPackageConversions();
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
-    ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
-    CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
-    model.put("packageFor", new ClientPackageForMethod(conversions));
-    model.put("classnameFor", classnameFor);
-    model.put("componentTypeFor", componentTypeFor);
-    model.put("collectionTypeFor", collectionTypeFor);
-    model.put("soapAddressLocation", new SoapAddressLocationMethod());
+      URL eiTemplate = getTemplateURL("client-endpoint-interface.fmt");
+      URL soapImplTemplate = getTemplateURL("client-soap-endpoint-impl.fmt");
+      URL faultTemplate = getTemplateURL("client-web-fault.fmt");
+      URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
+      URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
+      URL faultBeanTemplate = getTemplateURL("client-fault-bean.fmt");
+      URL requestBeanTemplate = getTemplateURL("client-request-bean.fmt");
+      URL responseBeanTemplate = getTemplateURL("client-response-bean.fmt");
+      URL jdk14EnumTypeTemplate = getTemplateURL("client-jdk14-enum-type.fmt");
+      URL jdk15EnumTypeTemplate = getTemplateURL("client-jdk15-enum-type.fmt");
 
-    String uuid = this.uuid;
-    model.put("uuid", uuid);
+      //set up the model, first allowing for jdk 14 compatability.
+      EnunciateFreemarkerModel model = getModel();
+      Map<String, String> conversions = getClientPackageConversions();
+      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+      ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
+      CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
+      model.put("packageFor", new ClientPackageForMethod(conversions));
+      model.put("classnameFor", classnameFor);
+      model.put("componentTypeFor", componentTypeFor);
+      model.put("collectionTypeFor", collectionTypeFor);
+      model.put("soapAddressLocation", new SoapAddressLocationMethod());
 
-    // First, generate everything that is common to both jdk 14 and jdk 15
-    // This includes all request/response beans and all xfire types.
-    // Also, we're going to gather the annotation information, the type list,
-    // and the list of unique web faults.
-    info("Generating the XFire client classes that are common to both jdk 1.4 and jdk 1.5.");
-    model.setFileOutputDirectory(getCommonJdkGenerateDir());
-    generatedAnnotations = new ExplicitWebAnnotations();
-    generatedTypeList = new ArrayList<String>();
-    HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
+      String uuid = this.uuid;
+      model.put("uuid", uuid);
 
-    // Process the annotations, the request/response beans, and gather the set of web faults
-    // for each endpoint interface.
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        addExplicitAnnotations(ei, classnameFor);
+      // First, generate everything that is common to both jdk 14 and jdk 15
+      // This includes all request/response beans and all xfire types.
+      // Also, we're going to gather the annotation information, the type list,
+      // and the list of unique web faults.
+      info("Generating the XFire client classes that are common to both jdk 1.4 and jdk 1.5.");
+      model.setFileOutputDirectory(commonJdkGenerateDir);
+      generatedAnnotations = new ExplicitWebAnnotations();
+      generatedTypeList = new ArrayList<String>();
+      HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
 
-        for (WebMethod webMethod : ei.getWebMethods()) {
-          for (WebMessage webMessage : webMethod.getMessages()) {
-            if (webMessage instanceof RequestWrapper) {
-              model.put("message", webMessage);
-              processTemplate(requestBeanTemplate, model);
-              generatedTypeList.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+      // Process the annotations, the request/response beans, and gather the set of web faults
+      // for each endpoint interface.
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          addExplicitAnnotations(ei, classnameFor);
+
+          for (WebMethod webMethod : ei.getWebMethods()) {
+            for (WebMessage webMessage : webMethod.getMessages()) {
+              if (webMessage instanceof RequestWrapper) {
+                model.put("message", webMessage);
+                processTemplate(requestBeanTemplate, model);
+                generatedTypeList.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+              }
+              else if (webMessage instanceof ResponseWrapper) {
+                model.put("message", webMessage);
+                processTemplate(responseBeanTemplate, model);
+                generatedTypeList.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
+              }
+              else if (webMessage instanceof RPCInputMessage) {
+                RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
+                model.put("message", new RPCInputRequestBeanAdapter(rpcInputMessage));
+                processTemplate(requestBeanTemplate, model);
+                generatedTypeList.add(getBeanName(classnameFor, rpcInputMessage.getRequestBeanName()));
+              }
+              else if (webMessage instanceof RPCOutputMessage) {
+                RPCOutputMessage outputMessage = ((RPCOutputMessage) webMessage);
+                model.put("message", new RPCOutputResponseBeanAdapter(outputMessage));
+                processTemplate(responseBeanTemplate, model);
+                generatedTypeList.add(getBeanName(classnameFor, outputMessage.getResponseBeanName()));
+              }
+              else if (webMessage instanceof WebFault) {
+                WebFault fault = (WebFault) webMessage;
+                allFaults.put(fault.getQualifiedName(), fault);
+              }
             }
-            else if (webMessage instanceof ResponseWrapper) {
-              model.put("message", webMessage);
-              processTemplate(responseBeanTemplate, model);
-              generatedTypeList.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
-            }
-            else if (webMessage instanceof RPCInputMessage) {
-              RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
-              model.put("message", new RPCInputRequestBeanAdapter(rpcInputMessage));
-              processTemplate(requestBeanTemplate, model);
-              generatedTypeList.add(getBeanName(classnameFor, rpcInputMessage.getRequestBeanName()));
-            }
-            else if (webMessage instanceof RPCOutputMessage) {
-              RPCOutputMessage outputMessage = ((RPCOutputMessage) webMessage);
-              model.put("message", new RPCOutputResponseBeanAdapter(outputMessage));
-              processTemplate(responseBeanTemplate, model);
-              generatedTypeList.add(getBeanName(classnameFor, outputMessage.getResponseBeanName()));
-            }
-            else if (webMessage instanceof WebFault) {
-              WebFault fault = (WebFault) webMessage;
-              allFaults.put(fault.getQualifiedName(), fault);
-            }
+
+            addExplicitAnnotations(webMethod, classnameFor);
+          }
+        }
+      }
+
+      //gather the annotation information and process the possible beans for each web fault.
+      for (WebFault webFault : allFaults.values()) {
+        String faultClass = classnameFor.convert(webFault);
+        boolean implicit = webFault.isImplicitSchemaElement();
+        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+
+        if (implicit) {
+          model.put("fault", webFault);
+          processTemplate(faultBeanTemplate, model);
+          generatedTypeList.add(faultBean);
+        }
+
+        String faultElementName = webFault.isImplicitSchemaElement() ? webFault.getElementName() : webFault.getExplicitFaultBean().getName();
+        String faultElementNamespace = webFault.isImplicitSchemaElement() ? webFault.getTargetNamespace() : webFault.getExplicitFaultBean().getNamespace();
+        this.generatedAnnotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(faultElementName, faultElementNamespace, faultBean, implicit));
+      }
+
+      //process each xfire type for client-side stubs.
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          model.put("type", typeDefinition);
+          RootElementDeclaration rootElement = model.findRootElementDeclaration(typeDefinition);
+          if (rootElement != null) {
+            model.put("rootElementName", new QName(rootElement.getNamespace(), rootElement.getName()));
+          }
+          else {
+            model.remove("rootElementName");
           }
 
-          addExplicitAnnotations(webMethod, classnameFor);
+          URL template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
+          processTemplate(template, model);
+
+          if (!typeDefinition.isAbstract()) {
+            generatedTypeList.add(classnameFor.convert(typeDefinition));
+          }
+        }
+
+        for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
+          addExplicitAnnotations(rootElementDeclaration, classnameFor);
         }
       }
-    }
+      model.remove("rootElementName");
 
-    //gather the annotation information and process the possible beans for each web fault.
-    for (WebFault webFault : allFaults.values()) {
-      String faultClass = classnameFor.convert(webFault);
-      boolean implicit = webFault.isImplicitSchemaElement();
-      String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+      //Now, generate the jdk14-compatable client-side stubs.
+      info("Generating the XFire client classes for jdk 1.4.");
+      model.setFileOutputDirectory(jdk14GenerateDir);
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          model.put("endpointInterface", ei);
 
-      if (implicit) {
-        model.put("fault", webFault);
-        processTemplate(faultBeanTemplate, model);
-        generatedTypeList.add(faultBean);
+          processTemplate(eiTemplate, model);
+          processTemplate(soapImplTemplate, model);
+        }
       }
 
-      String faultElementName = webFault.isImplicitSchemaElement() ? webFault.getElementName() : webFault.getExplicitFaultBean().getName();
-      String faultElementNamespace = webFault.isImplicitSchemaElement() ? webFault.getTargetNamespace() : webFault.getExplicitFaultBean().getNamespace();
-      this.generatedAnnotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(faultElementName, faultElementNamespace, faultBean, implicit));
-    }
-
-    //process each xfire type for client-side stubs.
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        model.put("type", typeDefinition);
-        RootElementDeclaration rootElement = model.findRootElementDeclaration(typeDefinition);
-        if (rootElement != null) {
-          model.put("rootElementName", new QName(rootElement.getNamespace(), rootElement.getName()));
+      for (WebFault webFault : allFaults.values()) {
+        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
         }
         else {
-          model.remove("rootElementName");
+          model.remove("superFault");
         }
-        
-        URL template = typeDefinition.isEnum() ? xfireEnumTemplate : typeDefinition.isSimple() ? xfireSimpleTemplate : xfireComplexTemplate;
-        processTemplate(template, model);
 
-        if (!typeDefinition.isAbstract()) {
-          generatedTypeList.add(classnameFor.convert(typeDefinition));
+        model.put("fault", webFault);
+        processTemplate(faultTemplate, model);
+      }
+
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          model.put("type", typeDefinition);
+          URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+          processTemplate(template, model);
         }
       }
 
-      for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
-        addExplicitAnnotations(rootElementDeclaration, classnameFor);
+      //Now enable jdk-15 compatability and generate those client-side stubs.
+      info("Generating the XFire client classes for jdk 1.5.");
+      model.setFileOutputDirectory(jdk15GenerateDir);
+      classnameFor.setJdk15(true);
+      componentTypeFor.setJdk15(true);
+      collectionTypeFor.setJdk15(true);
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          model.put("endpointInterface", ei);
+
+          processTemplate(eiTemplate, model);
+          processTemplate(soapImplTemplate, model);
+        }
+      }
+
+      for (WebFault webFault : allFaults.values()) {
+        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+        }
+        else {
+          model.remove("superFault");
+        }
+
+        model.put("fault", webFault);
+        processTemplate(faultTemplate, model);
+      }
+
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          model.put("type", typeDefinition);
+          URL template = typeDefinition.isEnum() ? jdk15EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+          processTemplate(template, model);
+        }
       }
     }
-    model.remove("rootElementName");
-
-
-    //Now, generate the jdk14-compatable client-side stubs.
-    info("Generating the XFire client classes for jdk 1.4.");
-    model.setFileOutputDirectory(getJdk14GenerateDir());
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        model.put("endpointInterface", ei);
-
-        processTemplate(eiTemplate, model);
-        processTemplate(soapImplTemplate, model);
-      }
+    else {
+      info("Skipping generation of XFire Client sources as everything appears up-to-date...");
     }
+  }
 
-    for (WebFault webFault : allFaults.values()) {
-      ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-      if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-        model.put("superFault", allFaults.get(superFault.getQualifiedName()));
-      }
-      else {
-        model.remove("superFault");
-      }
-
-      model.put("fault", webFault);
-      processTemplate(faultTemplate, model);
-    }
-
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        model.put("type", typeDefinition);
-        URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-        processTemplate(template, model);
-      }
-    }
-
-
-    //Now enable jdk-15 compatability and generate those client-side stubs.
-    info("Generating the XFire client classes for jdk 1.5.");
-    model.setFileOutputDirectory(getJdk15GenerateDir());
-    classnameFor.setJdk15(true);
-    componentTypeFor.setJdk15(true);
-    collectionTypeFor.setJdk15(true);
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        model.put("endpointInterface", ei);
-
-        processTemplate(eiTemplate, model);
-        processTemplate(soapImplTemplate, model);
-      }
-    }
-
-    for (WebFault webFault : allFaults.values()) {
-      ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-      if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-        model.put("superFault", allFaults.get(superFault.getQualifiedName()));
-      }
-      else {
-        model.remove("superFault");
-      }
-
-      model.put("fault", webFault);
-      processTemplate(faultTemplate, model);
-    }
-
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        model.put("type", typeDefinition);
-        URL template = typeDefinition.isEnum() ? jdk15EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-        processTemplate(template, model);
-      }
-    }
+  /**
+   * Whether the specified directories are up to date.
+   *
+   * @param commonJdkGenerateDir The common jdk generate directory.
+   * @param jdk14GenerateDir The jdk14 generate directory.
+   * @param jdk15GenerateDir The jdk15 generate directory.
+   * @return Whether the directories are up-to-date.
+   */
+  protected boolean isUpToDate(File commonJdkGenerateDir, File jdk14GenerateDir, File jdk15GenerateDir) {
+    return enunciate.isUpToDateWithSources(commonJdkGenerateDir) &&
+      enunciate.isUpToDateWithSources(jdk14GenerateDir) &&
+      enunciate.isUpToDateWithSources(jdk15GenerateDir);
   }
 
   protected void addExplicitAnnotations(EndpointInterface ei, ClientClassnameForMethod conversion) {
@@ -491,18 +513,30 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     Collection<String> typeFiles = enunciate.getJavaFiles(typesDir);
 
     //Compile the jdk14 files.
-    Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
-    jdk14Files.addAll(typeFiles);
-    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getJdk14CompileDir(), Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
-    writeTypesFile(new File(getJdk14CompileDir(), uuid + ".types"));
-    writeAnnotationsFile(new File(getJdk14CompileDir(), uuid + ".annotations"));
+    File jdk14CompileDir = getJdk14CompileDir();
+    if (!enunciate.isUpToDateWithSources(jdk14CompileDir)) {
+      Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
+      jdk14Files.addAll(typeFiles);
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk14CompileDir, Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
+      writeTypesFile(new File(jdk14CompileDir, uuid + ".types"));
+      writeAnnotationsFile(new File(jdk14CompileDir, uuid + ".annotations"));
+    }
+    else {
+      info("Skipping compilation of JDK 1.4 client classes as everything appears up-to-date...");
+    }
 
     //Compile the jdk15 files.
-    Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
-    jdk15Files.addAll(typeFiles);
-    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getJdk15CompileDir(), Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
-    writeTypesFile(new File(getJdk15CompileDir(), uuid + ".types"));
-    writeAnnotationsFile(new File(getJdk15CompileDir(), uuid + ".annotations"));
+    File jdk15CompileDir = getJdk15CompileDir();
+    if (!enunciate.isUpToDateWithSources(jdk15CompileDir)) {
+      Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
+      jdk15Files.addAll(typeFiles);
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk15CompileDir, Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
+      writeTypesFile(new File(jdk15CompileDir, uuid + ".types"));
+      writeAnnotationsFile(new File(jdk15CompileDir, uuid + ".annotations"));
+    }
+    else {
+      info("Skipping compilation of JDK 1.5 client classes as everything appears up-to-date...");
+    }
   }
 
   /**
@@ -565,12 +599,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     File jdk14Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4.jar"));
-    enunciate.zip(jdk14Jar, getJdk14CompileDir());
-    enunciate.setProperty("client.jdk14.jar", jdk14Jar);
+    if (!enunciate.isUpToDate(getJdk14CompileDir(), jdk14Jar)) {
+      enunciate.zip(jdk14Jar, getJdk14CompileDir());
+      enunciate.setProperty("client.jdk14.jar", jdk14Jar);
+    }
+    else {
+      info("Skipping creation of JDK 1.4 client jar as everything appears up-to-date...");
+    }
 
     File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-src.jar"));
-    enunciate.zip(jdk14Sources, getJdk14GenerateDir());
-    enunciate.setProperty("client.jdk14.sources", jdk14Sources);
+    if (!enunciate.isUpToDate(getJdk14GenerateDir(), jdk14Sources)) {
+      enunciate.zip(jdk14Sources, getJdk14GenerateDir());
+      enunciate.setProperty("client.jdk14.sources", jdk14Sources);
+    }
+    else {
+      info("Skipping creation of the JDK 1.4 client source jar as everything appears up-to-date...");
+    }
 
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
     MavenDependency xfireClientDependency = new MavenDependency();
@@ -660,12 +704,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     enunciate.addArtifact(jdk14ArtifactBundle);
 
     File jdk15Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5.jar"));
-    enunciate.zip(jdk15Jar, getJdk15CompileDir());
-    enunciate.setProperty("client.jdk15.jar", jdk15Jar);
+    if (!enunciate.isUpToDate(getJdk15CompileDir(), jdk15Jar)) {
+      enunciate.zip(jdk15Jar, getJdk15CompileDir());
+      enunciate.setProperty("client.jdk15.jar", jdk15Jar);
+    }
+    else {
+      info("Skipping creation of JDK 1.5 client jar as everything appears up-to-date...");
+    }
 
     File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-src.jar"));
-    enunciate.zip(jdk15Sources, getJdk15GenerateDir());
-    enunciate.setProperty("client.jdk15.sources", jdk15Sources);
+    if (!enunciate.isUpToDate(getJdk15GenerateDir(), jdk15Sources)) {
+      enunciate.zip(jdk15Sources, getJdk15GenerateDir());
+      enunciate.setProperty("client.jdk15.sources", jdk15Sources);
+    }
+    else {
+      info("Skipping creation of the JDK 1.5 client source jar as everything appears up-to-date...");
+    }
 
     //todo: generate the javadocs?
 

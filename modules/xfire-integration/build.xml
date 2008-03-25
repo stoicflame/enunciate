@@ -3,7 +3,7 @@
 <project default="test" name="xfire-integration" basedir=".">
 
   <property name="app.name" value="full"/>
-  <property name="build.dir" value="target/examples/${app.name}/classes/xfire-client/jdk14"/>
+  <property name="xfire.client.build.dir" value="target/examples/${app.name}/classes/xfire-client/jdk14"/>
 
   <import file="../../build-module.xml"/>
 
@@ -42,12 +42,23 @@
   <!--no-op because there are no java sources.  this is a test module.-->
   <target name="enunciate-full-api" depends="init-example-api, enunciate-example-api"/>
 
+  <target name="get-test-classpath" depends="get-build-classpath">
+    <path id="test.classpath">
+      <path refid="build.classpath"/>
+      <pathelement location="${build.dir}"/>
+      <pathelement location="${test.build.dir}"/>
+      <pathelement location="${conf.dir}"/>
+      <pathelement location="${xfire.client.build.dir}"/>
+    </path>
+  </target>
+
   <target name="compile-tests" depends="base.compile-tests">
     <javac destdir="${test.build.dir}" debug="true">
       <src>
         <pathelement location="${enunciate.sample.src.dir}/${app.name}"/>
       </src>
       <classpath refid="build.classpath"/>
+      <classpath location="${xfire.client.build.dir}"/>
     </javac>
     <copy file="target/examples/${app.name}/build/spring-app/META-INF/MANIFEST.MF" tofile="${test.build.dir}/war-manifest.mf" failonerror="true"/>
   </target>

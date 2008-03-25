@@ -85,6 +85,10 @@ public class TestXMLDeploymentModule extends TestCase {
         return model;
       }
 
+      @Override
+      protected boolean isUpToDate(File artifactDir) {
+        return false;
+      }
 
       @Override
       public void processTemplate(URL templateURL, Object model) {

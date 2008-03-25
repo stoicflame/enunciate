@@ -270,36 +270,85 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
     }
-
   }
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
-    //load the references to the templates....
-    URL typeMapperTemplate = getTemplateURL("gwt-type-mapper.fmt");
-    URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
-    URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
+    File clientSideGenerateDir = getClientSideGenerateDir();
+    File serverSideGenerateDir = getServerSideGenerateDir();
+    boolean upToDate = enunciate.isUpToDateWithSources(clientSideGenerateDir) && enunciate.isUpToDateWithSources(serverSideGenerateDir);
+    if (!upToDate) {
+      //load the references to the templates....
+      URL typeMapperTemplate = getTemplateURL("gwt-type-mapper.fmt");
+      URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
+      URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
 
-    URL eiTemplate = getTemplateURL("gwt-endpoint-interface.fmt");
-    URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
-    URL faultTemplate = getTemplateURL("gwt-fault.fmt");
-    URL typeTemplate = getTemplateURL("gwt-type.fmt");
-    URL enumTypeTemplate = getTemplateURL("gwt-enum-type.fmt");
+      URL eiTemplate = getTemplateURL("gwt-endpoint-interface.fmt");
+      URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
+      URL faultTemplate = getTemplateURL("gwt-fault.fmt");
+      URL typeTemplate = getTemplateURL("gwt-type.fmt");
+      URL enumTypeTemplate = getTemplateURL("gwt-enum-type.fmt");
 
-    //set up the model, first allowing for jdk 14 compatability.
-    EnunciateFreemarkerModel model = getModel();
-    Map<String, String> conversions = new HashMap<String, String>();
-    String clientNamespace = this.rpcModuleNamespace + ".client";
-    conversions.put(this.rpcModuleNamespace, clientNamespace);
-    if (!this.enforceNamespaceConformance) {
-      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          if (!isGWTTransient(ei)) {
-            String pckg = ei.getPackage().getQualifiedName();
+      //set up the model, first allowing for jdk 14 compatability.
+      EnunciateFreemarkerModel model = getModel();
+      Map<String, String> conversions = new HashMap<String, String>();
+      String clientNamespace = this.rpcModuleNamespace + ".client";
+      conversions.put(this.rpcModuleNamespace, clientNamespace);
+      if (!this.enforceNamespaceConformance) {
+        TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            if (!isGWTTransient(ei)) {
+              String pckg = ei.getPackage().getQualifiedName();
+              if (!conversions.containsKey(pckg)) {
+                conversions.put(pckg, pckg + "." + clientNamespace);
+              }
+              for (WebMethod webMethod : ei.getWebMethods()) {
+                for (WebFault webFault : webMethod.getWebFaults()) {
+                  allFaults.add(webFault);
+                }
+              }
+            }
+          }
+        }
+        for (WebFault webFault : allFaults) {
+          if (!isGWTTransient(webFault)) {
+            String pckg = webFault.getPackage().getQualifiedName();
             if (!conversions.containsKey(pckg)) {
               conversions.put(pckg, pckg + "." + clientNamespace);
             }
+          }
+        }
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            if (!isGWTTransient(typeDefinition)) {
+              String pckg = typeDefinition.getPackage().getQualifiedName();
+              if (!conversions.containsKey(pckg)) {
+                conversions.put(pckg, pckg + "." + clientNamespace);
+              }
+            }
+          }
+        }
+      }
+
+      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+      ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
+      CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
+      model.put("packageFor", new ClientPackageForMethod(conversions));
+      model.put("classnameFor", classnameFor);
+      model.put("componentTypeFor", componentTypeFor);
+      model.put("collectionTypeFor", collectionTypeFor);
+
+      model.setFileOutputDirectory(clientSideGenerateDir);
+
+      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+      info("Generating the GWT endpoints...");
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!isGWTTransient(ei)) {
+            model.put("endpointInterface", ei);
+            processTemplate(eiTemplate, model);
+
             for (WebMethod webMethod : ei.getWebMethods()) {
               for (WebFault webFault : webMethod.getWebFaults()) {
                 allFaults.add(webFault);
@@ -308,109 +357,67 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           }
         }
       }
+
+      info("Generating the GWT faults...");
       for (WebFault webFault : allFaults) {
         if (!isGWTTransient(webFault)) {
-          String pckg = webFault.getPackage().getQualifiedName();
-          if (!conversions.containsKey(pckg)) {
-            conversions.put(pckg, pckg + "." + clientNamespace);
-          }
+          model.put("fault", webFault);
+          processTemplate(faultTemplate, model);
         }
       }
+
+      info("Generating the GWT types...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isGWTTransient(typeDefinition)) {
-            String pckg = typeDefinition.getPackage().getQualifiedName();
-            if (!conversions.containsKey(pckg)) {
-              conversions.put(pckg, pckg + "." + clientNamespace);
-            }
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
+            processTemplate(template, model);
           }
         }
       }
-    }
 
-    ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
-    ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
-    CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
-    model.put("packageFor", new ClientPackageForMethod(conversions));
-    model.put("classnameFor", classnameFor);
-    model.put("componentTypeFor", componentTypeFor);
-    model.put("collectionTypeFor", collectionTypeFor);
+      model.put("gwtModuleName", this.rpcModuleName);
+      processTemplate(moduleXmlTemplate, model);
 
-    model.setFileOutputDirectory(getClientSideGenerateDir());
+      model.setFileOutputDirectory(serverSideGenerateDir);
 
-    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
-    info("Generating the GWT endpoints...");
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        if (!isGWTTransient(ei)) {
-          model.put("endpointInterface", ei);
-          processTemplate(eiTemplate, model);
-
-          for (WebMethod webMethod : ei.getWebMethods()) {
-            for (WebFault webFault : webMethod.getWebFaults()) {
-              allFaults.add(webFault);
-            }
+      info("Generating the GWT endpoint implementations...");
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!isGWTTransient(ei)) {
+            model.put("endpointInterface", ei);
+            processTemplate(endpointImplTemplate, model);
           }
         }
       }
-    }
 
-    info("Generating the GWT faults...");
-    for (WebFault webFault : allFaults) {
-      if (!isGWTTransient(webFault)) {
-        model.put("fault", webFault);
-        processTemplate(faultTemplate, model);
+      info("Generating the GWT type mappers...");
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
+            model.put("type", typeDefinition);
+            processTemplate(typeMapperTemplate, model);
+          }
+        }
       }
-    }
 
-    info("Generating the GWT types...");
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if (!isGWTTransient(typeDefinition)) {
-          model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
-          processTemplate(template, model);
+      info("Generating the GWT fault mappers...");
+      for (WebFault webFault : allFaults) {
+        if (!isGWTTransient(webFault)) {
+          model.put("fault", webFault);
+          processTemplate(faultMapperTemplate, model);
         }
       }
     }
-
-    model.put("gwtModuleName", this.rpcModuleName);
-    processTemplate(moduleXmlTemplate, model);
-
-    model.setFileOutputDirectory(getServerSideGenerateDir());
-
-    info("Generating the GWT endpoint implementations...");
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        if (!isGWTTransient(ei)) {
-          model.put("endpointInterface", ei);
-          processTemplate(endpointImplTemplate, model);
-        }
-      }
+    else {
+      info("Skipping GWT source generation as everything appears up-to-date...");
     }
 
-    info("Generating the GWT type mappers...");
-    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-        if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
-          model.put("type", typeDefinition);
-          processTemplate(typeMapperTemplate, model);
-        }
-      }
-    }
-
-    info("Generating the GWT fault mappers...");
-    for (WebFault webFault : allFaults) {
-      if (!isGWTTransient(webFault)) {
-        model.put("fault", webFault);
-        processTemplate(faultMapperTemplate, model);
-      }
-    }
-
-    enunciate.setProperty("gwt.client.src.dir", getClientSideGenerateDir());
-    enunciate.addArtifact(new FileArtifact(getName(), "gwt.client.src.dir", getClientSideGenerateDir()));
-    enunciate.setProperty("gwt.server.src.dir", getServerSideGenerateDir());
-    enunciate.addArtifact(new FileArtifact(getName(), "gwt.server.src.dir", getServerSideGenerateDir()));
+    enunciate.setProperty("gwt.client.src.dir", clientSideGenerateDir);
+    enunciate.addArtifact(new FileArtifact(getName(), "gwt.client.src.dir", clientSideGenerateDir));
+    enunciate.setProperty("gwt.server.src.dir", serverSideGenerateDir);
+    enunciate.addArtifact(new FileArtifact(getName(), "gwt.server.src.dir", serverSideGenerateDir));
   }
 
   /**
@@ -500,56 +507,64 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     for (GWTApp gwtApp : gwtApps) {
       String appName = gwtApp.getName();
       File appSource = enunciate.resolvePath(gwtApp.getSrcDir());
-      commandArray[classpathArgIndex] = classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath();
       String style = gwtApp.getJavascriptStyle().toString();
-      commandArray[styleArgIndex] = style;
       File appDir = getAppGenerateDir(appName);
       String out = appDir.getAbsolutePath();
+
+      commandArray[classpathArgIndex] = classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath();
+      commandArray[styleArgIndex] = style;
       commandArray[outArgIndex] = out;
 
       for (GWTAppModule appModule : gwtApp.getModules()) {
         String moduleName = appModule.getName();
-        commandArray[moduleNameIndex] = moduleName;
-        info("Executing GWTCompile for module '%s'...", moduleName);
-        if (enunciate.isDebug()) {
-          StringBuilder command = new StringBuilder();
-          for (String commandPiece : commandArray) {
-            command.append(' ').append(commandPiece);
-          }
-          debug("Executing GWTCompile for module %s with the command: %s", moduleName, command);
-        }
-        ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
-        processBuilder.directory(getGenerateDir());
-        processBuilder.redirectErrorStream(true);
-        Process process = processBuilder.start();
-        BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line = procReader.readLine();
-        while (line != null) {
-          info(line);
-          line = procReader.readLine();
-        }
-        int procCode;
-        try {
-          procCode = process.waitFor();
-        }
-        catch (InterruptedException e1) {
-          throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
-        }
-
-        if (procCode != 0) {
-          throw new EnunciateException("GWT compile failed for module " + moduleName);
-        }
-
         String outputPath = appModule.getOutputPath();
         File moduleOutputDir = appDir;
         if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
           moduleOutputDir = new File(appDir, outputPath);
         }
-        File moduleGenDir = new File(appDir, moduleName);
-        if (!moduleOutputDir.equals(moduleGenDir)) {
-          moduleOutputDir.mkdirs();
-          enunciate.copyDir(moduleGenDir, moduleOutputDir);
-          deleteDir(moduleGenDir);
+
+        boolean upToDate = enunciate.isUpToDate(getClientSideGenerateDir(), moduleOutputDir) && enunciate.isUpToDate(appSource, moduleOutputDir);
+        if (!upToDate) {
+          commandArray[moduleNameIndex] = moduleName;
+          info("Executing GWTCompile for module '%s'...", moduleName);
+          if (enunciate.isDebug()) {
+            StringBuilder command = new StringBuilder();
+            for (String commandPiece : commandArray) {
+              command.append(' ').append(commandPiece);
+            }
+            debug("Executing GWTCompile for module %s with the command: %s", moduleName, command);
+          }
+          ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
+          processBuilder.directory(getGenerateDir());
+          processBuilder.redirectErrorStream(true);
+          Process process = processBuilder.start();
+          BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+          String line = procReader.readLine();
+          while (line != null) {
+            info(line);
+            line = procReader.readLine();
+          }
+          int procCode;
+          try {
+            procCode = process.waitFor();
+          }
+          catch (InterruptedException e1) {
+            throw new EnunciateException("Unexpected inturruption of the GWT compile process.");
+          }
+
+          if (procCode != 0) {
+            throw new EnunciateException("GWT compile failed for module " + moduleName);
+          }
+
+          File moduleGenDir = new File(appDir, moduleName);
+          if (!moduleOutputDir.equals(moduleGenDir)) {
+            moduleOutputDir.mkdirs();
+            enunciate.copyDir(moduleGenDir, moduleOutputDir);
+            deleteDir(moduleGenDir);
+          }
+        }
+        else {
+          info("Skipping GWT compile for module %s as everything appears up-to-date...", moduleName);
         }
       }
     }
@@ -586,9 +601,15 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       enunciate.addArtifact(new FileArtifact(getName(), "gwt.app.dir", getAppGenerateDir()));
     }
 
-    info("Compiling the GWT client-side files...");
-    Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-    enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getClientSideCompileDir(), Arrays.asList("-source", "1.4", "-g"), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+    if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
+      info("Compiling the GWT client-side files...");
+      Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getClientSideCompileDir(), Arrays.asList("-source", "1.4", "-g"), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+    }
+    else {
+      info("Skipping compile of GWT client-side files because everything appears up-to-date...");
+    }
+    
     enunciate.setProperty("gwt.client.compile.dir", getClientSideCompileDir());
   }
 
@@ -607,9 +628,14 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     File clientJar = new File(getBuildDir(), clientJarName);
-    enunciate.copyDir(getClientSideGenerateDir(), getClientSideCompileDir());
-    enunciate.zip(clientJar, getClientSideCompileDir());
-    enunciate.setProperty("gwt.client.jar", clientJar);
+    if (!enunciate.isUpToDate(getClientSideGenerateDir(), clientJar)) {
+      enunciate.copyDir(getClientSideGenerateDir(), getClientSideCompileDir());
+      enunciate.zip(clientJar, getClientSideCompileDir());
+      enunciate.setProperty("gwt.client.jar", clientJar);
+    }
+    else {
+      info("GWT client jar appears up-to-date...");
+    }
 
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
     MavenDependency gwtUserDependency = new MavenDependency();
