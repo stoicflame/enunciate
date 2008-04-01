@@ -245,7 +245,14 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
       return false;
     }
 
-    DecoratedTypeMirror accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
+    DecoratedTypeMirror accessorType;
+    if (isAdapted()) {
+      accessorType = getAdapterType();
+    }
+    else {
+      accessorType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getAccessorType());
+    }
+
     if (accessorType.isArray()) {
       TypeMirror componentType = ((ArrayType) accessorType).getComponentType();
       //special case for byte[]

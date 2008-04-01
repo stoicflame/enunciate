@@ -240,15 +240,22 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       }
       instance.get${elementChoice.simpleName?cap_first}().add(value);
             [#else]
-      java.util.ArrayList elementList;
-      if (instance.get${elementChoice.simpleName?cap_first}() == null) {
-        elementList = new java.util.ArrayList();
+      ${componentTypeFor(element)}[] elementList = instance.get${elementChoice.simpleName?cap_first}();
+      if (elementList == null) {
+        elementList = new ${componentTypeFor(element)}[1];
       }
       else {
-        elementList = new java.util.ArrayList(java.util.Arrays.asList(instance.get${elementChoice.simpleName?cap_first}()));
+        ${componentTypeFor(element)}[] tempElementList = new ${componentTypeFor(element)}[elementList.length + 1];
+        System.arraycopy(elementList, 0, tempElementList, 0, elementList.length);
+        elementList = tempElementList;
       }
-      elementList.add(value);
-      instance.set${elementChoice.simpleName?cap_first}((${componentTypeFor(element)}[]) elementList.toArray(new ${componentTypeFor(element)}[elementList.size()]));
+
+              [#if element.bareAccessorType.primitive]
+      java.lang.reflect.Array.set${componentTypeFor(element)?cap_first}(elementList, elementList.length - 1, value);
+              [#else]
+      java.lang.reflect.Array.set(elementList, elementList.length - 1, value);
+              [/#if]
+      instance.set${elementChoice.simpleName?cap_first}(elementList);
             [/#if]
           [#else]
       instance.set${elementChoice.simpleName?cap_first}(value);

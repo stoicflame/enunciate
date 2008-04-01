@@ -57,6 +57,7 @@
   [/#if]
 
   <!-- the error handler for JSON -->
+  [#if securityEnabled]
   <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
     <constructor-arg>
       <bean class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
