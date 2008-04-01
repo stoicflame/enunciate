@@ -21,72 +21,66 @@ import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletOutputStream;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
-import java.util.Map;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.Map;
 
 /**
- * A JSON view of a REST result.
+ * A JSON REST view of a JAXB result.
  *
  * @author Ryan Heaton
  */
-public class JSONResultView<R> extends RESTResultView<R> {
+public class JaxbJsonView<R> extends JaxbXmlView<R> {
 
   /**
    * Construct a view for the result of a REST operation.
    *
    * @param operation The operation.
-   * @param result    The result.
    * @param ns2prefix The map of namespaces to prefixes.
    */
-  public JSONResultView(RESTOperation operation, R result, Map<String, String> ns2prefix) {
-    super(operation, result, ns2prefix);
+  public JaxbJsonView(RESTOperation operation, Map<String, String> ns2prefix) {
+    super(operation, ns2prefix);
   }
 
   /**
    * Marshals the result as a JSON response.
    *
+   * @param result The result to marshal.
    * @param marshaller The marshaller.
    * @param request The request.
    * @param response The response.
    */
   @Override
-  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    ServletOutputStream outStream = response.getOutputStream();
+  protected void marshal(final R result, final Marshaller marshaller, final HttpServletRequest request, HttpServletResponse response) throws Exception {
     String callbackName = null;
     String jsonpParameter = getOperation().getJSONPParameter();
     if (jsonpParameter != null) {
       callbackName = request.getParameter(jsonpParameter);
-      if ((callbackName != null) && (callbackName.trim().length() > 0)) {
-        outStream.print(callbackName);
-        outStream.print("(");
-      }
-      else {
-        callbackName = null;
-      }
+      callbackName = ((callbackName != null) && (callbackName.trim().length() > 0)) ? callbackName : null;
     }
-    
-    marshalToStream(marshaller, request, outStream);
 
-    if (callbackName != null) {
-      outStream.print(")");
-    }
+    new JsonPHandler(callbackName) {
+      public void writeBody(PrintWriter outStream) throws XMLStreamException, JAXBException, IOException {
+        marshalToStream(marshaller, result, request, outStream);
+      }
+    }.writeTo(response.getWriter());
   }
 
-  protected void marshalToStream(Marshaller marshaller, HttpServletRequest request, ServletOutputStream outStream) throws XMLStreamException, IOException, JAXBException {
+  protected void marshalToStream(Marshaller marshaller, R result, HttpServletRequest request, Writer outStream) throws XMLStreamException, IOException, JAXBException {
     XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
       new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
       new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
-    marshaller.marshal(getResult(), streamWriter);
+    marshaller.marshal(result, streamWriter);
   }
 
 
   @Override
-  protected String getContentType() {
+  protected String getContentType(R result) {
     return "application/json";
   }
 }

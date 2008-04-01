@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import javax.xml.bind.attachment.AttachmentUnmarshaller;
 import javax.activation.DataHandler;
+import javax.xml.bind.attachment.AttachmentUnmarshaller;
 
 /**
  * The Enunciate REST mechanism doesn't support attachments yet.

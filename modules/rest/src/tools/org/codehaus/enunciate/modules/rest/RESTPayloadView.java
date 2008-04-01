@@ -19,15 +19,11 @@ package org.codehaus.enunciate.modules.rest;
 import org.codehaus.enunciate.rest.annotations.ContentType;
 
 import javax.activation.DataHandler;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletOutputStream;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -35,60 +31,73 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class RESTPayloadView extends RESTResultView {
+public class RESTPayloadView extends RESTOperationView {
 
-  private final Object payloadBody;
-
-  public RESTPayloadView(RESTOperation operation, Object payload, Map<String, String> ns2prefix) {
-    super(operation, payload, ns2prefix);
-    try {
-      this.payloadBody = operation.getPayloadDeliveryMethod().invoke(payload);
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public RESTPayloadView(RESTOperation operation) {
+    super(operation);
   }
 
   @Override
-  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (getOperation().getPayloadHeadersMethod() != null) {
-      Map headers = (Map) getOperation().getPayloadHeadersMethod().invoke(getResult());
-      if (headers != null) {
-        for (Object header : headers.keySet()) {
-          response.setHeader(String.valueOf(header), String.valueOf(headers.get(header)));
+  protected void renderResult(Object result, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (result != null) {
+      Object payloadBody;
+      try {
+        payloadBody = getOperation().getPayloadDeliveryMethod().invoke(result);
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+
+      if (getOperation().getPayloadHeadersMethod() != null) {
+        Map headers = (Map) getOperation().getPayloadHeadersMethod().invoke(result);
+        if (headers != null) {
+          for (Object header : headers.keySet()) {
+            response.setHeader(String.valueOf(header), String.valueOf(headers.get(header)));
+          }
+        }
+      }
+
+      if (payloadBody != null) {
+        InputStream bodyStream;
+        if (payloadBody instanceof InputStream) {
+          bodyStream = (InputStream) payloadBody;
+        }
+        else if (payloadBody instanceof DataHandler) {
+          bodyStream = ((DataHandler) payloadBody).getInputStream();
+        }
+        else if (payloadBody instanceof byte[]) {
+          bodyStream = new ByteArrayInputStream((byte[]) payloadBody);
+        }
+        else {
+          throw new IllegalStateException("A payload body must be of type byte[], javax.activation.DataHandler, or java.io.InputStream.");
+        }
+
+        if (bodyStream != null) {
+          marshalPayloadStream(bodyStream, request, response, isXML(result));
         }
       }
     }
+  }
 
-    if (this.payloadBody != null) {
-      InputStream bodyStream;
-      if (this.payloadBody instanceof InputStream) {
-        bodyStream = (InputStream) this.payloadBody;
-      }
-      else if (this.payloadBody instanceof DataHandler) {
-        bodyStream = ((DataHandler) this.payloadBody).getInputStream();
-      }
-      else if (this.payloadBody instanceof byte[]) {
-        bodyStream = new ByteArrayInputStream((byte[]) this.payloadBody);
-      }
-      else {
-        throw new IllegalStateException("A payload body must be of type byte[], javax.activation.DataHandler, or java.io.InputStream.");
-      }
-
-      if (bodyStream != null) {
-        marshalPayloadStream(bodyStream, request, response);
-      }
-    }
+  /**
+   * Whether the result is XML.
+   *
+   * @param result Whether the result is XML.
+   * @return Whether the result is XML.
+   */
+  protected boolean isXML(Object result) {
+    return true;
   }
 
   /**
    * Marshals the payload stream to the servlet output stream.
    *
    * @param payloadStream The payload stream
-   * @param request The request.
-   * @param response The response.
+   * @param request       The request.
+   * @param response      The response.
+   * @param xml           Whether the payload is XML.
    */
-  protected void marshalPayloadStream(InputStream payloadStream, HttpServletRequest request, HttpServletResponse response) throws IOException, XMLStreamException {
+  protected void marshalPayloadStream(InputStream payloadStream, HttpServletRequest request, HttpServletResponse response, boolean xml) throws Exception {
     ServletOutputStream out = response.getOutputStream();
     byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
     int len;
@@ -98,27 +107,32 @@ public class RESTPayloadView extends RESTResultView {
   }
 
   @Override
-  protected Marshaller getMarshaller() throws JAXBException {
-    return null;
-  }
-
-  @Override
-  protected String getContentType() {
+  protected String getContentType(Object result) {
     String contentType = null;
     if (getOperation().getPayloadContentTypeMethod() != null) {
       try {
-        contentType = (String) getOperation().getPayloadContentTypeMethod().invoke(getResult());
+        contentType = (String) getOperation().getPayloadContentTypeMethod().invoke(result);
       }
       catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
-    else if (this.payloadBody instanceof DataHandler) {
-      contentType = ((DataHandler) payloadBody).getContentType();
+    else {
+      Object payloadBody;
+      try {
+        payloadBody = getOperation().getPayloadDeliveryMethod().invoke(result);
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+
+      if (payloadBody instanceof DataHandler) {
+        contentType = ((DataHandler) payloadBody).getContentType();
+      }
     }
 
     if (contentType == null) {
-      contentType = getOperation().getMethod().isAnnotationPresent(ContentType.class) ? getOperation().getMethod().getAnnotation(ContentType.class).value() : "application/octet-stream";;
+      contentType = getOperation().getMethod().isAnnotationPresent(ContentType.class) ? getOperation().getMethod().getAnnotation(ContentType.class).value() : "application/octet-stream";
     }
 
     return contentType;

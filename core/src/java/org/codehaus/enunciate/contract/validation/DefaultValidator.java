@@ -52,6 +52,10 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = new ValidationResult();
 
+    if ((ei.getEndpointImplementations() == null || (ei.getEndpointImplementations().isEmpty()))) {
+      result.addWarning(ei.getPosition(), "Endpoint interface has no implementations!  It will NOT be deployed...");
+    }
+
     Declaration delegate = ei.getDelegate();
 
     WebService ws = delegate.getAnnotation(WebService.class);

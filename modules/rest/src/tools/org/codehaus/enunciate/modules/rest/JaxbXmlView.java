@@ -16,37 +16,31 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.servlet.View;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
-import javax.xml.bind.JAXBException;
 import java.util.Map;
 
 /**
- * A view for the result of a REST operation.
+ * JAXB view for REST results.  Default implementation simply renders the XML.
  *
  * @author Ryan Heaton
  */
-public class RESTResultView<R> implements View {
+public class JaxbXmlView<R> extends RESTOperationView<R> {
 
-  private final RESTOperation operation;
-  private final R result;
   private final Map<String, String> ns2prefix;
   private final Object prefixMapper;
 
   /**
-   * Construct a view for the result of a REST operation.
+   * Construct a JAXB view for the result of a REST operation.
    *
    * @param operation The operation.
-   * @param result The result.
    * @param ns2prefix The namespace-to-prefix map.
    */
-  public RESTResultView(RESTOperation operation, R result, Map<String, String> ns2prefix) {
-    this.operation = operation;
-    this.result = result;
+  public JaxbXmlView(RESTOperation operation, Map<String, String> ns2prefix) {
+    super(operation);
     this.ns2prefix = ns2prefix;
     Object prefixMapper;
     try {
@@ -61,47 +55,23 @@ public class RESTResultView<R> implements View {
   }
 
   /**
-   * The operation used to render this view.
+   * Marshalls the result via JAXB.
    *
-   * @return The operation used to render this view.
-   */
-  public RESTOperation getOperation() {
-    return operation;
-  }
-
-  /**
-   * The result of invoking the operation.
-   *
-   * @return The result of invoking the operation.
-   */
-  public R getResult() {
-    return result;
-  }
-
-  /**
-   * Renders the XML view of the result.
-   *
-   * @param map The model.
+   * @param result The result to marshal.
    * @param request The request.
    * @param response The response.
-   * @throws Exception If a problem occurred during serialization.
    */
-  public void render(Map map, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    response.setStatus(HttpServletResponse.SC_OK);
-    if (result != null) {
-      response.setContentType(String.format("%s;charset=%s", getContentType(), this.operation.getCharset()));
-      marshal(getMarshaller(), request, response);
-    }
-    response.flushBuffer();
+  protected void renderResult(R result, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    marshal(result, loadMarshaller(), request, response);
   }
 
   /**
-   * Gets a marshaller instance.
+   * Loads a marshaller instance.
    *
    * @return The marshaller.
    */
-  protected Marshaller getMarshaller() throws JAXBException {
-    Marshaller marshaller = operation.getSerializationContext().createMarshaller();
+  protected Marshaller loadMarshaller() throws JAXBException {
+    Marshaller marshaller = newMarshaller();
     marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
     if (this.prefixMapper != null) {
       try {
@@ -115,23 +85,24 @@ public class RESTResultView<R> implements View {
   }
 
   /**
-   * Get the content type for this result view.
+   * Factory method for a new marshaller.
    *
-   * @return The content type.
+   * @return The new marshaller.
    */
-  protected String getContentType() {
-    return this.operation.getContentType();
+  protected Marshaller newMarshaller() throws JAXBException {
+    return operation.getSerializationContext().createMarshaller();
   }
 
   /**
    * Does the marshalling operation.
    *
+   * @param result The result to marshal.
    * @param marshaller The marshaller to use.
    * @param request The request.
    * @param response The response.
    */
-  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    marshaller.marshal(getResult(), response.getOutputStream());
+  protected void marshal(R result, Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    marshaller.marshal(result, response.getOutputStream());
   }
 
   /**

@@ -153,9 +153,9 @@ public class TestRESTResourceXMLExporter extends TestCase {
     paramValues.put("otherParam", "otherValue");
     ModelAndView modelAndView = controller.handleRESTOperation(VerbType.update, request, response);
     verify(request, response);
-    RESTResultView view = (RESTResultView) modelAndView.getView();
-    assertNotNull(view.getResult());
-    assertTrue(view.getResult() instanceof RootElementExample);
+    BasicRESTView view = (BasicRESTView) modelAndView.getView();
+    assertNotNull(modelAndView.getModel().get("result"));
+    assertTrue(modelAndView.getModel().get("result") instanceof RootElementExample);
     reset(request, response);
 
     //todo: add some tests...

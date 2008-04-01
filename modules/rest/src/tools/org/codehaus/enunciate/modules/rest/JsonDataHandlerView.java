@@ -16,52 +16,75 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
 import org.codehaus.jettison.badgerfish.BadgerFishXMLOutputFactory;
+import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
 
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
 import javax.xml.stream.*;
-import javax.xml.stream.events.XMLEvent;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Comment;
 import javax.xml.stream.events.Namespace;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
-import java.util.Map;
-import java.io.IOException;
+import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
-
-import javax.xml.namespace.QName;
+import java.io.PrintWriter;
+import java.util.Map;
 
 /**
  * JSON view for a data handler. Assumes that the data handler handles XML data, which is subsequently transformed into JSON.
  *
  * @author Ryan Heaton
  */
-public class JSONDataHandlerView extends JSONResultView<DataHandler> {
+public class JsonDataHandlerView extends DataHandlerView {
 
-  public JSONDataHandlerView(RESTOperation operation, DataHandler dataHandler, Map<String, String> ns2Prefix) {
-    super(operation, dataHandler, ns2Prefix);
+  private final Map<String, String> ns2prefix;
+
+  public JsonDataHandlerView(RESTOperation operation, Map<String, String> ns2Prefix) {
+    super(operation);
+
+    this.ns2prefix = ns2Prefix;
   }
 
   @Override
-  protected void marshalToStream(Marshaller marshaller, HttpServletRequest request, ServletOutputStream outStream) throws XMLStreamException, IOException {
-    if (getResult() != null) {
-      InputStream stream = getResult().getInputStream();
-      XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
-        new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
-        new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
-      convertXMLStreamToJSON(XMLInputFactory.newInstance().createXMLEventReader(stream), streamWriter);
-      streamWriter.flush();
-      streamWriter.close();
+  protected void renderResult(final DataHandler result, final HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (result != null) {
+      boolean xml = getOperation().isDeliversXMLPayload() || String.valueOf(result.getContentType()).toLowerCase().contains("xml");
+      if (xml) {
+        String callbackName = null;
+        String jsonpParameter = getOperation().getJSONPParameter();
+        if (jsonpParameter != null) {
+          callbackName = request.getParameter(jsonpParameter);
+          callbackName = ((callbackName != null) && (callbackName.trim().length() > 0)) ? callbackName : null;
+        }
+
+        new JsonPHandler(callbackName) {
+          public void writeBody(PrintWriter outStream) throws Exception {
+            InputStream stream = result.getInputStream();
+            XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
+              new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
+              new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
+            convertXMLStreamToJSON(XMLInputFactory.newInstance().createXMLEventReader(stream), streamWriter);
+            streamWriter.flush();
+            streamWriter.close();
+          }
+        }.writeTo(response.getWriter());
+      }
+      else {
+        // if it's not XML, we can't convert it to JSON, so just write it out.
+        result.writeTo(response.getOutputStream());
+      }
     }
   }
 
-  @Override
-  protected Marshaller getMarshaller() throws JAXBException {
-    return null;
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @return The map of namespaces to prefixes.
+   */
+  public Map<String, String> getNamespaces2Prefixes() {
+    return this.ns2prefix;
   }
 
   protected static void convertXMLStreamToJSON(XMLEventReader reader, XMLStreamWriter streamWriter) throws XMLStreamException {

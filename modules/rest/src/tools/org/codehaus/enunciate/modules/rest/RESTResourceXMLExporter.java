@@ -20,18 +20,18 @@ import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.AbstractController;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
-import org.springframework.validation.FieldError;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -54,7 +54,7 @@ public class RESTResourceXMLExporter extends AbstractController {
 
   private final DocumentBuilder documentBuilder;
   private final RESTResource resource;
-  private HandlerExceptionResolver exceptionHandler = new RESTExceptionHandler();
+  private HandlerExceptionResolver exceptionHandler;
   private Map<String, String> ns2prefix;
   private String[] supportedMethods;
   private MultipartResolverFactory multipartResolverFactory;
@@ -115,7 +115,16 @@ public class RESTResourceXMLExporter extends AbstractController {
       }
       this.multipartResolverFactory = resolverFactory;
     }
+    
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
+
+    if (this.exceptionHandler == null) {
+      this.exceptionHandler = new JaxbXmlExceptionHandler(getNamespaces2Prefixes());
+    }
+  }
+
+  public RESTResource getResource() {
+    return resource;
   }
 
   public HandlerExceptionResolver getExceptionHandler() {
@@ -127,6 +136,34 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    VerbType verb = getVerb(request);
+
+    if (!resource.getSupportedVerbs().contains(verb)) {
+      throw new MethodNotAllowedException(this.supportedMethods);
+    }
+
+    try {
+      return handleRESTOperation(verb, request, response);
+    }
+    catch (Exception e) {
+      if (getExceptionHandler() != null) {
+        request.setAttribute(VerbType.class.getName(), verb);
+        return getExceptionHandler().resolveException(request, response, this, e);
+      }
+      else {
+        throw e;
+      }
+    }
+  }
+
+  /**
+   * Gets the verb from an HTTP Servlet Request.
+   *
+   * @param request The request.
+   * @return The verb.
+   * @throws MethodNotAllowedException If the verb isn't recognized.
+   */
+  public VerbType getVerb(HttpServletRequest request) throws MethodNotAllowedException {
     String httpMethod = request.getHeader("X-HTTP-Method-Override");
     if ((httpMethod == null) || ("".equals(httpMethod.trim()))) {
       httpMethod = request.getMethod().toUpperCase();
@@ -151,22 +188,8 @@ public class RESTResourceXMLExporter extends AbstractController {
     else {
       throw new MethodNotAllowedException(this.supportedMethods);
     }
-
-    if (!resource.getSupportedVerbs().contains(verb)) {
-      throw new MethodNotAllowedException(this.supportedMethods);
-    }
-
-    try {
-      return handleRESTOperation(verb, request, response);
-    }
-    catch (Exception e) {
-      if (this.exceptionHandler != null) {
-        return this.exceptionHandler.resolveException(request, response, this, e);
-      }
-      else {
-        throw e;
-      }
-    }
+    
+    return verb;
   }
 
   /**
@@ -346,59 +369,50 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
 
     Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
-    return new ModelAndView(createView(operation, result));
-  }
-
-  /**
-   * Create the REST view for the specified operation and result.
-   *
-   * @param operation The operation.
-   * @param result    The result.
-   * @return The view.
-   */
-  protected View createView(RESTOperation operation, Object result) {
+    View view;
     if (result instanceof DataHandler) {
-      return createDataHandlerView(operation, (DataHandler) result);
+      view = createDataHandlerView(operation);
     }
     else if (operation.isDeliversPayload()) {
-      return createPayloadView(operation, result);
+      view = createPayloadView(operation);
     }
     else {
-      return createRESTView(operation, result);
+      view = createRESTView(operation);
     }
+
+    TreeMap<String, Object> model = new TreeMap<String, Object>();
+    model.put(RESTOperationView.MODEL_RESULT, result);
+    return new ModelAndView(view, model);
   }
 
   /**
    * Create the data handler view for the specified data handler.
    *
    * @param operation   The operation.
-   * @param dataHandler The data handler.
    * @return The data handler.
    */
-  protected RESTResultView createDataHandlerView(RESTOperation operation, DataHandler dataHandler) {
-    return new DataHandlerView(operation, dataHandler, getNamespaces2Prefixes());
+  protected BasicRESTView createDataHandlerView(RESTOperation operation) {
+    return new DataHandlerView(operation);
   }
 
   /**
    * Create the REST payload view for the specified operation and result.
    *
    * @param operation The operation.
-   * @param result    The result of the invocation of the operation.
    * @return The payload view.
    */
-  protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
-    return new RESTPayloadView(operation, result, getNamespaces2Prefixes());
+  protected BasicRESTView createPayloadView(RESTOperation operation) {
+    return new RESTPayloadView(operation);
   }
 
   /**
    * Create the REST view for the specified operation and result.
    *
    * @param operation The operation.
-   * @param result    The result.
    * @return The view.
    */
-  protected RESTResultView createRESTView(RESTOperation operation, Object result) {
-    return new RESTResultView(operation, result, getNamespaces2Prefixes());
+  protected BasicRESTView createRESTView(RESTOperation operation) {
+    return new JaxbXmlView(operation, getNamespaces2Prefixes());
   }
 
   /**

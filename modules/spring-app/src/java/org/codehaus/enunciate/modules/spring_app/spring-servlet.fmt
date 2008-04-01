@@ -26,20 +26,6 @@
     </constructor-arg>
   </bean>
 
-  <!-- the parent for all REST service endpoints -->
-  <bean id="rest-endpoint" abstract="true">
-    <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
-  [#if securityEnabled]
-    <property name="exceptionHandler">
-      <bean class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
-        <constructor-arg>
-          <bean class="org.codehaus.enunciate.modules.rest.RESTExceptionHandler"/>
-        </constructor-arg>
-      </bean>
-    </property>
-  [/#if]
-  </bean>
-
   <!-- the REST resource factory-->
   <bean id="restResourceFactory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
     <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
@@ -54,6 +40,35 @@
       </list>
     </property>
   </bean>
+
+  <!-- the error handler for XML -->
+  [#if securityEnabled]
+  <bean id="restXmlErrorHandler" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
+    <constructor-arg>
+      <bean class="org.codehaus.enunciate.modules.rest.JaxbXmlExceptionHandler">
+        <constructor-arg ref="namespaces2prefix"/>
+      </bean>
+    </constructor-arg>
+  </bean>
+  [#else]
+  <bean id="restXmlErrorHandler" class="org.codehaus.enunciate.modules.rest.JaxbXmlExceptionHandler">
+    <constructor-arg ref="namespaces2prefix"/>
+  </bean>
+  [/#if]
+
+  <!-- the error handler for JSON -->
+  <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
+    <constructor-arg>
+      <bean class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
+        <constructor-arg ref="namespaces2prefix"/>
+      </bean>
+    </constructor-arg>
+  </bean>
+  [#else]
+  <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
+    <constructor-arg ref="namespaces2prefix"/>
+  </bean>
+  [/#if]
 
   <!-- the handler mapping for the spring servlet. -->
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
@@ -103,46 +118,54 @@
 
   [@forEachRESTNoun]
         <entry key="${restSubcontext}${noun.antPattern}">
-          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
                 <constructor-arg value="${noun.name}"/>
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+            <property name="exceptionHandler" ref="restXmlErrorHandler"/>
           </bean>
         </entry>
 
         <entry key="${restSubcontext}${noun.antPattern}/**">
-          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
                 <constructor-arg value="${noun.name}"/>
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+            <property name="exceptionHandler" ref="restXmlErrorHandler"/>
           </bean>
         </entry>
 
         <entry key="${jsonSubcontext}${noun.antPattern}">
-          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
                 <constructor-arg value="${noun.name}"/>
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+            <property name="exceptionHandler" ref="restJsonErrorHandler"/>
           </bean>
         </entry>
 
         <entry key="${jsonSubcontext}${noun.antPattern}/**">
-          <bean parent="rest-endpoint" class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
                 <constructor-arg value="${noun.name}"/>
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
+            <property name="exceptionHandler" ref="restJsonErrorHandler"/>
           </bean>
         </entry>
   [/@forEachRESTNoun]

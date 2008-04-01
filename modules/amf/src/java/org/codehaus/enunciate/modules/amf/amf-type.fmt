@@ -41,13 +41,25 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void writeExternal(java.io.ObjectOutput out) throws java.io.IOException {
     [#if !baseobject]super.writeExternal(out);[/#if]
   [#list type.attributes as attribute]
+    [#if attribute.accessorType.primitive]
+    out.write${attribute.accessorType.kind?string?lower_case?cap_first}(this.${attribute.simpleName});
+    [#else]
     out.writeObject(this.${attribute.simpleName});
+    [/#if]
   [/#list]
   [#if type.value?exists]
+    [#if value.accessorType.primitive]
+    out.write${value.accessorType.kind?string?lower_case?cap_first}(this.${value.simpleName});
+    [#else]
     out.writeObject(this.${value.simpleName});
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if element.accessorType.primitive]
+    out.write${element.accessorType.kind?string?lower_case?cap_first}(this.${element.simpleName});
+      [#else]
     out.writeObject(this.${element.simpleName});
+      [/#if]
     [/#list]
   [/#if]
   }
@@ -55,13 +67,25 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void readExternal(java.io.ObjectInput in) throws java.io.IOException, ClassNotFoundException {
     [#if !baseobject]super.readExternal(in);[/#if]
   [#list type.attributes as attribute]
+    [#if attribute.accessorType.primitive]
+    this.${attribute.simpleName} = (${classnameFor(attribute)}) in.read${attribute.accessorType.kind?string?lower_case?cap_first}();
+    [#else]
     this.${attribute.simpleName} = (${classnameFor(attribute)}) in.readObject();
+    [/#if]
   [/#list]
   [#if type.value?exists]
+    [#if value.accessorType.primitive]
+    this.${value.simpleName} = (${classnameFor(value)}) in.read${value.accessorType.kind?string?lower_case?cap_first}();
+    [#else]
     this.${value.simpleName} = (${classnameFor(value)}) in.readObject();
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if element.accessorType.primitive]
+    this.${element.simpleName} = (${classnameFor(element)}) in.read${element.accessorType.kind?string?lower_case?cap_first}();
+      [#else]
     this.${element.simpleName} = (${classnameFor(element)}) in.readObject();
+      [/#if]
     [/#list]
   [/#if]
   }

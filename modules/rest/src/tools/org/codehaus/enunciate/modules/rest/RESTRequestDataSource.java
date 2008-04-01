@@ -2,8 +2,8 @@ package org.codehaus.enunciate.modules.rest;
 
 import javax.activation.DataSource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 /**

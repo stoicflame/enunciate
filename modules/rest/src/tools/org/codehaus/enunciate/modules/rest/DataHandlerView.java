@@ -19,35 +19,28 @@ package org.codehaus.enunciate.modules.rest;
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.JAXBException;
-import java.util.Map;
 
 /**
  * Spring view for a data handler.
  *
  * @author Ryan Heaton
  */
-public class DataHandlerView extends RESTResultView<DataHandler> {
+public class DataHandlerView extends RESTOperationView<DataHandler> {
 
-  public DataHandlerView(RESTOperation operation, DataHandler dataHandler, Map<String, String> ns2prefix) {
-    super(operation, dataHandler, ns2prefix);
+  public DataHandlerView(RESTOperation operation) {
+    super(operation);
   }
 
   @Override
-  protected void marshal(Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (getResult() != null) {
-      getResult().writeTo(response.getOutputStream());
+  protected void renderResult(DataHandler result, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (result != null) {
+      result.writeTo(response.getOutputStream());
     }
   }
 
   @Override
-  protected String getContentType() {
-    return getResult() != null && getResult().getContentType() != null ? getResult().getContentType() : "application/octet-stream";
+  protected String getContentType(DataHandler result) {
+    return result != null && result.getContentType() != null ? result.getContentType() : "application/octet-stream";
   }
 
-  @Override
-  protected Marshaller getMarshaller() throws JAXBException {
-    return null;
-  }
 }

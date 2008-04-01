@@ -232,14 +232,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {
-      info("Validation result has warnings.");
+      warn("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
         env.getMessager().printWarning(warning.getPosition(), warning.getText());
       }
     }
 
     if (validationResult.hasErrors()) {
-      info("Validation result has errors.");
+      warn("Validation result has errors.");
       for (ValidationMessage error : validationResult.getErrors()) {
         env.getMessager().printError(error.getPosition(), error.getText());
       }

@@ -337,6 +337,16 @@ public class Enunciate {
       }
     }
 
+    if (sourceFiles.isEmpty()) {
+      //no source files (all imports are on the classpath).  Since APT requires at least one, we'll write it out ourselves....
+      File tempSource = File.createTempFile("EnunciateMockClass", "java");
+      FileWriter writer = new FileWriter(tempSource);
+      writer.write(String.format("public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
+      writer.flush();
+      writer.close();
+      sourceFiles.add(tempSource.getAbsolutePath());
+    }
+
     invokeApt(sourceFiles.toArray(new String[sourceFiles.size()]), additionalApiClasses.toArray(new String[additionalApiClasses.size()]));
   }
 
@@ -346,10 +356,6 @@ public class Enunciate {
    * @return The deployment modules that were loaded and initialized.
    */
   protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
-    if ((this.sourceFiles == null) || (this.sourceFiles.isEmpty())) {
-      throw new EnunciateException("No source files have been specified!");
-    }
-
     if (isJavacCheck()) {
       invokeJavac(createTempDir(), getSourceFiles());
     }
@@ -432,15 +438,6 @@ public class Enunciate {
    */
   public String[] getSourceFiles() {
     return this.sourceFiles.toArray(new String[this.sourceFiles.size()]);
-  }
-
-  /**
-   * Modifiable list of the Enunciate source files.
-   *
-   * @return The modifiable list of enunciate source files.
-   */
-  public List<String> getSourceFileList() {
-    return this.sourceFiles;
   }
 
   /**
@@ -606,6 +603,11 @@ public class Enunciate {
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(String classpath, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
+    if ((sourceFiles == null) || (sourceFiles.length == 0)) {
+      warn("Skipping compile.  No source files specified.");
+      return;
+    }
+
     List<String> args = new ArrayList<String>();
 
     args.add("-cp");

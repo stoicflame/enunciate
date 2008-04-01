@@ -18,10 +18,10 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.lang.reflect.Method;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A REST resource is composed of the following:

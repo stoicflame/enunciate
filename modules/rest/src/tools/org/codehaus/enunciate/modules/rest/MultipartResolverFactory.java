@@ -1,7 +1,7 @@
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.multipart.MultipartResolver;
 import org.codehaus.enunciate.rest.annotations.VerbType;
+import org.springframework.web.multipart.MultipartResolver;
 
 import javax.servlet.http.HttpServletRequest;
 

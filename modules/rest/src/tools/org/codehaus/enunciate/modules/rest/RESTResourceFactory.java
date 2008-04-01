@@ -28,7 +28,6 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.io.IOException;
 
 /**
  * A factory for REST resources.

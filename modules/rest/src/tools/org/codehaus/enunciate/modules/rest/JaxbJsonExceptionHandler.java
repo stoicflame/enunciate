@@ -16,28 +16,29 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
-
-import java.util.HashMap;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import java.util.Map;
 
 /**
- * A namespace prefix mapper.
- * 
+ * JAXB error view for JSON operation requests.
+ *
  * @author Ryan Heaton
  */
-public class PrefixMapper extends NamespacePrefixMapper {
-
-  private final Map<String, String> ns2prefix;
-
-  public PrefixMapper(Map<String, String> ns2prefix) {
-    if (ns2prefix == null) {
-      ns2prefix = new HashMap<String, String>();
-    }
-    this.ns2prefix = ns2prefix;
+public class JaxbJsonExceptionHandler extends JaxbXmlExceptionHandler {
+  
+  public JaxbJsonExceptionHandler(Map<String, String> ns2prefix) {
+    super(ns2prefix);
   }
 
-  public String getPreferredPrefix(String nsuri, String suggestion, boolean defaultPossible) {
-    return this.ns2prefix.containsKey(nsuri) ? this.ns2prefix.get(nsuri) : suggestion;
+  @Override
+  protected JaxbXmlView newJaxbView(final Class errorType, RESTOperation operation) {
+    return new JaxbJsonView(operation, getNamespaces2Prefixes()) {
+      @Override
+      protected Marshaller newMarshaller() throws JAXBException {
+        return JAXBContext.newInstance(errorType).createMarshaller();
+      }
+    };
   }
 }

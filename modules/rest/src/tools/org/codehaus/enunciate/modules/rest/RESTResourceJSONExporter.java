@@ -22,7 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.activation.DataHandler;
 
 /**
  * A controller for the JSON API.
@@ -38,6 +37,10 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   }
 
   protected void initApplicationContext() throws BeansException {
+    if (getExceptionHandler() == null) {
+      setExceptionHandler(new JaxbJsonExceptionHandler(getNamespaces2Prefixes()));
+    }
+
     super.initApplicationContext();
 
     try {
@@ -66,53 +69,18 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   }
 
   @Override
-  protected RESTResultView createDataHandlerView(RESTOperation operation, DataHandler dataHandler) {
-    boolean xml = operation.isDeliversXMLPayload() || (dataHandler != null && String.valueOf(dataHandler.getContentType()).toLowerCase().contains("xml"));
-    return xml ? new JSONDataHandlerView(operation, dataHandler, getNamespaces2Prefixes()) : super.createDataHandlerView(operation, dataHandler);
+  protected BasicRESTView createDataHandlerView(RESTOperation operation) {
+    return new JsonDataHandlerView(operation, getNamespaces2Prefixes());
   }
 
   @Override
-  protected RESTResultView createPayloadView(RESTOperation operation, Object result) {
-    //todo: you've got to create another annotation @RESTPayloadIsXML
-    //todo: you've got to document the new annotation and the xml() value of RESTOperation
-    boolean xml = operation.isDeliversXMLPayload();
-
-    if (!xml && operation.getPayloadXmlHintMethod() != null) {
-      try {
-        Boolean xmlHintResult = (Boolean) operation.getPayloadXmlHintMethod().invoke(result);
-        xml = xmlHintResult != null && xmlHintResult;
-      }
-      catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    if (!xml && operation.getPayloadContentTypeMethod() != null) {
-      try {
-        String contentType = (String) operation.getPayloadContentTypeMethod().invoke(result);
-        xml = contentType != null && contentType.toLowerCase().contains("xml");
-      }
-      catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    if (!xml && operation.getPayloadDeliveryMethod() != null) {
-      try {
-        Object body = operation.getPayloadDeliveryMethod().invoke(result);
-        xml = ((body instanceof DataHandler) && (String.valueOf(((DataHandler)body).getContentType()).toLowerCase().contains("xml")));
-      }
-      catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    return xml ? new JSONPayloadView(operation, result, getNamespaces2Prefixes()) : super.createPayloadView(operation, result);
+  protected BasicRESTView createPayloadView(RESTOperation operation) {
+    return new JsonPayloadView(operation, getNamespaces2Prefixes());
   }
 
   @Override
-  protected RESTResultView createRESTView(RESTOperation operation, Object result) {
-    return new JSONResultView(operation, result, getNamespaces2Prefixes());
+  protected BasicRESTView createRESTView(RESTOperation operation) {
+    return new JaxbJsonView(operation, getNamespaces2Prefixes());
   }
 
 }
