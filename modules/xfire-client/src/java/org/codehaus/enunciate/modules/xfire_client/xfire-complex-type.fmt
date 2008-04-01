@@ -234,7 +234,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       ${componentTypeFor(elementChoice)} value = (${componentTypeFor(elementChoice)}) type.readObject(elementReader, context);
           [/#if]
           [#if element.collectionType]
-            [#if element.accessorType.collection]
+            [#if (element.adapted && element.adapterType.adaptingType.collection) || element.accessorType.collection]
       if (instance.get${elementChoice.simpleName?cap_first}() == null) {
         instance.set${elementChoice.simpleName?cap_first}((${element.accessorType.declaration.qualifiedName}) ListParser.newCollectionInstance(${collectionTypeFor(element)}.class));
       }
@@ -250,7 +250,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         elementList = tempElementList;
       }
 
-              [#if element.bareAccessorType.primitive]
+              [#if (element.adapted && element.adapterType.adaptingType.primitive) || element.bareAccessorType.primitive]
       java.lang.reflect.Array.set${componentTypeFor(element)?cap_first}(elementList, elementList.length - 1, value);
               [#else]
       java.lang.reflect.Array.set(elementList, elementList.length - 1, value);
