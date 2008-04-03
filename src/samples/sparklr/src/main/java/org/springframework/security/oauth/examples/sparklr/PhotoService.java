@@ -1,13 +1,19 @@
 package org.springframework.security.oauth.examples.sparklr;
 
-import java.util.Collection;
-import java.io.InputStream;
+import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
+import org.codehaus.enunciate.rest.annotations.Noun;
+import org.codehaus.enunciate.rest.annotations.ProperNoun;
+
+import javax.activation.DataHandler;
+import javax.jws.WebService;
 
 /**
  * Service for retrieving photos.
  * 
  * @author Ryan Heaton
  */
+@WebService
+@RESTEndpoint
 public interface PhotoService {
 
   /**
@@ -15,7 +21,10 @@ public interface PhotoService {
    *
    * @return The photos for the current user.
    */
-  Collection<PhotoInfo> getPhotosForCurrentUser();
+  @Noun (
+    "photos"
+  )
+  Photos getPhotosForCurrentUser();
 
   /**
    * Load a photo by id.
@@ -23,5 +32,9 @@ public interface PhotoService {
    * @param id The id of the photo.
    * @return The photo that was read.
    */
-  InputStream loadPhoto(String id);
+  @Noun (
+    value = "photo",
+    disableTopContext = true
+  )
+  DataHandler loadPhoto(@ProperNoun String id);
 }

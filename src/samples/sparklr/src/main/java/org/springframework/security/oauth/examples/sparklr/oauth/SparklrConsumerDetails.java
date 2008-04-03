@@ -1,10 +1,12 @@
 package org.springframework.security.oauth.examples.sparklr.oauth;
 
 import org.springframework.security.oauth.provider.BaseConsumerDetails;
+import org.codehaus.enunciate.XmlTransient;
 
 /**
  * @author Ryan Heaton
  */
+@XmlTransient
 public class SparklrConsumerDetails extends BaseConsumerDetails {
 
   private String displayName;

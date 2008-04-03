@@ -1,38 +1,54 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
-  <!--Basic application beans.-->
-  <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-    <property name="prefix" value="/WEB-INF/jsp/"/>
-    <property name="suffix" value=".jsp"/>
-  </bean>
+  <!--
+    The sparklr users.
+  -->
+  <bean id="userDetailsService" class="org.acegisecurity.userdetails.memory.InMemoryDaoImpl">
+     <property name="userMap">
+       <value>
+         marissa=koala,ROLE_USER
+         paul=emu,ROLE_USER
+       </value>
+     </property>
+   </bean>
 
-  <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-    <property name="mappings">
-      <props>
-        <prop key="/xml/photos">photosController</prop>
-        <prop key="/json/photos">photosController</prop>
-        <prop key="/photo/*">photoController</prop>
-        <prop key="/oauth/confirm_access">accessConfirmationController</prop>
-      </props>
+  <!--
+    Definition of a consumer details service for sparklr.  For now, we only have one registered consumer, tonr,
+    whose consumer key is "tonr-consumer-key" and whose shared secret is "SHHHHH!!!!!!!!!!".  (There is also some
+    other information about the consumer included.)
+  -->
+  <bean id="consumerDetailsService" class="org.springframework.security.oauth.provider.InMemoryConsumerDetailsService">
+    <property name="consumerDetailsStore">
+      <map>
+        <entry key="tonr-consumer-key">
+          <bean class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrConsumerDetails">
+            <property name="consumerKey" value="tonr-consumer-key"/>
+            <property name="displayName" value="Tonr.com"/>
+            <property name="resourceName" value="Your Photos"/>
+            <property name="resourceDescription" value="Your photos that you have uploaded to sparklr.com."/>
+            <property name="signatureSecret">
+              <bean class="org.springframework.security.oauth.common.signature.SharedConsumerSecret">
+                <constructor-arg value="SHHHHH!!!!!!!!!!"/>
+              </bean>
+            </property>
+          </bean>
+        </entry>
+      </map>
     </property>
-    <property name="alwaysUseFullPath" value="true"/>
-  </bean>
-
-  <bean id="photosController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotosController">
-    <property name="photoService" ref="photoServices"/>
   </bean>
   
-  <bean id="photoController" class="org.springframework.security.oauth.examples.sparklr.mvc.PhotoController">
-    <property name="photoService" ref="photoServices"/>    
-  </bean>
+  <!--
+    This is the definition for the token services that service the sparklr OAuth engine.  Since sparklr only
+    runs on a single app server, we can use an in-memory implementation of the token services.  If the
+    app were distributed among multiple app servers, you'd have to provide token services that make the tokens
+    visible to all app servers.
 
-  <bean id="accessConfirmationController" class="org.springframework.security.oauth.examples.sparklr.mvc.AccessConfirmationController">
-    <property name="tokenServices" ref="tokenServices"/>
-    <property name="consumerDetailsService" ref="consumerDetailsService"/>
-  </bean>
+    The in-memory token services spawn a separate thread that cleans up expired tokens.
+  -->
+  <bean id="tokenServices" class="org.springframework.security.oauth.provider.token.InMemoryProviderTokenServices"/>
 
   <bean id="photoServices" class="org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl">
     <property name="photos">

@@ -6,12 +6,13 @@ import org.acegisecurity.context.SecurityContextHolder;
 import org.acegisecurity.userdetails.UserDetails;
 import org.springframework.security.oauth.examples.sparklr.PhotoInfo;
 import org.springframework.security.oauth.examples.sparklr.PhotoService;
+import org.springframework.security.oauth.examples.sparklr.Photos;
+import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
-import java.io.IOException;
-import java.io.InputStream;
+import javax.activation.DataHandler;
+import javax.jws.WebService;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,11 +20,15 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
+@WebService (
+  endpointInterface = "org.springframework.security.oauth.examples.sparklr.PhotoService"
+)
+@RESTEndpoint
 public class PhotoServiceImpl implements PhotoService {
 
   private List<PhotoInfo> photos;
 
-  public Collection<PhotoInfo> getPhotosForCurrentUser() {
+  public Photos getPhotosForCurrentUser() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication.getPrincipal() instanceof UserDetails) {
       UserDetails details = (UserDetails) authentication.getPrincipal();
@@ -34,14 +39,16 @@ public class PhotoServiceImpl implements PhotoService {
           infos.add(info);
         }
       }
-      return infos;
+      Photos photos = new Photos();
+      photos.setPhotos(infos);
+      return photos;
     }
     else {
       throw new BadCredentialsException("Bad credentials: not a username/password authentication.");
     }
   }
 
-  public InputStream loadPhoto(String id) {
+  public DataHandler loadPhoto(String id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication.getPrincipal() instanceof UserDetails) {
       UserDetails details = (UserDetails) authentication.getPrincipal();
@@ -50,12 +57,7 @@ public class PhotoServiceImpl implements PhotoService {
         if (id.equals(photoInfo.getId()) && username.equals(photoInfo.getUserId())) {
           URL resourceURL = getClass().getResource(photoInfo.getResourceURL());
           if (resourceURL != null) {
-            try {
-              return resourceURL.openStream();
-            }
-            catch (IOException e) {
-              //fall through...
-            }
+            return new DataHandler(resourceURL);
           }
         }
       }
