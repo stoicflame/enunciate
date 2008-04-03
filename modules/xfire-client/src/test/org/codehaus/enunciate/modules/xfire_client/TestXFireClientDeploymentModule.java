@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
@@ -35,6 +36,7 @@ import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +80,16 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
       @Override
       protected boolean isUpToDate(File commonJdkGenerateDir, File jdk14GenerateDir, File jdk15GenerateDir) {
         return false;
+      }
+
+      @Override
+      protected void writeAnnotationsFile(File annotationsFile) throws EnunciateException, IOException {
+        //fall through...
+      }
+
+      @Override
+      protected void writeTypesFile(File typesFile) throws EnunciateException, FileNotFoundException {
+        //fall through...
       }
     };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 
 /**
  * A controller for the JSON API.
@@ -64,8 +67,8 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
   }
 
   @Override
-  protected boolean isOperationAllowed(RESTOperation operation) {
-    return super.isOperationAllowed(operation) && operation.getVerb() == VerbType.read;
+  protected Object unmarshalNounValue(HttpServletRequest request, Unmarshaller unmarshaller) throws JAXBException, IOException, XMLStreamException {
+    return JsonUnmarshaller.unmarshal(request, unmarshaller, getNamespaces2Prefixes());
   }
 
   @Override

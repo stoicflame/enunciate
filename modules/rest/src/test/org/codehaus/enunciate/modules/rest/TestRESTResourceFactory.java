@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,10 @@ public class TestRESTResourceFactory extends TestCase {
       assertNotNull(resource);
 
       for (VerbType verbType : VerbType.values()) {
+        if (verbType.getAlias() != null) {
+          verbType = verbType.getAlias();
+        }
+        
         RESTOperation operation = resource.getOperation(verbType);
         assertNotNull(resource.toString() + " does not contain an operation for " + verbType + ".", operation);
       }
@@ -99,6 +103,7 @@ public class TestRESTResourceFactory extends TestCase {
       assertNotNull(resource);
 
       for (VerbType verbType : VerbType.values()) {
+        verbType = verbType.getAlias() != null ? verbType.getAlias() : verbType;
         RESTOperation operation = resource.getOperation(verbType);
         assertSame(advisedEndpoint, operation.getEndpoint());
         assertNotNull(operation);

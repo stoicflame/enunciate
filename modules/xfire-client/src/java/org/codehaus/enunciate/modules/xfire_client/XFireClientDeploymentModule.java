@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   @Override
-  public void doFreemarkerGenerate() throws IOException, TemplateException {
+  public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File commonJdkGenerateDir = getCommonJdkGenerateDir();
     File jdk14GenerateDir = getJdk14GenerateDir();
     File jdk15GenerateDir = getJdk15GenerateDir();
@@ -348,6 +348,9 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
           processTemplate(template, model);
         }
       }
+
+      writeTypesFile(new File(getCommonJdkGenerateDir(), uuid + ".types"));
+      writeAnnotationsFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"));
     }
     else {
       info("Skipping generation of XFire Client sources as everything appears up-to-date...");
@@ -518,8 +521,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
       jdk14Files.addAll(typeFiles);
       enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk14CompileDir, Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
-      writeTypesFile(new File(jdk14CompileDir, uuid + ".types"));
-      writeAnnotationsFile(new File(jdk14CompileDir, uuid + ".annotations"));
+      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk14CompileDir, uuid + ".types"));
+      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk14CompileDir, uuid + ".annotations"));
     }
     else {
       info("Skipping compilation of JDK 1.4 client classes as everything appears up-to-date...");
@@ -531,8 +534,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
       jdk15Files.addAll(typeFiles);
       enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk15CompileDir, Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
-      writeTypesFile(new File(jdk15CompileDir, uuid + ".types"));
-      writeAnnotationsFile(new File(jdk15CompileDir, uuid + ".annotations"));
+      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk15CompileDir, uuid + ".types"));
+      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk15CompileDir, uuid + ".annotations"));
     }
     else {
       info("Skipping compilation of JDK 1.5 client classes as everything appears up-to-date...");
@@ -782,7 +785,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for the jdk14 client files.
    */
-  protected File getJdk14GenerateDir() {
+  public File getJdk14GenerateDir() {
     return new File(getGenerateDir(), "jdk14");
   }
 
@@ -791,7 +794,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for compiling the jdk 14 compatible classes.
    */
-  protected File getJdk14CompileDir() {
+  public File getJdk14CompileDir() {
     return new File(getCompileDir(), "jdk14");
   }
 
@@ -800,7 +803,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for the jdk15 client files.
    */
-  protected File getJdk15GenerateDir() {
+  public File getJdk15GenerateDir() {
     return new File(getGenerateDir(), "jdk15");
   }
 
@@ -809,7 +812,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for compiling the jdk 15 compatible classes.
    */
-  protected File getJdk15CompileDir() {
+  public File getJdk15CompileDir() {
     return new File(getCompileDir(), "jdk15");
   }
 
@@ -818,7 +821,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    *
    * @return The directory for the java files common to both jdk 14 and jdk 15.
    */
-  protected File getCommonJdkGenerateDir() {
+  public File getCommonJdkGenerateDir() {
     return new File(getGenerateDir(), "common");
   }
 

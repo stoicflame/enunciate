@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,14 @@ import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.io.IOException;
 
 /**
  * An xml exporter for a REST resource.
@@ -94,11 +97,8 @@ public class RESTResourceXMLExporter extends AbstractController {
         case update:
           method = "POST";
           break;
-        case delete:
-          method = "DELETE";
-          break;
         default:
-          throw new IllegalStateException("Unsupported verb: " + supportedVerb);
+          method = supportedVerb.toString().toUpperCase();
       }
       supportedMethods[i++] = method;
     }
@@ -357,7 +357,7 @@ public class RESTResourceXMLExporter extends AbstractController {
       else {
         try {
           //if the operation has a noun value type, unmarshall it from the body....
-          nounValue = unmarshaller.unmarshal(request.getInputStream());
+          nounValue = unmarshalNounValue(request, unmarshaller);
         }
         catch (Exception e) {
           //if we can't unmarshal the noun value, continue if the noun value is optional.
@@ -383,6 +383,17 @@ public class RESTResourceXMLExporter extends AbstractController {
     TreeMap<String, Object> model = new TreeMap<String, Object>();
     model.put(RESTOperationView.MODEL_RESULT, result);
     return new ModelAndView(view, model);
+  }
+
+  /**
+   * Unmarshal the noun value from the request given the specified unmarshaller.
+   *
+   * @param request The request.
+   * @param unmarshaller The unmarshaller.
+   * @return The noun value.
+   */
+  protected Object unmarshalNounValue(HttpServletRequest request, Unmarshaller unmarshaller) throws JAXBException, IOException, XMLStreamException {
+    return unmarshaller.unmarshal(request.getInputStream());
   }
 
   /**

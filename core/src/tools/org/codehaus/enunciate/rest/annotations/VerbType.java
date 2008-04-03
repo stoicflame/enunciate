@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,30 @@ public enum VerbType {
 
   update,
 
-  delete
-  
+  delete,
+
+  get(read),
+
+  put(create),
+
+  post(update);
+
+  private final VerbType alias;
+
+  VerbType() {
+    this.alias = null;
+  }
+
+  VerbType(VerbType alias) {
+    this.alias = alias;
+  }
+
+  /**
+   * The alias of the verb.
+   *
+   * @return The alias of the verb, or null if none.
+   */
+  public VerbType getAlias() {
+    return alias;
+  }
 }

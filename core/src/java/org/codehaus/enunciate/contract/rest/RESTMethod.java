@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,13 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     Verb verbInfo = getAnnotation(Verb.class);
     if (verbInfo != null) {
       verbs = verbInfo.value();
+    }
+
+    for (int i = 0; i < verbs.length; i++) {
+      VerbType verb = verbs[i];
+      if (verb.getAlias() != null) {
+        verbs[i] = verb.getAlias();
+      }
     }
 
     return verbs;

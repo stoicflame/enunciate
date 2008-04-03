@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Web Cohesion
+ * Copyright 2006-2008 Web Cohesion
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
             if ((Modifier.isPublic(modifiers)) && (restMethod.isAnnotationPresent(Verb.class)) && (!isImplMethod(restMethod, endpointTypes))) {
-              VerbType[] verbs = restMethod.getAnnotation(Verb.class).value();
+              VerbType[] verbs = normalize(restMethod.getAnnotation(Verb.class).value());
               String noun = restMethod.getName();
               Noun nounInfo = restMethod.getAnnotation(Noun.class);
               NounContext nounContextInfo = ((NounContext) endpointType.getAnnotation(NounContext.class));
@@ -110,6 +110,20 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
         }
       }
     }
+  }
+
+  /**
+   * Normalizes the verb types.
+   *
+   * @param verbs The verbs to normalize.
+   * @return The normalized list of verbs.
+   */
+  private VerbType[] normalize(VerbType[] verbs) {
+    EnumSet<VerbType> normalized = EnumSet.noneOf(VerbType.class);
+    for (VerbType verb : verbs) {
+      normalized.add(verb.getAlias() != null ? verb.getAlias() : verb);
+    }
+    return normalized.toArray(new VerbType[normalized.size()]);
   }
 
   /**
