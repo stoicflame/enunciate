@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+  <!--
+    This is the definition for the token services that service the sparklr OAuth engine.  Since sparklr only
+    runs on a single app server, we can use an in-memory implementation of the token services.  If the
+    app were distributed among multiple app servers, you'd have to provide token services that make the tokens
+    visible to all app servers.
+
+    The in-memory token services spawn a separate thread that cleans up expired tokens. 
+  -->
+  <bean id="tokenServices" class="org.springframework.security.oauth.provider.token.InMemoryProviderTokenServices"/>
+
+</beans>

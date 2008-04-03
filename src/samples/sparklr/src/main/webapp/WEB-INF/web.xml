@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+  <filter>
+    <filter-name>security-filter</filter-name>
+    <filter-class>org.acegisecurity.util.FilterToBeanProxy</filter-class>
+    <init-param>
+      <param-name>targetClass</param-name>
+      <param-value>org.acegisecurity.util.FilterChainProxy</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>security-filter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>spring</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>xml/photos</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>json/photos</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>photo/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>oauth/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>
