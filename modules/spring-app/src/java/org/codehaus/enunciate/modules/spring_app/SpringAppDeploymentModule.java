@@ -118,6 +118,7 @@ import java.util.jar.Manifest;
  * <li><a href="#config_springImport">The "springImport" element</a></li>
  * <li><a href="#config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></li>
  * <li><a href="#config_handlerInterceptor">The "handlerInterceptor" element</a></li>
+ * <li><a href="#config_handlerMapping">The "handlerMapping" element</a></li>
  * <li><a href="#config_copyResources">The "copyResources" element</a></li>
  * </ul>
  * </li>
@@ -177,6 +178,10 @@ import java.util.jar.Manifest;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerMapping pattern="..." beanName="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerMapping pattern="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;copyResources dir="..." pattern="..."/&gt;
@@ -320,6 +325,18 @@ import java.util.jar.Manifest;
  * <p>For more information on spring bean configuration and interceptor advice, see
  * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
  *
+ * <h3><a name="config_handlerMapping">The "handlerMapping" element</a></h3>
+ *
+ * <p>The "handlerMapping" element is used to specify a custom Spring handler mapping.</p>
+ *
+ * <ul>
+ * <li>The "pattern" attribute specifies the pattern that maps to the handler.</p>
+ * <li>The "beanName" attribute specifies the bean name of the handler.</p>
+ * </ul>
+ *
+ * <p>For more information on spring handler mappings, see
+ * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
+ *
  * <h3><a name="config_copyResources">The "copyResources" element</a></h3>
  *
  * <p>The "copyResources" element is used to specify a pattern of resources to copy to the compile directory.  It supports the following attributes:</p>
@@ -351,6 +368,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
+  private final Map<String, String> customHandlerMappings = new HashMap<String, String>();
   private boolean compileDebugInfo = true;
   private String defaultAutowire = null;
   private String defaultDependencyCheck = null;
@@ -437,6 +455,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         model.put("handlerInterceptors", this.handlerInterceptors);
       }
 
+      model.put("customHandlerMappings", this.customHandlerMappings);
       model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
       model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
       model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
@@ -1178,6 +1197,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addHandlerInterceptor(HandlerInterceptor interceptorConfig) {
     this.handlerInterceptors.add(interceptorConfig);
+  }
+
+  /**
+   * Add a custom handler mapping to the Spring handler.
+   *
+   * @param pattern The pattern.
+   * @param beanName The bean name.
+   */
+  public void addCustomHandlerMapping(String pattern, String beanName) {
+    if (pattern == null) {
+      throw new IllegalArgumentException("A pattern must be supplied to a custom handler mapping.");
+    }
+
+    if (beanName == null) {
+      throw new IllegalArgumentException("The bean name for a custom handler must be supplied to a custom handler mapping.");
+    }
+
+    this.customHandlerMappings.put(pattern, beanName);
   }
 
   /**

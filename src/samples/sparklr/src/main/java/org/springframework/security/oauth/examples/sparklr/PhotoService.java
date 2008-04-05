@@ -1,11 +1,10 @@
 package org.springframework.security.oauth.examples.sparklr;
 
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
-import org.codehaus.enunciate.rest.annotations.Noun;
-import org.codehaus.enunciate.rest.annotations.ProperNoun;
+import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
+import javax.annotation.security.RolesAllowed;
 
 /**
  * Service for retrieving photos.
@@ -14,6 +13,10 @@ import javax.jws.WebService;
  */
 @WebService
 @RESTEndpoint
+@JSONP
+@RolesAllowed (
+  "ROLE_USER"
+)
 public interface PhotoService {
 
   /**
@@ -23,6 +26,9 @@ public interface PhotoService {
    */
   @Noun (
     "photos"
+  )
+  @Verb (
+    VerbType.get
   )
   Photos getPhotosForCurrentUser();
 
@@ -34,7 +40,10 @@ public interface PhotoService {
    */
   @Noun (
     value = "photo",
-    disableTopContext = true
+    context = "jpg"
+  )
+  @Verb (
+    VerbType.get
   )
   DataHandler loadPhoto(@ProperNoun String id);
 }

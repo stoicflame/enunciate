@@ -71,6 +71,15 @@
           <module name="base" />
         </modules>
       </facet-type>
+      <facet-type id="web">
+        <modules>
+          <module name="base">
+            <files>
+              <file url="file://$PROJECT_DIR$/src/samples/sparklr/src/main/webapp/WEB-INF/web.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
     </autodetection-disabled>
   </component>
   <component name="IdProvider" IDEtalkID="BE65902CCDA3510877F8779C4AA4EF5D" />

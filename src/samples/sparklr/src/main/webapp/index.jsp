@@ -10,9 +10,9 @@
   <authz:authorize ifAllGranted="ROLE_USER">
     <script type='text/javascript'>
       function pictureDisplay(json) {
-        for (var i = 0; i < json.photos.length; i++) {
-          var photo = json.photos[i];
-          document.write('<img src="photo/' + photo.id + '" alt="' + photo.name + '">');
+        for (var i = 0; i < json.photos.photo.length; i++) {
+          var photo = json.photos.photo[i];
+          document.write('<img src="rest/jpg/photo/' + photo['@id'] + '" alt="' + photo.name + '">');
         }
       }
     </script>
@@ -33,8 +33,8 @@
     <authz:authorize ifNotGranted="ROLE_USER">
       <div class="header1">Login</div>
       <form action="<c:url value="/login.do"/>" method="POST">
-        <p class="formtext">Username: <input type='text' name='j_username'></p>
-        <p class="formtext">Password: <input type='password' name='j_password'></p>
+        <p class="formtext">Username: <input type='text' name='j_username' value="marissa"></p>
+        <p class="formtext">Password: <input type='password' name='j_password' value="koala"></p>
         <p class="formtext"><input name="login" value="login" type="submit"></p>
       </form>
     </authz:authorize>

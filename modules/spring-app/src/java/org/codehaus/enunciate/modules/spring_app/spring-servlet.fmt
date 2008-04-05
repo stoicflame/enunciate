@@ -181,7 +181,7 @@
             </property>
             <property name="model">
               <map>
-                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="cssURL" value="/${docsDir}default.css"/>
                 <entry key="formLoginURL" value="${securityConfig.formBasedLoginConfig.url}"/>
               </map>
             </property>
@@ -199,10 +199,12 @@
             </property>
             <property name="model">
               <map>
-                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="cssURL" value="/${docsDir}default.css"/>
                 <entry key="grantAccessURL" value="${securityConfig.OAuthConfig.grantAccessURL}"/>
               </map>
             </property>
+            <property name="tokenServices" ref="localTokenServices"/>
+            <property name="consumerDetailsService" ref="localConsumerDetailsService"/>
           </bean>
         </entry>
 
@@ -215,7 +217,7 @@
             </property>
             <property name="model">
               <map>
-                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="cssURL" value="/${docsDir}default.css"/>
               </map>
             </property>
           </bean>
@@ -230,7 +232,7 @@
             </property>
             <property name="model">
               <map>
-                <entry key="cssURL" value="${docsDir}default.css"/>
+                <entry key="cssURL" value="/${docsDir}default.css"/>
                 <entry key="request_token_url" value="${securityConfig.OAuthConfig.requestTokenURL}"/>
                 <entry key="access_token_url" value="${securityConfig.OAuthConfig.accessTokenURL}"/>
                 <entry key="confirm_access_url" value="${securityConfig.OAuthConfig.accessConfirmationURL}"/>
@@ -239,6 +241,12 @@
           </bean>
         </entry>
   [/#if]
+  [#list customHandlerMappings?keys as pattern]
+
+        <entry key="${pattern}">
+          <ref bean="${customHandlerMappings[pattern]}"/>
+        </entry>
+  [/#list]
       </map>
     </property>
   </bean>

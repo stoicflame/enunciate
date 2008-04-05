@@ -42,10 +42,10 @@
     [#if securityConfig.loadAnonymousIdentity]
       loadAnonymousIdentity,[#t]
     [/#if]
-    [#if securityConfig.enableOAuth]
-      oauthRequestTokenFilter,oauthUserAuthorizationFilter,oauthAccessTokenFilter,oauthProtectedResourceFilter,[#t]
-    [/#if]
     translateExceptions[#t]
+    [#if securityConfig.enableOAuth]
+      ,oauthRequestTokenFilter,oauthConfirmAccessFilter,oauthUserAuthorizationFilter,oauthAccessTokenFilter,oauthProtectedResourceFilter[#t]
+    [/#if]
   [/#assign]
 
   <bean id="filterChainProxy" class="org.acegisecurity.util.FilterChainProxy">

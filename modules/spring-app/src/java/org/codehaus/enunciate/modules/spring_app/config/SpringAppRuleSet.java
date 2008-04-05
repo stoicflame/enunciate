@@ -60,6 +60,10 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/springImport");
     digester.addSetNext("enunciate/modules/spring-app/springImport", "addSpringImport");
 
+    digester.addCallMethod("enunciate/modules/spring-app/handlerMapping", "addCustomHandlerMapping", 2);
+    digester.addCallParam("enunciate/modules/spring-app/handlerMapping", 0, "pattern");
+    digester.addCallParam("enunciate/modules/spring-app/handlerMapping", 1, "beanName");
+
     digester.addObjectCreate("enunciate/modules/spring-app/copyResources", CopyResources.class);
     digester.addSetProperties("enunciate/modules/spring-app/copyResources");
     digester.addSetNext("enunciate/modules/spring-app/copyResources", "addCopyResources");

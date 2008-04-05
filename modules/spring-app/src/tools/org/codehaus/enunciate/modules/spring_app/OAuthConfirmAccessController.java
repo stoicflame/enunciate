@@ -21,7 +21,6 @@ import org.springframework.security.oauth.provider.ConsumerDetailsService;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.AbstractController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +35,7 @@ public class OAuthConfirmAccessController extends StaticModelViewController {
   private ConsumerDetailsService consumerDetailsService;
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String token = request.getParameter("oauth_token");
+    String token = request.getParameter("requestToken");
     if (token == null) {
       throw new IllegalArgumentException("An access token must be provided.");
     }
@@ -44,11 +43,11 @@ public class OAuthConfirmAccessController extends StaticModelViewController {
     OAuthProviderToken providerToken = getTokenServices().getToken(token);
     ConsumerDetails consumer = getConsumerDetailsService().loadConsumerByConsumerKey(providerToken.getConsumerKey());
 
-    String callback = request.getParameter("oauth_callback");
+    String callback = request.getParameter("callbackURL");
     TreeMap<String, Object> model = getModel() == null ? new TreeMap<String, Object>() : new TreeMap<String, Object>(getModel());
-    model.put("oauth_token", token);
+    model.put("requestToken", token);
     if (callback != null) {
-      model.put("oauth_callback", callback);
+      model.put("callbackURL", callback);
     }
 
     model.put("consumer", consumer);

@@ -25,6 +25,8 @@
   <bean id="oauthUserAuthorizationFilter" class="org.springframework.security.oauth.provider.UserAuthorizationProcessingFilter">
     <property name="filterProcessesUrl" value="${securityConfig.OAuthConfig.grantAccessURL}"/>
     <property name="tokenServices" ref="localTokenServices"/>
+    <property name="tokenIdParameterName" value="requestToken"/>
+    <property name="callbackParameterName" value="callbackURL"/>
     <property name="authenticationFailureUrl" value="${securityConfig.OAuthConfig.accessConfirmationURL}"/>
 
     <!--This is where the user will be redirected if the consumer didn't provide a callback URL.-->
@@ -43,6 +45,29 @@
     <property name="consumerDetailsService" ref="localConsumerDetailsService"/>
     <property name="tokenServices" ref="localTokenServices"/>
   </bean>
+
+  <!--The filter that ensures that the user is authenticated before allowing the confirm access page.-->
+	<bean id="oauthConfirmAccessFilter" class="org.acegisecurity.intercept.web.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager"/>
+		<property name="accessDecisionManager">
+			<bean class="org.acegisecurity.vote.AffirmativeBased">
+				<property name="allowIfAllAbstainDecisions" value="false"/>
+				<property name="decisionVoters">
+					<list>
+						<bean class="org.acegisecurity.vote.AuthenticatedVoter"/>
+					</list>
+				</property>
+			</bean>
+		</property>
+		<property name="objectDefinitionSource">
+			<value><![CDATA[
+				CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+				PATTERN_TYPE_APACHE_ANT
+				${securityConfig.OAuthConfig.accessConfirmedURL}=IS_AUTHENTICATED_REMEMBERED
+				${securityConfig.OAuthConfig.accessConfirmationURL}=IS_AUTHENTICATED_REMEMBERED
+			]]></value>
+		</property>
+	</bean>
 
   [#if securityConfig.OAuthConfig.consumerDetailsService?exists]
     [#if securityConfig.OAuthConfig.consumerDetailsService.beanName?exists]

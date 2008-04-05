@@ -11,6 +11,12 @@
     <level value="debug"/>
   </logger>
 
+  <!--
+  <logger name="org.acegisecurity">
+    <level value="debug"/>
+  </logger>
+  -->
+
   <root>
     <level value ="error"/>
     <appender-ref ref="ConsoleAppender"/>

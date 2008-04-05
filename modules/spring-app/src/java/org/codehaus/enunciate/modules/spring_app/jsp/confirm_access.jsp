@@ -31,9 +31,9 @@
 
       <div align="center">
         <form action="<c:url value="${grantAccessURL}"/>" method="POST">
-          <input type="hidden" name="oauth_token" value="<c:out value="${oauth_token}"/>"/>
-          <c:if test="${!empty oauth_callback}">
-            <input type="hidden" name="oauth_callback" value="<c:out value="${oauth_callback}"/>"/>
+          <input type="hidden" name="requestToken" value="<c:out value="${requestToken}"/>"/>
+          <c:if test="${!empty callbackURL}">
+            <input type="hidden" name="callbackURL" value="<c:out value="${callbackURL}"/>"/>
           </c:if>
           <input type="submit" value="confirm"/>
         </form>

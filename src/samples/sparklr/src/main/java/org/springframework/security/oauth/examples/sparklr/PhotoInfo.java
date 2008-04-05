@@ -1,5 +1,8 @@
 package org.springframework.security.oauth.examples.sparklr;
 
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * Photo information.
  *
@@ -17,6 +20,7 @@ public class PhotoInfo {
    *
    * @return Id of the photo.
    */
+  @XmlAttribute
   public String getId() {
     return id;
   }
@@ -35,6 +39,7 @@ public class PhotoInfo {
    *
    * @return The resource URL.
    */
+  @XmlTransient
   public String getResourceURL() {
     return resourceURL;
   }

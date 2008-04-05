@@ -270,8 +270,11 @@ import java.util.ArrayList;
  * <h3>formBasedLogin</h3>
  *
  * <p>The "formBasedLoginConfig" child element is used to configure the form-based login endpoint.  The "url" attribute specifies the URL where the form-based
- * login will be mounted.  The default is "/form/login".  The "redirectOnSuccessUrl" specifies the URL to which a successful login will be redirected. The
- * default value is "/".  The "redirectOnFailureUrl" specifies the URL to which an unsuccessful login will be redirected.  The default value is "/".</p>
+ * login will be mounted.  The default is "/form/login".  The "loginPageFile" attribute is used to specify a JSP file on the filesystem that will be
+ * used to display the login page. If none is provided, a default will be supplied. The "loginPageURL" is the URL at which said loginPageFile will be mounted.
+ * The default is "login.jsp". The "redirectOnSuccessUrl" specifies the URL to which a successful 
+ * login will be redirected. The default value is "/".  The "redirectOnFailureUrl" specifies the URL to which an unsuccessful login will be redirected.
+ * The default value is "/".</p>
  *
  * <p>For more information about the form-based login endpoint, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/webapp/AuthenticationProcessingFilter.html">org.acegisecurity.ui.webapp.AuthenticationProcessingFilter</a>.</p>
  *
@@ -371,6 +374,10 @@ public class SecurityConfig {
    */
   public void setEnableFormBasedLogin(boolean enableFormBasedLogin) {
     this.enableFormBasedLogin = enableFormBasedLogin;
+    
+    if (enableFormBasedLogin) {
+      this.persistIdentityAcrossHttpSession = true;
+    }
   }
 
   /**

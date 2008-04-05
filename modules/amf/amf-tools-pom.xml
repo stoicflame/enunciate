@@ -51,19 +51,19 @@
     <dependency>
       <groupId>com.adobe.blazeds</groupId>
       <artifactId>blazeds-common</artifactId>
-      <version>1.0-beta1</version>
+      <version>3.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.adobe.blazeds</groupId>
       <artifactId>blazeds-core</artifactId>
-      <version>1.0-beta1</version>
+      <version>3.0</version>
     </dependency>
 
     <dependency>
       <groupId>com.adobe.blazeds</groupId>
       <artifactId>blazeds-remoting</artifactId>
-      <version>1.0-beta1</version>
+      <version>3.0</version>
       <exclusions>
         <!--There was a bug in the original maven upload of blazeds-remoting, necessitating these exclusions.-->
         <exclusion>

@@ -4,13 +4,6 @@
 <web-app>
 
   [#if securityEnabled]
-  <context-param>
-    <param-name>formLoginURL</param-name>
-    <param-value>${securityConfig.formBasedLoginConfig.url}</param-value>
-  </context-param>
-  
-  [/#if]
-  [#if securityEnabled]
   <filter>
     <filter-name>spring-security</filter-name>
     <filter-class>org.acegisecurity.util.FilterToBeanProxy</filter-class>
@@ -101,14 +94,15 @@
     <url-pattern>${jsonSubcontext}*</url-pattern>
   </servlet-mapping>
 
-  [#if securityEnabled && securityConfig.enableFormBasedLogin]
+  [#if securityEnabled]
+    [#if securityConfig.enableFormBasedLogin]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
     <url-pattern>${securityConfig.formBasedLoginConfig.loginPageURL}</url-pattern>
   </servlet-mapping>
 
-  [/#if]
-  [#if securityEnabled && securityConfig.enableOAuth]
+    [/#if]
+    [#if securityConfig.enableOAuth]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.infoURL}</url-pattern>
@@ -124,7 +118,15 @@
     <url-pattern>${securityConfig.OAuthConfig.accessConfirmedURL}</url-pattern>
   </servlet-mapping>
 
+    [/#if]
   [/#if]
+  [#list customHandlerMappings?keys as pattern]
+
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>${pattern}</url-pattern>
+  </servlet-mapping>
+  [/#list]
   <mime-mapping>
     <extension>wsdl</extension>
     <mime-type>text/xml</mime-type>
