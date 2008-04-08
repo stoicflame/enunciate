@@ -59,6 +59,9 @@
 				</property>
 			</bean>
 		</property>
+		<property name="eventPublisher">
+		  <bean class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessController"/>
+		</property>
 		<property name="objectDefinitionSource">
 			<value><![CDATA[
 				CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON

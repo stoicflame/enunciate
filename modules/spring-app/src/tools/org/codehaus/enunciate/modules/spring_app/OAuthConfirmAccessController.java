@@ -18,26 +18,41 @@ package org.codehaus.enunciate.modules.spring_app;
 
 import org.springframework.security.oauth.provider.ConsumerDetails;
 import org.springframework.security.oauth.provider.ConsumerDetailsService;
+import org.springframework.security.oauth.provider.OAuthProviderProcessingFilter;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEvent;
+import org.acegisecurity.event.authorization.AuthorizedEvent;
+import org.acegisecurity.intercept.web.FilterInvocation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.TreeMap;
 
 /**
+ * Controller for displaying the OAuth "confirm access" page. As an event publisher, listens for any
+ * {@link org.acegisecurity.event.authorization.AuthorizedEvent}s and ensures that any OAuth processing
+ * filter don't get called after the request is authorized.
+ *
  * @author Ryan Heaton
  */
-public class OAuthConfirmAccessController extends StaticModelViewController {
+public class OAuthConfirmAccessController extends StaticModelViewController implements ApplicationEventPublisher {
 
   private OAuthProviderTokenServices tokenServices;
   private ConsumerDetailsService consumerDetailsService;
 
+  public void publishEvent(ApplicationEvent event) {
+    if ((event instanceof AuthorizedEvent) && (event.getSource() instanceof FilterInvocation)) {
+      ((FilterInvocation) event.getSource()).getHttpRequest().setAttribute(OAuthProviderProcessingFilter.OAUTH_PROCESSING_HANDLED, Boolean.TRUE);
+    }
+  }
+
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String token = request.getParameter("requestToken");
     if (token == null) {
-      throw new IllegalArgumentException("An access token must be provided.");
+      throw new IllegalArgumentException("An request token to authorize must be provided.");
     }
 
     OAuthProviderToken providerToken = getTokenServices().getToken(token);
