@@ -59,7 +59,7 @@
 				</property>
 			</bean>
 		</property>
-		<property name="eventPublisher">
+		<property name="applicationEventPublisher">
 		  <bean class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessController"/>
 		</property>
 		<property name="objectDefinitionSource">
