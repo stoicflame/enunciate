@@ -7,6 +7,23 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="spring-app" />
+    <orderEntry type="library" name="spring-j2ee" level="project" />
+    <orderEntry type="module-library">
+      <library name="test-integration">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/mortbay/jetty/jetty/6.1.7/jetty-6.1.7.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/commons-httpclient/commons-httpclient/2.0.2/commons-httpclient-2.0.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/json/json/20070829/json-20070829.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/jdom/jdom/1.0/jdom-1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/commons-jxpath/commons-jxpath/1.2/commons-jxpath-1.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/mortbay/jetty/jetty-util/6.1.7/jetty-util-6.1.7.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
   <component name="copyright">

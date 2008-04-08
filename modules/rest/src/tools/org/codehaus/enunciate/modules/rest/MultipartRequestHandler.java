@@ -16,17 +16,16 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.rest.annotations.VerbType;
-import org.springframework.web.multipart.MultipartResolver;
-
+import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 
 /**
- * A factory for a multipart resolver.
- * 
+ * Handler for multipart requests.
+ *
  * @author Ryan Heaton
  */
-public interface MultipartResolverFactory {
+public interface MultipartRequestHandler {
 
   /**
    * Whether the request represents a multipart request.
@@ -37,13 +36,19 @@ public interface MultipartResolverFactory {
   boolean isMultipart(HttpServletRequest request);
 
   /**
-   * Get the multipart resolver for the given REST resource.
+   * Handles the multipart request.
    *
-   * @param nounContext The noun context of the rest resource.
-   * @param noun The noun of the rest resource.
-   * @param verb The verb for the operation for which the multipart resolver will be applied.
-   * @return The multipart resolver.
+   * @param request The multipart request to handle.
+   * @return The handled form of the request.
    */
-  MultipartResolver getMultipartResolver(String nounContext, String noun, VerbType verb);
+  HttpServletRequest handleMultipartRequest(HttpServletRequest request) throws Exception;
+
+  /**
+   * Parses the parts of the specified multipart request into a collection of javax.activation.DataHandler.
+   *
+   * @param request The (already {@link #handleMultipartRequest(javax.servlet.http.HttpServletRequest) handled) request.
+   * @return The parsed parts.
+   */
+  Collection<DataHandler> parseParts(HttpServletRequest request) throws Exception;
 
 }

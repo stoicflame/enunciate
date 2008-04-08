@@ -64,6 +64,10 @@
     [@processImplicitElement implicitElement=implicitElement/]
   [/#list]
 [#t]
+  [#list schema.implicitSchemaAttributes as implicitAttribute]
+    [@processImplicitAttribute implicitAttribute=implicitAttribute/]
+  [/#list]
+[#t]
 [/#macro]
 
 [#--
@@ -330,4 +334,15 @@
     [/#if]
 </${xs}:element>
   [/#if]
+[/#macro]
+[#macro processImplicitAttribute implicitAttribute]
+<${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}">
+    [#if implicitAttribute.attributeDocs?exists]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitAttribute.attributeDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+</${xs}:attribute>
 [/#macro]

@@ -24,8 +24,8 @@ import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Iterator;
 import java.util.Map;

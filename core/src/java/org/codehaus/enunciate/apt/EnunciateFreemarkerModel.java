@@ -20,15 +20,16 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.Schema;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.jaxws.WebMessage;
+import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
+import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
@@ -241,11 +242,85 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.setNamespace(namespace);
       namespacesToSchemas.put(namespace, schemaInfo);
     }
+
+    for (Element element : typeDef.getElements()) {
+      ImplicitSchemaElement implicitElement = getImplicitElement(element);
+      if (implicitElement != null) {
+        String implicitElementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+        SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitElementNamespace);
+        if (referencedSchemaInfo == null) {
+          referencedSchemaInfo = new SchemaInfo();
+          referencedSchemaInfo.setId(addNamespace(implicitElementNamespace));
+          referencedSchemaInfo.setNamespace(implicitElementNamespace);
+          namespacesToSchemas.put(implicitElementNamespace, referencedSchemaInfo);
+        }
+        referencedSchemaInfo.getImplicitSchemaElements().add(implicitElement);
+      }
+    }
+
+    for (Attribute attribute : typeDef.getAttributes()) {
+      ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
+      if (implicitAttribute != null) {
+        String implicitAttributeNamespace = attribute.getNamespace();
+        SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitAttributeNamespace);
+        if (referencedSchemaInfo == null) {
+          referencedSchemaInfo = new SchemaInfo();
+          referencedSchemaInfo.setId(addNamespace(implicitAttributeNamespace));
+          referencedSchemaInfo.setNamespace(implicitAttributeNamespace);
+          namespacesToSchemas.put(implicitAttributeNamespace, referencedSchemaInfo);
+        }
+        referencedSchemaInfo.getImplicitSchemaAttributes().add(implicitAttribute);
+      }
+    }
+
     schemaInfo.getTypeDefinitions().add(typeDef);
 
     int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
     if (position < 0) {
       this.typeDefinitions.add(-position - 1, typeDef);
+    }
+  }
+
+  /**
+   * Gets the implicit element for the specified element, or null if there is no implicit element.
+   *
+   * @param element The element.
+   * @return The implicit element, or null if none.
+   */
+  protected ImplicitSchemaElement getImplicitElement(Element element) {
+    if (!(element instanceof ElementRef)) {
+      boolean qualified = element.getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
+      String typeNamespace = element.getTypeDefinition().getNamespace();
+      typeNamespace = typeNamespace == null ? "" : typeNamespace;
+      String elementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+      elementNamespace = elementNamespace == null ? "" : elementNamespace;
+
+      if ((!elementNamespace.equals(typeNamespace)) && (qualified || !"".equals(elementNamespace))) {
+        return element.isWrapped() ? new ImplicitWrappedElementRef(element) : new ImplicitElementRef(element);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Gets the implicit attribute for the specified attribute, or null if there is no implicit attribute.
+   *
+   * @param attribute The attribute.
+   * @return The implicit attribute, or null if none.
+   */
+  protected ImplicitSchemaAttribute getImplicitAttribute(Attribute attribute) {
+    boolean qualified = attribute.getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
+    String typeNamespace = attribute.getTypeDefinition().getNamespace();
+    typeNamespace = typeNamespace == null ? "" : typeNamespace;
+    String attributeNamespace = attribute.getNamespace();
+    attributeNamespace = attributeNamespace == null ? "" : attributeNamespace;
+
+    if ((!attributeNamespace.equals(typeNamespace)) && (qualified || !"".equals(attributeNamespace))) {
+      return new ImplicitAttributeRef(attribute);
+    }
+    else {
+      return null;
     }
   }
 

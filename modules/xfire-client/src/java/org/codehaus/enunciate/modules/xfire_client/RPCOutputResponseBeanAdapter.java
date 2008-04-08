@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.xfire_client;
 
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
-import org.codehaus.enunciate.contract.jaxws.ImplicitRootElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 import org.codehaus.enunciate.contract.jaxws.RPCOutputMessage;
 import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
 

@@ -9,68 +9,6 @@
         <setting name="compilerMaxHeapSize" value="128" />
       </configuration>
     </facet>
-    <facet type="web" name="Web2" implicit="true">
-      <configuration>
-        <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/src/samples/sparklr/target/sparklr-1.0-SNAPSHOT/WEB-INF/web.xml" optional="false" version="2.5" />
-        </descriptors>
-        <webroots>
-          <root url="file://$MODULE_DIR$/src/samples/sparklr/target/sparklr-1.0-SNAPSHOT" relative="/" />
-        </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/src/samples/basic" />
-          <root url="file://$MODULE_DIR$/src/samples/full" />
-        </sourceRoots>
-        <building>
-          <setting name="EXPLODED_URL" value="file://" />
-          <setting name="EXPLODED_ENABLED" value="false" />
-          <setting name="JAR_URL" value="file://" />
-          <setting name="JAR_ENABLED" value="false" />
-          <setting name="BUILD_MODULE_ON_FRAME_DEACTIVATION" value="false" />
-          <setting name="BUILD_EXTERNAL_DEPENDENCIES" value="false" />
-          <setting name="EXCLUDE_EXPLODED_DIRECTORY" value="true" />
-          <setting name="RUN_JASPER_VALIDATION" value="true" />
-          <setting name="BUILD_ONLY_WEB_RESOURCES" value="false" />
-        </building>
-        <packaging>
-          <containerElement type="module" name="base">
-            <attribute name="method" value="1" />
-            <attribute name="URI" value="/WEB-INF/classes" />
-          </containerElement>
-        </packaging>
-      </configuration>
-    </facet>
-    <facet type="web" name="Web3" implicit="true">
-      <configuration>
-        <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/src/samples/sparklr/target/work/webapp/WEB-INF/web.xml" optional="false" version="2.5" />
-        </descriptors>
-        <webroots>
-          <root url="file://$MODULE_DIR$/src/samples/sparklr/target/work/webapp" relative="/" />
-        </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/src/samples/basic" />
-          <root url="file://$MODULE_DIR$/src/samples/full" />
-        </sourceRoots>
-        <building>
-          <setting name="EXPLODED_URL" value="file://" />
-          <setting name="EXPLODED_ENABLED" value="false" />
-          <setting name="JAR_URL" value="file://" />
-          <setting name="JAR_ENABLED" value="false" />
-          <setting name="BUILD_MODULE_ON_FRAME_DEACTIVATION" value="false" />
-          <setting name="BUILD_EXTERNAL_DEPENDENCIES" value="false" />
-          <setting name="EXCLUDE_EXPLODED_DIRECTORY" value="true" />
-          <setting name="RUN_JASPER_VALIDATION" value="true" />
-          <setting name="BUILD_ONLY_WEB_RESOURCES" value="false" />
-        </building>
-        <packaging>
-          <containerElement type="module" name="base">
-            <attribute name="method" value="1" />
-            <attribute name="URI" value="/WEB-INF/classes" />
-          </containerElement>
-        </packaging>
-      </configuration>
-    </facet>
     <facet type="web" name="Web">
       <configuration>
         <descriptors>

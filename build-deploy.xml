@@ -71,6 +71,11 @@
       <pom refid="rt.pom"/>
       <remoteRepository refid="deploy.repo"/>
     </artifact:deploy>
+    <artifact:deploy file="target/${full.jar.name}">
+      <pom refid="full.pom"/>
+      <remoteRepository refid="deploy.repo"/>
+      <attach file="target/${full.sources.jar.name}" classifier="sources"/>
+    </artifact:deploy>
   </target>
 
 </project>

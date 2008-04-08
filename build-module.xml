@@ -122,11 +122,13 @@
 
   <target name="jar-tools" description="create the tools jar." depends="compile-tools" if="tools.exists">
     <jar jarfile="target/enunciate-${module.name}-tools-${version}.jar" basedir="${tools.build.dir}"/>
+    <jar jarfile="target/enunciate-${module.name}-tools-${version}-sources.jar" basedir="src/tools"/>
   </target>
 
   <target name="install-tools" description="install the tools jar into the local repo" depends="jar-tools" if="tools.exists">
     <artifact:install file="target/enunciate-${module.name}-tools-${version}.jar">
       <pom refid="module.tools.pom"/>
+      <attach file="target/enunciate-${module.name}-tools-${version}-sources.jar" classifier="sources"/>
     </artifact:install>
   </target>
 
@@ -264,17 +266,20 @@
 
   <target name="jar" description="create the main jar." depends="test, extract-module-docs">
     <jar jarfile="target/enunciate-${module.name}-${version}.jar" basedir="${build.dir}"/>
+    <jar jarfile="target/enunciate-${module.name}-${version}-sources.jar" basedir="src/java"/>
   </target>
 
   <target name="install" description="install the main jar into the local repo." depends="jar">
     <artifact:install file="target/enunciate-${module.name}-${version}.jar">
       <pom refid="module.pom"/>
+      <attach file="target/enunciate-${module.name}-${version}-sources.jar" classifier="sources"/>
     </artifact:install>
   </target>
 
   <target name="deploy-tools" depends="init" if="deploy.tools">
     <artifact:deploy file="target/enunciate-${module.name}-tools-${version}.jar">
       <pom refid="module.tools.pom"/>
+      <attach file="target/enunciate-${module.name}-tools-${version}-sources.jar" classifier="sources"/>
       <remoteRepository refid="deploy.repo"/>
     </artifact:deploy>
   </target>
@@ -282,6 +287,7 @@
   <target name="deploy-main" depends="init" if="deploy.main">
     <artifact:deploy file="target/enunciate-${module.name}-${version}.jar">
       <pom refid="module.pom"/>
+      <attach file="target/enunciate-${module.name}-${version}-sources.jar" classifier="sources"/>
       <remoteRepository refid="deploy.repo"/>
     </artifact:deploy>
   </target>

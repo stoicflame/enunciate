@@ -25,9 +25,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -60,7 +57,7 @@ public class RESTResourceXMLExporter extends AbstractController {
   private HandlerExceptionResolver exceptionHandler;
   private Map<String, String> ns2prefix;
   private String[] supportedMethods;
-  private MultipartResolverFactory multipartResolverFactory;
+  private MultipartRequestHandler multipartRequestHandler;
 
   public RESTResourceXMLExporter(RESTResource resource) {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -103,19 +100,22 @@ public class RESTResourceXMLExporter extends AbstractController {
       supportedMethods[i++] = method;
     }
     this.supportedMethods = supportedMethods;
-    Map resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MultipartResolverFactory.class);
-    if (resolverBeans.size() > 0) {
-      //todo: add a configuration element to specify which one to use.
-      this.multipartResolverFactory = (MultipartResolverFactory) resolverBeans.values().iterator().next();
-    }
-    else {
-      CommonsMultipartResolverFactory resolverFactory = new CommonsMultipartResolverFactory();
-      if (getApplicationContext() instanceof WebApplicationContext) {
-        resolverFactory.setServletContext(getServletContext());
+
+    if (this.multipartRequestHandler == null) {
+      Map resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MultipartRequestHandler.class);
+      if (resolverBeans.size() > 0) {
+        //todo: add a configuration element to specify which one to use.
+        this.multipartRequestHandler = (MultipartRequestHandler) resolverBeans.values().iterator().next();
       }
-      this.multipartResolverFactory = resolverFactory;
+      else {
+        DefaultMultipartRequestHandler defaultMultipartHandler = new DefaultMultipartRequestHandler();
+        if (getApplicationContext() instanceof WebApplicationContext) {
+          defaultMultipartHandler.setServletContext(getServletContext());
+        }
+        this.multipartRequestHandler = defaultMultipartHandler;
+      }
     }
-    
+
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
 
     if (this.exceptionHandler == null) {
@@ -206,13 +206,10 @@ public class RESTResourceXMLExporter extends AbstractController {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
       return null;
     }
+    request.setAttribute(RESTOperation.class.getName(), operation);
 
-    boolean isMultipart = this.multipartResolverFactory != null && this.multipartResolverFactory.isMultipart(request);
-    if (isMultipart) {
-      MultipartResolver multipartResolver = this.multipartResolverFactory.getMultipartResolver(resource.getNounContext(), resource.getNoun(), verb);
-      if (multipartResolver != null && multipartResolver.isMultipart(request)) {
-        request = multipartResolver.resolveMultipart(request);
-      }
+    if ((this.multipartRequestHandler != null) && (this.multipartRequestHandler.isMultipart(request))) {
+      request = this.multipartRequestHandler.handleMultipartRequest(request);
     }
 
     Document document = documentBuilder.newDocument();
@@ -331,23 +328,21 @@ public class RESTResourceXMLExporter extends AbstractController {
 
     Object nounValue = null;
     if (operation.getNounValueType() != null) {
-      Class type1 = operation.getNounValueType();
-      if ((operation.getNounValueType().equals(DataHandler.class)) || ((type1.isArray() && type1.getComponentType().equals(DataHandler.class)))) {
-        ArrayList<DataHandler> dataHandlers = new ArrayList<DataHandler>();
-        if (request instanceof MultipartHttpServletRequest) {
-          Collection<MultipartFile> multipartFiles = (Collection<MultipartFile>) ((MultipartHttpServletRequest) request).getFileMap().values();
-          for (MultipartFile multipartFile : multipartFiles) {
-            dataHandlers.add(new DataHandler(new MultipartFileDataSource(multipartFile)));
-          }
+      Class nounValueType = operation.getNounValueType();
+      if ((nounValueType.equals(DataHandler.class)) || ((nounValueType.isArray() && nounValueType.getComponentType().equals(DataHandler.class)))) {
+        Collection<DataHandler> dataHandlers;
+        if (this.multipartRequestHandler != null) {
+          dataHandlers = this.multipartRequestHandler.parseParts(request);
         }
         else {
+          dataHandlers = new ArrayList<DataHandler>();
           dataHandlers.add(new DataHandler(new RESTRequestDataSource(request, resource.getNounContext() + resource.getNoun())));
         }
 
         if (operation.getNounValueType().equals(DataHandler.class)) {
-          nounValue = dataHandlers.get(0);
+          nounValue = dataHandlers.iterator().next();
         }
-        else {
+        else if (mustConvertNounValueToArray(operation)) {
           Class type = operation.getNounValueType();
           if ((type.isArray() && type.getComponentType().equals(DataHandler.class))) {
             nounValue = dataHandlers.toArray(new DataHandler[dataHandlers.size()]);
@@ -383,6 +378,16 @@ public class RESTResourceXMLExporter extends AbstractController {
     TreeMap<String, Object> model = new TreeMap<String, Object>();
     model.put(RESTOperationView.MODEL_RESULT, result);
     return new ModelAndView(view, model);
+  }
+
+  /**
+   * Whether the noun value should be converted to an array for the given operation.
+   *
+   * @param operation The operation.
+   * @return Whether the noun value should be converted to an array.
+   */
+  protected boolean mustConvertNounValueToArray(RESTOperation operation) {
+    return operation.getMethod().getParameterTypes()[operation.getNounValueIndex()].isArray();
   }
 
   /**
@@ -454,4 +459,21 @@ public class RESTResourceXMLExporter extends AbstractController {
     return this.ns2prefix;
   }
 
+  /**
+   * The multipart request handler.
+   *
+   * @return The multipart request handler.
+   */
+  public MultipartRequestHandler getMultipartRequestHandler() {
+    return multipartRequestHandler;
+  }
+
+  /**
+   * The multipart request handler.
+   *
+   * @param multipartRequestHandler The multipart request handler.
+   */
+  public void setMultipartRequestHandler(MultipartRequestHandler multipartRequestHandler) {
+    this.multipartRequestHandler = multipartRequestHandler;
+  }
 }

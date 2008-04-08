@@ -5,6 +5,7 @@
   <property file="build.properties"/>
   <property name="dist.name" value="enunciate-${version}"/>
   <property name="full.jar.name" value="enunciate-full-${version}.jar"/>
+  <property name="full.sources.jar.name" value="enunciate-full-${version}-sources.jar"/>
   <property name="top.jar.name" value="enunciate-top-${version}.jar"/>
   <property name="rt.jar.name" value="enunciate-rt-${version}.jar"/>
 
@@ -69,8 +70,15 @@
       </filterset>
     </copy>
 
+    <copy file="full-pom.xml" todir="target" failonerror="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
+
     <artifact:pom id="top.pom" file="target/top-pom.xml"/>
     <artifact:pom id="rt.pom" file="target/rt-pom.xml"/>
+    <artifact:pom id="full.pom" file="target/full-pom.xml"/>
 
     <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
     <loadfile srcfile="${static.docs.dir}/sidenav.include.html" property="sidenav"/>
@@ -259,8 +267,18 @@
         <include name="modules/*/target/*.jar"/>
         <exclude name="modules/test-integration/target/*.jar"/>
         <exclude name="modules/xfire-integration/target/*.jar"/>
+        <exclude name="**/*-sources.jar"/>
       </zipgroupfileset>
 
+    </jar>
+
+    <jar destfile="target/${full.sources.jar.name}" duplicate="preserve">
+      <zipgroupfileset dir="${enunciate.basedir}">
+        <include name="core/target/*-sources.jar"/>
+        <include name="modules/*/target/*-sources.jar"/>
+        <exclude name="modules/test-integration/target/*-sources.jar"/>
+        <exclude name="modules/xfire-integration/target/*-sources.jar"/>
+      </zipgroupfileset>
     </jar>
 
   </target>
@@ -290,6 +308,11 @@ jars for the purposes of Maven integration.
 
     <artifact:install file="target/${rt.jar.name}">
       <pom refid="rt.pom"/>
+    </artifact:install>
+
+    <artifact:install file="target/${full.jar.name}">
+      <pom refid="full.pom"/>
+      <attach file="target/${full.sources.jar.name}" classifier="sources"/>
     </artifact:install>
   </target>
 

@@ -32,6 +32,7 @@ public class RESTRequestDataSource implements DataSource {
 
   /**
    * @param request The servlet request.
+   * @param name The name of the data source.
    */
   public RESTRequestDataSource(HttpServletRequest request, String name) {
     this.request = request;

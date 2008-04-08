@@ -29,7 +29,7 @@ public class MultipartFileDataSource extends RESTRequestDataSource {
   private final MultipartFile multipartFile;
 
   public MultipartFileDataSource(MultipartFile multipartFile) {
-    super(null, multipartFile.getName());
+    super(null, multipartFile.getOriginalFilename());
     this.multipartFile = multipartFile;
   }
 
@@ -48,7 +48,4 @@ public class MultipartFileDataSource extends RESTRequestDataSource {
     return multipartFile.getSize();
   }
 
-  public String getOriginalFilename() {
-    return multipartFile.getOriginalFilename();
-  }
 }

@@ -34,6 +34,7 @@ import java.util.*;
  */
 public class RESTOperation {
 
+  private final RESTResource resource;
   private final VerbType verb;
   private final Object endpoint;
   final Method method;
@@ -65,12 +66,14 @@ public class RESTOperation {
   /**
    * Construct a REST operation.
    *
+   * @param resource The resource for this operation.
    * @param verb     The verb for the operation.
    * @param endpoint The REST endpoint.
    * @param method   The method.
    * @param parameterNames The parameter names.
    */
-  protected RESTOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+  protected RESTOperation(RESTResource resource, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+    this.resource = resource;
     this.verb = verb;
     this.endpoint = endpoint;
     this.method = method;
@@ -346,6 +349,7 @@ public class RESTOperation {
   /**
    * Invokes the operation with the specified proper noun, adjectives, and noun value.
    *
+   * @param contextParameters The context parametesr for this operation.
    * @param properNoun The value for the proper noun.
    * @param adjectives The value for the adjectives.
    * @param nounValue  The value for the noun.
@@ -362,17 +366,7 @@ public class RESTOperation {
     if (nounValueIndex > -1) {
       if ((nounValue != null) && (Collection.class.isAssignableFrom(parameterTypes[nounValueIndex]))) {
         //convert the noun value back into a collection...
-        Object[] values;
-        try {
-          values = (Object[]) nounValue;
-        }
-        catch (ClassCastException e) {
-          throw new IllegalArgumentException("Noun value should be an array...");
-        }
-
-        Collection collection = newCollectionInstance(parameterTypes[nounValueIndex]);
-        collection.addAll(Arrays.asList(values));
-        nounValue = collection;
+        nounValue = convertToCollection(nounValue, parameterTypes[nounValueIndex]);
       }
       
       parameters[nounValueIndex] = nounValue;
@@ -383,17 +377,7 @@ public class RESTOperation {
       Integer index = adjectiveIndices.get(adjective);
       if ((adjectiveValue != null) && (Collection.class.isAssignableFrom(parameterTypes[index]))) {
         //convert the array back into a collection...
-        Object[] values;
-        try {
-          values = (Object[]) adjectiveValue;
-        }
-        catch (ClassCastException e) {
-          throw new IllegalArgumentException("Adjective '" + adjective + "' should be an array...");
-        }
-
-        Collection collection = newCollectionInstance(parameterTypes[index]);
-        collection.addAll(Arrays.asList(values));
-        adjectiveValue = collection;
+        adjectiveValue = convertToCollection(adjectiveValue, parameterTypes[index]);
       }
 
       parameters[index] = adjectiveValue;
@@ -414,6 +398,26 @@ public class RESTOperation {
 
       throw (Exception) target;
     }
+  }
+
+  /**
+   * Converts an array back into a collection.
+   *
+   * @param array The array.
+   * @param collectionType The collection type.
+   * @return The collection.
+   */
+  protected Object convertToCollection(Object array, Class collectionType) {
+    if (array instanceof Object[]) {
+      Collection collection = newCollectionInstance(collectionType);
+      collection.addAll(Arrays.asList((Object[]) array));
+      array = collection;
+    }
+    else if (!(array instanceof Collection)) {
+      throw new IllegalArgumentException("Expected an array or collection.");
+    }
+
+    return array;
   }
 
   /**
@@ -459,6 +463,15 @@ public class RESTOperation {
   }
 
   /**
+   * The resource for this operation.
+   *
+   * @return The resource for this operation.
+   */
+  public RESTResource getResource() {
+    return resource;
+  }
+
+  /**
    * The verb for the operation.
    *
    * @return The verb for the operation.
@@ -492,6 +505,15 @@ public class RESTOperation {
    */
   public Class getNounValueType() {
     return nounValueType;
+  }
+
+  /**
+   * The index to the noun value.
+   *
+   * @return The index to the noun value.
+   */
+  protected Integer getNounValueIndex() {
+    return nounValueIndex;
   }
 
   /**

@@ -16,6 +16,9 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
+
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -752,21 +752,11 @@ public class DefaultValidator implements Validator {
       result.addError(attribute.getPosition(), "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
+    else if (baseType.isAnonymous()) {
+      result.addError(attribute.getPosition(), "An attribute must not have an anonymous type.");
+    }
     else if (attribute.isBinaryData()) {
       result.addError(attribute.getPosition(), "Attributes can't have binary data.");
-    }
-
-    boolean qualified = attribute.getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
-    String typeNamespace = attribute.getTypeDefinition().getNamespace();
-    typeNamespace = typeNamespace == null ? "" : typeNamespace;
-    String attributeNamespace = attribute.getNamespace();
-    attributeNamespace = attributeNamespace == null ? "" : attributeNamespace;
-    if ((qualified) && (!attributeNamespace.equals(typeNamespace))) {
-      result.addError(attribute.getPosition(), "Enunciate doesn't support attributes of a different namespace than their containing type definition if " +
-        "their form is qualified.  Use an attribute ref.");
-    }
-    else if ((!qualified) && (!"".equals(attributeNamespace))) {
-      result.addError(attribute.getPosition(), "Enunciate only supports the default namespace on attributes that have an unqualified form.");
     }
 
     return result;
@@ -782,35 +772,9 @@ public class DefaultValidator implements Validator {
                       "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
     }
 
-    boolean qualified = element.getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
-
     QName ref = element.getRef();
-    if (ref == null) {
-      String typeNamespace = element.getTypeDefinition().getNamespace();
-      typeNamespace = typeNamespace == null ? "" : typeNamespace;
-      String elementNamespace = element.getNamespace();
-      elementNamespace = elementNamespace == null ? "" : elementNamespace;
-      if ((qualified) && (!elementNamespace.equals(typeNamespace))) {
-        result.addError(element.getPosition(), "Enunciate doesn't support elements of a different namespace than their containing type definition if " +
-          "their form is qualified.  Use an element ref.");
-      }
-      else if ((!qualified) && (!"".equals(elementNamespace))) {
-        result.addError(element.getPosition(), "Enunciate only supports the default namespace on elements that have an unqualified form.");
-      }
-    }
-
-    if (element.isWrapped()) {
-      String wrapperNamespace = element.getWrapperNamespace();
-      wrapperNamespace = wrapperNamespace == null ? "" : wrapperNamespace;
-      String typeNamespace = element.getTypeDefinition().getNamespace();
-      typeNamespace = typeNamespace == null ? "" : typeNamespace;
-      if ((qualified) && (!wrapperNamespace.equals(typeNamespace))) {
-        result.addError(element.getPosition(), "Enunciate doesn't support element wrappers of different namespaces than their type definitions if their " +
-          "form is qualified.");
-      }
-      else if ((!qualified) && (!"".equals(wrapperNamespace))) {
-        result.addError(element.getPosition(), "Enunciate only supports the default namespace on wrapper elements that have an unqualified form.");
-      }
+    if ((ref != null) && (element.getBaseType().isAnonymous())) {
+      result.addError(element.getPosition(), "Element whose namespace differs from that of its type definition must not have an anonymous base type.");
     }
 
     return result;

@@ -97,7 +97,7 @@ public class RESTResource implements Comparable<RESTResource> {
   }
 
   protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
-    return new RESTOperation(verb, endpoint, method, parameterNames);
+    return new RESTOperation(this, verb, endpoint, method, parameterNames);
   }
 
   /**
@@ -121,8 +121,7 @@ public class RESTResource implements Comparable<RESTResource> {
     }
 
     canonicalForm.append(getNoun()).append('/').append(verb);
-    String canonicalReference = canonicalForm.toString();
-    return canonicalReference;
+    return canonicalForm.toString();
   }
 
   /**

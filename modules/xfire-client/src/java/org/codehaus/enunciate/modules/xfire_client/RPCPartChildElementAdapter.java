@@ -17,7 +17,7 @@
 package org.codehaus.enunciate.modules.xfire_client;
 
 import com.sun.mirror.type.TypeMirror;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.jaxws.WebResult;

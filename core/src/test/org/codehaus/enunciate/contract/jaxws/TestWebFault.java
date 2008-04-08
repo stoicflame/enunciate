@@ -22,6 +22,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 
 import javax.xml.namespace.QName;
 import java.util.Arrays;

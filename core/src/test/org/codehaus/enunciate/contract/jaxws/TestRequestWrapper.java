@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxws;
 
 import junit.framework.Test;
 import org.codehaus.enunciate.InAPTTestCase;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;

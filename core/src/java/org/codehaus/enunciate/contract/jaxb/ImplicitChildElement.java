@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package org.codehaus.enunciate.contract.jaxb;
 
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 

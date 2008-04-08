@@ -75,10 +75,9 @@
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     <property name="alwaysUseFullPath" value="true"/>
 
+  [#if handlerInterceptors?exists]
     <property name="interceptors">
       <list>
-        <bean class="org.codehaus.enunciate.modules.spring_app.HTTPRequestContextInterceptor"/>
-  [#if handlerInterceptors?exists]
     [#list handlerInterceptors as interceptor]
       [#if interceptor.interceptorClass?exists]
         <bean class="${interceptor.interceptorClass}"/>
@@ -86,9 +85,9 @@
         <ref bean="${interceptor.beanName}"/>
       [/#if]
     [/#list]
-  [/#if]
       </list>
     </property>
+  [/#if]
 
     <property name="urlMap">
       <map>

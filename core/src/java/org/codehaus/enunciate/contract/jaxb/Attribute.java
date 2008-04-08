@@ -71,12 +71,13 @@ public class Attribute extends Accessor {
    */
   @Override
   public QName getRef() {
+    boolean qualified = getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
+    String typeNamespace = getTypeDefinition().getNamespace();
+    typeNamespace = typeNamespace == null ? "" : typeNamespace;
     String namespace = getNamespace();
     namespace = namespace == null ? "" : namespace;
-    String typeNamespace = getTypeDefinition().getNamespace();
-    typeNamespace = (typeNamespace == null || (getTypeDefinition().getSchema().getAttributeFormDefault() != XmlNsForm.QUALIFIED)) ? "" : typeNamespace;
 
-    if (!namespace.equals(typeNamespace)) {
+    if ((!namespace.equals(typeNamespace)) && (qualified || !"".equals(namespace))) {
       return new QName(namespace, getName());
     }
 

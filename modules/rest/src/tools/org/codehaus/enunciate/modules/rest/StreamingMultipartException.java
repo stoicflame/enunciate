@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may obtain a copy of the License at 
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
-
-import java.util.Collection;
+package org.codehaus.enunciate.modules.rest;
 
 /**
- * An implicit root schema element.
+ * Exception that occurs during an error when parsing a streaming multipart request.
  *
  * @author Ryan Heaton
  */
-public interface ImplicitRootElement extends ImplicitSchemaElement {
+public class StreamingMultipartException extends RuntimeException {
 
-  /**
-   * If the schema type of this element is anonymous, get the list of child elements for this schema element.
-   *
-   * @return The list of child elements for this schema element, or null if the type of this implicit element is not anonymous.
-   */
-  Collection<ImplicitChildElement> getChildElements();
+  public StreamingMultipartException() {
+  }
 
+  public StreamingMultipartException(String message) {
+    super(message);
+  }
+
+  public StreamingMultipartException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public StreamingMultipartException(Throwable cause) {
+    super(cause);
+  }
 }

@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.jaxws;
+package org.codehaus.enunciate.apt;
+
+import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
+import org.codehaus.enunciate.contract.jaxb.Element;
 
 import javax.xml.namespace.QName;
 
 /**
- * An implicit schema element.  Implied by "literal" SOAP use.
+ * An implicit element reference.
  *
  * @author Ryan Heaton
  */
-public interface ImplicitSchemaElement {
+public class ImplicitElementRef implements ImplicitSchemaElement {
 
-  /**
-   * The local element name.
-   *
-   * @return The local element name.
-   */
-  String getElementName();
+  protected final Element element;
 
-  /**
-   * Documentation for the element, if it exists.
-   *
-   * @return Documentation for the element, or null if none.
-   */
-  String getElementDocs();
+  public ImplicitElementRef(Element element) {
+    this.element = element;
+  }
 
-  /**
-   * The qname of the type for this element, if the type is not anonymous.
-   *
-   * @return The qname of the type for this element, or null if it's an anonymous type.
-   */
-  QName getTypeQName();
+  public String getElementName() {
+    return element.getName();
+  }
 
+  public String getElementDocs() {
+    return element.getJavaDoc() != null ? element.getJavaDoc().toString() : null;
+  }
+
+  public QName getTypeQName() {
+    return element.getBaseType().getQname();
+  }
 }

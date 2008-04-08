@@ -25,8 +25,8 @@ import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
 
 import java.util.Collection;
 import java.util.Iterator;

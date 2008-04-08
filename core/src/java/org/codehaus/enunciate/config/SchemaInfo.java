@@ -21,9 +21,9 @@ import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.contract.jaxws.ImplicitSchemaElement;
-import org.codehaus.enunciate.contract.jaxws.ImplicitRootElement;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
@@ -39,6 +39,7 @@ public class SchemaInfo {
   private String id;
   private String namespace;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
+  private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
@@ -105,6 +106,15 @@ public class SchemaInfo {
    */
   public Collection<ImplicitSchemaElement> getImplicitSchemaElements() {
     return implicitSchemaElements;
+  }
+
+  /**
+   * Get the implicit schema attributes to be included in this schema.
+   *
+   * @return The implicit schema attributes to be included in this schema.
+   */
+  public Collection<ImplicitSchemaAttribute> getImplicitSchemaAttributes() {
+    return implicitSchemaAttributes;
   }
 
   /**
@@ -211,6 +221,13 @@ public class SchemaInfo {
         for (ImplicitChildElement childElement : ((ImplicitRootElement) schemaElement).getChildElements()) {
           addReferencedNamespaces(childElement.getXmlType(), referencedNamespaces);
         }
+      }
+    }
+
+    for (ImplicitSchemaAttribute schemaAttribute : implicitSchemaAttributes) {
+      QName typeQName = schemaAttribute.getTypeQName();
+      if (typeQName != null) {
+        referencedNamespaces.add(typeQName.getNamespaceURI());
       }
     }
 
@@ -346,6 +363,21 @@ public class SchemaInfo {
      */
     public int compare(ImplicitSchemaElement element1, ImplicitSchemaElement element2) {
       return element1.getElementName().compareTo(element2.getElementName());
+    }
+  }
+
+  /**
+   * Compares implicit attributes by attribute name.
+   */
+  private static class ImplicitSchemaAttributeComparator implements Comparator<ImplicitSchemaAttribute> {
+
+    /**
+     * @param attribute1 The first attribute.
+     * @param attribute2 The second attribute.
+     * @return The comparison of the attribute names.
+     */
+    public int compare(ImplicitSchemaAttribute attribute1, ImplicitSchemaAttribute attribute2) {
+      return attribute1.getAttributeName().compareTo(attribute2.getAttributeName());
     }
   }
 }

@@ -16,32 +16,28 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.HandlerInterceptor;
-
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
- * Interceptor that sets up the request context.
+ * Filter that sets up the request context.
  *
  * @author Ryan Heaton
  */
-public class HTTPRequestContextInterceptor implements HandlerInterceptor {
+public class HTTPRequestContextFilter implements Filter {
 
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-    HTTPRequestContext.TL_CONTEXT.set(new HTTPRequestContext(request, response));
-    return true;
+  public void init(FilterConfig filterConfig) throws ServletException {
   }
 
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-  }
-
-  public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    HTTPRequestContext.TL_CONTEXT.set(new HTTPRequestContext((HttpServletRequest) request, (HttpServletResponse) response));
+    filterChain.doFilter(request, response);
     HTTPRequestContext.TL_CONTEXT.remove();
   }
 
-  public int getOrder() {
-    return 0;
+  public void destroy() {
   }
+
 }

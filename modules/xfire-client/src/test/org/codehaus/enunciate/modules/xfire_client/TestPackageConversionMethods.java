@@ -26,7 +26,7 @@ import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
-import org.codehaus.enunciate.contract.jaxws.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 
 import java.util.Arrays;
 import java.util.Collection;

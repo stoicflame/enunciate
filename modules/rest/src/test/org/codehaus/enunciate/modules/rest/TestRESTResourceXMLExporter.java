@@ -139,6 +139,8 @@ public class TestRESTResourceXMLExporter extends TestCase {
     verify(request, response);
     reset(request, response);
 
+    controller.setMultipartRequestHandler(null);
+    request.setAttribute(RESTOperation.class.getName(), resource.getOperation(VerbType.update));
     expect(request.getRequestURI()).andReturn("/ctx/is/unimportant");
     expect(request.getContextPath()).andReturn("");
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);

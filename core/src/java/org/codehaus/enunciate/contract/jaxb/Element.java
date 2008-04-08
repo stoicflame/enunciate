@@ -140,13 +140,24 @@ public class Element extends Accessor {
   public QName getRef() {
     QName ref = null;
 
-    //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
-    XmlType baseType = getBaseType();
-    if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
-      TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
-      if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
-        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
-        ref = new QName(rootElement.getNamespace(), rootElement.getName());
+    boolean qualified = getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
+    String typeNamespace = getTypeDefinition().getNamespace();
+    typeNamespace = typeNamespace == null ? "" : typeNamespace;
+    String elementNamespace = isWrapped() ? getWrapperNamespace() : getNamespace();
+    elementNamespace = elementNamespace == null ? "" : elementNamespace;
+    if ((!elementNamespace.equals(typeNamespace)) && (qualified || !"".equals(elementNamespace))) {
+      //the namespace is different; must be a ref...
+      return new QName(elementNamespace, isWrapped() ? getWrapperName() : getName());
+    }
+    else {
+      //check to see if this is an implied ref as per the jaxb spec, section 8.9.1.2
+      XmlType baseType = getBaseType();
+      if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
+        TypeDefinition baseTypeDef = ((XmlClassType) baseType).getTypeDefinition();
+        if (baseTypeDef.getAnnotation(XmlRootElement.class) != null) {
+          RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) baseTypeDef.getDelegate(), baseTypeDef);
+          ref = new QName(rootElement.getNamespace(), rootElement.getName());
+        }
       }
     }
 

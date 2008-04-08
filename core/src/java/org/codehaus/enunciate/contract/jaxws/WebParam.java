@@ -24,6 +24,7 @@ import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;

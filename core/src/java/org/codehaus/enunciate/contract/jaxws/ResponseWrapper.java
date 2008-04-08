@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
+import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
+
 /**
  * A response wrapper for a web method in document/literal wrapped style.
  *

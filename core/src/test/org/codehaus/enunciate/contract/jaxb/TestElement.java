@@ -126,7 +126,7 @@ public class TestElement extends InAPTTestCase {
     assertSame(element, element.getChoices().iterator().next());
     assertEquals("changedname", element.getName());
     assertEquals("urn:changedname", element.getNamespace());
-    assertNull(element.getRef());
+    assertNotNull(element.getRef());
     assertEquals(property.getPropertyType(), element.getAccessorType());
     assertEquals(KnownXmlType.INT.getQname(), element.getBaseType().getQname());
     assertTrue(element.isNillable());
@@ -196,7 +196,7 @@ public class TestElement extends InAPTTestCase {
     assertSame(element, element.getChoices().iterator().next());
     assertEquals("item", element.getName());
     assertEquals("urn:item", element.getNamespace());
-    assertNull(element.getRef());
+    assertNotNull(element.getRef());
     assertEquals(property.getPropertyType(), element.getAccessorType());
     assertEquals(KnownXmlType.ANY_TYPE.getQname(), element.getBaseType().getQname());
     assertFalse(element.isNillable());
@@ -219,7 +219,7 @@ public class TestElement extends InAPTTestCase {
     for (Element choice : choices) {
       if ("durationItem".equals(choice.getName())) {
         assertEquals("urn:durationItem", choice.getNamespace());
-        assertNull(choice.getRef());
+        assertNotNull(choice.getRef());
         assertEquals(javax.xml.datatype.Duration.class.getName(), ((DeclaredType)choice.getAccessorType()).getDeclaration().getQualifiedName());
         assertEquals(KnownXmlType.DURATION.getQname(), choice.getBaseType().getQname());
         assertFalse(choice.isNillable());
@@ -231,7 +231,7 @@ public class TestElement extends InAPTTestCase {
       }
       else if ("imageItem".equals(choice.getName())) {
         assertEquals("urn:imageItem", choice.getNamespace());
-        assertNull(choice.getRef());
+        assertNotNull(choice.getRef());
         assertEquals(java.awt.Image.class.getName(), ((DeclaredType)choice.getAccessorType()).getDeclaration().getQualifiedName());
         assertEquals(KnownXmlType.BASE64_BINARY.getQname(), choice.getBaseType().getQname());
         assertFalse(choice.isNillable());
@@ -283,7 +283,7 @@ public class TestElement extends InAPTTestCase {
     assertSame(element, element.getChoices().iterator().next());
     assertEquals("wrappedElementsProperty1", element.getName());
     assertNull(element.getNamespace());
-    assertNull(element.getRef());
+    assertNotNull(element.getRef());
     assertEquals(property.getPropertyType(), element.getAccessorType());
     assertEquals(KnownXmlType.DECIMAL.getQname(), element.getBaseType().getQname());
     assertFalse(element.isNillable());

@@ -16,14 +16,11 @@
 
 package org.codehaus.enunciate.modules.xml;
 
-import org.codehaus.enunciate.contract.jaxb.Attribute;
-import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.Element;
+import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
-import javax.xml.bind.annotation.XmlNsForm;
 import java.util.HashMap;
 
 /**
@@ -102,56 +99,4 @@ public class XMLValidator extends BaseValidator {
     return result;
   }
 
-  @Override
-  public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
-    ValidationResult result = super.validateComplexType(complexType);
-
-    String typeNamespace = complexType.getNamespace();
-    typeNamespace = typeNamespace == null ? "" : typeNamespace;
-    boolean elementFormDefaultQualified = complexType.getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
-
-    for (Element element : complexType.getElements()) {
-      if (element.getRef() == null) {
-        String elementNamespace = element.getNamespace();
-        elementNamespace = elementNamespace == null ? "" : elementNamespace;
-
-        if ((elementFormDefaultQualified) && (!elementNamespace.equals(typeNamespace))) {
-          result.addError(element.getPosition(), "Enunciate doesn't support elements of different namespaces than their type definitions.  The namespace ["
-            + elementNamespace + "] of element [" + element.getName() + "] has a different namespace than [" + typeNamespace + "] of definition [" +
-            element.getTypeDefinition().getName() + "].  You'll need to make this element an element ref.");
-        }
-
-        if ((!elementFormDefaultQualified) && (!"".equals(elementNamespace))) {
-          result.addError(element.getPosition(), "Enunciate requires that if the elementFormDefault is not \"qualified\" the namespace of the element must " +
-            "be the default namespace.");
-        }
-      }
-
-      if (element.isWrapped()) {
-        String wrapperNamespace = element.getWrapperNamespace();
-        wrapperNamespace = wrapperNamespace == null ? "" : wrapperNamespace;
-
-        if ((elementFormDefaultQualified) && (!wrapperNamespace.equals(typeNamespace))) {
-          result.addError(element.getPosition(), "Enunciate doesn't support wrapper elements of different namespaces than their type definitions.  The wrapper namespace ["
-            + wrapperNamespace + "] of element [" + element.getName() + "] has a different namespace than [" + typeNamespace + "] of definition [" +
-            element.getTypeDefinition().getName() + "].");
-        }
-
-        if ((!elementFormDefaultQualified) && (!"".equals(wrapperNamespace))) {
-          result.addError(element.getPosition(), "Enunciate requires that if the elementFormDefault is not \"qualified\" the namespace of the wrapper element must " +
-            "be the default namespace.");
-        }
-      }
-    }
-
-    for (Attribute attribute : complexType.getAttributes()) {
-      if (attribute.getRef() != null) {
-        result.addError(attribute.getPosition(), "Enunciate doesn't support attribute refs.  If attributeFormDefault is \"qualified,\" the namespace of the " +
-          "attribute must be the same as its containing type definition.  If attributeFormDefault is not \"qualified, \" the namespace of the attribute must " +
-          "be the default namespace.");
-      }
-    }
-
-    return result;
-  }
 }
