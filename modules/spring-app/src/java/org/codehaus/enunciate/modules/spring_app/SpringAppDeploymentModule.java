@@ -519,7 +519,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     Enunciate enunciate = getEnunciate();
     final File compileDir = getCompileDir();
     if (!enunciate.isUpToDateWithSources(compileDir)) {
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
 
       File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
       if (jaxwsSources != null) {
@@ -535,7 +535,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         if (!jaxwsSourceFiles.isEmpty()) {
           StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
           jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-          enunciate.invokeJavac(jaxwsClasspath.toString(), compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
+          enunciate.invokeJavac(jaxwsClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
         }
         else {
           info("No JAX-WS source files have been found to compile.");
@@ -558,7 +558,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
         StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
         gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-        enunciate.invokeJavac(gwtClasspath.toString(), compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
+        enunciate.invokeJavac(gwtClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
       }
 
       File amfSources = (File) enunciate.getProperty("amf.server.src.dir");
@@ -567,7 +567,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         Collection<String> amfSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(amfSources));
         StringBuilder amfClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
         amfClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-        enunciate.invokeJavac(amfClasspath.toString(), compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
+        enunciate.invokeJavac(amfClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
       }
 
       File restParamterNames = (File) enunciate.getProperty("rest.parameter.names");

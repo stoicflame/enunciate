@@ -590,19 +590,19 @@ public class Enunciate {
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(String classpath, File compileDir, String[] sourceFiles) throws EnunciateException {
-    invokeJavac(classpath, compileDir, new ArrayList<String>(), sourceFiles);
+    invokeJavac(classpath, "1.5", compileDir, new ArrayList<String>(), sourceFiles);
   }
 
   /**
    * Invokes javac on the specified source files.
    *
    * @param classpath      The classpath.
+   * @param version        The Java version to compile to.
    * @param compileDir     The compile directory.
    * @param additionalArgs Any additional arguments to the compiler.
-   * @param sourceFiles    The source files.
-   * @throws EnunciateException if the compile fails.
+   * @param sourceFiles    The source files. @throws EnunciateException if the compile fails.
    */
-  public void invokeJavac(String classpath, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
+  public void invokeJavac(String classpath, String version, File compileDir, List<String> additionalArgs, String[] sourceFiles) throws EnunciateException {
     if ((sourceFiles == null) || (sourceFiles.length == 0)) {
       warn("Skipping compile.  No source files specified.");
       return;
@@ -612,6 +612,11 @@ public class Enunciate {
 
     args.add("-cp");
     args.add(classpath);
+
+    args.add("-source");
+    args.add(version);
+    args.add("-target");
+    args.add(version);
 
     if (isDebug()) {
       args.add("-verbose");

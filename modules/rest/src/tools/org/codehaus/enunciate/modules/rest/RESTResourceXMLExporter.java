@@ -339,6 +339,7 @@ public class RESTResourceXMLExporter extends AbstractController {
           dataHandlers.add(new DataHandler(new RESTRequestDataSource(request, resource.getNounContext() + resource.getNoun())));
         }
 
+        nounValue = dataHandlers;
         if (operation.getNounValueType().equals(DataHandler.class)) {
           nounValue = dataHandlers.iterator().next();
         }

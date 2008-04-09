@@ -521,7 +521,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     if (!enunciate.isUpToDateWithSources(jdk14CompileDir)) {
       Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
       jdk14Files.addAll(typeFiles);
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk14CompileDir, Arrays.asList("-source", "1.4", "-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", jdk14CompileDir, Arrays.asList("-g"), jdk14Files.toArray(new String[jdk14Files.size()]));
       enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk14CompileDir, uuid + ".types"));
       enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk14CompileDir, uuid + ".annotations"));
     }
@@ -534,7 +534,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     if (!enunciate.isUpToDateWithSources(jdk15CompileDir)) {
       Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
       jdk15Files.addAll(typeFiles);
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), jdk15CompileDir, Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", jdk15CompileDir, Arrays.asList("-g"), jdk15Files.toArray(new String[jdk15Files.size()]));
       enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk15CompileDir, uuid + ".types"));
       enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk15CompileDir, uuid + ".annotations"));
     }
