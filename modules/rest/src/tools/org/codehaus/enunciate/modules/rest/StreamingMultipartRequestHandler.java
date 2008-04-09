@@ -27,10 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FilterInputStream;
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Multipart request handler that provides for a streaming approach for
@@ -41,10 +38,11 @@ import java.util.NoSuchElementException;
  * restrictions:<br/><br/>
  *
  * <ul>
- * <li>The multipart request is parsed ONLY for its file fields.  (The form fields are ignored).</li>
- * <li>When a multipart request is parsed, the resulting collection of parts has an undefined size.
- * Any attempts to access the size of the collection (including toArray()) will result in an
- * UnsupportedOperationException.</li>
+ *   <li>When a multipart request is parsed, the resulting collection of parts has an undefined size.
+ *   Any attempts to access the size of the collection (including toArray() and isEmpty()) will result in an
+ *   UnsupportedOperationException.</li>
+ *   <li>Iterating to the "next" item in the collection (using the iterator) invalidates the "previous" item
+ *   in the collection (since the stream cursor advances to the next file)</li> 
  * </ul>
  *
  * @author Ryan Heaton
@@ -112,14 +110,23 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
 
     private final FileItemIterator itemIterator;
     private final ProgressListener progressListener;
+    private boolean modified;
 
     public StreamingMultipartCollection(FileItemIterator itemIterator, ProgressListener progressListener) {
       this.itemIterator = itemIterator;
       this.progressListener = progressListener;
+      modified = false;
     }
 
     public Iterator<DataHandler> iterator() {
-      return new StreamingMultipartIterator(this.itemIterator);
+      if (!modified) {
+        StreamingMultipartIterator iterator = new StreamingMultipartIterator(this.itemIterator);
+        modified = true;
+        return iterator;
+      }
+      else {
+        throw new ConcurrentModificationException("This streaming collection has already been read.");
+      }
     }
 
     public int size() {
@@ -129,48 +136,16 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
     private class StreamingMultipartIterator implements Iterator<DataHandler> {
 
       private final FileItemIterator itemIterator;
-      private FileItemStream nextStream;
       private long bytesReadSoFar = 0L;
       private int currentItemNumber = 0;
 
       public StreamingMultipartIterator(FileItemIterator itemIterator) {
         this.itemIterator = itemIterator;
-        advanceNextStream();
       }
 
       public boolean hasNext() {
-        return this.nextStream != null;
-      }
-
-      public DataHandler next() {
-        if (this.nextStream == null) {
-          throw new NoSuchElementException();
-        }
-
-        DataHandler dataHandler = new DataHandler(new FileItemStreamDataSource(this.nextStream, this.currentItemNumber));
-        advanceNextStream();
-        return dataHandler;
-      }
-
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-
-      /**
-       * Advances to the next stream, skipping any form fields.
-       */
-      private void advanceNextStream() {
-        this.nextStream = null;
         try {
-          while (this.itemIterator.hasNext()) {
-            FileItemStream nextStream = this.itemIterator.next();
-            while (!nextStream.isFormField()) {
-              //skip any form fields.
-              nextStream = this.itemIterator.next();
-            }
-            this.nextStream = nextStream;
-            this.currentItemNumber++;
-          }
+          return this.itemIterator.hasNext();
         }
         catch (FileUploadException e) {
           throw new StreamingMultipartException("Error parsing multipart request.", e);
@@ -178,6 +153,22 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
         catch (IOException e) {
           throw new StreamingMultipartException("Error parsing multipart request.", e);
         }
+      }
+
+      public DataHandler next() {
+        try {
+          return new DataHandler(new FileItemStreamDataSource(this.itemIterator.next(), this.currentItemNumber));
+        }
+        catch (FileUploadException e) {
+          throw new StreamingMultipartException("Error parsing multipart request.", e);
+        }
+        catch (IOException e) {
+          throw new StreamingMultipartException("Error parsing multipart request.", e);
+        }
+      }
+
+      public void remove() {
+        throw new UnsupportedOperationException();
       }
 
       private class FileItemStreamDataSource extends RESTRequestDataSource {
