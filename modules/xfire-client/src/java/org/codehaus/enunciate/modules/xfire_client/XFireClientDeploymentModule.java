@@ -377,7 +377,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     SerializableWebServiceAnnotation wsAnnotation = new SerializableWebServiceAnnotation();
     wsAnnotation.setName(ei.getPortTypeName());
-    wsAnnotation.setPortName(ei.getSimpleName() + "SOAPPort");
+    //according to JSR 181, the port name can't go on the Endpoint Interface...
+    //wsAnnotation.setPortName(ei.getSimpleName() + "SOAPPort");
     wsAnnotation.setServiceName(ei.getServiceName());
     wsAnnotation.setTargetNamespace(ei.getTargetNamespace());
     this.generatedAnnotations.class2WebService.put(clazz, wsAnnotation);

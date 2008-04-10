@@ -175,13 +175,13 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertNotNull(wsInfo);
     assertEquals("BasicEIOne", wsInfo.getName());
     assertEquals("urn:xfire_client", wsInfo.getTargetNamespace());
-    assertEquals("BasicEIOneSOAPPort", wsInfo.getPortName());
+//    assertEquals("BasicEIOneSOAPPort", wsInfo.getPortName());
     assertEquals("BasicEIOneService", wsInfo.getServiceName());
     wsInfo = (SerializableWebServiceAnnotation) annotations.class2WebService.get("org.codehaus.enunciate.samples.xfire_client.BasicEITwo");
     assertNotNull(wsInfo);
     assertEquals("ei2", wsInfo.getName());
     assertEquals("urn:xfire_client", wsInfo.getTargetNamespace());
-    assertEquals("BasicEITwoSOAPPort", wsInfo.getPortName());
+//    assertEquals("BasicEITwoSOAPPort", wsInfo.getPortName());
     assertEquals("ei2-service", wsInfo.getServiceName());
 
     assertEquals(4, annotations.method2SOAPBinding.size());

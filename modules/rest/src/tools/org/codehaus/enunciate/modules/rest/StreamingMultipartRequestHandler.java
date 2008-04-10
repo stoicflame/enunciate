@@ -190,11 +190,6 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
           return itemStream.getContentType();
         }
 
-        @Override
-        public long getSize() {
-          return super.getSize();
-        }
-
         private class ProgressAwareInputStream extends FilterInputStream {
 
           public ProgressAwareInputStream(InputStream in) {
