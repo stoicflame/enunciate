@@ -35,9 +35,18 @@ import java.util.Map;
 public class JsonUnmarshaller {
 
   public static Object unmarshal(HttpServletRequest request, Unmarshaller unmarshaller, Map<String, String> namespaces2prefix) throws JAXBException, IOException, XMLStreamException {
-    XMLStreamReader reader = (request.getParameter("badgerfish") == null) ?
-      new MappedXMLInputFactory(namespaces2prefix).createXMLStreamReader(request.getInputStream()) :
-      new BadgerFishXMLInputFactory().createXMLStreamReader(request.getInputStream());
+    XMLStreamReader reader;
+    JsonSerializationMethod method = RESTResourceJSONExporter.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
+    switch (method) {
+      case xmlMapped:
+        reader = new MappedXMLInputFactory(namespaces2prefix).createXMLStreamReader(request.getInputStream());
+        break;
+      case badgerfish:
+        reader = new BadgerFishXMLInputFactory().createXMLStreamReader(request.getInputStream());
+        break;
+      default:
+        throw new IllegalArgumentException("Illegal JSON serialization method: " + method);
+    }
     return unmarshaller.unmarshal(reader);
   }
 }

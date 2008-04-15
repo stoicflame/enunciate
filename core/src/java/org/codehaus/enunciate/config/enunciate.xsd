@@ -59,6 +59,7 @@
 
     <xs:sequence>
       <xs:element name="soap" type="services-soap" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="rest" type="services-rest" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
 
   </xs:complexType>
@@ -77,6 +78,27 @@
 
     <xs:attribute name="defaultSubcontext" type="xs:string" />
   </xs:complexType>
+
+  <xs:complexType name="services-rest">
+
+    <xs:annotation>
+      <xs:documentation>
+        Custom configuration for REST services.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="xmlSubcontext" type="xs:string" />
+    <xs:attribute name="jsonSubcontext" type="xs:string" />
+    <xs:attribute name="defaultJsonSerialization" type="jsonSerialization" />
+  </xs:complexType>
+
+  <xs:simpleType name="jsonSerialization">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="hierarchical"/>
+      <xs:enumeration value="xmlMapped"/>
+      <xs:enumeration value="badgerfish"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="services-soap-service">
 

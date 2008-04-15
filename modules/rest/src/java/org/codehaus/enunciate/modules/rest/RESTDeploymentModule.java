@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.rest;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 
@@ -240,9 +241,19 @@ import java.net.URL;
  *
  * <h1><a name="json">JSON API</a></h1>
  *
- * <p>Each READ verb (and only the read verb) is also published as a JSON endpoint.  The mapping of XML to JSON is done by default using the
- * "mapped convention".  The badgerfish convention is also available by passing in the http request parameter named "badgerfish."  To learn
+ * <p>Each XML endpoint is also published as a JSON endpoint. JSON endpoints support three different serialization methods: "hierarchical",
+ * "xmlMapped", and "badgerfish". These values can be passed as request parameters to specify which format is desired. The serialization method
+ * to use when none is specified by a request parameter can be specified by using the "defaultJsonSerialization" attribute on the main enunciate
+ * element of the Enunciate configuration file. Note the default value is ("xmlMapped").</p>
+ *
+ * <p>When the JSON serialization is done by converting the XML result to JSON, there are two mapping conventions that can be used. By default, the mapping is
+ * done using the "mapped" convention (JSON serialization method "xmlMapped").  The Badgerfish convention is also available (method "badgerfish"). To learn
  * more about the difference between the two convensions, see the <a href="http://jettison.codehaus.org/User%27s+Guide">Jettison user's guide</a>.</p>
+ *
+ * <p>The "hierarchical" serialization method serializes the result of the operation using
+ * <a href="http://xstream.codehaus.org">XStream</a>'s JSON serialization (which leverages the object hierarchy). For more information, see
+ * <a href="http://xstream.codehaus.org/json-tutorial.html">XStream JSON Tutorial</a>.  You can also use
+ * <a href="http://xstream.codehaus.org/annotations-tutorial.html">XStream's annotations</a> to customize the serialized JSON.</p>
  *
  * <h3>JSONP</h3>
  *
@@ -290,6 +301,18 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     return RESTDeploymentModule.class.getResource("enunciate-rest-parameter-names.properties.fmt");
   }
 
+  @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    try {
+      JsonSerializationMethod.valueOf(enunciate.getConfig().getDefaultJsonSerialization());
+    }
+    catch (IllegalArgumentException e) {
+      throw new EnunciateException("Illegal JSON serialization method: " + enunciate.getConfig().getDefaultJsonSerialization());
+    }
+  }
+
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
     if (!enunciate.isUpToDateWithSources(paramNameFile)) {
@@ -300,4 +323,5 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     }
     enunciate.setProperty("rest.parameter.names", paramNameFile);
   }
+
 }

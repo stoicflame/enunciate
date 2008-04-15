@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FilterInputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -42,7 +43,7 @@ import java.util.*;
  *   Any attempts to access the size of the collection (including toArray() and isEmpty()) will result in an
  *   UnsupportedOperationException.</li>
  *   <li>Iterating to the "next" item in the collection (using the iterator) invalidates the "previous" item
- *   in the collection (since the stream cursor advances to the next file)</li> 
+ *   in the collection (since the stream cursor advances to the next file).</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -73,7 +74,10 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
 
   /**
    * Parses the parts.  The resulting collection has an undefined size. Any attempts to access the size of the
-   * collection (including toArray()) will result in an UnsupportedOperationException.
+   * collection (including toArray()) will result in an UnsupportedOperationException.<br/><br/>
+   *
+   * The DataHandler instances each will have a DataSource that is an instance of
+   * {@link org.codehaus.enunciate.modules.rest.StreamingFileItemDataSource}
    *
    * @param request The request.
    * @return The parts.
@@ -171,19 +175,34 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
         throw new UnsupportedOperationException();
       }
 
-      private class FileItemStreamDataSource extends RESTRequestDataSource {
+      private class FileItemStreamDataSource implements StreamingFileItemDataSource {
 
         private final FileItemStream itemStream;
         private final int itemNumber;
 
         public FileItemStreamDataSource(FileItemStream itemStream, int itemNumber) {
-          super(null, itemStream.getName());
           this.itemStream = itemStream;
           this.itemNumber = itemNumber;
         }
 
         public InputStream getInputStream() throws IOException {
           return new ProgressAwareInputStream(itemStream.openStream());
+        }
+
+        public boolean isFormField() {
+          return this.itemStream.isFormField();
+        }
+
+        public String getFormFieldName() {
+          return this.itemStream.getFieldName();
+        }
+
+        public OutputStream getOutputStream() throws IOException {
+          throw new IOException();
+        }
+
+        public String getName() {
+          return this.itemStream.getName();
         }
 
         public String getContentType() {

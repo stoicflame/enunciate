@@ -72,9 +72,18 @@ public class JaxbJsonView<R> extends JaxbXmlView<R> {
   }
 
   protected void marshalToStream(Marshaller marshaller, R result, HttpServletRequest request, Writer outStream) throws XMLStreamException, IOException, JAXBException {
-    XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
-      new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
-      new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
+    XMLStreamWriter streamWriter;
+    JsonSerializationMethod method = RESTResourceJSONExporter.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
+    switch (method) {
+      case xmlMapped:
+        streamWriter = new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream);
+        break;
+      case badgerfish:
+        streamWriter = new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported JSON serialization method: " + method);
+    }
     marshaller.marshal(result, streamWriter);
   }
 

@@ -1,11 +1,11 @@
 <enunciate>
   <modules>
-    <gwt disabled="false" gwtHome="/path/to/gwt/home" rpcModuleName="net.java.ws.addressbook.AddressBookGWT">
+    <gwt disabled="false" gwtHome="/home/heatonra/tools/gwt-linux-1.4.60" rpcModuleName="net.java.ws.addressbook.AddressBookGWT">
       <app srcDir="src/main/gwt">
         <module name="net.java.apps.addressbook.AddressBookApp"/>
       </app>
     </gwt>
-    <amf disabled="false" flexHome="/path/to/flex/sdk">
+    <amf disabled="false" flexHome="/home/heatonra/tools/flex-sdk-2">
       <app srcDir="src/main/flex" name="bytype" mainMxmlFile="src/main/flex/net/java/apps/addressbook/bytype.mxml"/>
     </amf>
   </modules>

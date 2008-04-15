@@ -23,8 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * A controller for the JSON API.
@@ -33,31 +35,43 @@ import java.io.IOException;
  */
 public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
-  private boolean enabled = false;
+  private boolean jettisonEnabled = false;
+  private boolean xstreamEnabled = false;
+  private JsonSerializationMethod defaultSerializationMethod;
 
-  public RESTResourceJSONExporter(RESTResource resource) {
+  public RESTResourceJSONExporter(RESTResource resource, JsonSerializationMethod defaultSerializationMethod) {
     super(resource);
+
+    this.defaultSerializationMethod = defaultSerializationMethod;
   }
 
   protected void initApplicationContext() throws BeansException {
     if (getExceptionHandler() == null) {
-      setExceptionHandler(new JaxbJsonExceptionHandler(getNamespaces2Prefixes()));
+      setExceptionHandler(new JaxbJsonExceptionHandler(getNamespaces2Prefixes(), getDefaultSerializationMethod()));
     }
 
     super.initApplicationContext();
 
     try {
       Class.forName("org.codehaus.jettison.mapped.MappedXMLOutputFactory", true, RESTResourceJSONExporter.class.getClassLoader());
-      enabled = true;
+      jettisonEnabled = true;
     }
-    catch (ClassNotFoundException e) {
-      enabled = false;
+    catch (Throwable e) {
+      jettisonEnabled = false;
+    }
+
+    try {
+      Class.forName("com.thoughtworks.xstream.XStream", true, RESTResourceJSONExporter.class.getClassLoader());
+      xstreamEnabled = true;
+    }
+    catch (Throwable e) {
+      xstreamEnabled = false;
     }
   }
 
   @Override
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (enabled) {
+    if (jettisonEnabled || xstreamEnabled) {
       return super.handleRequestInternal(request, response);
     }
     else {
@@ -68,22 +82,91 @@ public class RESTResourceJSONExporter extends RESTResourceXMLExporter {
 
   @Override
   protected Object unmarshalNounValue(HttpServletRequest request, Unmarshaller unmarshaller) throws JAXBException, IOException, XMLStreamException {
-    return JsonUnmarshaller.unmarshal(request, unmarshaller, getNamespaces2Prefixes());
+    if (jettisonEnabled) {
+      return JsonUnmarshaller.unmarshal(request, unmarshaller, getNamespaces2Prefixes());
+    }
+    else {
+      throw new UnmarshalException("Jettison not enabled: cannot unmarshal the request body.");
+    }
   }
 
   @Override
-  protected BasicRESTView createDataHandlerView(RESTOperation operation) {
-    return new JsonDataHandlerView(operation, getNamespaces2Prefixes());
+  protected BasicRESTView createDataHandlerView(RESTOperation operation, HttpServletRequest request) {
+    if (jettisonEnabled) {
+      return new JsonDataHandlerView(operation, getNamespaces2Prefixes());
+    }
+    else {
+      return super.createDataHandlerView(operation, request);
+    }
   }
 
   @Override
-  protected BasicRESTView createPayloadView(RESTOperation operation) {
-    return new JsonPayloadView(operation, getNamespaces2Prefixes());
+  protected BasicRESTView createPayloadView(RESTOperation operation, HttpServletRequest request) {
+    if (jettisonEnabled) {
+      return new JsonPayloadView(operation, getNamespaces2Prefixes());
+    }
+    else {
+      return super.createDataHandlerView(operation, request);
+    }
   }
 
   @Override
-  protected BasicRESTView createRESTView(RESTOperation operation) {
-    return new JaxbJsonView(operation, getNamespaces2Prefixes());
+  protected BasicRESTView createRESTView(RESTOperation operation, HttpServletRequest request) {
+    JsonSerializationMethod serializationMethod = loadSerializationMethod(request);
+    switch (serializationMethod) {
+      case xmlMapped:
+      case badgerfish:
+        if (!jettisonEnabled) {
+          throw new IllegalArgumentException("Cannot support " + serializationMethod + " JSON. (Jettison is disabled.)");
+        }
+        return new JaxbJsonView(operation, getNamespaces2Prefixes());
+
+      case hierarchical:
+        if (!xstreamEnabled) {
+          throw new IllegalArgumentException("Cannot support " + serializationMethod + " JSON. (XStream is disabled.)");
+        }
+        return new JsonHierarchicalView(operation);
+
+      default:
+        throw new IllegalArgumentException("Illegal JSON serialization method: " + serializationMethod);
+    }
   }
 
+  /**
+   * Loads the JSON serialization method from the specified request.
+   *
+   * @param request The request.
+   * @return The serialization method.
+   */
+  protected JsonSerializationMethod loadSerializationMethod(HttpServletRequest request) {
+    return loadSerializationMethod(request, getDefaultSerializationMethod());
+  }
+
+  /**
+   * Loads the JSON serialization method from the specified request.
+   *
+   * @param request       The request.
+   * @param defaultMethod The default method.
+   * @return The serialization method.
+   */
+  public static JsonSerializationMethod loadSerializationMethod(HttpServletRequest request, JsonSerializationMethod defaultMethod) {
+    Map parameterMap = request.getParameterMap();
+    for (JsonSerializationMethod method : JsonSerializationMethod.values()) {
+      if (parameterMap.containsKey(method.toString())) {
+        defaultMethod = method;
+        break;
+      }
+    }
+
+    return defaultMethod;
+  }
+
+  /**
+   * The default serialization method for this JSON exporter.
+   *
+   * @return The default serialization method for this JSON exporter.
+   */
+  public JsonSerializationMethod getDefaultSerializationMethod() {
+    return defaultSerializationMethod;
+  }
 }

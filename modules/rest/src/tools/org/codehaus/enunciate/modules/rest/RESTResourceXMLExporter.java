@@ -367,13 +367,13 @@ public class RESTResourceXMLExporter extends AbstractController {
     Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
     View view;
     if (result instanceof DataHandler) {
-      view = createDataHandlerView(operation);
+      view = createDataHandlerView(operation, request);
     }
     else if (operation.isDeliversPayload()) {
-      view = createPayloadView(operation);
+      view = createPayloadView(operation, request);
     }
     else {
-      view = createRESTView(operation);
+      view = createRESTView(operation, request);
     }
 
     TreeMap<String, Object> model = new TreeMap<String, Object>();
@@ -405,10 +405,11 @@ public class RESTResourceXMLExporter extends AbstractController {
   /**
    * Create the data handler view for the specified data handler.
    *
-   * @param operation   The operation.
+   * @param operation The operation.
+   * @param request The request for which to create the view.
    * @return The data handler.
    */
-  protected BasicRESTView createDataHandlerView(RESTOperation operation) {
+  protected BasicRESTView createDataHandlerView(RESTOperation operation, HttpServletRequest request) {
     return new DataHandlerView(operation);
   }
 
@@ -416,9 +417,10 @@ public class RESTResourceXMLExporter extends AbstractController {
    * Create the REST payload view for the specified operation and result.
    *
    * @param operation The operation.
+   * @param request The request for which to create the view.
    * @return The payload view.
    */
-  protected BasicRESTView createPayloadView(RESTOperation operation) {
+  protected BasicRESTView createPayloadView(RESTOperation operation, HttpServletRequest request) {
     return new RESTPayloadView(operation);
   }
 
@@ -426,9 +428,10 @@ public class RESTResourceXMLExporter extends AbstractController {
    * Create the REST view for the specified operation and result.
    *
    * @param operation The operation.
+   * @param request The request for which to create the view.
    * @return The view.
    */
-  protected BasicRESTView createRESTView(RESTOperation operation) {
+  protected BasicRESTView createRESTView(RESTOperation operation, HttpServletRequest request) {
     return new JaxbXmlView(operation, getNamespaces2Prefixes());
   }
 

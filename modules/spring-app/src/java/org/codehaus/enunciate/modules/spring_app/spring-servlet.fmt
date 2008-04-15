@@ -62,12 +62,14 @@
     <constructor-arg>
       <bean class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
         <constructor-arg ref="namespaces2prefix"/>
+        <constructor-arg value="${defaultJsonSerialization}"/>
       </bean>
     </constructor-arg>
   </bean>
   [#else]
   <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
     <constructor-arg ref="namespaces2prefix"/>
+    <constructor-arg value="${defaultJsonSerialization}"/>
   </bean>
   [/#if]
 
@@ -151,6 +153,7 @@
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <constructor-arg value="${defaultJsonSerialization}"/>
             <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
             <property name="exceptionHandler" ref="restJsonErrorHandler"/>
           </bean>
@@ -164,6 +167,7 @@
                 <constructor-arg value="${noun.context}"/>
               </bean>
             </constructor-arg>
+            <constructor-arg value="${defaultJsonSerialization}"/>
             <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
             <property name="exceptionHandler" ref="restJsonErrorHandler"/>
           </bean>

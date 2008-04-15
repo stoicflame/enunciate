@@ -27,9 +27,12 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class JaxbJsonExceptionHandler extends JaxbXmlExceptionHandler {
+
+  private final JsonSerializationMethod serializationMethod;
   
-  public JaxbJsonExceptionHandler(Map<String, String> ns2prefix) {
+  public JaxbJsonExceptionHandler(Map<String, String> ns2prefix, JsonSerializationMethod serializationMethod) {
     super(ns2prefix);
+    this.serializationMethod = serializationMethod;
   }
 
   @Override

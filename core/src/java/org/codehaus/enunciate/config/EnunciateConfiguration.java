@@ -50,6 +50,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String defaultSoapSubcontext = "/soap/";
   private String defaultRestSubcontext = "/rest/";
   private String defaultJsonSubcontext = "/json/";
+  private String defaultJsonSerialization = "xmlMapped";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -315,6 +316,24 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * The default JSON serialization method.
+   *
+   * @return The default JSON serialization method.
+   */
+  public String getDefaultJsonSerialization() {
+    return defaultJsonSerialization;
+  }
+
+  /**
+   * The default JSON serialization method.
+   *
+   * @param defaultJsonSerialization The default JSON serialization method.
+   */
+  public void setDefaultJsonSerialization(String defaultJsonSerialization) {
+    this.defaultJsonSerialization = defaultJsonSerialization;
+  }
+
+  /**
    * Adds a custom soap endpoint location for an SOAP service.
    *
    * @param serviceName The service name.
@@ -472,6 +491,11 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/services/soap/service", "addSoapEndpointLocation", 2);
     digester.addCallParam("enunciate/services/soap/service", 0, "name");
     digester.addCallParam("enunciate/services/soap/service", 1, "relativePath");
+
+    //allow for the default soap subcontext to be set.
+    digester.addSetProperties("enunciate/services/rest",
+                              new String[] {"xmlSubcontext", "jsonSubcontext", "defaultJsonSerialization"},
+                              new String[] {"defaultRestSubcontext", "defaultJsonSubcontext", "defaultJsonSerialization"});
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

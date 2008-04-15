@@ -14,6 +14,26 @@ package ${endpointInterface.package.qualifiedName} {
   [/@forEachAMFImport]
   import ${endpointInterface.qualifiedName}.*;
 
+  [@forEachWebMethod endpointInterface=endpointInterface]
+    [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+      [#if webMethod.returnType.map?default(false)]
+        [#if webMethod.returnType.keyType.declared && as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]?exists]
+  //register the type for the key type of the key-value pairs that are returned.
+  registerClassAlias("${webMethod.returnType.keyType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]});
+        [/#if]
+        [#if webMethod.returnType.valueType.declared && as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]?exists]
+  //register the type for the value type of the key-value pairs that are returned.
+  registerClassAlias("${webMethod.returnType.valueType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]});
+        [/#if]
+      [#elseif webMethod.returnType.collection || webMethod.returnType.array]
+        [#if as3Aliases[componentTypeFor(webMethod.returnType)]?exists]
+  //register the item type of the collection that is returned.
+  registerClassAlias("${componentTypeFor(webMethod.returnType)}", ${as3Aliases[componentTypeFor(webMethod.returnType)]});
+        [/#if]
+      [/#if]
+    [/#if]
+  [/@forEachWebMethod]
+
   /**
    * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
@@ -26,7 +46,27 @@ package ${endpointInterface.package.qualifiedName} {
   public class ${endpointInterface.simpleName} extends EventDispatcher {
 
     private var _requestTimeout:int = 0;
+    [@forEachWebMethod endpointInterface=endpointInterface]
+      [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
 
+    /**
+     * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
+     */
+    public function ${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}:${classnameFor(param)}[#if param_has_next], [/#if][/#list]):void {
+      var ro:RemoteObject = new RemoteObject();
+      ro.requestTimeout = _requestTimeout;
+      ro.destination = "${endpointInterface.simpleName}";
+      ro.addEventListener("result", handle${webMethod.simpleName?cap_first}Result);
+      ro.addEventListener("fault", handleFault);
+      ro.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]);
+    }
+
+    private function handle${webMethod.simpleName?cap_first}Result(event:ResultEvent):void {
+      dispatchEvent(new ${webMethod.operationName?cap_first}ResultEvent([#if !webMethod.returnType.void]${classnameFor(webMethod.webResult)}(event.result)[/#if]));
+    }
+      [/#if]
+    [/@forEachWebMethod]
+    
     /**
      * The request timeout, in seconds.
      */
@@ -51,42 +91,6 @@ package ${endpointInterface.package.qualifiedName} {
     private function handleFault(event:FaultEvent):void {
       dispatchEvent(event);
     }
-
-    [@forEachWebMethod endpointInterface=endpointInterface]
-      [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
-
-    /**
-     * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
-     */
-    public function ${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}:${classnameFor(param)}[#if param_has_next], [/#if][/#list]):void {
-      [#if webMethod.returnType.map?default(false)]
-        [#if webMethod.returnType.keyType.declared && as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]?exists]
-      //register the type for the key type of the key-value pairs that are returned.
-      registerClassAlias("${webMethod.returnType.keyType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.keyType.declaration.qualifiedName]});
-        [/#if]
-        [#if webMethod.returnType.valueType.declared && as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]?exists]
-      //register the type for the value type of the key-value pairs that are returned.
-      registerClassAlias("${webMethod.returnType.valueType.declaration.qualifiedName}", ${as3Aliases[webMethod.returnType.valueType.declaration.qualifiedName]});
-        [/#if]
-      [#elseif webMethod.returnType.collection || webMethod.returnType.array]
-        [#if as3Aliases[componentTypeFor(webMethod.returnType)]?exists]
-      //register the item type of the collection that is returned.
-      registerClassAlias("${componentTypeFor(webMethod.returnType)}", ${as3Aliases[componentTypeFor(webMethod.returnType)]});
-        [/#if]
-      [/#if]
-      var ro:RemoteObject = new RemoteObject();
-      ro.requestTimeout = _requestTimeout;
-      ro.destination = "${endpointInterface.simpleName}";
-      ro.addEventListener("result", handle${webMethod.simpleName?cap_first}Result);
-      ro.addEventListener("fault", handleFault);
-      ro.${webMethod.simpleName}([#list webMethod.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]);
-    }
-
-    private function handle${webMethod.simpleName?cap_first}Result(event:ResultEvent):void {
-      dispatchEvent(new ${webMethod.operationName?cap_first}ResultEvent([#if !webMethod.returnType.void]${classnameFor(webMethod.webResult)}(event.result)[/#if]));
-    }
-      [/#if]
-    [/@forEachWebMethod]
   }
 }
 [/@file]

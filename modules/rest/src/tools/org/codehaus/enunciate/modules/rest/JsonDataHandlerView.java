@@ -62,9 +62,18 @@ public class JsonDataHandlerView extends DataHandlerView {
         new JsonPHandler(callbackName) {
           public void writeBody(PrintWriter outStream) throws Exception {
             InputStream stream = result.getInputStream();
-            XMLStreamWriter streamWriter = (request.getParameter("badgerfish") == null) ?
-              new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream) :
-              new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
+            XMLStreamWriter streamWriter;
+            JsonSerializationMethod method = RESTResourceJSONExporter.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
+            switch (method) {
+              case xmlMapped:
+                streamWriter = new MappedXMLOutputFactory(getNamespaces2Prefixes()).createXMLStreamWriter(outStream);
+                break;
+              case badgerfish:
+                streamWriter = new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream);
+                break;
+              default:
+                throw new IllegalArgumentException("Unsupported JSON serialization method: " + method);
+            }
             convertXMLStreamToJSON(XMLInputFactory.newInstance().createXMLEventReader(stream), streamWriter);
             streamWriter.flush();
             streamWriter.close();
