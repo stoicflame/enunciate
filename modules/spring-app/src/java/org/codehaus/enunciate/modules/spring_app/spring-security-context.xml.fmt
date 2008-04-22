@@ -287,17 +287,35 @@
     </property>
   </bean>
 
+  [#if securityConfig.primaryAuthenticationProvider?exists]
+    [#if securityConfig.primaryAuthenticationProvider.beanName?exists]
+  <alias alias="defaultProvider" name="${securityConfig.primaryAuthenticationProvider.beanName}"/>
+
+    [#elseif securityConfig.primaryAuthenticationProvider.className?exists]
+  <bean id="defaultProvider" class="${securityConfig.primaryAuthenticationProvider.className}"/>
+
+    [#else]
   <bean id="defaultProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
     <property name="userDetailsService" ref="localUserDetailsService"/>
   </bean>
 
+    [/#if]
+  [#else]
+  <bean id="defaultProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+    <property name="userDetailsService" ref="localUserDetailsService"/>
+  </bean>
+
+  [/#if]
   [#if securityConfig.userDetailsService?exists]
     [#if securityConfig.userDetailsService.beanName?exists]
   <alias alias="localUserDetailsService" name="${securityConfig.userDetailsService.beanName}"/>
+
     [#elseif securityConfig.userDetailsService.className?exists]
   <bean id="localUserDetailsService" class="${securityConfig.userDetailsService.className}"/>
+
     [#else]
   <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.DelegatingUserDetailsService"/>
+
     [/#if]
   [#else]
   <bean id="localUserDetailsService" class="org.codehaus.enunciate.modules.spring_app.DelegatingUserDetailsService"/>

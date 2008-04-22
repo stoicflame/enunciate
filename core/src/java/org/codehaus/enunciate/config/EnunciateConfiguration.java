@@ -48,12 +48,12 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
   private String defaultSoapSubcontext = "/soap/";
-  private String defaultRestSubcontext = "/rest/";
-  private String defaultJsonSubcontext = "/json/";
   private String defaultJsonSerialization = "xmlMapped";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
+  private final Map<String, String> contentTypes = new HashMap<String, String>();
+  private final Map<String, String> contentTypeHandlers = new HashMap<String, String>();
   private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
   private final List<APIImport> apiImports = new ArrayList<APIImport>();
 
@@ -214,6 +214,20 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * Configures a content type.
+   *
+   * @param value The value of the content type.
+   * @param id The id of the content type.
+   * @param handler The handler of the content type.
+   */
+  public void putContentType(String value, String id, String handler) {
+    this.contentTypes.put(value, id);
+    if (handler != null) {
+      this.contentTypeHandlers.put(value, handler);
+    }
+  }
+
+  /**
    * The default soap context.
    *
    * @return The default soap context.
@@ -245,74 +259,6 @@ public class EnunciateConfiguration implements ErrorHandler {
     }
 
     this.defaultSoapSubcontext = defaultSoapSubcontext;
-  }
-
-  /**
-   * The default rest context.
-   *
-   * @return The default rest context.
-   */
-  public String getDefaultRestSubcontext() {
-    return defaultRestSubcontext;
-  }
-
-  /**
-   * The default rest context.
-   *
-   * @param defaultRestSubcontext The default rest context.
-   */
-  public void setDefaultRestSubcontext(String defaultRestSubcontext) {
-    if (defaultRestSubcontext == null) {
-      throw new IllegalArgumentException("The default REST context must not be null.");
-    }
-
-    if ("".equals(defaultRestSubcontext)) {
-      throw new IllegalArgumentException("The default REST context must not be the emtpy string.");
-    }
-
-    if (!defaultRestSubcontext.startsWith("/")) {
-      defaultRestSubcontext = "/" + defaultRestSubcontext;
-    }
-
-    if (!defaultRestSubcontext.endsWith("/")) {
-      defaultRestSubcontext = defaultRestSubcontext + "/";
-    }
-
-    this.defaultRestSubcontext = defaultRestSubcontext;
-  }
-
-  /**
-   * The default json context.
-   *
-   * @return The default json context.
-   */
-  public String getDefaultJsonSubcontext() {
-    return defaultJsonSubcontext;
-  }
-
-  /**
-   * The default json context.
-   *
-   * @param defaultJsonSubcontext The default json context.
-   */
-  public void setDefaultJsonSubcontext(String defaultJsonSubcontext) {
-    if (defaultJsonSubcontext == null) {
-      throw new IllegalArgumentException("The default JSON context must not be null.");
-    }
-
-    if ("".equals(defaultJsonSubcontext)) {
-      throw new IllegalArgumentException("The default JSON context must not be the emtpy string.");
-    }
-
-    if (!defaultJsonSubcontext.startsWith("/")) {
-      defaultJsonSubcontext = "/" + defaultJsonSubcontext;
-    }
-
-    if (!defaultJsonSubcontext.endsWith("/")) {
-      defaultJsonSubcontext = defaultJsonSubcontext + "/";
-    }
-
-    this.defaultJsonSubcontext = defaultJsonSubcontext;
   }
 
   /**
@@ -386,6 +332,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public Map<String, String> getNamespacesToPrefixes() {
     return this.namespaces;
+  }
+
+  /**
+   * The map of content types to ids.
+   *
+   * @return The map of content types to ids.
+   */
+  public Map<String, String> getContentTypesToIds() {
+    return contentTypes;
+  }
+
+  /**
+   * The map of content types to handlers.
+   *
+   * @return The map of content types to handlers.
+   */
+  public Map<String, String> getContentTypeHandlers() {
+    return contentTypeHandlers;
   }
 
   /**
@@ -484,6 +448,12 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/namespaces/namespace", 0, "uri");
     digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
 
+    //allow for namespace prefixes to be specified in the config file.
+    digester.addCallMethod("enunciate/content-types/content-type", "putContentType", 3);
+    digester.addCallParam("enunciate/content-types/content-type", 0, "value");
+    digester.addCallParam("enunciate/content-types/content-type", 1, "id");
+    digester.addCallParam("enunciate/content-types/content-type", 2, "handler");
+
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
 
@@ -494,7 +464,7 @@ public class EnunciateConfiguration implements ErrorHandler {
 
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/rest",
-                              new String[] {"xmlSubcontext", "jsonSubcontext", "defaultJsonSerialization"},
+                              new String[] {"xmlContext", "jsonContext", "defaultJsonSerialization"},
                               new String[] {"defaultRestSubcontext", "defaultJsonSubcontext", "defaultJsonSerialization"});
 
     //set up the module configuration.

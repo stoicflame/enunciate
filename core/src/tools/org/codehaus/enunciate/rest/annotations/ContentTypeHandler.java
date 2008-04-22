@@ -22,13 +22,24 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Annotates a method on a {@link org.codehaus.enunciate.rest.annotations.RESTPayload} to indicate
- * that the method returns a hint as to whether the payload is XML. The method is required to return
- * a boolean.
+ * Annotation used to specify a handler for a specific content type.
  *
  * @author Ryan Heaton
+ * @see ContentType
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.METHOD} )
-public @interface RESTPayloadXMLHint {
+@Retention (
+  RetentionPolicy.RUNTIME
+)
+@Target (
+  ElementType.TYPE
+)
+public @interface ContentTypeHandler {
+
+  /**
+   * The content types supported by this content type handler.
+   *
+   * @return The content types supported by this content type handler.
+   */
+  String[] contentTypes();
+
 }

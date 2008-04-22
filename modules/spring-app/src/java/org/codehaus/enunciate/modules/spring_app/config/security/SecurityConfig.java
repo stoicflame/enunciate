@@ -126,6 +126,8 @@ import java.util.ArrayList;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entryPoint beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/onAccessDenied&gt;
  *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;primaryProvider beanName="..." className="..."/&gt;
+ *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -303,6 +305,13 @@ import java.util.ArrayList;
  * security filter implements the javax.servlet.Filter interface. You can provide any number of additional
  * security filters to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/x509/X509ProcessingFilter.html">X509ProcessingFilter</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/siteminder/SiteminderAuthenticationProvider.html">SiteminderAuthenticationProcessingFilter</a>, etc.).</p>
  *
+ * <h3>primaryProvider</h3>
+ *
+ * <p>The "primaryProvider" child element specifies the primary Spring Security authentication provider that is to be used to provide authentication services.
+ * The "primaryProvider" element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
+ * primary authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. The
+ * primary authentication provider implements the <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/AuthenticationProvider.html">org.acegisecurity.providers.AuthenticationProvider</a> interface.</p>
+ *
  * <h3>provider</h3>
  *
  * <p>The "provider" child element specifies another Spring Security authentication provider that is to be used to provide authentication services. The "provider"
@@ -351,6 +360,7 @@ public class SecurityConfig {
   private EntryPointConfig onAccessDenied;
 
   private BeanReference userDetailsService;
+  private BeanReference primaryAuthenticationProvider;
   private List<BeanReference> additionalAuthenticationProviders;
   private List<BeanReference> additionalAuthenticationFilters;
 
@@ -666,6 +676,24 @@ public class SecurityConfig {
    */
   public void setUserDetailsService(BeanReference userDetailsService) {
     this.userDetailsService = userDetailsService;
+  }
+
+  /**
+   * The primary authentication provider.
+   *
+   * @return The primary authentication provider.
+   */
+  public BeanReference getPrimaryAuthenticationProvider() {
+    return primaryAuthenticationProvider;
+  }
+
+  /**
+   * The primary authentication provider.
+   *
+   * @param primaryAuthenticationProvider The primary authentication provider.
+   */
+  public void setPrimaryAuthenticationProvider(BeanReference primaryAuthenticationProvider) {
+    this.primaryAuthenticationProvider = primaryAuthenticationProvider;
   }
 
   /**

@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 /**
  * @author Ryan Heaton
  */
-public class TestRESTResourceXMLExporter extends TestCase {
+public class TestRESTResourceExporter extends TestCase {
 
   /**
    * simple tests for regexps
@@ -67,12 +67,12 @@ public class TestRESTResourceXMLExporter extends TestCase {
   public void testHandleRequestInternal() throws Exception {
     RESTResource restResource = new RESTResource("mynoun") {
       @Override
-      public Set<VerbType> getSupportedVerbs() {
+      public Set<VerbType> getSupportedVerbs(String contentType) {
         return EnumSet.allOf(VerbType.class);
       }
     };
     
-    RESTResourceXMLExporter exporter = new RESTResourceXMLExporter(restResource) {
+    RESTResourceExporter exporter = new RESTResourceExporter(restResource, null, null) {
       @Override
       protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute("verb", verb);
@@ -117,7 +117,7 @@ public class TestRESTResourceXMLExporter extends TestCase {
     RESTResource resource = new RESTResource("example") {
 
       @Override
-      public Set<VerbType> getSupportedVerbs() {
+      public Set<VerbType> getSupportedVerbs(String contentType) {
         return EnumSet.allOf(VerbType.class);
       }
 
@@ -127,8 +127,8 @@ public class TestRESTResourceXMLExporter extends TestCase {
       }
     };
 
-    resource.addOperation(VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
-    RESTResourceXMLExporter controller = new RESTResourceXMLExporter(resource);
+    resource.addOperation("text/xml", VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
+    RESTResourceExporter controller = new RESTResourceExporter(resource, null, null);
     controller.setApplicationContext(new GenericApplicationContext());
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
@@ -140,7 +140,8 @@ public class TestRESTResourceXMLExporter extends TestCase {
     reset(request, response);
 
     controller.setMultipartRequestHandler(null);
-    request.setAttribute(RESTOperation.class.getName(), resource.getOperation(VerbType.update));
+    RESTOperation operation = resource.getOperation("text/xml", VerbType.update);
+    request.setAttribute(RESTOperation.class.getName(), operation);
     expect(request.getRequestURI()).andReturn("/ctx/is/unimportant");
     expect(request.getContextPath()).andReturn("");
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);
@@ -149,13 +150,13 @@ public class TestRESTResourceXMLExporter extends TestCase {
     expect(request.getParameterValues("arg2")).andReturn(new String[] {"9999"});
     expect(request.getParameterValues("arg3")).andReturn(new String[] {"value1", "value2"});
     expect(request.getInputStream()).andReturn(new ByteArrayServletInputStream(bytes.toByteArray()));
+    expect(request.getAttribute(RESTOperation.class.getName())).andReturn(operation);
     replay(request, response);
     paramValues.put(null, "id");
     paramValues.put("uriParam1", "ctxValueOne");
     paramValues.put("otherParam", "otherValue");
     ModelAndView modelAndView = controller.handleRESTOperation(VerbType.update, request, response);
     verify(request, response);
-    BasicRESTView view = (BasicRESTView) modelAndView.getView();
     assertNotNull(modelAndView.getModel().get("result"));
     assertTrue(modelAndView.getModel().get("result") instanceof RootElementExample);
     reset(request, response);

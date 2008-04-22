@@ -41,8 +41,9 @@ public class RESTResource implements Comparable<RESTResource> {
   private final String nounContext;
   private final Pattern regexpPattern;
   private final List<String> contextParameters;
-  private final EnumMap<VerbType, RESTOperation> operations = new EnumMap<VerbType, RESTOperation>(VerbType.class);
+  private final Set<RESTOperation> operations;
   private Properties paramterNames;
+  private String defaultContentType = "application/xml";
 
   /**
    * Construct a REST resource for the specified noun, assuming the empty context.
@@ -68,36 +69,50 @@ public class RESTResource implements Comparable<RESTResource> {
     }
 
     this.regexpPattern = Pattern.compile(nounContext.replaceAll(CONTEXT_PARAM_PATTERN, "([^/]+)") + "/" + noun + "/?(.*)$");
+    this.operations = new TreeSet<RESTOperation>(new Comparator<RESTOperation>() {
+      public int compare(RESTOperation o1, RESTOperation o2) {
+        int comparison = o1.getContentType().compareTo(o2.getContentType());
+        if (comparison == 0) {
+          comparison = o1.getVerb().compareTo(o2.getVerb());
+        }
+        return comparison;
+      }
+    });
   }
 
   /**
    * Adds an operation to this REST resource.
    *
+   * @param contentType The content type of the operation.
    * @param verb The verb for the operation.
    * @param endpoint The endpoint on which to invoke the operation.
    * @param method The method to invoke on the endpoint.
    * @return Whether the operation was successfully added.  (false if the specified verb was already added).
    */
-  public boolean addOperation(VerbType verb, Object endpoint, Method method) {
-    if (operations.containsKey(verb)) {
-      return false;
-    }
-    else {
-      String[] parameterNames = null;
-      if (getParamterNames() != null) {
-        String parameterList = (String) getParamterNames().get(getCanonicalReference(verb));
-        if (parameterList != null) {
-          parameterNames = parameterList.split(",");
-        }
+  public boolean addOperation(String contentType, VerbType verb, Object endpoint, Method method) {
+    String[] parameterNames = null;
+    if (getParamterNames() != null) {
+      String parameterList = (String) getParamterNames().get(getCanonicalReference(verb));
+      if (parameterList != null) {
+        parameterNames = parameterList.split(",");
       }
-
-      RESTOperation operation = createOperation(verb, endpoint, method, parameterNames);
-      return operations.put(verb, operation) == null;
     }
+
+    return this.operations.add(createOperation(contentType, verb, endpoint, method, parameterNames));
   }
 
-  protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
-    return new RESTOperation(this, verb, endpoint, method, parameterNames);
+  /**
+   * Create an operation.
+   *
+   * @param contentType The content type.
+   * @param verb The verb.
+   * @param endpoint The endpoint.
+   * @param method The method.
+   * @param parameterNames The parameter names.
+   * @return The operation.
+   */
+  protected RESTOperation createOperation(String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+    return new RESTOperation(this, contentType, verb, endpoint, method, parameterNames);
   }
 
   /**
@@ -125,13 +140,28 @@ public class RESTResource implements Comparable<RESTResource> {
   }
 
   /**
-   * Gets the REST operation for the specified verb.
+   * Gets the REST operation for the specified verb and content type.
    *
+   * @param contentType The content type.
    * @param verb The verb.
    * @return The REST operation.
    */
-  public RESTOperation getOperation(VerbType verb) {
-    return operations.get(verb);
+  public RESTOperation getOperation(String contentType, VerbType verb) {
+    for (RESTOperation operation : operations) {
+      if ((operation.getVerb().equals(verb)) && (operation.getContentType().equals(contentType))) {
+        return operation;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The operations available to this resource.
+   *
+   * @return The operations available to this resource.
+   */
+  public Collection<RESTOperation> getOperations() {
+    return operations;
   }
 
   /**
@@ -189,12 +219,19 @@ public class RESTResource implements Comparable<RESTResource> {
   }
 
   /**
-   * Gets the supported verbs for this resource.
+   * Gets the supported verbs for the specified conent type of this resource.
    *
+   * @param contentType The content type;
    * @return The supported verbs.
    */
-  public Set<VerbType> getSupportedVerbs() {
-    return operations.keySet();
+  public Set<VerbType> getSupportedVerbs(String contentType) {
+    Set<VerbType> verbs = EnumSet.noneOf(VerbType.class);
+    for (RESTOperation operation : operations) {
+      if (operation.getContentType().equals(contentType)) {
+        verbs.add(operation.getVerb());
+      }
+    }
+    return verbs;
   }
 
   /**
@@ -223,6 +260,24 @@ public class RESTResource implements Comparable<RESTResource> {
    */
   public void setParamterNames(Properties paramterNames) {
     this.paramterNames = paramterNames;
+  }
+
+  /**
+   * The default content type for this resource.
+   *
+   * @return The default content type for this resource.
+   */
+  public String getDefaultContentType() {
+    return defaultContentType;
+  }
+
+  /**
+   * The default content type for this resource.
+   *
+   * @param defaultContentType The default content type for this resource.
+   */
+  public void setDefaultContentType(String defaultContentType) {
+    this.defaultContentType = defaultContentType;
   }
 
   @Override

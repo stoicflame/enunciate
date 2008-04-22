@@ -16,6 +16,9 @@
 
 package org.codehaus.enunciate.modules.rest;
 
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -27,48 +30,34 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.AbstractController;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.io.IOException;
 
 /**
- * An xml exporter for a REST resource.
+ * A exporter for a REST resource.
  *
  * @author Ryan Heaton
  */
-public class RESTResourceXMLExporter extends AbstractController {
+public class RESTResourceExporter extends AbstractController {
 
-  private final DocumentBuilder documentBuilder;
+  public static final Log LOG = LogFactory.getLog(RESTResourceExporter.class);
+
   private final RESTResource resource;
+  private final RESTRequestContentTypeHandler contentTypeHandler;
+  private final String contentType;
   private HandlerExceptionResolver exceptionHandler;
-  private Map<String, String> ns2prefix;
   private String[] supportedMethods;
   private MultipartRequestHandler multipartRequestHandler;
+  private Map<String, String> namespaces2Prefixes = new HashMap<String, String>();
 
-  public RESTResourceXMLExporter(RESTResource resource) {
-    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    builderFactory.setNamespaceAware(false);
-    try {
-      documentBuilder = builderFactory.newDocumentBuilder();
-    }
-    catch (ParserConfigurationException e) {
-      throw new RuntimeException(e);
-    }
+  public RESTResourceExporter(RESTResource resource, RESTRequestContentTypeHandler contentTypeHandler, String contentType) {
     this.resource = resource;
+    this.contentTypeHandler = contentTypeHandler;
+    this.contentType = contentType;
   }
 
   @Override
@@ -79,7 +68,7 @@ public class RESTResourceXMLExporter extends AbstractController {
       throw new ApplicationContextException("A REST resource must be provided.");
     }
 
-    Set<VerbType> supportedVerbs = resource.getSupportedVerbs();
+    Set<VerbType> supportedVerbs = resource.getSupportedVerbs(contentType);
     String[] supportedMethods = new String[supportedVerbs.size()];
     int i = 0;
     for (VerbType supportedVerb : supportedVerbs) {
@@ -118,36 +107,35 @@ public class RESTResourceXMLExporter extends AbstractController {
 
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
 
-    if (this.exceptionHandler == null) {
-      this.exceptionHandler = new JaxbXmlExceptionHandler(getNamespaces2Prefixes());
+    if (this.contentTypeHandler instanceof RESTResourceAware) {
+      ((RESTResourceAware)this.contentTypeHandler).setRESTResource(resource);
     }
-  }
 
-  public RESTResource getResource() {
-    return resource;
-  }
+    if (this.contentTypeHandler instanceof NamespacePrefixesAware) {
+      ((NamespacePrefixesAware)this.contentTypeHandler).setNamespacesToPrefixes(getNamespaces2Prefixes());
+    }
 
-  public HandlerExceptionResolver getExceptionHandler() {
-    return exceptionHandler;
-  }
-
-  public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
-    this.exceptionHandler = exceptionHandler;
+    if (this.contentTypeHandler instanceof ContentTypeAware) {
+      ((ContentTypeAware)this.contentTypeHandler).setContentType(getContentType());
+    }
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    VerbType verb = getVerb(request);
-
-    if (!resource.getSupportedVerbs().contains(verb)) {
+    if (!Arrays.asList(this.supportedMethods).contains(request.getMethod().toUpperCase())) {
       throw new MethodNotAllowedException(this.supportedMethods);
     }
+
+    VerbType verb = getVerb(request);
 
     try {
       return handleRESTOperation(verb, request, response);
     }
     catch (Exception e) {
+      if (LOG.isErrorEnabled()) {
+        LOG.error("Error invoking REST operation.", e);
+      }
+
       if (getExceptionHandler() != null) {
-        request.setAttribute(VerbType.class.getName(), verb);
         return getExceptionHandler().resolveException(request, response, this, e);
       }
       else {
@@ -161,7 +149,7 @@ public class RESTResourceXMLExporter extends AbstractController {
    *
    * @param request The request.
    * @return The verb.
-   * @throws MethodNotAllowedException If the verb isn't recognized.
+   * @throws org.codehaus.enunciate.modules.rest.MethodNotAllowedException If the verb isn't recognized.
    */
   public VerbType getVerb(HttpServletRequest request) throws MethodNotAllowedException {
     String httpMethod = request.getHeader("X-HTTP-Method-Override");
@@ -188,7 +176,7 @@ public class RESTResourceXMLExporter extends AbstractController {
     else {
       throw new MethodNotAllowedException(this.supportedMethods);
     }
-    
+
     return verb;
   }
 
@@ -201,21 +189,28 @@ public class RESTResourceXMLExporter extends AbstractController {
    * @return The model and view.
    */
   protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    RESTOperation operation = resource.getOperation(verb);
+    RESTOperation operation = resource.getOperation(contentType, verb);
     if (!isOperationAllowed(operation)) {
       response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
       return null;
     }
-    request.setAttribute(RESTOperation.class.getName(), operation);
 
     if ((this.multipartRequestHandler != null) && (this.multipartRequestHandler.isMultipart(request))) {
       request = this.multipartRequestHandler.handleMultipartRequest(request);
     }
 
-    Document document = documentBuilder.newDocument();
+    return handleRESTRequest(new RESTRequest(request, operation, getContentType()), response);
+  }
 
-    Unmarshaller unmarshaller = operation.getSerializationContext().createUnmarshaller();
-    unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
+  /**
+   * Handle the specified REST request.
+   *
+   * @param request The request.
+   * @param response The response.
+   * @return The model and view.
+   */
+  protected ModelAndView handleRESTRequest(RESTRequest request, HttpServletResponse response) throws Exception {
+    RESTOperation operation = request.getOperation();
 
     String requestContext = request.getRequestURI().substring(request.getContextPath().length());
     Map<String, String> contextParameters;
@@ -230,28 +225,31 @@ public class RESTResourceXMLExporter extends AbstractController {
     Object properNounValue = null;
     HashMap<String, Object> contextParameterValues = new HashMap<String, Object>();
     for (Map.Entry<String, String> entry : contextParameters.entrySet()) {
-      if (entry.getKey() == null) {
-        if (operation.getProperNounType() != null) {
-          if (!String.class.isAssignableFrom(operation.getProperNounType())) {
-            Element element = document.createElement("unimportant");
-            element.appendChild(document.createTextNode(contextParameters.get(entry.getKey())));
-            properNounValue = unmarshaller.unmarshal(element, operation.getProperNounType()).getValue();
+      String parameterName = entry.getKey();
+      String parameterValue = entry.getValue();
+      if (parameterName == null) {
+        Class nounType = operation.getProperNounType();
+        if (nounType != null) {
+          //todo: provide a hook to some other conversion mechanism?
+          try {
+            properNounValue = ConvertUtils.convert(parameterValue, nounType);
           }
-          else {
-            properNounValue = contextParameters.get(entry.getKey());
+          catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
+            return null;
           }
         }
       }
       else {
-        Class contextParameterType = operation.getContextParameterTypes().get(entry.getKey());
+        Class contextParameterType = operation.getContextParameterTypes().get(parameterName);
         if (contextParameterType != null) {
-          if (!String.class.isAssignableFrom(contextParameterType)) {
-            Element element = document.createElement("unimportant");
-            element.appendChild(document.createTextNode(contextParameters.get(entry.getKey())));
-            contextParameterValues.put(entry.getKey(), unmarshaller.unmarshal(element, contextParameterType).getValue());
+          //todo: provide a hook to some other conversion mechanism?
+          try {
+            contextParameterValues.put(parameterName, ConvertUtils.convert(parameterValue, contextParameterType));
           }
-          else {
-            contextParameterValues.put(entry.getKey(), contextParameters.get(entry.getKey()));
+          catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
+            return null;
           }
         }
       }
@@ -269,21 +267,16 @@ public class RESTResourceXMLExporter extends AbstractController {
         //not complex, map it.
         String[] parameterValues = request.getParameterValues(adjective);
         if ((parameterValues != null) && (parameterValues.length > 0)) {
-          Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
-          Class componentType = adjectiveType;
-          if (adjectiveType.isArray()) {
-            componentType = adjectiveType.getComponentType();
-          }
-          Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
-
+          //todo: provide a hook to some other conversion mechanism?
+          final Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
+          Object[] adjectiveValues = new Object[parameterValues.length];
           for (int i = 0; i < parameterValues.length; i++) {
-            if (!String.class.isAssignableFrom(componentType)) {
-              Element element = document.createElement("unimportant");
-              element.appendChild(document.createTextNode(parameterValues[i]));
-              Array.set(adjectiveValues, i, unmarshaller.unmarshal(element, componentType).getValue());
+            try {
+              adjectiveValues[i] = ConvertUtils.convert(parameterValues[i], adjectiveType);
             }
-            else {
-              Array.set(adjectiveValues, i, parameterValues[i]);
+            catch (Exception e) {
+              response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid value '" + parameterValues[i] + "' for parameter '" + adjective + "'.");
+              return null;
             }
           }
 
@@ -291,7 +284,7 @@ public class RESTResourceXMLExporter extends AbstractController {
             adjectiveValue = adjectiveValues;
           }
           else {
-            adjectiveValue = Array.get(adjectiveValues, 0);
+            adjectiveValue = adjectiveValues[0];
           }
         }
 
@@ -353,7 +346,7 @@ public class RESTResourceXMLExporter extends AbstractController {
       else {
         try {
           //if the operation has a noun value type, unmarshall it from the body....
-          nounValue = unmarshalNounValue(request, unmarshaller);
+          nounValue = getContentTypeHandler().read(request);
         }
         catch (Exception e) {
           //if we can't unmarshal the noun value, continue if the noun value is optional.
@@ -365,20 +358,16 @@ public class RESTResourceXMLExporter extends AbstractController {
     }
 
     Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
-    View view;
+
+    //successful invocation, set up the response...
+    response.setContentType(String.format("%s;charset=%s", this.contentType, operation.getCharset()));
     if (result instanceof DataHandler) {
-      view = createDataHandlerView(operation, request);
-    }
-    else if (operation.isDeliversPayload()) {
-      view = createPayloadView(operation, request);
+      ((DataHandler)result).writeTo(response.getOutputStream());
     }
     else {
-      view = createRESTView(operation, request);
+      this.contentTypeHandler.write(result, request, response);
     }
-
-    TreeMap<String, Object> model = new TreeMap<String, Object>();
-    model.put(RESTOperationView.MODEL_RESULT, result);
-    return new ModelAndView(view, model);
+    return null;
   }
 
   /**
@@ -392,50 +381,6 @@ public class RESTResourceXMLExporter extends AbstractController {
   }
 
   /**
-   * Unmarshal the noun value from the request given the specified unmarshaller.
-   *
-   * @param request The request.
-   * @param unmarshaller The unmarshaller.
-   * @return The noun value.
-   */
-  protected Object unmarshalNounValue(HttpServletRequest request, Unmarshaller unmarshaller) throws JAXBException, IOException, XMLStreamException {
-    return unmarshaller.unmarshal(request.getInputStream());
-  }
-
-  /**
-   * Create the data handler view for the specified data handler.
-   *
-   * @param operation The operation.
-   * @param request The request for which to create the view.
-   * @return The data handler.
-   */
-  protected BasicRESTView createDataHandlerView(RESTOperation operation, HttpServletRequest request) {
-    return new DataHandlerView(operation);
-  }
-
-  /**
-   * Create the REST payload view for the specified operation and result.
-   *
-   * @param operation The operation.
-   * @param request The request for which to create the view.
-   * @return The payload view.
-   */
-  protected BasicRESTView createPayloadView(RESTOperation operation, HttpServletRequest request) {
-    return new RESTPayloadView(operation);
-  }
-
-  /**
-   * Create the REST view for the specified operation and result.
-   *
-   * @param operation The operation.
-   * @param request The request for which to create the view.
-   * @return The view.
-   */
-  protected BasicRESTView createRESTView(RESTOperation operation, HttpServletRequest request) {
-    return new JaxbXmlView(operation, getNamespaces2Prefixes());
-  }
-
-  /**
    * Whether the specified operation is allowed.
    *
    * @param operation The operation to test whether it is allowed.
@@ -443,24 +388,6 @@ public class RESTResourceXMLExporter extends AbstractController {
    */
   protected boolean isOperationAllowed(RESTOperation operation) {
     return operation != null;
-  }
-
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @param ns2prefix The map of namespaces to prefixes.
-   */
-  public void setNamespaces2Prefixes(Map<String, String> ns2prefix) {
-    this.ns2prefix = ns2prefix;
-  }
-
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @return The map of namespaces to prefixes.
-   */
-  public Map<String, String> getNamespaces2Prefixes() {
-    return this.ns2prefix;
   }
 
   /**
@@ -479,5 +406,68 @@ public class RESTResourceXMLExporter extends AbstractController {
    */
   public void setMultipartRequestHandler(MultipartRequestHandler multipartRequestHandler) {
     this.multipartRequestHandler = multipartRequestHandler;
+  }
+
+  /**
+   * The resource associated with this exporter.
+   *
+   * @return The resource associated with this exporter.
+   */
+  public RESTResource getResource() {
+    return resource;
+  }
+
+  /**
+   * The data format handler used by this exporter.
+   *
+   * @return The data format handler used by this exporter.
+   */
+  public RESTRequestContentTypeHandler getContentTypeHandler() {
+    return contentTypeHandler;
+  }
+
+  /**
+   * The data format handled by this exporter.
+   *
+   * @return The data format handled by this exporter.
+   */
+  public String getContentType() {
+    return contentType;
+  }
+
+  /**
+   * The exception handler.
+   *
+   * @return The exception handler.
+   */
+  public HandlerExceptionResolver getExceptionHandler() {
+    return exceptionHandler;
+  }
+
+  /**
+   * The exception handler.
+   *
+   * @param exceptionHandler The exception handler.
+   */
+  public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
+    this.exceptionHandler = exceptionHandler;
+  }
+
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @return The map of namespaces to prefixes.
+   */
+  public Map<String, String> getNamespaces2Prefixes() {
+    return namespaces2Prefixes;
+  }
+
+  /**
+   * The map of namespaces to prefixes.
+   *
+   * @param namespaces2Prefixes The map of namespaces to prefixes.
+   */
+  public void setNamespaces2Prefixes(Map<String, String> namespaces2Prefixes) {
+    this.namespaces2Prefixes = namespaces2Prefixes;
   }
 }

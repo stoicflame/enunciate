@@ -58,7 +58,7 @@ public class TestRESTResourceFactory extends TestCase {
           verbType = verbType.getAlias();
         }
         
-        RESTOperation operation = resource.getOperation(verbType);
+        RESTOperation operation = resource.getOperation("text/xml", verbType);
         assertNotNull(resource.toString() + " does not contain an operation for " + verbType + ".", operation);
       }
 
@@ -104,7 +104,7 @@ public class TestRESTResourceFactory extends TestCase {
 
       for (VerbType verbType : VerbType.values()) {
         verbType = verbType.getAlias() != null ? verbType.getAlias() : verbType;
-        RESTOperation operation = resource.getOperation(verbType);
+        RESTOperation operation = resource.getOperation("text/xml", verbType);
         assertSame(advisedEndpoint, operation.getEndpoint());
         assertNotNull(operation);
       }

@@ -14,47 +14,31 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.rest;
+package org.codehaus.enunciate.modules.rest.xml;
 
 import javax.activation.DataHandler;
-import javax.xml.bind.attachment.AttachmentMarshaller;
+import javax.xml.bind.attachment.AttachmentUnmarshaller;
 
 /**
  * The Enunciate REST mechanism doesn't support attachments yet.
  *
  * @author Ryan Heaton
  */
-public class RESTAttachmentMarshaller extends AttachmentMarshaller {
-
-  public static final RESTAttachmentMarshaller INSTANCE = new RESTAttachmentMarshaller();
-
-  /**
-   * @return false;
-   */
-  @Override
-  public boolean isXOPPackage() {
-    return false;
-  }
+public class RESTAttachmentUnmarshaller extends AttachmentUnmarshaller {
+  
+  public static final RESTAttachmentUnmarshaller INSTANCE = new RESTAttachmentUnmarshaller();
 
   /**
    * @throws UnsupportedOperationException
    */
-  public String addMtomAttachment(DataHandler dataHandler, String string, String string1) {
+  public DataHandler getAttachmentAsDataHandler(String string) {
     throw new UnsupportedOperationException();
   }
 
   /**
    * @throws UnsupportedOperationException
    */
-  public String addMtomAttachment(byte[] bytes, int i, int i1, String string, String string1, String string2) {
+  public byte[] getAttachmentAsByteArray(String string) {
     throw new UnsupportedOperationException();
   }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  public String addSwaRefAttachment(DataHandler dataHandler) {
-    throw new UnsupportedOperationException();
-  }
-
 }

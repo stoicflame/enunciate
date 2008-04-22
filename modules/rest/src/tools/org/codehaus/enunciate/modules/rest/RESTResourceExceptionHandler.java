@@ -24,27 +24,25 @@ import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Handles exception that occurred when invoking a RESTOperation. Marshals the body of the exception
- * via JAXB.
+ * Handles exceptions that occur when handling a REST resource.
  *
  * @author Ryan Heaton
  */
-public class JaxbXmlExceptionHandler implements HandlerExceptionResolver {
+public class RESTResourceExceptionHandler implements HandlerExceptionResolver {
 
-  private final Map<String, String> ns2prefix;
   private final Map<Class, Method> errorBodies = new HashMap<Class, Method>();
+  private final RESTRequestContentTypeHandler handler;
+  private final String contentType;
 
-  public JaxbXmlExceptionHandler(Map<String, String> ns2prefix) {
-    this.ns2prefix = ns2prefix;
+  public RESTResourceExceptionHandler(RESTRequestContentTypeHandler handler, String contentType) {
+    this.handler = handler;
+    this.contentType = contentType;
   }
 
   public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
@@ -83,54 +81,15 @@ public class JaxbXmlExceptionHandler implements HandlerExceptionResolver {
     }
 
     TreeMap<String, Object> model = new TreeMap<String, Object>();
-    model.put(BasicRESTView.MODEL_STATUS, statusCode);
-    model.put(BasicRESTView.MODEL_STATUS_MESSAGE, message);
-    model.put(RESTOperationView.MODEL_RESULT, result);
-
-    Class errorType = bodyMethod != null ? bodyMethod.getReturnType() : null;
-    View view = loadErrorView(errorType, handler);
+    model.put(RESTResourceView.MODEL_RESULT, result);
+    View view;
+    if (request instanceof RESTRequest) {
+      RESTRequest restRequest = (RESTRequest) request;
+      view = new RESTResourceView(restRequest.getOperation(), this.handler, this.contentType);
+    }
+    else {
+    }
     return new ModelAndView(view, model);
   }
 
-  /**
-   * Load the error view for the specified request.  If the error occurred from a REST resource exporter, it will be provided to
-   * the method call.
-   *
-   * @param errorType The type of the error.
-   * @param handler The handler that was executed upon error (possibly null).
-   * @return The error view
-   */
-  protected View loadErrorView(Class errorType, Object handler) {
-    if ((handler instanceof RESTOperation) && (errorType != null)) {
-      return newJaxbView(errorType, (RESTOperation) handler);
-    }
-    else {
-      return new BasicRESTView();
-    }
-  }
-
-  /**
-   * Create a new jaxb view for the specified error type and operation.
-   *
-   * @param errorType The error type.
-   * @param operation The operation.
-   * @return The jaxb view for the error type.
-   */
-  protected JaxbXmlView newJaxbView(final Class errorType, final RESTOperation operation) {
-    return new JaxbXmlView(operation, getNamespaces2Prefixes()) {
-      @Override
-      protected Marshaller newMarshaller() throws JAXBException {
-        return JAXBContext.newInstance(errorType).createMarshaller();
-      }
-    };
-  }
-
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @return The map of namespaces to prefixes.
-   */
-  public Map<String, String> getNamespaces2Prefixes() {
-    return this.ns2prefix;
-  }
 }

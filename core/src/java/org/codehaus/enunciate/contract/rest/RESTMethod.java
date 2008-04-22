@@ -30,8 +30,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A REST method.
@@ -47,6 +46,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final Collection<RESTParameter> contextParameters;
   private final Collection<RESTError> RESTErrors;
   private final String jsonpParameter;
+  private final Set<String> contentTypes;
 
   public RESTMethod(MethodDeclaration delegate) {
     super(delegate);
@@ -124,8 +124,29 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     if (jsonpInfo != null) {
       jsonpParameter = jsonpInfo.paramName();
     }
-
     this.jsonpParameter = jsonpParameter;
+
+    this.contentTypes = new TreeSet<String>();
+    this.contentTypes.add("application/xml");
+    this.contentTypes.add("application/json");
+
+    ContentType contentTypeInfo = delegate.getDeclaringType().getPackage() != null ? delegate.getDeclaringType().getPackage().getAnnotation(ContentType.class) : null;
+    if (contentTypeInfo != null) {
+      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+    }
+
+    contentTypeInfo = delegate.getDeclaringType().getAnnotation(ContentType.class);
+    if (contentTypeInfo != null) {
+      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+    }
+
+    contentTypeInfo = getAnnotation(ContentType.class);
+    if (contentTypeInfo != null) {
+      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+    }
   }
 
   /**
@@ -235,5 +256,14 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public String getJSONPParameter() {
     return jsonpParameter;
+  }
+
+  /**
+   * The data formats applied to this method.
+   *
+   * @return The data formats applied to this method.
+   */
+  public Set<String> getContentTypes() {
+    return contentTypes;
   }
 }

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+package org.codehaus.enunciate.modules.rest;
 
 /**
- * Indicates an object that represents a REST payload.
+ * Interface for components that are assignable to a specified REST resource.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.TYPE} )
-public @interface RESTPayload {
+public interface RESTResourceAware {
 
-  boolean xml() default false;
+  /**
+   * Set the REST resource.
+   *
+   * @param resource The resource to set.
+   */
+  void setRESTResource(RESTResource resource);
   
 }

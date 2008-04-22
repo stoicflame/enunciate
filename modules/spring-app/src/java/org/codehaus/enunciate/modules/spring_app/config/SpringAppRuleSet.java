@@ -133,6 +133,10 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied/entryPoint");
     digester.addSetNext("enunciate/modules/spring-app/security/onAccessDenied/entryPoint", "setEntryPoint");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/security/primaryProvider", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/primaryProvider");
+    digester.addSetNext("enunciate/modules/spring-app/security/primaryProvider", "setPrimaryAuthenticationProvider");
+
     digester.addObjectCreate("enunciate/modules/spring-app/security/provider", BeanReference.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/provider");
     digester.addSetNext("enunciate/modules/spring-app/security/provider", "addAdditionalAuthenticationProvider");

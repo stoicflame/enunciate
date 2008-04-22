@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +76,16 @@ public class ValidatorChain implements Validator {
 
     for (Validator validator : validators) {
       result.aggregate(validator.validateRESTAPI(restAPI));
+    }
+
+    return result;
+  }
+
+  public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
+    ValidationResult result = new ValidationResult();
+
+    for (Validator validator : validators) {
+      result.aggregate(validator.validateContentTypeHandlers(contentTypeHandlers));
     }
 
     return result;

@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+package org.codehaus.enunciate.modules.rest.json;
 
 /**
- * Annotates a method on a {@link RESTPayload} to indicate
- * that the method returns the body of the payload. This annotation can only be applied to a method
- * that returns a byte[], an {@link java.io.InputStream}, or a {@link javax.activation.DataHandler}.
+ * Enum for the JSON serialization method.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.METHOD} )
-public @interface RESTPayloadBody {
+public enum JsonSerializationMethod {
+
+  /**
+   * Hierarchical mapping (based on the object hierarchy, skipping the XML).
+   */
+  hierarchical,
+
+  /**
+   * Mapped-namespace XML translation.
+   */
+  xmlMapped,
+
+  /**
+   * Badgerfish XML translation.
+   */
+  badgerfish,
+
 }

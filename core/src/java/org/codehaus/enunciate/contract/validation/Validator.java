@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 
 import java.util.Map;
 import java.util.List;
@@ -51,6 +52,14 @@ public interface Validator {
    * @return The result of the validation.
    */
   ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI);
+
+  /**
+   * Validate the content type handlers.
+   *
+   * @param contentTypeHandlers The content type handlers.
+   * @return The validation result.
+   */
+  ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers);
 
   /**
    * Validate a complex type definition.

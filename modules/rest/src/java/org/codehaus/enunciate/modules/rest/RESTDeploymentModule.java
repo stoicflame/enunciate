@@ -16,15 +16,24 @@
 
 package org.codehaus.enunciate.modules.rest;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.TemplateException;
+import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.rest.json.JsonContentHandler;
+import org.codehaus.enunciate.modules.rest.json.JsonSerializationMethod;
+import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.*;
 
 /**
  * <h1>REST Module</h1>
@@ -178,25 +187,9 @@ import java.net.URL;
  * root XML element. The default content type of a JAXB response is "text/xml" for XML requests and "application/json" for JSON requests.  You can use the
  * org.codehaus.enunciate.rest.annotations.ContentType annotation to specify a different content type for the XML requests (e.g. "application/atom+xml").</p>
  *
- * <p>However, Enunciate also supports REST payloads and resources of different content types. One way you can do this is by defining the Java method to return
- * javax.activation.DataHandler, which defines its own payload and content type.  The other way of doing this is by defining a custom "REST payload" object that
- * has its own methods for returning the payload, content type, and metadata (HTTP headers). The class of a REST payload object is annotated with the
- * org.codehaus.enunciate.rest.annotations.RESTPayload annotation.  Such a class <i>must</i> define a single no-argument method that returns either byte[],
- * javax.activation.DataHandler, or java.io.InputStream and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadBody. This method will
- * return the payload body.</p>
- *
- * <p>The default content type of REST payloads is "application/octet-stream".  This can be customized by defining a single no-argument method on the payload
- * object that returns a String and is annotated with org.codehaus.enunciate.rest.annotations.RESTPayloadContentType. If the Java return type is
- * javax.activation.DataHandler instead of a REST payload object, then the content type defined by the data handler is used.</p>
- *
- * <p>You may also define a no-argument method on the REST payload object that returns an instance of java.util.Map and is annotated with
- * org.codehaus.enunciate.rest.annotations.RESTPayloadHeaders that will define a set of HTTP headers that will be set in the HTTP response.</p>
- *
- * <p>REST Payloads will be converted to JSON if the payload body is determined to be XML.  You can hint that a REST payload body will always return XML with
- * the xml() value on the @RESTPayload annotation.  Alternatively, you can specify a no-argument method of a boolean return type that is annotated with
- * org.codehaus.enunciate.rest.annotations.RESTPayloadXMLHint that will hint at whether the payload body returns XML.  Otherwise, if there is no hint, an
- * attempt to interpret the content type (mime type) to determine whether it implies XML will be made.  If Enunciate is unable to determine whether the payload
- * is XML, it will not attempt to convert it to JSON.</p>
+ * <p>However, Enunciate also supports resources of different content types. This can be done by defining the Java method to return
+ * javax.activation.DataHandler, which defines its own payload and content type. For such methods, you must supply the
+ * <i>@org.codehaus.enunciate.rest.annotations.DataFormat</i> annotation which is used to identify externally the id of the data format URL.</p>
  *
  * <h3>Java Method Parameters</h3>
  *
@@ -267,7 +260,12 @@ import java.net.URL;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>There are no configuration options for the REST deployment module.</p>
+ * <p>The REST module supports the following attributes:</p>
+ *
+ * <ul>
+ *   <li>The "defaultContentTypeHandler" attribute is used to define the default content type handler when no others are found for a given content type.
+ *       The default value is "org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler".</li>
+ * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -277,6 +275,8 @@ import java.net.URL;
  * @docFileName module_rest.html
  */
 public class RESTDeploymentModule extends FreemarkerDeploymentModule {
+
+  private String defaultContentTypeHandler = JaxbXmlContentHandler.class.getName();
 
   /**
    * @return "rest"
@@ -291,7 +291,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new RESTValidator();
+    return new RESTValidator(getEnunciate().getConfig().getContentTypeHandlers());
   }
 
   /**
@@ -314,14 +314,48 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
+    EnunciateFreemarkerModel model = getModel();
+
+    //set up the model with the content type handlers.
+    Map<String, String> knownContentTypeHandlers = new TreeMap<String, String>();
+    knownContentTypeHandlers.put("text/xml", JaxbXmlContentHandler.class.getName());
+    knownContentTypeHandlers.put("application/xml", JaxbXmlContentHandler.class.getName());
+    knownContentTypeHandlers.put("application/json", JsonContentHandler.class.getName());
+    for (ContentTypeHandler handler : model.getContentTypeHandlers()) {
+      for (String contentType : handler.getSupportedContentTypes()) {
+        knownContentTypeHandlers.put(contentType, handler.getQualifiedName());
+      }
+    }
+    model.put("knownContentTypeHandlers", knownContentTypeHandlers);
+    model.put("defaultContentTypeHandler", getDefaultContentTypeHandler());
+
+    //populate the content-type-to-handler map.
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
     if (!enunciate.isUpToDateWithSources(paramNameFile)) {
-      processTemplate(getProperyNamesTemplateURL(), getModel());
+      processTemplate(getProperyNamesTemplateURL(), model);
     }
     else {
       info("Skipping generation of REST parameter names as everything appears up-to-date...");
     }
+    
     enunciate.setProperty("rest.parameter.names", paramNameFile);
   }
 
+  /**
+   * The default conent type handler to use (when no others are configured).
+   *
+   * @return The default conent type handler to use (when no others are configured).
+   */
+  public String getDefaultContentTypeHandler() {
+    return defaultContentTypeHandler;
+  }
+
+  /**
+   * The default conent type handler to use (when no others are configured).
+   *
+   * @param defaultContentTypeHandler The default conent type handler to use (when no others are configured).
+   */
+  public void setDefaultContentTypeHandler(String defaultContentTypeHandler) {
+    this.defaultContentTypeHandler = defaultContentTypeHandler;
+  }
 }

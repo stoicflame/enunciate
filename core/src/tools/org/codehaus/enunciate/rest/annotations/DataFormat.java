@@ -22,13 +22,24 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Annotates a method on a {@link org.codehaus.enunciate.rest.annotations.RESTPayload} to indicate
- * that the method returns the headers of the payload. This annotation can only be applied to a no-arg
- * method that returns a string-to-string map.
+ * Annotation used to specify the data format(s) that are applicable to REST resources.
  *
  * @author Ryan Heaton
+ * @see org.codehaus.enunciate.rest.annotations.DataFormat
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.METHOD} )
-public @interface RESTPayloadHeaders {
+@Retention (
+  RetentionPolicy.RUNTIME
+)
+@Target (
+  { ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE }
+)
+public @interface DataFormat {
+
+  /**
+   * The supported data formats.
+   *
+   * @return The ids of the data formats.
+   */
+  String[] value();
+
 }

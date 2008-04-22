@@ -16,13 +16,14 @@
 
 package org.codehaus.enunciate.modules.rest;
 
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.Converter;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -55,28 +56,24 @@ public class RESTOperation {
   private final String contentType;
   private final String charset;
   private final String JSONPParameter;
-
-  private final boolean deliversPayload;
-  private final boolean deliversXMLPayload;
-  private final Method payloadDeliveryMethod;
-  private final Method payloadContentTypeMethod;
-  private final Method payloadHeadersMethod;
-  private final Method payloadXMLHintMethod;
+  private final Set<Class> contextClasses;
 
   /**
    * Construct a REST operation.
    *
    * @param resource The resource for this operation.
+   * @param contentType The content type of the operation.
    * @param verb     The verb for the operation.
    * @param endpoint The REST endpoint.
    * @param method   The method.
    * @param parameterNames The parameter names.
    */
-  protected RESTOperation(RESTResource resource, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+  protected RESTOperation(RESTResource resource, String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
     this.resource = resource;
     this.verb = verb;
     this.endpoint = endpoint;
     this.method = method;
+    this.contentType = contentType;
 
     int properNounIndex = -1;
     Class properNoun = null;
@@ -110,13 +107,28 @@ public class RESTOperation {
               method.getDeclaringClass().getName() + "." + method.getName() + ".");
           }
           else if (properNoun == null) {
-            if (((ProperNoun) annotation).optional()) {
+            ProperNoun properNounInfo = (ProperNoun) annotation;
+            if (properNounInfo.optional()) {
               if (parameterType.isPrimitive()) {
                 throw new IllegalStateException("An optional proper noun cannot be a primitive type for method " +
                   method.getDeclaringClass().getName() + "." + method.getName() + ".");
               }
 
               properNounOptional = true;
+            }
+
+            if (!properNounInfo.converter().equals(ProperNoun.DEFAULT.class)) {
+              try {
+                ConvertUtils.register((Converter) properNounInfo.converter().newInstance(), parameterType);
+              }
+              catch (ClassCastException e) {
+                throw new IllegalArgumentException("Illegal converter class for method " +
+                  method.getDeclaringClass().getName() + "." + method.getName() + ". Must be an instance of org.apache.commons.beanutils.Converter.");
+              }
+              catch (Exception e) {
+                throw new IllegalArgumentException("Unable to instantiate converter class " + properNounInfo.converter().getName() + " on method " +
+                  method.getDeclaringClass().getName() + "." + method.getName() + ".", e);
+              }
             }
 
             properNoun = parameterType;
@@ -154,7 +166,23 @@ public class RESTOperation {
           }
         }
         else if (annotation instanceof ContextParameter) {
-          String contextParameterName = ((ContextParameter) annotation).value();
+          ContextParameter contextParameterInfo = (ContextParameter) annotation;
+          String contextParameterName = contextParameterInfo.value();
+
+          if (!contextParameterInfo.converter().equals(ContextParameter.DEFAULT.class)) {
+            try {
+              ConvertUtils.register((Converter) contextParameterInfo.converter().newInstance(), parameterType);
+            }
+            catch (ClassCastException e) {
+              throw new IllegalArgumentException("Illegal converter class for method " +
+                method.getDeclaringClass().getName() + "." + method.getName() + ". Must be an instance of org.apache.commons.beanutils.Converter.");
+            }
+            catch (Exception e) {
+              throw new IllegalArgumentException("Unable to instantiate converter class " + contextParameterInfo.converter().getName() + " on method " +
+                method.getDeclaringClass().getName() + "." + method.getName() + ".", e);
+            }
+          }
+
           contextParameterTypes.put(contextParameterName, parameterType);
           contextParameterIndices.put(contextParameterName, i);
           isAdjective = false;
@@ -173,6 +201,20 @@ public class RESTOperation {
           }
 
           adjectiveComplex = adjectiveInfo.complex();
+
+          if (!adjectiveInfo.converter().equals(Adjective.DEFAULT.class)) {
+            try {
+              ConvertUtils.register((Converter) adjectiveInfo.converter().newInstance(), parameterType);
+            }
+            catch (ClassCastException e) {
+              throw new IllegalArgumentException("Illegal converter class for method " +
+                method.getDeclaringClass().getName() + "." + method.getName() + ". Must be an instance of org.apache.commons.beanutils.Converter.");
+            }
+            catch (Exception e) {
+              throw new IllegalArgumentException("Unable to instantiate converter class " + adjectiveInfo.converter().getName() + " on method " +
+                method.getDeclaringClass().getName() + "." + method.getName() + ".", e);
+            }
+          }
 
           break;
         }
@@ -195,88 +237,12 @@ public class RESTOperation {
       }
     }
 
-    boolean deliversPayload = false;
-    boolean deliversXMLPayload = false;
-    Method payloadDeliveryMethod = null;
-    Method payloadContentTypeMethod = null;
-    Method payloadHeadersMethod = null;
-    Method payloadXMLHintMethod = null;
     Class returnType = null;
     if (!Void.TYPE.equals(method.getReturnType())) {
       returnType = method.getReturnType();
 
-      if (returnType.isAnnotationPresent(org.codehaus.enunciate.rest.annotations.RESTPayload.class)) {
-        //load the payload methods if its a payload.
-        deliversPayload = true;
-        deliversXMLPayload = ((org.codehaus.enunciate.rest.annotations.RESTPayload)returnType.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTPayload.class)).xml();
-        for (Method payloadMethod : returnType.getMethods()) {
-          if (payloadMethod.isAnnotationPresent(RESTPayloadBody.class)) {
-            if (payloadDeliveryMethod != null) {
-              throw new IllegalStateException("There may only be one payload body method on a REST payload.");
-            }
-            else {
-              if (payloadMethod.getParameterTypes().length > 0) {
-                throw new IllegalStateException("A payload body method must have no parameters.");
-              }
-
-              Class bodyType = payloadMethod.getReturnType();
-              if (byte[].class.isAssignableFrom(bodyType) || InputStream.class.isAssignableFrom(bodyType) || DataHandler.class.isAssignableFrom(bodyType)) {
-                payloadDeliveryMethod = payloadMethod;
-              }
-              else {
-                throw new IllegalStateException("A payload body must be of type byte[], javax.activation.DataHandler, or java.io.InputStream.");
-              }
-            }
-          }
-
-          if (payloadMethod.isAnnotationPresent(RESTPayloadContentType.class)) {
-            if (payloadContentTypeMethod != null) {
-              throw new IllegalStateException("There may only be one payload content type method on a REST payload.");
-            }
-            else if (payloadMethod.getParameterTypes().length > 0) {
-              throw new IllegalStateException("A payload content type method must have no parameters.");
-            }
-            else if (!String.class.isAssignableFrom(payloadMethod.getReturnType())) {
-              throw new IllegalStateException("The payload content type method must return a string.");
-            }
-            else {
-              payloadContentTypeMethod = payloadMethod;
-            }
-          }
-
-          if (payloadMethod.isAnnotationPresent(RESTPayloadHeaders.class)) {
-            if (payloadHeadersMethod != null) {
-              throw new IllegalStateException("There may only be one payload headers method on a REST payload.");
-            }
-            else if (payloadMethod.getParameterTypes().length > 0) {
-              throw new IllegalStateException("A payload headers method must have no parameters.");
-            }
-            else if (!Map.class.isAssignableFrom(payloadMethod.getReturnType())) {
-              throw new IllegalStateException("The payload headers method must return a map.");
-            }
-            else {
-              payloadHeadersMethod = payloadMethod;
-            }
-          }
-
-          if (payloadMethod.isAnnotationPresent(RESTPayloadXMLHint.class)) {
-            if (payloadHeadersMethod != null) {
-              throw new IllegalStateException("There may only be one payload XML hint method on a REST payload.");
-            }
-            else if (payloadMethod.getParameterTypes().length > 0) {
-              throw new IllegalStateException("A payload XML hint method must have no parameters.");
-            }
-            else if ((Boolean.TYPE.equals(payloadMethod.getReturnType())) || (Boolean.class.equals(payloadMethod.getReturnType()))) {
-              payloadXMLHintMethod = payloadMethod;
-            }
-            else {
-              throw new IllegalStateException("The payload headers method must return a map.");
-            }
-          }
-        }
-      }
-      else if (!returnType.isAnnotationPresent(XmlRootElement.class) && (!DataHandler.class.isAssignableFrom(returnType))) {
-        throw new IllegalStateException("REST operation results must be xml root elements, REST payloads or instances of javax.activation.DataHandler.  Invalid return type for method " +
+      if (!returnType.isAnnotationPresent(XmlRootElement.class) && (!DataHandler.class.isAssignableFrom(returnType))) {
+        throw new IllegalStateException("REST operation results must be xml root elements or instances of javax.activation.DataHandler.  Invalid return type for method " +
           method.getDeclaringClass() + "." + method.getName() + ".");
       }
 
@@ -295,6 +261,18 @@ public class RESTOperation {
       jsonpParameter = jsonpInfo.paramName();
     }
 
+    String charset = "utf-8";
+    ContentType contentTypeInfo = method.getAnnotation(ContentType.class);
+    if (contentTypeInfo == null) {
+      contentTypeInfo = method.getDeclaringClass().getAnnotation(ContentType.class);
+      if (contentTypeInfo == null) {
+        contentTypeInfo = method.getDeclaringClass().getPackage().getAnnotation(ContentType.class);
+      }
+    }
+    if (contentTypeInfo != null) {
+      charset = contentTypeInfo.charset();
+    }
+
     this.properNounType = properNoun;
     this.properNounIndex = properNounIndex;
     this.properNounOptional = properNounOptional;
@@ -302,15 +280,9 @@ public class RESTOperation {
     this.nounValueIndex = nounValueIndex;
     this.nounValueOptional = nounValueOptional;
     this.resultType = returnType;
-    this.contentType = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).value() : "text/xml";
-    this.charset = this.method.isAnnotationPresent(ContentType.class) ? this.method.getAnnotation(ContentType.class).charset() : "utf-8";
+    this.charset = charset;
     this.JSONPParameter = jsonpParameter;
-    this.deliversPayload = deliversPayload;
-    this.deliversXMLPayload = deliversXMLPayload;
-    this.payloadDeliveryMethod = payloadDeliveryMethod;
-    this.payloadContentTypeMethod = payloadContentTypeMethod;
-    this.payloadHeadersMethod = payloadHeadersMethod;
-    this.payloadXMLHintMethod = payloadXMLHintMethod;
+    this.contextClasses = contextClasses;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
@@ -562,6 +534,15 @@ public class RESTOperation {
   }
 
   /**
+   * The set of context classes for this operation.  I.e. the set of visible classes from the method declaration.
+   *
+   * @return The set of context classes for this operation.  I.e. the set of visible classes from the method declaration.
+   */
+  public Set<Class> getContextClasses() {
+    return contextClasses;
+  }
+
+  /**
    * Gets the serialization context for this operation.
    *
    * @return The serialization context.
@@ -598,21 +579,21 @@ public class RESTOperation {
   }
 
   /**
+   * The character set for the result of this operation.
+   *
+   * @return The character set for the result of this operation.
+   */
+  public String getCharset() {
+    return charset;
+  }
+
+  /**
    * The method supporting this operation.
    *
    * @return The method supporting this operation.
    */
   public Method getMethod() {
     return method;
-  }
-
-  /**
-   * The character set of this REST operation.
-   *
-   * @return The character set of this REST operation.
-   */
-  public String getCharset() {
-    return charset;
   }
 
   /**
@@ -624,57 +605,4 @@ public class RESTOperation {
     return JSONPParameter;
   }
 
-  /**
-   * Whether this operation wraps a payload.
-   *
-   * @return Whether this operation wraps a payload.
-   */
-  public boolean isDeliversPayload() {
-    return deliversPayload;
-  }
-
-  /**
-   * Whether this operation wraps an XML payload.
-   *
-   * @return Whether this operation wraps an XML payload.
-   */
-  public boolean isDeliversXMLPayload() {
-    return deliversXMLPayload;
-  }
-
-  /**
-   * The method to use to get the payload body.
-   *
-   * @return The method to use to get the payload body.
-   */
-  public Method getPayloadDeliveryMethod() {
-    return payloadDeliveryMethod;
-  }
-
-  /**
-   * The method to use to get the payload content type.
-   *
-   * @return The method to use to get the payload content type.
-   */
-  public Method getPayloadContentTypeMethod() {
-    return payloadContentTypeMethod;
-  }
-
-  /**
-   * The method to use to get the payload xml hint.
-   *
-   * @return The method to use to get the payload xml hint.
-   */
-  public Method getPayloadXmlHintMethod() {
-    return payloadXMLHintMethod;
-  }
-
-  /**
-   * The method to use to get the payload content type.
-   *
-   * @return The method to use to get the payload content type.
-   */
-  public Method getPayloadHeadersMethod() {
-    return payloadHeadersMethod;
-  }
 }

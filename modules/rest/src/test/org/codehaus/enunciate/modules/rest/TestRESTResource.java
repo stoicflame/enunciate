@@ -139,7 +139,7 @@ public class TestRESTResource extends TestCase {
 
     RESTResource resource = new RESTResource("mynoun", "") {
       @Override
-      protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+      protected RESTOperation createOperation(String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
         assertEquals(4, parameterNames.length);
         assertEquals("one", parameterNames[0]);
         assertEquals("four", parameterNames[3]);
@@ -148,12 +148,12 @@ public class TestRESTResource extends TestCase {
       }
     };
     resource.setParamterNames(props);
-    resource.addOperation(VerbType.read, null, null);
+    resource.addOperation("text/xml", VerbType.read, null, null);
     assertNotNull(props.get("1"));
 
     resource = new RESTResource("mynoun", "/mycontext/") {
       @Override
-      protected RESTOperation createOperation(VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+      protected RESTOperation createOperation(String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
         assertEquals(4, parameterNames.length);
         assertEquals("five", parameterNames[0]);
         assertEquals("eight", parameterNames[3]);
@@ -162,7 +162,7 @@ public class TestRESTResource extends TestCase {
       }
     };
     resource.setParamterNames(props);
-    resource.addOperation(VerbType.read, null, null);
+    resource.addOperation("text/xml", VerbType.read, null, null);
     assertNotNull(props.get("2"));
   }
 

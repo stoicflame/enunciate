@@ -16,6 +16,7 @@
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>
         <xs:element name="services" type="services" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -87,8 +88,6 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="xmlSubcontext" type="xs:string" />
-    <xs:attribute name="jsonSubcontext" type="xs:string" />
     <xs:attribute name="defaultJsonSerialization" type="jsonSerialization" />
   </xs:complexType>
 
@@ -134,6 +133,31 @@
 
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="uri" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="content-types">
+
+    <xs:annotation>
+      <xs:documentation>
+        Set of namespace declarations.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="content-type" type="content-type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="content-type">
+    <xs:annotation>
+      <xs:documentation>
+        A content-type declaration.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="value" type="xs:string" use="required"/>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="handler" type="xs:string" use="optional"/>
   </xs:complexType>
 
   <xs:complexType name="jaxb-import">

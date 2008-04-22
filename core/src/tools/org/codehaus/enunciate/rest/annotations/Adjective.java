@@ -52,4 +52,17 @@ public @interface Adjective {
    */
   boolean complex() default false;
 
+  /**
+   * The converter to use.
+   *
+   * @return The converter to use.
+   */
+  Class converter() default DEFAULT.class;
+
+  /**
+   * Default converter class.
+   */
+  public static final class DEFAULT  {
+    private DEFAULT() { }
+  }
 }

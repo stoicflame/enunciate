@@ -30,6 +30,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.XmlTransient;
+import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
@@ -47,6 +48,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Root annotation processor for enunciate.  Initializes the model and signals the modules to generate.
@@ -138,7 +141,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
       final boolean isRESTEndpoint = isRESTEndpoint(declaration);
-      if (isEndpointInterface || isRESTEndpoint) {
+      final boolean isContentTypeHandler = isRESTContentTypeHandler(declaration);
+      if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler) {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
@@ -149,6 +153,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
           info("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
           model.add(restEndpoint);
+        }
+
+        if (isContentTypeHandler) {
+          info("%s to be considered a content type handler.", declaration.getQualifiedName());
+          model.addContentTypeHandler((ClassDeclaration) declaration);
         }
       }
       else if (isPotentialSchemaType(declaration)) {
@@ -166,6 +175,13 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       String prefix = config.getNamespacesToPrefixes().get(ns);
       String old = model.getNamespacesToPrefixes().put(ns, prefix);
       debug("Replaced namespace prefix %s with %s for namespace %s as specified in the config.", old, prefix, ns);
+    }
+
+    //override any content type ids as specified in the config.
+    for (String ct : config.getContentTypesToIds().keySet()) {
+      String id = config.getContentTypesToIds().get(ct);
+      String old = model.getContentTypesToIds().put(ct, id);
+      debug("Replaced content type '%s' with '%s' for content type '%s' as specified in the config.", old, id, ct);
     }
 
     String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
@@ -234,14 +250,24 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (validationResult.hasWarnings()) {
       warn("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
-        env.getMessager().printWarning(warning.getPosition(), warning.getText());
+        if (warning.getPosition() != null) {
+          env.getMessager().printWarning(warning.getPosition(), warning.getText());
+        }
+        else {
+          env.getMessager().printWarning(warning.getText());
+        }
       }
     }
 
     if (validationResult.hasErrors()) {
       warn("Validation result has errors.");
       for (ValidationMessage error : validationResult.getErrors()) {
-        env.getMessager().printError(error.getPosition(), error.getText());
+        if (error.getPosition() != null) {
+          env.getMessager().printError(error.getPosition(), error.getText());
+        }
+        else {
+          env.getMessager().printError(error.getText());
+        }
       }
 
       throw new ModelValidationException();
@@ -319,6 +345,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   public boolean isRESTEndpoint(TypeDeclaration declaration) {
     return ((declaration.getAnnotation(XmlTransient.class) == null)
       && (declaration instanceof ClassDeclaration) && (declaration.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class) != null));
+  }
+
+  /**
+   * Whether the specified declaration is a data format handler.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified declaration is a data format handler.
+   */
+  public boolean isRESTContentTypeHandler(TypeDeclaration declaration) {
+    return (declaration instanceof ClassDeclaration) && (declaration.getAnnotation(ContentTypeHandler.class) != null);
   }
 
   /**
@@ -480,6 +516,25 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     debug("Validating the REST API...");
     validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));
+    validationResult.aggregate(validator.validateContentTypeHandlers(model.getContentTypeHandlers()));
+
+    //validate unique content type ids.
+    Set<String> uniqueContentTypeIds = new TreeSet<String>();
+    for (String contentType : model.getContentTypesToIds().keySet()) {
+      String id = model.getContentTypesToIds().get(contentType);
+      if (!uniqueContentTypeIds.add(id)) {
+        StringBuilder builder = new StringBuilder("All content types must have unique ids.  The id '").
+          append(id).append("' is assigned to the following content types: '").append(contentType).append("'");
+        for (String ct : model.getContentTypesToIds().keySet()) {
+          if (!contentType.equals(ct) && (id.equals(model.getContentTypesToIds()))) {
+            builder.append(", '").append(ct).append("'");
+          }
+        }
+        builder.append(". Please use the Enunciate configuration to specify a unique id for each content type.");
+        validationResult.addError(null,  builder.toString());
+        break;
+      }
+    }
 
     return validationResult;
   }

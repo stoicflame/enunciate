@@ -43,7 +43,8 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
   /**
    * Sets up the controller for servicing the specified REST endpoints.
    *
-   * @throws org.springframework.beans.BeansException If there was a problem setting it up.
+   * @throws org.springframework.beans.BeansException
+   *          If there was a problem setting it up.
    */
   @Override
   protected void initApplicationContext() throws BeansException {
@@ -56,7 +57,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
     catch (Exception e) {
       //fall through... no parameter names found.
     }
-    
+
     Map<Class, Object> class2instances = new HashMap<Class, Object>();
     if (endpointClasses != null) {
       for (Class endpointClass : endpointClasses) {
@@ -71,7 +72,10 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
           for (Method restMethod : restMethods) {
             int modifiers = restMethod.getModifiers();
             if ((Modifier.isPublic(modifiers)) && (restMethod.isAnnotationPresent(Verb.class)) && (!isImplMethod(restMethod, endpointTypes))) {
+              //get the verbs...
               VerbType[] verbs = normalize(restMethod.getAnnotation(Verb.class).value());
+
+              //get the noun...
               String noun = restMethod.getName();
               Noun nounInfo = restMethod.getAnnotation(Noun.class);
               NounContext nounContextInfo = ((NounContext) endpointType.getAnnotation(NounContext.class));
@@ -83,11 +87,48 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
                 }
               }
 
+              //get the content types...
+              Set<String> supportedContentTypes = new TreeSet<String>();
+              supportedContentTypes.add("application/xml");
+              supportedContentTypes.add("application/json");
+
+              String defaultContentType = null;
+              ContentType contentTypeInfo = endpointType.getPackage() != null ? endpointType.getPackage().getAnnotation(ContentType.class) : null;
+              if (contentTypeInfo != null) {
+                supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+                supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+                if (contentTypeInfo.value().length > 0) {
+                  defaultContentType = contentTypeInfo.value()[0];
+                }
+              }
+
+              contentTypeInfo = (ContentType) endpointType.getAnnotation(ContentType.class);
+              if (contentTypeInfo != null) {
+                supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+                supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+                if (contentTypeInfo.value().length > 0) {
+                  defaultContentType = contentTypeInfo.value()[0];
+                }
+              }
+
+              contentTypeInfo = restMethod.getAnnotation(ContentType.class);
+              if (contentTypeInfo != null) {
+                supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+                supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
+                if (contentTypeInfo.value().length > 0) {
+                  defaultContentType = contentTypeInfo.value()[0];
+                }
+              }
+
               RESTResource resource = getRESTResource(noun, context);
               if (resource == null) {
                 resource = new RESTResource(noun, context);
                 resource.setParamterNames(restParameterNames);
                 RESTResources.add(resource);
+              }
+
+              if (defaultContentType != null) {
+                resource.setDefaultContentType(defaultContentType);
               }
 
               Object endpoint = class2instances.get(endpointType);
@@ -96,13 +137,16 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
                 class2instances.put(endpointType, endpoint);
               }
 
-              for (VerbType verb : verbs) {
-                if (!resource.addOperation(verb, endpoint, restMethod)) {
-                  RESTOperation duplicateOperation = resource.getOperation(verb);
+              for (String contentType : supportedContentTypes) {
+                for (VerbType verb : verbs) {
+                  if (!resource.addOperation(contentType, verb, endpoint, restMethod)) {
+                    RESTOperation duplicateOperation = resource.getOperation(contentType, verb);
 
-                  throw new ApplicationContextException("Noun '" + noun + "' in context '" + context + "' has more than one '" + verb +
-                    "' verbs.  One was found at " + restMethod.getDeclaringClass().getName() + "." + restMethod.getName() + ", the other at " +
-                    duplicateOperation.method.getDeclaringClass().getName() + "." + duplicateOperation.method.getName() + ".");
+                    throw new ApplicationContextException("Noun '" + noun + "' in context '" + context + "' has more than one '" + verb +
+                      "' verb for content type '" + contentType + "'.  One was found at " + restMethod.getDeclaringClass().getName() + "." +
+                      restMethod.getName() + ", the other at " + duplicateOperation.method.getDeclaringClass().getName() + "." +
+                      duplicateOperation.method.getName() + ".");
+                  }
                 }
               }
             }
@@ -129,7 +173,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
   /**
    * Gets the REST resource identified by the given context and noun.
    *
-   * @param noun The noun.
+   * @param noun    The noun.
    * @param context The context.
    * @return The resource, or null if none was found.
    */
@@ -151,9 +195,10 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
    * instantiate type specified default implementation.
    *
    * @param endpointType The class of the endpoint bean to attempt to load.
-   * @param defaultImpl The default implementation class.
+   * @param defaultImpl  The default implementation class.
    * @return The endpoint bean.
-   * @throws org.springframework.beans.BeansException If an attempt was made to instantiate the bean but it failed.
+   * @throws org.springframework.beans.BeansException
+   *          If an attempt was made to instantiate the bean but it failed.
    */
   protected Object loadEndpointBean(Class endpointType, Class defaultImpl) throws BeansException {
     Object endpointBean;
@@ -202,7 +247,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
    * Determines whether the specified rest method is an implementation of a method declared in one of
    * the specfied endpoint types.
    *
-   * @param restMethod The method.
+   * @param restMethod    The method.
    * @param endpointTypes The endpoint types.
    * @return Whether it's an impl method.
    */

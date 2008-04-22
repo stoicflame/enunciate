@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.rest.annotations;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+package org.codehaus.enunciate.modules.rest;
 
 /**
- * Annotates a method on a {@link org.codehaus.enunciate.rest.annotations.RESTPayload} to indicate
- * that the method returns the content type of the payload. This annotation can only be applied to a no-arg
- * method that returns a string.
+ * Interface for components that are assignable to a specific content type.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( {ElementType.METHOD} )
-public @interface RESTPayloadContentType {
+public interface ContentTypeAware {
+
+  /**
+   * The content type to assign.
+   *
+   * @param contentType The content type to assign.
+   */
+  void setContentType(String contentType);
+  
 }

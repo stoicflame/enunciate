@@ -16,28 +16,13 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import static org.easymock.EasyMock.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import junit.framework.TestCase;
 
 /**
- * A namespace prefix mapper.
- * 
  * @author Ryan Heaton
  */
-public class PrefixMapper extends NamespacePrefixMapper {
+public class TestRESTContentTypeRoutingController extends TestCase {
 
-  private final Map<String, String> ns2prefix;
-
-  public PrefixMapper(Map<String, String> ns2prefix) {
-    if (ns2prefix == null) {
-      ns2prefix = new HashMap<String, String>();
-    }
-    this.ns2prefix = ns2prefix;
-  }
-
-  public String getPreferredPrefix(String nsuri, String suggestion, boolean defaultPossible) {
-    return this.ns2prefix.containsKey(nsuri) ? this.ns2prefix.get(nsuri) : suggestion;
-  }
 }

@@ -22,20 +22,24 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Used to specify the content type of the result of a REST method.
+ * Used to specify the content type(s) available for a REST resource.
  *
  * @author Ryan Heaton
  */
-@Retention ( RetentionPolicy.RUNTIME )
-@Target ( ElementType.METHOD )
+@Retention (
+  RetentionPolicy.RUNTIME
+)
+@Target (
+  { ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE }
+)
 public @interface ContentType {
 
   /**
-   * The content type.
+   * The supported content types.
    *
-   * @return The content type.
+   * @return The supported content types.
    */
-  String value() default "text/xml";
+  String[] value() default {};
 
   /**
    * The charset.
@@ -43,4 +47,11 @@ public @interface ContentType {
    * @return The charset.
    */
   String charset() default "utf-8";
+
+  /**
+   * The unsupported content types.
+   *
+   * @return The unsupported content types.
+   */
+  String[] unsupported() default {};
 }

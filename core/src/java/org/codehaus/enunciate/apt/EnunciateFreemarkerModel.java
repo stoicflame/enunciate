@@ -33,6 +33,7 @@ import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.ClassDeclarationComparator;
 
@@ -50,10 +51,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
   int prefixIndex = 0;
   final Map<String, String> namespacesToPrefixes;
+  final Map<String, String> contentTypesToIds;
   final Map<String, SchemaInfo> namespacesToSchemas;
   final Map<String, WsdlInfo> namespacesToWsdls;
   final Map<String, XmlType> knownTypes;
   final Map<RESTNoun, List<RESTMethod>> nounsToRESTMethods;
+  final Map<RESTNoun, Set<String>> nounsToContentTypes;
+  final List<ContentTypeHandler> contentTypeHandlers;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
@@ -64,16 +68,21 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
+    this.contentTypesToIds = new HashMap<String, String>();
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
     this.nounsToRESTMethods = new HashMap<RESTNoun, List<RESTMethod>>();
+    this.nounsToContentTypes = new HashMap<RESTNoun, Set<String>>();
+    this.contentTypeHandlers = new ArrayList<ContentTypeHandler>();
 
     setVariable("knownNamespaces", new ArrayList<String>(this.namespacesToPrefixes.keySet()));
     setVariable("ns2prefix", this.namespacesToPrefixes);
     setVariable("ns2schema", this.namespacesToSchemas);
     setVariable("ns2wsdl", this.namespacesToWsdls);
+    setVariable("contentTypes2Ids", this.contentTypesToIds);
     setVariable("nouns2methods", this.nounsToRESTMethods);
+    setVariable("nouns2formats", this.nounsToContentTypes);
     setVariable("restEndpoints", this.restEndpoints);
   }
 
@@ -148,6 +157,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * A map of content types to ids.
+   *
+   * @return A map of content types to ids.
+   */
+  public Map<String, String> getContentTypesToIds() {
+    return contentTypesToIds;
+  }
+
+  /**
    * A map of namespace URIs to their associated schema information.
    *
    * @return A map of namespace URIs to their associated schema information.
@@ -172,6 +190,24 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public Map<RESTNoun, List<RESTMethod>> getNounsToRESTMethods() {
     return nounsToRESTMethods;
+  }
+
+  /**
+   * The map of nouns to associated content types.
+   *
+   * @return The map of nouns to associated content types.
+   */
+  public Map<RESTNoun, Set<String>> getNounsToContentTypes() {
+    return nounsToContentTypes;
+  }
+
+  /**
+   * The set of data format handlers.
+   *
+   * @return The set of data format handlers.
+   */
+  public List<ContentTypeHandler> getContentTypeHandlers() {
+    return contentTypeHandlers;
   }
 
   /**
@@ -338,9 +374,28 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         this.nounsToRESTMethods.put(noun, restMethods);
       }
       restMethods.add(restMethod);
+
+      Set<String> contentTypes = this.nounsToContentTypes.get(noun);
+      if (contentTypes == null) {
+        contentTypes = new TreeSet<String>();
+        this.nounsToContentTypes.put(noun, contentTypes);
+      }
+      for (String contentType : restMethod.getContentTypes()) {
+        contentTypes.add(contentType);
+        addContentType(contentType);
+      }
     }
 
     this.restEndpoints.add(endpoint);
+  }
+
+  /**
+   * Add a content type handler to the model.
+   *
+   * @param declaration The definition of the content type handler.
+   */
+  public void addContentTypeHandler(ClassDeclaration declaration) {
+    this.contentTypeHandlers.add(new ContentTypeHandler(declaration));
   }
 
   /**
@@ -418,6 +473,40 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       namespacesToPrefixes.put(namespace, prefix);
     }
     return prefix;
+  }
+
+  /**
+   * Add a content type.
+   *
+   * @param contentType The content type to add.
+   * @return The id for the contentType.
+   */
+  public String addContentType(String contentType) {
+    String id = contentTypesToIds.get(contentType);
+    if (id == null) {
+      id = getDefaultContentTypeId(contentType);
+      contentTypesToIds.put(contentType, id);
+    }
+    return id;
+  }
+
+  /**
+   * Get the default content type id for the specified content type.
+   *
+   * @param contentType The content type.
+   * @return The default content type id.
+   */
+  protected String getDefaultContentTypeId(String contentType) {
+    String id = contentType;
+    if (contentType.endsWith("/")) {
+      throw new IllegalArgumentException("Illegal content type: " + contentType);
+    }
+    
+    int lastSlash = contentType.lastIndexOf('/');
+    if (lastSlash > -1) {
+      id = contentType.substring(lastSlash + 1);
+    }
+    return id;
   }
 
   /**

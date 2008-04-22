@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.rest;
+package org.codehaus.enunciate.modules.rest.json;
 
 import java.io.PrintWriter;
 

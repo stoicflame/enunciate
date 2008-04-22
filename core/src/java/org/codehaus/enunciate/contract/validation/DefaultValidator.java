@@ -18,29 +18,28 @@ package org.codehaus.enunciate.contract.validation;
 
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
-import org.codehaus.enunciate.contract.rest.RESTParameter;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
-import org.codehaus.enunciate.rest.annotations.*;
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import org.codehaus.enunciate.contract.rest.RESTParameter;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.rest.annotations.VerbType;
 
+import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import javax.activation.DataHandler;
 import java.util.*;
-import java.io.InputStream;
 
 /**
  * Default validator.
@@ -154,23 +153,27 @@ public class DefaultValidator implements Validator {
     ValidationResult result = new ValidationResult();
 
     for (RESTNoun noun : restAPI.keySet()) {
-      EnumSet<VerbType> verbs = EnumSet.noneOf(VerbType.class);
+      Map<String, Set<VerbType>> contentTypes2Verbs = new TreeMap<String, Set<VerbType>>();
       List<RESTMethod> methods = restAPI.get(noun);
       for (RESTMethod method : methods) {
-        List<VerbType> verbList = Arrays.asList(method.getVerbs());
-        for (VerbType verb : verbList) {
-          if (!verbs.add(verb)) {
-            result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for REST noun '" + noun + "'.");
+        Collection<VerbType> verbList = Arrays.asList(method.getVerbs());
+        for (String contentType : method.getContentTypes()) {
+          Set<VerbType> verbs = contentTypes2Verbs.get(contentType);
+          if (verbs == null) {
+            verbs = EnumSet.noneOf(VerbType.class);
+            contentTypes2Verbs.put(contentType, verbs);
+          }
+          
+          for (VerbType verb : verbList) {
+            if (!verbs.add(verb)) {
+              result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for content type '" + contentType + "' of REST noun '" + noun + "'.");
+            }
           }
         }
 
         RESTParameter properNoun = method.getProperNoun();
         if (properNoun != null) {
           XmlType nounType = properNoun.getXmlType();
-          if (!nounType.isSimple()) {
-            result.addError(properNoun.getPosition(), "A proper noun must have a simple xml type.");
-          }
-
           if (properNoun.isCollectionType()) {
             result.addError(properNoun.getPosition(), "A proper noun is not allowed to be a collection or an array.");
           }
@@ -187,10 +190,6 @@ public class DefaultValidator implements Validator {
           }
 
           if (!adjective.isComplexAdjective()) {
-            if (!adjective.getXmlType().isSimple()) {
-              result.addError(adjective.getPosition(), "An adjective must either be of simple xml type, or of a collection (or array) of simple xml types.");
-            }
-
             if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
               result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
             }
@@ -205,10 +204,6 @@ public class DefaultValidator implements Validator {
         for (RESTParameter contextParam : method.getContextParameters()) {
           if (!contextParameters.add(contextParam.getContextParameterName())) {
             result.addError(contextParam.getPosition(), "Duplicate context parameter name '" + contextParam.getContextParameterName() + "'.");
-          }
-
-          if ((!contextParam.getXmlType().isSimple()) || (contextParam.isCollectionType())) {
-            result.addError(contextParam.getPosition(), "A context parameter must be of a simple xml type.");
           }
 
           boolean parameterFound = false;
@@ -248,111 +243,27 @@ public class DefaultValidator implements Validator {
           boolean isValidRESTReturnType = false;
           if (method.getReturnType() instanceof DeclaredType) {
             TypeDeclaration declaration = ((DeclaredType) method.getReturnType()).getDeclaration();
-            if (declaration.getAnnotation(RESTPayload.class) != null) {
-              MethodDeclaration payloadBodyMethod = null;
-              MethodDeclaration payloadContentTypeMethod = null;
-              MethodDeclaration payloadHeadersMethod = null;
-              MethodDeclaration payloadXMLHintMethod = null;
-              for (MethodDeclaration payloadMethod : declaration.getMethods()) {
-                if (payloadMethod.getAnnotation(RESTPayloadBody.class) != null) {
-                  if (payloadBodyMethod != null) {
-                    result.addError(payloadMethod.getPosition(), "There may only be one REST payload body method.");
-                  }
-                  else if (payloadMethod.getParameters().size() > 0) {
-                    result.addError(payloadMethod.getPosition(), "A payload body method must have no parameters.");
-                  }
-                  else {
-                    DecoratedTypeMirror payloadBodyReturnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(payloadMethod.getReturnType());
-                    //byte[]
-                    boolean validReturnType = (payloadBodyReturnType.isArray() && (((ArrayType)payloadBodyReturnType).getComponentType() instanceof PrimitiveType) && ((PrimitiveType) (((ArrayType)payloadBodyReturnType).getComponentType())).getKind() == PrimitiveType.Kind.BYTE);
-                    //DataHandler
-                    validReturnType |= payloadBodyReturnType.isInstanceOf(DataHandler.class.getName());
-                    //or InputStream
-                    validReturnType |= payloadBodyReturnType.isInstanceOf(InputStream.class.getName());
-
-                    if (!validReturnType) {
-                      result.addError(payloadMethod.getPosition(), "A payload body must be an instance of byte[], javax.activation.DataHandler, or java.io.InputStream");
-                    }
-                    else {
-                      payloadBodyMethod = payloadMethod;
-                    }
-                  }
-                }
-
-                if (payloadMethod.getAnnotation(RESTPayloadContentType.class) != null) {
-                  if (payloadContentTypeMethod != null) {
-                    result.addError(payloadMethod.getPosition(), "There may only be one payload content type method.");
-                  }
-                  else if (payloadMethod.getParameters().size() > 0) {
-                    result.addError(payloadMethod.getPosition(), "A payload content type method must have no parameters.");
-                  }
-                  else {
-                    DecoratedTypeMirror payloadBodyReturnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(payloadMethod.getReturnType());
-                    if (!payloadBodyReturnType.isInstanceOf(String.class.getName())) {
-                      result.addError(payloadMethod.getPosition(), "A payload content type method must return java.lang.String.");
-                    }
-                    else {
-                      payloadContentTypeMethod = payloadMethod;
-                    }
-                  }
-                }
-
-                if (payloadMethod.getAnnotation(RESTPayloadHeaders.class) != null) {
-                  if (payloadHeadersMethod != null) {
-                    result.addError(payloadMethod.getPosition(), "There may only be one payload headers method.");
-                  }
-                  else if (payloadMethod.getParameters().size() > 0) {
-                    result.addError(payloadMethod.getPosition(), "A payload headers method must have no parameters.");
-                  }
-                  else {
-                    DecoratedTypeMirror payloadBodyReturnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(payloadMethod.getReturnType());
-                    if (!payloadBodyReturnType.isInstanceOf(Map.class.getName())) {
-                      result.addError(payloadMethod.getPosition(), "A payload headers method must return java.util.Map.");
-                    }
-                    else {
-                      payloadHeadersMethod = payloadMethod;
-                    }
-                  }
-                }
-
-                if (payloadMethod.getAnnotation(RESTPayloadXMLHint.class) != null) {
-                  if (payloadXMLHintMethod != null) {
-                    result.addError(payloadMethod.getPosition(), "There may only be one payload XML hint method.");
-                  }
-                  else if (payloadMethod.getParameters().size() > 0) {
-                    result.addError(payloadMethod.getPosition(), "A payload XML hint method must have no parameters.");
-                  }
-                  else {
-                    DecoratedTypeMirror payloadXMLHintReturnType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(payloadMethod.getReturnType());
-                    if (!payloadXMLHintReturnType.isPrimitive() && !payloadXMLHintReturnType.isInstanceOf(Boolean.class.getName())) {
-                      result.addError(payloadMethod.getPosition(), "A payload XML hint method must return a boolean.");
-                    }
-                    else {
-                      payloadXMLHintMethod = payloadMethod;
-                    }
-                  }
-                }
-              }
-
-              if (payloadBodyMethod == null) {
-                result.addError(method.getPosition(), "A REST payload must define a payload body. " + declaration.getQualifiedName() + " has no method annotated with @RESTPayloadBody.");
-              }
-
-              isValidRESTReturnType = payloadBodyMethod != null;
-            }
-            else {
-              isValidRESTReturnType = declaration.getAnnotation(XmlRootElement.class) != null;
-            }
+            isValidRESTReturnType = declaration.getAnnotation(XmlRootElement.class) != null;
           }
 
           if (!isValidRESTReturnType) {
-            result.addError(method.getPosition(), "REST operation results must be xml root elements, rest payloads, or instances of " + DataHandler.class.getName() + ". " + method.getReturnType() + " is not annotated with @XmlRootElement nor with @RESTPayload, nor is it an instance of " + DataHandler.class.getName() + ".");
+            result.addError(method.getPosition(), "REST operation results must be xml root elements or instances of " + DataHandler.class.getName() + ". " + method.getReturnType() + " is not annotated with @XmlRootElement nor is it an instance of " + DataHandler.class.getName() + ".");
           }
         }
       }
     }
 
     return result;
+  }
+
+  /**
+   * Leave validation of data format handlers to the associated modules.
+   *
+   * @param contentTypeHandlers The content type handlers.
+   * @return The validation result.
+   */
+  public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
+    return new ValidationResult();
   }
 
   private boolean isDataHandler(DecoratedTypeMirror type) {

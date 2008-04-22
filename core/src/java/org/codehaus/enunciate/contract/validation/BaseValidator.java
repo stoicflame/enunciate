@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 
 import java.util.Map;
 import java.util.List;
@@ -42,9 +43,17 @@ public class BaseValidator implements Validator {
   }
 
   /**
-   * @return An empty result. @param restAPI
+   * @return An empty result.
    */
   public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
+    return new ValidationResult();
+  }
+
+  /**
+   * @return An empty result.
+   * @param contentTypeHandlers The content type handlers.
+   */
+  public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
     return new ValidationResult();
   }
 

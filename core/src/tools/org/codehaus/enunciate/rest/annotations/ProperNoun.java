@@ -37,4 +37,17 @@ public @interface ProperNoun {
    */
   boolean optional() default true;
 
+  /**
+   * The converter to use.
+   *
+   * @return The converter to use.
+   */
+  Class converter() default DEFAULT.class;
+
+  /**
+   * Default converter class.
+   */
+  public static final class DEFAULT  {
+    private DEFAULT() { }
+  }
 }

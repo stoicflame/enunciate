@@ -16,26 +16,20 @@
 
 package org.codehaus.enunciate.modules.rest;
 
+import java.util.Map;
+
 /**
- * Enum for the JSON serialization method.
+ * Interface for components that are aware of the XML namespace-to-prefix map.
  *
  * @author Ryan Heaton
  */
-public enum JsonSerializationMethod {
+public interface NamespacePrefixesAware {
 
   /**
-   * Hierarchical mapping (based on the object hierarchy, skipping the XML).
+   * Set the map of namespaces to prefix.
+   *
+   * @param ns2prefix The map of namespaces to prefix.
    */
-  hierarchical,
-
-  /**
-   * Mapped-namespace XML translation.
-   */
-  xmlMapped,
-
-  /**
-   * Badgerfish XML translation.
-   */
-  badgerfish,
+  void setNamespacesToPrefixes(Map<String, String> ns2prefix);
 
 }
