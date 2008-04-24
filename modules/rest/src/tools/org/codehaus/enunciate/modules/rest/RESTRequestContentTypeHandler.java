@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.rest;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Content type handler interface.  Supported by the REST module as a
@@ -30,19 +31,19 @@ public interface RESTRequestContentTypeHandler {
    * Read data from the specified REST request. (Optional operation.)
    *
    * @param request The REST request.
-   * @return The data that was read.
+   * @return The data that was read (may be null).
    * @throws UnsupportedOperationException If this content type handler doesn't
    * support reading.
    */
-  Object read(RESTRequest request) throws Exception;
+  Object read(HttpServletRequest request) throws Exception;
 
   /**
    * Write data to the specified response.
    *
-   * @param data The data to write.
+   * @param data The data to write (may be null).
    * @param request The request.
    * @param response The response.
    */
-  void write(Object data, RESTRequest request, HttpServletResponse response) throws Exception;
+  void write(Object data, HttpServletRequest request, HttpServletResponse response) throws Exception;
   
 }

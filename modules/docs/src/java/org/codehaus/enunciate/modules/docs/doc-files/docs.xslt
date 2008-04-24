@@ -685,24 +685,27 @@
                         </li>
                       </xsl:for-each>
                     </ul>
+                  </xsl:if>
 
-                    <h2>Mount Points</h2>
+                  <xsl:if test="contentType">
+                    <h2>Content Types</h2>
 
-                    <p>The following URLs are examples of where this resource is mounted <xsl:if test="contains(../../@baseAddress, 'localhost:8080')">(you may need to change the host, port, and application context)</xsl:if>:</p>
+                    <p>This resource is available in the following content types:</p>
 
                     <table>
                       <tr>
-                        <td>XML:</td>
-                        <td><a href="{concat(../../@baseAddress, @xmlPath)}"><xsl:value-of select="concat(../../@baseAddress, @xmlPath)"/></a></td>
+                        <th>content type</th>
+                        <th>mount point<xsl:if test="contains(../../@baseAddress, 'localhost:8080')">*</xsl:if></th>
                       </tr>
-                      <tr>
-                        <td>*JSON:</td>
-                        <td><a href="{concat(../../@baseAddress, @jsonPath)}"><xsl:value-of select="concat(../../@baseAddress, @jsonPath)"/></a></td>
-                      </tr>
-                      <tr>
-                        <td colspan="2">*JSON endpoints are mounted read-only.</td>
-                      </tr>
+                      <xsl:for-each select="contentType">
+                        <tr>
+                          <td><xsl:value-of select="@type"/></td>
+                          <td><a href="{concat(../../../@baseAddress, @path)}"><xsl:value-of select="concat(../../../@baseAddress, @path)"/></a></td>
+                        </tr>
+                      </xsl:for-each>
                     </table>
+
+                    <xsl:if test="contains(../../@baseAddress, 'localhost:8080')"><p>*Note that you may need to adjust the host, port, and application context</p></xsl:if>
                   </xsl:if>
 
                 </div>

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.rest;
+package org.codehaus.enunciate.modules.rest.json;
+
+import junit.framework.TestCase;
 
 /**
- * Interface for components that are assignable to a specific content type.
- *
  * @author Ryan Heaton
  */
-public interface ContentTypeAware {
+public class TestJsonContentHandler extends TestCase {
 
   /**
-   * The content type to assign.
-   *
-   * @param contentType The content type to assign.
+   * test unmarshal
    */
-  void setContentType(String contentType);
-  
+  public void testUnmarshal() throws Exception {
+    //todo
+  }
+
 }

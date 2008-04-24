@@ -13,14 +13,34 @@
     <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
   </bean>
 
-  <!-- the namespace-to-prefix map. -->
-  <bean id="namespaces2prefix" class="java.util.HashMap">
+  <!-- the namespace-to-prefix support. -->
+  <bean id="namespacePrefixLookup" class="org.codehaus.enunciate.modules.rest.NamespacePrefixLookup">
     <constructor-arg>
       <map>
   [#list ns2prefix?keys as ns]
     [#if ns?exists]
         <entry key="${ns}" value="${ns2prefix[ns]}"/>
     [/#if]
+  [/#list]
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <!-- the content type support -->
+  <bean id="contentTypeSupport" class="org.codehaus.enunciate.modules.rest.ContentTypeSupport">
+    <constructor-arg>
+      <map>
+  [#list contentTypes2Ids?keys as contentType]
+        <entry key="${contentType}" value="${contentTypes2Ids[contentType]}"/>
+  [/#list]
+      </map>
+    </constructor-arg>
+    <constructor-arg>
+      <map>
+  [#list contentTypes2Ids?keys as contentType]
+        <entry key="${contentType}">
+          <bean class="${configuredContentTypeHandlers[contentType]?default(knownContentTypeHandlers[contentType]?default(defaultContentTypeHandler))}"/>
+        </entry>
   [/#list]
       </map>
     </constructor-arg>
@@ -33,44 +53,21 @@
       <list>
         <!-- List the REST endpoint bean classes -->
   [@forEachRESTEndpoint]
-    [#if endpoint.class]
         <value>${endpoint.qualifiedName}</value>
-    [/#if]
   [/@forEachRESTEndpoint]
       </list>
     </property>
   </bean>
 
-  <!-- the error handler for XML -->
+  <!-- the error handler -->
   [#if securityEnabled]
-  <bean id="restXmlErrorHandler" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
+  <bean id="handlerExceptionResolver" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
     <constructor-arg>
-      <bean class="org.codehaus.enunciate.modules.rest.JaxbXmlExceptionHandler">
-        <constructor-arg ref="namespaces2prefix"/>
-      </bean>
+      <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler"/>
     </constructor-arg>
   </bean>
   [#else]
-  <bean id="restXmlErrorHandler" class="org.codehaus.enunciate.modules.rest.JaxbXmlExceptionHandler">
-    <constructor-arg ref="namespaces2prefix"/>
-  </bean>
-  [/#if]
-
-  <!-- the error handler for JSON -->
-  [#if securityEnabled]
-  <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.spring_app.SecurityAwareExceptionHandler">
-    <constructor-arg>
-      <bean class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
-        <constructor-arg ref="namespaces2prefix"/>
-        <constructor-arg value="${defaultJsonSerialization}"/>
-      </bean>
-    </constructor-arg>
-  </bean>
-  [#else]
-  <bean id="restJsonErrorHandler" class="org.codehaus.enunciate.modules.rest.JaxbJsonExceptionHandler">
-    <constructor-arg ref="namespaces2prefix"/>
-    <constructor-arg value="${defaultJsonSerialization}"/>
-  </bean>
+  <bean id="handlerExceptionResolver" class="org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler"/>
   [/#if]
 
   <!-- the handler mapping for the spring servlet. -->
@@ -117,62 +114,70 @@
       [/#list]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
+  [@forEachRESTEndpoint]
+    [#list endpoint.RESTMethods as RESTMethod]
+      [#list RESTMethod.contentTypes as contentType]
 
-  [@forEachRESTNoun]
-        <entry key="${restSubcontext}${noun.antPattern}">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
+        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${noun.name}"/>
-                <constructor-arg value="${noun.context}"/>
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
               </bean>
             </constructor-arg>
-            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
-            <property name="exceptionHandler" ref="restXmlErrorHandler"/>
+            <property name="contentTypeSupport">
+              <ref bean="contentTypeSupport"/>
+            </property>
           </bean>
         </entry>
 
-        <entry key="${restSubcontext}${noun.antPattern}/**">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceXMLExporter">
+        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}/**">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${noun.name}"/>
-                <constructor-arg value="${noun.context}"/>
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
               </bean>
             </constructor-arg>
-            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
-            <property name="exceptionHandler" ref="restXmlErrorHandler"/>
+            <property name="contentTypeSupport">
+              <ref bean="contentTypeSupport"/>
+            </property>
+          </bean>
+        </entry>
+      [/#list]
+
+        <entry key="${restSubcontext}${RESTMethod.noun.antPattern}">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
+            <constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
+              </bean>
+            </constructor-arg>
+            <constructor-arg>
+              <ref bean="contentTypeSupport"/>
+            </constructor-arg>
+            <property name="subcontext" value="${restSubcontext}"/>
           </bean>
         </entry>
 
-        <entry key="${jsonSubcontext}${noun.antPattern}">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
+        <entry key="${restSubcontext}${RESTMethod.noun.antPattern}/**">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
             <constructor-arg>
               <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${noun.name}"/>
-                <constructor-arg value="${noun.context}"/>
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
               </bean>
             </constructor-arg>
-            <constructor-arg value="${defaultJsonSerialization}"/>
-            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
-            <property name="exceptionHandler" ref="restJsonErrorHandler"/>
-          </bean>
-        </entry>
-
-        <entry key="${jsonSubcontext}${noun.antPattern}/**">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceJSONExporter">
             <constructor-arg>
-              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${noun.name}"/>
-                <constructor-arg value="${noun.context}"/>
-              </bean>
+              <ref bean="contentTypeSupport"/>
             </constructor-arg>
-            <constructor-arg value="${defaultJsonSerialization}"/>
-            <property name="namespaces2Prefixes" ref="namespaces2prefix"/>
-            <property name="exceptionHandler" ref="restJsonErrorHandler"/>
+            <property name="subcontext" value="${restSubcontext}"/>
           </bean>
         </entry>
-  [/@forEachRESTNoun]
+    [/#list]
+  [/@forEachRESTEndpoint]
   [#if securityEnabled && securityConfig.enableFormBasedLogin]
 
         <entry key="${securityConfig.formBasedLoginConfig.loginPageURL}">

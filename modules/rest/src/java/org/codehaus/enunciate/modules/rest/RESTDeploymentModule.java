@@ -326,6 +326,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
         knownContentTypeHandlers.put(contentType, handler.getQualifiedName());
       }
     }
+    model.put("configuredContentTypeHandlers", model.getEnunciateConfig().getContentTypeHandlers());
     model.put("knownContentTypeHandlers", knownContentTypeHandlers);
     model.put("defaultContentTypeHandler", getDefaultContentTypeHandler());
 

@@ -28,8 +28,8 @@ import java.util.Arrays;
 )
 public class MethodNotAllowedException extends Exception {
 
-  public MethodNotAllowedException(String[] supportedMethods) {
-    super("Method Not Allowed.  Supported methods: " + Arrays.asList(supportedMethods).toString());
+  public MethodNotAllowedException(String message) {
+    super(message);
   }
   
 }

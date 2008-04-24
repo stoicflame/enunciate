@@ -21,9 +21,11 @@ import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 
 import javax.xml.bind.*;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Content type handler for JAXB XML.
@@ -33,94 +35,104 @@ import java.util.Map;
 @ContentTypeHandler (
   contentTypes = { "text/xml", "application/xml" }
 )
-public class JaxbXmlContentHandler implements RESTRequestContentTypeHandler, RESTResourceAware, NamespacePrefixesAware, ContentTypeAware {
+public class JaxbXmlContentHandler implements RESTRequestContentTypeHandler, NamespacePrefixAware {
 
-  private JAXBContext context;
-  private Map<String, String> ns2prefix;
+  protected final Map<RESTResource, JAXBContext> resourcesToContexts = new TreeMap<RESTResource, JAXBContext>();
+  private NamespacePrefixLookup namespaceLookup;
   private Object prefixMapper;
-  private String contentType;
 
-  public Object read(RESTRequest request) throws Exception {
-    if (this.context == null) {
+  /**
+   * Read the object from the request.
+   *
+   * @param request The request.
+   * @return The object.
+   */
+  public Object read(HttpServletRequest request) throws Exception {
+    RESTResource resource = (RESTResource) request.getAttribute(RESTResource.class.getName());
+    JAXBContext context = loadContext(resource);
+    if (context == null) {
       throw new UnsupportedOperationException();
     }
 
-    Unmarshaller unmarshaller = this.context.createUnmarshaller();
+    Unmarshaller unmarshaller = context.createUnmarshaller();
     unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
     return unmarshal(unmarshaller, request);
   }
 
-  public void write(Object data, RESTRequest request, HttpServletResponse response) throws Exception {
-    JAXBContext context = this.context;
-    if (context == null) {
-      //if a context wasn't specified, we'll just attempt to create one dynamically.
-      context = JAXBContext.newInstance(data.getClass());
-    }
-
-    Marshaller marshaller = context.createMarshaller();
-    marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
-    if (this.prefixMapper != null) {
-      try {
-        marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", this.prefixMapper);
+  /**
+   * Write the object to the response.
+   *
+   * @param data The data to write.
+   * @param request The request.
+   * @param response The response.
+   */
+  public void write(Object data, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (data != null) {
+      RESTResource resource = (RESTResource) request.getAttribute(RESTResource.class.getName());
+      JAXBContext context = loadContext(resource);
+      if (context == null) {
+        //if a context wasn't specified, we'll just attempt to create one dynamically.
+        context = JAXBContext.newInstance(data.getClass());
       }
-      catch (PropertyException e) {
-        //fall through...
+
+      Marshaller marshaller = context.createMarshaller();
+      marshaller.setAttachmentMarshaller(RESTAttachmentMarshaller.INSTANCE);
+      if (this.prefixMapper != null) {
+        try {
+          marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", this.prefixMapper);
+        }
+        catch (PropertyException e) {
+          //fall through...
+        }
       }
+      marshal(data, marshaller, request, response);
     }
-    marshal(data, marshaller, request, response);
-  }
-
-  protected Object unmarshal(Unmarshaller unmarshaller, RESTRequest request) throws Exception {
-    return unmarshaller.unmarshal(request.getInputStream());
-  }
-
-  protected void marshal(Object data, Marshaller marshaller, RESTRequest request, HttpServletResponse response) throws Exception {
-    marshaller.marshal(data, response.getOutputStream());
   }
 
   /**
-   * The JAXB context.
+   * Load the JAXB context for the specified resource.
    *
+   * @param resource the resource.
    * @return The JAXB context.
    */
-  public JAXBContext getContext() {
+  protected JAXBContext loadContext(RESTResource resource) throws JAXBException {
+    if (resource == null) {
+      return null;
+    }
+    
+    JAXBContext context = this.resourcesToContexts.get(resource);
+    if (context == null) {
+      Set<Class> classes = new HashSet<Class>();
+      for (RESTOperation operation : resource.getOperations()) {
+        classes.addAll(operation.getContextClasses());
+      }
+      context = JAXBContext.newInstance(classes.toArray(new Class[classes.size()]));
+      this.resourcesToContexts.put(resource, context);
+    }
     return context;
   }
 
   /**
-   * The JAXB context.
+   * Unmarshal the data from the request.
    *
-   * @param context The JAXB context.
+   * @param unmarshaller The unmarshaller.
+   * @param request The request.
+   * @return The unmarshalled data.
    */
-  public void setContext(JAXBContext context) {
-    this.context = context;
+  protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request) throws Exception {
+    return unmarshaller.unmarshal(request.getInputStream());
   }
 
   /**
-   * Set the REST resource for this handler.
+   * Marshal the data to the response.
    *
-   * @param resource The REST resource for this handler.
+   * @param data The data.
+   * @param marshaller The marshaller.
+   * @param request The request.
+   * @param response The response.
    */
-  public void setRESTResource(RESTResource resource) {
-    Set<Class> classes = new HashSet<Class>();
-    for (RESTOperation operation : resource.getOperations()) {
-      classes.addAll(operation.getContextClasses());
-    }
-    setContextClasses(classes.toArray(new Class[classes.size()]));
-  }
-
-  /**
-   * Set the context classes for this handler.
-   *
-   * @param contextClasses The context classes.
-   */
-  public void setContextClasses(Class... contextClasses) {
-    try {
-      this.context = JAXBContext.newInstance(contextClasses);
-    }
-    catch (JAXBException e) {
-      throw new IllegalArgumentException(e);
-    }
+  protected void marshal(Object data, Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    marshaller.marshal(data, response.getOutputStream());
   }
 
   /**
@@ -129,21 +141,30 @@ public class JaxbXmlContentHandler implements RESTRequestContentTypeHandler, RES
    * @return The map of namespaces to prefixes.
    */
   public Map<String, String> getNamespacesToPrefixes() {
-    return this.ns2prefix;
+    return this.namespaceLookup != null ? this.namespaceLookup.getNamespacesToPrefixes() : null;
   }
 
   /**
-   * The map of namespaces to prefixes.
+   * The namespace lookup.
    *
-   * @param ns2prefix The map of namespaces to prefixes.
+   * @return The namespace lookup.
    */
-  public void setNamespacesToPrefixes(Map<String, String> ns2prefix) {
-    this.ns2prefix = ns2prefix;
+  public NamespacePrefixLookup getNamespaceLookup() {
+    return namespaceLookup;
+  }
+
+  /**
+   * The namespace lookup.
+   *
+   * @param namespaceLookup The namespace lookup.
+   */
+  public void setNamespaceLookup(NamespacePrefixLookup namespaceLookup) {
+    this.namespaceLookup = namespaceLookup;
 
     Object prefixMapper;
     try {
       //we want to support a prefix mapper, but don't want to break those on JDK 6 that don't have the prefix mapper on the classpath.
-      prefixMapper = Class.forName("org.codehaus.enunciate.modules.rest.xml.PrefixMapper").getConstructor(Map.class).newInstance(ns2prefix);
+      prefixMapper = Class.forName("org.codehaus.enunciate.modules.rest.xml.PrefixMapper").getConstructor(Map.class).newInstance(getNamespacesToPrefixes());
     }
     catch (Throwable e) {
       prefixMapper = null;
@@ -152,21 +173,4 @@ public class JaxbXmlContentHandler implements RESTRequestContentTypeHandler, RES
     this.prefixMapper = prefixMapper;
   }
 
-  /**
-   * The content type assigned to this handler.
-   *
-   * @return The content type assigned to this handler.
-   */
-  public String getContentType() {
-    return contentType;
-  }
-
-  /**
-   * The content type assigned to this handler.
-   *
-   * @param contentType The content type assigned to this handler.
-   */
-  public void setContentType(String contentType) {
-    this.contentType = contentType;
-  }
 }

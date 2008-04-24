@@ -28,7 +28,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -36,6 +35,9 @@ import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.lang.reflect.Array;
 
 /**
  * A exporter for a REST resource.
@@ -47,17 +49,13 @@ public class RESTResourceExporter extends AbstractController {
   public static final Log LOG = LogFactory.getLog(RESTResourceExporter.class);
 
   private final RESTResource resource;
-  private final RESTRequestContentTypeHandler contentTypeHandler;
-  private final String contentType;
-  private HandlerExceptionResolver exceptionHandler;
-  private String[] supportedMethods;
   private MultipartRequestHandler multipartRequestHandler;
-  private Map<String, String> namespaces2Prefixes = new HashMap<String, String>();
+  private ContentTypeSupport contentTypeSupport;
+  private Pattern contentTypeIdPattern = Pattern.compile("^/?([^/]+)");
 
-  public RESTResourceExporter(RESTResource resource, RESTRequestContentTypeHandler contentTypeHandler, String contentType) {
+  public RESTResourceExporter(RESTResource resource) {
     this.resource = resource;
-    this.contentTypeHandler = contentTypeHandler;
-    this.contentType = contentType;
+    super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
   @Override
@@ -68,27 +66,9 @@ public class RESTResourceExporter extends AbstractController {
       throw new ApplicationContextException("A REST resource must be provided.");
     }
 
-    Set<VerbType> supportedVerbs = resource.getSupportedVerbs(contentType);
-    String[] supportedMethods = new String[supportedVerbs.size()];
-    int i = 0;
-    for (VerbType supportedVerb : supportedVerbs) {
-      String method;
-      switch (supportedVerb) {
-        case create:
-          method = "PUT";
-          break;
-        case read:
-          method = "GET";
-          break;
-        case update:
-          method = "POST";
-          break;
-        default:
-          method = supportedVerb.toString().toUpperCase();
-      }
-      supportedMethods[i++] = method;
+    if (contentTypeSupport == null) {
+      throw new ApplicationContextException("No content type support was supplied.");
     }
-    this.supportedMethods = supportedMethods;
 
     if (this.multipartRequestHandler == null) {
       Map resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MultipartRequestHandler.class);
@@ -104,44 +84,49 @@ public class RESTResourceExporter extends AbstractController {
         this.multipartRequestHandler = defaultMultipartHandler;
       }
     }
-
-    super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
-
-    if (this.contentTypeHandler instanceof RESTResourceAware) {
-      ((RESTResourceAware)this.contentTypeHandler).setRESTResource(resource);
-    }
-
-    if (this.contentTypeHandler instanceof NamespacePrefixesAware) {
-      ((NamespacePrefixesAware)this.contentTypeHandler).setNamespacesToPrefixes(getNamespaces2Prefixes());
-    }
-
-    if (this.contentTypeHandler instanceof ContentTypeAware) {
-      ((ContentTypeAware)this.contentTypeHandler).setContentType(getContentType());
-    }
   }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    if (!Arrays.asList(this.supportedMethods).contains(request.getMethod().toUpperCase())) {
-      throw new MethodNotAllowedException(this.supportedMethods);
-    }
-
+    request.setAttribute(RESTResource.class.getName(), getResource());
+    
+    String contentTypeId = findContentTypeId(request);
+    String contentType = getContentTypeSupport().lookupContentTypeById(contentTypeId);
     VerbType verb = getVerb(request);
+    RESTOperation operation = getResource().getOperation(contentType, verb);
 
-    try {
-      return handleRESTOperation(verb, request, response);
+    if (operation == null) {
+      throw new MethodNotAllowedException("Method not allowed for content type '" + contentType + "'.");
     }
-    catch (Exception e) {
+    request.setAttribute(RESTOperation.class.getName(), operation);
+
+    RESTRequestContentTypeHandler handler = getContentTypeSupport().lookupHandlerById(contentTypeId);
+    if (handler == null) {
+      throw new IllegalStateException("No handler found for content type " + contentTypeId + " (" + contentType + ").");
+    }
+    request.setAttribute(RESTRequestContentTypeHandler.class.getName(), handler);
+
+    return handleRESTOperation(operation, handler, request, response);
+  }
+
+  /**
+   * Find the content type id from the request.
+   *
+   * @param request The request from which to lookup the content type id.
+   * @return The content type id.
+   */
+  protected String findContentTypeId(HttpServletRequest request) {
+    String requestContext = request.getRequestURI().substring(request.getContextPath().length());
+    Matcher matcher = getContentTypeIdPattern().matcher(requestContext);
+    String contentTypeId = null;
+    if (matcher.find()) {
+      contentTypeId = matcher.group(1);
+    }
+    else {
       if (LOG.isErrorEnabled()) {
-        LOG.error("Error invoking REST operation.", e);
-      }
-
-      if (getExceptionHandler() != null) {
-        return getExceptionHandler().resolveException(request, response, this, e);
-      }
-      else {
-        throw e;
+        LOG.error("No content type id found in request context " + requestContext);
       }
     }
+    return contentTypeId;
   }
 
   /**
@@ -174,7 +159,7 @@ public class RESTResourceExporter extends AbstractController {
       verb = VerbType.delete;
     }
     else {
-      throw new MethodNotAllowedException(this.supportedMethods);
+      throw new MethodNotAllowedException("Method not supported: " + httpMethod);
     }
 
     return verb;
@@ -183,34 +168,17 @@ public class RESTResourceExporter extends AbstractController {
   /**
    * Handles a specific REST operation.
    *
-   * @param verb     The verb.
+   * @param operation The operation.
+   * @param handler The handler for the operation.
    * @param request  The request.
    * @param response The response.
    * @return The model and view.
    */
-  protected ModelAndView handleRESTOperation(VerbType verb, HttpServletRequest request, HttpServletResponse response) throws Exception {
-    RESTOperation operation = resource.getOperation(contentType, verb);
-    if (!isOperationAllowed(operation)) {
-      response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Unsupported verb: " + verb);
-      return null;
-    }
+  protected ModelAndView handleRESTOperation(RESTOperation operation, RESTRequestContentTypeHandler handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
     if ((this.multipartRequestHandler != null) && (this.multipartRequestHandler.isMultipart(request))) {
       request = this.multipartRequestHandler.handleMultipartRequest(request);
     }
-
-    return handleRESTRequest(new RESTRequest(request, operation, getContentType()), response);
-  }
-
-  /**
-   * Handle the specified REST request.
-   *
-   * @param request The request.
-   * @param response The response.
-   * @return The model and view.
-   */
-  protected ModelAndView handleRESTRequest(RESTRequest request, HttpServletResponse response) throws Exception {
-    RESTOperation operation = request.getOperation();
 
     String requestContext = request.getRequestURI().substring(request.getContextPath().length());
     Map<String, String> contextParameters;
@@ -269,10 +237,11 @@ public class RESTResourceExporter extends AbstractController {
         if ((parameterValues != null) && (parameterValues.length > 0)) {
           //todo: provide a hook to some other conversion mechanism?
           final Class adjectiveType = operation.getAdjectiveTypes().get(adjective);
-          Object[] adjectiveValues = new Object[parameterValues.length];
+          Class componentType = adjectiveType.isArray() ? adjectiveType.getComponentType() : adjectiveType;
+          Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
           for (int i = 0; i < parameterValues.length; i++) {
             try {
-              adjectiveValues[i] = ConvertUtils.convert(parameterValues[i], adjectiveType);
+              Array.set(adjectiveValues, i, ConvertUtils.convert(parameterValues[i], componentType));
             }
             catch (Exception e) {
               response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid value '" + parameterValues[i] + "' for parameter '" + adjective + "'.");
@@ -284,7 +253,7 @@ public class RESTResourceExporter extends AbstractController {
             adjectiveValue = adjectiveValues;
           }
           else {
-            adjectiveValue = adjectiveValues[0];
+            adjectiveValue = Array.get(adjectiveValues, 0);
           }
         }
 
@@ -346,7 +315,7 @@ public class RESTResourceExporter extends AbstractController {
       else {
         try {
           //if the operation has a noun value type, unmarshall it from the body....
-          nounValue = getContentTypeHandler().read(request);
+          nounValue = handler.read(request);
         }
         catch (Exception e) {
           //if we can't unmarshal the noun value, continue if the noun value is optional.
@@ -360,12 +329,12 @@ public class RESTResourceExporter extends AbstractController {
     Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
 
     //successful invocation, set up the response...
-    response.setContentType(String.format("%s;charset=%s", this.contentType, operation.getCharset()));
+    response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
     if (result instanceof DataHandler) {
       ((DataHandler)result).writeTo(response.getOutputStream());
     }
     else {
-      this.contentTypeHandler.write(result, request, response);
+      handler.write(result, request, response);
     }
     return null;
   }
@@ -418,56 +387,38 @@ public class RESTResourceExporter extends AbstractController {
   }
 
   /**
-   * The data format handler used by this exporter.
+   * The content type support.
    *
-   * @return The data format handler used by this exporter.
+   * @return The content type support.
    */
-  public RESTRequestContentTypeHandler getContentTypeHandler() {
-    return contentTypeHandler;
+  public ContentTypeSupport getContentTypeSupport() {
+    return contentTypeSupport;
   }
 
   /**
-   * The data format handled by this exporter.
+   * Set the content type support.
    *
-   * @return The data format handled by this exporter.
+   * @param support the content type support.
    */
-  public String getContentType() {
-    return contentType;
+  public void setContentTypeSupport(ContentTypeSupport support) {
+    this.contentTypeSupport = support;
   }
 
   /**
-   * The exception handler.
+   * The pattern for matching the content type id from a request URL.
    *
-   * @return The exception handler.
+   * @return The pattern for matching the content type id from a request URL.
    */
-  public HandlerExceptionResolver getExceptionHandler() {
-    return exceptionHandler;
+  public Pattern getContentTypeIdPattern() {
+    return contentTypeIdPattern;
   }
 
   /**
-   * The exception handler.
+   * The pattern for matching the content type id from a request URL.
    *
-   * @param exceptionHandler The exception handler.
+   * @param contentTypeIdPattern The pattern for matching the content type id from a request URL.
    */
-  public void setExceptionHandler(HandlerExceptionResolver exceptionHandler) {
-    this.exceptionHandler = exceptionHandler;
-  }
-
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @return The map of namespaces to prefixes.
-   */
-  public Map<String, String> getNamespaces2Prefixes() {
-    return namespaces2Prefixes;
-  }
-
-  /**
-   * The map of namespaces to prefixes.
-   *
-   * @param namespaces2Prefixes The map of namespaces to prefixes.
-   */
-  public void setNamespaces2Prefixes(Map<String, String> namespaces2Prefixes) {
-    this.namespaces2Prefixes = namespaces2Prefixes;
+  public void setContentTypeIdPattern(Pattern contentTypeIdPattern) {
+    this.contentTypeIdPattern = contentTypeIdPattern;
   }
 }

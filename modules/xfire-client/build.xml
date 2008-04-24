@@ -9,10 +9,7 @@
   <property name="deployment.module.fqn" value="org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule"/>
 
   <target name="get-build-classpath" depends="install-tools">
-    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom">
-      <remoteRepository refid="repo.java.net"/>
-    </artifact:dependencies>
-
+    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom"/>
     <path id="build.classpath">
       <!--the maven artifact tasks don't recognize the "system" jars.-->
       <pathelement location="${java.home}/../lib/tools.jar"/>

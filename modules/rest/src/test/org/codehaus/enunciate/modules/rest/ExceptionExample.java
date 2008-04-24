@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs;
+package org.codehaus.enunciate.modules.rest;
 
-import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.rest.annotations.RESTError;
+import org.codehaus.enunciate.rest.annotations.RESTErrorBody;
 
 /**
- * Json resource path.
- *
  * @author Ryan Heaton
  */
-public class JsonResourcePathMethod extends RestResourcePathMethod {
+@RESTError (
+  errorCode = 333
+)
+public class ExceptionExample extends Exception {
 
-  protected String getSubcontext(EnunciateConfiguration config) {
-    return config.getDefaultJsonSubcontext();
+  private final RootElementExample body;
+
+  public ExceptionExample(RootElementExample body, String message) {
+    super(message);
+    this.body = body;
   }
 
+  @RESTErrorBody
+  public RootElementExample getBody() {
+    return body;
+  }
 }

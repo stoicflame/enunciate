@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.rest.json;
 
-import org.codehaus.enunciate.modules.rest.*;
 import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
+import org.codehaus.enunciate.modules.rest.RESTOperation;
 import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.jettison.mapped.MappedXMLInputFactory;
 import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
@@ -51,8 +51,15 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
 
   private JsonSerializationMethod defaultSerializationMethod = JsonSerializationMethod.xmlMapped;
 
+  /**
+   * Unmarshal data from the request.
+   *
+   * @param unmarshaller The unmarshaller.
+   * @param request The request.
+   * @return The data.
+   */
   @Override
-  protected Object unmarshal(Unmarshaller unmarshaller, RESTRequest request) throws Exception {
+  protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request) throws Exception {
     loadSerializationMethod(request, getDefaultSerializationMethod());
     XMLStreamReader reader;
     JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
@@ -69,10 +76,20 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
     return unmarshaller.unmarshal(reader);
   }
 
+  /**
+   * Marshal the JSON data.
+   *
+   * @param data The data.
+   * @param marshaller The marshaller.
+   * @param request The request.
+   * @param response The response.
+   */
   @Override
-  protected void marshal(final Object data, final Marshaller marshaller, final RESTRequest request, HttpServletResponse response) throws Exception {
+  protected void marshal(final Object data, final Marshaller marshaller, final HttpServletRequest request, HttpServletResponse response) throws Exception {
     String callbackName = null;
-    String jsonpParameter = request.getOperation().getJSONPParameter();
+    RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
+
+    String jsonpParameter = operation != null ? operation.getJSONPParameter() : null;
     if (jsonpParameter != null) {
       callbackName = request.getParameter(jsonpParameter);
       callbackName = ((callbackName != null) && (callbackName.trim().length() > 0)) ? callbackName : null;

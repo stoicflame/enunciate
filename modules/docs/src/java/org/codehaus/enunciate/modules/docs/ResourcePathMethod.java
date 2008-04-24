@@ -32,22 +32,23 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
-public class RestResourcePathMethod implements TemplateMethodModelEx {
+public class ResourcePathMethod implements TemplateMethodModelEx {
 
   public Object exec(List list) throws TemplateModelException {
-    if (list.size() < 1) {
-      throw new TemplateModelException("The restAddressPath method must have an rest noun as a parameter.");
+    if (list.size() < 2) {
+      throw new TemplateModelException("The resourcePath method must have an rest noun and content type as a parameter.");
     }
 
-    TemplateModel from = (TemplateModel) list.get(0);
-    Object object = BeansWrapper.getDefaultInstance().unwrap(from);
+    Object object = BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(0));
     RESTNoun restNoun;
     if (object instanceof RESTNoun) {
       restNoun = ((RESTNoun) object);
     }
     else {
-      throw new TemplateModelException("The restAddressPath method must be an RESTNoun.  Not " + object.getClass().getName());
+      throw new TemplateModelException("The resourcePath method must be an RESTNoun.  Not " + object.getClass().getName());
     }
+
+    String contentType = String.valueOf(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(1)));
 
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
     EnunciateConfiguration config = model.getEnunciateConfig();

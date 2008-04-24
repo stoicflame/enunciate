@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may obtain a copy of the License at 
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -17,17 +17,16 @@
 package org.codehaus.enunciate.modules.rest;
 
 /**
- * Interface for components that are assignable to a specified REST resource.
- *
+ * Interface for beans that are aware of the namespace-to-prefix map.
+ * 
  * @author Ryan Heaton
  */
-public interface RESTResourceAware {
+public interface NamespacePrefixAware {
 
   /**
-   * Set the REST resource.
+   * Set the namespace lookup.
    *
-   * @param resource The resource to set.
+   * @param namespaceLookup The namespace lookup.
    */
-  void setRESTResource(RESTResource resource);
-  
+  void setNamespaceLookup(NamespacePrefixLookup namespaceLookup);
 }

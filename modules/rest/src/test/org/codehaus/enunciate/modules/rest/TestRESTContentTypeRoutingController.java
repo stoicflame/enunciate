@@ -20,9 +20,78 @@ import static org.easymock.EasyMock.*;
 
 import junit.framework.TestCase;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
+import java.util.HashMap;
+
 /**
  * @author Ryan Heaton
  */
 public class TestRESTContentTypeRoutingController extends TestCase {
+
+  /**
+   * test handleRequestInternal
+   */
+  public void testHandleRequestInternal() throws Exception {
+    HashMap<String, String> contentTypes2Ids = new HashMap<String, String>();
+    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"), new ContentTypeSupport(contentTypes2Ids, null)) {
+      @Override
+      protected String getContentType(HttpServletRequest request) {
+        return "application/data+xml";
+      }
+    };
+    contentTypes2Ids.put("application/data+xml", "data");
+
+    HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletResponse response = createMock(HttpServletResponse.class);
+    expect(request.getRequestURI()).andReturn("/context/rest/noun");
+    expect(request.getContextPath()).andReturn("/context");
+    RequestDispatcher dispatcher = createMock(RequestDispatcher.class);
+    expect(request.getRequestDispatcher("/data/noun")).andReturn(dispatcher);
+    dispatcher.forward(request, response);
+    replay(request, response, dispatcher);
+    controller.handleRequestInternal(request, response);
+    verify(request, response, dispatcher);
+    reset(request, response, dispatcher);
+
+    expect(request.getRequestURI()).andReturn("/context/rest/noun");
+    expect(request.getContextPath()).andReturn("/context/");
+    expect(request.getRequestDispatcher("/data/noun")).andReturn(dispatcher);
+    dispatcher.forward(request, response);
+    replay(request, response, dispatcher);
+    controller.handleRequestInternal(request, response);
+    verify(request, response, dispatcher);
+    reset(request, response, dispatcher);
+
+    contentTypes2Ids.clear();
+    expect(request.getRequestURI()).andReturn("/context/rest/noun");
+    expect(request.getContextPath()).andReturn("/context/");
+    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+    replay(request, response, dispatcher);
+    controller.handleRequestInternal(request, response);
+    verify(request, response, dispatcher);
+    reset(request, response, dispatcher);
+  }
+
+  /**
+   * test getContentType
+   */
+  public void testGetContentType() throws Exception {
+    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"), null);
+    HttpServletRequest request = createMock(HttpServletRequest.class);
+    expect(request.getParameter("contentType")).andReturn("application/xml");
+    replay(request);
+    assertEquals("application/xml", controller.getContentType(request));
+    verify(request);
+    reset(request);
+
+    expect(request.getParameter("contentType")).andReturn(null);
+    expect(request.getContentType()).andReturn("application/xml;charset=ascii");
+    replay(request);
+    assertEquals("application/xml", controller.getContentType(request));
+    verify(request);
+    reset(request);
+  }
 
 }

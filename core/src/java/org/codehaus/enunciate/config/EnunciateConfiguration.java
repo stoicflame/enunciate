@@ -48,6 +48,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
   private String defaultSoapSubcontext = "/soap/";
+  private String defaultRestSubcontext = "/rest/";
   private String defaultJsonSerialization = "xmlMapped";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
@@ -262,6 +263,40 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * The default rest context.
+   *
+   * @return The default rest context.
+   */
+  public String getDefaultRestSubcontext() {
+    return defaultRestSubcontext;
+  }
+
+  /**
+   * The default rest context.
+   *
+   * @param defaultRestSubcontext The default rest context.
+   */
+  public void setDefaultRestSubcontext(String defaultRestSubcontext) {
+    if (defaultRestSubcontext == null) {
+      throw new IllegalArgumentException("The default REST context must not be null.");
+    }
+
+    if ("".equals(defaultRestSubcontext)) {
+      throw new IllegalArgumentException("The default REST context must not be the emtpy string.");
+    }
+
+    if (!defaultRestSubcontext.startsWith("/")) {
+      defaultRestSubcontext = "/" + defaultRestSubcontext;
+    }
+
+    if (!defaultRestSubcontext.endsWith("/")) {
+      defaultRestSubcontext = defaultRestSubcontext + "/";
+    }
+
+    this.defaultRestSubcontext = defaultRestSubcontext;
+  }
+
+  /**
    * The default JSON serialization method.
    *
    * @return The default JSON serialization method.
@@ -449,10 +484,10 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
 
     //allow for namespace prefixes to be specified in the config file.
-    digester.addCallMethod("enunciate/content-types/content-type", "putContentType", 3);
-    digester.addCallParam("enunciate/content-types/content-type", 0, "value");
-    digester.addCallParam("enunciate/content-types/content-type", 1, "id");
-    digester.addCallParam("enunciate/content-types/content-type", 2, "handler");
+    digester.addCallMethod("enunciate/services/rest/content-types/content-type", "putContentType", 3);
+    digester.addCallParam("enunciate/services/rest/content-types/content-type", 0, "type");
+    digester.addCallParam("enunciate/services/rest/content-types/content-type", 1, "id");
+    digester.addCallParam("enunciate/services/rest/content-types/content-type", 2, "handler");
 
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
@@ -463,9 +498,7 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/services/soap/service", 1, "relativePath");
 
     //allow for the default soap subcontext to be set.
-    digester.addSetProperties("enunciate/services/rest",
-                              new String[] {"xmlContext", "jsonContext", "defaultJsonSerialization"},
-                              new String[] {"defaultRestSubcontext", "defaultJsonSubcontext", "defaultJsonSerialization"});
+    digester.addSetProperties("enunciate/services/rest");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

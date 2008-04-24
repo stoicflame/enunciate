@@ -437,7 +437,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       model.put("springDispatcherServletClass", getDispatcherServletClass());
       model.put("soapAddressPath", new SoapAddressPathMethod());
       model.put("restSubcontext", model.getEnunciateConfig().getDefaultRestSubcontext());
-      model.put("jsonSubcontext", model.getEnunciateConfig().getDefaultJsonSubcontext());
+      model.put("configuredContentTypeHandlers", model.getEnunciateConfig().getContentTypeHandlers());
       model.put("defaultJsonSerialization", model.getEnunciateConfig().getDefaultJsonSerialization());
       if (!globalServiceInterceptors.isEmpty()) {
         for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {

@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.rest;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -33,7 +34,7 @@ public abstract class AbstractContentTypeHandler implements RESTRequestContentTy
    * @param request The request.
    * @return The object.
    */
-  public Object read(RESTRequest request) throws Exception {
+  public Object read(HttpServletRequest request) throws Exception {
     return read(request.getInputStream());
   }
 
@@ -44,7 +45,7 @@ public abstract class AbstractContentTypeHandler implements RESTRequestContentTy
    * @param request The request.
    * @param response The response.
    */
-  public void write(Object data, RESTRequest request, HttpServletResponse response) throws Exception {
+  public void write(Object data, HttpServletRequest request, HttpServletResponse response) throws Exception {
     write(data, response.getOutputStream());
   }
 

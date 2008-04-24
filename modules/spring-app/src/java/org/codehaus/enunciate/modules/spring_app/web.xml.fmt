@@ -99,11 +99,13 @@
     <url-pattern>${restSubcontext}*</url-pattern>
   </servlet-mapping>
 
+  [#list contentTypes2Ids?values as contentTypeId]
   <servlet-mapping>
     <servlet-name>spring</servlet-name>
-    <url-pattern>${jsonSubcontext}*</url-pattern>
+    <url-pattern>/${contentTypeId}/*</url-pattern>
   </servlet-mapping>
 
+  [/#list]
   [#if securityEnabled]
     [#if securityConfig.enableFormBasedLogin]
   <servlet-mapping>

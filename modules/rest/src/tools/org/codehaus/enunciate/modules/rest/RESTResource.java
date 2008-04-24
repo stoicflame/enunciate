@@ -165,15 +165,6 @@ public class RESTResource implements Comparable<RESTResource> {
   }
 
   /**
-   * Compile a regexp pattern to match a request for this resource.
-   *
-   * @return The pattern.
-   */
-  public Pattern compileRegexPattern() {
-    return regexpPattern;
-  }
-
-  /**
    * Pulls out the values of the context parameters and proper noun into a map.  The value of the proper
    * noun is put under the null key.
    *
@@ -216,22 +207,6 @@ public class RESTResource implements Comparable<RESTResource> {
    */
   public String getNounContext() {
     return nounContext;
-  }
-
-  /**
-   * Gets the supported verbs for the specified conent type of this resource.
-   *
-   * @param contentType The content type;
-   * @return The supported verbs.
-   */
-  public Set<VerbType> getSupportedVerbs(String contentType) {
-    Set<VerbType> verbs = EnumSet.noneOf(VerbType.class);
-    for (RESTOperation operation : operations) {
-      if (operation.getContentType().equals(contentType)) {
-        verbs.add(operation.getVerb());
-      }
-    }
-    return verbs;
   }
 
   /**

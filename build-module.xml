@@ -41,9 +41,6 @@
       </classpath>
     </typedef>
 
-    <!--the repo at java.net contains needed Sun jars.-->
-    <artifact:remoteRepository id="repo.java.net" url="https://maven-repository.dev.java.net/nonav/repository" layout="legacy"/>
-
     <copy file="${module.name}-pom.xml" todir="target" failonerror="true">
       <filterset>
         <filter token="VERSION" value="${version}"/>
@@ -89,9 +86,7 @@
   </target>
 
   <target name="get-tools-classpath" depends="get-tools-pom, set-proxy" if="tools.exists">
-    <artifact:dependencies pathId="tools.classpath" pomRefId="module.tools.pom">
-      <remoteRepository refid="repo.java.net"/>
-    </artifact:dependencies>
+    <artifact:dependencies pathId="tools.classpath" pomRefId="module.tools.pom"/>
   </target>
 
   <target name="compile-tools" description="compile the tools code" depends="get-tools-classpath" if="tools.exists">
@@ -133,9 +128,7 @@
   </target>
 
   <target name="get-build-classpath" depends="install-tools">
-    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom">
-      <remoteRepository refid="repo.java.net"/>
-    </artifact:dependencies>
+    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom"/>
 
     <path id="build.classpath">
       <!--the maven artifact tasks don't recognize the "system" jars.-->
@@ -239,7 +232,14 @@
     <fail if="tests.failed">There were test failures.</fail>
   </target>
 
-  <target name="extract-module-docs" if="deployment.module.fqn" depends="get-build-classpath" unless="skip.tests">
+  <target name="fakeout-tools-classpath" unless="tools.exists">
+    <path id="tools.classpath">
+      <!--just set the tools classpath to the build classpath for those that don't have a tools classpath-->
+      <path refid="build.classpath"/>
+    </path>
+  </target>
+
+  <target name="extract-module-docs" if="deployment.module.fqn" depends="get-build-classpath, fakeout-tools-classpath" unless="skip.tests">
     <pathconvert pathsep="&#34; &#34;" dirsep="${file.separator}" property="module.src.file.args">
       <path>
         <fileset dir="src">
@@ -251,10 +251,15 @@
     <mkdir dir="target/docs"/>
     <dirname property="apt.output.dir" file="target/docs/any.txt"/>
 
+    <path id="module.docs.classpath">
+      <path refid="tools.classpath"/>
+      <path refid="build.classpath"/>
+    </path>
+
     <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">
       <classpath location="${java.home}/../lib/tools.jar"/>
       <arg value="-cp"/>
-      <arg pathref="build.classpath"/>
+      <arg pathref="module.docs.classpath"/>
       <arg value="-s"/>
       <arg value="${apt.output.dir}"/>
       <arg value="-nocompile"/>

@@ -16,7 +16,6 @@
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="deployment" type="deployment" minOccurs="0" maxOccurs="1"/>
         <xs:element name="namespaces" type="namespaces" minOccurs="0" maxOccurs="1"/>
-        <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>
         <xs:element name="services" type="services" minOccurs="0" maxOccurs="1"/>
         <xs:element name="modules" type="modules" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
@@ -88,7 +87,12 @@
       </xs:documentation>
     </xs:annotation>
 
+    <xs:sequence>
+      <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>      
+    </xs:sequence>
+
     <xs:attribute name="defaultJsonSerialization" type="jsonSerialization" />
+    <xs:attribute name="defaultRestSubcontext" type="xs:string" />
   </xs:complexType>
 
   <xs:simpleType name="jsonSerialization">
@@ -155,7 +159,7 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="value" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="xs:string" use="required"/>
     <xs:attribute name="id" type="xs:string" use="required"/>
     <xs:attribute name="handler" type="xs:string" use="optional"/>
   </xs:complexType>

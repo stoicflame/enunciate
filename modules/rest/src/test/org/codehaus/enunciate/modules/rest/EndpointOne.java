@@ -25,6 +25,7 @@ import org.codehaus.enunciate.rest.annotations.*;
 public interface EndpointOne {
   @Noun ( "one" )
   @Verb (VerbType.read)
+  @ContentType ("application/atom+xml")
   RootElementExample getOne(@ProperNoun String which);
 
   @Noun ( "one")

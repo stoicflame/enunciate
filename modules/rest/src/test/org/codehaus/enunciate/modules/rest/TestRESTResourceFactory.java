@@ -55,11 +55,19 @@ public class TestRESTResourceFactory extends TestCase {
 
       for (VerbType verbType : VerbType.values()) {
         if (verbType.getAlias() != null) {
-          verbType = verbType.getAlias();
+          continue;
         }
         
-        RESTOperation operation = resource.getOperation("text/xml", verbType);
-        assertNotNull(resource.toString() + " does not contain an operation for " + verbType + ".", operation);
+        RESTOperation operation = resource.getOperation("application/xml", verbType);
+        assertNotNull(resource.toString() + " does not contain an xml operation for " + verbType + ".", operation);
+
+        operation = resource.getOperation("application/json", verbType);
+        assertNotNull(resource.toString() + " does not contain a json operation for " + verbType + ".", operation);
+
+        if ("one".equals(resource.getNoun()) && VerbType.read == verbType) {
+          operation = resource.getOperation("application/atom+xml", verbType);
+          assertNotNull(resource.toString() + " does not contain an atom operation for " + verbType + ".", operation);
+        }
       }
 
       resources.remove(resource);
@@ -103,8 +111,11 @@ public class TestRESTResourceFactory extends TestCase {
       assertNotNull(resource);
 
       for (VerbType verbType : VerbType.values()) {
-        verbType = verbType.getAlias() != null ? verbType.getAlias() : verbType;
-        RESTOperation operation = resource.getOperation("text/xml", verbType);
+        if (verbType.getAlias() != null) {
+          continue;
+        }
+
+        RESTOperation operation = resource.getOperation("application/xml", verbType);
         assertSame(advisedEndpoint, operation.getEndpoint());
         assertNotNull(operation);
       }

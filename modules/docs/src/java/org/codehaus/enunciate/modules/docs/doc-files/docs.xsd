@@ -433,11 +433,22 @@
     </xs:annotation>
 
     <xs:sequence>
+      <xs:element name="contentType" type="contentType" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+
     <xs:attribute name="name" type="xs:string"/>
-    <xs:attribute name="xmlPath" type="xs:string"/>
-    <xs:attribute name="jsonPath" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="contentType">
+    <xs:annotation>
+      <xs:documentation>
+        A content type for a resource. Gives the content type (mime type) and the path.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="type" type="xs:string"/>
+    <xs:attribute name="path" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="operation">

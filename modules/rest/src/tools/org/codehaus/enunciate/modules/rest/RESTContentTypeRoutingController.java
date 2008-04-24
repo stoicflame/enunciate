@@ -16,15 +16,14 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.RequestDispatcher;
-import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * REST controller that routes requests for specific content types.
@@ -34,31 +33,36 @@ import java.util.regex.Matcher;
 public class RESTContentTypeRoutingController extends AbstractController {
 
   private final String defaultContentType;
-  private final Map<String, String> contentTypesToIds;
-  private Pattern replacePattern = Pattern.compile("/rest");
+  private final ContentTypeSupport contentTypeSupport;
+  private Pattern replacePattern = Pattern.compile("^/?rest/");
   private String contentTypeParameter = "contentType";
 
-  public RESTContentTypeRoutingController(RESTResource resource, Map<String, String> contentTypesToIds) {
-    this.contentTypesToIds = contentTypesToIds;
+  public RESTContentTypeRoutingController(RESTResource resource, ContentTypeSupport contentTypeSupport) {
     this.defaultContentType = resource.getDefaultContentType();
+    this.contentTypeSupport = contentTypeSupport;
+    super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
+  /**
+   * Redirects the request to the location of the specific content type.
+   *
+   * @param request The request.
+   * @param response The response.
+   * @return null
+   */
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String requestContext = request.getRequestURI().substring(request.getContextPath().length());
     Matcher matcher = replacePattern.matcher(requestContext);
     if (matcher.find()) {
-      String contentType = request.getParameter(getContentTypeParameter());
-      if (contentType == null) {
-        contentType = this.defaultContentType;
-      }
+      String contentType = getContentType(request);
 
       String contentTypeId = null;
       if (contentType != null) {
-        contentTypeId = this.contentTypesToIds.get(contentType);
+        contentTypeId = lookupContentTypeId(contentType);
       }
 
       if (contentTypeId != null) {
-        String redirect = matcher.replaceFirst("/" + contentTypeId);
+        String redirect = matcher.replaceFirst("/" + contentTypeId + "/");
         RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
         if (dispatcher != null) {
           dispatcher.forward(request, response);
@@ -72,18 +76,88 @@ public class RESTContentTypeRoutingController extends AbstractController {
 
   }
 
+  /**
+   * Lookup the content type id.
+   *
+   * @param contentType The content type.
+   * @return The content type id.
+   */
+  protected String lookupContentTypeId(String contentType) {
+    return this.contentTypeSupport.lookupIdByContentType(contentType);
+  }
+
+  /**
+   * Get the content type for the specified request.
+   *
+   * @param request The request.
+   * @return The content type.
+   */
+  protected String getContentType(HttpServletRequest request) {
+    String contentType = request.getParameter(getContentTypeParameter());
+    if (contentType == null) {
+      contentType = request.getContentType();
+      if (contentType != null) {
+        int semiIndex = contentType.indexOf(';');
+        if (semiIndex >= 0) {
+          contentType = contentType.substring(0, semiIndex);
+        }
+      }
+      else {
+        contentType = this.defaultContentType;
+      }
+    }
+    return contentType;
+  }
+
+  /**
+   * The pattern of the URL to replace with the content type id.
+   *
+   * @return The pattern of the URL to replace with the content type id.
+   */
   public Pattern getReplacePattern() {
     return replacePattern;
   }
 
+  /**
+   * The pattern of the URL to replace with the content type id.
+   *
+   * @param replacePattern The pattern of the URL to replace with the content type id.
+   */
   public void setReplacePattern(Pattern replacePattern) {
     this.replacePattern = replacePattern;
   }
 
+  /**
+   * The subcontext at which this controller is mounted.
+   *
+   * @param subcontext The subcontext at which this controller is mounted.
+   */
+  public void setSubcontext(String subcontext) {
+    if (subcontext.charAt(0) == '/') {
+      subcontext = subcontext.substring(1);
+    }
+
+    if (!subcontext.endsWith("/")) {
+      subcontext = subcontext + "/";
+    }
+
+    setReplacePattern(Pattern.compile("^/?" + subcontext));
+  }
+
+  /**
+   * The name of the parameter that specifies the content type.
+   *
+   * @return The name of the parameter that specifies the content type.
+   */
   public String getContentTypeParameter() {
     return contentTypeParameter;
   }
 
+  /**
+   * The name of the parameter that specifies the content type.
+   *
+   * @param contentTypeParameter The name of the parameter that specifies the content type.
+   */
   public void setContentTypeParameter(String contentTypeParameter) {
     this.contentTypeParameter = contentTypeParameter;
   }

@@ -27,69 +27,81 @@ import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Handles exceptions that occur when handling a REST resource.
  *
  * @author Ryan Heaton
  */
-public class RESTResourceExceptionHandler implements HandlerExceptionResolver {
+public class RESTResourceExceptionHandler implements HandlerExceptionResolver, View {
+
+  public final static String MODEL_EXCEPTION = "org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler#EXCEPTION";
 
   private final Map<Class, Method> errorBodies = new HashMap<Class, Method>();
-  private final RESTRequestContentTypeHandler handler;
-  private final String contentType;
-
-  public RESTResourceExceptionHandler(RESTRequestContentTypeHandler handler, String contentType) {
-    this.handler = handler;
-    this.contentType = contentType;
-  }
 
   public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
+    RESTRequestContentTypeHandler contentHandler = (RESTRequestContentTypeHandler) request.getAttribute(RESTRequestContentTypeHandler.class.getName());
+    if (contentHandler != null) {
+      return new ModelAndView(this, MODEL_EXCEPTION, exception);
+    }
+
+    return null;
+  }
+
+  public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    Exception exception = (Exception) model.get(MODEL_EXCEPTION);
+    RESTRequestContentTypeHandler contentHandler = (RESTRequestContentTypeHandler) request.getAttribute(RESTRequestContentTypeHandler.class.getName());
+
     int statusCode = 500;
-    RESTError errorInfo = exception.getClass().getAnnotation(RESTError.class);
-    if (errorInfo != null) {
-      statusCode = errorInfo.errorCode();
-    }
+    if (exception != null && contentHandler != null) {
+      RESTError errorInfo = exception.getClass().getAnnotation(RESTError.class);
+      if (errorInfo != null) {
+        statusCode = errorInfo.errorCode();
+      }
 
-    String message = exception.getMessage();
-    if ((message == null) && (statusCode == 404)) {
-      message = request.getRequestURI();
-    }
+      String message = exception.getMessage();
+      if ((message == null) && (statusCode == 404)) {
+        message = request.getRequestURI();
+      }
 
-    Method bodyMethod = errorBodies.get(exception.getClass());
-    if (!errorBodies.containsKey(exception.getClass())) {
-      bodyMethod = null;
-      for (Method method : exception.getClass().getMethods()) {
-        if (method.isAnnotationPresent(RESTErrorBody.class)) {
-          bodyMethod = method;
-          break;
+      Method bodyMethod = errorBodies.get(exception.getClass());
+      if (!errorBodies.containsKey(exception.getClass())) {
+        bodyMethod = null;
+        for (Method method : exception.getClass().getMethods()) {
+          if (method.isAnnotationPresent(RESTErrorBody.class)) {
+            bodyMethod = method;
+            break;
+          }
+        }
+
+        errorBodies.put(exception.getClass(), bodyMethod);
+      }
+
+      Object result = null;
+      if (bodyMethod != null) {
+        try {
+          result = bodyMethod.invoke(exception);
+        }
+        catch (Exception e) {
+          //fall through...
         }
       }
 
-      errorBodies.put(exception.getClass(), bodyMethod);
-    }
-
-    Object result = null;
-    if (bodyMethod != null) {
-      try {
-        result = bodyMethod.invoke(exception);
+      if (message != null) {
+        response.setStatus(statusCode, message);
       }
-      catch (Exception e) {
-        //fall through...
+      else {
+        response.setStatus(statusCode);
       }
-    }
-
-    TreeMap<String, Object> model = new TreeMap<String, Object>();
-    model.put(RESTResourceView.MODEL_RESULT, result);
-    View view;
-    if (request instanceof RESTRequest) {
-      RESTRequest restRequest = (RESTRequest) request;
-      view = new RESTResourceView(restRequest.getOperation(), this.handler, this.contentType);
+      
+      RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
+      if (operation != null) {
+        response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
+      }
+      contentHandler.write(result, request, response);
     }
     else {
+      response.sendError(statusCode);
     }
-    return new ModelAndView(view, model);
   }
-
 }
