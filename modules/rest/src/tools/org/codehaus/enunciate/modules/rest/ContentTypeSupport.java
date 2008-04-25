@@ -24,7 +24,7 @@ import java.util.TreeMap;
 /**
  * @author Ryan Heaton
  */
-public class ContentTypeSupport implements NamespacePrefixAware {
+public class ContentTypeSupport {
 
   private final Map<String, String> contentTypesToIds;
   private final Map<String, RESTRequestContentTypeHandler> contentTypesToHandlers;
@@ -46,7 +46,14 @@ public class ContentTypeSupport implements NamespacePrefixAware {
     Map<String, RESTRequestContentTypeHandler> idsToHandlers = new HashMap<String, RESTRequestContentTypeHandler>();
     Map<String, String> idsToContentTypes = new HashMap<String, String>();
     for (String contentType : contentTypesToIds.keySet()) {
-      RESTRequestContentTypeHandler handler = contentTypesToHandlers.get(contentType);
+      RESTRequestContentTypeHandler handler;
+      try {
+        handler = contentTypesToHandlers.get(contentType);
+      }
+      catch (ClassCastException e) {
+        throw new IllegalArgumentException("Illegal content type handler for content type '" + contentType + "'.  (Must implement org.codehaus.enunciate.modules.rest.RESTRequestContentTypeHandler).");
+      }
+
       if (handler == null) {
         throw new IllegalArgumentException("No handler specified for content type '" + contentType + "'");
       }
@@ -99,11 +106,4 @@ public class ContentTypeSupport implements NamespacePrefixAware {
     return this.idsToHandlers.get(id);
   }
 
-  public void setNamespaceLookup(NamespacePrefixLookup namespaceLookup) {
-    for (RESTRequestContentTypeHandler handler : contentTypesToHandlers.values()) {
-      if (handler instanceof NamespacePrefixAware) {
-        ((NamespacePrefixAware) handler).setNamespaceLookup(namespaceLookup);
-      }
-    }
-  }
 }

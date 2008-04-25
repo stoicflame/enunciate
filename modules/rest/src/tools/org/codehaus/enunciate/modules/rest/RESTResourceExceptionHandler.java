@@ -24,6 +24,7 @@ import org.springframework.web.servlet.View;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.activation.DataHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,12 +94,18 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
       else {
         response.setStatus(statusCode);
       }
-      
-      RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
-      if (operation != null) {
-        response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
+
+      if (result instanceof DataHandler) {
+        response.setContentType(((DataHandler) result).getContentType());
+        ((DataHandler)result).writeTo(response.getOutputStream());
       }
-      contentHandler.write(result, request, response);
+      else {
+        RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
+        if (operation != null) {
+          response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
+        }
+        contentHandler.write(result, request, response);
+      }
     }
     else {
       response.sendError(statusCode);

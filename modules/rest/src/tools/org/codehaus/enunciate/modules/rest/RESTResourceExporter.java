@@ -329,11 +329,12 @@ public class RESTResourceExporter extends AbstractController {
     Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
 
     //successful invocation, set up the response...
-    response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
     if (result instanceof DataHandler) {
+      response.setContentType(((DataHandler)result).getContentType());
       ((DataHandler)result).writeTo(response.getOutputStream());
     }
     else {
+      response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
       handler.write(result, request, response);
     }
     return null;

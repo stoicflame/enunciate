@@ -16,28 +16,29 @@
 
 package org.codehaus.enunciate.modules.rest.json;
 
-import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 import org.codehaus.enunciate.modules.rest.RESTOperation;
+import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
 import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
-import org.codehaus.jettison.mapped.MappedXMLInputFactory;
-import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
 import org.codehaus.jettison.badgerfish.BadgerFishXMLInputFactory;
 import org.codehaus.jettison.badgerfish.BadgerFishXMLOutputFactory;
+import org.codehaus.jettison.mapped.MappedXMLInputFactory;
+import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.Marshaller;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
+import java.util.Map;
 
 /**
  * Content handler for JSON requests.
@@ -49,7 +50,19 @@ import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 )
 public class JsonContentHandler extends JaxbXmlContentHandler {
 
-  private JsonSerializationMethod defaultSerializationMethod = JsonSerializationMethod.xmlMapped;
+  private JsonConfiguration config;
+
+  @Override
+  protected void initApplicationContext() throws BeansException {
+    super.initApplicationContext();
+
+    if (this.config == null) {
+      Map nsLookups = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), JsonConfiguration.class);
+      if (!nsLookups.isEmpty()) {
+        this.config = (JsonConfiguration) nsLookups.values().iterator().next();
+      }
+    }
+  }
 
   /**
    * Unmarshal data from the request.
@@ -108,7 +121,24 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
       case hierarchical:
         XStream xstream = new XStream(new JsonHierarchicalStreamDriver());
         xstream.autodetectAnnotations(true);
+        if ((this.config != null) && (this.config.getXstreamReferenceAction() != null)) {
+          switch (this.config.getXstreamReferenceAction()) {
+            case absolute_references:
+              xstream.setMode(XStream.XPATH_ABSOLUTE_REFERENCES);
+              break;
+            case id_references:
+              xstream.setMode(XStream.ID_REFERENCES);
+              break;
+            case no_references:
+              xstream.setMode(XStream.NO_REFERENCES);
+              break;
+            default:
+              xstream.setMode(XStream.XPATH_RELATIVE_REFERENCES);
+              break;
+          }
+        }
         xstream.toXML(data, outStream);
+        break;
       case xmlMapped:
         marshaller.marshal(data, new MappedXMLOutputFactory(getNamespacesToPrefixes()).createXMLStreamWriter(outStream));
         break;
@@ -118,24 +148,6 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
       default:
         throw new IllegalArgumentException("Unsupported JSON serialization method: " + method);
     }
-  }
-
-  /**
-   * The default serialization method.
-   *
-   * @return The default serialization method.
-   */
-  public JsonSerializationMethod getDefaultSerializationMethod() {
-    return defaultSerializationMethod;
-  }
-
-  /**
-   * The default serialization method.
-   *
-   * @param defaultSerializationMethod The default serialization method.
-   */
-  public void setDefaultSerializationMethod(JsonSerializationMethod defaultSerializationMethod) {
-    this.defaultSerializationMethod = defaultSerializationMethod;
   }
 
   /**
@@ -157,4 +169,30 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
     return defaultMethod;
   }
 
+  /**
+   * The json configuration.
+   *
+   * @return The json configuration.
+   */
+  public JsonConfiguration getConfig() {
+    return config;
+  }
+
+  /**
+   * The json configuration.
+   *
+   * @param config The json configuration.
+   */
+  public void setConfig(JsonConfiguration config) {
+    this.config = config;
+  }
+
+  /**
+   * The default JSON serialization method.
+   *
+   * @return The default JSON serialization method.
+   */
+  public JsonSerializationMethod getDefaultSerializationMethod() {
+    return this.config == null ? JsonSerializationMethod.xmlMapped : this.config.getDefaultSerializationMethod();
+  }
 }

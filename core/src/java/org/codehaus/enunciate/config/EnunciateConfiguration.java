@@ -49,12 +49,10 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentContext = null;
   private String defaultSoapSubcontext = "/soap/";
   private String defaultRestSubcontext = "/rest/";
-  private String defaultJsonSerialization = "xmlMapped";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
   private final Map<String, String> contentTypes = new HashMap<String, String>();
-  private final Map<String, String> contentTypeHandlers = new HashMap<String, String>();
   private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
   private final List<APIImport> apiImports = new ArrayList<APIImport>();
 
@@ -217,15 +215,11 @@ public class EnunciateConfiguration implements ErrorHandler {
   /**
    * Configures a content type.
    *
-   * @param value The value of the content type.
+   * @param type The value of the content type.
    * @param id The id of the content type.
-   * @param handler The handler of the content type.
    */
-  public void putContentType(String value, String id, String handler) {
-    this.contentTypes.put(value, id);
-    if (handler != null) {
-      this.contentTypeHandlers.put(value, handler);
-    }
+  public void putContentType(String type, String id) {
+    this.contentTypes.put(type, id);
   }
 
   /**
@@ -297,24 +291,6 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
-   * The default JSON serialization method.
-   *
-   * @return The default JSON serialization method.
-   */
-  public String getDefaultJsonSerialization() {
-    return defaultJsonSerialization;
-  }
-
-  /**
-   * The default JSON serialization method.
-   *
-   * @param defaultJsonSerialization The default JSON serialization method.
-   */
-  public void setDefaultJsonSerialization(String defaultJsonSerialization) {
-    this.defaultJsonSerialization = defaultJsonSerialization;
-  }
-
-  /**
    * Adds a custom soap endpoint location for an SOAP service.
    *
    * @param serviceName The service name.
@@ -376,15 +352,6 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public Map<String, String> getContentTypesToIds() {
     return contentTypes;
-  }
-
-  /**
-   * The map of content types to handlers.
-   *
-   * @return The map of content types to handlers.
-   */
-  public Map<String, String> getContentTypeHandlers() {
-    return contentTypeHandlers;
   }
 
   /**
@@ -483,11 +450,13 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/namespaces/namespace", 0, "uri");
     digester.addCallParam("enunciate/namespaces/namespace", 1, "id");
 
+    //allow for the default soap subcontext to be set.
+    digester.addSetProperties("enunciate/services/rest");
+
     //allow for namespace prefixes to be specified in the config file.
-    digester.addCallMethod("enunciate/services/rest/content-types/content-type", "putContentType", 3);
+    digester.addCallMethod("enunciate/services/rest/content-types/content-type", "putContentType", 2);
     digester.addCallParam("enunciate/services/rest/content-types/content-type", 0, "type");
     digester.addCallParam("enunciate/services/rest/content-types/content-type", 1, "id");
-    digester.addCallParam("enunciate/services/rest/content-types/content-type", 2, "handler");
 
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");
@@ -496,9 +465,6 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/services/soap/service", "addSoapEndpointLocation", 2);
     digester.addCallParam("enunciate/services/soap/service", 0, "name");
     digester.addCallParam("enunciate/services/soap/service", 1, "relativePath");
-
-    //allow for the default soap subcontext to be set.
-    digester.addSetProperties("enunciate/services/rest");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

@@ -46,6 +46,12 @@
     </constructor-arg>
   </bean>
 
+  <!-- the JSON configuration -->
+  <bean id="jsonConfiguration" class="org.codehaus.enunciate.modules.rest.json.JsonConfiguration">
+    <property name="defaultSerializationMethod" value="${defaultJsonSerialization?default("xmlMapped")}"/>
+    <property name="xstreamReferenceAction" value="${xstreamReferenceAction?default("relative_references")}"/>
+  </bean>
+
   <!-- the REST resource factory-->
   <bean id="restResourceFactory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
     <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>

@@ -16,33 +16,29 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.TemplateException;
-import net.sf.jelly.apt.Context;
+import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.rest.config.RESTRuleSet;
 import org.codehaus.enunciate.modules.rest.json.JsonContentHandler;
 import org.codehaus.enunciate.modules.rest.json.JsonSerializationMethod;
+import org.codehaus.enunciate.modules.rest.json.XStreamReferenceAction;
 import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * <h1>REST Module</h1>
  *
- * <p>All metadata for REST endpoints can be discovered at runtime, therefore, the REST deployment module
- * exists only as a set of tools used to deploy the REST API.  In other words, no compile-time
- * generation or validation is needed.</p>
- *
- * <p>The order of the REST deployment module is 0, as it doesn't depend on any artifacts exported
+ * <p>The REST module compiles and validates the REST API. The order of the REST deployment module is 0, as it doesn't depend on any artifacts exported
  * by any other module.</p>
  *
  * <ul>
@@ -59,10 +55,10 @@ import java.util.*;
  *
  * <p>We start by defining a model for the REST API.  A REST API is comprised of a set of <i>resources</i>
  * on which a constrained set of <i>operations</i> can act.  Borrowing terms from english grammar, Enunciate
- * refers to the REST resources as <i>nouns</i> and the REST operations as <i>verbs</i>.  Because the REST
- * API is to be deployed using HTTP, Enunciate constrains the set of verbs to the set {<i>create</i>, <i>read</i>,
- * <i>update</i>, <i>delete</i>}, mapping to the HTTP verbs {<i>PUT</i>, <i>GET</i>, <i>POST</i>, <i>DELETE</i>},
- * respectively.</p>
+ * identifies each REST resource as a <i>noun</i> (with an associated <i>noun context</i>) and the REST operations
+ * as <i>verbs</i>.  Because the REST API is to be deployed using HTTP, Enunciate constrains the set of verbs to
+ * the set {<i>create</i>, <i>read</i>, <i>update</i>, <i>delete</i>}, mapping to the HTTP verbs 
+ * {<i>PUT</i>, <i>GET</i>, <i>POST</i>, <i>DELETE</i>}, respectively.</p>
  *
  * <p>While a REST endpoint <i>must</i> have a noun and a verb, it can optionally use other constructs to
  * more clearly define itself.</p>
@@ -109,27 +105,59 @@ import java.util.*;
  * &lt;circle color="red"/&gt;
  * </code>
  *
- * <p>It is also important to note that noun values (request payloads) don't necessarily have to be XML; they can
- * be of any custom content type.</p>
- *
  * <h3>Noun Context</h3>
  *
- * <p>A noun can be qualified by a noun context.  The noun context can be though of as a "grouping" of nouns.
+ * <p>A noun can be qualified by a noun context.  The noun context can be thought of as a "grouping" of nouns.
  * Perhaps, as an admittedly contrived example, we were to have two separate resources for the noun "rectangle",
- * say "wide" and "tall". The "rectangle" those two contexts could be applied to qualifies the different "rectangle"
+ * say "wide" and "tall". The "rectangle" to which those two contexts could be applied qualifies two different "rectangle"
  * nouns.</p>
  *
  * <h3>Noun Context Parameters</h3>
  *
- * <p>A noun context parameter (or just "context parameter") is a parameter that is defined by the noun context. For example, if we wanted to identify
+ * <p>A noun context parameter (or just "context parameter" for short) is a parameter that is defined by the noun context. For example, if we wanted to identify
  * a specific user of a specific group, we could identify the "group id" as a context parameter, the user as the noun, and the user id as the proper
  * noun.</p>
  *
- * <h3>REST Payloads and Custom Content Types</h3>
+ * <h3>Content Types</h3>
  *
- * <p>It is often necessary to provide REST resources of custom content types along with the XML responses. We define these resources as REST payloads.
- * A REST payload consists of the resource, it's content type (MIME type), and an optional set of metadata (i.e. HTTP headers) that are associated with
- * the resource.</p>
+ * <p>Each REST noun is represented by a set of content types (i.e. MIME types).  By default, Enunciate represents each noun with both the "application/xml"
+ * content type and "application/json" content type (corresponding to XML and JSON representations of the noun). You can also apply other content types to each
+ * noun (and optionally disable the default content types) using the <i>org.codehaus.enunciate.rest.annotations.ContentType</i> annotation. This annotation
+ * can be applied at the method level, type level, and package level (in that priority order).</p>
+ *
+ * <p>Associated with each content type is (1) a "content type id" and (2) a "content type handler".  By default, the content type id is the "subtype" of the
+ * content type. For example, the default id of "application/xml" is "xml", the default id of "application/json" is "json", and the default id for
+ * "application/atom+xml" is "atom+xml".  The content type id is used to identify the content type for a resource on the URL. For example, the content type
+ * with content type id "xml" for a resource "circle" will be accessed at the relative URL "/xml/circle".</p>
+ *
+ * <p>Content type ids can be cofigured with the enunciate configuration file. Because content type ids relate to the location of endpoints, they are considered
+ * application-level configuration (not module-level configuration).  The configuration for content type ids occurs in the "services" element of the main
+ * Enunciate configuration file.  Here is an example:</p>
+ *
+ * <code class="console">
+ * &lt;enunciate&gt;
+ * &nbsp;&nbsp;&lt;services&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;rest&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;content-types&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;content-type type="..." id="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;content-type type="..." id="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/content-types&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/rest&gt;
+ * &nbsp;&nbsp;&lt;/services&gt;
+ * &lt;/enunciate&gt;
+ * </code>
+ *
+ * <p>Content type handlers contain the logic for marshalling a Java object to/from a given content type. There must be one (and only one) content type handler
+ * for each content type.  By default, Enunciate provides content type handlers for XML ("application/xml" and "text/xml") and JSON ("application/json").  You
+ * can specify a content type handler by annotating the class declaration with <i>@org.codehaus.enunciate.rest.annotations.ContentTypeHandler</i>, which you can
+ * use to identify the applicable content types.  You can also specify a content type handler using rest module configuration (see below).  If no content type handler for
+ * a content type is specified via type declaration nor by configuration, a configurable (see below) default content type handler will be used.  Without
+ * configuration, the default content handler will be <i>org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler</i> (the XML content handler).</p>
+ *
+ * <p>Content type handlers supported by the module must implement <i>org.codehaus.enunciate.modules.rest.RESTRequestContentTypeHandler</i> and have an accessible
+ * no-arg constructor.</p>
  *
  * <h1><a name="constraints">Constraints</a></h1>
  *
@@ -142,9 +170,9 @@ import java.util.*;
  *   <li>There can only be one proper noun for a REST operation</li>
  *   <li>Adjectives must be simple types, but there can be more than one value for a single adjective.</li>
  *   <li>The verbs "read" and "delete" cannot support a noun value.</li>
- *   <li>A noun value must be an xml root element (not just a complex type)</li>
- *   <li>A return type must be either a root element or a REST payload.</li>
- *   <li>Noun context parameters must be simple types</li>
+ *   <li>A noun value must be either an xml root element (not just a complex type) or javax.activation.DataHandler.</li>
+ *   <li>A return type must be either a root element or javax.activation.DataHandler.</li>
+ *   <li>Noun context parameters must be simple types.</li>
  * </ul>
  *
  * <h1><a name="java2rest">Mapping Java to a REST API</a></h1>
@@ -182,20 +210,17 @@ import java.util.*;
  *
  * <h3>Java Return Types</h3>
  *
- * <p>The return type of the Java method determines the content type (MIME type) of a REST resource.  By default, Enunciate will attempt serialize the return
- * value of a method using JAXB.  Thus the default requirement that return types must be XML root elements, since otherwise JAXB wouldn't know the name of the outer
- * root XML element. The default content type of a JAXB response is "text/xml" for XML requests and "application/json" for JSON requests.  You can use the
- * org.codehaus.enunciate.rest.annotations.ContentType annotation to specify a different content type for the XML requests (e.g. "application/atom+xml").</p>
- *
- * <p>However, Enunciate also supports resources of different content types. This can be done by defining the Java method to return
- * javax.activation.DataHandler, which defines its own payload and content type. For such methods, you must supply the
- * <i>@org.codehaus.enunciate.rest.annotations.DataFormat</i> annotation which is used to identify externally the id of the data format URL.</p>
+ * <p>By default, the return type of the Java method defines the payload of the response.  In order support the default content type handlers (see
+ * "Content Types" above), the return type of the Java method must be an XML root element. The exception to this is that Enunciate
+ * also allows the return type of a Java method to be javax.activation.DataHandler, which defines its own payload and content type. In the case where
+ * the return type is a DataHandler, consider using the @ContentType (see "Content Types" above) annotation to specify which content types the
+ * DataHandler supports and which content types are not supported.</p>
  *
  * <h3>Java Method Parameters</h3>
  *
  * <p>A parameter to a method can be a proper noun, an adjective, a context parameter, or a noun value.  By default, a parameter is mapped
- * as an adjective.  The name of the adjective by default is the name of the parameter.  Parameters
- * can be customized with the <i>org.codehaus.enunciate.rest.annotations.Adjective</i>, <i>org.codehaus.enunciate.rest.annotations.NounValue</i>,
+ * as an adjective.  By default, the name of the adjective is the name of the parameter.  Parameters can be customized with the
+ * <i>org.codehaus.enunciate.rest.annotations.Adjective</i>, <i>org.codehaus.enunciate.rest.annotations.NounValue</i>,
  * <i>org.codehaus.enunciate.rest.annotations.ContextParameter</i>, and <i>org.codehaus.enunciate.rest.annotations.ProperNoun</i> annotations.</p>
  *
  * <p><u>Complex Adjectives</u></p>
@@ -203,16 +228,16 @@ import java.util.*;
  * <p>There may be cases where a REST request may accept a large number of adjectives (HTTP parameters).  If this is the case, the corresponding Java method
  * could start to get unwieldy because of the number of parameters on the method.  To address this inconvenience, Enunciate supports the concept of a
  * "complex adjective".  An adjective is marked as complex with by setting "complex=true" on the @Adjective annotation.  The type of a complex adjective is
- * expected to be a simple bean with an accessible no-arg constructor. In the case of a complex adjective the properties of the bean of a complex adjective
+ * expected to be a simple bean with an accessible no-arg constructor. In the case of a complex adjective, the properties of the bean
  * define the names and types of the adjectives.</p>
  *
  * <p><u>Noun Value Types</u></p>
  *
- * <p>A parameter that is identified as a noun value is usually required to have a type that is an XML root element (i.e. a class annotated with
- * javax.xml.bind.annotation.XmlRootElement).  There is an exception to this rule: a noun value parameter type can be javax.activation.DataHandler
- * or an array/collection of javax.activation.DataHandler. In the case of javax.activation.DataHandler, the request payload is considered to be of
- * a "custom type" and the DataHandler will become a handler to the InputStream of the request payload. The DataSource of the DataHandler will be
- * an instance of <a href="api/org/codehaus/enunciate/modules/rest/RESTRequestDataSource.html">org.codehaus.enunciate.modules.rest.RESTRequestDataSource</a>.</p>
+ * <p>By default, a method parameter that is identified as a noun value is deserialized from the request body from the content type handler (see "Content Types"
+ * above).  This means that the noun value parameter must be an XML root element to support the default content type handlers. Like the return type, there is an
+ * exception to this rule: a noun value parameter can be of type javax.activation.DataHandler or an array/collection of javax.activation.DataHandler. In the
+ * case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handler to the InputStream
+ * of the request payload. The DataSource of the DataHandler will be an instance of <i>org.codehaus.enunciate.modules.rest.RESTRequestDataSource</i>.</p>
  *
  * <p>In the case of an array/collection of javax.activation.DataHandler, the REST method will be considered able to handle a multipart file upload as defined
  * in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>. However, in order for a REST request to be able to be parsed as a multipart file upload,
@@ -224,20 +249,22 @@ import java.util.*;
  * <p>In some cases, you may want to provide your own <a href="api/org/codehaus/enunciate/modules/rest/MultipartRequestHandler.html">org.codehaus.enunciate.modules.rest.MultipartRequestHandler</a>.
  * Enunciate provides another implementation, the <a href="api/org/codehaus/enunciate/modules/rest/StreamingMultipartRequestHandler.html">org.codehaus.enunciate.modules.rest.StreamingMultipartRequestHandler</a>,
  * that uses <a href="http://commons.apache.org/fileupload/">Commons-FileUpload</a> to provide a "streaming" approach to parsing a multipart form upload.  See
- * the docs for details.</p>
+ * the JavaDocs for details.</p>
  *
  * <h3>Exceptions</h3>
  *
  * <p>By default, an exception that gets thrown during a REST invocation will return an HTTP 500 error.  This
  * can be customized with the <i>org.codehaus.enunciate.rest.annotations.RESTError</i> annotation on the exception
- * that gets thrown.</p>
+ * that gets thrown. The body of the error response can be customized by annotating an accessor method on the exception with
+ * <i>org.codehaus.enunciate.rest.annotations.RESTErrorBody</i>.  The object that is returns from this method will be written to the response in the same manner
+ * that the return type of the method is serialized (see "Java Return Types" above).</p>
  *
  * <h1><a name="json">JSON API</a></h1>
  *
- * <p>Each XML endpoint is also published as a JSON endpoint. JSON endpoints support three different serialization methods: "hierarchical",
- * "xmlMapped", and "badgerfish". These values can be passed as request parameters to specify which format is desired. The serialization method
- * to use when none is specified by a request parameter can be specified by using the "defaultJsonSerialization" attribute on the main enunciate
- * element of the Enunciate configuration file. Note the default value is ("xmlMapped").</p>
+ * <p>By default, each resource is available as both the "application/xml" content type and "application/json" content type. The default JSON content type
+ * handler supports three different serialization methods: "hierarchical", "xmlMapped", and "badgerfish". These values can be passed as request parameters
+ * to specify which format is desired. The serialization method to use when none is specified by a request parameter can be specified by using the
+ * "defaultJsonSerialization" attribute on the REST module configuration element. Note the default value is ("xmlMapped").</p>
  *
  * <p>When the JSON serialization is done by converting the XML result to JSON, there are two mapping conventions that can be used. By default, the mapping is
  * done using the "mapped" convention (JSON serialization method "xmlMapped").  The Badgerfish convention is also available (method "badgerfish"). To learn
@@ -256,7 +283,10 @@ import java.util.*;
  *
  * <h1><a name="steps">Steps</a></h1>
  *
- * <p>There are no significant steps in the REST module.  </p>
+ * <h3>generate</h3>
+ *
+ * <p>The generate step of the REST module sets up the known content type handlers and writes out a metadata file that contains
+ * the parameter names of each REST method.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -266,6 +296,23 @@ import java.util.*;
  *   <li>The "defaultContentTypeHandler" attribute is used to define the default content type handler when no others are found for a given content type.
  *       The default value is "org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler".</li>
  * </ul>
+ *
+ * <h3>The "json" element</h3>
+ *
+ * <p>The "json" child element of the rest module configuration element supports configuration options for JSON serialization. The following attributes
+ * are supported on this element:</p>
+ *
+ * <ul>
+ *   <li>The "defaultJsonSerialization" attribute is used to define the default default JSON serialization method. Default: "xmlMapped".</li>
+ *   <li>The "xstreamReferenceAction" attribute is used to define the action that XStream takes with object references.  Possible values are "no_references",
+ *       "id_references", "relative_references", "absolute_references". Default value is "relative_references". For more information, see
+ *       <a href="http://xstream.codehaus.org/graphs.html">the XStream documentation.</a></li>
+ * </ul>
+ *
+ * <h3>The "content-type-handlers" element</h3>
+ *
+ * <p>The "content-type-handlers" child element of the rest module configuration element supports configuration of the content type handler for a specific
+ * content type. The "contentType" attribute identifies the content type.  The "class" element is the fully-qualified classname of the content handler.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -277,6 +324,9 @@ import java.util.*;
 public class RESTDeploymentModule extends FreemarkerDeploymentModule {
 
   private String defaultContentTypeHandler = JaxbXmlContentHandler.class.getName();
+  private String xstreamReferenceAction = XStreamReferenceAction.relative_references.toString();
+  private Map<String, String> contentTypeHandlers = new TreeMap<String, String>();
+  private String defaultJsonSerialization = JsonSerializationMethod.xmlMapped.toString();
 
   /**
    * @return "rest"
@@ -291,7 +341,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new RESTValidator(getEnunciate().getConfig().getContentTypeHandlers());
+    return new RESTValidator(getContentTypeHandlers());
   }
 
   /**
@@ -299,18 +349,6 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected URL getProperyNamesTemplateURL() {
     return RESTDeploymentModule.class.getResource("enunciate-rest-parameter-names.properties.fmt");
-  }
-
-  @Override
-  public void init(Enunciate enunciate) throws EnunciateException {
-    super.init(enunciate);
-
-    try {
-      JsonSerializationMethod.valueOf(enunciate.getConfig().getDefaultJsonSerialization());
-    }
-    catch (IllegalArgumentException e) {
-      throw new EnunciateException("Illegal JSON serialization method: " + enunciate.getConfig().getDefaultJsonSerialization());
-    }
   }
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
@@ -326,9 +364,11 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
         knownContentTypeHandlers.put(contentType, handler.getQualifiedName());
       }
     }
-    model.put("configuredContentTypeHandlers", model.getEnunciateConfig().getContentTypeHandlers());
+    model.put("configuredContentTypeHandlers", getContentTypeHandlers());
     model.put("knownContentTypeHandlers", knownContentTypeHandlers);
     model.put("defaultContentTypeHandler", getDefaultContentTypeHandler());
+    model.put("defaultJsonSerialization", getDefaultJsonSerialization());
+    model.put("xstreamReferenceAction", getXstreamReferenceAction());
 
     //populate the content-type-to-handler map.
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
@@ -340,6 +380,32 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     }
     
     enunciate.setProperty("rest.parameter.names", paramNameFile);
+  }
+
+  /**
+   * The content handlers (content type to content handler).
+   *
+   * @return The content handlers.
+   */
+  public Map<String, String> getContentTypeHandlers() {
+    return contentTypeHandlers;
+  }
+
+  /**
+   * Put a content type handler.
+   *
+   * @param contentType The content type.
+   * @param contentHandler The content handler.
+   */
+  public void putContentTypeHandler(String contentType, String contentHandler) {
+    if (contentType == null) {
+      throw new IllegalArgumentException("A content type must be supplied.");
+    }
+    if (contentHandler == null) {
+      throw new IllegalArgumentException("A content type handler must be supplied.");
+    }
+
+    this.contentTypeHandlers.put(contentType, contentHandler);
   }
 
   /**
@@ -358,5 +424,46 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDefaultContentTypeHandler(String defaultContentTypeHandler) {
     this.defaultContentTypeHandler = defaultContentTypeHandler;
+  }
+
+  /**
+   * The xstream reference action.
+   *
+   * @return The xstream reference action.
+   */
+  public String getXstreamReferenceAction() {
+    return xstreamReferenceAction;
+  }
+
+  /**
+   * Set the reference action for XStream references.
+   *
+   * @param xstreamReferenceAction The xstream reference action.
+   */
+  public void setXstreamReferenceAction(String xstreamReferenceAction) {
+    this.xstreamReferenceAction = XStreamReferenceAction.valueOf(xstreamReferenceAction).toString();
+  }
+
+  /**
+   * The default JSON serialization method.
+   *
+   * @return The default JSON serialization method.
+   */
+  public String getDefaultJsonSerialization() {
+    return defaultJsonSerialization;
+  }
+
+  /**
+   * The default JSON serialization method.
+   *
+   * @param defaultJsonSerialization The default JSON serialization method.
+   */
+  public void setDefaultJsonSerialization(String defaultJsonSerialization) {
+    this.defaultJsonSerialization = JsonSerializationMethod.valueOf(defaultJsonSerialization).toString();
+  }
+
+  @Override
+  public RuleSet getConfigurationRules() {
+    return new RESTRuleSet();
   }
 }

@@ -91,17 +91,8 @@
       <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>      
     </xs:sequence>
 
-    <xs:attribute name="defaultJsonSerialization" type="jsonSerialization" />
     <xs:attribute name="defaultRestSubcontext" type="xs:string" />
   </xs:complexType>
-
-  <xs:simpleType name="jsonSerialization">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="hierarchical"/>
-      <xs:enumeration value="xmlMapped"/>
-      <xs:enumeration value="badgerfish"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <xs:complexType name="services-soap-service">
 

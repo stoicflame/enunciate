@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at 
+ * You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.rest;
+package org.codehaus.enunciate.modules.rest.json;
 
 /**
- * Interface for beans that are aware of the namespace-to-prefix map.
+ * Available actions when XStream encounters circular references.
  * 
  * @author Ryan Heaton
  */
-public interface NamespacePrefixAware {
+public enum XStreamReferenceAction {
 
-  /**
-   * Set the namespace lookup.
-   *
-   * @param namespaceLookup The namespace lookup.
-   */
-  void setNamespaceLookup(NamespacePrefixLookup namespaceLookup);
+  no_references,
+
+  absolute_references,
+
+  relative_references,
+
+  id_references
 }

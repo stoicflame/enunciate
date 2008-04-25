@@ -17,8 +17,6 @@
 package org.codehaus.enunciate.modules.rest;
 
 import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,16 +32,6 @@ public class NamespacePrefixLookup extends ApplicationObjectSupport {
 
   public NamespacePrefixLookup(Map<String, String> ns2prefix) {
     this.ns2prefix = Collections.unmodifiableMap(ns2prefix);
-  }
-
-  @Override
-  protected void initApplicationContext() throws BeansException {
-    super.initApplicationContext();
-
-    Map prefixAwareBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), NamespacePrefixAware.class);
-    for (Object prefixAwareBean : prefixAwareBeans.values()) {
-      ((NamespacePrefixAware)prefixAwareBean).setNamespaceLookup(this);
-    }
   }
 
   /**
