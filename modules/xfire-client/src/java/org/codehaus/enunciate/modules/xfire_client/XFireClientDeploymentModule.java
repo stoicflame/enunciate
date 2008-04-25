@@ -666,6 +666,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     clientDeps.add(dep);
 
     dep = new BaseArtifactDependency();
+    dep.setId("commons-logging");
+    dep.setArtifactType("jar");
+    dep.setVersion("1.1");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
     dep.setId("commons-httpclient");
     dep.setArtifactType("jar");
     dep.setVersion("3.0");

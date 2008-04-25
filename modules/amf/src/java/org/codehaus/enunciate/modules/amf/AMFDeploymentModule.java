@@ -127,8 +127,8 @@ import java.util.*;
  * <p>The "compiler" element also supports the following subelements:</p>
  *
  * <ul>
- * <li>"JVMArg" (additional JVM arguments, passed in order to the JVM used to invoke the compiler)</li>
- * <li>"arg" (additional compiler arguments, passed in order to the compiler)</li>
+ * <li>"JVMArg" (additional JVM arguments, passed in order to the JVM used to invoke the compiler, supports a single attribute: "value")</li>
+ * <li>"arg" (additional compiler arguments, passed in order to the compiler, supports a single attribute: "value")</li>
  * <li>"license" (supports attributes "product" and "serialNumber")</li>
  * </ul>
  *

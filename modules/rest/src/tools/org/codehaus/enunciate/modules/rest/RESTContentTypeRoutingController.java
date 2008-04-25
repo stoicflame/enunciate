@@ -95,16 +95,7 @@ public class RESTContentTypeRoutingController extends AbstractController {
   protected String getContentType(HttpServletRequest request) {
     String contentType = request.getParameter(getContentTypeParameter());
     if (contentType == null) {
-      contentType = request.getContentType();
-      if (contentType != null) {
-        int semiIndex = contentType.indexOf(';');
-        if (semiIndex >= 0) {
-          contentType = contentType.substring(0, semiIndex);
-        }
-      }
-      else {
-        contentType = this.defaultContentType;
-      }
+      contentType = this.defaultContentType;
     }
     return contentType;
   }

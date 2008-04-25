@@ -85,13 +85,6 @@ public class TestRESTContentTypeRoutingController extends TestCase {
     assertEquals("application/xml", controller.getContentType(request));
     verify(request);
     reset(request);
-
-    expect(request.getParameter("contentType")).andReturn(null);
-    expect(request.getContentType()).andReturn("application/xml;charset=ascii");
-    replay(request);
-    assertEquals("application/xml", controller.getContentType(request));
-    verify(request);
-    reset(request);
   }
 
 }
