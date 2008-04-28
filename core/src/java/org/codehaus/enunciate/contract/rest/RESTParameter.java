@@ -18,10 +18,7 @@ package org.codehaus.enunciate.contract.rest;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.rest.annotations.ProperNoun;
-import org.codehaus.enunciate.rest.annotations.Adjective;
-import org.codehaus.enunciate.rest.annotations.NounValue;
-import org.codehaus.enunciate.rest.annotations.ContextParameter;
+import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
@@ -47,12 +44,9 @@ import java.util.Collection;
  */
 public class RESTParameter extends DecoratedParameterDeclaration {
 
-  private final int parameterPosition;
 
-  public RESTParameter(ParameterDeclaration delegate, int parameterPosition) {
+  public RESTParameter(ParameterDeclaration delegate) {
     super(delegate);
-
-    this.parameterPosition = parameterPosition;
   }
 
   /**
@@ -90,6 +84,15 @@ public class RESTParameter extends DecoratedParameterDeclaration {
   public boolean isComplexAdjective() {
     Adjective adjectiveInfo = getAnnotation(Adjective.class);
     return adjectiveInfo != null && adjectiveInfo.complex();
+  }
+
+  /**
+   * Whether this REST parameter is a content type parameter.
+   *
+   * @return Whether this REST parameter is a content type parameter.
+   */
+  public boolean isContentTypeParameter() {
+    return getAnnotation(ContentTypeParameter.class) != null;
   }
 
   /**

@@ -42,6 +42,7 @@ public class RESTOperation {
   private final int properNounIndex;
   private final Class properNounType;
   private final Boolean properNounOptional;
+  private final int contentTypeParameterIndex;
   private final Map<String, Integer> adjectiveIndices;
   private final Map<String, Class> adjectiveTypes;
   private final Map<String, Boolean> adjectivesOptional;
@@ -81,6 +82,7 @@ public class RESTOperation {
     int nounValueIndex = -1;
     Class nounValue = null;
     Boolean nounValueOptional = null;
+    int contentTypeParameterIndex = -1;
     adjectiveTypes = new HashMap<String, Class>();
     adjectiveIndices = new HashMap<String, Integer>();
     adjectivesOptional = new HashMap<String, Boolean>();
@@ -188,6 +190,11 @@ public class RESTOperation {
           isAdjective = false;
           break;
         }
+        else if (annotation instanceof ContentTypeParameter) {
+          contentTypeParameterIndex = i;
+          isAdjective = false;
+          break;
+        }
         else if (annotation instanceof Adjective) {
           Adjective adjectiveInfo = (Adjective) annotation;
           adjectiveOptional = adjectiveInfo.optional();
@@ -283,6 +290,7 @@ public class RESTOperation {
     this.charset = charset;
     this.JSONPParameter = jsonpParameter;
     this.contextClasses = contextClasses;
+    this.contentTypeParameterIndex = contentTypeParameterIndex;
     try {
       this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
     }
@@ -342,6 +350,10 @@ public class RESTOperation {
       }
       
       parameters[nounValueIndex] = nounValue;
+    }
+
+    if (contentTypeParameterIndex > -1) {
+      parameters[contentTypeParameterIndex] = getContentType();
     }
 
     for (String adjective : adjectiveIndices.keySet()) {

@@ -1,4 +1,11 @@
 <enunciate>
+  <services>
+    <rest>
+      <content-types>
+        <content-type type="text/plain" id="txt"/>
+      </content-types>
+    </rest>
+  </services>
   <modules>
     <gwt disabled="false"
          rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">

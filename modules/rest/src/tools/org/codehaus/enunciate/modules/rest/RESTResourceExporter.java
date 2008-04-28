@@ -200,7 +200,7 @@ public class RESTResourceExporter extends AbstractController {
         if (nounType != null) {
           //todo: provide a hook to some other conversion mechanism?
           try {
-            properNounValue = ConvertUtils.convert(parameterValue, nounType);
+            properNounValue = convert(parameterValue, nounType);
           }
           catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
@@ -213,7 +213,7 @@ public class RESTResourceExporter extends AbstractController {
         if (contextParameterType != null) {
           //todo: provide a hook to some other conversion mechanism?
           try {
-            contextParameterValues.put(parameterName, ConvertUtils.convert(parameterValue, contextParameterType));
+            contextParameterValues.put(parameterName, convert(parameterValue, contextParameterType));
           }
           catch (Exception e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
@@ -241,7 +241,7 @@ public class RESTResourceExporter extends AbstractController {
           Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
           for (int i = 0; i < parameterValues.length; i++) {
             try {
-              Array.set(adjectiveValues, i, ConvertUtils.convert(parameterValues[i], componentType));
+              Array.set(adjectiveValues, i, convert(parameterValues[i], componentType));
             }
             catch (Exception e) {
               response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid value '" + parameterValues[i] + "' for parameter '" + adjective + "'.");
@@ -338,6 +338,25 @@ public class RESTResourceExporter extends AbstractController {
       handler.write(result, request, response);
     }
     return null;
+  }
+
+  /**
+   * Convert a string to a specified type.
+   *
+   * @param value The value.
+   * @param type The type.
+   * @return The conversion.
+   */
+  protected Object convert(String value, Class type) {
+    if (ConvertUtils.lookup(type) != null) {
+      return ConvertUtils.convert(value, type);
+    }
+    else if (Enum.class.isAssignableFrom(type)) {
+      return Enum.valueOf(type, value);
+    }
+    else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   /**

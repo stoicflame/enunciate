@@ -1,9 +1,6 @@
 package org.codehaus.enunciate.samples.petclinic.schema;
 
-import org.codehaus.enunciate.rest.annotations.RESTPayload;
-import org.codehaus.enunciate.rest.annotations.RESTPayloadHeaders;
-import org.codehaus.enunciate.rest.annotations.RESTPayloadBody;
-
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.activation.DataHandler;
 import java.util.Map;
 
@@ -12,7 +9,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-@RESTPayload
+@XmlRootElement
 public class ClinicBrochure {
 
   private Map<String, String> metaData;
@@ -23,7 +20,6 @@ public class ClinicBrochure {
    *
    * @return Metadata about the brochure.  
    */
-  @RESTPayloadHeaders
   public Map<String, String> getMetaData() {
     return metaData;
   }
@@ -42,7 +38,6 @@ public class ClinicBrochure {
    *
    * @return The data that handles the brochure.
    */
-  @RESTPayloadBody
   public DataHandler getData() {
     return data;
   }

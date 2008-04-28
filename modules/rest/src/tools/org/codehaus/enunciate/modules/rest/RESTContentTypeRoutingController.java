@@ -20,10 +20,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.IOException;
 
 /**
  * REST controller that routes requests for specific content types.
@@ -65,7 +67,17 @@ public class RESTContentTypeRoutingController extends AbstractController {
         String redirect = matcher.replaceFirst("/" + contentTypeId + "/");
         RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
         if (dispatcher != null) {
-          dispatcher.forward(request, response);
+          try {
+            dispatcher.forward(request, response);
+          }
+          catch (ServletException e) {
+            if (e.getRootCause() instanceof Exception) {
+              throw (Exception) e.getRootCause();
+            }
+            else {
+              throw e;
+            }
+          }
           return null;
         }
       }

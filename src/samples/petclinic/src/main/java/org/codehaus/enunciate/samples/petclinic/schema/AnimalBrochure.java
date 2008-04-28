@@ -1,9 +1,6 @@
 package org.codehaus.enunciate.samples.petclinic.schema;
 
-import org.codehaus.enunciate.rest.annotations.RESTPayload;
-import org.codehaus.enunciate.rest.annotations.RESTPayloadContentType;
-import org.codehaus.enunciate.rest.annotations.RESTPayloadBody;
-
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.InputStream;
 
@@ -12,7 +9,7 @@ import java.io.InputStream;
  *
  * @author Ryan Heaton
  */
-@RESTPayload
+@XmlRootElement
 public class AnimalBrochure {
 
   private String contentType;
@@ -23,7 +20,6 @@ public class AnimalBrochure {
    *
    * @return The content type (MIME type) of the brochure.
    */
-  @RESTPayloadContentType
   public String getContentType() {
     return contentType;
   }
@@ -42,7 +38,6 @@ public class AnimalBrochure {
    *
    * @return The content of the brochure.
    */
-  @RESTPayloadBody
   @XmlTransient //JAXB doesn't recognize InputStream as a valid type.
   public InputStream getContent() {
     return content;

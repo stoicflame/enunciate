@@ -253,7 +253,7 @@ public class TestFullAPI extends TestCase {
    * tests the REST API.
    */
   public void testFullRESTAPI() throws Exception {
-    int port = 8888;
+    int port = 8080;
     if (System.getProperty("container.port") != null) {
       port = Integer.parseInt(System.getProperty("container.port"));
     }

@@ -44,6 +44,7 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final RESTParameter nounValue;
   private final Collection<RESTParameter> adjectives;
   private final Collection<RESTParameter> contextParameters;
+  private final Collection<RESTParameter> contentTypeParameters;
   private final Collection<RESTError> RESTErrors;
   private final String jsonpParameter;
   private final Set<String> contentTypes;
@@ -55,9 +56,9 @@ public class RESTMethod extends DecoratedMethodDeclaration {
     RESTParameter nounValue = null;
     this.adjectives = new ArrayList<RESTParameter>();
     this.contextParameters = new ArrayList<RESTParameter>();
-    int parameterPosition = 0;
+    this.contentTypeParameters = new ArrayList<RESTParameter>();
     for (ParameterDeclaration parameterDeclaration : getParameters()) {
-      RESTParameter restParameter = new RESTParameter(parameterDeclaration, parameterPosition++);
+      RESTParameter restParameter = new RESTParameter(parameterDeclaration);
       if (restParameter.isProperNoun()) {
         if (properNoun != null) {
           throw new ValidationException(properNoun.getPosition(), "REST method has more than one proper noun.  The other found at " + restParameter.getPosition());
@@ -80,6 +81,9 @@ public class RESTMethod extends DecoratedMethodDeclaration {
       }
       else if (restParameter.isContextParam()) {
         contextParameters.add(restParameter);
+      }
+      else if (restParameter.isContentTypeParameter()) {
+        contentTypeParameters.add(restParameter);
       }
       else {
         adjectives.add(restParameter);
@@ -215,6 +219,15 @@ public class RESTMethod extends DecoratedMethodDeclaration {
    */
   public Collection<RESTParameter> getContextParameters() {
     return contextParameters;
+  }
+
+  /**
+   * The content type paramters for this REST method.
+   *
+   * @return The content type paramters for this REST method.
+   */
+  public Collection<RESTParameter> getContentTypeParameters() {
+    return contentTypeParameters;
   }
 
   /**

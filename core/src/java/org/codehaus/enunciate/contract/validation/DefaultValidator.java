@@ -219,6 +219,18 @@ public class DefaultValidator implements Validator {
           }
         }
 
+        if (!method.getContentTypeParameters().isEmpty()) {
+          if (method.getContentTypeParameters().size() > 1) {
+            result.addError(method.getPosition(), "Multiple content type parameters.");
+          }
+          else {
+            RESTParameter restParameter = method.getContentTypeParameters().iterator().next();
+            if (!((DecoratedTypeMirror) restParameter.getType()).isInstanceOf(String.class.getName())) {
+              result.addError(restParameter.getPosition(), "Content type parameter must be a String.");
+            }
+          }
+        }
+
         RESTParameter nounValue = method.getNounValue();
         if (nounValue != null) {
           if ((verbList.contains(VerbType.read)) || (verbList.contains(VerbType.delete))) {

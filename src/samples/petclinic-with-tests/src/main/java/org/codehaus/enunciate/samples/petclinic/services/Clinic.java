@@ -59,13 +59,16 @@ public interface Clinic {
   @Noun ( "brochure" )
   @Verb ( VerbType.read )
   @RolesAllowed("USER")
-  ClinicBrochure getClinicBrochure(@Adjective( name = "format" ) BrochureFormat format) throws PetClinicException;
+  @ContentType (
+    value = {"text/html", "text/plain", "application/pdf"}
+  )
+  ClinicBrochure getClinicBrochure(@ContentTypeParameter String format) throws PetClinicException;
 
   /**
    * Get the brochure for the specified animal in the specified format.
    *
    * @param animalType The animal type.
-   * @param format The format.
+   * @param contentType The content type (MIME type)
    * @return The brochure.
    */
   @Noun (
@@ -73,7 +76,10 @@ public interface Clinic {
     context = "{animalType}"
   )
   @Verb ( VerbType.read )
-  AnimalBrochure getAnimalBrochure(@ContextParameter ( "animalType" ) String animalType, @Adjective( name = "format" ) BrochureFormat format) throws PetClinicException;
+  @ContentType (
+    value = {"text/html", "text/plain", "application/pdf"}
+  )
+  AnimalBrochure getAnimalBrochure(@ContextParameter ( "animalType" ) String animalType, @ContentTypeParameter String contentType) throws PetClinicException;
 
   /**
    * Retrieve all <code>Vet</code>s from the datastore.

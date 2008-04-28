@@ -164,9 +164,9 @@ public class ClinicImpl implements Clinic {
     }
   }
 
-  public ClinicBrochure getClinicBrochure(BrochureFormat format) throws PetClinicException {
+  public ClinicBrochure getClinicBrochure(String format) throws PetClinicException {
     if (format == null) {
-      format = BrochureFormat.pdf;
+      format = "application/pdf";
     }
 
     Map<String, String> metaData = new HashMap<String, String>();
@@ -174,28 +174,20 @@ public class ClinicImpl implements Clinic {
     metaData.put("Header2", "Value2");
 
     InputStream data;
-    final String contentType;
-    switch (format) {
-      case html:
-        data = getClass().getResourceAsStream("clinic-brochure.html");
-        contentType = "text/html";
-        break;
-      case txt:
-        data = getClass().getResourceAsStream("clinic-brochure.txt");
-        contentType = "text/plain";
-        break;
-      case pdf:
-        data = getClass().getResourceAsStream("clinic-brochure.pdf");
-        contentType = "application/pdf";
-        break;
-      default:
-        throw new PetClinicException("Unknown brochure format: " + format);
+    if ("text/html".equalsIgnoreCase(format)) {
+      data = getClass().getResourceAsStream("clinic-brochure.html");
+    }
+    else if ("text/plain".equalsIgnoreCase(format)) {
+      data = getClass().getResourceAsStream("clinic-brochure.txt");
+    }
+    else {
+      data = getClass().getResourceAsStream("clinic-brochure.pdf");
     }
 
     ClinicBrochure brochure = new ClinicBrochure();
     brochure.setMetaData(metaData);
     try {
-      brochure.setData(new DataHandler(new ByteArrayDataSource(data, contentType)));
+      brochure.setData(new DataHandler(new ByteArrayDataSource(data, format)));
     }
     catch (IOException e) {
       throw new PetClinicException(e.getMessage());
@@ -203,9 +195,9 @@ public class ClinicImpl implements Clinic {
     return brochure;
   }
 
-  public AnimalBrochure getAnimalBrochure(String animalType, BrochureFormat format) throws PetClinicException {
+  public AnimalBrochure getAnimalBrochure(String animalType, String format) throws PetClinicException {
     if (format == null) {
-      format = BrochureFormat.pdf;
+      format = "application/pdf";
     }
 
     if (animalType == null) {
@@ -221,23 +213,18 @@ public class ClinicImpl implements Clinic {
     if (data == null) {
       throw new NotFoundException("A brochure for animal " + animalType + " in format " + format + " was not found.");
     }
-    String contentType;
-    switch (format) {
-      case html:
-        contentType = "text/html";
-        break;
-      case txt:
-        contentType = "text/plain";
-        break;
-      case pdf:
-        contentType = "application/pdf";
-        break;
-      default:
-        throw new PetClinicException("Unknown brochure format: " + format);
+    if ("text/html".equalsIgnoreCase(format)) {
+      data = getClass().getResourceAsStream("clinic-brochure.html");
+    }
+    else if ("text/plain".equalsIgnoreCase(format)) {
+      data = getClass().getResourceAsStream("clinic-brochure.txt");
+    }
+    else {
+      throw new PetClinicException("Unknown brochure format: " + format);
     }
 
     AnimalBrochure brochure = new AnimalBrochure();
-    brochure.setContentType(contentType);
+    brochure.setContentType(format);
     brochure.setContent(data);
     return brochure;
   }
