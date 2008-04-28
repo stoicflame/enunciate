@@ -100,13 +100,25 @@ package ${packageFor(type)} {
     public [#if !baseobject]override [/#if]function writeExternal(output:IDataOutput):void {
       [#if !baseobject]super.writeExternal(output);[/#if]
   [#list type.attributes as attribute]
+    [#if attribute.accessorType.primitive && !("char" = attribute.accessorType.kind?string)]
+      output.write${attribute.accessorType.kind?string?lower_case?cap_first}(_${attribute.simpleName});
+    [#else]
       output.writeObject(_${attribute.simpleName});
+    [/#if]
   [/#list]
   [#if type.value?exists]
-      output.writeObject(_${value.simpleName});
+    [#if type.value.accessorType.primitive && !("char" = type.value.accessorType.kind?string)]
+      output.write${type.value.accessorType.kind?string?lower_case?cap_first}(_${type.value.simpleName});
+    [#else]
+      output.writeObject(_${type.value.simpleName});
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if element.accessorType.primitive && !("char" = element.accessorType.kind?string)]
+      output.write${element.accessorType.kind?string?lower_case?cap_first}(_${element.simpleName});
+      [#else]
       output.writeObject(_${element.simpleName});
+      [/#if]
     [/#list]
   [/#if]
     }
@@ -114,13 +126,25 @@ package ${packageFor(type)} {
     public [#if !baseobject]override [/#if]function readExternal(input:IDataInput):void {
       [#if !baseobject]super.readExternal(input);[/#if]
   [#list type.attributes as attribute]
+    [#if attribute.accessorType.primitive && !("char" = attribute.accessorType.kind?string)]
+      _${attribute.simpleName} = input.read${attribute.accessorType.kind?string?lower_case?cap_first}();
+    [#else]
       _${attribute.simpleName} = input.readObject() as ${classnameFor(attribute)};
+    [/#if]
   [/#list]
   [#if type.value?exists]
-      _${value.simpleName} = input.readObject() as ${classnameFor(value)};
+    [#if type.value.accessorType.primitive && !("char" = type.value.accessorType.kind?string)]
+      _${type.value.simpleName} = input.read${type.value.accessorType.kind?string?lower_case?cap_first}();
+    [#else]
+      _${type.value.simpleName} = input.readObject() as ${classnameFor(type.value)};
+    [/#if]
   [#else]
     [#list type.elements as element]
+      [#if element.accessorType.primitive && !("char" = element.accessorType.kind?string)]
+      _${element.simpleName} = input.read${element.accessorType.kind?string?lower_case?cap_first}();
+      [#else]
       _${element.simpleName} = input.readObject() as ${classnameFor(element)};
+      [/#if]
     [/#list]
   [/#if]
     }
