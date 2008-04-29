@@ -54,6 +54,7 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
 
   @Override
   protected void initApplicationContext() throws BeansException {
+
     super.initApplicationContext();
 
     if (this.config == null) {
@@ -73,9 +74,8 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
    */
   @Override
   protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request) throws Exception {
-    loadSerializationMethod(request, getDefaultSerializationMethod());
     XMLStreamReader reader;
-    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
+    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, getDefaultSerializationMethod());
     switch (method) {
       case xmlMapped:
         reader = new MappedXMLInputFactory(getNamespacesToPrefixes()).createXMLStreamReader(request.getInputStream());
@@ -116,7 +116,7 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
   }
 
   protected void marshalToStream(Marshaller marshaller, Object data, HttpServletRequest request, Writer outStream) throws XMLStreamException, IOException, JAXBException {
-    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, JsonSerializationMethod.xmlMapped);
+    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, getDefaultSerializationMethod());
     switch (method) {
       case hierarchical:
         XStream xstream = new XStream(new JsonHierarchicalStreamDriver());
@@ -148,25 +148,6 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
       default:
         throw new IllegalArgumentException("Unsupported JSON serialization method: " + method);
     }
-  }
-
-  /**
-   * Loads the JSON serialization method from the specified request.
-   *
-   * @param request       The request.
-   * @param defaultMethod The default method.
-   * @return The serialization method.
-   */
-  public static JsonSerializationMethod loadSerializationMethod(HttpServletRequest request, JsonSerializationMethod defaultMethod) {
-    Map parameterMap = request.getParameterMap();
-    for (JsonSerializationMethod method : JsonSerializationMethod.values()) {
-      if (parameterMap.containsKey(method.toString())) {
-        defaultMethod = method;
-        break;
-      }
-    }
-
-    return defaultMethod;
   }
 
   /**
