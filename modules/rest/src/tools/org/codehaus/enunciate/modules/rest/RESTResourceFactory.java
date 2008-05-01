@@ -97,7 +97,10 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-                if (contentTypeInfo.value().length > 0) {
+                if (!"##undefined".equals(contentTypeInfo.defaultContentType())) {
+                  defaultContentType = contentTypeInfo.defaultContentType();
+                }
+                else if (contentTypeInfo.value().length > 0) {
                   defaultContentType = contentTypeInfo.value()[0];
                 }
               }
@@ -106,7 +109,10 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-                if (contentTypeInfo.value().length > 0) {
+                if (!"##undefined".equals(contentTypeInfo.defaultContentType())) {
+                  defaultContentType = contentTypeInfo.defaultContentType();
+                }
+                else if (contentTypeInfo.value().length > 0) {
                   defaultContentType = contentTypeInfo.value()[0];
                 }
               }
@@ -115,7 +121,10 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-                if (contentTypeInfo.value().length > 0) {
+                if (!"##undefined".equals(contentTypeInfo.defaultContentType())) {
+                  defaultContentType = contentTypeInfo.defaultContentType();
+                }
+                else if (contentTypeInfo.value().length > 0) {
                   defaultContentType = contentTypeInfo.value()[0];
                 }
               }

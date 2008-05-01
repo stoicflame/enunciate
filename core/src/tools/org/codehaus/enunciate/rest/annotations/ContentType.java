@@ -54,4 +54,11 @@ public @interface ContentType {
    * @return The unsupported content types.
    */
   String[] unsupported() default {};
+
+  /**
+   * The default content type to use.
+   *
+   * @return The default content type to use.
+   */
+  String defaultContentType() default "##undefined";
 }
