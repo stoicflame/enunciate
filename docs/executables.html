@@ -300,14 +300,6 @@
   &lt;name&gt;ifyouwannabecool&lt;/name&gt;
   &lt;url&gt;http://www.ifyouwannabecool.com&lt;/url&gt;
 
-  &lt;repositories&gt;
-    &lt;repository&gt;
-      &lt;id&gt;java.net&lt;/id&gt;
-      &lt;url&gt;https://maven-repository.dev.java.net/nonav/repository&lt;/url&gt;
-      &lt;layout&gt;legacy&lt;/layout&gt;
-    &lt;/repository&gt;
-  &lt;/repositories&gt;
-
   &lt;build&gt;
     &lt;plugins&gt;
       &lt;plugin&gt;
@@ -315,7 +307,7 @@
         &lt;artifactId&gt;maven-enunciate-plugin&lt;/artifactId&gt;
 
         &lt;configuration&gt;
-          &lt;configFile&gt;path/to/enunciate.xml&lt;/configFile&gt;
+          &lt;configFile&gt;enunciate.xml&lt;/configFile&gt;
           &lt;exports&gt;
             &lt;client.jdk14.library.binaries&gt;client.jar&lt;/client.jdk14.library.binaries&gt;
           &lt;/exports&gt;

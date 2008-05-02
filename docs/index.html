@@ -33,38 +33,69 @@
     <div class="content">
 
       <div class="sidenews">
-        <p><b>Enunciate 1.6 Released!</b></p>
-        <p>Enunciate 1.6 provides support for publishing your endpoints via <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>. Enunciate
-          will also generate the strongly-typed client-side ActionScript classes that can be used by Flex developers to access the AMF endpoints. Release 1.6
-          also adds a <a href="executables.html#maven">new Maven 2 build goal</a> for tighter Maven 2 integration, and (of course) a good set of bug fixes and enhancements.</p>
+        <p><b>Enunciate 1.7 Released!</b></p>
+        <p>Enunciate 1.7 provides support for securing your Web service endpoints by leveraging the capabilities of <a
+          href="http://static.springframework.org/spring-security/site/">Spring Security</a>, including HTTP basic auth,
+          remember-me tokens, form-based login, etc.  Enunciate 1.7 also supports <a href="http://oauth.net">OAuth</a>
+          via <a href="http://spring-security-oauth.codehaus.org">OAuth for Spring Security</a>.</p>
+        <p>The 1.7 release also include support for custom REST content types (in addition to XML and JSON) and some
+          bug fixes and enhancements.</p>
         <p><a href="downloads.html">Click here</a> to download.</p>
       </div>
 
       <h1>The Basics</h1>
 
-      <p>Here's the deal: you develop your complete Web API in source code.  Make sure it's well-documented and that the
-        <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/annotations.html">metadata</a> is correct, but don't
-        worry about deployment descriptors, servlet configuration, packaging, or even interoperability.</p>
+      <p>Enunciate is an engine for creating, maintaining, and deploying your Web service API for the Java
+        platform, with a particular focus on support for <a href="http://sites.google.com/a/thinserverarchitecture.com/home/Home">Thin Server Architectures and
+        SOFEA</a>.</p>
+
+      <p>If that sounds complicated, it's not. All you have to do is define your service interfaces in Java source
+        code. Make sure it's well-documented and that the <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/annotations.html">metadata</a> is
+        correct, but don't worry about deployment descriptors, servlet configuration, packaging, or even interoperability.</p>
 
       <p>Then invoke Enunciate.</p>
 
-      <p>Enunciate will build your web application <a href="http://sanitystack.blogspot.com/2007/03/on-compiled-contract.html">and enforce its
+      <p>Enunciate will build your web application <a href="http://webcohesion.com/compiled_contract.html">and enforce its
         interoperability</a>.  And the app will include some impressive features, too:</p>
 
       <ul>
-        <li>Full user documentation</li>
-        <li>Consolidated, annotated WSDL(s) referencing a common set of schemas</li>
-        <li>The same endpoint(s) published via SOAP, REST, JSON, <a href="http://code.google.com/webtoolkit/">GWT-RPC</a>, and <a
-          href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a></li>
-        <li>Client-side libraries for download</li>
+        <li>Full HTML documentation of your services.</li>
+        <li>The endpoint(s) published via SOAP, REST, JSON, <a href="http://code.google.com/webtoolkit/">GWT-RPC</a>, and <a
+          href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>.
+        </li>
+        <li>Client-side libraries for rich client support.</li>
+        <li>Interface Definition Documents (e.g. WSDL, XML-Schema, etc.)</li>
         <li>Etc.</li>
       </ul>
 
-      <h1>The Details</h1>
+      <h1>An Example</h1>
 
-      <p><b>Enunciate</b> is a Web service deployment framework. It is <i>not</i> another Web service stack implementation.
-        Rather, Enunciate leverages existing Web service technologies to provide a mechanism to build, package, deploy,
-        and to clearly, accurately deliver your Web service API on the Java platform.</p>
+      <p>So let's say you're developing a rich <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> client using <a
+        href="http://www.adobe.com/products/flex/">Flex</a>, and you've got to make some asynchronous
+        Web service calls to your server. You've got your service interfaces defined in Java, and you need to
+        make those interfaces available to your client. Sure, you could use <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to
+        publish your services via <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>. Or you could use
+        <a href="http://www.restlet.org/">RESTlet</a> or <a href="https://jersey.dev.java.net/">Jersey</a> to make them available
+        via REST. Or perhaps you optimize for Flex and use <a href="http://labs.adobe.com/technologies/blazeds/">BlazeDS</a> to publish
+        your services as <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a> endpoints.</p>
+
+      <p>But for any of these choices, you've got to deal with the mess of deployment descriptors and keeping
+        your documentation up-to-date. And let's face it, the Flex code you write isn't going to be pretty, since
+        you'll be working with remote calls and loosly-typed objects.</p>
+
+      <p>This is a case where Enunciate is designed to make your life easier. Enunciate deals with
+        your deployment difficulties, documentation, and client-side code. By using Enunciate to publish your service
+        interfaces, not only will you have <i>all three</i> Web service interfaces (SOAP, REST, and AMF), but you'll
+        also have full up-to-date documentation and generated, strongly typed ActionScript code that you can use
+        to invoke your remote services from your Flex code. And it's all nicely packaged in a standard war that
+        you can drop in your favorite application server.</p>
+
+      <p>There are many more cases where Enunciate can be applied.  Whether you're developing a public API for application-to-application
+        development, creating an <a href="http://en.wikipedia.org/wiki/Ajax_%28programming%29">AJAX</a> application, or providing
+        secure data to affiliate applications via <a href="http://oauth.net">OAuth</a>, Enunciate will simplify both server-side and client-side
+        development--<i>without</i> having to learn a any new development frameworks or libraries.</p>
+
+      <h1>How</h1>
 
       <p>Enunciate's novel approach to Web service development centers around leveraging all components of an API that are
         definied and maintained in <i>original source code</i> (as opposed to only those that are defined by compiled bytecode).
@@ -89,25 +120,8 @@
           <p>
             Enunciate will generate <b>full user-level documentation</b> to describe your web API.  The content for the documentation is
             taken from the documentation of the original source code (i.e. <a href="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/index.html">Javadoc</a>),
-            consolidating the maintenance of your entire Web service contract to a single place. <a name="consolidated_contract">&nbsp;</a>
-          </p>
-        </li>
-        <li>
-          <h3>Consolidated, Annotated WSDL and Schemas</h3>
-          <p>
-            The common WS stack will provide a WSDL for an endpoint when queried.  Generally, the WSDL is generated at runtime, the
-            associated schema is inline, the semantic constructs (i.e. namespaces, message names, argument ids, etc.) are awkward
-            and inconsistent, and the scope is limited to that specific endpoint.  The XML contract is difficult to interpret (especially
-            when being consumed for client-side stubs) and doesn't give a consolidated picture of the whole API because it has no reference
-            to other endpoints and schema data that service the same namespace
-            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for a more
-            complete discussion</a>).
-          </p>
-          <p>
-            Enunciate generates the formalized XML contract at compile-time, providing for a <b>consolidated, efficient XML definition</b>.
-            Core schema data is consolidated into a single set of schema documents (grouped by namespace), and multiple endpoints
-            that service the same namespace are put into a single WSDL.  This allows for a wider, cleaner picture of the formal contract
-            and relieves the consumer of the consolidation work.
+            consolidating the maintenance of your entire Web service contract to a single place. The documentation is in the form of both HTML docs
+            and documentation for the generated client-side code.
           </p>
         </li>
         <li>
@@ -130,15 +144,33 @@
         <li>
           <h3>Client Code Generation</h3>
           <p>
-            Enunciate will generate <b>client code for multiple platforms</b> to interface remotely with your published API.  Not only is
+            Enunciate will generate <b>client-side code</b> to interface remotely with your published API.  Not only is
             the generated code <b>fully documented</b>, but it is simple, elegant and efficient.  Enunciate does not generate
             client code from the WSDL but instead reflects it from the original source code, allowing code documentation to be carried over
             and preserving valuable information like method signatures, class structure, and variable names.
           </p>
           <p>
             Currently, Enunciate generates code for the Java 1.4 platform and the Java 5 platform, but has plans to add modules that
-            generate code for the .NET and C/C++ platforms in the future.  Consult the <a href="http://docs.codehaus.org/display/ENUNCIATE/Roadmap">roadmap</a> for
-            information on other modules in the pipe and how you can help.
+            generate code for other platforms (.NET, C++, PHP, etc.) in the future.  Consult the
+            <a href="http://docs.codehaus.org/display/ENUNCIATE/Roadmap">roadmap</a> for information on other modules in the pipe and how you can help.
+          </p>
+        </li>
+        <li>
+          <h3>Clean, Consolidated Interface Definition Documents</h3>
+          <p>
+            The common WS stack will provide a WSDL for an endpoint when queried.  Generally, the WSDL is generated at runtime, the
+            associated schema is inline, the semantic constructs (i.e. namespaces, message names, argument ids, etc.) are awkward
+            and inconsistent, and the scope is limited to that specific endpoint.  The XML contract is difficult to interpret (especially
+            when being consumed for client-side stubs) and doesn't give a consolidated picture of the whole API because it has no reference
+            to other endpoints and schema data that service the same namespace
+            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for a more
+            complete discussion</a>).
+          </p>
+          <p>
+            Enunciate generates the formalized XML contract at compile-time, providing for a <b>consolidated, efficient XML definition</b>.
+            Core schema data is consolidated into a single set of schema documents (grouped by namespace), and multiple endpoints
+            that service the same namespace are put into a single WSDL.  This allows for a wider, cleaner picture of the formal contract
+            and relieves the consumer of the consolidation work.
           </p>
         </li>
         <li>

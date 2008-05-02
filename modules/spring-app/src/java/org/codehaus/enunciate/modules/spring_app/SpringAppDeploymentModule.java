@@ -959,8 +959,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
     if (includePatterns.isEmpty()) {
       //if no include patterns are specified, the implicit pattern is "**/*".
-      debug("No include patterns have been specified.  Using the implicit '**/*' pattern.");
-      includePatterns.add("**/*");
+      String starPattern = "**" + File.separatorChar + "*";
+      debug("No include patterns have been specified.  Using the implicit '%s' pattern.", starPattern);
+      includePatterns.add(starPattern);
     }
 
     List<String> warLibs = new ArrayList<String>();
@@ -985,6 +986,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
             includedLibs.add(libFile);
             break;
+          }
+          else if (enunciate.isDebug()) {
+            debug("Library '%s' did NOT match include pattern '%s'.", includePattern);
           }
         }
       }
