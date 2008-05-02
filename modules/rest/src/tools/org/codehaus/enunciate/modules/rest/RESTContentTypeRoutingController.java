@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 /**
  * REST controller that routes requests for specific content types.
@@ -64,7 +65,7 @@ public class RESTContentTypeRoutingController extends AbstractController {
       }
 
       if (contentTypeId != null) {
-        String redirect = matcher.replaceFirst("/" + contentTypeId + "/");
+        String redirect = matcher.replaceFirst("/" + URLEncoder.encode(contentTypeId, "UTF-8") + "/");
         RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
         if (dispatcher != null) {
           try {

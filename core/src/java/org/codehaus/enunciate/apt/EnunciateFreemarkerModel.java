@@ -498,14 +498,25 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   protected String getDefaultContentTypeId(String contentType) {
     String id = contentType;
-    if (contentType.endsWith("/")) {
-      throw new IllegalArgumentException("Illegal content type: " + contentType);
+    if (id.endsWith("/")) {
+      throw new IllegalArgumentException("Illegal content type: " + id);
     }
     
-    int lastSlash = contentType.lastIndexOf('/');
-    if (lastSlash > -1) {
-      id = contentType.substring(lastSlash + 1);
+    int semiColon = id.indexOf(';');
+    if (semiColon > -1) {
+      id = id.substring(0, semiColon);
     }
+
+    int lastSlash = id.lastIndexOf('/');
+    if (lastSlash > -1) {
+      id = id.substring(lastSlash + 1);
+    }
+
+    int plus = id.indexOf('+');
+    if (plus > -1) {
+      id = id.substring(0, plus);
+    }
+
     return id;
   }
 

@@ -116,7 +116,17 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
   }
 
   protected void marshalToStream(Marshaller marshaller, Object data, HttpServletRequest request, Writer outStream) throws XMLStreamException, IOException, JAXBException {
-    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, getDefaultSerializationMethod());
+    JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, null);
+    if (method == null) {
+      if (data instanceof JsonSerializable) {
+        outStream.write(((JsonSerializable)data).toJSON());
+        return;
+      }
+      else {
+        method = getDefaultSerializationMethod();
+      }
+    }
+    
     switch (method) {
       case hierarchical:
         XStream xstream = new XStream(new JsonHierarchicalStreamDriver());

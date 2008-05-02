@@ -347,6 +347,16 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertEquals(0, model.typeDefinitions.size());
   }
 
+
+  /**
+   * tests getting the default content type id.
+   */
+  public void testGetDefaultContentTypeId() throws Exception {
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    String id = model.getDefaultContentTypeId("application/atom+xml;charset=utf-8");
+    assertEquals("atom", id);
+  }
+
   /**
    * tests adding a REST endpoint
    */
