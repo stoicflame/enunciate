@@ -369,13 +369,11 @@ public class EnunciateTask extends MatchingTask {
 
     @Override
     public void debug(String message, Object... formatArgs) {
-      super.debug(message, formatArgs);
       getProject().log(String.format(message, formatArgs), Project.MSG_DEBUG);
     }
 
     @Override
     public void info(String message, Object... formatArgs) {
-      super.info(message, formatArgs);
       getProject().log(String.format(message, formatArgs), Project.MSG_INFO);
     }
 

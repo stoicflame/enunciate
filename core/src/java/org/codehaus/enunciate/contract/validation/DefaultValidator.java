@@ -417,20 +417,11 @@ public class DefaultValidator implements Validator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = validateTypeDefinition(complexType);
 
-    XmlType baseType = complexType.getBaseType();
-    while ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      ComplexTypeDefinition superType = (ComplexTypeDefinition) ((XmlClassType) baseType).getTypeDefinition();
-      baseType = superType.getBaseType();
-
-      if (superType.getValue() != null) {
-        result.addError(complexType.getPosition(), "A complex type cannot subclass another complex type (" + superType.getQualifiedName() +
-          ") that has an xml value.");
+    if (complexType.getValue() != null) {
+      if (!complexType.isBaseObject()) {
+        result.addError(complexType.getPosition(), "A type with an @XmlValue must not extend another object (other than java.lang.Object).");
       }
 
-      //we don't have to recurse into the superclasses because we will have already validated (or will validate them) later.
-    }
-
-    if (complexType.getValue() != null) {
       if (!complexType.getElements().isEmpty()) {
         result.addError(complexType.getPosition(), "A type definition cannot have both an xml value and elements.");
       }

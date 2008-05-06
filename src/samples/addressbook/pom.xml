@@ -12,7 +12,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.7-RC1</version>
+        <version>1.7</version>
         <executions>
           <execution>
             <goals>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
-      <version>1.7-RC1</version>
+      <version>1.7</version>
     </dependency>
 
     <dependency>

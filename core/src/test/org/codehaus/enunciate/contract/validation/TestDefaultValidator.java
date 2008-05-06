@@ -234,12 +234,10 @@ public class TestDefaultValidator extends InAPTTestCase {
 
     ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeComplexContentBean"));
     model.add(complexType);
-    complexType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.InvalidComplexTypeExtension"));
-    assertTrue("A complex type definition should not be valid if it exends another class with an xml value.", validator.validateComplexType(complexType).hasErrors());
-    assertEquals(1, typeDefCounter.getCount());
 
     complexType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ComplexTypeWithValueAndElements"));
     assertTrue("A complex type definition should not be valid if it has both elements and a value.", validator.validateComplexType(complexType).hasErrors());
+    assertEquals(1, typeDefCounter.getCount());
   }
 
   /**
