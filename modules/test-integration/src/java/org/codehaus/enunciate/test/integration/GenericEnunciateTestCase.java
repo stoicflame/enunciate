@@ -133,16 +133,16 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * <p>This JUnit test framework can be used to test (at least) three types of web service clients Enunciate supports:</p>
  *
  * <ul>
- *   <li>REST clients</li>
- *   <li>JSON clients</li>
- *   <li>Java SOAP clients</li>
+ *   <li>restSubContext clients</li>
+ *   <li>jsonSubContext clients</li>
+ *   <li>Java soapSubContext clients</li>
  * </ul>
  *
  * <p>To make this possible, the integration test environment leverages JUnit, HttpClient, JDOM, json.org, JXPath and EasyMock third party libraries.</p>
  *
- * <h2>REST Tests</h2>
+ * <h2>restSubContext Tests</h2>
  *
- * <p>REST endpoints can be obtained by calling <tt>getRestEndpoint(MY_WEB_SERVICE_NOUN)</tt>, appending any "proper nouns" or parameters your web service
+ * <p>restSubContext endpoints can be obtained by calling <tt>getRestEndpoint(MY_WEB_SERVICE_NOUN)</tt>, appending any "proper nouns" or parameters your web service
  * needs to return a valid result, in this case we are requesting an object with the ID of '1'.  Using the <tt>parseXml</tt> and <tt>xPathValue</tt> helper
  * methods, you can write tests that look like this:</p>
  *
@@ -182,9 +182,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * &gt;/ns0:owner&lt;
  * </code>
  *
- * <h2>JSON Tests</h2>
+ * <h2>jsonSubContext Tests</h2>
  *
- * <p>The JSON endpoint is obtained by calling <tt>getJsonEndpoint(MY_WEB_SERVICE_NOUN)</tt>:</p>
+ * <p>The jsonSubContext endpoint is obtained by calling <tt>getJsonEndpoint(MY_WEB_SERVICE_NOUN)</tt>:</p>
  *
  * <code class="console>
  * &#064;Test
@@ -205,11 +205,11 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * </code>
  *
  * <p>Using JXPath adds a bit of complexity but allows the tests to be less fragile.  First
- *  you parse the JSON using <tt>new JSONObject(json)</tt>, then it is added to the JXPath
+ *  you parse the jsonSubContext using <tt>new JSONObject(json)</tt>, then it is added to the JXPath
  *  using <tt>JXPathContext.newContext(jsonObj)</tt> to create a context. Lastly, the context is
  *  used to pull values out of the object using an XPath-like syntax.</p>
  *
- * <p>For this example, the JSON returned is:</p>
+ * <p>For this example, the jsonSubContext returned is:</p>
  *
  * <code class="console>
  * {"ns0.owner":
@@ -225,11 +225,11 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * }
  * </code>
  *
- * <h2>Java SOAP Tests</h2>
+ * <h2>Java soapSubContext Tests</h2>
  *
- * <p> SOAP tests are strait forward because they are just standard JUnit Java tests - you
- *  don't need to know or care about the XML SOAP envelopes.  These tests use the generated Java
- *  client code.  All you have to do is pass the SOAP endpoint to the client constructor:</p>
+ * <p> soapSubContext tests are strait forward because they are just standard JUnit Java tests - you
+ *  don't need to know or care about the XML soapSubContext envelopes.  These tests use the generated Java
+ *  client code.  All you have to do is pass the soapSubContext endpoint to the client constructor:</p>
  *
  * <code class="console>
  * &#064;Test
@@ -311,17 +311,17 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  */
 public class GenericEnunciateTestCase extends GenericWebServerTestCase {
 
-	public final static String SOAP = "/soap";
-
-	public final static String REST = "/rest";
-
-	public final static String JSON = "/json";
-
 	protected static SAXBuilder documentBuilder;
 
 	protected static XPath xPath;
 
 	protected static Map<String, String> defaultNamespaceContext = new HashMap<String, String>();
+	
+	private static String soapSubContext = "/soap";
+	
+	private static String restSubContext = "/rest";
+	
+	private static String jsonSubContext = "/json";
 
 	/**
 	 * Start web server and initialize test environment. Should be called once
@@ -370,30 +370,44 @@ public class GenericEnunciateTestCase extends GenericWebServerTestCase {
 	// Enunciate-specific methods
 	// //////////////////////////////////////////////////////////////////////////
 
-	/** return SOAP WS endpoint given the name of the web service. */
+	/** return soapSubContext WS endpoint given the name of the web service. */
 	public static String getSoapEndpoint(String webServiceName) {
-		return getBaseContextAsString() + SOAP + "/" + webServiceName;
+		return getBaseContextAsString() + "/" + getSoapSubContext() + "/" + webServiceName;
 	}
 
-	/** return REST WS endpoint given a REST noun. */
+	/** return restSubContext WS endpoint given a restSubContext noun. */
 	public static String getRestEndpoint(String noun) {
-		return getBaseContextAsString() + REST + "/" + noun + "/";
+		return getBaseContextAsString() + "/" + getRestSubContext() + "/" + noun + "/";
 	}
 
-	/** return JSON WS endpoint given a REST noun. */
+	/** return jsonSubContext WS endpoint given a restSubContext noun. */
 	public static String getJsonEndpoint(String noun) {
-		return getBaseContextAsString() + JSON + "/" + noun + "/";
+		return getBaseContextAsString() + "/" + getJsonSubContext() + "/" + noun + "/";
 	}
 
-	// static Object getServiceImplementation(Class clientServiceClass, Class
-	// clientServiceInterface) throws IllegalAccessException,
-	// InstantiationException {
-	// Object obj = getWebContextBean("enunciateServiceFactory");
-	// SpringAppServiceFactory factory = (SpringAppServiceFactory)obj;
-	// Object serviceInstance = factory.getInstance(clientServiceClass,
-	// clientServiceInterface);
-	// return serviceInstance;
-	// }
+	public static String getSoapSubContext() {
+		return soapSubContext;
+	}
+
+	public static void setSoapSubContext(String soap) {
+		soapSubContext = soap;
+	}
+
+	public static String getRestSubContext() {
+		return restSubContext;
+	}
+
+	public static void setRestSubContext(String rest) {
+		restSubContext = rest;
+	}
+
+	public static String getJsonSubContext() {
+		return jsonSubContext;
+	}
+
+	public static void setJsonSubContext(String json) {
+		jsonSubContext = json;
+	}
 
 	/**
 	 * Given registered bean name, get the bean instance from Spring's
@@ -405,11 +419,15 @@ public class GenericEnunciateTestCase extends GenericWebServerTestCase {
 	 * @throws org.springframework.beans.BeansException
 	 */
 	public static Object getWebContextBean(String beanName) {
+		return getWebApplicationContext().getBean(beanName);
+	}
+
+	public static WebApplicationContext getWebApplicationContext() {
 		WebAppContext jettyWebAppContext = (WebAppContext) getJettyServer().getHandler();
 		ServletContext servletContext = jettyWebAppContext.getServletHandler().getServletContext();
 		WebApplicationContext springWebAppContext = WebApplicationContextUtils
 				.getRequiredWebApplicationContext(servletContext);
-		return springWebAppContext.getBean(beanName);
+		return springWebAppContext;
 	}
 
 	// //////////////////////////////////////////////////////////////////////////
@@ -417,10 +435,10 @@ public class GenericEnunciateTestCase extends GenericWebServerTestCase {
 	// //////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Pull a single value out of a JSON result using JXPath.
+	 * Pull a single value out of a jsonSubContext result using JXPath.
 	 * 
 	 * @param jsonObj
-	 *            a JSONObject containing parsed JSON object
+	 *            a JSONObject containing parsed jsonSubContext object
 	 * @param jxpath
 	 *            JXPath query
 	 * @return returns single result or null
@@ -432,15 +450,15 @@ public class GenericEnunciateTestCase extends GenericWebServerTestCase {
 	}
 
 	/**
-	 * Pull a single value out of a JSON result using JXPath.
+	 * Pull a single value out of a jsonSubContext result using JXPath.
 	 * 
 	 * @param json
-	 *            unparsed JSON string
+	 *            unparsed jsonSubContext string
 	 * @param jxpath
 	 *            JXPath query
 	 * @return returns single result or null
 	 * @throws JSONException
-	 *             json text is not a valid JSON object
+	 *             json text is not a valid jsonSubContext object
 	 */
 	public static Object jXPathValue(String json, String jxpath) throws JSONException {
 		return jXPathValue(new JSONObject(json), jxpath);
