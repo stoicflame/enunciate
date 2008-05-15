@@ -122,36 +122,6 @@
   [/@forEachWsdl]
   [@forEachRESTEndpoint]
     [#list endpoint.RESTMethods as RESTMethod]
-      [#list RESTMethod.contentTypes as contentType]
-
-        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
-            <constructor-arg>
-              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${RESTMethod.noun.name}"/>
-                <constructor-arg value="${RESTMethod.noun.context}"/>
-              </bean>
-            </constructor-arg>
-            <property name="contentTypeSupport">
-              <ref bean="contentTypeSupport"/>
-            </property>
-          </bean>
-        </entry>
-
-        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}/**">
-          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
-            <constructor-arg>
-              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
-                <constructor-arg value="${RESTMethod.noun.name}"/>
-                <constructor-arg value="${RESTMethod.noun.context}"/>
-              </bean>
-            </constructor-arg>
-            <property name="contentTypeSupport">
-              <ref bean="contentTypeSupport"/>
-            </property>
-          </bean>
-        </entry>
-      [/#list]
 
         <entry key="${restSubcontext}${RESTMethod.noun.antPattern}">
           <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
@@ -182,6 +152,36 @@
             <property name="subcontext" value="${restSubcontext}"/>
           </bean>
         </entry>
+      [#list RESTMethod.contentTypes as contentType]
+
+        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
+            <constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
+              </bean>
+            </constructor-arg>
+            <property name="contentTypeSupport">
+              <ref bean="contentTypeSupport"/>
+            </property>
+          </bean>
+        </entry>
+
+        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}/**">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
+            <constructor-arg>
+              <bean factory-bean="restResourceFactory" factory-method="getRESTResource">
+                <constructor-arg value="${RESTMethod.noun.name}"/>
+                <constructor-arg value="${RESTMethod.noun.context}"/>
+              </bean>
+            </constructor-arg>
+            <property name="contentTypeSupport">
+              <ref bean="contentTypeSupport"/>
+            </property>
+          </bean>
+        </entry>
+      [/#list]
     [/#list]
   [/@forEachRESTEndpoint]
   [#if securityEnabled && securityConfig.enableFormBasedLogin]
