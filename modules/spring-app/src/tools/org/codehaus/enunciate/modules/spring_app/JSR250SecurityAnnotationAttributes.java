@@ -16,7 +16,7 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.SecurityConfig;
+import org.springframework.security.SecurityConfig;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.DenyAll;

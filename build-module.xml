@@ -44,6 +44,7 @@
     <copy file="${module.name}-pom.xml" todir="target" failonerror="true">
       <filterset>
         <filter token="VERSION" value="${version}"/>
+        <filtersfile file="${enunciate.basedir}/build.properties"/>
       </filterset>
     </copy>
     <artifact:pom id="module.pom" file="target/${module.name}-pom.xml"/>
@@ -76,6 +77,7 @@
     <copy file="${module.name}-tools-pom.xml" todir="target" failonerror="true">
       <filterset>
         <filter token="VERSION" value="${version}"/>
+        <filtersfile file="${enunciate.basedir}/build.properties"/>
       </filterset>
     </copy>
     <artifact:pom id="module.tools.pom" file="target/${module.name}-tools-pom.xml"/>

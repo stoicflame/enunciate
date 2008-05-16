@@ -47,14 +47,14 @@
   </bean>
 
   <!--The filter that ensures that the user is authenticated before allowing the confirm access page.-->
-	<bean id="oauthConfirmAccessFilter" class="org.acegisecurity.intercept.web.FilterSecurityInterceptor">
+	<bean id="oauthConfirmAccessFilter" class="org.springframework.security.intercept.web.FilterSecurityInterceptor">
 		<property name="authenticationManager" ref="authenticationManager"/>
 		<property name="accessDecisionManager">
-			<bean class="org.acegisecurity.vote.AffirmativeBased">
+			<bean class="org.springframework.security.vote.AffirmativeBased">
 				<property name="allowIfAllAbstainDecisions" value="false"/>
 				<property name="decisionVoters">
 					<list>
-						<bean class="org.acegisecurity.vote.AuthenticatedVoter"/>
+						<bean class="org.springframework.security.vote.AuthenticatedVoter"/>
 					</list>
 				</property>
 			</bean>

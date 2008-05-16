@@ -14,17 +14,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/acegisecurity/acegi-security/1.0.6/acegi-security-1.0.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../tools/acegi-security-1.0.6/src/1.0.x-branch/core/src/main/java" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/apache/tomcat/annotations-api/6.0.14/annotations-api-6.0.14.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -34,7 +23,18 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/codehaus/spring-security-oauth/spring-security-oauth/1.0/spring-security-oauth-1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/springframework/security/spring-security-core/2.0.1/spring-security-core-2.0.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/springframework/security/spring-security-core/2.0.1/spring-security-core-2.0.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/codehaus/spring-security-oauth/spring-security-oauth/2.0/spring-security-oauth-2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

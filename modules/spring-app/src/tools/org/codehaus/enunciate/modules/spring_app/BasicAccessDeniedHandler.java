@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.ui.AccessDeniedHandler;
-import org.acegisecurity.AccessDeniedException;
+import org.springframework.security.ui.AccessDeniedHandler;
+import org.springframework.security.AccessDeniedException;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;

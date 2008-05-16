@@ -49,6 +49,10 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
     return null;
   }
 
+  public String getContentType() {
+    return null;
+  }
+
   public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
     Exception exception = (Exception) model.get(MODEL_EXCEPTION);
     RESTRequestContentTypeHandler contentHandler = (RESTRequestContentTypeHandler) request.getAttribute(RESTRequestContentTypeHandler.class.getName());

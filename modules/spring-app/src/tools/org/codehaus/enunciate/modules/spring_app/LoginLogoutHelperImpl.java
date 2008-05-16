@@ -16,16 +16,16 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.providers.UsernamePasswordAuthenticationToken;
-import org.acegisecurity.providers.AbstractAuthenticationToken;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
-import org.acegisecurity.AuthenticationManager;
-import org.acegisecurity.ui.rememberme.RememberMeServices;
-import org.acegisecurity.ui.AuthenticationDetailsSource;
-import org.acegisecurity.ui.AuthenticationDetailsSourceImpl;
-import org.acegisecurity.ui.logout.LogoutHandler;
-import org.acegisecurity.context.SecurityContextHolder;
+import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.providers.AbstractAuthenticationToken;
+import org.springframework.security.Authentication;
+import org.springframework.security.AuthenticationException;
+import org.springframework.security.AuthenticationManager;
+import org.springframework.security.ui.rememberme.RememberMeServices;
+import org.springframework.security.ui.AuthenticationDetailsSource;
+import org.springframework.security.ui.AuthenticationDetailsSourceImpl;
+import org.springframework.security.ui.logout.LogoutHandler;
+import org.springframework.security.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.Authentication;
+import org.springframework.security.AuthenticationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;

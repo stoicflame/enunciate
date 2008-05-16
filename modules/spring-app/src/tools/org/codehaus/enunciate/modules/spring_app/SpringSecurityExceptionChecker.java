@@ -17,11 +17,11 @@
 package org.codehaus.enunciate.modules.spring_app;
 
 import org.codehaus.enunciate.service.SecurityExceptionChecker;
-import org.acegisecurity.AuthenticationException;
-import org.acegisecurity.AccessDeniedException;
+import org.springframework.security.AuthenticationException;
+import org.springframework.security.AccessDeniedException;
 
 /**
- * Security checker for Acegi.
+ * Security checker for Spring Security.
  *
  * @author Ryan Heaton
  */

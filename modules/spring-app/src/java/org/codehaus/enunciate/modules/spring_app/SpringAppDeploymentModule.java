@@ -403,14 +403,14 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "acegi-security-context.fmt"
+   * @return The URL to "spring-security-context.xml.fmt"
    */
   protected URL getSecurityTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("spring-security-context.xml.fmt");
   }
 
   /**
-   * @return The URL to "acegi-security-context.fmt"
+   * @return The URL to "spring-security-oauth-context.xml.fmt"
    */
   protected URL getOAuthTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("spring-security-oauth-context.xml.fmt");

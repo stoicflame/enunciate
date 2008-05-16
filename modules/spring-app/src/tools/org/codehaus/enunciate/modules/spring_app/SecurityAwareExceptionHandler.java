@@ -18,8 +18,8 @@ package org.codehaus.enunciate.modules.spring_app;
 
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.acegisecurity.AccessDeniedException;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.AccessDeniedException;
+import org.springframework.security.AuthenticationException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

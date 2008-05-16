@@ -78,7 +78,7 @@ public class TestRESTResourceFactory extends TestCase {
     //now we want to make sure that we can advise the impls...
     final ProxyFactoryBean advisedEndpoint = new ProxyFactoryBean();
     advisedEndpoint.setTarget(new EndpointOneImpl());
-    advisedEndpoint.setProxyInterfaces(new String[]{"org.codehaus.enunciate.modules.rest.EndpointOne"});
+    advisedEndpoint.setProxyInterfaces(new Class[]{org.codehaus.enunciate.modules.rest.EndpointOne.class});
     factory = new RESTResourceFactory();
     GenericWebApplicationContext ctx = new GenericWebApplicationContext() {
       @Override

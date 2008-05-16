@@ -22,9 +22,9 @@
 		</div>
 
 		<div class="widecontent">
-      <c:if test="${!empty sessionScope.ACEGI_SECURITY_LAST_EXCEPTION}">
-        <p class="errortext"><c:out value="${sessionScope.ACEGI_SECURITY_LAST_EXCEPTION.message}" default="Your login attempt was unsuccessful."/></p>
-        <c:remove scope="session" var="ACEGI_SECURITY_LAST_EXCEPTION"/>
+      <c:if test="${!empty sessionScope.SPRING_SECURITY_LAST_EXCEPTION}">
+        <p class="errortext"><c:out value="${sessionScope.SPRING_SECURITY_LAST_EXCEPTION.message}" default="Your login attempt was unsuccessful."/></p>
+        <c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION"/>
       </c:if>
 
       <form action="<c:url value="${formLoginURL}"/>" method="POST">

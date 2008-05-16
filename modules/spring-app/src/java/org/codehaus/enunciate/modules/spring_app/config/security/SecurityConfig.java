@@ -22,29 +22,29 @@ import java.util.ArrayList;
 /**
  * <h1><a name="security">Spring Application Security</a></h1>
  *
- * <p>Enunciate provides a mechanism for securing your Web service API by leveraging the capabilities of <a href="http://www.acegisecurity.org/">Spring Security</a>
+ * <p>Enunciate provides a mechanism for securing your Web service API by leveraging the capabilities of <a href="http://static.springframework.org/spring-security/site/">Spring Security</a>
  * (soon to be known as Spring Security).</p>
  *
  * <p>Spring Security provides a variety of different ways to secure a Spring application.  These include:</p>
  *
  * <ul>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#basic">HTTP basic authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#digest">HTTP digest authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#form">Form-based login</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#remember-me">Remember-me token</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#x509">X509 Authentication</a></li>
- *  <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#ldap">LDAP Authentication</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#basic">HTTP basic authentication</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#digest">HTTP digest authentication</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#form">Form-based login</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#remember-me">Remember-me token</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#x509">X509 Authentication</a></li>
+ *  <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#ldap">LDAP Authentication</a></li>
  *  <li>Etc.</li>
  * </ul>
  *
  * <p>In addition to the authentication mechanisms listed above, Spring Security provides other security features for a Spring-based web application.  These include:</p>
  *
  * <ul>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#anonymous">Anonymous identity loading</a></li>
+ *   <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#anonymous">Anonymous identity loading</a></li>
  *   <li>Identity persistence across the HTTP Session</li>
  *   <li>Integration with the standard J2EE security context</li>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#secure-objects">Secure objects</a></li>
- *   <li><a href="http://www.acegisecurity.org/guide/springsecurity.html#runas">Run-as authentication replacement</a></li>
+ *   <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#secure-objects">Secure objects</a></li>
+ *   <li><a href="http://static.springframework.org/spring-security/site/reference/html/springsecurity.html#runas">Run-as authentication replacement</a></li>
  * </ul>
  *
  * <p>Security, by nature, is very complex.  Enunciate attempts to provide an intuitive configuration mechanism for the most common security cases, but also
@@ -68,8 +68,8 @@ import java.util.ArrayList;
  * <h1><a name="security_user_details">User Details Service</a></h1>
  *
  * <p>In order for a security policy to be implemented, Spring Security must know how to load a user and have access to that user's roles and credentials. You must define
- * in instance of org.acegisecurity.userdetails.UserDetailsService in your own spring bean definition file and <a href="#config_springImport">import that
- * file into the spring application context</a>.  Alternatively, you may define a class that implements org.acegisecurity.userdetails.UserDetailsService and
+ * in instance of org.springframework.security.userdetails.UserDetailsService in your own spring bean definition file and <a href="#config_springImport">import that
+ * file into the spring application context</a>.  Alternatively, you may define a class that implements org.springframework.security.userdetails.UserDetailsService and
  * specify that class with the "userDetailsService" child element of the "security" element in the Enunciate configuration file (see below).</p>
  *
  * <h1><a name="security_config">The "security" configuration element</a></h1>
@@ -177,7 +177,7 @@ import java.util.ArrayList;
  *
  * <h3>userDetailsService</h3>
  *
- * <p>The "userDetailsService" child element is used to specify the implementation of <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/userdetails/UserDetailsService.html">org.acegisecurity.userdetails.UserDetailsService</a> to use for loading a
+ * <p>The "userDetailsService" child element is used to specify the implementation of <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/userdetails/UserDetailsService.html">org.springframework.security.userdetails.UserDetailsService</a> to use for loading a
  * user. This element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * user details service.  The "className" attribute is used to specify the fully-qualified class name of the implementation of UserDetailsService to use.</p>
  *
@@ -187,7 +187,7 @@ import java.util.ArrayList;
  * that will specify that the request is to be redirected to the given URL. The "onAuthenticationFailed" element also supports a child element, "useEntryPoint",
  * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
- * authentcation entry point must implement <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/AuthenticationEntryPoint.html">org.acegisecurity.ui.AuthenticationEntryPoint</a>.</p>
+ * authentcation entry point must implement <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/AuthenticationEntryPoint.html">org.springframework.security.ui.AuthenticationEntryPoint</a>.</p>
  *
  * <p>The default action Enunciate takes if authentication fails depends on the security configuration.  If HTTP Digest Auth is enabled, the action is to
  * commence digest authentication.  Otherwise, if HTTP Basic Auth is enabled, the default action is to commence basic authentication.  Otherwise, the default
@@ -199,7 +199,7 @@ import java.util.ArrayList;
  * that will specify that the request is to be redirected to the given URL. The "onAccessDenied" element also supports a child element, "useEntryPoint",
  * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
- * authentcation entry point must implement <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/AccessDeniedHandler.html">org.acegisecurity.ui.AccessDeniedHandler</a>.</p>
+ * authentcation entry point must implement <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/AccessDeniedHandler.html">org.springframework.security.ui.AccessDeniedHandler</a>.</p>
  *
  * <p>The default action Enunciate takes if access is denied is simply to issue an HTTP 403 (Forbidden) error.</p>
  *
@@ -210,14 +210,14 @@ import java.util.ArrayList;
  * The default value is "ANONYMOUS".  The "key" attribute specified the anonymous authentication key. If no key is supplied, the key supplied in the general
  * security configuration will be used.</p>
  *
- * <p>For more information about anonymous identity loading, see For more information, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/anonymous/AnonymousProcessingFilter.html">org.acegisecurity.providers.anonymous.AnonymousProcessingFilter</a>.</p>
+ * <p>For more information about anonymous identity loading, see For more information, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/anonymous/AnonymousProcessingFilter.html">org.springframework.security.providers.anonymous.AnonymousProcessingFilter</a>.</p>
  *
  * <h3>basicAuth</h3>
  *
  * <p>The "basicAuthConfig" child element is used to configure HTTP Basic Auth.  The "realmName" attribute specifies the authentication realm name. The default
  * value is the realm name of the general security configuration.</p>
  *
- * <p>For more information about basic authentication configuration, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/basicauth/BasicProcessingFilter.html">org.acegisecurity.ui.basicauth.BasicProcessingFilter</a>.</p>
+ * <p>For more information about basic authentication configuration, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/basicauth/BasicProcessingFilter.html">org.springframework.security.ui.basicauth.BasicProcessingFilter</a>.</p>
  *
  * <h3>digestAuth</h3>
  *
@@ -226,7 +226,7 @@ import java.util.ArrayList;
  * key configured in the general security configuration.  The "nonceValiditySeconds" attribute specifies how long the digest nonce is valid.  The default is
  * 300 seconds.</p>
  *
- * <p>For more information about digest authentication configuration, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/digestauth/DigestProcessingFilter.html">org.acegisecurity.ui.digestauth.DigestProcessingFilter</a>.</p>
+ * <p>For more information about digest authentication configuration, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/digestauth/DigestProcessingFilter.html">org.springframework.security.ui.digestauth.DigestProcessingFilter</a>.</p>
  *
  * <h3>oauth</h3>
  *
@@ -278,7 +278,7 @@ import java.util.ArrayList;
  * login will be redirected. The default value is "/".  The "redirectOnFailureUrl" specifies the URL to which an unsuccessful login will be redirected.
  * The default value is "/".</p>
  *
- * <p>For more information about the form-based login endpoint, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/webapp/AuthenticationProcessingFilter.html">org.acegisecurity.ui.webapp.AuthenticationProcessingFilter</a>.</p>
+ * <p>For more information about the form-based login endpoint, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/webapp/AuthenticationProcessingFilter.html">org.springframework.security.ui.webapp.AuthenticationProcessingFilter</a>.</p>
  *
  * <h3>formBasedLogout</h3>
  *
@@ -286,16 +286,16 @@ import java.util.ArrayList;
  * logout will be mounted.  The default is "/form/logout".  The "redirectOnSuccessUrl" specifies the URL to which a successful logout will be redirected. The
  * default value is "/".</p>
  *
- * <p>For more information about the form-based logout endpoint, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/logout/LogoutFilter.html">org.acegisecurity.ui.logout.LogoutFilter</a>.</p>
+ * <p>For more information about the form-based logout endpoint, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/logout/LogoutFilter.html">org.springframework.security.ui.logout.LogoutFilter</a>.</p>
  *
  * <h3>rememberMe</h3>
  *
  * <p>The "rememberMeConfig" child element is used to configure the remember-me identity processing.  The "key" attribute specifies the security key that will
  * be used to encode the remember-me token.  The default value is the key supplied in the general security configuration.  The "cookieName" is the name of
- * the cookie that will hold the remember-me token. The default value is "ACEGI_SECURITY_HASHED_REMEMBER_ME_COOKIE".  The "tokenValiditySeconds" attribute specifies how long the remember-me token will
+ * the cookie that will hold the remember-me token. The default value is "SPRING_SECURITY_HASHED_REMEMBER_ME_COOKIE".  The "tokenValiditySeconds" attribute specifies how long the remember-me token will
  * be valid.  The default value is 14 days.</p>
  *
- * <p>For more information about remember-me identity processing, see <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/rememberme/TokenBasedRememberMeServices.html">org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
+ * <p>For more information about remember-me identity processing, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/rememberme/TokenBasedRememberMeServices.html">org.springframework.security.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
  *
  * <h3>filter</h3>
  *
@@ -303,22 +303,22 @@ import java.util.ArrayList;
  * element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * security filter.  The "className" attribute is used to specify the fully-qualified class name of the security filter to use. A
  * security filter implements the javax.servlet.Filter interface. You can provide any number of additional
- * security filters to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/ui/x509/X509ProcessingFilter.html">X509ProcessingFilter</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/siteminder/SiteminderAuthenticationProvider.html">SiteminderAuthenticationProcessingFilter</a>, etc.).</p>
+ * security filters to Enunciate (e.g. <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/x509/X509ProcessingFilter.html">X509ProcessingFilter</a>, <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/siteminder/SiteminderAuthenticationProvider.html">SiteminderAuthenticationProcessingFilter</a>, etc.).</p>
  *
  * <h3>primaryProvider</h3>
  *
  * <p>The "primaryProvider" child element specifies the primary Spring Security authentication provider that is to be used to provide authentication services.
  * The "primaryProvider" element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * primary authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. The
- * primary authentication provider implements the <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/AuthenticationProvider.html">org.acegisecurity.providers.AuthenticationProvider</a> interface.</p>
+ * primary authentication provider implements the <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/AuthenticationProvider.html">org.springframework.security.providers.AuthenticationProvider</a> interface.</p>
  *
  * <h3>provider</h3>
  *
  * <p>The "provider" child element specifies another Spring Security authentication provider that is to be used to provide authentication services. The "provider"
  * element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. An
- * authentication provider implements the <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/AuthenticationProvider.html">org.acegisecurity.providers.AuthenticationProvider</a> interface. You can provide any number of additional
- * authentication providers to Enunciate (e.g. <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/x509/X509AuthenticationProvider.html">X509AuthenticationProvider</a>, <a href="http://www.acegisecurity.org/acegi-security/apidocs/org/acegisecurity/providers/ldap/LdapAuthenticationProvider.html">LdapAuthenticationProvider</a>, etc.).</p>
+ * authentication provider implements the <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/AuthenticationProvider.html">org.springframework.security.providers.AuthenticationProvider</a> interface. You can provide any number of additional
+ * authentication providers to Enunciate (e.g. <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/x509/X509AuthenticationProvider.html">X509AuthenticationProvider</a>, <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/ldap/LdapAuthenticationProvider.html">LdapAuthenticationProvider</a>, etc.).</p>
  *
  * <h1><a name="security_login_logout">Login and Logout API Methods</a></h1>
  *

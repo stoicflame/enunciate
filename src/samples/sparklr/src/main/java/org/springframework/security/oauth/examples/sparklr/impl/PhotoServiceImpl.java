@@ -1,9 +1,9 @@
 package org.springframework.security.oauth.examples.sparklr.impl;
 
-import org.acegisecurity.Authentication;
-import org.acegisecurity.BadCredentialsException;
-import org.acegisecurity.context.SecurityContextHolder;
-import org.acegisecurity.userdetails.UserDetails;
+import org.springframework.security.Authentication;
+import org.springframework.security.BadCredentialsException;
+import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.oauth.examples.sparklr.PhotoInfo;
 import org.springframework.security.oauth.examples.sparklr.PhotoService;
 import org.springframework.security.oauth.examples.sparklr.Photos;

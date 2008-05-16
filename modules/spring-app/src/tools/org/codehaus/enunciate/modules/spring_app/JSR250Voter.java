@@ -16,13 +16,11 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.vote.AccessDecisionVoter;
-import org.acegisecurity.ConfigAttribute;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.ConfigAttributeDefinition;
-import org.acegisecurity.GrantedAuthority;
-
-import java.util.Iterator;
+import org.springframework.security.Authentication;
+import org.springframework.security.ConfigAttribute;
+import org.springframework.security.ConfigAttributeDefinition;
+import org.springframework.security.GrantedAuthority;
+import org.springframework.security.vote.AccessDecisionVoter;
 
 /**
  * Voter on JSR-250 configuration attributes.
@@ -61,10 +59,9 @@ public class JSR250Voter implements AccessDecisionVoter {
    */
   public int vote(Authentication authentication, Object object, ConfigAttributeDefinition definition) {
     int result = ACCESS_ABSTAIN;
-    Iterator iter = definition.getConfigAttributes();
 
-    while (iter.hasNext()) {
-      ConfigAttribute attribute = (ConfigAttribute) iter.next();
+    for (Object item : definition.getConfigAttributes()) {
+      ConfigAttribute attribute = (ConfigAttribute) item;
 
       if (JSR250SecurityConfig.PERMIT_ALL_ATTRIBUTE.equals(attribute)) {
         return ACCESS_GRANTED;

@@ -1,6 +1,6 @@
-<%@ page import="org.acegisecurity.ui.AbstractProcessingFilter" %>
-<%@ page import="org.acegisecurity.AuthenticationException" %>
-<%@ taglib prefix="authz" uri="http://acegisecurity.org/authz" %>
+<%@ page import="org.springframework.security.ui.AbstractProcessingFilter" %>
+<%@ page import="org.springframework.security.AuthenticationException" %>
+<%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <authz:authorize ifAllGranted="ROLE_USER">
   <c:redirect url="/index.jsp"/>
@@ -20,12 +20,12 @@
     <div id="headertitle">Sparklr</div>
   </div>
   <div id="mainbody">
-    <c:if test="${!empty sessionScope.ACEGI_SECURITY_LAST_EXCEPTION}">
+    <c:if test="${!empty sessionScope.SPRING_SECURITY_LAST_EXCEPTION}">
       <div class="errorHeader">Woops!</div>
 
-      <p class="bodytext"><font color="red">Your login attempt was not successful. (<%= ((AuthenticationException) session.getAttribute(AbstractProcessingFilter.ACEGI_SECURITY_LAST_EXCEPTION_KEY)).getMessage() %>)</font></p>
+      <p class="bodytext"><font color="red">Your login attempt was not successful. (<%= ((AuthenticationException) session.getAttribute(AbstractProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY)).getMessage() %>)</font></p>
     </c:if>
-    <c:remove scope="session" var="ACEGI_SECURITY_LAST_EXCEPTION"/>
+    <c:remove scope="session" var="SPRING_SECURITY_LAST_EXCEPTION"/>
 
     <authz:authorize ifNotGranted="ROLE_USER">
       <div class="header1">Login</div>

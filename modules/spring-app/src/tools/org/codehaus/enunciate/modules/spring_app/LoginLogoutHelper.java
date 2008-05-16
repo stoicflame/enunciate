@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.Authentication;
+import org.springframework.security.AuthenticationException;
 
 /**
  * Helper utility for logging in, logging out.
@@ -32,7 +32,7 @@ public interface LoginLogoutHelper {
    *
    * @param username The username.
    * @param password The password.
-   * @throws org.acegisecurity.AuthenticationException If login fails.
+   * @throws org.springframework.security.AuthenticationException If login fails.
    */
   void loginWithUsernameAndPassword(String username, String password) throws AuthenticationException;
 
@@ -41,7 +41,7 @@ public interface LoginLogoutHelper {
    * security mechanisms to authenticate and establish the identity.
    *
    * @param authToken The auth token.
-   * @throws org.acegisecurity.AuthenticationException If login fails.
+   * @throws org.springframework.security.AuthenticationException If login fails.
    */
   void login(Authentication authToken) throws AuthenticationException;
 

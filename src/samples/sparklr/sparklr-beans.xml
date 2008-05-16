@@ -6,7 +6,7 @@
   <!--
     The sparklr users.
   -->
-  <bean id="userDetailsService" class="org.acegisecurity.userdetails.memory.InMemoryDaoImpl">
+  <bean id="userDetailsService" class="org.springframework.security.userdetails.memory.InMemoryDaoImpl">
      <property name="userMap">
        <value>
          marissa=koala,ROLE_USER

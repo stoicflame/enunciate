@@ -587,14 +587,13 @@
     </library>
     <library name="spring-j2ee">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/1.2.9/spring-1.2.9.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/javax/servlet/servlet-api/2.3/servlet-api-2.3.jar!/" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring/2.5.1/spring-2.5.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/springframework/spring-webmvc/2.5.1/spring-webmvc-2.5.1.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="file://$PROJECT_DIR$/../../tools/spring-framework-1.2.8/src" />
-      </SOURCES>
+      <SOURCES />
     </library>
   </component>
 </project>

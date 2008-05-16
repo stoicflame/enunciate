@@ -12,7 +12,7 @@
   </logger>
 
   <!--
-  <logger name="org.acegisecurity">
+  <logger name="org.springframework.security">
     <level value="debug"/>
   </logger>
   -->

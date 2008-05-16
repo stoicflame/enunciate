@@ -16,9 +16,9 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.providers.AuthenticationProvider;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.providers.AuthenticationProvider;
+import org.springframework.security.Authentication;
+import org.springframework.security.AuthenticationException;
 
 /**
  * No-op provider.

@@ -48,7 +48,7 @@
     [/#if]
   [/#assign]
 
-  <bean id="filterChainProxy" class="org.acegisecurity.util.FilterChainProxy">
+  <bean id="filterChainProxy" class="org.springframework.security.util.FilterChainProxy">
     <property name="filterInvocationDefinitionSource">
       <value><![CDATA[
 				PATTERN_TYPE_APACHE_ANT
@@ -66,12 +66,12 @@
 
   [/#if]
   [#if securityConfig.persistIdentityAcrossHttpSession]
-  <bean id="loadHttpSessionIdentity" class="org.acegisecurity.context.HttpSessionContextIntegrationFilter"/>
+  <bean id="loadHttpSessionIdentity" class="org.springframework.security.context.HttpSessionContextIntegrationFilter"/>
 
   [/#if]
   [#if securityConfig.enableFormBasedLogin]
   [#-- logout filter, but only for HTTP form-based requests --]
-  <bean id="handleFormBasedAuth" class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilter">
+  <bean id="handleFormBasedAuth" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilter">
     <property name="authenticationFailureUrl" value="${securityConfig.formBasedLoginConfig.redirectOnFailureUrl}"/>
     <property name="defaultTargetUrl" value="${securityConfig.formBasedLoginConfig.redirectOnSuccessUrl}"/>
     <property name="filterProcessesUrl" value="${securityConfig.formBasedLoginConfig.url}"/>
@@ -85,7 +85,7 @@
   [/#if]
   [#if securityConfig.enableFormBasedLogout]
   [#-- logout filter, but only for HTTP form-based requests --]
-  <bean id="handleLogoutRequest" class="org.acegisecurity.ui.logout.LogoutFilter">
+  <bean id="handleLogoutRequest" class="org.springframework.security.ui.logout.LogoutFilter">
     <constructor-arg value="${securityConfig.formBasedLogoutConfig.redirectOnSuccessUrl}"/>
     <!-- URL redirected to after logout -->
     <constructor-arg>
@@ -93,7 +93,7 @@
   [#if securityConfig.enableRememberMeToken]
         <ref bean="rememberMeServices"/>
   [/#if]
-        <bean class="org.acegisecurity.ui.logout.SecurityContextLogoutHandler"/>
+        <bean class="org.springframework.security.ui.logout.SecurityContextLogoutHandler"/>
       </list>
     </constructor-arg>
     <property name="filterProcessesUrl" value="${securityConfig.formBasedLogoutConfig.url}"/>
@@ -102,12 +102,12 @@
   [/#if]
   [#if securityConfig.enableDigestHTTPAuth]
   [#--Handles HTTP digest auth.--]
-  <bean id="handleDigestHTTPAuth" class="org.acegisecurity.ui.digestauth.DigestProcessingFilter">
+  <bean id="handleDigestHTTPAuth" class="org.springframework.security.ui.digestauth.DigestProcessingFilter">
     <property name="userDetailsService" ref="localUserDetailsService"/>
     <property name="authenticationEntryPoint" ref="digestHTTPAuthEntryPoint"/>
   </bean>
 
-  <bean id="digestHTTPAuthEntryPoint" class="org.acegisecurity.ui.digestauth.DigestProcessingFilterEntryPoint">
+  <bean id="digestHTTPAuthEntryPoint" class="org.springframework.security.ui.digestauth.DigestProcessingFilterEntryPoint">
     <property name="realmName" value="${securityConfig.digestAuthConfig.realmName?default(securityConfig.realmName)}"/>
     <property name="key" value="${securityConfig.digestAuthConfig.key?default(securityConfig.key)}"/>
     [#if securityConfig.digestAuthConfig.nonceValiditySeconds?exists]
@@ -118,12 +118,12 @@
   [/#if]
   [#if securityConfig.enableBasicHTTPAuth]
   [#--Handles HTTP basic auth.--]
-  <bean id="handleBasicHTTPAuth" class="org.acegisecurity.ui.basicauth.BasicProcessingFilter">
+  <bean id="handleBasicHTTPAuth" class="org.springframework.security.ui.basicauth.BasicProcessingFilter">
     <property name="authenticationManager" ref="authenticationManager"/>
     <property name="authenticationEntryPoint" ref="basicHTTPAuthEntryPoint"/>
   </bean>
 
-  <bean id="basicHTTPAuthEntryPoint" class="org.acegisecurity.ui.basicauth.BasicProcessingFilterEntryPoint">
+  <bean id="basicHTTPAuthEntryPoint" class="org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint">
     <property name="realmName" value="${securityConfig.basicAuthConfig.realmName?default(securityConfig.realmName)}"/>
   </bean>
 
@@ -132,12 +132,12 @@
   [#--to add j2ee-specific security context info to an HttpServletRequest.
   Also, if a user is redirected to a login page from a previous request,
   this will reset that saved request information after login.--]
-  <bean id="initJ2EESecurityContext" class="org.acegisecurity.wrapper.SecurityContextHolderAwareRequestFilter"/>
+  <bean id="initJ2EESecurityContext" class="org.springframework.security.wrapper.SecurityContextHolderAwareRequestFilter"/>
 
   [/#if]
   [#if securityConfig.enableRememberMeToken]
   [#--loads the remember-me identity from a long-term remember-me cookie value.--]
-  <bean id="loadRememberMeIdentity" class="org.acegisecurity.ui.rememberme.RememberMeProcessingFilter">
+  <bean id="loadRememberMeIdentity" class="org.springframework.security.ui.rememberme.RememberMeProcessingFilter">
     <property name="authenticationManager" ref="authenticationManager"/>
     <property name="rememberMeServices" ref="rememberMeServices"/>
   </bean>
@@ -145,7 +145,7 @@
   [/#if]
   [#if securityConfig.loadAnonymousIdentity]
   [#--anonymous user loading--]
-  <bean id="loadAnonymousIdentity" class="org.acegisecurity.providers.anonymous.AnonymousProcessingFilter">
+  <bean id="loadAnonymousIdentity" class="org.springframework.security.providers.anonymous.AnonymousProcessingFilter">
     <property name="key" value="${securityConfig.anonymousConfig.key?default(securityConfig.key)}"/>
     <property name="userAttribute" value="${securityConfig.anonymousConfig.userId?default("anonymous")},${securityConfig.anonymousConfig.roles?default("ROLE_ANONYMOUS")}"/>
   </bean>
@@ -153,7 +153,7 @@
   [/#if]
   [#if securityConfig.onAuthenticationFailed?exists && securityConfig.onAuthenticationFailed.redirectTo?exists]
   [#--entry point for a login page.--]
-  <bean id="loginEntryPoint" class="org.acegisecurity.ui.webapp.AuthenticationProcessingFilterEntryPoint">
+  <bean id="loginEntryPoint" class="org.springframework.security.ui.webapp.AuthenticationProcessingFilterEntryPoint">
     <property name="loginFormUrl" value="${securityConfig.onAuthenticationFailed.redirectTo}"/>
     <property name="forceHttps" value="false"/>
     <property name="serverSideRedirect" value="false"/>
@@ -161,7 +161,7 @@
 
   [/#if]
   [#--handles a failed login and access denied responses.--]
-  <bean id="translateExceptions" class="org.acegisecurity.ui.ExceptionTranslationFilter">
+  <bean id="translateExceptions" class="org.springframework.security.ui.ExceptionTranslationFilter">
   [#if securityConfig.onAuthenticationFailed?exists && securityConfig.onAuthenticationFailed.redirectTo?exists]
     <property name="authenticationEntryPoint" ref="loginEntryPoint"/>
   [#elseif securityConfig.onAuthenticationFailed?exists && securityConfig.onAuthenticationFailed.useEntryPoint?exists]
@@ -187,7 +187,7 @@
   [/#if]
   [#if securityConfig.onAccessDenied?exists && securityConfig.onAccessDenied.redirectTo?exists]
     <property name="accessDeniedHandler">
-      <bean class="org.acegisecurity.ui.AccessDeniedHandlerImpl">
+      <bean class="org.springframework.security.ui.AccessDeniedHandlerImpl">
         <property name="errorPage" value="${securityConfig.onAccessDenied.redirectTo}"/>
       </bean>
     </property>
@@ -215,15 +215,15 @@
   todo: uncomment to enable resource-level filtering
   For now, Enunciate doesn't support resource-level filtering; we're doing method-level filtering.
 
-  <bean id="filterInvocationInterceptor" class="org.acegisecurity.intercept.web.FilterSecurityInterceptor">
+  <bean id="filterInvocationInterceptor" class="org.springframework.security.intercept.web.FilterSecurityInterceptor">
     <property name="authenticationManager" ref="authenticationManager"/>
     <property name="accessDecisionManager">
-      <bean class="org.acegisecurity.vote.AffirmativeBased">
+      <bean class="org.springframework.security.vote.AffirmativeBased">
         <property name="allowIfAllAbstainDecisions" value="false"/>
         <property name="decisionVoters">
           <list>
-            <bean class="org.acegisecurity.vote.RoleVoter"/>
-            <bean class="org.acegisecurity.vote.AuthenticatedVoter"/>
+            <bean class="org.springframework.security.vote.RoleVoter"/>
+            <bean class="org.springframework.security.vote.AuthenticatedVoter"/>
           </list>
         </property>
       </bean>
@@ -242,7 +242,7 @@
   --]
   [#if securityConfig.enableRememberMeToken]
   [#--used to load a user using a remember-me token--]
-  <bean id="rememberMeServices" class="org.acegisecurity.ui.rememberme.TokenBasedRememberMeServices">
+  <bean id="rememberMeServices" class="org.springframework.security.ui.rememberme.TokenBasedRememberMeServices">
     <property name="userDetailsService" ref="localUserDetailsService"/>
     <property name="alwaysRemember" value="true"/>
     [#if securityConfig.rememberMeConfig?exists]
@@ -260,7 +260,7 @@
 
   [/#if]
   [#--authenticates the user via dao, anonymous, or remember me token--]
-  <bean id="authenticationManager" class="org.acegisecurity.providers.ProviderManager">
+  <bean id="authenticationManager" class="org.springframework.security.providers.ProviderManager">
     <property name="providers">
       <list>
   [#if securityConfig.additionalAuthenticationProviders?exists]
@@ -274,12 +274,12 @@
   [/#if]
         <ref bean="defaultProvider"/>
   [#if securityConfig.loadAnonymousIdentity]
-        <bean class="org.acegisecurity.providers.anonymous.AnonymousAuthenticationProvider">
+        <bean class="org.springframework.security.providers.anonymous.AnonymousAuthenticationProvider">
           <property name="key" value="${securityConfig.anonymousConfig.key?default(securityConfig.key)}"/>
         </bean>
   [/#if]
   [#if securityConfig.enableRememberMeToken]
-        <bean class="org.acegisecurity.providers.rememberme.RememberMeAuthenticationProvider">
+        <bean class="org.springframework.security.providers.rememberme.RememberMeAuthenticationProvider">
           <property name="key" value="${securityConfig.rememberMeConfig.key?default(securityConfig.key)}"/>
         </bean>
   [/#if]
@@ -295,13 +295,13 @@
   <bean id="defaultProvider" class="${securityConfig.primaryAuthenticationProvider.className}"/>
 
     [#else]
-  <bean id="defaultProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+  <bean id="defaultProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
     <property name="userDetailsService" ref="localUserDetailsService"/>
   </bean>
 
     [/#if]
   [#else]
-  <bean id="defaultProvider" class="org.acegisecurity.providers.dao.DaoAuthenticationProvider">
+  <bean id="defaultProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
     <property name="userDetailsService" ref="localUserDetailsService"/>
   </bean>
 
@@ -322,10 +322,10 @@
 
   [/#if]
   [#--definition of the service method interceptor that will ensure secured methods are secured.--]
-  <bean id="serviceMethodSecurityInterceptor" class="org.acegisecurity.intercept.method.aopalliance.MethodSecurityInterceptor">
+  <bean id="serviceMethodSecurityInterceptor" class="org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor">
     <property name="authenticationManager" ref="authenticationManager"/>
     <property name="accessDecisionManager">
-      <bean class="org.acegisecurity.vote.AffirmativeBased">
+      <bean class="org.springframework.security.vote.AffirmativeBased">
         <property name="allowIfAllAbstainDecisions" value="true"/>
         <property name="decisionVoters">
           <list>
@@ -338,7 +338,7 @@
       </bean>
     </property>
     <property name="objectDefinitionSource">
-      <bean class="org.acegisecurity.intercept.method.MethodDefinitionAttributes">
+      <bean class="org.springframework.security.intercept.method.MethodDefinitionAttributes">
         <property name="attributes">
           <bean class="org.codehaus.enunciate.modules.spring_app.WebMethodSecurityAnnotationAttributes">
             <constructor-arg>
@@ -365,7 +365,7 @@
   [#if securityConfig.enableRememberMeToken]
         <ref bean="rememberMeServices"/>
   [/#if]
-        <bean class="org.acegisecurity.ui.logout.SecurityContextLogoutHandler"/>
+        <bean class="org.springframework.security.ui.logout.SecurityContextLogoutHandler"/>
       </list>
     </property>
   </bean>

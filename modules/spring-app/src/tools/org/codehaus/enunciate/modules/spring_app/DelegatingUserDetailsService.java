@@ -16,9 +16,9 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.userdetails.UserDetails;
-import org.acegisecurity.userdetails.UserDetailsService;
-import org.acegisecurity.userdetails.UsernameNotFoundException;
+import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.userdetails.UserDetailsService;
+import org.springframework.security.userdetails.UsernameNotFoundException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.context.ApplicationContextException;
@@ -45,7 +45,7 @@ public class DelegatingUserDetailsService extends ApplicationObjectSupport imple
     for (UserDetailsService userDetailsService : userDetailsServiceMap.values()) {
       if (!userDetailsService.equals(this)) {
         if (delegate != null) {
-          throw new ApplicationContextException("There are multiple beans of type org.acegisecurity.userdetails.UserDetailsService defined in the context.  Please specify which one to use in the Enunciate configuration file.");
+          throw new ApplicationContextException("There are multiple beans of type org.springframework.security.userdetails.UserDetailsService defined in the context.  Please specify which one to use in the Enunciate configuration file.");
         }
         else {
           delegate = userDetailsService;

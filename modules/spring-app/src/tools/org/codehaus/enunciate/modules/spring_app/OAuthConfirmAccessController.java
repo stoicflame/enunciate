@@ -24,8 +24,8 @@ import org.springframework.security.oauth.provider.token.OAuthProviderTokenServi
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEvent;
-import org.acegisecurity.event.authorization.AuthorizedEvent;
-import org.acegisecurity.intercept.web.FilterInvocation;
+import org.springframework.security.event.authorization.AuthorizedEvent;
+import org.springframework.security.intercept.web.FilterInvocation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,7 +33,7 @@ import java.util.TreeMap;
 
 /**
  * Controller for displaying the OAuth "confirm access" page. As an event publisher, listens for any
- * {@link org.acegisecurity.event.authorization.AuthorizedEvent}s and ensures that any OAuth processing
+ * {@link org.springframework.security.event.authorization.AuthorizedEvent}s and ensures that any OAuth processing
  * filter don't get called after the request is authorized.
  *
  * @author Ryan Heaton

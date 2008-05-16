@@ -21,33 +21,32 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring</artifactId>
-      <version>1.2.9</version>
-      <exclusions>
-        <!--We'll depend on enunciate's version of mail and activation. Not Spring's.-->
-        <exclusion>
-          <groupId>javax.mail</groupId>
-          <artifactId>mail</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.activation</groupId>
-          <artifactId>activation</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>@spring.version@</version>
     </dependency>
 
     <dependency>
-      <groupId>org.acegisecurity</groupId>
-      <artifactId>acegi-security</artifactId>
-      <version>1.0.6</version>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>@spring.version@</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core-tiger</artifactId>
+      <version>@spring.security.version@</version>
       <exclusions>
         <!--we'll depend on enunciate's version of these artifacts.-->
         <exclusion>
-          <groupId>org.acegisecurity</groupId>
-          <artifactId>acegi-security</artifactId>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-aop</artifactId>
         </exclusion>
         <exclusion>
           <groupId>org.springframework</groupId>
-          <artifactId>spring-aop</artifactId>
+          <artifactId>spring-context</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
         </exclusion>
       </exclusions>
       <optional>true</optional>
@@ -56,12 +55,12 @@
     <dependency>
       <groupId>org.codehaus.spring-security-oauth</groupId>
       <artifactId>spring-security-oauth</artifactId>
-      <version>1.0</version>
+      <version>2.0</version>
       <exclusions>
         <!--we'll depend on enunciate's version of these artifacts.-->
         <exclusion>
-          <groupId>org.acegisecurity</groupId>
-          <artifactId>acegi-security</artifactId>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>spring-security-core-tiger</artifactId>
         </exclusion>
       </exclusions>
       <optional>true</optional>

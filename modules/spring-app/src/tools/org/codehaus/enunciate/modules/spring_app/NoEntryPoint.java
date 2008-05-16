@@ -16,8 +16,8 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.acegisecurity.ui.AuthenticationEntryPoint;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.ui.AuthenticationEntryPoint;
+import org.springframework.security.AuthenticationException;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
