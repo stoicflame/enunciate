@@ -18,15 +18,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/org/springframework/spring/1.2.9/spring-1.2.9.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="spring-j2ee" level="project" />
     <orderEntry type="module-library">
       <library>

@@ -88,7 +88,7 @@
   </target>
 
   <target name="get-tools-classpath" depends="get-tools-pom, set-proxy" if="tools.exists">
-    <artifact:dependencies pathId="tools.classpath" pomRefId="module.tools.pom"/>
+    <artifact:dependencies pathId="tools.classpath" pomRefId="module.tools.pom" sourcesFilesetId="tools.classpath.sources"/>
   </target>
 
   <target name="compile-tools" description="compile the tools code" depends="get-tools-classpath" if="tools.exists">
@@ -130,7 +130,7 @@
   </target>
 
   <target name="get-build-classpath" depends="install-tools">
-    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom"/>
+    <artifact:dependencies pathId="nonsystem.build.classpath" pomRefId="module.pom" sourcesFilesetId="nonsystem.build.classpath.sources"/>
 
     <path id="build.classpath">
       <!--the maven artifact tasks don't recognize the "system" jars.-->
