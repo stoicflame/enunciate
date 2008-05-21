@@ -1,0 +1,31 @@
+notes:
+
+-the optimizations would be nice, but they're very, very difficult.
+  -REST endpoints can be defined by multiple interfaces AND/OR a class
+  -What about backwards compatibility? you first look for a single bean, then disambiguate by the bean name, and then instantiate the class.
+
+Current thoughts:
+
+  -create a bean for each service interface.
+  -reference the bean explicitly (soap, rest controllers) OR use @Autowired (GWT, AMF)
+  -"imported" service implementation beans can be decorated with a BeanPostProcessor
+    -but then how do you tell the difference between an "imported" service impl and an enunciate-loaded one?
+    -and what about ORDER? how do you know there WON'T be a custom service implementation bean defined in the future when looking for them from the factory?
+
+todo:
+
+remove EnunciateServiceFactory, EnunciateServiceFactoryAware, DefaultEnunciateServiceFactory
+  spring config changes for: GWTEndpointImpls, AMFEndpointimpls, EnunciatedXFireExporter (call setServiceBean), RESTResourceFactory (call
+remove SecurityExceptionChecker injections
+remove EnunciateServiceAdvice, EnunciateServiceAdvisor
+remove LoginLogoutProvider
+remove EnunciateSpringSecuritySupport
+remove org.codehaus.enunciate.modules.spring_app.Delegating*
+adjust spring config files
+make sure GWT, AMF endpoints populated correctly.
+
+confirm:
+
+  -spring-servlet beans get injected with applicationContext-level beans correctly
+  -annotation configurations are inherited by class (e.g. AMFEndpointImpl gets
+    correctly injected with SecurityExceptionChecker).
