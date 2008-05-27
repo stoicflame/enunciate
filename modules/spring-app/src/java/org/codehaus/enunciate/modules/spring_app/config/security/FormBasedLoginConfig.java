@@ -26,7 +26,7 @@ public class FormBasedLoginConfig {
   private String url = "/form/login";
   private String redirectOnSuccessUrl = "/";
   private String redirectOnFailureUrl = "/login.jsp";
-  private String loginPageURL = "login.jsp";
+  private String loginPageURL = "/login.jsp";
   private String loginPageFile;
 
   /**
