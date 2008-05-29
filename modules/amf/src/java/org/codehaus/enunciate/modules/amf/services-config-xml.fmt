@@ -15,8 +15,9 @@
           <channel ref="${endpointInterface.simpleName}AMFChannel"/>
         </channels>
         <properties>
-          <factory>spring</factory>
-          <source>${endpointInterface.serviceName}-amf</source>
+          <factory>enunciate</factory>
+          <source>${endpointInterface.package.qualifiedName}.amf.AMF${endpointInterface.simpleName}</source>
+          <scope>application</scope>
         </properties>
       </destination>
     [/@forEachEndpointInterface]
@@ -35,7 +36,7 @@
   </channels>
 
   <factories>
-    <factory id="spring" class="org.codehaus.enunciate.modules.amf.SpringFactory"/>
+    <factory id="enunciate" class="org.codehaus.enunciate.modules.amf.EnunciateFlexFactory"/>
   </factories>
 </services-config>
 [/@file]

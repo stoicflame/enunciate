@@ -9,6 +9,10 @@ package ${endpointInterface.package.qualifiedName}.gwt;
  */
 public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enunciate.modules.gwt.GWTEndpointImpl implements ${packageFor(endpointInterface)}.GWT${endpointInterface.simpleName} {
 
+  public GWT${endpointInterface.simpleName}Impl() throws Exception {
+    super(new ${endpointInterface.endpointImplementations[0].qualifiedName}());
+  }
+
   [@forEachWebMethod endpointInterface=endpointInterface]
     [#if !webMethod.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
 
@@ -45,9 +49,13 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
   [/@forEachWebMethod]
 
   // Inherited.
-  protected Class getServiceClass() {
-    return ${endpointInterface.endpointImplementations[0].qualifiedName}.class;
+  protected Class getServiceInterface() {
+    return ${endpointInterface.qualifiedName}.class;
   }
 
+  @org.springframework.beans.factory.annotation.Autowired ( required = false )
+  public void setServiceBean(@org.springframework.beans.factory.annotation.Qualifier( "enunciate-service-bean" ) ${endpointInterface.qualifiedName} serviceBean) {
+    this.serviceBean = serviceBean;
+  }
 }
 [/@file]

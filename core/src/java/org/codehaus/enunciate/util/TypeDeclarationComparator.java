@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.util;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 
 import java.util.Comparator;
 
@@ -25,9 +26,9 @@ import java.util.Comparator;
  *
  * @author Ryan Heaton
  */
-public class ClassDeclarationComparator implements Comparator<ClassDeclaration> {
+public class TypeDeclarationComparator implements Comparator<TypeDeclaration> {
 
-  public int compare(ClassDeclaration class1, ClassDeclaration class2) {
-    return class1.getQualifiedName().compareTo(class2.getQualifiedName());
+  public int compare(TypeDeclaration type1, TypeDeclaration type2) {
+    return type1.getQualifiedName().compareTo(type2.getQualifiedName());
   }
 }

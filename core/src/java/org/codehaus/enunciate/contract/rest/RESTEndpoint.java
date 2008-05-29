@@ -17,18 +17,18 @@
 package org.codehaus.enunciate.contract.rest;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.InterfaceDeclaration;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.Modifier;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.InterfaceType;
 import com.sun.mirror.util.Declarations;
 import org.codehaus.enunciate.rest.annotations.Verb;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A class declaration decorated as a REST endpoint.
@@ -39,11 +39,15 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
 
   //todo: support versioning a REST endpoint.
 
+  private final Set<TypeDeclaration> definingInterfaces;
   private final Collection<RESTMethod> RESTMethods;
+  private final String name;
   private String baseURL;
 
   public RESTEndpoint(ClassDeclaration delegate) {
     super(delegate);
+
+    this.definingInterfaces = new TreeSet<TypeDeclaration>(new TypeDeclarationComparator());
 
     ArrayList<MethodDeclaration> methods = new ArrayList<MethodDeclaration>();
     //first iterate through all direct superinterfaces and add their methods if they are annotated as a REST endpoint:
@@ -52,6 +56,7 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
       if ((interfaceDeclaration != null) && (interfaceDeclaration.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class) != null)) {
         for (MethodDeclaration methodDeclaration : interfaceDeclaration.getMethods()) {
           if (methodDeclaration.getAnnotation(Verb.class) != null) {
+            this.definingInterfaces.add(interfaceDeclaration);
             methods.add(methodDeclaration);
           }
         }
@@ -71,13 +76,22 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
       }
 
       if ((methodDeclaration.getModifiers().contains(Modifier.PUBLIC)) && (methodDeclaration.getAnnotation(Verb.class) != null)) {
+        definingInterfaces.add(delegate);
         methods.add(methodDeclaration);
       }
     }
 
+    org.codehaus.enunciate.rest.annotations.RESTEndpoint endpointInfo = getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class);
+    if ((endpointInfo != null) && !"".equals(endpointInfo.name())) {
+      this.name = endpointInfo.name();
+    }
+    else {
+      this.name = getSimpleName() + "Endpoint";
+    }
+
     this.RESTMethods = new ArrayList<RESTMethod>();
     for (MethodDeclaration methodDeclaration : methods) {
-      this.RESTMethods.add(new RESTMethod(methodDeclaration));
+      this.RESTMethods.add(new RESTMethod(methodDeclaration, this));
     }
   }
 
@@ -88,6 +102,25 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
    */
   public Collection<RESTMethod> getRESTMethods() {
     return RESTMethods;
+  }
+
+  /**
+   * The type declarations that define this REST endpoint.  Not necessarily an instance of {@link com.sun.mirror.declaration.InterfaceDeclaration} as
+   * a REST method could be defined on a class.
+   *
+   * @return The type declarations that define this REST endpoint.
+   */
+  public Set<TypeDeclaration> getDefiningInterfaces() {
+    return definingInterfaces;
+  }
+
+  /**
+   * The name of this endpoint.
+   *
+   * @return The name of this endpoint.
+   */
+  public String getName() {
+    return name;
   }
 
   /**

@@ -68,8 +68,9 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
     }
     module.doFreemarkerGenerate();
 
-    assertEquals(2, processedTemplates.size());
+    assertEquals(3, processedTemplates.size());
     assertTrue(processedTemplates.contains(module.getRPCRequestBeanTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCResponseBeanTemplateURL()));
+    assertTrue(processedTemplates.contains(module.getXfireServletTemplateURL()));
   }
 }

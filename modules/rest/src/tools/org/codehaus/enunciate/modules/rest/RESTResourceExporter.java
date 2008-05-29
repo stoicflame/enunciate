@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -49,12 +50,15 @@ public class RESTResourceExporter extends AbstractController {
   public static final Log LOG = LogFactory.getLog(RESTResourceExporter.class);
 
   private final RESTResource resource;
+  private final Object endpoint;
+
   private MultipartRequestHandler multipartRequestHandler;
   private ContentTypeSupport contentTypeSupport;
   private Pattern contentTypeIdPattern = Pattern.compile("^/?([^/]+)");
 
-  public RESTResourceExporter(RESTResource resource) {
+  public RESTResourceExporter(RESTResource resource, Object endpoint) {
     this.resource = resource;
+    this.endpoint = endpoint;
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
@@ -326,7 +330,7 @@ public class RESTResourceExporter extends AbstractController {
       }
     }
 
-    Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue);
+    Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue, this.endpoint);
 
     //successful invocation, set up the response...
     if (result instanceof DataHandler) {
@@ -420,6 +424,7 @@ public class RESTResourceExporter extends AbstractController {
    *
    * @param support the content type support.
    */
+  @Autowired
   public void setContentTypeSupport(ContentTypeSupport support) {
     this.contentTypeSupport = support;
   }

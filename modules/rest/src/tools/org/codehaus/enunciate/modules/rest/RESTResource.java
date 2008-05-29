@@ -85,11 +85,10 @@ public class RESTResource implements Comparable<RESTResource> {
    *
    * @param contentType The content type of the operation.
    * @param verb The verb for the operation.
-   * @param endpoint The endpoint on which to invoke the operation.
    * @param method The method to invoke on the endpoint.
    * @return Whether the operation was successfully added.  (false if the specified verb was already added).
    */
-  public boolean addOperation(String contentType, VerbType verb, Object endpoint, Method method) {
+  public boolean addOperation(String contentType, VerbType verb, Method method) {
     String[] parameterNames = null;
     if (getParamterNames() != null) {
       String parameterList = (String) getParamterNames().get(getCanonicalReference(verb));
@@ -98,7 +97,7 @@ public class RESTResource implements Comparable<RESTResource> {
       }
     }
 
-    return this.operations.add(createOperation(contentType, verb, endpoint, method, parameterNames));
+    return this.operations.add(createOperation(contentType, verb, method, parameterNames));
   }
 
   /**
@@ -106,13 +105,12 @@ public class RESTResource implements Comparable<RESTResource> {
    *
    * @param contentType The content type.
    * @param verb The verb.
-   * @param endpoint The endpoint.
    * @param method The method.
    * @param parameterNames The parameter names.
    * @return The operation.
    */
-  protected RESTOperation createOperation(String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
-    return new RESTOperation(this, contentType, verb, endpoint, method, parameterNames);
+  protected RESTOperation createOperation(String contentType, VerbType verb, Method method, String[] parameterNames) {
+    return new RESTOperation(this, contentType, verb, method, parameterNames);
   }
 
   /**

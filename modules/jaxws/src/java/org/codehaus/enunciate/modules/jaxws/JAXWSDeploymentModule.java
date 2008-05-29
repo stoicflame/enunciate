@@ -22,7 +22,7 @@ import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.main.FileArtifact;
 
 import java.io.File;
@@ -84,7 +84,7 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
       URL responseBeanTemplate = JAXWSDeploymentModule.class.getResource("response-bean.fmt");
       URL faultBeanTemplate = JAXWSDeploymentModule.class.getResource("fault-bean.fmt");
 
-      TreeSet<WebFault> visitedFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+      TreeSet<WebFault> visitedFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
       for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           for (WebMethod webMethod : ei.getWebMethods()) {
@@ -110,8 +110,8 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping JAX-WS support generation as everything appears up-to-date...");
     }
 
-    getEnunciate().setProperty("jaxws.src.dir", genDir);
     getEnunciate().addArtifact(new FileArtifact(getName(), "jaxws.src.dir", genDir));
+    getEnunciate().addAdditionalSourceRoot(genDir);
   }
 
   /**

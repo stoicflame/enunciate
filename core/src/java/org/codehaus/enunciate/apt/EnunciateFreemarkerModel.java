@@ -35,7 +35,7 @@ import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlTransient;
@@ -47,7 +47,7 @@ import java.util.*;
  */
 public class EnunciateFreemarkerModel extends FreemarkerModel {
 
-  private static final Comparator<ClassDeclaration> CLASS_COMPARATOR = new ClassDeclarationComparator();
+  private static final Comparator<TypeDeclaration> CLASS_COMPARATOR = new TypeDeclarationComparator();
 
   int prefixIndex = 0;
   final Map<String, String> namespacesToPrefixes;

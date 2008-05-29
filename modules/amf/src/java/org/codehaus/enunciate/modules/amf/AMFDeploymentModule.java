@@ -30,6 +30,8 @@ import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
@@ -41,6 +43,8 @@ import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+
+import flex.messaging.MessageBrokerServlet;
 
 /**
  * <h1>AMF Module</h1>
@@ -100,6 +104,16 @@ import java.util.*;
  * generated web application.  Default: "false".</li>
  * </ul>
  *
+ * <h3>The "war" element</h3>
+ *
+ * <p>The "war" element under the "amf" element is used to configure the webapp that will host the AMF endpoints and Flex applications. It supports
+ * the following attributes:</p>
+ *
+ * <ul>
+ * <li>The "amfSubcontext" attribute is the subcontext at which the amf endpoints will be mounted.  Default: "/amf".</li>
+ * <li>The "flexAppDir" attribute is the directory in the war to which the flex applications will be put.  The default is the root of the war.</li>
+ * </ul>
+ *
  * <h3>The "compiler" element</h3>
  *
  * <p>The "compiler" element under the "amf" element is used to configure the compiler that will be used to compile the SWC
@@ -151,7 +165,7 @@ import java.util.*;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;amf disabled="false" swcName="mycompany-amf.swc"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;amf disabled="false" swcName="mycompany-amf.swc"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flexHome="/home/myusername/tools/flex-sdk-2"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/flexapp" name="main" mainMxmlFile="src/main/flexapp/com/mycompany/main.mxml"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another" mainMxmlFile="src/main/anotherapp/com/mycompany/another.mxml"/&gt;
@@ -187,6 +201,8 @@ import java.util.*;
  */
 public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
+  private String amfSubcontext = "/amf/";
+  private String flexAppDir = null;
   private final List<FlexApp> flexApps = new ArrayList<FlexApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
 
@@ -342,11 +358,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping generation of AMF support as everything appears up-to-date...");
     }
 
-    this.enunciate.setProperty("amf.xml.dir", xmlGenerateDir);
-    this.enunciate.setProperty("amf.client.src.dir", clientGenerateDir);
     this.enunciate.addArtifact(new FileArtifact(getName(), "amf.client.src.dir", clientGenerateDir));
-    this.enunciate.setProperty("amf.server.src.dir", serverGenerateDir);
     this.enunciate.addArtifact(new FileArtifact(getName(), "amf.server.src.dir", serverGenerateDir));
+
+    this.enunciate.addAdditionalSourceRoot(serverGenerateDir);
   }
 
   /**
@@ -532,8 +547,6 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping compilation of %s as everything appears up-to-date...", as3Bundle.getAbsolutePath());
     }
 
-    enunciate.setProperty("as3.client.swc", as3Bundle);
-
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
     BaseArtifactDependency as3Dependency = new BaseArtifactDependency();
     as3Dependency.setId("flex-sdk");
@@ -686,10 +699,58 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     if (isSwcDownloadable() || this.flexApps.size() > 0) {
       doFlexCompile();
       if (this.flexApps.size() > 0) {
-        enunciate.setProperty("flex.app.dir", getSwfCompileDir());
         enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getSwfCompileDir()));
       }
     }
+  }
+
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    //assemble the server-side webapp fragment
+    BaseWebAppFragment webAppFragment = new BaseWebAppFragment(getName());
+
+    //base webapp dir...
+    File webappDir = new File(getBuildDir(), "webapp");
+    File servicesConfigFile = new File(getXMLGenerateDir(), "services-config.xml");
+    if (servicesConfigFile.exists()) {
+      getEnunciate().copyFile(servicesConfigFile, new File(new File(new File(webappDir, "WEB-INF"), "flex"), "services-config.xml"));
+    }
+    else {
+      throw new FileNotFoundException("File not found: " + servicesConfigFile.getAbsolutePath());
+    }
+
+    File swfCompileDir = getSwfCompileDir();
+    if ((this.flexApps.size() > 0) && (swfCompileDir != null) && (swfCompileDir.exists())) {
+      File flexAppDir = webappDir;
+      if ((getFlexAppDir() != null) && (!"".equals(getFlexAppDir()))) {
+        info("Flex applications will be put into the %s subdirectory of the web application.", getFlexAppDir());
+        flexAppDir = new File(webappDir, getFlexAppDir());
+      }
+      getEnunciate().copyDir(swfCompileDir, flexAppDir);
+    }
+    else {
+      info("No flex apps were found.");
+    }
+    webAppFragment.setBaseDir(webappDir);
+
+    //servlets.
+    WebAppComponent messageServlet = new WebAppComponent();
+    messageServlet.setClassname(MessageBrokerServlet.class.getName());
+    messageServlet.setName("AMFMessageServlet");
+    TreeSet<String> urlMappings = new TreeSet<String>();
+    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        urlMappings.add(getAmfSubcontext() + ei.getServiceName());
+      }
+    }
+    messageServlet.setUrlMappings(urlMappings);
+    TreeMap<String, String> initParams = new TreeMap<String, String>();
+    initParams.put("services.configuration.file", "/WEB-INF/flex/services-config.xml");
+    initParams.put("flex.write.path", "/WEB-INF/flex");
+    messageServlet.setInitParams(initParams);
+    webAppFragment.setServlets(Arrays.asList(messageServlet));
+
+    getEnunciate().addWebAppFragment(webAppFragment);
   }
 
   /**
@@ -915,5 +976,57 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setSwcDownloadable(boolean swcDownloadable) {
     this.swcDownloadable = swcDownloadable;
+  }
+
+  /**
+   * The amf subcontext.
+   *
+   * @return The amf subcontext.
+   */
+  public String getAmfSubcontext() {
+    return amfSubcontext;
+  }
+
+  /**
+   * The amf subcontext.
+   *
+   * @param amfSubcontext The amf subcontext.
+   */
+  public void setAmfSubcontext(String amfSubcontext) {
+    if (amfSubcontext == null) {
+      throw new IllegalArgumentException("The AMF context must not be null.");
+    }
+
+    if ("".equals(amfSubcontext)) {
+      throw new IllegalArgumentException("The AMF context must not be the emtpy string.");
+    }
+
+    if (!amfSubcontext.startsWith("/")) {
+      amfSubcontext = "/" + amfSubcontext;
+    }
+
+    if (!amfSubcontext.endsWith("/")) {
+      amfSubcontext = amfSubcontext + "/";
+    }
+
+    this.amfSubcontext = amfSubcontext;
+  }
+
+  /**
+   * The flex app dir.
+   *
+   * @return The flex app dir.
+   */
+  public String getFlexAppDir() {
+    return flexAppDir;
+  }
+
+  /**
+   * The flex app dir.
+   *
+   * @param flexAppDir The flex app dir.
+   */
+  public void setFlexAppDir(String flexAppDir) {
+    this.flexAppDir = flexAppDir;
   }
 }

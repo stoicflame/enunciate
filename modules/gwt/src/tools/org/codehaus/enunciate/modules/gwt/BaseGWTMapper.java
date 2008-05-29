@@ -16,11 +16,12 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
-import org.springframework.beans.BeanUtils;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
@@ -56,18 +57,48 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
     this.jaxbProperties2gwtProperties = new PropertyDescriptor[this.properties.length][];
     for (int i = 0; i < properties.length; i++) {
       String property = properties[i];
-      PropertyDescriptor jaxbProperty = BeanUtils.getPropertyDescriptor(jaxbClass, property);
+      PropertyDescriptor jaxbProperty = findProperty(jaxbClass, property);
       if (jaxbProperty == null) {
         throw new IllegalStateException("Unknown property '" + property + "' on class " + jaxbClass.getName() + ".");
       }
 
-      PropertyDescriptor gwtProperty = BeanUtils.getPropertyDescriptor(gwtClass, property);
+      PropertyDescriptor gwtProperty = findProperty(gwtClass, property);
       if (gwtProperty == null) {
         throw new IllegalStateException("Unknown property '" + property + "' on class " + gwtClass.getName() + ".");
       }
 
       this.jaxbProperties2gwtProperties[i] = new PropertyDescriptor[]{jaxbProperty, gwtProperty};
     }
+  }
+
+  /**
+   * Find the specified property for the given class.
+   *
+   * @param clazz The class.
+   * @param property The property.
+   * @return The property descriptor.
+   */
+  protected PropertyDescriptor findProperty(Class clazz, final String property) {
+    if (Object.class.equals(clazz)) {
+      return null;
+    }
+
+    BeanInfo beanInfo;
+    try {
+      beanInfo = Introspector.getBeanInfo(clazz);
+    }
+    catch (IntrospectionException e) {
+      throw new IllegalStateException(e);
+    }
+
+    PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+    for (PropertyDescriptor pd : pds) {
+      if (pd.getName().equals(property)) {
+        return pd;
+      }
+    }
+
+    return findProperty(clazz.getSuperclass(), property);
   }
 
   /**

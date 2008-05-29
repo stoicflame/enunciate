@@ -1,23 +1,46 @@
 [#ftl]
 [@file name="applicationContext.xml"]
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans[#if defaultDependencyCheck?exists] default-dependency-check="${defaultDependencyCheck}"[/#if][#if defaultAutowire?exists] default-autowire="${defaultAutowire}"[/#if]>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
-  <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
+  <context:annotation-config/>
+
   [#if securityEnabled]
-  <import resource="spring-security-context.xml"/>
+  <import resource="security-context.xml"/>
   [/#if]
   [#if springImports?exists]
     [#list springImports as springImport]
   <import resource="${springImport}"/>
     [/#list]
   [/#if]
+  [#if handlerInterceptors?exists]
 
-  <bean id="enunciateServiceFactory" class="org.codehaus.enunciate.modules.spring_app.SpringAppServiceFactory">
+  <!-- global handler mapping interceptors -->
+  <util:list id="interceptors">
+    [#list handlerInterceptors as interceptor]
+      [#if interceptor.interceptorClass?exists]
+    <bean class="${interceptor.interceptorClass}"/>
+      [#else]
+    <ref bean="${interceptor.beanName}"/>
+      [/#if]
+    [/#list]
+  </util:list>
+  [/#if]
+  [@forEachServiceEndpoint]
+
+  <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
+    <qualifier value="enunciate-service-bean"/>
+    <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
+    <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
+    <property name="defaultImplementationClass" value="${endpoint.serviceEndpointDefaultImplementation.qualifiedName}"/>
+    <property name="interceptors">
+      <list>
     [#if globalServiceInterceptors?exists]
-    <property name="globalServiceInterceptors">
-        <list>
       [#list globalServiceInterceptors as interceptor]
         [#if interceptor.interceptorClass?exists]
         <bean class="${interceptor.interceptorClass.name}"/>
@@ -25,41 +48,13 @@
         <ref bean="${interceptor.beanName}"/>
         [/#if]
       [/#list]
-        </list>
-    </property>
     [/#if]
-    [#if securityEnabled]
-    <property name="serviceSpecificInterceptors">
-      <map>
-      [@forEachWsdl]
-        [@forEachEndpointInterface wsdl=wsdl]
-          [#if hasSecureMethod(endpointInterface)]
-        <entry key="${endpointInterface.qualifiedName}">
-          <list>
-            <ref bean="serviceMethodSecurityInterceptor"/>
-          </list>
-        </entry>
-          [/#if]
-        [/@forEachEndpointInterface]
-      [/@forEachWsdl]
-      </map>
-    </property>
+    [#if securityEnabled && hasSecureMethod(endpoint.serviceEndpointInterface)]
+        <ref bean="enunciate-security-interceptor"/>
     [/#if]
+      </list>
+    </property>
   </bean>
-  [#if amfEnabled]
-    [@forEachWsdl]
-      [@forEachEndpointInterface wsdl=wsdl]
-        [#if !endpointInterface.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
-
-  <bean id="${endpointInterface.serviceName}-amf" class="${endpointInterface.package.qualifiedName}.amf.AMF${endpointInterface.simpleName}">
-    <property name="enunciateServiceFactory" ref="enunciateServiceFactory"/>
-          [#if securityEnabled]
-    <property name="securityChecker" ref="securityChecker"/>
-          [/#if]
-  </bean>
-        [/#if]
-      [/@forEachEndpointInterface]
-    [/@forEachWsdl]
-  [/#if]
+  [/@forEachServiceEndpoint]
 </beans>
 [/@file]

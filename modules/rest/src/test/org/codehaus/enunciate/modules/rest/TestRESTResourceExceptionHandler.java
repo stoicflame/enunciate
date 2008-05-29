@@ -18,7 +18,6 @@ package org.codehaus.enunciate.modules.rest;
 
 import static org.easymock.EasyMock.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.codehaus.enunciate.apt.ModelValidationException;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
 import junit.framework.TestCase;
@@ -91,7 +90,7 @@ public class TestRESTResourceExceptionHandler extends TestCase {
     model.put(RESTResourceExceptionHandler.MODEL_EXCEPTION, new ExceptionExample(ree, "wow"));
     expect(request.getAttribute(RESTRequestContentTypeHandler.class.getName())).andReturn(contentHandler);
     response.setStatus(333, "wow");
-    final RESTOperation operation = new RESTOperation(null, "content/type", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("properNoun", String.class), null);
+    final RESTOperation operation = new RESTOperation(null, "content/type", VerbType.read, RESTOperationExamples.class.getMethod("properNoun", String.class), null);
     expect(request.getAttribute(RESTOperation.class.getName())).andReturn(operation);
     response.setContentType("content/type;charset=utf-8");
     contentHandler.write(ree, request, response);

@@ -1,0 +1,56 @@
+[#ftl]
+[@file name="xfire-servlet.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+  <context:annotation-config/>
+
+  <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
+
+  <!-- the soap service factory -->
+  <bean id="soapServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>
+
+  <!-- the parent for all soap service endpoints -->
+  <bean id="soap-endpoint" abstract="true" class="org.codehaus.enunciate.modules.xfire.EnunciatedXFireExporter">
+    <property name="serviceFactory" ref="soapServiceFactory"/>
+    <property name="xfire" ref="xfire"/>
+  </bean>
+
+  <!-- the handler mapping for the spring servlet. -->
+  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping" autowire="byName">
+    <property name="alwaysUseFullPath" value="true"/>
+    <property name="urlMap">
+      <map>
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+      [#list endpointInterface.endpointImplementations as impl]
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+
+        [#--todo: what about eis with the same name, different namespace?--]
+        <entry key="${soapAddressPath(endpointInterface)}">
+          <bean parent="soap-endpoint">
+            <property name="serviceClass" value="${impl.qualifiedName}"/>
+            <property name="serviceBean" ref="${endpointBeanId(endpointInterface)}"/>
+          [#if wsdl.properties.filename?exists && docsDir?exists]
+            <property name="wsdlView">
+              <bean class="org.springframework.web.servlet.view.RedirectView">
+                <property name="url" value="/${docsDir}${wsdl.properties.filename}"/>
+                <property name="contextRelative" value="true"/>
+              </bean>
+            </property>
+          [/#if]
+          </bean>
+        </entry>
+        [/#if]
+      [/#list]
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+      </map>
+    </property>
+  </bean>
+</beans>
+[/@file]

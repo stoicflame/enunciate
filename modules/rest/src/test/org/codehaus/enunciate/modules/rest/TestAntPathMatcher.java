@@ -14,38 +14,26 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.amf;
+package org.codehaus.enunciate.modules.rest;
+
+import junit.framework.TestCase;
+import org.springframework.util.AntPathMatcher;
 
 /**
- * Utility class for holding a service interface with its associated service bean.
- *
  * @author Ryan Heaton
  */
-public class ServiceBean {
-
-  private final Class serviceInterface;
-  private final Object bean;
-
-  public ServiceBean(Class serviceInterface, Object bean) {
-    this.serviceInterface = serviceInterface;
-    this.bean = bean;
-  }
+public class TestAntPathMatcher extends TestCase {
 
   /**
-   * The service interface.
-   *
-   * @return The service interface.
+   * test matching the path
    */
-  public Class getServiceInterface() {
-    return serviceInterface;
+  public void testMatchPath() throws Exception {
+    AntPathMatcher matcher = new AntPathMatcher();
+    matcher.isPattern("/hello*");
+    assertTrue(matcher.match("/hello/**", "/hello/my/friend"));
+    assertTrue(matcher.match("/hello/**", "/hello"));
+    assertFalse(matcher.match("/hello*", "/hello/my/friend"));
+    assertFalse(matcher.match("/hello**", "/hello/my/friend"));
   }
 
-  /**
-   * The service bean.
-   *
-   * @return The service bean.
-   */
-  public Object getBean() {
-    return bean;
-  }
 }

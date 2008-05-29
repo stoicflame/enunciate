@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.service;
+package org.codehaus.enunciate.contract;
+
+import com.sun.mirror.declaration.TypeDeclaration;
 
 /**
- * Factory for creating Enunciate services.
+ * Common interface for service endpoints.
  *
  * @author Ryan Heaton
  */
-public interface EnunciateServiceFactory {
+public interface ServiceEndpoint {
 
   /**
-   * Gets an instance of the specified service.
+   * The interface that defines this service endpoint.
    *
-   * @param implClass The base implementation class.
-   * @param interfaces The interfaces to be implemented.
-   * @return The instance.
+   * @return The interface that defines this service endpoint.
    */
-  Object getInstance(Class implClass, Class... interfaces) throws IllegalAccessException, InstantiationException;
-  
-  /**
-   * Gets an instance of the specified service.
-   *
-   * @param impl The base implementation object.
-   * @param interfaces The interfaces to be implemented.
-   * @return The instance.
-   */
-  Object getInstance(Object impl, Class... interfaces);
+  TypeDeclaration getServiceEndpointInterface();
 
+  /**
+   * The default implementation of the service endpoint.
+   *
+   * @return The default implementation of the service endpoint.
+   */
+  TypeDeclaration getServiceEndpointDefaultImplementation();
 }

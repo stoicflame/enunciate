@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
+package org.codehaus.enunciate.main.webapp;
+
+import java.util.Comparator;
 
 /**
- * Marker interface for a provider of login/logout services;
- *
  * @author Ryan Heaton
  */
-public interface LoginLogoutProvider {
+public class WebAppFragmentComparator implements Comparator<WebAppFragment> {
 
-  /**
-   * Initialize this provider with the specified login/logout helper.
-   *
-   * @param helper The login-logout helper.
-   */
-  void initLoginLogoutHelper(LoginLogoutHelper helper);
+  public int compare(WebAppFragment fragment1, WebAppFragment fragment2) {
+    return fragment1.getId().compareTo(fragment2.getId());
+  }
 }

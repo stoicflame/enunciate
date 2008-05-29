@@ -32,12 +32,14 @@ import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.modules.gwt.config.GWTApp;
 import org.codehaus.enunciate.modules.gwt.config.GWTAppModule;
 import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
 import java.net.URL;
@@ -116,6 +118,16 @@ import com.sun.mirror.declaration.Declaration;
  * <li>The "enforceNoFieldAccessors" attribute specifies whether to enforce that a field accessor cannot be used for GWT mapping.
  * <i>Note: whether this option is enabled or disabled, there currently MUST be a getter and setter for each accessor.  This option only
  * disables the compile-time validation check.</i></li>
+ * </ul>
+ *
+ * <h3>The "war" element</h3>
+ *
+ * <p>The "war" element under the "gwt" element is used to configure the webapp that will host the GWT endpoints and GWT applications. It supports
+ * the following attributes:</p>
+ *
+ * <ul>
+ * <li>The "gwtSubcontext" attribute is the subcontext at which the gwt endpoints will be mounted.  Default: "/gwt/".</li>
+ * <li>The "gwtAppDir" attribute is the directory in the war to which the gwt applications will be put.  The default is the root of the war.</li>
  * </ul>
  *
  * <h3>The "app" element</h3>
@@ -225,6 +237,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String gwtHome = System.getProperty("gwt.home") == null ? System.getenv("GWT_HOME") : System.getProperty("gwt.home");
   private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
   private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
+  private String gwtSubcontext = "/gwt/";
+  private String gwtAppDir = null;
 
   public GWTDeploymentModule() {
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
@@ -295,7 +309,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       String clientNamespace = this.rpcModuleNamespace + ".client";
       conversions.put(this.rpcModuleNamespace, clientNamespace);
       if (!this.enforceNamespaceConformance) {
-        TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+        TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
           for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
             if (!isGWTTransient(ei)) {
@@ -341,7 +355,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
       model.setFileOutputDirectory(clientSideGenerateDir);
 
-      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+      TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
       info("Generating the GWT endpoints...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -414,10 +428,11 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping GWT source generation as everything appears up-to-date...");
     }
 
-    enunciate.setProperty("gwt.client.src.dir", clientSideGenerateDir);
     enunciate.addArtifact(new FileArtifact(getName(), "gwt.client.src.dir", clientSideGenerateDir));
-    enunciate.setProperty("gwt.server.src.dir", serverSideGenerateDir);
     enunciate.addArtifact(new FileArtifact(getName(), "gwt.server.src.dir", serverSideGenerateDir));
+
+    enunciate.addAdditionalSourceRoot(clientSideGenerateDir); //server-side also uses client-side classes.
+    enunciate.addAdditionalSourceRoot(serverSideGenerateDir);
   }
 
   /**
@@ -597,24 +612,61 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     if (this.gwtApps.size() > 0) {
       doGWTCompile();
-      enunciate.setProperty("gwt.app.dir", getAppGenerateDir());
       enunciate.addArtifact(new FileArtifact(getName(), "gwt.app.dir", getAppGenerateDir()));
     }
 
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       info("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", getClientSideCompileDir(), Arrays.asList("-g"), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
       info("Skipping compile of GWT client-side files because everything appears up-to-date...");
     }
-    
-    enunciate.setProperty("gwt.client.compile.dir", getClientSideCompileDir());
   }
 
   @Override
   protected void doBuild() throws EnunciateException, IOException {
+    buildClientJar();
+
+    //assemble the server-side webapp fragment
+    BaseWebAppFragment webAppFragment = new BaseWebAppFragment(getName());
+
+    //base webapp dir...
+    File webappDir = new File(getBuildDir(), "webapp");
+    File gwtCompileDir = getAppGenerateDir();
+    if ((this.gwtApps.size() > 0) && (gwtCompileDir != null) && (gwtCompileDir.exists())) {
+      File gwtAppDir = webappDir;
+      if ((getGwtAppDir() != null) && (!"".equals(getGwtAppDir()))) {
+        info("Gwt applications will be put into the %s subdirectory of the web application.", getGwtAppDir());
+        gwtAppDir = new File(webappDir, getGwtAppDir());
+      }
+      getEnunciate().copyDir(gwtCompileDir, gwtAppDir);
+    }
+    else {
+      info("No gwt apps were found.");
+    }
+    webAppFragment.setBaseDir(webappDir);
+
+    //servlets.
+    ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
+    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        WebAppComponent gwtServlet = new WebAppComponent();
+        gwtServlet.setClassname(ei.getPackage().getQualifiedName() + ".gwt.GWT" + ei.getSimpleName() + "Impl");
+        gwtServlet.setName("GWT" + ei.getSimpleName());
+        TreeSet<String> urlMappings = new TreeSet<String>();
+        urlMappings.add(getGwtSubcontext() + ei.getServiceName());
+        gwtServlet.setUrlMappings(urlMappings);
+        servlets.add(gwtServlet);
+      }
+    }
+    webAppFragment.setServlets(servlets);
+
+    getEnunciate().addWebAppFragment(webAppFragment);
+  }
+
+  protected void buildClientJar() throws IOException {
     Enunciate enunciate = getEnunciate();
     String clientJarName = getClientJarName();
 
@@ -631,7 +683,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), clientJar)) {
       enunciate.copyDir(getClientSideGenerateDir(), getClientSideCompileDir());
       enunciate.zip(clientJar, getClientSideCompileDir());
-      enunciate.setProperty("gwt.client.jar", clientJar);
     }
     else {
       info("GWT client jar appears up-to-date...");
@@ -1006,5 +1057,57 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addGWTApp(GWTApp gwtApp) {
     this.gwtApps.add(gwtApp);
+  }
+
+  /**
+   * The GWT subcontext.
+   *
+   * @return The GWT subcontext.
+   */
+  public String getGwtSubcontext() {
+    return gwtSubcontext;
+  }
+
+  /**
+   * The gwt subcontext.
+   *
+   * @param gwtSubcontext The gwt subcontext.
+   */
+  public void setGwtSubcontext(String gwtSubcontext) {
+    if (gwtSubcontext == null) {
+      throw new IllegalArgumentException("The GWT context must not be null.");
+    }
+
+    if ("".equals(gwtSubcontext)) {
+      throw new IllegalArgumentException("The GWT context must not be the emtpy string.");
+    }
+
+    if (!gwtSubcontext.startsWith("/")) {
+      gwtSubcontext = "/" + gwtSubcontext;
+    }
+
+    if (!gwtSubcontext.endsWith("/")) {
+      gwtSubcontext = gwtSubcontext + "/";
+    }
+
+    this.gwtSubcontext = gwtSubcontext;
+  }
+
+  /**
+   * The gwt app dir.
+   *
+   * @return The gwt app dir.
+   */
+  public String getGwtAppDir() {
+    return gwtAppDir;
+  }
+
+  /**
+   * The gwt app dir.
+   *
+   * @param gwtAppDir The gwt app dir.
+   */
+  public void setGwtAppDir(String gwtAppDir) {
+    this.gwtAppDir = gwtAppDir;
   }
 }

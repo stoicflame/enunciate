@@ -19,12 +19,14 @@ package org.codehaus.enunciate.contract.rest;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.ReferenceType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.ServiceEndpoint;
 import org.codehaus.enunciate.rest.annotations.*;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -37,7 +39,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class RESTMethod extends DecoratedMethodDeclaration {
+public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEndpoint {
 
   private final RESTNoun noun;
   private final RESTParameter properNoun;
@@ -48,10 +50,12 @@ public class RESTMethod extends DecoratedMethodDeclaration {
   private final Collection<RESTError> RESTErrors;
   private final String jsonpParameter;
   private final Set<String> contentTypes;
+  private final RESTEndpoint endpoint;
 
-  public RESTMethod(MethodDeclaration delegate) {
+  public RESTMethod(MethodDeclaration delegate, RESTEndpoint endpoint) {
     super(delegate);
 
+    this.endpoint = endpoint;
     RESTParameter properNoun = null;
     RESTParameter nounValue = null;
     this.adjectives = new ArrayList<RESTParameter>();
@@ -151,6 +155,30 @@ public class RESTMethod extends DecoratedMethodDeclaration {
       this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
       this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
     }
+  }
+
+  /**
+   * The REST endpoint that defines specifies this REST method.
+   *
+   * @return The REST endpoint that defines specifies this REST method.
+   */
+  public RESTEndpoint getRESTEndpoint() {
+    return endpoint;
+  }
+
+  // Inherited.
+  public String getServiceEndpointName() {
+    return getRESTEndpoint().getName();
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointInterface() {
+    return getDeclaringType();
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointDefaultImplementation() {
+    return getRESTEndpoint();
   }
 
   /**

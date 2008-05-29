@@ -17,6 +17,8 @@
 package org.codehaus.enunciate.main;
 
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.main.webapp.WebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.APIImport;
@@ -69,6 +71,7 @@ public class Enunciate {
   private boolean verbose = false;
   private boolean debug = false;
   private boolean javacCheck = false;
+  private boolean compileDebugInfo = true;
 
   private File configFile;
   private File generateDir;
@@ -82,6 +85,8 @@ public class Enunciate {
   private final Set<Artifact> artifacts = new TreeSet<Artifact>();
   private final HashMap<String, File> exports = new HashMap<String, File>();
   private final List<String> sourceFiles = new ArrayList<String>();
+  private final Set<File> additionalSourceRoots = new TreeSet<File>();
+  private final Set<WebAppFragment> webAppFragments = new TreeSet<WebAppFragment>(new WebAppFragmentComparator());
 
   public static void main(String[] args) throws Exception {
     Main.main(args);
@@ -568,6 +573,20 @@ public class Enunciate {
   }
 
   /**
+   * Compile all sources and any additional (generated) sources to the specified directory.
+   *
+   * @param compileDir The compile directory.
+   * @throws EnunciateException If the compile fails.
+   */
+  public void compileSources(File compileDir) throws EnunciateException {
+    ArrayList<String> sources = new ArrayList<String>(Arrays.asList(getSourceFiles()));
+    for (File sourceRoot : getAdditionalSourceRoots()) {
+      sources.addAll(getJavaFiles(sourceRoot));
+    }
+    invokeJavac(compileDir, sources.toArray(new String[sources.size()]));
+  }
+
+  /**
    * Invokes javac on the specified source files. The classpath will be the classpath for this enunciate mechanism,
    * if specified, otherwise the system classpath.
    *
@@ -617,6 +636,10 @@ public class Enunciate {
     args.add(version);
     args.add("-target");
     args.add(version);
+
+    if (isCompileDebugInfo()) {
+      args.add("-g");
+    }
 
     if (isDebug()) {
       args.add("-verbose");
@@ -1020,6 +1043,24 @@ public class Enunciate {
   }
 
   /**
+   * Whether to compile with debug info.
+   *
+   * @return Whether to compile with debug info.
+   */
+  public boolean isCompileDebugInfo() {
+    return compileDebugInfo;
+  }
+
+  /**
+   * Whether to compile with debug info.
+   *
+   * @param compileDebugInfo Whether to compile with debug info.
+   */
+  public void setCompileDebugInfo(boolean compileDebugInfo) {
+    this.compileDebugInfo = compileDebugInfo;
+  }
+
+  /**
    * The enunciate config file.
    *
    * @return The enunciate config file.
@@ -1191,6 +1232,42 @@ public class Enunciate {
   public boolean addArtifact(Artifact artifact) {
     info("Artifact %s added for module %s.", artifact.getId(), artifact.getModule());
     return this.artifacts.add(artifact);
+  }
+
+  /**
+   * Add a webapp fragment for Enunciate to process.
+   *
+   * @param fragment The fragment.
+   */
+  public void addWebAppFragment(WebAppFragment fragment) {
+    this.webAppFragments.add(fragment);
+  }
+
+  /**
+   * The webapp fragments.
+   *
+   * @return The webapp fragments.
+   */
+  public Set<WebAppFragment> getWebAppFragments() {
+    return Collections.unmodifiableSet(webAppFragments);
+  }
+
+  /**
+   * Add an additional source root for Enunciate to process.
+   *
+   * @param root The source root directory.
+   */
+  public void addAdditionalSourceRoot(File root) {
+    this.additionalSourceRoots.add(root);
+  }
+
+  /**
+   * The additional source roots.
+   *
+   * @return The additional source roots.
+   */
+  public Set<File> getAdditionalSourceRoots() {
+    return Collections.unmodifiableSet(additionalSourceRoots);
   }
 
   /**

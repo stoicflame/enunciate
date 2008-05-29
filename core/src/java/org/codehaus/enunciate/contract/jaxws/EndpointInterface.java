@@ -20,6 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.contract.ServiceEndpoint;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
@@ -33,7 +34,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class EndpointInterface extends DecoratedTypeDeclaration {
+public class EndpointInterface extends DecoratedTypeDeclaration implements ServiceEndpoint {
 
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
@@ -93,6 +94,21 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     }
 
     this.webMethods = webMethods;
+  }
+
+  // Inherited.
+  public String getServiceEndpointName() {
+    return getSimpleName();
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointInterface() {
+    return this;
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointDefaultImplementation() {
+    return impls.isEmpty() ? null : impls.iterator().next();
   }
 
   /**

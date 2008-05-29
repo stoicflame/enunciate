@@ -38,13 +38,13 @@
     <ant dir="${core.basedir}" target="clean"/>
     <ant dir="${modules.xml.basedir}" target="clean"/>
     <ant dir="${modules.jaxws.basedir}" target="clean"/>
-    <ant dir="${modules.rest.basedir}" target="clean"/>
     <ant dir="${modules.xfire-client.basedir}" target="clean"/>
     <ant dir="${modules.docs.basedir}" target="clean"/>
     <ant dir="${modules.amf.basedir}" target="clean"/>
     <ant dir="${modules.gwt.basedir}" target="clean"/>
-    <ant dir="${modules.xfire.basedir}" target="clean"/>
     <ant dir="${modules.spring-app.basedir}" target="clean"/>
+    <ant dir="${modules.xfire.basedir}" target="clean"/>
+    <ant dir="${modules.rest.basedir}" target="clean"/>
     <ant dir="${modules.test-integration.basedir}" target="clean"/>
     <ant dir="${modules.xfire-integration.basedir}" target="clean"/>
   </target>
@@ -93,13 +93,13 @@
     <ant dir="${core.basedir}"/>
     <ant dir="${modules.xml.basedir}"/>
     <ant dir="${modules.jaxws.basedir}"/>
-    <ant dir="${modules.rest.basedir}"/>
     <ant dir="${modules.xfire-client.basedir}"/>
     <ant dir="${modules.docs.basedir}"/>
     <ant dir="${modules.amf.basedir}"/>
     <ant dir="${modules.gwt.basedir}"/>
-    <ant dir="${modules.xfire.basedir}"/>
     <ant dir="${modules.spring-app.basedir}"/>
+    <ant dir="${modules.xfire.basedir}"/>
+    <ant dir="${modules.rest.basedir}"/>
     <ant dir="${modules.test-integration.basedir}"/>
   </target>
 

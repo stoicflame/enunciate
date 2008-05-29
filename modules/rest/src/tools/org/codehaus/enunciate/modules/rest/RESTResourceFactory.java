@@ -17,11 +17,7 @@
 package org.codehaus.enunciate.modules.rest;
 
 import org.codehaus.enunciate.rest.annotations.*;
-import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
-import org.codehaus.enunciate.service.EnunciateServiceFactory;
-import org.codehaus.enunciate.service.EnunciateServiceFactoryAware;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 
@@ -34,9 +30,8 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class RESTResourceFactory extends ApplicationObjectSupport implements EnunciateServiceFactoryAware {
+public class RESTResourceFactory extends ApplicationObjectSupport {
 
-  private EnunciateServiceFactory enunciateServiceFactory = new DefaultEnunciateServiceFactory();
   private Class[] endpointClasses;
   private List<RESTResource> RESTResources = new ArrayList<RESTResource>();
 
@@ -58,7 +53,6 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
       //fall through... no parameter names found.
     }
 
-    Map<Class, Object> class2instances = new HashMap<Class, Object>();
     if (endpointClasses != null) {
       for (Class endpointClass : endpointClasses) {
         Collection<Class> endpointTypes = findEndpointTypes(endpointClass);
@@ -140,15 +134,9 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
                 resource.setDefaultContentType(defaultContentType);
               }
 
-              Object endpoint = class2instances.get(endpointType);
-              if (endpoint == null) {
-                endpoint = loadEndpointBean(endpointType, endpointClass);
-                class2instances.put(endpointType, endpoint);
-              }
-
               for (String contentType : supportedContentTypes) {
                 for (VerbType verb : verbs) {
-                  if (!resource.addOperation(contentType, verb, endpoint, restMethod)) {
+                  if (!resource.addOperation(contentType, verb, restMethod)) {
                     RESTOperation duplicateOperation = resource.getOperation(contentType, verb);
 
                     throw new ApplicationContextException("Noun '" + noun + "' in context '" + context + "' has more than one '" + verb +
@@ -194,62 +182,6 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
     }
 
     return null;
-  }
-
-  /**
-   * Attempts to load the endpoint bean by first looking for beans that implement the specified endpoint type.
-   * If there is only one, it will be used.  Otherwise, if there is more than one, it will attempt to find one that is named
-   * the {@link org.codehaus.enunciate.rest.annotations.RESTEndpoint#name() same as the REST endpoint} or fail.  If there are
-   * no endpoint beans in the context that can be assigned to the specified endpoint type, an attempt will be made to
-   * instantiate type specified default implementation.
-   *
-   * @param endpointType The class of the endpoint bean to attempt to load.
-   * @param defaultImpl  The default implementation class.
-   * @return The endpoint bean.
-   * @throws org.springframework.beans.BeansException
-   *          If an attempt was made to instantiate the bean but it failed.
-   */
-  protected Object loadEndpointBean(Class endpointType, Class defaultImpl) throws BeansException {
-    Object endpointBean;
-    Map endpointClassBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), endpointType);
-    if (endpointClassBeans.size() > 0) {
-      RESTEndpoint annotation = (RESTEndpoint) endpointType.getAnnotation(RESTEndpoint.class);
-      String endpointName = annotation == null ? "" : annotation.name();
-      if (!"".equals(endpointName) && endpointClassBeans.containsKey(endpointName)) {
-        //first attempt will be to load the bean identified by the endpoint name:
-        endpointBean = endpointClassBeans.get(endpointName);
-      }
-      else if (endpointClassBeans.size() == 1) {
-        // not there; use the only one if it exists...
-        endpointBean = endpointClassBeans.values().iterator().next();
-      }
-      else {
-        //panic: can't determine the endpoint bean to use.
-        ArrayList beanNames = new ArrayList(endpointClassBeans.keySet());
-        if ("".equals(endpointName)) {
-          endpointName = "and supply an endpoint name with the @RESTEndpoint annotation";
-        }
-        throw new ApplicationContextException("There are more than one beans of type " + endpointType.getName() +
-          " in the application context " + beanNames + ".  Cannot determine which one to use to handle the REST requests.  " +
-          "Either reduce the number of beans of this type to one, or specify which one to use by naming it the name of the REST endpoint (" +
-          endpointName + ").");
-      }
-    }
-    else {
-      //try to instantiate the bean with the default impl...
-      try {
-        endpointBean = defaultImpl.newInstance();
-      }
-      catch (Exception e) {
-        throw new ApplicationContextException("Unable to instantiate REST endpoint bean of class " + defaultImpl.getName() + ".", e);
-      }
-    }
-
-    if (endpointType.isInterface()) {
-      endpointBean = this.enunciateServiceFactory.getInstance(endpointBean, endpointType);
-    }
-
-    return endpointBean;
   }
 
   /**
@@ -335,12 +267,4 @@ public class RESTResourceFactory extends ApplicationObjectSupport implements Enu
     this.endpointClasses = endpointClasses;
   }
 
-  /**
-   * Sets the enunciate service factory for this REST controller.
-   *
-   * @param enunciateServiceFactory The enunciate service factory.
-   */
-  public void setEnunciateServiceFactory(EnunciateServiceFactory enunciateServiceFactory) {
-    this.enunciateServiceFactory = enunciateServiceFactory;
-  }
 }

@@ -56,21 +56,22 @@ import java.util.ArrayList;
  *
  * <h1><a name="security_annotations">Security Annotations</a></h1>
  *
- * <p>Web service endpoints are secured via the <a href="http://jcp.org/en/jsr/detail?id=250">JSR-250</a>-defined security annotations: javax.annotation.security.RolesAllowed,
- * javax.annotation.security.PermitAll, and javax.annotation.security.DenyAll.  These annotations can be applied to your endpoint interface methods to specify
+ * <p>Web service endpoints are secured via the <a href="http://jcp.org/en/jsr/detail?id=250">JSR-250</a>-defined security annotations: <tt>javax.annotation.security.RolesAllowed</tt>,
+ * <tt>javax.annotation.security.PermitAll</tt>, and <tt>javax.annotation.security.DenyAll</tt>.  These annotations can be applied to your endpoint interface methods to specify
  * the user roles that are allowed to access these methods and resources. In accordance with the JSR-250 specifiction, these annotations can be applied
  * at either the class-or-interface-level or at the method-level, with the roles granted at the method-level overriding those granted at the
  * class-or-interface-level.</p>
  *
- * <p>If no security annotations are applied to a method nor to its endpoint interface, then no security policy will be applied to the method an access will be
- * open to all users.</p>
+ * <p>If no security annotations are applied to a method nor to its endpoint interface, then no security policy will be applied to the method and access will be
+ * open publicly to all users.</p>
  *
  * <h1><a name="security_user_details">User Details Service</a></h1>
  *
  * <p>In order for a security policy to be implemented, Spring Security must know how to load a user and have access to that user's roles and credentials. You must define
- * in instance of org.springframework.security.userdetails.UserDetailsService in your own spring bean definition file and <a href="#config_springImport">import that
- * file into the spring application context</a>.  Alternatively, you may define a class that implements org.springframework.security.userdetails.UserDetailsService and
- * specify that class with the "userDetailsService" child element of the "security" element in the Enunciate configuration file (see below).</p>
+ * in instance of <tt>org.springframework.security.userdetails.UserDetailsService</tt> in your own spring bean definition file and
+ * <a href="module_spring_app.html#config_springImport">import</a> that file into the spring application context</a>.  Alternatively, you may define a class that implements
+ * <tt>org.springframework.security.userdetails.UserDetailsService</tt> and specify that class with the "userDetailsService" child element of the "security"
+ * element in the Enunciate configuration file (see below).</p>
  *
  * <h1><a name="security_config">The "security" configuration element</a></h1>
  *
@@ -89,11 +90,11 @@ import java.util.ArrayList;
  * 
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security enableFormBasedLogin="[true|false]" enableFormBasedLogout="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;persistIdentityAcrossHttpSession="[true|false]" enableRememberMeToken="[true|false]"
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security enableFormBasedLogin="[true|false]" key="..." realmName="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enableRememberMeToken="[true|false]" enableFormBasedLogout="[true|false]"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadAnonymousIdentity="[true|false]" enableBasicHTTPAuth="[true|false]"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enableDigestHTTPAuth="[true|false]" enableOAuth="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initJ2EESecurityContext="[true|false]" key="..." realmName="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initJ2EESecurityContext="[true|false]"&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;userDetailsService beanName="..." className="..."/&gt;
  *
@@ -109,10 +110,7 @@ import java.util.ArrayList;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;oauth infoURL="..." infoPageFile="..." requestTokenURL="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accessConfirmationURL="..." confirmAccessPageFile="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accessConfirmedURL="..." accessConfirmedPageFile="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grantAccessURL="..." accessTokenURL="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;tokenServices beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;consumerDetailsService beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/oauth&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grantAccessURL="..." accessTokenURL="..."/&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formBasedLogout url="..." redirectOnSuccessUrl="..."/&gt;
  *
@@ -122,15 +120,7 @@ import java.util.ArrayList;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entryPoint beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/onAuthenticationFailed&gt;
  *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;onAccessDenied redirectTo="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;entryPoint beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/onAccessDenied&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;primaryProvider beanName="..." className="..."/&gt;
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;provider beanName="..." className="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;onAccessDenied redirectTo="..."/&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
@@ -152,8 +142,6 @@ import java.util.ArrayList;
  *       This endpoint can be configured with the "formBasedLogin" child element (see below).</li>
  *   <li>The "enableFormBasedLogout" attribute is used to enable a form-based logout endpoint (for example, a browser-submitted form). Default: "false".
  *       This endpoint can be configured with the "formBasedLogout" child element (see below).</li>
- *   <li>The "persistIdentityAcrossHttpSession" attribute is used to specify whether the identity (established upon authentication) is to be persisted across
- *       the HTTP session. Default: "false".</li>
  *   <li>The "enableRememberMeToken" attribute is used to enable Spring Security to set a remember-me token as a cookie in the HTTP response which can be used to
  *       "remember" the identity for a specified time.  Default: "false". Remember-me services can be configured with the "rememberMe" child element
  *       (see below).</li>
@@ -170,7 +158,7 @@ import java.util.ArrayList;
  *   <li>The "key" attribute is used to specify the default security key that is to be used as necessary for security hashes. etc. If not supplied, a random
  *       default will be provided.</li>
  *   <li>The "realmName" attribute is used to specify the default realm name to be used for the authentication mechanisms that require it (e.g. HTTP Basic Auth,
- *       HTTP Digest Auth). The default value is "Generic Enunciate Application Realm".</li>
+ *       HTTP Digest Auth). The default value is "Spring Security Application".</li>
  * </ul>
  *
  * <p>The "security" element also supports a number of child elements that can be used to further configure the Web service security mechanism.</p>
@@ -196,10 +184,7 @@ import java.util.ArrayList;
  * <h3>onAccessDenied</h3>
  *
  * <p>The "onAccessDenied" child element is used to specify the action to take if access is denied. This element supports a "redirectTo" attribute
- * that will specify that the request is to be redirected to the given URL. The "onAccessDenied" element also supports a child element, "useEntryPoint",
- * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
- * authentcation entry point must implement <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/AccessDeniedHandler.html">org.springframework.security.ui.AccessDeniedHandler</a>.</p>
+ * that will specify that the request is to be redirected to the given URL.</p>
  *
  * <p>The default action Enunciate takes if access is denied is simply to issue an HTTP 403 (Forbidden) error.</p>
  *
@@ -234,9 +219,8 @@ import java.util.ArrayList;
  * that the user give out any credentials to that third party.  To learn more about OAuth, please refer to the <a href="http://oauth.net/">OAuth project</a>.
  * You may also want to read <a href="http://www.hueniverse.com/hueniverse/2007/10/beginners-gui-1.html">this fine illustration</a> of OAuth in action.</p>
  *
- * <p>To enable OAuth, you must provide implementations of <a href="#">org.springframework.security.oauth.provider.ConsumerDetailsService</a> and
- * <a href="#">org.springframework.security.oauth.provider.token.OAuthProviderTokenServices</a> which you will provide in the corresponding
- * configuration elements (see blow).</p>
+ * <p>To enable OAuth, you must provide an implementation of <a href="http://spring-security-oauth.codehaus.org/apidocs/org/springframework/security/oauth/provider/ConsumerDetailsService.html">org.springframework.security.oauth.provider.ConsumerDetailsService</a>,
+ * which you can do by defining the bean in your own spring bean configuration file (and importing it) or by using the configuration of the "oauth" element (see below.)</p>
  *
  * <p>The "oauth" element supports the following attributes:</p>
  *
@@ -265,7 +249,7 @@ import java.util.ArrayList;
  * and "className" which can be used to specify the implementation of OAuthProviderTokenServices and ConsumerDetailsService to use.  The "beanName" attribute
  * is used to specify the name of a spring bean.  The "className" attribute is used to specify the FQN of the implementation class. It should be noted that
  * if these elements are not supplied, an instance of OAuthProviderTokenServices and ConsumerDetailsService will attempt to be looked up in the context. If
- * an instance for either of these is not found, OAuth will be disabled.</p>
+ * an instance for either of these is not found, OAuth will fail.</p>
  *
  * <p>For more information about OAuth configuration, refer to <a href="http://spring-security-oauth.codehaus.org/">OAuth for Spring Security</a>.</p>
  *
@@ -291,9 +275,7 @@ import java.util.ArrayList;
  * <h3>rememberMe</h3>
  *
  * <p>The "rememberMeConfig" child element is used to configure the remember-me identity processing.  The "key" attribute specifies the security key that will
- * be used to encode the remember-me token.  The default value is the key supplied in the general security configuration.  The "cookieName" is the name of
- * the cookie that will hold the remember-me token. The default value is "SPRING_SECURITY_HASHED_REMEMBER_ME_COOKIE".  The "tokenValiditySeconds" attribute specifies how long the remember-me token will
- * be valid.  The default value is 14 days.</p>
+ * be used to encode the remember-me token.  The default value is the key supplied in the general security configuration.</p>
  *
  * <p>For more information about remember-me identity processing, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/rememberme/TokenBasedRememberMeServices.html">org.springframework.security.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
  *
@@ -312,25 +294,13 @@ import java.util.ArrayList;
  * primary authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. The
  * primary authentication provider implements the <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/AuthenticationProvider.html">org.springframework.security.providers.AuthenticationProvider</a> interface.</p>
  *
- * <h3>provider</h3>
- *
- * <p>The "provider" child element specifies another Spring Security authentication provider that is to be used to provide authentication services. The "provider"
- * element supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
- * authentication provider.  The "className" attribute is used to specify the fully-qualified class name of the authentication provider to use. An
- * authentication provider implements the <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/AuthenticationProvider.html">org.springframework.security.providers.AuthenticationProvider</a> interface. You can provide any number of additional
- * authentication providers to Enunciate (e.g. <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/x509/X509AuthenticationProvider.html">X509AuthenticationProvider</a>, <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/providers/ldap/LdapAuthenticationProvider.html">LdapAuthenticationProvider</a>, etc.).</p>
- *
  * <h1><a name="security_login_logout">Login and Logout API Methods</a></h1>
  *
- * <p>You may be interested in implementing "login" and "logout" Web service API methods. To do this:</p>
- *
- * <ul>
- *   <li>Create an endpoint interface that implements org.codehaus.enunciate.modules.spring_app.LoginLogoutProvider</li>
- *   <li>Create your login and logout API methods on your interface.</li>
- *   <li>Delegate the login and logout method calls to the supplied org.codehaus.enunciate.modules.spring_app.LoginLogoutHelper</li>
- * </ul>
- *
- * <p>This will put/remove the identity in the current Spring Security security context.  (Note that if you want this identity to persist across the HTTP session, make sure
+ * <p>You may be interested in implementing "login" and "logout" Web service API methods. To do this, you may
+ * <a href="http://static.springframework.org/spring/docs/2.5.x/reference/beans.html#beans-annotation-config">autowire</a> an instance of
+ * <tt>org.codehaus.enunciate.modules.spring_app.LoginLogoutHelper</tt> into your service endpoint bean. The definition of your login method may
+ * then delegate the login and logout method calls to the supplied <tt>LoginLogoutHelper</tt>, which will put/remove the identity in the
+ * current Spring Security security context.  (Note that if you want this identity to persist across the HTTP session, make sure
  * that "persistIdentityAcrossHttpSession" on the security config is set to "true".)</p>
  *
  * @author Ryan Heaton
@@ -340,7 +310,6 @@ public class SecurityConfig {
 
   private boolean enableFormBasedLogin = false;
   private boolean enableFormBasedLogout = false;
-  private boolean persistIdentityAcrossHttpSession = false;
   private boolean enableRememberMeToken = false;
   private boolean loadAnonymousIdentity = true;
   private boolean enableBasicHTTPAuth = true;
@@ -360,8 +329,6 @@ public class SecurityConfig {
   private EntryPointConfig onAccessDenied;
 
   private BeanReference userDetailsService;
-  private BeanReference primaryAuthenticationProvider;
-  private List<BeanReference> additionalAuthenticationProviders;
   private List<BeanReference> additionalAuthenticationFilters;
 
   //global defaults
@@ -386,7 +353,6 @@ public class SecurityConfig {
     this.enableFormBasedLogin = enableFormBasedLogin;
     
     if (enableFormBasedLogin) {
-      this.persistIdentityAcrossHttpSession = true;
     }
   }
 
@@ -406,24 +372,6 @@ public class SecurityConfig {
    */
   public void setEnableFormBasedLogout(boolean enableFormBasedLogout) {
     this.enableFormBasedLogout = enableFormBasedLogout;
-  }
-
-  /**
-   * Whether to persist the identity across the HTTP session.
-   *
-   * @return Whether to persist the identity across the HTTP session.
-   */
-  public boolean isPersistIdentityAcrossHttpSession() {
-    return persistIdentityAcrossHttpSession;
-  }
-
-  /**
-   * Whether to persist the identity across the HTTP session.
-   *
-   * @param persistIdentityAcrossHttpSession Whether to persist the identity across the HTTP session.
-   */
-  public void setPersistIdentityAcrossHttpSession(boolean persistIdentityAcrossHttpSession) {
-    this.persistIdentityAcrossHttpSession = persistIdentityAcrossHttpSession;
   }
 
   /**
@@ -676,55 +624,6 @@ public class SecurityConfig {
    */
   public void setUserDetailsService(BeanReference userDetailsService) {
     this.userDetailsService = userDetailsService;
-  }
-
-  /**
-   * The primary authentication provider.
-   *
-   * @return The primary authentication provider.
-   */
-  public BeanReference getPrimaryAuthenticationProvider() {
-    return primaryAuthenticationProvider;
-  }
-
-  /**
-   * The primary authentication provider.
-   *
-   * @param primaryAuthenticationProvider The primary authentication provider.
-   */
-  public void setPrimaryAuthenticationProvider(BeanReference primaryAuthenticationProvider) {
-    this.primaryAuthenticationProvider = primaryAuthenticationProvider;
-  }
-
-  /**
-   * Any additional authentication service providers.
-   *
-   * @return Any additional authentication service providers.
-   */
-  public List<BeanReference> getAdditionalAuthenticationProviders() {
-    return additionalAuthenticationProviders;
-  }
-
-  /**
-   * Any additional authentication service providers.
-   *
-   * @param additionalAuthenticationProviders Any additional authentication service providers.
-   */
-  public void setAdditionalAuthenticationProviders(List<BeanReference> additionalAuthenticationProviders) {
-    this.additionalAuthenticationProviders = additionalAuthenticationProviders;
-  }
-
-  /**
-   * Add an additional authentication provider.
-   *
-   * @param additionalAuthenticationProvider The additional authentication provider.
-   */
-  public void addAdditionalAuthenticationProvider(BeanReference additionalAuthenticationProvider) {
-    if (this.additionalAuthenticationProviders == null) {
-      this.additionalAuthenticationProviders = new ArrayList<BeanReference>();
-    }
-
-    this.additionalAuthenticationProviders.add(additionalAuthenticationProvider);
   }
 
   /**

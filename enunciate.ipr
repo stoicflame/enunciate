@@ -542,7 +542,6 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="file://$PROJECT_DIR$/../../tools/jaxb-2.0.5/src" />
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/org/codehaus/jettison/jettison/1.0-RC2/jettison-1.0-RC2-sources.jar!/" />
       </SOURCES>
     </library>
@@ -564,11 +563,7 @@
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/stax/stax-api/1.0.1/stax-api-1.0.1.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-java5/src/main" />
-        <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-aegis/src/main" />
-        <root url="file://$PROJECT_DIR$/../../tools/xfire-1.2.2/src/xfire-core/src/main" />
-      </SOURCES>
+      <SOURCES />
     </library>
     <library name="xfire">
       <CLASSES>
@@ -580,7 +575,6 @@
     <library name="gwt">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/../../.m2/repository/com/google/gwt/gwt-servlet/1.4.60/gwt-servlet-1.4.60.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../../.m2/repository/net/sf/gwt-widget/gwt-widgets-server/0.1.4/gwt-widgets-server-0.1.4.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

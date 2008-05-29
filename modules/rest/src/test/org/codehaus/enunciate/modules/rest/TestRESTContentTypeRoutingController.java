@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.rest;
 
 import static org.easymock.EasyMock.*;
+import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
 
 import junit.framework.TestCase;
 
@@ -35,13 +36,16 @@ public class TestRESTContentTypeRoutingController extends TestCase {
    */
   public void testHandleRequestInternal() throws Exception {
     HashMap<String, String> contentTypes2Ids = new HashMap<String, String>();
-    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"), new ContentTypeSupport(contentTypes2Ids, null)) {
+    HashMap<String, RESTRequestContentTypeHandler> contentTypes2Handlers = new HashMap<String, RESTRequestContentTypeHandler>();
+    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun")) {
       @Override
       protected String getContentType(HttpServletRequest request) {
         return "application/data+xml";
       }
     };
     contentTypes2Ids.put("application/data+xml", "data");
+    contentTypes2Handlers.put("application/data+xml", new JaxbXmlContentHandler());
+    controller.setContentTypeSupport(new ContentTypeSupport(contentTypes2Ids, contentTypes2Handlers));
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
     HttpServletResponse response = createMock(HttpServletResponse.class);
@@ -65,6 +69,7 @@ public class TestRESTContentTypeRoutingController extends TestCase {
     reset(request, response, dispatcher);
 
     contentTypes2Ids.clear();
+    controller.setContentTypeSupport(new ContentTypeSupport(null, null));
     expect(request.getRequestURI()).andReturn("/context/rest/noun");
     expect(request.getContextPath()).andReturn("/context/");
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -78,7 +83,7 @@ public class TestRESTContentTypeRoutingController extends TestCase {
    * test getContentType
    */
   public void testGetContentType() throws Exception {
-    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"), null);
+    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"));
     HttpServletRequest request = createMock(HttpServletRequest.class);
     expect(request.getParameter("contentType")).andReturn("application/xml");
     replay(request);

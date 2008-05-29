@@ -16,8 +16,6 @@
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.springframework.context.support.ApplicationObjectSupport;
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,7 +24,7 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class NamespacePrefixLookup extends ApplicationObjectSupport {
+public class NamespacePrefixLookup {
 
   private final Map<String, String> ns2prefix;
 

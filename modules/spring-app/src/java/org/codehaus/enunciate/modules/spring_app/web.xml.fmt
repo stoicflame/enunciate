@@ -4,152 +4,170 @@
 <web-app>
 
   <display-name>${displayName}</display-name>
+  [#list webAppFragments as fragment]
+    [#if fragment.contextParameters?exists]
+      [#list fragment.contextParameters?keys as param]
+
+    <context-param>
+      <param-name>${param}</param-name>
+      <param-value>${fragment.contextParameters[param]}</param-value>
+    </context-param>
+      [/#list]
+    [/#if]
+  [/#list]
 
   <filter>
     <filter-name>http-request-context</filter-name>
     <filter-class>org.codehaus.enunciate.modules.spring_app.HTTPRequestContextFilter</filter-class>
   </filter>
+  [#list webAppFragments as fragment]
+    [#if fragment.filters?exists]
+      [#list fragment.filters as filter]
 
-  [#if securityEnabled]
   <filter>
-    <filter-name>spring-security</filter-name>
-    <filter-class>org.springframework.security.util.FilterToBeanProxy</filter-class>
+    <filter-name>${filter.name}</filter-name>
+    <filter-class>${filter.classname}</filter-class>
+        [#if filter.initParams?exists]
+          [#list filter.initParams?keys as initParam]
     <init-param>
-      <param-name>targetBean</param-name>
-      <param-value>filterChainProxy</param-value>
+      <param-name>${initParam}</param-name>
+      <param-value>${filter.initParams[initParam]}</param-value>
     </init-param>
+          [/#list]
+        [/#if]
   </filter>
+      [/#list]
+    [/#if]
+  [/#list]
+  [#if securityEnabled]
 
+  <filter>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  </filter>
   [/#if]
+  [#list webAppFragments as fragment]
+    [#if fragment.filters?exists]
+      [#list fragment.filters as filter]
+        [#if filter.urlMappings?exists]
+          [#list filter.urlMappings as urlMapping]
+
+  <filter-mapping>
+    <filter-name>${filter.name}</filter-name>
+    <url-pattern>${urlMapping}</url-pattern>
+  </filter-mapping>
+          [/#list]
+        [/#if]
+      [/#list]
+    [/#if]
+  [/#list]
+
   <filter-mapping>
     <filter-name>http-request-context</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-
   [#if securityEnabled]
+
   <filter-mapping>
-    <filter-name>spring-security</filter-name>
+    <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-
   [/#if]
+
   <listener>
     <listener-class>${springContextLoaderListenerClass?default("org.springframework.web.context.ContextLoaderListener")}</listener-class>
   </listener>
 
-  <servlet>
-    <servlet-name>spring</servlet-name>
-    <servlet-class>${springDispatcherServletClass?default("org.springframework.web.servlet.DispatcherServlet")}</servlet-class>
-  </servlet>
+  <listener>
+    <listener-class>org.codehaus.enunciate.modules.spring_app.SpringComponentPostProcessor</listener-class>
+  </listener>
+  [#list webAppFragments as fragment]
+    [#if fragment.listeners?exists]
+      [#list fragment.listeners as listener]
 
-  [#if gwtEnabled]
-    [@forEachWsdl]
-      [@forEachEndpointInterface wsdl=wsdl]
-  <servlet>
-    <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
-    <servlet-class>${endpointInterface.package.qualifiedName}.gwt.GWT${endpointInterface.simpleName}Impl</servlet-class>
-  </servlet>
+  <listener>
+    <listener-class>${listener}</listener-class>
+  </listener>
+      [/#list]
+    [/#if]
+  [/#list]
+  [#list webAppFragments as fragment]
+    [#if fragment.servlets?exists]
+      [#list fragment.servlets as servlet]
 
-      [/@forEachEndpointInterface]
-    [/@forEachWsdl]
+  <servlet>
+    <servlet-name>${servlet.name}</servlet-name>
+    <servlet-class>${servlet.classname}</servlet-class>
+        [#if servlet.initParams?exists]
+          [#list servlet.initParams?keys as initParam]
+    <init-param>
+      <param-name>${initParam}</param-name>
+      <param-value>${servlet.initParams[initParam]}</param-value>
+    </init-param>
+          [/#list]
+        [/#if]
+  </servlet>
+      [/#list]
+    [/#if]
+  [/#list]
+  [#if securityEnabled]
+
+  <servlet>
+    <servlet-name>security</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  </servlet>
   [/#if]
-  [#if amfEnabled]
-  <servlet>
-      <servlet-name>AMFMessageServlet</servlet-name>
-      <servlet-class>flex.messaging.MessageBrokerServlet</servlet-class>
-      <init-param>
-          <param-name>services.configuration.file</param-name>
-          <param-value>/WEB-INF/flex/services-config.xml</param-value>
-      </init-param>
-      <init-param>
-          <param-name>flex.write.path</param-name>
-          <param-value>/WEB-INF/flex</param-value>
-      </init-param>
-      <load-on-startup>1</load-on-startup>
-  </servlet>
+  [#list webAppFragments as fragment]
+    [#if fragment.servlets?exists]
+      [#list fragment.servlets as servlet]
+        [#if servlet.urlMappings?exists]
+          [#list servlet.urlMappings as urlMapping]
 
-  [/#if]
-  [@forEachWsdl]
-    [@forEachEndpointInterface wsdl=wsdl]
-      [#list endpointInterface.endpointImplementations as impl]
-        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>${soapAddressPath(endpointInterface)}</url-pattern>
+    <servlet-name>${servlet.name}</servlet-name>
+    <url-pattern>${urlMapping}</url-pattern>
   </servlet-mapping>
-
+          [/#list]
         [/#if]
       [/#list]
-      [#if gwtEnabled]
-  <servlet-mapping>
-    <servlet-name>GWT${endpointInterface.simpleName}</servlet-name>
-    <url-pattern>/gwt/${endpointInterface.serviceName}</url-pattern>
-  </servlet-mapping>
-
-      [/#if]
-      [#if amfEnabled]
-  <servlet-mapping>
-      <servlet-name>AMFMessageServlet</servlet-name>
-      <url-pattern>/amf/${endpointInterface.serviceName}</url-pattern>
-  </servlet-mapping>
-
-      [/#if]
-    [/@forEachEndpointInterface]
-  [/@forEachWsdl]
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>${restSubcontext}*</url-pattern>
-  </servlet-mapping>
-
-  [#list contentTypes2Ids?values as contentTypeId]
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>/${contentTypeId}/*</url-pattern>
-  </servlet-mapping>
-
+    [/#if]
   [/#list]
   [#if securityEnabled]
     [#if securityConfig.enableFormBasedLogin]
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
+    <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.formBasedLoginConfig.loginPageURL}</url-pattern>
   </servlet-mapping>
 
     [/#if]
     [#if securityConfig.enableOAuth]
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
+    <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.infoURL}</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
+    <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.accessConfirmationURL}</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>spring</servlet-name>
+    <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.accessConfirmedURL}</url-pattern>
   </servlet-mapping>
 
     [/#if]
   [/#if]
-  [#list customHandlerMappings?keys as pattern]
+  [#list webAppFragments as fragment]
+    [#if fragment.mimeMappings?exists]
+      [#list fragment.mimeMappings?keys as extension]
 
-  <servlet-mapping>
-    <servlet-name>spring</servlet-name>
-    <url-pattern>${pattern}</url-pattern>
-  </servlet-mapping>
+  <mime-mapping>
+    <extension>${extension}</extension>
+    <mime-type>${fragment.mimeMappings[extension]}</mime-type>
+  </mime-mapping>
+      [/#list]
+    [/#if]
   [/#list]
-  <mime-mapping>
-    <extension>wsdl</extension>
-    <mime-type>text/xml</mime-type>
-  </mime-mapping>
-
-  <mime-mapping>
-    <extension>xsd</extension>
-    <mime-type>text/xml</mime-type>
-  </mime-mapping>
-
 </web-app>
 [/@file]

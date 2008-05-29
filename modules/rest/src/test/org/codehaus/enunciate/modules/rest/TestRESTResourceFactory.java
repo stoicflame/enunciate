@@ -116,7 +116,6 @@ public class TestRESTResourceFactory extends TestCase {
         }
 
         RESTOperation operation = resource.getOperation("application/xml", verbType);
-        assertSame(advisedEndpoint, operation.getEndpoint());
         assertNotNull(operation);
       }
       resources.remove(resource);

@@ -27,13 +27,15 @@ import org.apache.commons.digester.RuleSetBase;
 public class GWTRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
+    digester.addSetProperties("enunciate/modules/gwt/war");
+    
     digester.addCallMethod("enunciate/modules/gwt/gwtCompileJVMArg", "addGwtCompileJVMArg", 1);
     digester.addCallParam("enunciate/modules/gwt/gwtCompileJVMArg", 0, "value");
 
     digester.addObjectCreate("enunciate/modules/gwt/app", GWTApp.class);
     digester.addSetProperties("enunciate/modules/gwt/app",
-                              new String[] {"name", "javascriptStyle", "srcDir"},
-                              new String[] {"name", "javascriptStyleValue", "srcDir"} );
+                              new String[]{"name", "javascriptStyle", "srcDir"},
+                              new String[]{"name", "javascriptStyleValue", "srcDir"});
     digester.addSetNext("enunciate/modules/gwt/app", "addGWTApp");
 
     digester.addObjectCreate("enunciate/modules/gwt/app/module", GWTAppModule.class);

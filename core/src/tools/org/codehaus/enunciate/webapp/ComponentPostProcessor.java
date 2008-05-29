@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.service;
+package org.codehaus.enunciate.webapp;
 
 /**
- * Interface for specifying awareness of an {@link EnunciateServiceFactory}.
+ * Basic interface for post-processing a web application component.
  *
  * @author Ryan Heaton
  */
-public interface EnunciateServiceFactoryAware {
+public interface ComponentPostProcessor {
 
   /**
-   * Set the enunciate service factory to use.
+   * Perform any component post-processing.
    *
-   * @param factory The factory to use.
+   * @param component The component to post-process.
    */
-  void setEnunciateServiceFactory(EnunciateServiceFactory factory);
-  
+  void postProcess(Object component);
 }

@@ -9,6 +9,10 @@ package ${endpointInterface.package.qualifiedName}.amf;
  */
 public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.modules.amf.AMFEndpointImpl {
 
+  public AMF${endpointInterface.simpleName}() throws Exception {
+    super(new ${endpointInterface.endpointImplementations[0].qualifiedName}());
+  }
+
   [@forEachWebMethod endpointInterface=endpointInterface]
     [#if !webMethod.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
 
@@ -45,9 +49,13 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
   [/@forEachWebMethod]
 
   // Inherited.
-  protected Class getServiceClass() {
-    return ${endpointInterface.endpointImplementations[0].qualifiedName}.class;
+  protected Class getServiceInterface() {
+    return ${endpointInterface.qualifiedName}.class;
   }
 
+  @org.springframework.beans.factory.annotation.Autowired ( required = false )
+  public void setServiceBean(@org.springframework.beans.factory.annotation.Qualifier( "enunciate-service-bean" ) ${endpointInterface.qualifiedName} serviceBean) {
+    this.serviceBean = serviceBean;
+  }
 }
 [/@file]

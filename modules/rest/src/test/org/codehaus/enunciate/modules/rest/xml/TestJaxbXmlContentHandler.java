@@ -56,7 +56,7 @@ public class TestJaxbXmlContentHandler extends TestCase {
     reset(request);
 
     RESTResource resource = new RESTResource("example");
-    resource.addOperation("text/xml", VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
+    resource.addOperation("text/xml", VerbType.update, MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
     expect(request.getAttribute(RESTResource.class.getName())).andReturn(resource);
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -83,7 +83,7 @@ public class TestJaxbXmlContentHandler extends TestCase {
     reset(request, response);
 
     RESTResource resource = new RESTResource("example");
-    resource.addOperation("text/xml", VerbType.update, new MockRESTEndpoint(), MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
+    resource.addOperation("text/xml", VerbType.update, MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
     expect(request.getAttribute(RESTResource.class.getName())).andReturn(resource);
     RootElementExample ex = new RootElementExample();
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);

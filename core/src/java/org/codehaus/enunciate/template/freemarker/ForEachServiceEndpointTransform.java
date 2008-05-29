@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
+package org.codehaus.enunciate.template.freemarker;
 
-import org.springframework.security.providers.AuthenticationProvider;
-import org.springframework.security.Authentication;
-import org.springframework.security.AuthenticationException;
+import org.codehaus.enunciate.template.strategies.ServiceEndpointLoopStrategy;
+import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 
 /**
- * No-op provider.
- *
  * @author Ryan Heaton
  */
-public class NoOpProvider implements AuthenticationProvider {
+public class ForEachServiceEndpointTransform extends FreemarkerTransform<ServiceEndpointLoopStrategy> {
 
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    return null;
+  public ForEachServiceEndpointTransform(String namespace) {
+    super(namespace);
   }
 
-  public boolean supports(Class authentication) {
-    return false;
+  public ServiceEndpointLoopStrategy newStrategy() {
+    return new ServiceEndpointLoopStrategy();
   }
 }

@@ -24,8 +24,6 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,20 +60,18 @@ public class HasSecureMethod implements TemplateMethodModelEx {
    */
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The hasSecureMethod method must have an endpoint as a parameter.");
+      throw new TemplateModelException("The hasSecureMethod method must have an endpoint interface as a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object object = BeansWrapper.getDefaultInstance().unwrap(from);
     Collection<? extends MethodDeclaration> methods;
-    if (object instanceof EndpointInterface) {
-      methods = ((EndpointInterface) object).getWebMethods();
-    }
-    else if (object instanceof RESTEndpoint) {
-      methods = ((RESTEndpoint) object).getRESTMethods();
+    if (object instanceof TypeDeclaration) {
+      //todo: this doesn't check to see if the method is excluded (e.g. @WebMethod(exclude=true)). 
+      methods = ((TypeDeclaration) object).getMethods();
     }
     else {
-      throw new TemplateModelException("The hasSecureMethod method must be either an EndpointInterface or a RESTEndpoint.  Not " + object.getClass().getName());
+      throw new TemplateModelException("The hasSecureMethod method must be a TypeDeclaration.  Not " + object.getClass().getName());
     }
 
     TypeDeclaration typeDeclaration = (TypeDeclaration) object;

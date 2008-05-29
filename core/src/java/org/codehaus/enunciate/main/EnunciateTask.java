@@ -43,6 +43,7 @@ public class EnunciateTask extends MatchingTask {
 
   private boolean verbose = false;
   private boolean debug = false;
+  private boolean compileDebugInfo = true;
   private File configFile;
   private File basedir;
   private Path classpath;
@@ -256,6 +257,24 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setFlexHome(File flexHome) {
     this.flexHome = flexHome;
+  }
+
+  /**
+   * Whether to compile with debug info.
+   *
+   * @return Whether to compile with debug info.
+   */
+  public boolean isCompileDebugInfo() {
+    return compileDebugInfo;
+  }
+
+  /**
+   * Whether to compile with debug info.
+   *
+   * @param compileDebugInfo Whether to compile with debug info.
+   */
+  public void setCompileDebugInfo(boolean compileDebugInfo) {
+    this.compileDebugInfo = compileDebugInfo;
   }
 
   /**

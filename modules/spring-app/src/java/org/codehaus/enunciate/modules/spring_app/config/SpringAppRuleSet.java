@@ -20,8 +20,6 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 import org.codehaus.enunciate.modules.spring_app.config.security.*;
 
-import java.util.List;
-
 /**
  * Rules for the configuration of the XFire client module.
  *
@@ -59,10 +57,6 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/spring-app/springImport", SpringImport.class);
     digester.addSetProperties("enunciate/modules/spring-app/springImport");
     digester.addSetNext("enunciate/modules/spring-app/springImport", "addSpringImport");
-
-    digester.addCallMethod("enunciate/modules/spring-app/handlerMapping", "addCustomHandlerMapping", 2);
-    digester.addCallParam("enunciate/modules/spring-app/handlerMapping", 0, "pattern");
-    digester.addCallParam("enunciate/modules/spring-app/handlerMapping", 1, "beanName");
 
     digester.addObjectCreate("enunciate/modules/spring-app/copyResources", CopyResources.class);
     digester.addSetProperties("enunciate/modules/spring-app/copyResources");
@@ -128,18 +122,6 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/spring-app/security/onAccessDenied", EntryPointConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied");
     digester.addSetNext("enunciate/modules/spring-app/security/onAccessDenied", "setOnAccessDenied");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/security/onAccessDenied/entryPoint", BeanReference.class);
-    digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied/entryPoint");
-    digester.addSetNext("enunciate/modules/spring-app/security/onAccessDenied/entryPoint", "setEntryPoint");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/security/primaryProvider", BeanReference.class);
-    digester.addSetProperties("enunciate/modules/spring-app/security/primaryProvider");
-    digester.addSetNext("enunciate/modules/spring-app/security/primaryProvider", "setPrimaryAuthenticationProvider");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/security/provider", BeanReference.class);
-    digester.addSetProperties("enunciate/modules/spring-app/security/provider");
-    digester.addSetNext("enunciate/modules/spring-app/security/provider", "addAdditionalAuthenticationProvider");
 
     digester.addObjectCreate("enunciate/modules/spring-app/security/filter", BeanReference.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/filter");

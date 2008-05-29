@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.modules.rest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
@@ -23,10 +24,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.IOException;
-import java.net.URLEncoder;
 
 /**
  * REST controller that routes requests for specific content types.
@@ -36,13 +36,12 @@ import java.net.URLEncoder;
 public class RESTContentTypeRoutingController extends AbstractController {
 
   private final String defaultContentType;
-  private final ContentTypeSupport contentTypeSupport;
+  private ContentTypeSupport contentTypeSupport;
   private Pattern replacePattern = Pattern.compile("^/?rest/");
   private String contentTypeParameter = "contentType";
 
-  public RESTContentTypeRoutingController(RESTResource resource, ContentTypeSupport contentTypeSupport) {
+  public RESTContentTypeRoutingController(RESTResource resource) {
     this.defaultContentType = resource.getDefaultContentType();
-    this.contentTypeSupport = contentTypeSupport;
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
@@ -54,32 +53,34 @@ public class RESTContentTypeRoutingController extends AbstractController {
    * @return null
    */
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String requestContext = request.getRequestURI().substring(request.getContextPath().length());
-    Matcher matcher = replacePattern.matcher(requestContext);
-    if (matcher.find()) {
-      String contentType = getContentType(request);
+    if (getContentTypeSupport() != null) {
+      String requestContext = request.getRequestURI().substring(request.getContextPath().length());
+      Matcher matcher = replacePattern.matcher(requestContext);
+      if (matcher.find()) {
+        String contentType = getContentType(request);
 
-      String contentTypeId = null;
-      if (contentType != null) {
-        contentTypeId = lookupContentTypeId(contentType);
-      }
+        String contentTypeId = null;
+        if (contentType != null) {
+          contentTypeId = lookupContentTypeId(contentType);
+        }
 
-      if (contentTypeId != null) {
-        String redirect = matcher.replaceFirst("/" + URLEncoder.encode(contentTypeId, "UTF-8") + "/");
-        RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
-        if (dispatcher != null) {
-          try {
-            dispatcher.forward(request, response);
-          }
-          catch (ServletException e) {
-            if (e.getRootCause() instanceof Exception) {
-              throw (Exception) e.getRootCause();
+        if (contentTypeId != null) {
+          String redirect = matcher.replaceFirst("/" + URLEncoder.encode(contentTypeId, "UTF-8") + "/");
+          RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
+          if (dispatcher != null) {
+            try {
+              dispatcher.forward(request, response);
             }
-            else {
-              throw e;
+            catch (ServletException e) {
+              if (e.getRootCause() instanceof Exception) {
+                throw (Exception) e.getRootCause();
+              }
+              else {
+                throw e;
+              }
             }
+            return null;
           }
-          return null;
         }
       }
     }
@@ -165,4 +166,24 @@ public class RESTContentTypeRoutingController extends AbstractController {
   public void setContentTypeParameter(String contentTypeParameter) {
     this.contentTypeParameter = contentTypeParameter;
   }
+
+  /**
+   * The content type support.
+   *
+   * @return The content type support.
+   */
+  public ContentTypeSupport getContentTypeSupport() {
+    return contentTypeSupport;
+  }
+
+  /**
+   * Set the content type support.
+   *
+   * @param support the content type support.
+   */
+  @Autowired
+  public void setContentTypeSupport(ContentTypeSupport support) {
+    this.contentTypeSupport = support;
+  }
+
 }

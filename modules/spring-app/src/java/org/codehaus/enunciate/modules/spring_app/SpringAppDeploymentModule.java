@@ -21,12 +21,11 @@ import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.template.freemarker.SoapAddressPathMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.Artifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
@@ -144,15 +143,10 @@ import java.util.jar.Manifest;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app compileDebugInfo="[true | false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contextLoaderListenerClass="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dispatcherServletClass="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultDependencyCheck="[none | objects | simple | all]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultAutowire="[no | byName | byType | constructor | autodetect]"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app contextLoaderListenerClass="..."&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docsDir="..." gwtAppDir="..." flexAppDir="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -201,11 +195,7 @@ import java.util.jar.Manifest;
  *
  * <ul>
  * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="module_spring_app_security.html">security</a> should be enabled.  The default is "false."</li>
- * <li>The "<b>compileDebugInfo</b>" attribute specifies that the compiled classes should be compiled with debug info.  The default is "true."</li>
- * <li>The "<b>dispatcherServletClass</b>" attribute specifies the FQN of the class to use as the Spring dispatcher servlet.  The default is "org.springframework.web.servlet.DispatcherServlet".</li>
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
- * <li>The "<b>defaultDependencyCheck</b>" attribute specifies that value of the "default-dependency-check" for the generated spring file.</li>
- * <li>The "<b>defaultAutowire</b>" attribute specifies that value of the "default-autowire" for the generated spring file.</li>
  * <li>The "<b>doCompile</b>" attribute specifies whether this module should take on the responsibility of compiling the server-side classes.  This may not be
  * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
  * <li>The "<b>doLibCopy</b>" attribute specifies whether this module should take on the responsibility of copying libraries to WEB-INF/lib.  This may not be
@@ -220,12 +210,6 @@ import java.util.jar.Manifest;
  *
  * <ul>
  * <li>The "<b>name</b>" attribute specifies the name of the war.  The default is the enunciate configuration label.</li>
- * <li>The "<b>docsDir</b>" attribute specifies a different directory in the war for the documentation (including WSDL and schemas).  The default is the
- * root directory of the war.</li>
- * <li>The "<b>gwtAppDir</b>" attribute specifies a different directory in the war for the GWT appliction(s).  The default is the
- * root directory of the war.</li>
- * <li>The "<b>flexAppDir</b>" attribute specifies a different directory in the war for the flex appliction(s).  The default is the
- * root directory of the war.</li>
  * <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
  * directory.  No tranformation will be applied if none is specified.</li>
  * <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
@@ -368,12 +352,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
-  private final Map<String, String> customHandlerMappings = new HashMap<String, String>();
-  private boolean compileDebugInfo = true;
   private String defaultAutowire = null;
   private String defaultDependencyCheck = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
-  private String dispatcherServletClass = "org.springframework.web.servlet.DispatcherServlet";
+  private String dispatcherServletClass;
   private boolean doCompile = true;
   private boolean doLibCopy = true;
   private boolean doPackage = true;
@@ -389,10 +371,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "spring-servlet.fmt"
+   * @return The URL to "security-servlet.xml.fmt"
    */
-  protected URL getSpringServletTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("spring-servlet.fmt");
+  protected URL getSecurityServletTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("security-servlet.xml.fmt");
   }
 
   /**
@@ -403,17 +385,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "spring-security-context.xml.fmt"
+   * @return The URL to "security-context.xml.fmt"
    */
-  protected URL getSecurityTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("spring-security-context.xml.fmt");
-  }
-
-  /**
-   * @return The URL to "spring-security-oauth-context.xml.fmt"
-   */
-  protected URL getOAuthTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("spring-security-oauth-context.xml.fmt");
+  protected URL getSecurityContextTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("security-context.xml.fmt");
   }
 
   /**
@@ -424,20 +399,43 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    //spit out any deprecation warnings...
+    if (getDefaultDependencyCheck() != null) {
+      warn("As of Enunciate 1.8, defaultDependencyCheck is no longer supported.");
+    }
+
+    if (getDefaultAutowire() != null) {
+      warn("As of Enunciate 1.8, defaultAutowire is no longer supported.");
+    }
+
+    if (getDispatcherServletClass() != null) {
+      warn("As of Enunciate 1.8, specifying the dispatcherServletClass is no longer supported.");
+    }
+
+    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+      warn("As of Enunciate 1.8, the \"docsDir\" attribute is no longer supported on the spring-app war config.  (It was moved to the docs module war config.)");
+    }
+  }
+
+  @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!enunciate.isUpToDateWithSources(getConfigGenerateDir())) {
       EnunciateFreemarkerModel model = getModel();
-
-      //generate the spring-servlet.xml
       model.setFileOutputDirectory(getConfigGenerateDir());
+
+      //standard spring configuration:
+      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("springImports", getSpringImportURIs());
-      model.put("defaultDependencyCheck", getDefaultDependencyCheck());
-      model.put("defaultAutowire", getDefaultAutowire());
       model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
-      model.put("springDispatcherServletClass", getDispatcherServletClass());
-      model.put("soapAddressPath", new SoapAddressPathMethod());
-      model.put("restSubcontext", model.getEnunciateConfig().getDefaultRestSubcontext());
       model.put("displayName", model.getEnunciateConfig().getLabel());
+      Object docsDir = enunciate.getProperty("docs.webapp.dir");
+      if (docsDir == null) {
+        docsDir = "";
+      }
+      model.put("docsDir", docsDir);
       if (!globalServiceInterceptors.isEmpty()) {
         for (GlobalServiceInterceptor interceptor : this.globalServiceInterceptors) {
           if ((interceptor.getBeanName() == null) && (interceptor.getInterceptorClass() == null)) {
@@ -455,32 +453,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         model.put("handlerInterceptors", this.handlerInterceptors);
       }
 
-      model.put("customHandlerMappings", this.customHandlerMappings);
-      model.put("xfireEnabled", getEnunciate().isModuleEnabled("xfire"));
-      model.put("restEnabled", getEnunciate().isModuleEnabled("rest"));
-      model.put("gwtEnabled", getEnunciate().isModuleEnabled("gwt"));
-      model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
-
-      String docsDir = "";
-      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-        docsDir = this.warConfig.getDocsDir().trim();
-        if ((!"".equals(docsDir)) && (!docsDir.endsWith("/"))) {
-          docsDir = docsDir + "/";
-        }
-      }
-      model.put("docsDir", docsDir);
-
       //spring security configuration:
       model.put("securityEnabled", isEnableSecurity());
       model.put("hasSecureMethod", new HasSecureMethod());
       SecurityConfig securityConfig = getSecurityConfig();
       if (securityConfig.getRealmName() == null) {
-        String realmName = "Generic Enunciate Application Realm";
         EnunciateConfiguration enunciateConfig = enunciate.getConfig();
         if (enunciateConfig.getDescription() != null) {
-          realmName = enunciateConfig.getDescription();
+          securityConfig.setRealmName(enunciateConfig.getDescription());
         }
-        securityConfig.setRealmName(realmName);
       }
 
       if (securityConfig.getKey() == null) {
@@ -489,14 +470,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       model.put("securityConfig", securityConfig);
 
       processTemplate(getApplicationContextTemplateURL(), model);
-      processTemplate(getSpringServletTemplateURL(), model);
-      processTemplate(getWebXmlTemplateURL(), model);
       if (isEnableSecurity()) {
-        processTemplate(getSecurityTemplateURL(), model);
-
-        if (getSecurityConfig().isEnableOAuth()) {
-          processTemplate(getOAuthTemplateURL(), model);
-        }
+        processTemplate(getSecurityServletTemplateURL(), model);
+        processTemplate(getSecurityContextTemplateURL(), model);
       }
     }
     else {
@@ -511,70 +487,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       return;
     }
 
-    ArrayList<String> javacAdditionalArgs = new ArrayList<String>();
-    if (compileDebugInfo) {
-      javacAdditionalArgs.add("-g");
-    }
-
     Enunciate enunciate = getEnunciate();
     final File compileDir = getCompileDir();
     if (!enunciate.isUpToDateWithSources(compileDir)) {
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", compileDir, javacAdditionalArgs, enunciate.getSourceFiles());
-
-      File jaxwsSources = (File) enunciate.getProperty("jaxws.src.dir");
-      if (jaxwsSources != null) {
-        info("Compiling the JAX-WS support classes found in %s...", jaxwsSources);
-        Collection<String> jaxwsSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(jaxwsSources));
-
-        File xfireSources = (File) enunciate.getProperty("xfire-server.src.dir");
-        if (xfireSources != null) {
-          //make sure we include all the wrappers generated for the rpc methods, too...
-          jaxwsSourceFiles.addAll(enunciate.getJavaFiles(xfireSources));
-        }
-
-        if (!jaxwsSourceFiles.isEmpty()) {
-          StringBuilder jaxwsClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-          jaxwsClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-          enunciate.invokeJavac(jaxwsClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, jaxwsSourceFiles.toArray(new String[jaxwsSourceFiles.size()]));
-        }
-        else {
-          info("No JAX-WS source files have been found to compile.");
-        }
-      }
-      else {
-        info("No JAX-WS source directory has been found.  SOAP services disabled.");
-      }
-
-      File gwtSources = (File) enunciate.getProperty("gwt.server.src.dir");
-      if (gwtSources != null) {
-        info("Copying the GWT client classes to %s...", compileDir);
-        File gwtClientCompileDir = (File) enunciate.getProperty("gwt.client.compile.dir");
-        if (gwtClientCompileDir == null) {
-          throw new EnunciateException("Required dependency on the GWT client classes not found.");
-        }
-        enunciate.copyDir(gwtClientCompileDir, compileDir);
-
-        info("Compiling the GWT support classes found in %s...", gwtSources);
-        Collection<String> gwtSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(gwtSources));
-        StringBuilder gwtClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-        gwtClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-        enunciate.invokeJavac(gwtClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, gwtSourceFiles.toArray(new String[gwtSourceFiles.size()]));
-      }
-
-      File amfSources = (File) enunciate.getProperty("amf.server.src.dir");
-      if (amfSources != null) {
-        info("Compiling the AMF support classes found in %s...", amfSources);
-        Collection<String> amfSourceFiles = new ArrayList<String>(enunciate.getJavaFiles(amfSources));
-        StringBuilder amfClasspath = new StringBuilder(enunciate.getEnunciateClasspath());
-        amfClasspath.append(File.pathSeparator).append(compileDir.getAbsolutePath());
-        enunciate.invokeJavac(amfClasspath.toString(), "1.5", compileDir, javacAdditionalArgs, amfSourceFiles.toArray(new String[amfSourceFiles.size()]));
-      }
-
-      File restParamterNames = (File) enunciate.getProperty("rest.parameter.names");
-      if (restParamterNames != null) {
-        enunciate.copyFile(restParamterNames, new File(compileDir, "enunciate-rest-parameter-names.properties"));
-      }
-
+      enunciate.compileSources(compileDir);
+      
       if (!this.copyResources.isEmpty()) {
         AntPathMatcher matcher = new AntPathMatcher();
         for (CopyResources copyResource : this.copyResources) {
@@ -623,6 +540,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
       info("Building the expanded WAR in %s", buildDir);
 
+      for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
+        if (fragment.getBaseDir() != null) {
+          enunciate.copyDir(fragment.getBaseDir(), buildDir);
+        }
+      }
+
       if (isDoCompile()) {
         //copy the compiled classes to WEB-INF/classes.
         File webinf = new File(buildDir, "WEB-INF");
@@ -637,17 +560,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         info("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
       }
 
-      copyWebXml();
+      generateWebXml();
 
       copySpringConfig();
-
-      copyDocs();
-
-      copyGwtApps();
-
-      copyAmfConfig();
-
-      copyFlexApps();
 
       if (isEnableSecurity()) {
         createSecurityUI();
@@ -780,89 +695,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Copy any flex apps.
-   */
-  protected void copyFlexApps() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File flexAppDir = (File) enunciate.getProperty("flex.app.dir");
-    if (flexAppDir != null) {
-      File flexAppDest = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getFlexAppDir() != null)) {
-        flexAppDest = new File(buildDir, this.warConfig.getFlexAppDir());
-      }
-      enunciate.copyDir(flexAppDir, flexAppDest);
-    }
-    else {
-      info("No FLEX application directory was found.  Skipping the copy...");
-    }
-  }
-
-  /**
-   * Copy the AMF configuration.
-   */
-  protected void copyAmfConfig() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
-    File amfXmlDir = (File) enunciate.getProperty("amf.xml.dir");
-    if (amfXmlDir != null) {
-      File servicesConfigFile = new File(amfXmlDir, "services-config.xml");
-      if (servicesConfigFile.exists()) {
-        enunciate.copyFile(servicesConfigFile, new File(new File(webinf, "flex"), "services-config.xml"));
-      }
-      else {
-        warn("No services configuration file found.  Skipping the copy...");
-      }
-    }
-    else {
-      info("No AMF configuration directory was found.  Skipping the copy...");
-    }
-  }
-
-  /**
-   * Copy the GWT apps.
-   */
-  protected void copyGwtApps() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File gwtAppDir = (File) enunciate.getProperty("gwt.app.dir");
-    if (gwtAppDir != null) {
-      File gwtAppDest = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getGwtAppDir() != null)) {
-        gwtAppDest = new File(buildDir, this.warConfig.getGwtAppDir());
-      }
-      enunciate.copyDir(gwtAppDir, gwtAppDest);
-    }
-    else {
-      info("No GWT application directory was found.  Skipping the copy...");
-    }
-  }
-
-  /**
-   * Copy the documentation.
-   *
-   * @throws IOException
-   */
-  protected void copyDocs() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    Artifact artifact = enunciate.findArtifact("docs");
-    if (artifact != null) {
-      File docsDir = buildDir;
-      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-        docsDir = new File(buildDir, this.warConfig.getDocsDir());
-        docsDir.mkdirs();
-      }
-
-      artifact.exportTo(docsDir, enunciate);
-    }
-    else {
-      warn("WARNING: No documentation artifact found!");
-    }
-  }
-
-  /**
    * Copy the spring application context and servlet config from the build dir to the WEB-INF directory.
    */
   protected void copySpringConfig() throws IOException {
@@ -871,13 +703,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     File webinf = new File(buildDir, "WEB-INF");
     File configDir = getConfigGenerateDir();
     enunciate.copyFile(new File(configDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
-    enunciate.copyFile(new File(configDir, "spring-servlet.xml"), new File(webinf, "spring-servlet.xml"));
     if (isEnableSecurity()) {
-      enunciate.copyFile(new File(configDir, "spring-security-context.xml"), new File(webinf, "spring-security-context.xml"));
-
-      if (getSecurityConfig().isEnableOAuth()) {
-        enunciate.copyFile(new File(configDir, "spring-security-oauth-context.xml"), new File(webinf, "spring-security-oauth-context.xml"));
-      }
+      enunciate.copyFile(new File(configDir, "security-servlet.xml"), new File(webinf, "security-servlet.xml"));
+      enunciate.copyFile(new File(configDir, "security-context.xml"), new File(webinf, "security-context.xml"));
     }
 
     for (SpringImport springImport : springImports) {
@@ -890,13 +718,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Copies web.xml to WEB-INF. Pass it through a stylesheet, if specified.
+   * generates web.xml to WEB-INF. Pass it through a stylesheet, if specified.
    */
-  protected void copyWebXml() throws IOException, EnunciateException {
+  protected void generateWebXml() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
+    EnunciateFreemarkerModel model = getModel();
     File configDir = getConfigGenerateDir();
+    model.setFileOutputDirectory(configDir);
+    try {
+      //delayed to the "build" phase to enable modules to supply their web app fragments.
+      model.put("webAppFragments", enunciate.getWebAppFragments());
+      processTemplate(getWebXmlTemplateURL(), model);
+    }
+    catch (TemplateException e) {
+      throw new EnunciateException("Error processing web.xml template file.", e);
+    }
+
+    File webinf = new File(buildDir, "WEB-INF");
     File webXML = new File(configDir, "web.xml");
     File destWebXML = new File(webinf, "web.xml");
 
@@ -1204,24 +1043,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * Add a custom handler mapping to the Spring handler.
-   *
-   * @param pattern The pattern.
-   * @param beanName The bean name.
-   */
-  public void addCustomHandlerMapping(String pattern, String beanName) {
-    if (pattern == null) {
-      throw new IllegalArgumentException("A pattern must be supplied to a custom handler mapping.");
-    }
-
-    if (beanName == null) {
-      throw new IllegalArgumentException("The bean name for a custom handler must be supplied to a custom handler mapping.");
-    }
-
-    this.customHandlerMappings.put(pattern, beanName);
-  }
-
-  /**
    * The value for the spring default autowiring.
    *
    * @return The value for the spring default autowiring.
@@ -1484,15 +1305,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
-  }
-
-  /**
-   * Configure whether to compile with debug info (default: true).
-   *
-   * @param compileDebugInfo Whether to compile with debug info (default: true).
-   */
-  public void setCompileDebugInfo(boolean compileDebugInfo) {
-    this.compileDebugInfo = compileDebugInfo;
   }
 
   /**

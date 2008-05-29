@@ -26,7 +26,7 @@ import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.util.*;
 
@@ -55,7 +55,7 @@ public class GWTValidator extends BaseValidator {
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
 
-    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
     if (!isGWTTransient(ei)) {
       if ((this.enforceNamespaceConformance) && (!ei.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
         result.addError(ei.getPosition(), String.format("The package of the endpoint interface, %s, must start with the GWT module namespace, %s.", ei.getPackage().getQualifiedName(), gwtModuleNamespace));

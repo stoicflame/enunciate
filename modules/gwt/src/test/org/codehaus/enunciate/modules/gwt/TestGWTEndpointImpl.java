@@ -17,21 +17,11 @@
 package org.codehaus.enunciate.modules.gwt;
 
 import junit.framework.TestCase;
-import org.codehaus.enunciate.service.DefaultEnunciateServiceFactory;
-import org.codehaus.enunciate.service.EnunciateServiceFactory;
-import org.codehaus.enunciate.service.SecurityExceptionChecker;
-import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
 
-import javax.xml.ws.Holder;
-import javax.servlet.ServletException;
 import javax.servlet.ServletConfig;
+import javax.xml.ws.Holder;
 import java.util.UUID;
 
 /**
@@ -43,47 +33,18 @@ public class TestGWTEndpointImpl extends TestCase {
    * Tests invoking an operation on a GWT endpoint.
    */
   public void testInvokeOperation() throws Exception {
-    final Holder<Integer> counter = new Holder<Integer>(0);
     final ServletConfig servletConfig = createMock(ServletConfig.class);
-    GWTEndpointImpl impl = new GWTEndpointImpl() {
+    GWTEndpointImpl impl = new GWTEndpointImpl(new BeansServiceImpl()) {
 
       @Override
       public ServletConfig getServletConfig() {
         return servletConfig;
       }
 
-      @Override
-      protected ApplicationContext loadAppContext() {
-        return new GenericApplicationContext();
+      protected Class getServiceInterface() {
+        return BeansService.class;
       }
 
-      @Override
-      protected EnunciateServiceFactory loadServiceFactory(ApplicationContext applicationContext) throws ServletException {
-        return new DefaultEnunciateServiceFactory() {
-          @Override
-          public Object getInstance(Object impl, Class... interfaces) {
-            ProxyFactory proxyFactory = new ProxyFactory(impl);
-            proxyFactory.setInterfaces(interfaces);
-            proxyFactory.addAdvice(new MethodInterceptor() {
-              public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-                counter.value = counter.value + 1;
-                return methodInvocation.proceed();
-              }
-            });
-            return proxyFactory.getProxy();
-          }
-        };
-      }
-
-
-      protected Class getServiceClass() {
-        return BeansServiceImpl.class;
-      }
-
-      @Override
-      protected SecurityExceptionChecker loadSecurityChecker(ApplicationContext applicationContext) {
-        return new DefaultSecurityExceptionChecker();
-      }
     };
     replay(servletConfig);
     impl.init();
@@ -109,7 +70,6 @@ public class TestGWTEndpointImpl extends TestCase {
       assertEquals((byte) 8, ex.getProperty2());
       assertEquals(new Character('h'), ex.getProperty3());
     }
-    assertEquals(new Integer(4), counter.value);
   }
 
 }

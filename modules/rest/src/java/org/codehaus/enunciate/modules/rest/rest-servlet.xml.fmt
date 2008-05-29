@@ -1,0 +1,102 @@
+[#ftl]
+[@file name="rest-servlet.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+  <context:annotation-config/>
+
+  <!-- The REST error handler -->
+  <bean id="handlerExceptionResolver" class="org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler"/>
+
+  <!-- the namespace-to-prefix support. -->
+  <bean id="namespacePrefixLookup" class="org.codehaus.enunciate.modules.rest.NamespacePrefixLookup">
+    <constructor-arg>
+      <map>
+  [#list ns2prefix?keys as ns]
+    [#if ns?exists]
+        <entry key="${ns}" value="${ns2prefix[ns]}"/>
+    [/#if]
+  [/#list]
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <!-- the REST content type support -->
+  <bean id="contentTypeSupport" class="org.codehaus.enunciate.modules.rest.ContentTypeSupport">
+    <constructor-arg>
+      <map>
+  [#list contentTypes2Ids?keys as contentType]
+        <entry key="${contentType}" value="${contentTypes2Ids[contentType]}"/>
+  [/#list]
+      </map>
+    </constructor-arg>
+    <constructor-arg>
+      <map>
+  [#list contentTypes2Ids?keys as contentType]
+        <entry key="${contentType}">
+          <bean class="${configuredContentTypeHandlers[contentType]?default(knownContentTypeHandlers[contentType]?default(defaultContentTypeHandler))}"/>
+        </entry>
+  [/#list]
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <!-- the JSON configuration -->
+  <bean id="jsonConfiguration" class="org.codehaus.enunciate.modules.rest.json.JsonConfiguration">
+    <property name="defaultSerializationMethod" value="${defaultJsonSerialization?default("xmlMapped")}"/>
+    <property name="xstreamReferenceAction" value="${xstreamReferenceAction?default("relative_references")}"/>
+  </bean>
+
+  <!-- the REST resource factory and REST resources-->
+  <bean id="restResourceFactory" class="org.codehaus.enunciate.modules.rest.RESTResourceFactory">
+    <property name="endpointClasses">
+      <list>
+        <!-- List the REST endpoint bean classes -->
+  [@forEachRESTEndpoint]
+        <value>${endpoint.qualifiedName}</value>
+  [/@forEachRESTEndpoint]
+      </list>
+    </property>
+  </bean>
+  [@forEachRESTNoun]
+
+  <bean name="enunciate:noun:${noun}" factory-bean="restResourceFactory" factory-method="getRESTResource">
+    <constructor-arg value="${noun.name}"/>
+    <constructor-arg value="${noun.context}"/>
+  </bean>
+  [/@forEachRESTNoun]
+
+  <!-- the handler mapping for the spring servlet. -->
+  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping" autowire="byName">
+    <property name="alwaysUseFullPath" value="true"/>
+    <property name="urlMap">
+      <map>
+  [@forEachRESTEndpoint]
+    [#list endpoint.RESTMethods as RESTMethod]
+
+        <entry key="${restSubcontext}${RESTMethod.noun.antPattern}/**">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
+            <constructor-arg ref="enunciate:noun:${RESTMethod.noun}"/>
+            <property name="subcontext" value="${restSubcontext}"/>
+          </bean>
+        </entry>
+      [#list RESTMethod.contentTypes as contentType]
+
+        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}/**">
+          <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
+            <constructor-arg ref="enunciate:noun:${RESTMethod.noun}"/>
+            <constructor-arg ref="${endpointBeanId(RESTMethod)}"/>
+          </bean>
+        </entry>
+      [/#list]
+    [/#list]
+  [/@forEachRESTEndpoint]
+      </map>
+    </property>
+  </bean>
+</beans>
+[/@file]

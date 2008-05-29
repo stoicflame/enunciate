@@ -20,7 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.util.ClassDeclarationComparator;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.util.MapType;
 import net.sf.jelly.apt.Context;
 
@@ -36,12 +36,12 @@ import java.util.TreeSet;
 public class JAXWSValidator extends BaseValidator {
   
   private final HashSet<String> jaxwsBeans = new HashSet<String>();
-  private final TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new ClassDeclarationComparator());
+  private final TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new TypeDeclarationComparator());
 
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
-    TreeSet<WebFault> unvisitedFaults = new TreeSet<WebFault>(new ClassDeclarationComparator());
+    TreeSet<WebFault> unvisitedFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
         if (webMessage instanceof RequestWrapper) {

@@ -27,6 +27,8 @@ import org.apache.commons.digester.RuleSetBase;
 public class AMFRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
+    digester.addSetProperties("enunciate/modules/amf/war");
+
     digester.addObjectCreate("enunciate/modules/amf/compiler", FlexCompilerConfig.class);
     digester.addSetProperties("enunciate/modules/amf/compiler");
     digester.addSetNext("enunciate/modules/amf/compiler", "setCompilerConfig");

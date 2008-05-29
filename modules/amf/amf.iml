@@ -23,9 +23,9 @@
     <orderEntry type="module-library">
       <library name="blazeds">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-common/1.0-beta1/blazeds-common-1.0-beta1.jar!/" />
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-remoting/1.0-beta1/blazeds-remoting-1.0-beta1.jar!/" />
-          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-core/1.0-beta1/blazeds-core-1.0-beta1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-common/3.0/blazeds-common-3.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-remoting/3.0/blazeds-remoting-3.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../.m2/repository/com/adobe/blazeds/blazeds-core/3.0/blazeds-core-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>

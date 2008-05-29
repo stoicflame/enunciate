@@ -16,17 +16,21 @@
 
 package org.codehaus.enunciate.modules.rest.xml;
 
-import org.codehaus.enunciate.modules.rest.*;
+import org.codehaus.enunciate.modules.rest.NamespacePrefixLookup;
+import org.codehaus.enunciate.modules.rest.RESTOperation;
+import org.codehaus.enunciate.modules.rest.RESTRequestContentTypeHandler;
+import org.codehaus.enunciate.modules.rest.RESTResource;
 import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ApplicationObjectSupport;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 
-import javax.xml.bind.*;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Content type handler for JAXB XML.
@@ -41,22 +45,6 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
   protected final Map<RESTResource, JAXBContext> resourcesToContexts = new TreeMap<RESTResource, JAXBContext>();
   private NamespacePrefixLookup namespaceLookup;
   private Object prefixMapper;
-
-  @Override
-  protected void initApplicationContext() throws BeansException {
-    super.initApplicationContext();
-
-    if (this.namespaceLookup == null) {
-      Map nsLookups = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), NamespacePrefixLookup.class);
-      if (nsLookups.isEmpty()) {
-        throw new ApplicationContextException("Unable to find a namespace prefix lookup.");
-      }
-      else if (nsLookups.size() > 1) {
-        throw new ApplicationContextException("Unable to determine the correct namespace prefix lookup out of " + new ArrayList(nsLookups.keySet()).toString());
-      }
-      this.namespaceLookup = (NamespacePrefixLookup) nsLookups.values().iterator().next();
-    }
-  }
 
   /**
    * Read the object from the request.
@@ -175,6 +163,7 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
    *
    * @param namespaceLookup The namespace lookup.
    */
+  @Autowired (required = false)
   public void setNamespaceLookup(NamespacePrefixLookup namespaceLookup) {
     this.namespaceLookup = namespaceLookup;
 

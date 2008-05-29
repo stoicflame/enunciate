@@ -22,18 +22,24 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.rest.config.RESTRuleSet;
 import org.codehaus.enunciate.modules.rest.json.JsonContentHandler;
 import org.codehaus.enunciate.modules.rest.json.JsonSerializationMethod;
 import org.codehaus.enunciate.modules.rest.json.XStreamReferenceAction;
 import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
+import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * <h1>REST Module</h1>
@@ -351,6 +357,13 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     return RESTDeploymentModule.class.getResource("enunciate-rest-parameter-names.properties.fmt");
   }
 
+  /**
+   * @return The URL to "rest-servlet.xml.fmt"
+   */
+  protected URL getRestServletTemplateURL() {
+    return RESTDeploymentModule.class.getResource("rest-servlet.xml.fmt");
+  }
+
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
 
@@ -369,6 +382,8 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     model.put("defaultContentTypeHandler", getDefaultContentTypeHandler());
     model.put("defaultJsonSerialization", getDefaultJsonSerialization());
     model.put("xstreamReferenceAction", getXstreamReferenceAction());
+    model.put("restSubcontext", getRestSubcontext());
+    model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
 
     //populate the content-type-to-handler map.
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
@@ -378,8 +393,45 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     else {
       info("Skipping generation of REST parameter names as everything appears up-to-date...");
     }
-    
-    enunciate.setProperty("rest.parameter.names", paramNameFile);
+
+    File restServletXml = new File(getGenerateDir(), "rest-servlet.xml");
+    if (!enunciate.isUpToDateWithSources(restServletXml)) {
+      processTemplate(getRestServletTemplateURL(), model);
+    }
+    else {
+      info("Skipping generation of the REST servlet configuration as everything appears up-to-date...");
+    }
+  }
+
+  protected String getRestSubcontext() {
+    String restSubcontext = getEnunciate().getConfig().getDefaultRestSubcontext();
+    //todo: override default rest subcontext?
+    return restSubcontext;
+  }
+
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    super.doBuild();
+
+    File webappDir = getBuildDir();
+    File webinf = new File(webappDir, "WEB-INF");
+    getEnunciate().copyFile(new File(getGenerateDir(), "rest-servlet.xml"), new File(webinf, "rest-servlet.xml"));
+    File webinfClasses = new File(webinf, "classes");
+    getEnunciate().copyFile(new File(getGenerateDir(), "enunciate-rest-parameter-names.properties"), new File(webinfClasses, "enunciate-rest-parameter-names.properties"));
+
+    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
+    webappFragment.setBaseDir(webappDir);
+    WebAppComponent servletComponent = new WebAppComponent();
+    servletComponent.setName("rest");
+    servletComponent.setClassname(DispatcherServlet.class.getName());
+    TreeSet<String> urlMappings = new TreeSet<String>();
+    urlMappings.add(getRestSubcontext() + "*");
+    for (String contentTypeId : getModel().getContentTypesToIds().values()) {
+      urlMappings.add("/" + contentTypeId + "/*");
+    }
+    servletComponent.setUrlMappings(urlMappings);
+    webappFragment.setServlets(Arrays.asList(servletComponent));
+    getEnunciate().addWebAppFragment(webappFragment);
   }
 
   /**

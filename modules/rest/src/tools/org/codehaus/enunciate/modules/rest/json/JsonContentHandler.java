@@ -25,8 +25,7 @@ import org.codehaus.jettison.badgerfish.BadgerFishXMLInputFactory;
 import org.codehaus.jettison.badgerfish.BadgerFishXMLOutputFactory;
 import org.codehaus.jettison.mapped.MappedXMLInputFactory;
 import org.codehaus.jettison.mapped.MappedXMLOutputFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +37,6 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Map;
 
 /**
  * Content handler for JSON requests.
@@ -51,19 +49,6 @@ import java.util.Map;
 public class JsonContentHandler extends JaxbXmlContentHandler {
 
   private JsonConfiguration config;
-
-  @Override
-  protected void initApplicationContext() throws BeansException {
-
-    super.initApplicationContext();
-
-    if (this.config == null) {
-      Map nsLookups = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), JsonConfiguration.class);
-      if (!nsLookups.isEmpty()) {
-        this.config = (JsonConfiguration) nsLookups.values().iterator().next();
-      }
-    }
-  }
 
   /**
    * Unmarshal data from the request.
@@ -174,6 +159,7 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
    *
    * @param config The json configuration.
    */
+  @Autowired (required = false)
   public void setConfig(JsonConfiguration config) {
     this.config = config;
   }

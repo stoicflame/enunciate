@@ -18,35 +18,39 @@ package org.codehaus.enunciate.modules.spring_app;
 
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.security.AccessDeniedException;
 import org.springframework.security.AuthenticationException;
+import org.springframework.core.Ordered;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Exception handler that's aware of how to deal with security exceptions.
  *
  * @author Ryan Heaton
  */
-public class SecurityAwareExceptionHandler implements HandlerExceptionResolver {
+public class SecurityAwareExceptionHandler implements HandlerExceptionResolver, Ordered {
 
-  private final HandlerExceptionResolver delegate;
-
-  public SecurityAwareExceptionHandler(HandlerExceptionResolver delegate) {
-    if (delegate == null) {
-      throw new IllegalArgumentException("A delegate must be provided.");
-    }
-    this.delegate = delegate;
-  }
-
-  public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+  public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, final Exception ex) {
     if ((ex instanceof AccessDeniedException) || (ex instanceof AuthenticationException)) {
-      throw (RuntimeException) ex;
+      return new ModelAndView(new View() {
+        public String getContentType() {
+          return null;
+        }
+
+        public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+          throw ex;
+        }
+      });
     }
-    else {
-      return delegate.resolveException(request, response, handler, ex);
-    }
+
+    return null;
   }
 
+  public int getOrder() {
+    return Ordered.HIGHEST_PRECEDENCE;
+  }
 }

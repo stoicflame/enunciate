@@ -17,17 +17,26 @@
 package org.codehaus.enunciate.modules.xfire;
 
 import freemarker.template.TemplateException;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.SoapAddressPathMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
+import org.springframework.web.servlet.DispatcherServlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 /**
  * <h1>XFire Module</h1>
@@ -36,7 +45,9 @@ import java.net.URL;
  * for rpc/lit SOAP operations.</p>
  *
  * <p>The XFire module <i>used</i> to be the primary module for assembing the app.  As of release 1.5,
- * this functionality has been separated into the spring-app module.</i>
+ * this functionality has been separated into the spring-app module. However, the XFire module still
+ * depends on the spring-app module to function, as it assumes that the endpoint beans are defined
+ * in the Spring root application context.</i>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -48,7 +59,8 @@ import java.net.URL;
  *
  * <h3>generate</h3>
  * 
- * <p>The "generate" step generates the source beans.  It is the only significant step in the XFire module.</p>
+ * <p>The "generate" step generates the source beans and the spring configuration file.  And the spring
+ * servlet file for the XFire soap servlet.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -89,6 +101,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     return XFireDeploymentModule.class.getResource("rpc-response-bean.fmt");
   }
 
+  /**
+   * @return The URL to "xfire-servlet.xml.fmt"
+   */
+  protected URL getXfireServletTemplateURL() {
+    return XFireDeploymentModule.class.getResource("xfire-servlet.xml.fmt");
+  }
+
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
@@ -120,13 +139,53 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
           }
         }
       }
+
+      model.put("soapAddressPath", new SoapAddressPathMethod());
+      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
+      model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
+      processTemplate(getXfireServletTemplateURL(), model);
     }
     else {
       info("Skipping generation of XFire support classes as everything appears up-to-date....");
     }
 
-    getEnunciate().setProperty("xfire-server.src.dir", getGenerateDir());
     getEnunciate().addArtifact(new FileArtifact(getName(), "xfire-server.src.dir", getGenerateDir()));
+    getEnunciate().addAdditionalSourceRoot(getGenerateDir());
+  }
+
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    super.doBuild();
+
+    File webappDir = getBuildDir();
+    File webinf = new File(webappDir, "WEB-INF");
+    getEnunciate().copyFile(new File(getGenerateDir(), "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
+
+    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
+    webappFragment.setBaseDir(webappDir);
+    WebAppComponent servletComponent = new WebAppComponent();
+    servletComponent.setName("xfire");
+    servletComponent.setClassname(DispatcherServlet.class.getName());
+    TreeSet<String> urlMappings = new TreeSet<String>();
+    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
+        EnunciateConfiguration config = getEnunciate().getConfig();
+        String path = getSoapSubcontext() + endpointInterface.getServiceName();
+        if (config.getSoapServices2Paths().containsKey(endpointInterface.getServiceName())) {
+          path = config.getSoapServices2Paths().get(endpointInterface.getServiceName());
+        }
+        urlMappings.add(path);
+      }
+    }
+    servletComponent.setUrlMappings(urlMappings);
+    webappFragment.setServlets(Arrays.asList(servletComponent));
+    getEnunciate().addWebAppFragment(webappFragment);
+  }
+
+  private String getSoapSubcontext() {
+    String soapSubcontext = getEnunciate().getConfig().getDefaultSoapSubcontext();
+    //todo: provide an override?
+    return soapSubcontext;
   }
 
   /**

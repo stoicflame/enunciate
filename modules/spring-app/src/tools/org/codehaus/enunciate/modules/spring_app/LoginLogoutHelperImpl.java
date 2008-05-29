@@ -26,6 +26,7 @@ import org.springframework.security.ui.AuthenticationDetailsSource;
 import org.springframework.security.ui.AuthenticationDetailsSourceImpl;
 import org.springframework.security.ui.logout.LogoutHandler;
 import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,6 +98,7 @@ public class LoginLogoutHelperImpl implements LoginLogoutHelper {
     return authenticationDetailsSource;
   }
 
+  @Autowired (required = false)
   public void setAuthenticationDetailsSource(AuthenticationDetailsSource authenticationDetailsSource) {
     this.authenticationDetailsSource = authenticationDetailsSource;
   }
@@ -105,6 +107,7 @@ public class LoginLogoutHelperImpl implements LoginLogoutHelper {
     return authenticationManager;
   }
 
+  @Autowired (required = false)
   public void setAuthenticationManager(AuthenticationManager authenticationManager) {
     this.authenticationManager = authenticationManager;
   }
@@ -113,6 +116,7 @@ public class LoginLogoutHelperImpl implements LoginLogoutHelper {
     return rememberMeServices;
   }
 
+  @Autowired (required = false)
   public void setRememberMeServices(RememberMeServices rememberMeServices) {
     this.rememberMeServices = rememberMeServices;
   }
@@ -121,6 +125,7 @@ public class LoginLogoutHelperImpl implements LoginLogoutHelper {
     return logoutHandlers;
   }
 
+  @Autowired (required = false)
   public void setLogoutHandlers(List<LogoutHandler> logoutHandlers) {
     this.logoutHandlers = logoutHandlers;
   }

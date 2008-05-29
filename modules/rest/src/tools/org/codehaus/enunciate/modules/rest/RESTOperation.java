@@ -21,8 +21,6 @@ import org.apache.commons.beanutils.Converter;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.activation.DataHandler;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -37,7 +35,6 @@ public class RESTOperation {
 
   private final RESTResource resource;
   private final VerbType verb;
-  private final Object endpoint;
   final Method method;
   private final int properNounIndex;
   private final Class properNounType;
@@ -52,7 +49,6 @@ public class RESTOperation {
   private final int nounValueIndex;
   private final Class nounValueType;
   private final Boolean nounValueOptional;
-  private final JAXBContext context;
   private final Class resultType;
   private final String contentType;
   private final String charset;
@@ -65,14 +61,12 @@ public class RESTOperation {
    * @param resource The resource for this operation.
    * @param contentType The content type of the operation.
    * @param verb     The verb for the operation.
-   * @param endpoint The REST endpoint.
    * @param method   The method.
    * @param parameterNames The parameter names.
    */
-  protected RESTOperation(RESTResource resource, String contentType, VerbType verb, Object endpoint, Method method, String[] parameterNames) {
+  protected RESTOperation(RESTResource resource, String contentType, VerbType verb, Method method, String[] parameterNames) {
     this.resource = resource;
     this.verb = verb;
-    this.endpoint = endpoint;
     this.method = method;
     this.contentType = contentType;
 
@@ -291,12 +285,6 @@ public class RESTOperation {
     this.JSONPParameter = jsonpParameter;
     this.contextClasses = contextClasses;
     this.contentTypeParameterIndex = contentTypeParameterIndex;
-    try {
-      this.context = JAXBContext.newInstance(contextClasses.toArray(new Class[contextClasses.size()]));
-    }
-    catch (JAXBException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   /**
@@ -327,16 +315,17 @@ public class RESTOperation {
   }
 
   /**
-   * Invokes the operation with the specified proper noun, adjectives, and noun value.
+   * Invokes the operation with the specified proper noun, adjectives, and noun value on the given endpoint.
    *
-   * @param contextParameters The context parametesr for this operation.
    * @param properNoun The value for the proper noun.
+   * @param contextParameters The context parametesr for this operation.
    * @param adjectives The value for the adjectives.
    * @param nounValue  The value for the noun.
+   * @param endpoint The endpoint on which to invoke the operation.
    * @return The result of the invocation.  If the invocation has no return type (void), returns null.
    * @throws Exception if any problems occur.
    */
-  public Object invoke(Object properNoun, Map<String, Object> contextParameters, Map<String, Object> adjectives, Object nounValue) throws Exception {
+  public Object invoke(Object properNoun, Map<String, Object> contextParameters, Map<String, Object> adjectives, Object nounValue, Object endpoint) throws Exception {
     Class[] parameterTypes = this.method.getParameterTypes();
     Object[] parameters = new Object[parameterTypes.length];
     if (properNounIndex > -1) {
@@ -372,7 +361,7 @@ public class RESTOperation {
     }
 
     try {
-      return this.method.invoke(this.endpoint, parameters);
+      return this.method.invoke(endpoint, parameters);
     }
     catch (InvocationTargetException e) {
       Throwable target = e.getTargetException();
@@ -552,24 +541,6 @@ public class RESTOperation {
    */
   public Set<Class> getContextClasses() {
     return contextClasses;
-  }
-
-  /**
-   * Gets the serialization context for this operation.
-   *
-   * @return The serialization context.
-   */
-  public JAXBContext getSerializationContext() {
-    return context;
-  }
-
-  /**
-   * The endpoint handling this REST operation.
-   *
-   * @return The endpoint handling this REST operation.
-   */
-  public Object getEndpoint() {
-    return endpoint;
   }
 
   /**

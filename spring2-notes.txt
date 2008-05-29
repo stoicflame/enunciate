@@ -23,6 +23,7 @@ remove EnunciateSpringSecuritySupport
 remove org.codehaus.enunciate.modules.spring_app.Delegating*
 adjust spring config files
 make sure GWT, AMF endpoints populated correctly.
+make sure inner beans are autowired properly, too (jaxb xml content handler)
 
 confirm:
 

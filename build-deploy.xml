@@ -22,10 +22,6 @@
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>
-    <ant dir="${modules.rest.basedir}">
-      <reference refid="deploy.repo"/>
-      <reference refid="antlib.loader"/>
-    </ant>
     <ant dir="${modules.xfire-client.basedir}">
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
@@ -42,11 +38,15 @@
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>
+    <ant dir="${modules.spring-app.basedir}">
+      <reference refid="deploy.repo"/>
+      <reference refid="antlib.loader"/>
+    </ant>
     <ant dir="${modules.xfire.basedir}">
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>
-    <ant dir="${modules.spring-app.basedir}">
+    <ant dir="${modules.rest.basedir}">
       <reference refid="deploy.repo"/>
       <reference refid="antlib.loader"/>
     </ant>

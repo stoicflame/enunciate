@@ -31,6 +31,7 @@ import org.codehaus.enunciate.main.Artifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.NamedArtifact;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
@@ -58,7 +59,7 @@ import java.util.*;
  *
  * <p>The order of the documentation module is 100, essentially putting it after the generation
  * of any static documents (e.g. WSDL, schemas) or static downloads (e.g. client libraries), but
- * before the assembly of the war (see the xfire module, order 200).</p>
+ * before the assembly of the war (see the spring-app module, order 200).</p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -136,6 +137,15 @@ import java.util.*;
  * the "artifact" attribute is set.</li>
  * </ul>
  *
+ * <h3>The "war" element</h3>
+ *
+ * <p>The "war" element under the "docs" element is used to configure the webapp that will host the documenation. It supports
+ * the following attributes:</p>
+ *
+ * <ul>
+ * <li>The "docsDir" attribute is the directory in the war to which the documentation will be put.  The default is the root of the war.</li>
+ * </ul>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <h3>docs</h3>
@@ -156,6 +166,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   private File css;
   private File base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
+  private String docsDir = null;
 
   /**
    * @return "docs"
@@ -346,6 +357,46 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The subdirectory in the web application where the documentation will be put.
+   *
+   * @return The subdirectory in the web application where the documentation will be put.
+   */
+  public String getDocsDir() {
+    return docsDir;
+  }
+
+  /**
+   * The subdirectory in the web application where the documentation will be put.
+   *
+   * @param docsDir The subdirectory in the web application where the documentation will be put.
+   */
+  public void setDocsDir(String docsDir) {
+    this.docsDir = docsDir;
+  }
+
+  /**
+   * The directory into which the documentation is put.
+   *
+   * @return The directory into which the documentation is put.
+   */
+  public File getDocsBuildDir() {
+    File docsDir = getBuildDir();
+    if (getDocsDir() != null) {
+      docsDir = new File(docsDir, getDocsDir());
+    }
+
+    return docsDir;
+  }
+
+  @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    //some application components might want to reference their documentation, so we'll put a reference to the configured docs dir.
+    enunciate.setProperty("docs.webapp.dir", getDocsDir());
+  }
+
+  /**
    * The generate logic builds the XML documentation structure for the enunciated API.
    */
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
@@ -394,7 +445,16 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     //export the generated documentation as an artifact.
-    getEnunciate().addArtifact(new FileArtifact(getName(), "docs", getBuildDir()));
+    getEnunciate().addArtifact(new FileArtifact(getName(), "docs", getDocsBuildDir()));
+
+    //add the webapp fragment...
+    BaseWebAppFragment webAppFragment = new BaseWebAppFragment(getName());
+    webAppFragment.setBaseDir(getBuildDir());
+    TreeMap<String, String> mimeMappings = new TreeMap<String, String>();
+    mimeMappings.put("wsdl", "text/xml");
+    mimeMappings.put("xsd", "text/xml");
+    webAppFragment.setMimeMappings(mimeMappings);
+    getEnunciate().addWebAppFragment(webAppFragment);
   }
 
   /**
@@ -419,7 +479,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected void buildBase() throws IOException {
     Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
+    File buildDir = getDocsBuildDir();
     buildDir.mkdirs();
     if (this.base == null) {
       debug("Default base to be used for documentation base.");
@@ -442,7 +502,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       if (schemaInfo.getProperty("file") != null) {
         File from = (File) schemaInfo.getProperty("file");
         String filename = schemaInfo.getProperty("filename") != null ? (String) schemaInfo.getProperty("filename") : from.getName();
-        File to = new File(getBuildDir(), filename);
+        File to = new File(getDocsBuildDir(), filename);
         enunciate.copyFile(from, to);
       }
     }
@@ -451,7 +511,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       if (wsdlInfo.getProperty("file") != null) {
         File from = (File) wsdlInfo.getProperty("file");
         String filename = wsdlInfo.getProperty("filename") != null ? (String) wsdlInfo.getProperty("filename") : from.getName();
-        File to = new File(getBuildDir(), filename);
+        File to = new File(getDocsBuildDir(), filename);
         enunciate.copyFile(from, to);
       }
     }
@@ -530,7 +590,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       debug("Extra downloads exist: %b", transformer.getParameter("downloads-exists"));
 
       File docsXml = new File(getGenerateDir(), "docs.xml");
-      File buildDir = getBuildDir();
+      File buildDir = getDocsBuildDir();
       buildDir.mkdirs();
       transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
       File indexPage = new File(buildDir, "index.html");

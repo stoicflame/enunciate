@@ -32,12 +32,11 @@ public class TestRESTOperation extends TestCase {
    * tests the "ping" method as a REST operation.
    */
   public void testPing() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("ping"), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("ping"), null);
     assertEquals(VerbType.read, operation.getVerb());
     assertNull(operation.getProperNounType());
     assertNull(operation.getNounValueType());
     assertTrue(operation.getAdjectiveTypes().isEmpty());
-    assertNotNull(operation.getSerializationContext());
     assertNull(operation.getResultType());
   }
 
@@ -46,7 +45,7 @@ public class TestRESTOperation extends TestCase {
    */
   public void testBadReturnType() throws Exception {
     try {
-      new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("badReturnType"), null);
+      new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("badReturnType"), null);
       fail("shouldn't have accepted a return type that isn't an XML root element.");
     }
     catch (IllegalStateException e) {
@@ -58,11 +57,10 @@ public class TestRESTOperation extends TestCase {
    * tests the "properNoun" method as a REST operation.
    */
   public void testProperNoun() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("properNoun", String.class), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("properNoun", String.class), null);
     assertEquals(VerbType.read, operation.getVerb());
     assertNull(operation.getNounValueType());
     assertTrue(operation.getAdjectiveTypes().isEmpty());
-    assertNotNull(operation.getSerializationContext());
 
     Class properNounType = operation.getProperNounType();
     assertNotNull(properNounType);
@@ -75,7 +73,7 @@ public class TestRESTOperation extends TestCase {
    */
   public void testBadProperNoun() throws Exception {
     try {
-      new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("badProperNoun", String[].class), null);
+      new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("badProperNoun", String[].class), null);
       fail("shouldn't have allowed a non-simple proper noun type.");
     }
     catch (IllegalStateException e) {
@@ -88,7 +86,7 @@ public class TestRESTOperation extends TestCase {
    */
   public void testTwoProperNouns() throws Exception {
     try {
-      new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("twoProperNouns", String.class, String.class), null);
+      new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("twoProperNouns", String.class, String.class), null);
       fail("shouldn't have allowed two proper nouns.");
     }
     catch (IllegalStateException e) {
@@ -100,11 +98,10 @@ public class TestRESTOperation extends TestCase {
    * tests the "nounValue" method as a REST operation.
    */
   public void testNounValue() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.update, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("nounValue", RootElementExample.class), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.update, RESTOperationExamples.class.getMethod("nounValue", RootElementExample.class), null);
     assertEquals(VerbType.update, operation.getVerb());
     assertNull(operation.getProperNounType());
     assertTrue(operation.getAdjectiveTypes().isEmpty());
-    assertNotNull(operation.getSerializationContext());
 
     Class nounValueType = operation.getNounValueType();
     assertNotNull(nounValueType);
@@ -117,7 +114,7 @@ public class TestRESTOperation extends TestCase {
    */
   public void testBadNounValue() throws Exception {
     try {
-      new RESTOperation(null, "text/xml", VerbType.update, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("badNounValue", Object.class), null);
+      new RESTOperation(null, "text/xml", VerbType.update, RESTOperationExamples.class.getMethod("badNounValue", Object.class), null);
       fail("shouldn't have allowed a non-root xml noun value type.");
     }
     catch (IllegalStateException e) {
@@ -130,7 +127,7 @@ public class TestRESTOperation extends TestCase {
    */
   public void testTwoNounValues() throws Exception {
     try {
-      new RESTOperation(null, "text/xml", VerbType.update, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("twoNounValues", RootElementExample.class, RootElementExample.class), null);
+      new RESTOperation(null, "text/xml", VerbType.update, RESTOperationExamples.class.getMethod("twoNounValues", RootElementExample.class, RootElementExample.class), null);
       fail("shouldn't have allowed two noun values.");
     }
     catch (IllegalStateException e) {
@@ -142,11 +139,10 @@ public class TestRESTOperation extends TestCase {
    * tests the "defaultAdjectives" method as a REST operation.
    */
   public void testDefaultAdjectives() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("defaultAdjectives", String.class, Double.TYPE), new String[]{null, "secondAdjective"});
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("defaultAdjectives", String.class, Double.TYPE), new String[]{null, "secondAdjective"});
     assertEquals(VerbType.read, operation.getVerb());
     assertNull(operation.getProperNounType());
     assertNull(operation.getNounValueType());
-    assertNotNull(operation.getSerializationContext());
     assertNull(operation.getResultType());
 
     Map<String, Class> adjectiveTypes = operation.getAdjectiveTypes();
@@ -161,11 +157,10 @@ public class TestRESTOperation extends TestCase {
    * tests the "customAdjectives" method as a REST operation.
    */
   public void testCustomAdjectives() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("customAdjectives", String.class, Double.TYPE), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("customAdjectives", String.class, Double.TYPE), null);
     assertEquals(VerbType.read, operation.getVerb());
     assertNull(operation.getProperNounType());
     assertNull(operation.getNounValueType());
-    assertNotNull(operation.getSerializationContext());
     assertNull(operation.getResultType());
 
     Map<String, Class> adjectiveTypes = operation.getAdjectiveTypes();
@@ -180,11 +175,10 @@ public class TestRESTOperation extends TestCase {
    * tests the "adjectivesAsLists" method as a REST operation.
    */
   public void testAdjectivesAsLists() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("adjectivesAsLists", boolean[].class, Collection.class), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("adjectivesAsLists", boolean[].class, Collection.class), null);
     assertEquals(VerbType.read, operation.getVerb());
     assertNull(operation.getProperNounType());
     assertNull(operation.getNounValueType());
-    assertNotNull(operation.getSerializationContext());
     assertNull(operation.getResultType());
 
     Map<String, Class> adjectiveTypes = operation.getAdjectiveTypes();
@@ -199,28 +193,28 @@ public class TestRESTOperation extends TestCase {
    * Tests the invoke operation.
    */
   public void testInvoke() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("invokeableOp", RootElementExample.class, String.class, Float.class, Collection.class), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("invokeableOp", RootElementExample.class, String.class, Float.class, Collection.class), null);
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
     adjectives.put("hi", new Float(1234.5));
     adjectives.put("arg1", "adjective1Value");
     adjectives.put("arg3", new Short[] {8, 7, 6});
     RootElementExample ex = new RootElementExample();
-    assertSame(ex, operation.invoke(null, new HashMap<String, Object>(), adjectives, ex));
+    assertSame(ex, operation.invoke(null, new HashMap<String, Object>(), adjectives, ex, new RESTOperationExamples()));
   }
 
   /**
    * Tests the invoke2 operation.
    */
   public void testInvoke2() throws Exception {
-    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, new RESTOperationExamples(), RESTOperationExamples.class.getMethod("invokeableOp2", RootElementExample.class, String.class, Float.class), null);
+    RESTOperation operation = new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("invokeableOp2", RootElementExample.class, String.class, Float.class), null);
     HashMap<String, Object> adjectives = new HashMap<String, Object>();
     adjectives.put("hi", new Float(1234.5));
     adjectives.put("ho", new Float(888.777));
     RootElementExample ex = new RootElementExample();
-    assertSame(ex, operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex));
-    assertNull(operation.invoke(null, new HashMap<String, Object>(), adjectives, ex));
+    assertSame(ex, operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex, new RESTOperationExamples()));
+    assertNull(operation.invoke(null, new HashMap<String, Object>(), adjectives, ex, new RESTOperationExamples()));
     adjectives.remove("hi");
-    Object differentEx = operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex);
+    Object differentEx = operation.invoke("properNounValue", new HashMap<String, Object>(), adjectives, ex, new RESTOperationExamples());
     assertNotNull(differentEx);
     assertFalse(differentEx == ex);
   }
