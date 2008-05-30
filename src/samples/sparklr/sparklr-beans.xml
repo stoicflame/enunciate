@@ -1,45 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:oauth="http://spring-security-oauth.codehaus.org/2.0"
+       xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd
+                           http://spring-security-oauth.codehaus.org/2.0 http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-2.0.xsd
+                           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
-<beans>
+  <context:annotation-config/>
 
   <!--
     The sparklr users.
   -->
-  <bean id="userDetailsService" class="org.springframework.security.userdetails.memory.InMemoryDaoImpl">
-     <property name="userMap">
-       <value>
-         marissa=koala,ROLE_USER
-         paul=emu,ROLE_USER
-       </value>
-     </property>
-   </bean>
+  <security:user-service>
+    <security:user name="marissa" password="koala" authorities="ROLE_USER" />
+    <security:user name="paul" password="emu" authorities="ROLE_USER" />
+  </security:user-service>
 
   <!--
     Definition of a consumer details service for sparklr.  For now, we only have one registered consumer, tonr,
     whose consumer key is "tonr-consumer-key" and whose shared secret is "SHHHHH!!!!!!!!!!".  (There is also some
     other information about the consumer included.)
   -->
-  <bean id="consumerDetailsService" class="org.springframework.security.oauth.provider.InMemoryConsumerDetailsService">
-    <property name="consumerDetailsStore">
-      <map>
-        <entry key="tonr-consumer-key">
-          <bean class="org.springframework.security.oauth.examples.sparklr.oauth.SparklrConsumerDetails">
-            <property name="consumerKey" value="tonr-consumer-key"/>
-            <property name="displayName" value="Tonr.com"/>
-            <property name="resourceName" value="Your Photos"/>
-            <property name="resourceDescription" value="Your photos that you have uploaded to sparklr.com."/>
-            <property name="signatureSecret">
-              <bean class="org.springframework.security.oauth.common.signature.SharedConsumerSecret">
-                <constructor-arg value="SHHHHH!!!!!!!!!!"/>
-              </bean>
-            </property>
-          </bean>
-        </entry>
-      </map>
-    </property>
-  </bean>
-  
+  <oauth:consumer-details-service id="consumerDetails">
+    <oauth:consumer name="Tonr.com" key="tonr-consumer-key" secret="SHHHHH!!!!!!!!!!" resourceName="Your Photos" resourceDescription="Your photos that you have uploaded to sparklr.com."/>
+  </oauth:consumer-details-service>
+
   <!--
     This is the definition for the token services that service the sparklr OAuth engine.  Since sparklr only
     runs on a single app server, we can use an in-memory implementation of the token services.  If the
@@ -48,7 +37,7 @@
 
     The in-memory token services spawn a separate thread that cleans up expired tokens.
   -->
-  <bean id="tokenServices" class="org.springframework.security.oauth.provider.token.InMemoryProviderTokenServices"/>
+  <oauth:token-services id="tokenServices"/>
 
   <bean id="photoServices" class="org.springframework.security.oauth.examples.sparklr.impl.PhotoServiceImpl">
     <property name="photos">

@@ -1,25 +1,19 @@
 <enunciate>
   <modules>
+    <docs>
+      <war docsDir="docs"/>
+    </docs>
     <spring-app enableSecurity="true">
 
       <springImport file="sparklr-beans.xml"/>
-
-      <war docsDir="docs"/>
 
       <security enableBasicHTTPAuth="false"
                 enableFormBasedLogin="true"
                 enableFormBasedLogout="true"
                 enableOAuth="true">
 
-        <userDetailsService beanName="userDetailsService"/>
-
         <formBasedLogin url="/login.do" loginPageFile="src/main/webapp/login.jsp"/>
         <formBasedLogout url="/logout.do"/>
-
-        <oauth>
-          <tokenServices beanName="tokenServices"/>
-          <consumerDetailsService beanName="consumerDetailsService"/>
-        </oauth>
 
         <onAuthenticationFailed redirectTo="/login.jsp"/>
       </security>

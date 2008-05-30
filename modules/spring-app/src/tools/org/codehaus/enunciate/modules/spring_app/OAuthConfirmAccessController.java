@@ -16,38 +16,26 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth.provider.ConsumerDetails;
 import org.springframework.security.oauth.provider.ConsumerDetailsService;
-import org.springframework.security.oauth.provider.OAuthProviderProcessingFilter;
 import org.springframework.security.oauth.provider.token.OAuthProviderToken;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.security.event.authorization.AuthorizedEvent;
-import org.springframework.security.intercept.web.FilterInvocation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.TreeMap;
 
 /**
- * Controller for displaying the OAuth "confirm access" page. As an event publisher, listens for any
- * {@link org.springframework.security.event.authorization.AuthorizedEvent}s and ensures that any OAuth processing
- * filter don't get called after the request is authorized.
+ * Controller for displaying the OAuth "confirm access" page. 
  *
  * @author Ryan Heaton
  */
-public class OAuthConfirmAccessController extends StaticModelViewController implements ApplicationEventPublisher {
+public class OAuthConfirmAccessController extends StaticModelViewController {
 
   private OAuthProviderTokenServices tokenServices;
   private ConsumerDetailsService consumerDetailsService;
-
-  public void publishEvent(ApplicationEvent event) {
-    if ((event instanceof AuthorizedEvent) && (event.getSource() instanceof FilterInvocation)) {
-      ((FilterInvocation) event.getSource()).getHttpRequest().setAttribute(OAuthProviderProcessingFilter.OAUTH_PROCESSING_HANDLED, Boolean.TRUE);
-    }
-  }
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
     String token = request.getParameter("requestToken");
@@ -73,6 +61,7 @@ public class OAuthConfirmAccessController extends StaticModelViewController impl
     return tokenServices;
   }
 
+  @Autowired
   public void setTokenServices(OAuthProviderTokenServices tokenServices) {
     this.tokenServices = tokenServices;
   }
@@ -81,6 +70,7 @@ public class OAuthConfirmAccessController extends StaticModelViewController impl
     return consumerDetailsService;
   }
 
+  @Autowired
   public void setConsumerDetailsService(ConsumerDetailsService consumerDetailsService) {
     this.consumerDetailsService = consumerDetailsService;
   }

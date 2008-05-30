@@ -711,6 +711,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
 
     //base webapp dir...
     File webappDir = new File(getBuildDir(), "webapp");
+    webappDir.mkdirs();
     File servicesConfigFile = new File(getXMLGenerateDir(), "services-config.xml");
     if (servicesConfigFile.exists()) {
       getEnunciate().copyFile(servicesConfigFile, new File(new File(new File(webappDir, "WEB-INF"), "flex"), "services-config.xml"));

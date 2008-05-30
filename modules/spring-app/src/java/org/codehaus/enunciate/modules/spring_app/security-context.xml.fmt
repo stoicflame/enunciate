@@ -108,6 +108,13 @@
     [#if securityConfig.OAuthConfig.consumerDetailsService?exists && securityConfig.OAuthConfig.consumerDetailsService.className?exists]
   <beans:bean class="${securityConfig.OAuthConfig.consumerDetailsService.className}"/>
     [/#if]
+
+  <!--The filter that ensures that the user is authenticated before allowing the confirm access page.-->
+  <beans:bean id="oauthConfirmAccessFilter" class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessFilter">
+    <custom-filter after="EXCEPTION_TRANSLATION_FILTER"/>
+    <beans:property name="confirmAccessUrl" value="${securityConfig.OAuthConfig.accessConfirmationURL}"/>
+    <beans:property name="accessConfirmedUrl" value="${securityConfig.OAuthConfig.accessConfirmedURL}"/>
+  </beans:bean>
   [/#if]
   [#if securityConfig.userDetailsService?exists && securityConfig.userDetailsService.beanName?exists]
 

@@ -27,7 +27,7 @@
 
       <h2>Please Confirm</h2>
 
-      <p>You hereby grant access to <b><c:out value="${consumer.displayName}"/></b> to access <b><c:out value="${consumer.resourceName}" default="your protected resources"/></b>. <c:out value="${consumer.resourceDescription}"/></p>
+      <p>You hereby grant access to <b><c:out value="${consumer.consumerName}"/></b> to access <b><c:out value="${consumer.resourceName}" default="your protected resources"/></b>. <c:out value="${consumer.resourceDescription}"/></p>
 
       <div align="center">
         <form action="<c:url value="${grantAccessURL}"/>" method="POST">

@@ -158,6 +158,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     super.doBuild();
 
     File webappDir = getBuildDir();
+    webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
     getEnunciate().copyFile(new File(getGenerateDir(), "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
 

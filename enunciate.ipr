@@ -69,16 +69,7 @@
       <facet-type id="Spring">
         <modules>
           <module name="base" />
-          <module name="xfire-integration">
-            <files>
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/src/custom_spring.xml" />
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/target/examples/full/build/spring-app/WEB-INF/applicationContext.xml" />
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/target/examples/full/build/spring-app/WEB-INF/custom_spring.xml" />
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/target/examples/full/build/spring-app/WEB-INF/spring-servlet.xml" />
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/target/examples/full/gen/spring-app/config/applicationContext.xml" />
-              <file url="file://$PROJECT_DIR$/modules/xfire-integration/target/examples/full/gen/spring-app/config/spring-servlet.xml" />
-            </files>
-          </module>
+          <module name="xfire-integration" />
         </modules>
       </facet-type>
       <facet-type id="web">

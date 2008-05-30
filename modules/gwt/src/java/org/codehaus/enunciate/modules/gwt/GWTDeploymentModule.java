@@ -634,6 +634,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     //base webapp dir...
     File webappDir = new File(getBuildDir(), "webapp");
+    webappDir.mkdirs();
+    
     File gwtCompileDir = getAppGenerateDir();
     if ((this.gwtApps.size() > 0) && (gwtCompileDir != null) && (gwtCompileDir.exists())) {
       File gwtAppDir = webappDir;

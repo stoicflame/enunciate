@@ -414,6 +414,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     super.doBuild();
 
     File webappDir = getBuildDir();
+    webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
     getEnunciate().copyFile(new File(getGenerateDir(), "rest-servlet.xml"), new File(webinf, "rest-servlet.xml"));
     File webinfClasses = new File(webinf, "classes");

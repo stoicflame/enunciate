@@ -21,7 +21,6 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 
 import javax.servlet.ServletConfig;
-import javax.xml.ws.Holder;
 import java.util.UUID;
 
 /**
@@ -34,7 +33,7 @@ public class TestGWTEndpointImpl extends TestCase {
    */
   public void testInvokeOperation() throws Exception {
     final ServletConfig servletConfig = createMock(ServletConfig.class);
-    GWTEndpointImpl impl = new GWTEndpointImpl(new BeansServiceImpl()) {
+    org.codehaus.enunciate.modules.gwt.GWTEndpointImpl impl = new org.codehaus.enunciate.modules.gwt.GWTEndpointImpl(new BeansServiceImpl()) {
 
       @Override
       public ServletConfig getServletConfig() {
