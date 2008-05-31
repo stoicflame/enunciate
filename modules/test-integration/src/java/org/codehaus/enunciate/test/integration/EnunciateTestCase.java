@@ -19,24 +19,40 @@ package org.codehaus.enunciate.test.integration;
 import java.net.URL;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 import com.meterware.httpunit.WebConversation;
 
 /**
+ * You should extend this test when you want to write system tests against an
+ * Enunciated service. Provides convenience methods to access the different
+ * contexts and nouns.
+ * 
+ * The idea is to write system tests that extend from here. You'll then be able
+ * to use the same test case in a Ws test by extending from
+ * {@link WsTestContainer} and including this extended class in it.
+ * 
+ * Check out SimpleNumberSystemTest and SimpleNumberWsTest for examples
+ * 
  * @author holmes
  */
-public abstract class EnunciateTestCase {
+public class EnunciateTestCase {
 
-	protected ContextProperties contextProperties;
+	protected static ContextProperties contextProperties;
 
 	protected WebConversation webConversation;
+
+	@BeforeClass
+	public static void startServer() {
+		if (contextProperties == null) {
+			contextProperties = new ContextProperties();
+		}
+	}
 
 	@Before
 	public void setupWebConversation() {
 		webConversation = new WebConversation();
 		webConversation.setExceptionsThrownOnErrorStatus(false);
-		
-		contextProperties = DeployedTestContainer.getInstance().getContextProperties();
 	}
 
 	/**
@@ -51,14 +67,14 @@ public abstract class EnunciateTestCase {
 	 * from the <code>actualPort</code> is when <code>0</code> (the default)
 	 * is used, in which case the server assigns an arbitrary unused port.
 	 */
-	public int getSpecifiedPort() {
+	public int getPort() {
 		return contextProperties.getSpecifiedPort();
 	}
 
 	/**
 	 * @return the context of the webapp, excluding protocol, host and port.
 	 */
-	public String getRelativeContext() {
+	public String getContext() {
 		return contextProperties.getRelativeContext();
 	}
 
@@ -72,6 +88,27 @@ public abstract class EnunciateTestCase {
 	 */
 	public String getBaseContextAsString() {
 		return getBaseContext().toExternalForm();
+	}
+
+	/**
+	 * @return the subcontext you should use to access SOAP services
+	 */
+	public String getSoapSubContext() {
+		return contextProperties.getSoapSubContext();
+	}
+
+	/**
+	 * @return the subcontext you should use to access rest/xml services
+	 */
+	public String getRestSubContext() {
+		return contextProperties.getRestSubContext();
+	}
+
+	/**
+	 * @return the subcontext you should use to access json services
+	 */
+	public String getJsonSubContext() {
+		return contextProperties.getJsonSubContext();
 	}
 
 	/**
@@ -96,39 +133,18 @@ public abstract class EnunciateTestCase {
 	}
 
 	/**
-	 * @return the subcontext you should use to access SOAP services
+	 * @return new {@link WebConversation} is created for each test (using
+	 *         {@link Before} in {@link #setupWebConversation()})
 	 */
-	public String getSoapSubContext() {
-		return contextProperties.getSoapSubContext();
-	}
-
-	/**
-	 * @return the subcontext you should use to access rest/xml services
-	 */
-	public String getRestSubContext() {
-		return contextProperties.getRestSubContext();
-	}
-
-	/**
-	 * @return the subcontext you should use to access json services
-	 */
-	public String getJsonSubContext() {
-		return contextProperties.getJsonSubContext();
-	}
-	
 	public WebConversation getWebConversation() {
 		return this.webConversation;
 	}
-	
-	public void setWebConversation(WebConversation webConversation) {
-		this.webConversation = webConversation;
-	}
 
-	public ContextProperties getContextProperties() {
+	public static ContextProperties getContextProperties() {
 		return contextProperties;
 	}
 
-	public void setContextProperties(ContextProperties properties) {
-		contextProperties = properties;
+	public static void setContextProperties(ContextProperties contextProperties) {
+		EnunciateTestCase.contextProperties = contextProperties;
 	}
 }

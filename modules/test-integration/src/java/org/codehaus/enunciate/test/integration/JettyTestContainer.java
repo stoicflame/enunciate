@@ -26,13 +26,24 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
- * @author holmes
+ * Runs Jetty with properties specified in the
+ * {@link JettyTestContainer.Initializer}
  * 
+ * Treated as a Singleton because you really don't want to be running many of
+ * these.
+ * 
+ * @author holmes
  */
 public class JettyTestContainer {
 	private static boolean runningMultiple = Boolean.getBoolean("runningMultiple");
 
+	private static JettyTestContainer instance;
+
 	protected Server jettyServer = null;
+
+	private JettyTestContainer() {
+		// enforce singleton
+	}
 
 	/**
 	 * Starts the Jetty container. You will want to call this method from your
@@ -57,7 +68,7 @@ public class JettyTestContainer {
 			jettyServer.addHandler(context);
 			jettyServer.start();
 		}
-		
+
 		return jettyServer.getConnectors()[0].getLocalPort();
 	}
 
@@ -117,7 +128,7 @@ public class JettyTestContainer {
 				.getRequiredWebApplicationContext(servletContext);
 		return springWebAppContext;
 	}
-	
+
 	/**
 	 * If you would like to start the Jetty Container, but pass things to it
 	 * before it starts up, put those initialization options in here
@@ -158,5 +169,17 @@ public class JettyTestContainer {
 		public void setContext(String context) {
 			this.context = context;
 		}
+	}
+
+	public static JettyTestContainer getInstance() {
+		if (instance == null) {
+			instance = new JettyTestContainer();
+		}
+
+		return instance;
+	}
+
+	public static void setInstance(JettyTestContainer instance) {
+		JettyTestContainer.instance = instance;
 	};
 }

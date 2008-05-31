@@ -16,96 +16,30 @@
  */
 package org.codehaus.enunciate.test.integration;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Enclosed;
 
 /**
- * Extend this when you want to run tests against a deployed server (i.e. jboss)
+ * Extend from this test case when you want to start up Jetty and continue to
+ * use existing tests.
  * 
- * If you want to run against Jetty, extend from {@link BaseEnunciateWsTest}
- * instead
+ * Ensure that your test class uses the {@link RunWith} annotation, with a value
+ * of {@link Enclosed}. Then just include the other test case as an inner
+ * class. Should run like normal, but the properties will point to a temporary
+ * jetty deployment.
+ * 
+ * <pre>
+ * &#064;RunWith(Enclosed.class)
+ * </pre>
  * 
  * @author holmes
  */
-public class WsTestContainer extends DeployedTestContainer {
-
-	public static final String CONTEXT_PROPERTY_NAME = "context";
-
-	public static final String PORT_PROPERTY_NAME = "port";
-
-	private static JettyTestContainer jettyTestContainer = new JettyTestContainer();
-
-	protected File webappHome;
+@RunWith(Enclosed.class)
+public class WsTestContainer extends EnunciateTestCase {
 
 	@BeforeClass
 	public static void startUpServer() {
-		setInstance(new WsTestContainer());
-	}
-
-	@Override
-	protected String getContextPropertyName() {
-		return CONTEXT_PROPERTY_NAME;
-	}
-
-	@Override
-	protected String getPortPropertyName() {
-		return PORT_PROPERTY_NAME;
-	}
-
-	@Override
-	protected void loadProperties(String propertiesPath) throws IOException, IllegalStateException {
-		super.loadProperties(propertiesPath);
-
-		final String webappDir = properties.getProperty("webapp.home");
-		if (webappDir == null) {
-			throw new IllegalStateException("Required property 'webapp.home' not found in " + propertiesPath);
-		}
-
-		webappHome = new File(webappDir);
-		if (!webappHome.exists()) {
-			throw new FileNotFoundException("The webapp.home does not exist: " + webappHome.getAbsolutePath());
-		}
-
-		startServer();
-	}
-
-	/**
-	 * Directory where the expanded webapp is located.
-	 */
-	public File getWebappHome() {
-		return webappHome;
-	}
-
-	public void setWebappHome(File webappHome) {
-		this.webappHome = webappHome;
-	}
-
-	public static JettyTestContainer getJettyTestContainer() {
-		return jettyTestContainer;
-	}
-
-	public static void setJettyTestContainer(JettyTestContainer testContainer) {
-		jettyTestContainer = testContainer;
-	}
-
-	/**
-	 * Starts the server up based on properties that have been loaded. Once the
-	 * server starts, it tells us what port we're on, and we pass that on to the
-	 * parent
-	 */
-	private void startServer() {
-		final JettyTestContainer.Initializer initializer = new JettyTestContainer.Initializer();
-		initializer.setContext(relativeContext);
-		initializer.setPort(specifiedPort);
-		initializer.setWebAppHome(webappHome);
-
-		try {
-			specifiedPort = jettyTestContainer.startServer(initializer);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		contextProperties = new WsContextProperties();
 	}
 }
