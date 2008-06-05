@@ -250,6 +250,26 @@ public class RESTOperation {
       contextClasses.add(returnType);
     }
 
+    for (Class exceptionClass : method.getExceptionTypes()) {
+      for (Method exceptionMethod : exceptionClass.getMethods()) {
+        if ((exceptionMethod.isAnnotationPresent(RESTErrorBody.class)) && (exceptionMethod.getReturnType() != Void.TYPE)) {
+          //add the error body to the context classes.
+          contextClasses.add(exceptionMethod.getReturnType());
+        }
+      }
+    }
+
+    //now load any additional context classes as specified by @RESTSeeAlso
+    if (method.isAnnotationPresent(RESTSeeAlso.class)) {
+      contextClasses.addAll(Arrays.asList(method.getAnnotation(RESTSeeAlso.class).value()));
+    }
+    if (method.getDeclaringClass().isAnnotationPresent(RESTSeeAlso.class)) {
+      contextClasses.addAll(Arrays.asList(method.getDeclaringClass().getAnnotation(RESTSeeAlso.class).value()));
+    }
+    if ((method.getDeclaringClass().getPackage() != null) && (method.getDeclaringClass().getPackage().isAnnotationPresent(RESTSeeAlso.class))) {
+      contextClasses.addAll(Arrays.asList(method.getDeclaringClass().getPackage().getAnnotation(RESTSeeAlso.class).value()));
+    }
+
     String jsonpParameter = null;
     JSONP jsonpInfo = method.getAnnotation(JSONP.class);
     if (jsonpInfo == null) {

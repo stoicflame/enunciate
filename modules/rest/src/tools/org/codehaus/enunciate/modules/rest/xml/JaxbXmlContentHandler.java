@@ -27,10 +27,12 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.*;
+import javax.xml.transform.stream.StreamSource;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.io.IOException;
 
 /**
  * Content type handler for JAXB XML.
@@ -125,7 +127,31 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
    * @return The unmarshalled data.
    */
   protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request) throws Exception {
-    return unmarshaller.unmarshal(request.getInputStream());
+    Class typeConstraint = null;
+    RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
+    if (operation != null) {
+      typeConstraint = operation.getNounValueType();
+    }
+
+    return unmarshal(unmarshaller, request, typeConstraint);
+  }
+
+  /**
+   * Unmarshal the data from the request.
+   *
+   * @param unmarshaller The unmarshaller.
+   * @param request The request
+   * @param typeConstraint The type constraint
+   * @return The object.
+   */
+  protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request, Class typeConstraint) throws Exception {
+    if (typeConstraint != null) {
+      //if a type constraint is applied, specify it when unmarshalling.
+      return unmarshaller.unmarshal(new StreamSource(request.getInputStream()), typeConstraint).getValue();
+    }
+    else {
+      return unmarshaller.unmarshal(request.getInputStream());
+    }
   }
 
   /**

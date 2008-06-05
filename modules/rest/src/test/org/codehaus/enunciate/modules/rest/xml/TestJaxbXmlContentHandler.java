@@ -17,10 +17,7 @@
 package org.codehaus.enunciate.modules.rest.xml;
 
 import junit.framework.TestCase;
-import org.codehaus.enunciate.modules.rest.MockRESTEndpoint;
-import org.codehaus.enunciate.modules.rest.RESTResource;
-import org.codehaus.enunciate.modules.rest.RootElementExample;
-import org.codehaus.enunciate.modules.rest.TestRESTResourceExporter;
+import org.codehaus.enunciate.modules.rest.*;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 import static org.easymock.EasyMock.*;
 
@@ -61,7 +58,9 @@ public class TestJaxbXmlContentHandler extends TestCase {
     JAXBContext context = JAXBContext.newInstance(RootElementExample.class);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     context.createMarshaller().marshal(new RootElementExample(), bytes);
+
     expect(request.getInputStream()).andReturn(new TestRESTResourceExporter.ByteArrayServletInputStream(bytes.toByteArray()));
+    expect(request.getAttribute(RESTOperation.class.getName())).andReturn(resource.getOperations().iterator().next());
     replay(request);
     assertTrue(handler.read(request) instanceof RootElementExample);
     assertTrue(handler.resourcesToContexts.containsKey(resource));

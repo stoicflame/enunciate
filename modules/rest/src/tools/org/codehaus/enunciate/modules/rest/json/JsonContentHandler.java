@@ -58,7 +58,7 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
    * @return The data.
    */
   @Override
-  protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request) throws Exception {
+  protected Object unmarshal(Unmarshaller unmarshaller, HttpServletRequest request, Class typeConstraint) throws Exception {
     XMLStreamReader reader;
     JsonSerializationMethod method = JsonUtil.loadSerializationMethod(request, getDefaultSerializationMethod());
     switch (method) {
@@ -71,7 +71,12 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
       default:
         throw new UnsupportedOperationException();
     }
-    return unmarshaller.unmarshal(reader);
+    if (typeConstraint != null) {
+      return unmarshaller.unmarshal(reader, typeConstraint).getValue();
+    }
+    else {
+      return unmarshaller.unmarshal(reader);
+    }
   }
 
   /**

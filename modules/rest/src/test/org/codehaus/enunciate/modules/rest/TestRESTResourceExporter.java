@@ -216,6 +216,7 @@ public class TestRESTResourceExporter extends TestCase {
     expect(request.getAttribute(RESTResource.class.getName())).andReturn(resource);
     expect(request.getParameterValues("arg2")).andReturn(new String[] {"9999"});
     expect(request.getParameterValues("arg3")).andReturn(new String[] {"value1", "value2"});
+    expect(request.getAttribute(RESTOperation.class.getName())).andReturn(resource.getOperations().iterator().next());
     expect(request.getInputStream()).andReturn(new ByteArrayServletInputStream(bytes.toByteArray()));
     paramValues.put(null, "id");
     paramValues.put("uriParam1", "ctxValueOne");

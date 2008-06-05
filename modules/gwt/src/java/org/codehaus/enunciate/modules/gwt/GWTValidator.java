@@ -84,6 +84,9 @@ public class GWTValidator extends BaseValidator {
         result.addError(ei.getPosition(), "Sorry, GWT doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
           "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
       }
+      else if (ei.getEndpointImplementations().isEmpty()) {
+        result.addError(ei.getPosition(), "GWT requires an implementation for each service interface.");
+      }
     }
     
     for (WebFault fault : allFaults) {

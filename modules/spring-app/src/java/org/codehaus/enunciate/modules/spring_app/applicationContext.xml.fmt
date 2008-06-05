@@ -37,7 +37,9 @@
     <qualifier value="enunciate-service-bean"/>
     <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
     <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
+    [#if endpoint.serviceEndpointDefaultImplementation?exists]
     <property name="defaultImplementationClass" value="${endpoint.serviceEndpointDefaultImplementation.qualifiedName}"/>
+    [/#if]
     <property name="interceptors">
       <list>
     [#if globalServiceInterceptors?exists]
