@@ -377,7 +377,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
           [#elseif type.value.binaryData]
-      EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+      EnunciateClientBinaryDataUtil.writeBinaryData(value, [#if type.value.mimeType?exists]"${type.value.mimeType}"[#else]null[/#if], EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
           [#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
       type.writeObject(value, writer, context);
@@ -401,7 +401,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       MessageWriter elementWriter = writer.getElementWriter("${element.name}", null);
         [/#if]
             [#if element.binaryData]
-      EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, ${element.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+      EnunciateClientBinaryDataUtil.writeBinaryData((${componentTypeFor(element)}) property, [#if element.mimeType?exists]"${element.mimeType}"[#else]null[/#if], EnunciateClientBinaryDataUtil.[#if element.swaRef]SWAREF[#elseif element.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
             [#else]
               [#if element.accessorType.map?default(false)]
       Type type = [@mapTypeOrRegisteredType type=element.accessorType/];

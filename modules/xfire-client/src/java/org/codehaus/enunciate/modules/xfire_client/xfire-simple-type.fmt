@@ -71,7 +71,7 @@ public class ${type.simpleName}XFireType extends Type {
       ListWriter listWriter = new ListWriter(value, getTypeMapping(), context);
       writer.writeValue(listWriter.getValue());
       [#elseif type.value.binaryData]
-      EnunciateClientBinaryDataUtil.writeBinaryData(value, ${type.value.mimeType?default("null")}, EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
+      EnunciateClientBinaryDataUtil.writeBinaryData(value, [#if type.value.mimeType?exists]"${type.value.mimeType}"[#else]null[/#if], EnunciateClientBinaryDataUtil.[#if type.value.swaRef]SWAREF[#elseif type.value.MTOMAttachment]MTOM[#else]BASE64[/#if], writer, context);
       [#else]
       Type type = getTypeMapping().getType(${classnameFor(type.value)}.class);
       type.writeObject(value, writer, context);
