@@ -116,18 +116,20 @@
     <beans:property name="accessConfirmedUrl" value="${securityConfig.OAuthConfig.accessConfirmedURL}"/>
   </beans:bean>
   [/#if]
-  [#if securityConfig.userDetailsService?exists && securityConfig.userDetailsService.beanName?exists]
+  [#if !securityConfig.disableDefaultProvider]
+    [#if securityConfig.userDetailsService?exists && securityConfig.userDetailsService.beanName?exists]
 
   <authentication-provider user-service-ref="${securityConfig.userDetailsService.beanName}"/>
-  [#elseif securityConfig.userDetailsService?exists && securityConfig.userDetailsService.className?exists]
+    [#elseif securityConfig.userDetailsService?exists && securityConfig.userDetailsService.className?exists]
 
   <beans:bean id="enunciate-user-details" class="${securityConfig.userDetailsService.className}"/>
   <authentication-provider user-service-ref="enunciate-user-details"/>
-  [#else]
+    [#else]
 
   <beans:bean id="enunciate-auth-provider" class="org.codehaus.enunciate.modules.spring_app.DefaultEnunciateAuthenticationProvider">
     <custom-authentication-provider/>
   </beans:bean>
+    [/#if]
   [/#if]
 
   <!-- service method interceptor (used to lock down the service methods.)-->

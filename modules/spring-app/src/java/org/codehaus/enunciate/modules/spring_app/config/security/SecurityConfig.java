@@ -159,6 +159,9 @@ import java.util.ArrayList;
  *       default will be provided.</li>
  *   <li>The "realmName" attribute is used to specify the default realm name to be used for the authentication mechanisms that require it (e.g. HTTP Basic Auth,
  *       HTTP Digest Auth). The default value is "Spring Security Application".</li>
+ *   <li>The "disableDefaultProvider" attribute is used to disable the Enunciate-supplied default authentication provider. If the Enunciate-supplied provider is
+ *       disabled, one will have to be custom-provided in the spring context. Note that setting this to "true" effectively causes Enunciate to ignore the
+ *       "userDetailsService" child element. Default: "false".</li>
  * </ul>
  *
  * <p>The "security" element also supports a number of child elements that can be used to further configure the Web service security mechanism.</p>
@@ -317,6 +320,8 @@ public class SecurityConfig {
   private boolean initJ2EESecurityContext = true;
   private boolean enableOAuth = false;
 
+  private boolean disableDefaultProvider = false;
+
   private AnonymousConfig anonymousConfig = new AnonymousConfig();
   private BasicAuthConfig basicAuthConfig = new BasicAuthConfig();
   private DigestAuthConfig digestAuthConfig = new DigestAuthConfig();
@@ -354,6 +359,24 @@ public class SecurityConfig {
     
     if (enableFormBasedLogin) {
     }
+  }
+
+  /**
+   * Whether to disable the default authentication provider (required one to be user-supplied).  Default: false.
+   *
+   * @return Whether to disable the default authentication provider (required one to be user-supplied).  Default: false.
+   */
+  public boolean isDisableDefaultProvider() {
+    return disableDefaultProvider;
+  }
+
+  /**
+   * Whether to disable the default authentication provider (required one to be user-supplied).  Default: false.
+   *
+   * @param disableDefaultProvider Whether to disable the default authentication provider (required one to be user-supplied).  Default: false.
+   */
+  public void setDisableDefaultProvider(boolean disableDefaultProvider) {
+    this.disableDefaultProvider = disableDefaultProvider;
   }
 
   /**

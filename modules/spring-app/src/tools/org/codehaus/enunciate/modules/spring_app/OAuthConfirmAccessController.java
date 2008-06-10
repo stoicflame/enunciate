@@ -38,15 +38,15 @@ public class OAuthConfirmAccessController extends StaticModelViewController {
   private ConsumerDetailsService consumerDetailsService;
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    String token = request.getParameter("requestToken");
+    String token = request.getParameter("oauth_token");
     if (token == null) {
-      throw new IllegalArgumentException("An request token to authorize must be provided.");
+      throw new IllegalArgumentException("A request token to authorize must be provided via request parameter \"oauth_token\".");
     }
 
     OAuthProviderToken providerToken = getTokenServices().getToken(token);
     ConsumerDetails consumer = getConsumerDetailsService().loadConsumerByConsumerKey(providerToken.getConsumerKey());
 
-    String callback = request.getParameter("callbackURL");
+    String callback = request.getParameter("oauth_callback");
     TreeMap<String, Object> model = getModel() == null ? new TreeMap<String, Object>() : new TreeMap<String, Object>(getModel());
     model.put("requestToken", token);
     if (callback != null) {
