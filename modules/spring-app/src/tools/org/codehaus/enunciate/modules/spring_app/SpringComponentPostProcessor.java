@@ -53,11 +53,21 @@ public class SpringComponentPostProcessor implements ServletContextListener, Com
   public void postProcess(Object component) {
     WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(this.context);
     if (applicationContext != null) {
-      Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, AutowiredAnnotationBeanPostProcessor.class);
-      if (!beans.isEmpty()) {
-        AutowiredAnnotationBeanPostProcessor processor = (AutowiredAnnotationBeanPostProcessor) beans.values().iterator().next();
-        processor.processInjection(component);
-      }
+      autowire(component, applicationContext);
+    }
+  }
+
+  /**
+   * Autowire the specified component.
+   *
+   * @param component the component.
+   * @param applicationContext the application context to use to autowire the component.
+   */
+  public static void autowire(Object component, WebApplicationContext applicationContext) {
+    Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, AutowiredAnnotationBeanPostProcessor.class);
+    if (!beans.isEmpty()) {
+      AutowiredAnnotationBeanPostProcessor processor = (AutowiredAnnotationBeanPostProcessor) beans.values().iterator().next();
+      processor.processInjection(component);
     }
   }
 }

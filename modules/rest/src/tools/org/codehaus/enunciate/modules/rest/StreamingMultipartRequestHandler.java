@@ -226,16 +226,6 @@ public class StreamingMultipartRequestHandler implements MultipartRequestHandler
           }
 
           @Override
-          public int read(byte b[]) throws IOException {
-            int bytesRead = super.read(b);
-            if (bytesRead >= 0) {
-              StreamingMultipartIterator.this.bytesReadSoFar += bytesRead;
-              updateProgress();
-            }
-            return bytesRead;
-          }
-
-          @Override
           public int read(byte b[], int off, int len) throws IOException {
             int bytesRead = super.read(b, off, len);
             if (bytesRead >= 0) {

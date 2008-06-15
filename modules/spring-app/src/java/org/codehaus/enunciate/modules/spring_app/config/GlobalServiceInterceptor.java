@@ -23,7 +23,7 @@ package org.codehaus.enunciate.modules.spring_app.config;
  */
 public class GlobalServiceInterceptor {
 
-  private Class interceptorClass;
+  private String interceptorClass;
   private String beanName;
 
   /**
@@ -31,7 +31,7 @@ public class GlobalServiceInterceptor {
    *
    * @return The class of the interceptor (advice or advisor).
    */
-  public Class getInterceptorClass() {
+  public String getInterceptorClass() {
     return interceptorClass;
   }
 
@@ -40,7 +40,7 @@ public class GlobalServiceInterceptor {
    *
    * @param clazz The class of the interceptor (advice or advisor).
    */
-  public void setInterceptorClass(Class clazz) {
+  public void setInterceptorClass(String clazz) {
     this.interceptorClass = clazz;
   }
 

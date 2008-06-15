@@ -23,7 +23,7 @@ package org.codehaus.enunciate.modules.spring_app.config;
  */
 public class HandlerInterceptor {
 
-  private Class interceptorClass;
+  private String interceptorClass;
   private String beanName;
 
   /**
@@ -31,7 +31,7 @@ public class HandlerInterceptor {
    *
    * @return The class of the handler interceptor.
    */
-  public Class getInterceptorClass() {
+  public String getInterceptorClass() {
     return interceptorClass;
   }
 
@@ -40,7 +40,7 @@ public class HandlerInterceptor {
    *
    * @param clazz The class of the handler interceptor.
    */
-  public void setInterceptorClass(Class clazz) {
+  public void setInterceptorClass(String clazz) {
     this.interceptorClass = clazz;
   }
 

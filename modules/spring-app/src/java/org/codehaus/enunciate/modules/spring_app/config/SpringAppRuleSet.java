@@ -37,6 +37,18 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/war/lib");
     digester.addSetNext("enunciate/modules/spring-app/war/lib", "addWarLib");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/war/resource-env-ref", WebAppResource.class);
+    digester.addSetProperties("enunciate/modules/spring-app/war/resource-env-ref");
+    digester.addSetNext("enunciate/modules/spring-app/war/resource-env-ref", "addResourceEnvRef");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/war/resource-ref", WebAppResource.class);
+    digester.addSetProperties("enunciate/modules/spring-app/war/resource-ref");
+    digester.addSetNext("enunciate/modules/spring-app/war/resource-ref", "addResourceRef");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/war/env", WebAppResource.class);
+    digester.addSetProperties("enunciate/modules/spring-app/war/env");
+    digester.addSetNext("enunciate/modules/spring-app/war/env", "addEnvEntry");
+
     digester.addObjectCreate("enunciate/modules/spring-app/war/excludeJar", IncludeExcludeLibs.class);
     digester.addSetProperties("enunciate/modules/spring-app/war/excludeJar");
     digester.addSetNext("enunciate/modules/spring-app/war/excludeJar", "addExcludeLibs");

@@ -29,8 +29,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory bean for creating service bean instances.
@@ -116,6 +120,9 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
       try {
         serviceImplementationBean = defaultImplementationClass.newInstance();
+
+        //do the bean autowiring
+        SpringComponentPostProcessor.autowire(serviceImplementationBean, (WebApplicationContext) getApplicationContext());
       }
       catch (Exception e) {
         throw new ApplicationContextException("Unable to instantiate " + defaultImplementationClass.getName(), e);

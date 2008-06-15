@@ -46,6 +46,10 @@ public class WarConfig {
   private String flexAppDir;
   private final Manifest manifest = getDefaultManifest();
 
+  private final List<WebAppResource> envEntries = new ArrayList<WebAppResource>();
+  private final List<WebAppResource> resourceEnvRefs = new ArrayList<WebAppResource>();
+  private final List<WebAppResource> resourceRefs = new ArrayList<WebAppResource>();
+
   /**
    * The name of the war.
    *
@@ -313,6 +317,68 @@ public class WarConfig {
     manifest.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
     manifest.getMainAttributes().putValue("Created-By", "Enunciate");
     return manifest;
+  }
+
+  /**
+   * Web app env entries.
+   *
+   * @return Web app env entries.
+   */
+  public List<WebAppResource> getEnvEntries() {
+    return envEntries;
+  }
+
+  public void addEnvEntry(WebAppResource resource) {
+    if (resource.getName() == null) {
+      throw new IllegalArgumentException("An env entry must have a name.");
+    }
+    else if (resource.getType() == null) {
+      throw new IllegalArgumentException("An env entry must have a type.");
+    }
+    this.envEntries.add(resource);
+  }
+
+  /**
+   * Web app resource env entries.
+   *
+   * @return Web app resource env entries.
+   */
+  public List<WebAppResource> getResourceEnvRefs() {
+    return resourceEnvRefs;
+  }
+
+  public void addResourceEnvRef(WebAppResource resource) {
+    if (resource.getName() == null) {
+      throw new IllegalArgumentException("An resource env entry must have a name.");
+    }
+    else if (resource.getType() == null) {
+      throw new IllegalArgumentException("An resource env entry must have a type.");
+    }
+
+    this.resourceEnvRefs.add(resource);
+  }
+
+  /**
+   * Web app resource entries.
+   *
+   * @return Web app resource entries.
+   */
+  public List<WebAppResource> getResourceRefs() {
+    return resourceRefs;
+  }
+
+  public void addResourceRef(WebAppResource resource) {
+    if (resource.getName() == null) {
+      throw new IllegalArgumentException("An resource entry must have a name.");
+    }
+    else if (resource.getType() == null) {
+      throw new IllegalArgumentException("An resource entry must have a type.");
+    }
+    else if (resource.getAuth() == null) {
+      throw new IllegalArgumentException("An resource entry must have an auth.");
+    }
+
+    this.resourceEnvRefs.add(resource);
   }
 
 }

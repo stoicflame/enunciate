@@ -169,5 +169,36 @@
       [/#list]
     [/#if]
   [/#list]
+  [#if resourceEnvRefs?exists]
+    [#list resourceEnvRefs as resourceEnvRef]
+
+  <resource-env-ref>
+    <resource-env-ref-name>${resourceEnvRef.name}</resource-env-ref-name>
+    <resource-env-ref-type>${resourceEnvRef.type}</resource-env-ref-type>
+  </resource-env-ref>
+    [/#list]
+  [/#if]
+  [#if resourceRefs?exists]
+    [#list resourceRefs as resourceRef]
+
+  <resource-ref>
+    <res-ref-name>${resourceRef.name}</res-ref-name>
+    <res-type>${resourceEnvRef.type}</res-type>
+    <res-auth>${resourceEnvRef.auth}</res-auth>
+  </resource-ref>
+    [/#list]
+  [/#if]
+  [#if envEntries?exists]
+    [#list envEntries as envEntry]
+
+  <env-entry>
+    <env-entry-name>${envEntry.name}</env-entry-name>
+    [#if envEntry.value?exists]
+    <env-entry-value>${envEntry.value}</env-entry-value>
+    [/#if]
+    <env-entry-type>${envEntry.type}</env-entry-type>
+  </env-entry>
+    [/#list]
+  [/#if]
 </web-app>
 [/@file]

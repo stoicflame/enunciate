@@ -45,7 +45,7 @@
     [#if globalServiceInterceptors?exists]
       [#list globalServiceInterceptors as interceptor]
         [#if interceptor.interceptorClass?exists]
-        <bean class="${interceptor.interceptorClass.name}"/>
+        <bean class="${interceptor.interceptorClass}"/>
         [#else]
         <ref bean="${interceptor.beanName}"/>
         [/#if]

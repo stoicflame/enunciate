@@ -163,10 +163,10 @@
 [#list nouns2methods?values as methodList]
   [#assign noun=(methodList?first).noun]
       <resource name="${noun}">
-  [#list methodList as method]
-    [#list method.contentTypes as contentType]
+  [#list uniqueContentTypes(methodList) as contentType]
         <contentType type="${contentType}" path="/${contentTypes2Ids[contentType]}/${noun}"/>
-    [/#list]
+  [/#list]
+  [#list methodList as method]
     [#list method.verbs as verb]
         <operation type="${verb}" requiresResourceId="${method.properNoun?exists?string}">
       [#if method.docValue?exists]

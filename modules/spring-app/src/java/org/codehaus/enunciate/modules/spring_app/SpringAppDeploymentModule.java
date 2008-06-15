@@ -155,6 +155,18 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;manifest&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name="..." value="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute section="..." name="..." value="..."/&gt;
@@ -723,37 +735,50 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   protected void generateWebXml() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
-    EnunciateFreemarkerModel model = getModel();
-    File configDir = getConfigGenerateDir();
-    model.setFileOutputDirectory(configDir);
-    try {
-      //delayed to the "build" phase to enable modules to supply their web app fragments.
-      model.put("webAppFragments", enunciate.getWebAppFragments());
-      processTemplate(getWebXmlTemplateURL(), model);
-    }
-    catch (TemplateException e) {
-      throw new EnunciateException("Error processing web.xml template file.", e);
-    }
-
     File webinf = new File(buildDir, "WEB-INF");
-    File webXML = new File(configDir, "web.xml");
     File destWebXML = new File(webinf, "web.xml");
 
-    if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
-      URL transformURL = this.warConfig.getWebXMLTransformURL();
-      info("web.xml transform has been specified as %s.", transformURL);
+    if (!enunciate.isUpToDateWithSources(destWebXML)) {
+      File configDir = getConfigGenerateDir();
+      File webXML = new File(configDir, "web.xml");
+      EnunciateFreemarkerModel model = getModel();
+      model.setFileOutputDirectory(configDir);
       try {
-        StreamSource source = new StreamSource(transformURL.openStream());
-        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-        info("Transforming %s to %s.", webXML, destWebXML);
-        transformer.transform(new StreamSource(new FileReader(webXML)), new StreamResult(destWebXML));
+        //delayed to the "build" phase to enable modules to supply their web app fragments.
+        model.put("webAppFragments", enunciate.getWebAppFragments());
+        List<WebAppResource> envEntries = Collections.<WebAppResource>emptyList();
+        List<WebAppResource> resourceEnvRefs = Collections.<WebAppResource>emptyList();
+        List<WebAppResource> resourceRefs = Collections.<WebAppResource>emptyList();
+        if (this.warConfig != null) {
+          envEntries = this.warConfig.getEnvEntries();
+          resourceEnvRefs = this.warConfig.getResourceEnvRefs();
+          resourceRefs = this.warConfig.getResourceRefs();
+        }
+        model.put("envEntries", envEntries);
+        model.put("resourceEnvRefs", resourceEnvRefs);
+        model.put("resourceRefs", resourceRefs);
+        processTemplate(getWebXmlTemplateURL(), model);
       }
-      catch (TransformerException e) {
-        throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
+      catch (TemplateException e) {
+        throw new EnunciateException("Error processing web.xml template file.", e);
       }
-    }
-    else {
-      enunciate.copyFile(webXML, destWebXML);
+
+      if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
+        URL transformURL = this.warConfig.getWebXMLTransformURL();
+        info("web.xml transform has been specified as %s.", transformURL);
+        try {
+          StreamSource source = new StreamSource(transformURL.openStream());
+          Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+          info("Transforming %s to %s.", webXML, destWebXML);
+          transformer.transform(new StreamSource(new FileReader(webXML)), new StreamResult(destWebXML));
+        }
+        catch (TransformerException e) {
+          throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
+        }
+      }
+      else {
+        enunciate.copyFile(webXML, destWebXML);
+      }
     }
   }
 

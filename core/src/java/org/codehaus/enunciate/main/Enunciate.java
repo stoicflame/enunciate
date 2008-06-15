@@ -864,6 +864,7 @@ public class Enunciate {
    */
   public boolean isUpToDate(File sourceFile, File destFile) {
     if ((sourceFile == null) || (!sourceFile.exists())) {
+      debug("%s is up-to-date because %s doesn't exist.", destFile, sourceFile);
       return true;
     }
     else if (!sourceFile.isDirectory()) {
@@ -905,9 +906,11 @@ public class Enunciate {
   protected boolean isUpToDate(List<File> sourceFiles, File destFile) {
     List<File> destFiles;
     if ((sourceFiles == null) || (sourceFiles.isEmpty())) {
+      debug("%s is up-to-date because the list of source files is empty.", destFile);
       return true;
     }
     else if ((destFile == null) || (!destFile.exists())) {
+      debug("%s is NOT up-to-date because it doesn't exist.", destFile);
       return false;
     }
     else if (!destFile.isDirectory()) {
@@ -918,35 +921,59 @@ public class Enunciate {
       buildFileList(destFiles, destFile);
     }
 
-    return !destFiles.isEmpty() && getLatestTimestamp(sourceFiles) < getEarliestTimestamp(destFiles);
+    if (destFiles.isEmpty()) {
+      debug("%s is NOT up-to-date because it's an empty directory.");
+      return false;
+    }
+    else {
+      File youngestSource = getYoungest(sourceFiles);
+      File oldestDest = getOldest(destFiles);
+
+      if (youngestSource.lastModified() < oldestDest.lastModified()) {
+        debug("%s is up-to-date because its oldest file, %s, is younger than the youngest source file, %s.", destFile, oldestDest, youngestSource);
+        return true;
+      }
+      else {
+        debug("%s is NOT up-to-date because its oldest file, %s, is older than the youngest source file, %s.", destFile, oldestDest, youngestSource);
+        return false;
+      }
+    }
   }
 
   /**
-   * Get the latest timestamp of the specified files.
+   * Get the latest modified file.
    *
    * @param files The files.
-   * @return The latest timestamp.
+   * @return The latest modified.
    */
-  protected long getLatestTimestamp(List<File> files) {
-    long timestamp = -1;
-    for (File file : files) {
-      timestamp = Math.max(timestamp, file.lastModified());
+  protected File getYoungest(List<File> files) {
+    if ((files == null) || (files.isEmpty())) {
+      return null;
     }
-    return timestamp;
+
+    File latest = files.get(0);
+    for (File file : files) {
+      latest = latest.lastModified() > file.lastModified() ? latest : file;
+    }
+    return latest;
   }
 
   /**
-   * Get the earliest timestamp of the specified files.
+   * Get the earliest modified file.
    *
    * @param files The files.
-   * @return The earliest timestamp.
+   * @return The earliest modified.
    */
-  protected long getEarliestTimestamp(List<File> files) {
-    long timestamp = Long.MAX_VALUE;
-    for (File file : files) {
-      timestamp = Math.min(timestamp, file.lastModified());
+  protected File getOldest(List<File> files) {
+    if ((files == null) || (files.isEmpty())) {
+      return null;
     }
-    return timestamp;
+
+    File earliest = files.get(0);
+    for (File file : files) {
+      earliest = earliest.lastModified() < file.lastModified() ? earliest : file;
+    }
+    return earliest;
   }
 
   /**
@@ -958,10 +985,11 @@ public class Enunciate {
   protected void buildFileList(List<File> list, File... dirs) {
     for (File dir : dirs) {
       for (File file : dir.listFiles()) {
-        list.add(file);
-
         if (file.isDirectory()) {
           buildFileList(list, file);
+        }
+        else {
+          list.add(file);
         }
       }
     }
@@ -1258,6 +1286,7 @@ public class Enunciate {
    * @param root The source root directory.
    */
   public void addAdditionalSourceRoot(File root) {
+    info("Adding " + root + " as an additional source root.");
     this.additionalSourceRoots.add(root);
   }
 

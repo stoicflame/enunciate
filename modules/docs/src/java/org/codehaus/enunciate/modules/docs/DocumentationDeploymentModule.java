@@ -425,6 +425,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
       model.setVariable("baseAddress", model.getBaseDeploymentAddress());
       model.setVariable("resourcePath", new ResourcePathMethod());
+      model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
 
       processTemplate(getDocsTemplateURL(), model);
     }
