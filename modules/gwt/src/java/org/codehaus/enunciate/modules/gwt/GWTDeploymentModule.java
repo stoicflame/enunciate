@@ -151,6 +151,8 @@ import com.sun.mirror.declaration.Declaration;
  * ".gwt.xml" module file.</li>
  * <li>The "outputDir" attribute specifies where the compiled module will be placed, relative to the application directory.  By default, the
  * outputDir is the empty string (""), which means the compiled module will be placed at the root of the application directory.</li>
+ * <li>The "shellPage" attribute specifies the (usually HTML) page to open when invoking the shell for this module (used to generate the shell script). By
+ * default, the shell page is the [moduleId].html, where [moduleId] is the (short, unqualified) name of the module.</li>
  * </ul>
  *
  * <h3>The "gwtCompileJVMArg" element</h3>
@@ -219,6 +221,9 @@ import com.sun.mirror.declaration.Declaration;
  * <li>The "gwt.client.src.dir" artifact is the directory where the client-side source code is generated.</li>
  * <li>The "gwt.server.src.dir" artifact is the directory where the server-side source code is generated.</li>
  * <li>The "gwt.app.dir" artifact is the directory to which the GWT AJAX apps are compiled.</li>
+ * <li>The "[appName].[moduleName].shell" artifact is the GWT shell script used to invoke the gwt shell for the module [moduleName] in app [appName].</li>
+ * <li>The "[appName].[moduleName].shell.noserver" artifact is the GWT shell script used to invoke the gwt shell for the module [moduleName] in app [appName].
+ * Script is different from the alternative in that it assumes a server is already running before invoking the GWTShell.</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -473,11 +478,13 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
+    boolean windows = false;
     File javaBinDir = new File(System.getProperty("java.home"), "bin");
     File javaExecutable = new File(javaBinDir, "java");
     if (!javaExecutable.exists()) {
       //append the "exe" for windows users.
       javaExecutable = new File(javaBinDir, "java.exe");
+      windows = true;
     }
 
     String javaCommand = javaExecutable.getAbsolutePath();
@@ -494,7 +501,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     //append the gwt-dev jar.
     classpath.append(File.pathSeparatorChar).append(gwtDevJar.getAbsolutePath());
 
-    //so here's the command:
+    //so here's the GWT compile command:
     //java [extra jvm args] -cp [classpath] [compilerClass] -gen [gwt-gen-dir] -style [style] -out [out] [moduleName]
     List<String> jvmargs = getGwtCompileJVMArgs();
     String[] commandArray = new String[jvmargs.size() + 11];
@@ -507,6 +514,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     commandArray[argIndex++] = "-cp";
     int classpathArgIndex = argIndex; //app-specific arg.
     commandArray[argIndex++] = null;
+    int compileClassIndex = argIndex;
     commandArray[argIndex++] = getGwtCompilerClass();
     commandArray[argIndex++] = "-gen";
     commandArray[argIndex++] = getGwtGenDir().getAbsolutePath();
@@ -577,9 +585,74 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
             enunciate.copyDir(moduleGenDir, moduleOutputDir);
             deleteDir(moduleGenDir);
           }
+
+          StringBuilder shellCommand = new StringBuilder();
+          StringBuilder noServerShellCommand = new StringBuilder();
+          for (int i = 0; i < commandArray.length; i++) {
+            String commandArg = commandArray[i];
+            if (i == compileClassIndex) {
+              commandArg = "com.google.gwt.dev.GWTShell";
+            }
+            else if (i == moduleNameIndex) {
+              //when invoking the shell, it requires a URL to load.
+              //The URL is the [moduleName]/[shellPage.html]
+              noServerShellCommand.append("-noserver ");
+
+              shellCommand.append(windows ? "%*" : "$@").append(' ');
+              noServerShellCommand.append(windows ? "%*" : "$@").append(' ');
+
+              shellCommand.append(moduleName).append('/');
+              if ((appName != null) && (appName.trim().length() > 0)) {
+                //the no-server shell command assumes the app is deployed according to its place in the generated war file
+                noServerShellCommand.append(appName).append('/');
+              }
+
+              String shellPage = getModuleId(moduleName) + ".html";
+              if (appModule.getShellPage() != null) {
+                shellPage = appModule.getShellPage();
+              }
+              shellCommand.append(shellPage);
+              noServerShellCommand.append(shellPage);
+              break;
+            }
+            else if (commandArg.indexOf(' ') >= 0) {
+              commandArg = '"' + commandArg + '"';
+            }
+
+            shellCommand.append(commandArg).append(' ');
+            noServerShellCommand.append(commandArg).append(' ');
+          }
+
+          File scriptFile = getShellScriptFile(appName, moduleName);
+          FileWriter writer = new FileWriter(scriptFile);
+          writer.write(shellCommand.toString());
+          writer.flush();
+          writer.close();
+
+          File noServerScriptFile = new File(scriptFile.getParentFile(), scriptFile.getName() + "-noserver");
+          writer = new FileWriter(noServerScriptFile);
+          writer.write(noServerShellCommand.toString());
+          writer.flush();
+          writer.close();
         }
         else {
           info("Skipping GWT compile for module %s as everything appears up-to-date...", moduleName);
+        }
+
+        File shellFile = getShellScriptFile(appName, moduleName);
+        if (shellFile.exists()) {
+          StringBuilder scriptArtifactId = new StringBuilder();
+          if ((appName != null) && (appName.trim().length() > 0)) {
+            scriptArtifactId.append(appName).append('.');
+          }
+          scriptArtifactId.append(moduleName).append(".shell");
+          getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.toString(), shellFile));
+
+          File noServerScriptFile = new File(shellFile.getParentFile(), shellFile.getName() + "-noserver");
+          getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.append(".noserver").toString(), noServerScriptFile));
+        }
+        else {
+          info("No GWT shell script file exists at %s.  No artifact added.", shellFile);
         }
       }
     }
@@ -823,6 +896,52 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public File getAppGenerateDir() {
     return new File(getCompileDir(), "gwtapps");
+  }
+
+  /**
+   * The base generate dir for the gwt scripts (e.g. shell scripts).
+   *
+   * @return The base generate dir for the gwt scripts (e.g. shell scripts).
+   */
+  public File getGwtScriptDir() {
+    return new File(getCompileDir(), "scripts");
+  }
+
+  /**
+   * Get the GWT shell script file for the specified module, app.
+   *
+   * @param appName The app name.
+   * @param moduleName The module name.
+   * @return The shell script file.
+   */
+  public File getShellScriptFile(String appName, String moduleName) {
+    StringBuilder filename = new StringBuilder();
+    if ((appName != null) && (appName.trim().length() > 0)) {
+      filename.append(appName).append('-');
+    }
+
+    String moduleId = getModuleId(moduleName);
+    filename.append(moduleId).append(".gwt-shell");
+    File scriptDir = getGwtScriptDir();
+    if (!scriptDir.exists()) {
+      scriptDir.mkdirs();
+    }
+    return new File(scriptDir, filename.toString());
+  }
+
+  /**
+   * Get the module id of the specified GWT module.
+   *
+   * @param moduleName The module name.
+   * @return The module id.
+   */
+  protected String getModuleId(String moduleName) {
+    String moduleId = moduleName;
+    int lastDot = moduleName.lastIndexOf('.');
+    if (lastDot >= 0) {
+      moduleId = moduleName.substring(lastDot + 1);
+    }
+    return moduleId;
   }
 
   /**

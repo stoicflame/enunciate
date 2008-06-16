@@ -25,6 +25,7 @@ public class GWTAppModule {
 
   private String name;
   private String outputPath;
+  private String shellPage;
 
   /**
    * The name of the module.
@@ -60,5 +61,23 @@ public class GWTAppModule {
    */
   public void setOutputPath(String outputPath) {
     this.outputPath = outputPath;
+  }
+
+  /**
+   * The HTML page for the GWT shell.
+   *
+   * @return The HTML page for the GWT shell.
+   */
+  public String getShellPage() {
+    return shellPage;
+  }
+
+  /**
+   * The HTML page for the GWT shell.
+   *
+   * @param shellPage The HTML page for the GWT shell.
+   */
+  public void setShellPage(String shellPage) {
+    this.shellPage = shellPage;
   }
 }

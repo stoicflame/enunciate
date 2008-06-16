@@ -32,6 +32,9 @@ public class GWTRuleSet extends RuleSetBase {
     digester.addCallMethod("enunciate/modules/gwt/gwtCompileJVMArg", "addGwtCompileJVMArg", 1);
     digester.addCallParam("enunciate/modules/gwt/gwtCompileJVMArg", 0, "value");
 
+    digester.addCallMethod("enunciate/modules/gwt/gwtShellJVMArg", "addGwtShellJVMArg", 1);
+    digester.addCallParam("enunciate/modules/gwt/gwtShellJVMArg", 0, "value");
+
     digester.addObjectCreate("enunciate/modules/gwt/app", GWTApp.class);
     digester.addSetProperties("enunciate/modules/gwt/app",
                               new String[]{"name", "javascriptStyle", "srcDir"},
