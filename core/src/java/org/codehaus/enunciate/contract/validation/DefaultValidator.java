@@ -46,7 +46,15 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class DefaultValidator implements Validator {
+public class DefaultValidator implements Validator, ConfigurableRules {
+
+  private final Set<String> disabledRules = new TreeSet<String>();
+
+  public void disableRules(Set<String> ruleIds) {
+    if (ruleIds != null) {
+      this.disabledRules.addAll(ruleIds);
+    }
+  }
 
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = new ValidationResult();
@@ -603,7 +611,7 @@ public class DefaultValidator implements Validator {
     }
 
     if (typeDef.getXmlID() != null) {
-      validateXmlID(typeDef.getXmlID());
+      result.aggregate(validateXmlID(typeDef.getXmlID()));
     }
 
     return result;
@@ -743,7 +751,12 @@ public class DefaultValidator implements Validator {
     }
 
     if ((accessor.isXmlIDREF()) && (accessor.getAccessorForXmlID() == null)) {
-      result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+      if (this.disabledRules.contains("jaxb.xmlidref.references.xmlid")) {
+        result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+      }
+      else {
+        result.addWarning(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+      }
     }
 
     return result;

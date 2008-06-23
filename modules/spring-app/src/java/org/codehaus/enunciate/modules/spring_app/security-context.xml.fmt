@@ -55,6 +55,11 @@
   [/#if]
 
   <http auto-config="false"[#if !securityConfig.initJ2EESecurityContext] servlet-api-provision="false"[/#if][#if securityConfig.onAccessDenied?exists && securityConfig.onAccessDenied.redirectTo?exists] access-denied-page="${securityConfig.onAccessDenied.redirectTo}"[/#if][#if entryPointDefined?exists && entryPointDefined] entry-point-ref="enunciate-entry-point"[/#if][#if securityConfig.realmName?exists] realm="${securityConfig.realmName}"[/#if]>
+  [#list securityConfig.secureUrls?keys as pattern]
+    [#if securityConfig.secureUrls[pattern]?exists]
+    <intercept-url pattern="${servletPatternToAntPattern(pattern)}" access="${securityConfig.secureUrls[pattern]}"/>
+    [/#if]
+  [/#list]
     <intercept-url pattern="/**"/>
 
   [#if securityConfig.enableFormBasedLogout]

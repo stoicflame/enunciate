@@ -55,6 +55,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Map<String, String> contentTypes = new HashMap<String, String>();
   private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
   private final List<APIImport> apiImports = new ArrayList<APIImport>();
+  private final Set<String> disabledRules = new TreeSet<String>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -132,6 +133,26 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setValidator(Validator validator) {
     this.validator = validator;
+  }
+
+  /**
+   * The disabled rules.
+   *
+   * @return The disabled rules.
+   */
+  public Set<String> getDisabledRules() {
+    return disabledRules;
+  }
+
+  /**
+   * Add a disabled rule.
+   *
+   * @param ruleId The id of the rule to disable.
+   */
+  public void addDisabledRule(String ruleId) {
+    if (ruleId != null) {
+      this.disabledRules.add(ruleId);
+    }
   }
 
   /**
@@ -425,6 +446,10 @@ public class EnunciateConfiguration implements ErrorHandler {
     //allow a validator to be configured.
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
     digester.addSetNext("enunciate/validator", "setValidator");
+
+    //set up the ability to disable certain rules
+    digester.addCallMethod("enunciate/validator/disable-rule", "addDisabledRule", 1);
+    digester.addCallParam("enunciate/validator", 0, "id");
 
     //allow for classes and packages to be imported for JAXB.
     digester.addObjectCreate("enunciate/api-import", APIImport.class);

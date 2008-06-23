@@ -87,6 +87,10 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security");
     digester.addSetNext("enunciate/modules/spring-app/security", "setSecurityConfig");
 
+    digester.addCallMethod("enunciate/modules/spring-app/security/url", "addSecureUrl", 2);
+    digester.addCallParam("enunciate/modules/spring-app/security/url", 0, "pattern");
+    digester.addCallParam("enunciate/modules/spring-app/security/url", 1, "rolesAllowed");
+
     digester.addObjectCreate("enunciate/modules/spring-app/security/anonymous", AnonymousConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/anonymous");
     digester.addSetNext("enunciate/modules/spring-app/security/anonymous", "setAnonymousConfig");

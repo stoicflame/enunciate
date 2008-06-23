@@ -33,7 +33,22 @@
       </xs:documentation>
     </xs:annotation>
 
+    <xs:sequence>
+      <xs:element name="disable-rule" type="disable-rule" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+
     <xs:attribute name="class" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="disable-rule">
+
+    <xs:annotation>
+      <xs:documentation>
+        Used to disable a rule on the validator.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="id" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="deployment">

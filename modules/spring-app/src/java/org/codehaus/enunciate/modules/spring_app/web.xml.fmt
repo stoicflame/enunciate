@@ -67,11 +67,59 @@
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   [#if securityEnabled]
+    [#list webAppFragments as fragment]
+      [#if fragment.servlets?exists]
+        [#list fragment.servlets as servlet]
+          [#if servlet.urlMappings?exists]
+            [#list servlet.urlMappings as urlMapping]
 
   <filter-mapping>
     <filter-name>springSecurityFilterChain</filter-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>${urlMapping}</url-pattern>
   </filter-mapping>
+            [/#list]
+          [/#if]
+        [/#list]
+      [/#if]
+    [/#list]
+    [#if securityConfig.enableFormBasedLogin]
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${securityConfig.formBasedLoginConfig.url}</url-pattern>
+  </filter-mapping>
+    [/#if]
+  [#if securityConfig.enableFormBasedLogout]
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${securityConfig.formBasedLogoutConfig.url}</url-pattern>
+  </filter-mapping>
+  [/#if]
+    [#if securityConfig.enableOAuth]
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${securityConfig.OAuthConfig.infoURL}</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${securityConfig.OAuthConfig.accessConfirmationURL}</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${securityConfig.OAuthConfig.accessConfirmedURL}</url-pattern>
+  </filter-mapping>
+    [/#if]
+    [#list securityConfig.secureUrls?keys as pattern]
+
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>${pattern}</url-pattern>
+  </filter-mapping>
+    [/#list]
   [/#if]
 
   <listener>

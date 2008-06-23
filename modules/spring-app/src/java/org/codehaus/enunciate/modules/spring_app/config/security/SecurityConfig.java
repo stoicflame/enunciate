@@ -16,8 +16,7 @@
 
 package org.codehaus.enunciate.modules.spring_app.config.security;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * <h1><a name="security">Spring Application Security</a></h1>
@@ -124,6 +123,9 @@ import java.util.ArrayList;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;filter beanName="..." className="..."/&gt;
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url pattern="..." rolesAllowed="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;url pattern="..." rolesAllowed="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/security&gt;
@@ -282,6 +284,14 @@ import java.util.ArrayList;
  *
  * <p>For more information about remember-me identity processing, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/rememberme/TokenBasedRememberMeServices.html">org.springframework.security.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
  *
+ * <h3>url</h3>
+ *
+ * <p>The "url" child element specifies another URL pattern (in addition to the Web service endpoints) to which the security policy is to be applied.  This
+ * can be used, for example, to secure static and/or internal resources in your web application (e.g. images, jsps, etc.).  The "url" element requires a "pattern"
+ * attribute that is used to apply a URL pattern to which the security policy is to be applied.  The pattern is interpresed per the "url-pattern" element
+ * of the servlet spec.  The "url" element also supports an optional "rolesAllowed" attribute that is a comma-separated list of roles that are allowed to
+ * access the URL at the specified pattern.</p>
+ *
  * <h3>filter</h3>
  *
  * <p>The "filter" child element specifies another security filter to be applied to provide securit services. The "filter"
@@ -335,6 +345,8 @@ public class SecurityConfig {
 
   private BeanReference userDetailsService;
   private List<BeanReference> additionalAuthenticationFilters;
+
+  private final Map<String, String> secureUrls = new LinkedHashMap<String, String>();
 
   //global defaults
   private String key;
@@ -678,6 +690,29 @@ public class SecurityConfig {
     }
 
     this.additionalAuthenticationFilters.add(additionalAuthenticationFilter);
+  }
+
+  /**
+   * The secure urls.
+   *
+   * @return The secure urls.
+   */
+  public Map<String, String> getSecureUrls() {
+    return secureUrls;
+  }
+
+  /**
+   * Add a secure URL.
+   *
+   * @param pattern The pattern for the secure URL.
+   * @param rolesAllowed The roles allowed to the secure URL.
+   */
+  public void addSecureUrl(String pattern, String rolesAllowed) {
+    if (pattern == null) {
+      throw new IllegalArgumentException("A 'pattern' attribute must be supplied.");
+    }
+
+    this.secureUrls.put(pattern, rolesAllowed);
   }
 
   /**

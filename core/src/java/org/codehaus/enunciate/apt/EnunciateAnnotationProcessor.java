@@ -235,7 +235,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     ValidatorChain validator = new ValidatorChain();
     EnunciateConfiguration config = this.enunciate.getConfig();
-    validator.addValidator(config.getValidator());
+    Validator coreValidator = config.getValidator();
+    if (coreValidator instanceof ConfigurableRules) {
+      ((ConfigurableRules)coreValidator).disableRules(config.getDisabledRules());
+    }
+    validator.addValidator(coreValidator);
     debug("Default validator added to the chain.");
     for (DeploymentModule module : config.getEnabledModules()) {
       Validator moduleValidator = module.getValidator();
