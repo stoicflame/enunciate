@@ -75,7 +75,7 @@ public class RESTOperation {
     Boolean properNounOptional = null;
     int nounValueIndex = -1;
     Class nounValue = null;
-    Boolean nounValueOptional = null;
+    Boolean nounValueOptional = Boolean.FALSE;
     int contentTypeParameterIndex = -1;
     adjectiveTypes = new HashMap<String, Class>();
     adjectiveIndices = new HashMap<String, Integer>();

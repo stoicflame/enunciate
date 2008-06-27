@@ -360,6 +360,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
       model.setFileOutputDirectory(clientSideGenerateDir);
 
+      Properties gwt2jaxbMappings = new Properties();
+
       TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
       info("Generating the GWT endpoints...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
@@ -417,6 +419,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
             model.put("type", typeDefinition);
             processTemplate(typeMapperTemplate, model);
+            gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
           }
         }
       }
@@ -426,8 +429,11 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         if (!isGWTTransient(webFault)) {
           model.put("fault", webFault);
           processTemplate(faultMapperTemplate, model);
+          gwt2jaxbMappings.setProperty(classnameFor.convert(webFault), webFault.getQualifiedName());
         }
       }
+
+      gwt2jaxbMappings.store(new FileOutputStream(new File(serverSideGenerateDir, "gwt-to-jaxb-mappings.properties")), "mappings for gwt classes to jaxb classes.");
     }
     else {
       info("Skipping GWT source generation as everything appears up-to-date...");
@@ -722,6 +728,14 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       info("No gwt apps were found.");
     }
     webAppFragment.setBaseDir(webappDir);
+
+    File classesDir = new File(new File(webappDir, "WEB-INF"), "classes");
+    if (!enunciate.isUpToDate(new File(getServerSideGenerateDir(), "gwt-to-jaxb-mappings.properties"), new File(classesDir, "gwt-to-jaxb-mappings.properties"))) {
+      enunciate.copyFile(new File(getServerSideGenerateDir(), "gwt-to-jaxb-mappings.properties"), new File(classesDir, "gwt-to-jaxb-mappings.properties"));
+    }
+    else {
+      info("Skipping gwt-to-jaxb mappings copy because everything appears up to date!");
+    }
 
     //servlets.
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();

@@ -17,16 +17,17 @@
 package org.codehaus.enunciate.modules.gwt;
 
 import javax.activation.DataHandler;
-import javax.xml.namespace.QName;
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.XmlElement;
-import java.util.*;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import java.io.InputStream;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Introspector used to lookup GWT mappers.
@@ -36,6 +37,7 @@ import java.lang.reflect.*;
 public class GWTMapperIntrospector {
 
   private static final Map<Type, GWTMapper> MAPPERS = new HashMap<Type, GWTMapper>();
+  private static final Properties GWT2JAXBMAPPINGS = new Properties();
 
   static {
     MAPPERS.put(BigDecimal.class, new BigDecimalGWTMapper());
@@ -46,6 +48,16 @@ public class GWTMapperIntrospector {
     MAPPERS.put(URI.class, new URIGWTMapper());
     MAPPERS.put(UUID.class, new UUIDGWTMapper());
     MAPPERS.put(XMLGregorianCalendar.class, new XMLGregorianCalendarGWTMapper());
+
+    try {
+      InputStream mappings = GWTMapperIntrospector.class.getResourceAsStream("/gwt-to-jaxb-mappings.properties");
+      if (mappings != null) {
+        GWT2JAXBMAPPINGS.load(mappings);
+      }
+    }
+    catch (Exception e) {
+      //fall through... forget the mappings load.
+    }
   }
 
   public static GWTMapper getGWTMapper(Type jaxbType) {
@@ -65,11 +77,14 @@ public class GWTMapperIntrospector {
     if (gwtObject != null) {
       Class gwtType = gwtObject.getClass();
       if ((gwtType != null) && (!gwtType.isArray()) && (!gwtType.isPrimitive())) {
-        try {
-          result = (GWTMapper) Class.forName(gwtType.getName() + "GWTMapper").newInstance();
-        }
-        catch (Throwable e) {
-          result = null;
+        String jaxbType = GWT2JAXBMAPPINGS.getProperty(gwtType.getName());
+        if (jaxbType != null) {
+          try {
+            result = (GWTMapper) Class.forName(jaxbType + "GWTMapper").newInstance();
+          }
+          catch (Throwable e) {
+            result = null;
+          }
         }
       }
     }

@@ -188,7 +188,7 @@
       [/#list]
       [#if method.nounValue?exists]
         [#if !method.nounValue.customType]
-          <inValue custom="false" typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name}">
+          <inValue custom="false" typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name?default("")}">
             <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
           </inValue>
         [#else]
@@ -199,7 +199,7 @@
       [/#if]
       [#if !method.returnType.void]
         [#if !method.customType]
-          <outValue custom="false" typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name}">
+          <outValue custom="false" typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name?default("")}">
             <![CDATA[${method.returnType.docValue?default("")}]]>
           </outValue>
         [#else]

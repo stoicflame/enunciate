@@ -737,6 +737,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     Enunciate enunciate = getEnunciate();
     File buildDir = getBuildDir();
     File webinf = new File(buildDir, "WEB-INF");
+    webinf.mkdirs();
     File destWebXML = new File(webinf, "web.xml");
 
     if (!enunciate.isUpToDateWithSources(destWebXML)) {
