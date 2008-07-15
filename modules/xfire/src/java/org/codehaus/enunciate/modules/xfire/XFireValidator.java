@@ -40,7 +40,7 @@ public class XFireValidator extends BaseValidator {
     EndpointInterface visited = visitedEndpoints.put(ei.getServiceName(), ei);
     if (visited != null) {
       if (visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
-        result.addError(ei.getPosition(), "Ummm... you already have a service named " + ei.getServiceName() + " at " +
+        result.addError(ei, "Ummm... you already have a service named " + ei.getServiceName() + " at " +
           visited.getPosition() + ".  You need to disambiguate.");
       }
     }
@@ -49,7 +49,7 @@ public class XFireValidator extends BaseValidator {
       for (WebParam webParam : webMethod.getWebParameters()) {
         if ((webParam.isHeader()) && ("".equals(webParam.getAnnotation(javax.jws.WebParam.class).name()))) {
           //todo: lift this constraint by serializing the parameter names to some file you can load for metadata...
-          result.addError(webParam.getPosition(), "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
+          result.addError(webParam, "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
         }
       }
     }

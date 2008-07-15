@@ -39,7 +39,7 @@ public class SpringAppValidator extends BaseValidator {
     if (visited != null) {
       if (!visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
         // todo: support multiple versions of web services.
-        result.addError(ei.getPosition(), "Enunciate doesn't support two endpoint interfaces with the same service name, " +
+        result.addError(ei, "Enunciate doesn't support two endpoint interfaces with the same service name, " +
           "even though they have different namespaces.  Future support for this is pending...");
       }
     }

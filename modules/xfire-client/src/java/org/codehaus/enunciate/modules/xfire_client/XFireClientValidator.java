@@ -48,14 +48,14 @@ public class XFireClientValidator extends BaseValidator {
     HashSet<String> uniqueMethodNames = new HashSet<String>();
     for (WebMethod webMethod : ei.getWebMethods()) {
       if (!uniqueMethodNames.add(webMethod.getSimpleName())) {
-        result.addError(webMethod.getPosition(), "Sorry, the xfire client module doesn't support overloaded methods yet.  Unfortunately, each method has " +
+        result.addError(webMethod, "Sorry, the xfire client module doesn't support overloaded methods yet.  Unfortunately, each method has " +
           "to have a unique name.");
       }
 
       for (WebParam webParam : webMethod.getWebParameters()) {
         if (webParam.isOutput()) {
           //todo: add support for in in/out parameters.
-          result.addError(webParam.getPosition(), "The xfire client module doesn't support IN/OUT or OUT parameters yet....");
+          result.addError(webParam, "The xfire client module doesn't support IN/OUT or OUT parameters yet....");
         }
       }
     }
@@ -85,17 +85,17 @@ public class XFireClientValidator extends BaseValidator {
     for (Accessor accessor : accessors) {
       if (accessor != null) {
         if ((accessor.getAnnotation(XmlIDREF.class) != null) && (accessor.getAnnotation(XmlList.class) != null)) {
-          result.addError(accessor.getPosition(), "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
+          result.addError(accessor, "The xfire client code currently doesn't support @XmlList and @XmlIDREF annotations together.");
         }
 
         TypeMirror accessorType = accessor.getBareAccessorType();
         if (accessorType instanceof DeclaredType) {
           String accessorTypeFQN = ((DeclaredType) accessorType).getDeclaration().getQualifiedName();
           if (java.awt.Image.class.getName().equals(accessorTypeFQN)) {
-            result.addError(accessor.getPosition(), "xfire-client module doesn't yet support handling java.awt.Image.");
+            result.addError(accessor, "xfire-client module doesn't yet support handling java.awt.Image.");
           }
           else if (javax.xml.transform.Source.class.getName().equals(accessorTypeFQN)) {
-            result.addError(accessor.getPosition(), "xfire-client module doesn't yet support handling javax.xml.transform.Source.");
+            result.addError(accessor, "xfire-client module doesn't yet support handling javax.xml.transform.Source.");
           }
         }
       }

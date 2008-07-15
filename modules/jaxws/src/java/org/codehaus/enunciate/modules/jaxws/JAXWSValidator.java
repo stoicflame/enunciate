@@ -60,12 +60,12 @@ public class JAXWSValidator extends BaseValidator {
 
       for (WebParam webParam : webMethod.getWebParameters()) {
         if (webParam.getType() instanceof MapType) {
-          result.addError(webParam.getPosition(), "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
+          result.addError(webParam, "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
         }
       }
 
       if (webMethod.getWebResult().getType() instanceof MapType) {
-        result.addError(webMethod.getPosition(), "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
+        result.addError(webMethod, "For some reason, JAXB doesn't support maps in return values or in parameters.  Still need to investigate further the reason....");
       }
     }
 
@@ -89,11 +89,11 @@ public class JAXWSValidator extends BaseValidator {
 
     String requestBeanName = wrapper.getRequestBeanName();
     if (!alreadyVisited.add(requestBeanName)) {
-      result.addError(wrapper.getWebMethod().getPosition(), requestBeanName + " conflicts with another generated bean name.  Please use the @RequestWrapper " +
+      result.addError(wrapper.getWebMethod(), requestBeanName + " conflicts with another generated bean name.  Please use the @RequestWrapper " +
         "annotation to customize the bean name.");
     }
     else if (ape.getTypeDeclaration(requestBeanName) != null) {
-      result.addError(wrapper.getWebMethod().getPosition(), requestBeanName + " is an existing class.  Either move it, or customize the request bean " +
+      result.addError(wrapper.getWebMethod(), requestBeanName + " is an existing class.  Either move it, or customize the request bean " +
         "class name with the @RequestWrapper annotation.");
     }
 
@@ -113,11 +113,11 @@ public class JAXWSValidator extends BaseValidator {
 
     String responseBeanName = wrapper.getResponseBeanName();
     if (!alreadyVisited.add(responseBeanName)) {
-      result.addError(wrapper.getWebMethod().getPosition(), responseBeanName + " conflicts with another generated bean name.  Please use the @ResponseWrapper " +
+      result.addError(wrapper.getWebMethod(), responseBeanName + " conflicts with another generated bean name.  Please use the @ResponseWrapper " +
         "annotation to customize the bean name.");
     }
     else if (ape.getTypeDeclaration(responseBeanName) != null) {
-      result.addError(wrapper.getWebMethod().getPosition(), responseBeanName + " is an existing class.  Either move it, or customize the response bean " +
+      result.addError(wrapper.getWebMethod(), responseBeanName + " is an existing class.  Either move it, or customize the response bean " +
         "class name with the @ResponseWrapper annotation.");
     }
 
@@ -138,11 +138,11 @@ public class JAXWSValidator extends BaseValidator {
     if (webFault.isImplicitSchemaElement()) {
       String faultBeanFQN = webFault.getImplicitFaultBeanQualifiedName();
       if (!alreadyVisited.add(faultBeanFQN)) {
-        result.addError(webFault.getPosition(), faultBeanFQN + " conflicts with another generated bean name.  Please use the @WebFault annotation " +
+        result.addError(webFault, faultBeanFQN + " conflicts with another generated bean name.  Please use the @WebFault annotation " +
           "to customize the fault bean name.");
       }
       else if (ape.getTypeDeclaration(faultBeanFQN) != null) {
-        result.addError(webFault.getPosition(), faultBeanFQN + " is an existing class.  Either move it, or customize the fault bean name with the " +
+        result.addError(webFault, faultBeanFQN + " is an existing class.  Either move it, or customize the fault bean name with the " +
           "@WebFault annotation.");
       }
     }

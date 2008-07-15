@@ -80,7 +80,7 @@ public class GWTMapperIntrospector {
         String jaxbType = GWT2JAXBMAPPINGS.getProperty(gwtType.getName());
         if (jaxbType != null) {
           try {
-            result = (GWTMapper) Class.forName(jaxbType + "GWTMapper").newInstance();
+            result = getGWTMapper(Class.forName(jaxbType));
           }
           catch (Throwable e) {
             result = null;

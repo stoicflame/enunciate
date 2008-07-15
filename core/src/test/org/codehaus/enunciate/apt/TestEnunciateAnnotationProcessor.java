@@ -217,9 +217,9 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       @Override
       protected ValidationResult validate(EnunciateFreemarkerModel model, Validator validator) {
         ValidationResult result = new ValidationResult();
-        result.addWarning(beanThree.getPosition(), "test warning.");
-        result.addError(beanTwo.getPosition(), "test error");
-        result.addError(beanTwo.getPosition(), "test error2");
+        result.addWarning(beanThree, "test warning.");
+        result.addError(beanTwo, "test error");
+        result.addError(beanTwo, "test error2");
         return result;
       }
     };

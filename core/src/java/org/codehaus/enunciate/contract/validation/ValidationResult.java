@@ -17,6 +17,10 @@
 package org.codehaus.enunciate.contract.validation;
 
 import com.sun.mirror.util.SourcePosition;
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.declaration.ParameterDeclaration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +49,28 @@ public class ValidationResult {
    *
    * @param position The source position.
    * @param text     The text of the error message.
+   * @deprecated Use {@link #addError(com.sun.mirror.declaration.Declaration, String)}
    */
   public void addError(SourcePosition position, String text) {
     this.errors.add(new ValidationMessage(position, text));
+  }
+
+  /**
+   * Add an error message.
+   *
+   * @param declaration The position of the error.
+   * @param text     The text of the error message.
+   */
+  public void addError(Declaration declaration, String text) {
+    if (declaration == null) {
+      this.errors.add(new ValidationMessage(null, text));
+    }
+    else if (declaration.getPosition() != null) {
+      this.errors.add(new ValidationMessage(declaration.getPosition(), text));
+    }
+    else {
+      this.errors.add(new ValidationMessage(null, toString(declaration) + ": " + text));
+    }
   }
 
   /**
@@ -73,9 +96,28 @@ public class ValidationResult {
    *
    * @param position The source position.
    * @param text     The text of the warning message.
+   * @deprecated Use {@link #addWarning(com.sun.mirror.declaration.Declaration, String)}
    */
   public void addWarning(SourcePosition position, String text) {
     this.warnings.add(new ValidationMessage(position, text));
+  }
+
+  /**
+   * Add n warning message.
+   *
+   * @param declaration The position of the warning.
+   * @param text     The text of the warning message.
+   */
+  public void addWarning(Declaration declaration, String text) {
+    if (declaration == null) {
+      this.errors.add(new ValidationMessage(null, text));
+    }
+    else if (declaration.getPosition() != null) {
+      this.warnings.add(new ValidationMessage(declaration.getPosition(), text));
+    }
+    else {
+      this.warnings.add(new ValidationMessage(null, toString(declaration) + ": " + text));
+    }
   }
 
   /**
@@ -95,6 +137,28 @@ public class ValidationResult {
   public void aggregate(ValidationResult result) {
     this.errors.addAll(result.errors);
     this.warnings.addAll(result.warnings);
+  }
+
+  private String toString(Declaration declaration) {
+    StringBuilder builder = new StringBuilder();
+    if (declaration instanceof TypeDeclaration) {
+      builder.append(((TypeDeclaration) declaration).getQualifiedName());
+    }
+    else if (declaration instanceof MemberDeclaration) {
+      if (((MemberDeclaration) declaration).getDeclaringType() != null) {
+        builder.append(((MemberDeclaration) declaration).getDeclaringType().getQualifiedName());
+        builder.append('.');
+      }
+
+      builder.append(declaration.getSimpleName());
+    }
+    else if (declaration instanceof ParameterDeclaration) {
+      builder.append("Parameter ").append(declaration.getSimpleName());
+    }
+    else {
+      builder.append(declaration.getSimpleName());
+    }
+    return builder.toString();
   }
 
 }

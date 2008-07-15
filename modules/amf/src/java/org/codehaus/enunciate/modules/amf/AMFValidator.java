@@ -62,11 +62,11 @@ public class AMFValidator extends BaseValidator {
       for (WebMethod webMethod : ei.getWebMethods()) {
         if (!isAMFTransient(webMethod)) {
           if (!isSupported(webMethod.getWebResult())) {
-            result.addError(webMethod.getPosition(), "AMF doesn't support '" + webMethod.getWebResult() + "' as a return type.");
+            result.addError(webMethod, "AMF doesn't support '" + webMethod.getWebResult() + "' as a return type.");
           }
           for (WebParam webParam : webMethod.getWebParameters()) {
             if (!isSupported(webParam.getType())) {
-              result.addError(webParam.getPosition(), "AMF doesn't support '" + webParam.getType() + "' as a parameter type.");
+              result.addError(webParam, "AMF doesn't support '" + webParam.getType() + "' as a parameter type.");
             }
           }
         }
@@ -77,11 +77,11 @@ public class AMFValidator extends BaseValidator {
         for (EndpointImplementation impl : ei.getEndpointImplementations()) {
           impls.add(impl.getQualifiedName());
         }
-        result.addError(ei.getPosition(), "Sorry, AMF doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
+        result.addError(ei, "Sorry, AMF doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
           "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
       }
       else if (ei.getEndpointImplementations().isEmpty()) {
-        result.addError(ei.getPosition(), "AMF requires an implementation for each service interface.");
+        result.addError(ei, "AMF requires an implementation for each service interface.");
       }
     }
     
@@ -93,17 +93,17 @@ public class AMFValidator extends BaseValidator {
     ValidationResult result = super.validateComplexType(complexType);
     if (!isAMFTransient(complexType)) {
       if (!hasDefaultConstructor(complexType)) {
-        result.addError(complexType.getPosition(), "The mapping from AMF to JAXB requires a public no-arg constructor.");
+        result.addError(complexType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
 
       for (Attribute attribute : complexType.getAttributes()) {
         if (!isAMFTransient(attribute)) {
           if (attribute.getDelegate() instanceof FieldDeclaration) {
-            result.addError(attribute.getPosition(), "If you're mapping to AMF, you can't use fields for your accessors. ");
+            result.addError(attribute, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(attribute.getAccessorType())) {
-            result.addError(attribute.getPosition(), "AMF doesn't support the '" + attribute.getAccessorType() + "' type.");
+            result.addError(attribute, "AMF doesn't support the '" + attribute.getAccessorType() + "' type.");
           }
         }
       }
@@ -111,11 +111,11 @@ public class AMFValidator extends BaseValidator {
       for (Element element : complexType.getElements()) {
         if (!isAMFTransient(element)) {
           if (element.getDelegate() instanceof FieldDeclaration) {
-            result.addError(element.getPosition(), "If you're mapping to AMF, you can't use fields for your accessors. ");
+            result.addError(element, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(element.getAccessorType())) {
-            result.addError(element.getPosition(), "AMF doesn't support the '" + element.getAccessorType() + "' type.");
+            result.addError(element, "AMF doesn't support the '" + element.getAccessorType() + "' type.");
           }
         }
       }
@@ -124,11 +124,11 @@ public class AMFValidator extends BaseValidator {
       if (value != null) {
         if (!isAMFTransient(value)) {
           if (value.getDelegate() instanceof FieldDeclaration) {
-            result.addError(value.getPosition(), "If you're mapping to AMF, you can't use fields for your accessors. ");
+            result.addError(value, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(value.getAccessorType())) {
-            result.addError(value.getPosition(), "AMF doesn't support the '" + value.getAccessorType() + "' type.");
+            result.addError(value, "AMF doesn't support the '" + value.getAccessorType() + "' type.");
           }
         }
       }
@@ -143,7 +143,7 @@ public class AMFValidator extends BaseValidator {
     ValidationResult result = super.validateSimpleType(simpleType);
     if (!isAMFTransient(simpleType)) {
       if (!hasDefaultConstructor(simpleType)) {
-        result.addError(simpleType.getPosition(), "The mapping from AMF to JAXB requires a public no-arg constructor.");
+        result.addError(simpleType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
     }
     return result;

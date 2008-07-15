@@ -58,17 +58,17 @@ public class GWTValidator extends BaseValidator {
     TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
     if (!isGWTTransient(ei)) {
       if ((this.enforceNamespaceConformance) && (!ei.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-        result.addError(ei.getPosition(), String.format("The package of the endpoint interface, %s, must start with the GWT module namespace, %s.", ei.getPackage().getQualifiedName(), gwtModuleNamespace));
+        result.addError(ei, String.format("The package of the endpoint interface, %s, must start with the GWT module namespace, %s.", ei.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
       for (WebMethod webMethod : ei.getWebMethods()) {
         if (!isGWTTransient(webMethod)) {
           if (!isSupported(webMethod.getWebResult())) {
-            result.addError(webMethod.getPosition(), "GWT doesn't support '" + webMethod.getWebResult() + "' as a return type.");
+            result.addError(webMethod, "GWT doesn't support '" + webMethod.getWebResult() + "' as a return type.");
           }
           for (WebParam webParam : webMethod.getWebParameters()) {
             if (!isSupported(webParam.getType())) {
-              result.addError(webParam.getPosition(), "GWT doesn't support '" + webParam.getType() + "' as a parameter type.");
+              result.addError(webParam, "GWT doesn't support '" + webParam.getType() + "' as a parameter type.");
             }
           }
 
@@ -81,18 +81,18 @@ public class GWTValidator extends BaseValidator {
         for (EndpointImplementation impl : ei.getEndpointImplementations()) {
           impls.add(impl.getQualifiedName());
         }
-        result.addError(ei.getPosition(), "Sorry, GWT doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
+        result.addError(ei, "Sorry, GWT doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
           "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
       }
       else if (ei.getEndpointImplementations().isEmpty()) {
-        result.addError(ei.getPosition(), "GWT requires an implementation for each service interface.");
+        result.addError(ei, "GWT requires an implementation for each service interface.");
       }
     }
     
     for (WebFault fault : allFaults) {
       if (!isGWTTransient(fault)) {
         if ((this.enforceNamespaceConformance) && (!fault.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-          result.addError(fault.getPosition(), String.format("The package of the fault, %s, must start with the GWT module namespace, %s.", fault.getPackage().getQualifiedName(), gwtModuleNamespace));
+          result.addError(fault, String.format("The package of the fault, %s, must start with the GWT module namespace, %s.", fault.getPackage().getQualifiedName(), gwtModuleNamespace));
         }
       }
     }
@@ -105,21 +105,21 @@ public class GWTValidator extends BaseValidator {
     ValidationResult result = super.validateComplexType(complexType);
     if (!isGWTTransient(complexType)) {
       if (!hasDefaultConstructor(complexType)) {
-        result.addError(complexType.getPosition(), "The mapping from GWT to JAXB requires a public no-arg constructor.");
+        result.addError(complexType, "The mapping from GWT to JAXB requires a public no-arg constructor.");
       }
 
       if ((this.enforceNamespaceConformance) && (!complexType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-        result.addError(complexType.getPosition(), String.format("The package of the complex type, %s, must start with the GWT module namespace, %s.", complexType.getPackage().getQualifiedName(), gwtModuleNamespace));
+        result.addError(complexType, String.format("The package of the complex type, %s, must start with the GWT module namespace, %s.", complexType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
       for (Attribute attribute : complexType.getAttributes()) {
         if (!isGWTTransient(attribute)) {
           if ((attribute.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
-            result.addError(attribute.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
+            result.addError(attribute, "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(attribute.getAccessorType())) {
-            result.addError(attribute.getPosition(), "GWT doesn't support the '" + attribute.getAccessorType() + "' type.");
+            result.addError(attribute, "GWT doesn't support the '" + attribute.getAccessorType() + "' type.");
           }
         }
       }
@@ -127,11 +127,11 @@ public class GWTValidator extends BaseValidator {
       for (Element element : complexType.getElements()) {
         if (!isGWTTransient(element)) {
           if ((element.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
-            result.addError(element.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
+            result.addError(element, "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(element.getAccessorType())) {
-            result.addError(element.getPosition(), "GWT doesn't support the '" + element.getAccessorType() + "' type.");
+            result.addError(element, "GWT doesn't support the '" + element.getAccessorType() + "' type.");
           }
         }
       }
@@ -140,11 +140,11 @@ public class GWTValidator extends BaseValidator {
       if (value != null) {
         if (!isGWTTransient(value)) {
           if ((value.getDelegate() instanceof FieldDeclaration) && (enforceNoFieldAccessors)) {
-            result.addError(value.getPosition(), "If you're mapping to GWT, you can't use fields for your accessors. ");
+            result.addError(value, "If you're mapping to GWT, you can't use fields for your accessors. ");
           }
 
           if (!isSupported(value.getAccessorType())) {
-            result.addError(value.getPosition(), "GWT doesn't support the '" + value.getAccessorType() + "' type.");
+            result.addError(value, "GWT doesn't support the '" + value.getAccessorType() + "' type.");
           }
         }
       }
@@ -159,11 +159,11 @@ public class GWTValidator extends BaseValidator {
     ValidationResult result = super.validateSimpleType(simpleType);
     if (!isGWTTransient(simpleType)) {
       if ((this.enforceNamespaceConformance) && (!simpleType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-        result.addError(simpleType.getPosition(), String.format("The package of the simple type, %s, must start with the GWT module namespace, %s.", simpleType.getPackage().getQualifiedName(), gwtModuleNamespace));
+        result.addError(simpleType, String.format("The package of the simple type, %s, must start with the GWT module namespace, %s.", simpleType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
       if (!hasDefaultConstructor(simpleType)) {
-        result.addError(simpleType.getPosition(), "The mapping from GWT to JAXB requires a public no-arg constructor.");
+        result.addError(simpleType, "The mapping from GWT to JAXB requires a public no-arg constructor.");
       }
     }
     return result;
@@ -175,7 +175,7 @@ public class GWTValidator extends BaseValidator {
     ValidationResult result = super.validateEnumType(enumType);
     if (!isGWTTransient(enumType)) {
       if ((this.enforceNamespaceConformance) && (!enumType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
-        result.addError(enumType.getPosition(), String.format("The package of the enum type, %s, must start with the GWT module namespace, %s.", enumType.getPackage().getQualifiedName(), gwtModuleNamespace));
+        result.addError(enumType, String.format("The package of the enum type, %s, must start with the GWT module namespace, %s.", enumType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
     }
     return result;

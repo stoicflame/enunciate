@@ -533,12 +533,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         StringBuilder builder = new StringBuilder("All content types must have unique ids.  The id '").
           append(id).append("' is assigned to the following content types: '").append(contentType).append("'");
         for (String ct : model.getContentTypesToIds().keySet()) {
-          if (!contentType.equals(ct) && (id.equals(model.getContentTypesToIds()))) {
+          if (!contentType.equals(ct) && (id.equals(model.getContentTypesToIds().get(ct)))) {
             builder.append(", '").append(ct).append("'");
           }
         }
         builder.append(". Please use the Enunciate configuration to specify a unique id for each content type.");
-        validationResult.addError(null,  builder.toString());
+        validationResult.addError((Declaration) null,  builder.toString());
         break;
       }
     }

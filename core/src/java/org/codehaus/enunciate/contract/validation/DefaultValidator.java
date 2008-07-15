@@ -60,37 +60,37 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     ValidationResult result = new ValidationResult();
 
     if ((ei.getEndpointImplementations() == null || (ei.getEndpointImplementations().isEmpty()))) {
-      result.addWarning(ei.getPosition(), "Endpoint interface has no implementations!  It will NOT be deployed...");
+      result.addWarning(ei, "Endpoint interface has no implementations!  It will NOT be deployed...");
     }
 
     Declaration delegate = ei.getDelegate();
 
     WebService ws = delegate.getAnnotation(WebService.class);
     if (ws == null) {
-      result.addError(delegate.getPosition(), "Not an endpoint interface: no WebService annotation");
+      result.addError(delegate, "Not an endpoint interface: no WebService annotation");
     }
     else {
       if (((ei.getPackage() == null) || ("".equals(ei.getPackage().getQualifiedName()))) && (ei.getTargetNamespace() == null)) {
-        result.addError(delegate.getPosition(), "An endpoint interface in no package must specify a target namespace.");
+        result.addError(delegate, "An endpoint interface in no package must specify a target namespace.");
       }
 
       if ((ws.endpointInterface() != null) && (!"".equals(ws.endpointInterface()))) {
-        result.addError(delegate.getPosition(), "Not an endpoint interface (it references another endpoint interface).");
+        result.addError(delegate, "Not an endpoint interface (it references another endpoint interface).");
       }
     }
 
     if (delegate instanceof AnnotationTypeDeclaration) {
-      result.addError(delegate.getPosition(), "Annotation types are not valid endpoint interfaces.");
+      result.addError(delegate, "Annotation types are not valid endpoint interfaces.");
     }
 
     if (delegate instanceof EnumDeclaration) {
-      result.addError(delegate.getPosition(), "Enums cannot be endpoint interfaces.");
+      result.addError(delegate, "Enums cannot be endpoint interfaces.");
     }
 
     TreeSet<WebMethod> uniquelyNamedWebMethods = new TreeSet<WebMethod>();
     for (WebMethod webMethod : ei.getWebMethods()) {
       if (!uniquelyNamedWebMethods.add(webMethod)) {
-        result.addError(webMethod.getPosition(), "Web methods must have unique operation names.  Use annotations to disambiguate.");
+        result.addError(webMethod, "Web methods must have unique operation names.  Use annotations to disambiguate.");
       }
 
       result.aggregate(validateWebMethod(webMethod));
@@ -101,7 +101,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     }
 
     if (ei.getSoapUse() == SOAPBinding.Use.ENCODED) {
-      result.addError(ei.getPosition(), "Enunciate does not support encoded-use web services.");
+      result.addError(ei, "Enunciate does not support encoded-use web services.");
     }
 
     return result;
@@ -113,15 +113,15 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     WebService ws = delegate.getAnnotation(WebService.class);
     if (ws == null) {
-      result.addError(delegate.getPosition(), "Not an endpoint implementation (no WebService annotation).");
+      result.addError(delegate, "Not an endpoint implementation (no WebService annotation).");
     }
 
     if (delegate instanceof EnumDeclaration) {
-      result.addError(delegate.getPosition(), "An enum cannot be an endpoint implementation.");
+      result.addError(delegate, "An enum cannot be an endpoint implementation.");
     }
 
     if (!isAssignable((TypeDeclaration) delegate, (TypeDeclaration) impl.getEndpointInterface().getDelegate())) {
-      result.addError(delegate.getPosition(), "Class does not implement its endpoint interface!");
+      result.addError(delegate, "Class does not implement its endpoint interface!");
     }
 
     return result;
@@ -174,7 +174,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           
           for (VerbType verb : verbList) {
             if (!verbs.add(verb)) {
-              result.addError(method.getPosition(), "Duplicate verb '" + verb + "' for content type '" + contentType + "' of REST noun '" + noun + "'.");
+              result.addError(method, "Duplicate verb '" + verb + "' for content type '" + contentType + "' of REST noun '" + noun + "'.");
             }
           }
         }
@@ -183,27 +183,27 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         if (properNoun != null) {
           XmlType nounType = properNoun.getXmlType();
           if (properNoun.isCollectionType()) {
-            result.addError(properNoun.getPosition(), "A proper noun is not allowed to be a collection or an array.");
+            result.addError(properNoun, "A proper noun is not allowed to be a collection or an array.");
           }
 
           if ((properNoun.isOptional()) && (properNoun.getType() instanceof PrimitiveType)) {
-            result.addError(properNoun.getPosition(), "An optional proper noun parameter cannot be a primitive type.");
+            result.addError(properNoun, "An optional proper noun parameter cannot be a primitive type.");
           }
         }
 
         HashSet<String> adjectives = new HashSet<String>();
         for (RESTParameter adjective : method.getAdjectives()) {
           if (!adjectives.add(adjective.getAdjectiveName())) {
-            result.addError(adjective.getPosition(), "Duplicate adjective name '" + adjective.getAdjectiveName() + "'.");
+            result.addError(adjective, "Duplicate adjective name '" + adjective.getAdjectiveName() + "'.");
           }
 
           if (!adjective.isComplexAdjective()) {
             if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
-              result.addError(adjective.getPosition(), "An optional adjective parameter cannot be a primitive type.");
+              result.addError(adjective, "An optional adjective parameter cannot be a primitive type.");
             }
 
             if (adjective.getAdjectiveName().equals(method.getJSONPParameter())) {
-              result.addError(adjective.getPosition(), "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
+              result.addError(adjective, "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
             }
           }
         }
@@ -211,7 +211,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         HashSet<String> contextParameters = new HashSet<String>();
         for (RESTParameter contextParam : method.getContextParameters()) {
           if (!contextParameters.add(contextParam.getContextParameterName())) {
-            result.addError(contextParam.getPosition(), "Duplicate context parameter name '" + contextParam.getContextParameterName() + "'.");
+            result.addError(contextParam, "Duplicate context parameter name '" + contextParam.getContextParameterName() + "'.");
           }
 
           boolean parameterFound = false;
@@ -223,18 +223,18 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           }
 
           if (!parameterFound) {
-            result.addError(contextParam.getPosition(), "No context parameter named '" + contextParam.getContextParameterName() + "' is found in the context (" + noun.toString() + ")");
+            result.addError(contextParam, "No context parameter named '" + contextParam.getContextParameterName() + "' is found in the context (" + noun.toString() + ")");
           }
         }
 
         if (!method.getContentTypeParameters().isEmpty()) {
           if (method.getContentTypeParameters().size() > 1) {
-            result.addError(method.getPosition(), "Multiple content type parameters.");
+            result.addError(method, "Multiple content type parameters.");
           }
           else {
             RESTParameter restParameter = method.getContentTypeParameters().iterator().next();
             if (!((DecoratedTypeMirror) restParameter.getType()).isInstanceOf(String.class.getName())) {
-              result.addError(restParameter.getPosition(), "Content type parameter must be a String.");
+              result.addError(restParameter, "Content type parameter must be a String.");
             }
           }
         }
@@ -242,19 +242,19 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         RESTParameter nounValue = method.getNounValue();
         if (nounValue != null) {
           if ((verbList.contains(VerbType.read)) || (verbList.contains(VerbType.delete))) {
-            result.addError(method.getPosition(), "The verbs 'read' and 'delete' do not support a noun value.");
+            result.addError(method, "The verbs 'read' and 'delete' do not support a noun value.");
           }
 
           DecoratedTypeMirror decoratedNounValueType = (DecoratedTypeMirror) nounValue.getType();
           if (!isDataHandler(decoratedNounValueType) && !isDataHandlers(decoratedNounValueType)) {
             XmlType nounValueType = nounValue.getXmlType();
             if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
-              result.addError(nounValue.getPosition(), "A noun value must be either a JAXB 2.0 root element, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.");
+              result.addError(nounValue, "A noun value must be either a JAXB 2.0 root element, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.");
             }
           }
 
           if ((nounValue.isOptional()) && (nounValue.getType() instanceof PrimitiveType)) {
-            result.addError(nounValue.getPosition(), "An optional noun value parameter cannot be a primitive type.");
+            result.addError(nounValue, "An optional noun value parameter cannot be a primitive type.");
           }
         }
 
@@ -267,7 +267,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           }
 
           if (!isValidRESTReturnType) {
-            result.addError(method.getPosition(), "REST operation results must be xml root elements or instances of " + DataHandler.class.getName() + ". " + method.getReturnType() + " is not annotated with @XmlRootElement nor is it an instance of " + DataHandler.class.getName() + ".");
+            result.addError(method, "REST operation results must be xml root elements or instances of " + DataHandler.class.getName() + ". " + method.getReturnType() + " is not annotated with @XmlRootElement nor is it an instance of " + DataHandler.class.getName() + ".");
           }
         }
       }
@@ -308,16 +308,16 @@ public class DefaultValidator implements Validator, ConfigurableRules {
   public ValidationResult validateWebMethod(WebMethod webMethod) {
     ValidationResult result = new ValidationResult();
     if (!webMethod.getModifiers().contains(Modifier.PUBLIC)) {
-      result.addError(webMethod.getPosition(), "A non-public method cannot be a web method.");
+      result.addError(webMethod, "A non-public method cannot be a web method.");
     }
 
     javax.jws.WebMethod annotation = webMethod.getAnnotation(javax.jws.WebMethod.class);
     if ((annotation != null) && (annotation.exclude())) {
-      result.addError(webMethod.getPosition(), "A method marked as excluded cannot be a web method.");
+      result.addError(webMethod, "A method marked as excluded cannot be a web method.");
     }
 
     if (webMethod.getSoapUse() == SOAPBinding.Use.ENCODED) {
-      result.addError(webMethod.getPosition(), "Enunciate doesn't support ENCODED-use web methods.");
+      result.addError(webMethod, "Enunciate doesn't support ENCODED-use web methods.");
     }
 
     int inParams = 0;
@@ -327,26 +327,26 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     SOAPBinding.Style soapBindingStyle = webMethod.getSoapBindingStyle();
 
     if (oneway && (!(webMethod.getReturnType() instanceof VoidType))) {
-      result.addError(webMethod.getPosition(), "A one-way method must have a void return type.");
+      result.addError(webMethod, "A one-way method must have a void return type.");
     }
 
     if (oneway && webMethod.getThrownTypes() != null && !webMethod.getThrownTypes().isEmpty()) {
-      result.addError(webMethod.getPosition(), "A one-way method can't throw any exceptions.");
+      result.addError(webMethod, "A one-way method can't throw any exceptions.");
     }
 
     if ((parameterStyle == SOAPBinding.ParameterStyle.BARE) && (soapBindingStyle != SOAPBinding.Style.DOCUMENT)) {
-      result.addError(webMethod.getPosition(), "A BARE web method must have a DOCUMENT binding style.");
+      result.addError(webMethod, "A BARE web method must have a DOCUMENT binding style.");
     }
 
     for (WebParam webParam : webMethod.getWebParameters()) {
       if ((webParam.getMode() == javax.jws.WebParam.Mode.INOUT) && (!webParam.isHolder())) {
-        result.addError(webParam.getPosition(), "An INOUT parameter must have a type of javax.xml.ws.Holder");
+        result.addError(webParam, "An INOUT parameter must have a type of javax.xml.ws.Holder");
       }
     }
 
     for (WebMessage webMessage : webMethod.getMessages()) {
       if (oneway && webMessage.isOutput()) {
-        result.addError(webMethod.getPosition(), "A one-way method cannot have any 'out' messages (i.e. non-void return values, thrown exceptions, " +
+        result.addError(webMethod, "A one-way method cannot have any 'out' messages (i.e. non-void return values, thrown exceptions, " +
           "out parameters, or in/out parameters).");
       }
 
@@ -361,7 +361,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
           if ((type.isCollection()) || (type.isArray())) {
             String description = type.isCollection() ? "an instance of java.util.Collection" : "an array";
-            result.addWarning(webMethod.getPosition(), "The header return value that is " + description + " may not (de)serialize " +
+            result.addWarning(webMethod, "The header return value that is " + description + " may not (de)serialize " +
               "correctly.  The spec is unclear as to how this should be handled.");
           }
         }
@@ -371,7 +371,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
           if (type.isCollection() || (type.isArray())) {
             String description = type.isCollection() ? "an instance of java.util.Collection" : "an array";
-            result.addWarning(webParam.getPosition(), "The header parameter that is " + description + " may not (de)serialize correctly.  " +
+            result.addWarning(webParam, "The header parameter that is " + description + " may not (de)serialize correctly.  " +
               "The spec is unclear as to how this should be handled.");
           }
         }
@@ -381,24 +381,24 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         if (webMessage instanceof WebParam) {
           DecoratedTypeMirror paramType = (DecoratedTypeMirror) ((WebParam) webMessage).getType();
           if (paramType.isArray()) {
-            result.addError(webMethod.getPosition(), "A BARE web method must not have an array as a parameter.");
+            result.addError(webMethod, "A BARE web method must not have an array as a parameter.");
           }
         }
         else if (webMessage instanceof RequestWrapper) {
           //todo: throw a runtime exception?  This is a problem with the engine, not the user.
-          result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a request wrapper.");
+          result.addError(webMethod, "A BARE web method shouldn't have a request wrapper.");
         }
         else if (webMessage instanceof ResponseWrapper) {
           //todo: throw a runtime exception?  This is a problem with the engine, not the user.
-          result.addError(webMethod.getPosition(), "A BARE web method shouldn't have a response wrapper.");
+          result.addError(webMethod, "A BARE web method shouldn't have a response wrapper.");
         }
 
         if (inParams > 1) {
-          result.addError(webMethod.getPosition(), "A BARE web method must not have more than one 'in' parameter.");
+          result.addError(webMethod, "A BARE web method must not have more than one 'in' parameter.");
         }
 
         if (outParams > 1) {
-          result.addError(webMethod.getPosition(), "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
+          result.addError(webMethod, "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
             "thrown exceptions, out parameters, or in/out parameters).");
         }
       }
@@ -410,7 +410,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
             DecoratedTypeMirror paramType = (DecoratedTypeMirror) webParam.getType();
             if (paramType.isCollection() || paramType.isArray()) {
               String description = paramType.isCollection() ? "An instance of java.util.Collection" : "An array";
-              result.addWarning(webParam.getPosition(), description + " as an RPC-style web message part may " +
+              result.addWarning(webParam, description + " as an RPC-style web message part may " +
                 "not be (de)serialized as you expect.  The spec is unclear as to how this should be handled.");
             }
           }
@@ -427,15 +427,15 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     if (complexType.getValue() != null) {
       if (!complexType.isBaseObject()) {
-        result.addError(complexType.getPosition(), "A type with an @XmlValue must not extend another object (other than java.lang.Object).");
+        result.addError(complexType, "A type with an @XmlValue must not extend another object (other than java.lang.Object).");
       }
 
       if (!complexType.getElements().isEmpty()) {
-        result.addError(complexType.getPosition(), "A type definition cannot have both an xml value and elements.");
+        result.addError(complexType, "A type definition cannot have both an xml value and elements.");
       }
       else if (complexType.getAttributes().isEmpty()) {
         //todo: throw a runtime exception? This is really a problem with the engine, not the user code.
-        result.addError(complexType.getPosition(), "Should be a simple type, not a complex type.");
+        result.addError(complexType, "Should be a simple type, not a complex type.");
       }
     }
 
@@ -448,10 +448,10 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     XmlType baseType = simpleType.getBaseType();
     if (baseType == null) {
-      result.addError(simpleType.getPosition(), "No base type specified.");
+      result.addError(simpleType, "No base type specified.");
     }
     else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      result.addError(simpleType.getPosition(), "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+      result.addError(simpleType, "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
 
@@ -473,13 +473,13 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     ValidationResult result = validatePackage(typeDef.getSchema());
 
     if (isXmlTransient(typeDef)) {
-      result.addError(typeDef.getPosition(), "XmlTransient type definition.");
+      result.addError(typeDef, "XmlTransient type definition.");
     }
 
     javax.xml.bind.annotation.XmlType xmlType = typeDef.getAnnotation(javax.xml.bind.annotation.XmlType.class);
 
     if ((typeDef.getDeclaringType() != null) && (!typeDef.getModifiers().contains(Modifier.STATIC))) {
-      result.addError(typeDef.getPosition(), "An xml type must be either a top-level class or a nested static class.");
+      result.addError(typeDef, "An xml type must be either a top-level class or a nested static class.");
     }
 
     boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition));
@@ -494,7 +494,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       catch (MirroredTypeException e) {
         TypeMirror typeMirror = e.getTypeMirror();
         if (!(typeMirror instanceof DeclaredType)) {
-          result.addError(typeDef.getPosition(), "Unsupported factory class: " + typeMirror);
+          result.addError(typeDef, "Unsupported factory class: " + typeMirror);
         }
         factoryClassFqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
       }
@@ -514,7 +514,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         }
 
         if (!methodFound) {
-          result.addError(typeDef.getPosition(), "A static, parameterless factory method named " + factoryMethod + " was not found on " + factoryClassFqn);
+          result.addError(typeDef, "A static, parameterless factory method named " + factoryMethod + " was not found on " + factoryClassFqn);
         }
       }
       else if (typeDef.getAnnotation(XmlJavaTypeAdapter.class) != null) {
@@ -540,7 +540,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       }
 
       if (!hasNoArgConstructor) {
-        result.addError(typeDef.getPosition(), "A TypeDefinition must have a public no-arg constructor or be annotated with a factory method.");
+        result.addError(typeDef, "A TypeDefinition must have a public no-arg constructor or be annotated with a factory method.");
       }
     }
 
@@ -549,7 +549,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       QName attributeQName = new QName(attribute.getNamespace(), attribute.getName());
       Attribute sameName = attributeNames.put(attributeQName, attribute);
       if (sameName != null) {
-        result.addError(attribute.getPosition(), "Attribute has the same name (" + attributeQName + ") as " + sameName.getPosition()
+        result.addError(attribute, "Attribute has the same name (" + attributeQName + ") as " + sameName.getPosition()
           + ".  Please use annotations to disambiguate.");
         //todo: this check should really be global (including supertypes)....
       }
@@ -561,7 +561,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.aggregate(validateValue(typeDef.getValue()));
 
       if (!typeDef.getElements().isEmpty()) {
-        result.addError(typeDef.getValue().getPosition(), "A type definition cannot have both an xml value and child element(s).");
+        result.addError(typeDef.getValue(), "A type definition cannot have both an xml value and child element(s).");
       }
     }
     else {
@@ -583,15 +583,15 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           QName choiceQName = new QName(choice.getNamespace(), choice.getName());
           Element sameName = choiceNames.put(choiceQName, choice);
           if (sameName != null) {
-            result.addError(choice.getPosition(), "Element (or element choice) has the same name (" + choiceQName + ") as " + sameName.getPosition()
+            result.addError(choice, "Element (or element choice) has the same name (" + choiceQName + ") as " + sameName.getPosition()
               + ".  Please use annotations to disambiguate.");
           }
           else if ((wrapperQName == null) && (elementNames.containsKey(choiceQName))) {
-            result.addError(choice.getPosition(), "Element (or element choice) has the same name (" + choiceQName + ") as element wrapper for " +
+            result.addError(choice, "Element (or element choice) has the same name (" + choiceQName + ") as element wrapper for " +
               elementNames.get(choiceQName).values().iterator().next().getPosition() + ".  Please use annotations to disambiguate.");
           }
           else if ((wrapperQName != null) && (elementNames.containsKey(null) && (elementNames.get(null).containsKey(wrapperQName)))) {
-            result.addError(element.getPosition(), "Wrapper for element has the same name (" + wrapperQName + ") as " +
+            result.addError(element, "Wrapper for element has the same name (" + wrapperQName + ") as " +
               elementNames.get(null).get(wrapperQName).getPosition() + ". Please use annotations to disambiguate.");
           }
 
@@ -638,7 +638,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     if (schemaType != null) {
       try {
         if (schemaType.type() == XmlSchemaType.DEFAULT.class) {
-          result.addError(schema.getPosition(), "A type must be specified at the package-level for @XmlSchemaType.");
+          result.addError(schema, "A type must be specified at the package-level for @XmlSchemaType.");
         }
       }
       catch (MirroredTypeException e) {
@@ -651,7 +651,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       for (XmlSchemaType xmlSchemaType : schemaTypes.value()) {
         try {
           if (xmlSchemaType.type() == XmlSchemaType.DEFAULT.class) {
-            result.addError(schema.getPosition(), "A type must be specified at the package-level for all types of @XmlSchemaTypes.");
+            result.addError(schema, "A type must be specified at the package-level for all types of @XmlSchemaTypes.");
           }
         }
         catch (MirroredTypeException e) {
@@ -668,17 +668,17 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     XmlType baseType = attribute.getBaseType();
     if (baseType == null) {
-      result.addError(attribute.getPosition(), "No base type specified.");
+      result.addError(attribute, "No base type specified.");
     }
     else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      result.addError(attribute.getPosition(), "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+      result.addError(attribute, "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
     else if (baseType.isAnonymous()) {
-      result.addError(attribute.getPosition(), "An attribute must not have an anonymous type.");
+      result.addError(attribute, "An attribute must not have an anonymous type.");
     }
     else if (attribute.isBinaryData()) {
-      result.addError(attribute.getPosition(), "Attributes can't have binary data.");
+      result.addError(attribute, "Attributes can't have binary data.");
     }
 
     return result;
@@ -690,13 +690,13 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     XmlElements xmlElements = element.getAnnotation(XmlElements.class);
     if ((element.isCollectionType()) && (element.getBaseType() != KnownXmlType.ANY_TYPE) &&
       (xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
-      result.addError(element.getPosition(),
+      result.addError(element,
                       "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
     }
 
     QName ref = element.getRef();
     if ((ref != null) && (element.getBaseType().isAnonymous())) {
-      result.addError(element.getPosition(), "Element whose namespace differs from that of its type definition must not have an anonymous base type.");
+      result.addError(element, "Element whose namespace differs from that of its type definition must not have an anonymous base type.");
     }
 
     return result;
@@ -707,10 +707,10 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     XmlType baseType = value.getBaseType();
     if (baseType == null) {
-      result.addError(value.getPosition(), "No base type specified.");
+      result.addError(value, "No base type specified.");
     }
     else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      result.addError(value.getPosition(), "An xml value must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+      result.addError(value, "An xml value must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
 
@@ -721,7 +721,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     ValidationResult result = validateAccessor(elementRef);
 
     if ((elementRef.getAnnotation(XmlElement.class) != null) || (elementRef.getAnnotation(XmlElements.class) != null)) {
-      result.addError(elementRef.getPosition(), "The xml element ref cannot be annotated also with XmlElement or XmlElements.");
+      result.addError(elementRef, "The xml element ref cannot be annotated also with XmlElement or XmlElements.");
     }
 
     return result;
@@ -741,21 +741,21 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         Map<String, AnnotationMirror> setterAnnotations = setter.getAnnotations();
         for (String annotation : getterAnnotations.keySet()) {
           if ((annotation.startsWith(XmlElement.class.getPackage().getName())) && (setterAnnotations.containsKey(annotation))) {
-            result.addError(setter.getPosition(), "'" + annotation + "' is on both the getter and setter.");
+            result.addError(setter, "'" + annotation + "' is on both the getter and setter.");
           }
         }
       }
       else {
-        result.addError(accessor.getPosition(), "A property accessor needs both a setter and a getter.");
+        result.addError(accessor, "A property accessor needs both a setter and a getter.");
       }
     }
 
     if ((accessor.isXmlIDREF()) && (accessor.getAccessorForXmlID() == null)) {
       if (this.disabledRules.contains("jaxb.xmlidref.references.xmlid")) {
-        result.addError(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+        result.addError(accessor, "An XML IDREF must have a base type that references another type that has an XML ID.");
       }
       else {
-        result.addWarning(accessor.getPosition(), "An XML IDREF must have a base type that references another type that has an XML ID.");
+        result.addWarning(accessor, "An XML IDREF must have a base type that references another type that has an XML ID.");
       }
     }
 
@@ -767,7 +767,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     TypeMirror accessorType = accessor.getAccessorType();
     if (!(accessorType instanceof DeclaredType) || !((DeclaredType) accessorType).getDeclaration().getQualifiedName().startsWith(String.class.getName())) {
-      result.addError(accessor.getPosition(), "An xml id must be a string.");
+      result.addError(accessor, "An xml id must be a string.");
     }
 
     return result;

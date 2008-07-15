@@ -63,7 +63,7 @@ public class RESTValidator extends BaseValidator {
     Map<String, ContentTypeHandler> knownContentTypeHandlers = new TreeMap<String, ContentTypeHandler>();
     for (ContentTypeHandler handler : contentTypeHandlers) {
       if (!isRESTRequestDataFormatHandler(handler)) {
-        result.addError(handler.getPosition(), "A content type handler must implement " + RESTRequestContentTypeHandler.class.getName() + ".");
+        result.addError(handler, "A content type handler must implement " + RESTRequestContentTypeHandler.class.getName() + ".");
       }
 
       //check for a zero-arg constructor...
@@ -77,13 +77,13 @@ public class RESTValidator extends BaseValidator {
       }
 
       if (!hasNoArgConstructor) {
-        result.addError(handler.getPosition(), "A content type handler must have a public no-arg constructor.");
+        result.addError(handler, "A content type handler must have a public no-arg constructor.");
       }
 
       for (String contentType : handler.getSupportedContentTypes()) {
         ContentTypeHandler otherHandler = knownContentTypeHandlers.put(contentType, handler);
         if ((otherHandler != null) && (this.configuredContentHandlers.get(contentType) != null)) {
-          result.addError(handler.getPosition(), "Handler conflicts for content type '" + contentType + "' with " + otherHandler.getQualifiedName() + ".  Please use configuration to specify which handler to use.");
+          result.addError(handler, "Handler conflicts for content type '" + contentType + "' with " + otherHandler.getQualifiedName() + ".  Please use configuration to specify which handler to use.");
         }
       }
     }
