@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.activation.DataHandler;
 import javax.servlet.ServletContext;
@@ -36,6 +37,7 @@ import java.util.Collection;
 public class DefaultMultipartRequestHandler implements MultipartRequestHandler, ServletContextAware {
 
   private final MultipartResolver resolver;
+  private ContentTypeSupport contentTypeSupport;
 
   public DefaultMultipartRequestHandler() {
     this("org.springframework.web.multipart.commons.CommonsMultipartResolver");
@@ -57,6 +59,7 @@ public class DefaultMultipartRequestHandler implements MultipartRequestHandler, 
     this.resolver = resolver;
   }
 
+  @Autowired
   public void setServletContext(ServletContext servletContext) {
     if ((resolver != null) && (resolver instanceof ServletContextAware)) {
       ((ServletContextAware) resolver).setServletContext(servletContext);
@@ -93,6 +96,25 @@ public class DefaultMultipartRequestHandler implements MultipartRequestHandler, 
   }
 
   /**
+   * The content type support.
+   *
+   * @return The content type support.
+   */
+  public ContentTypeSupport getContentTypeSupport() {
+    return contentTypeSupport;
+  }
+
+  /**
+   * The content type support.
+   *
+   * @param contentTypeSupport The content type support.
+   */
+  @Autowired (required = false)
+  public void setContentTypeSupport(ContentTypeSupport contentTypeSupport) {
+    this.contentTypeSupport = contentTypeSupport;
+  }
+
+  /**
    * Parses the parts. Assuming the request is multipart, the parts will have a {@link javax.activation.DataHandler#getDataSource() DataSource}
    * that is an instance of {@link org.codehaus.enunciate.modules.rest.MultipartFileDataSource MultipartFileDataSource}.
    *
@@ -104,7 +126,9 @@ public class DefaultMultipartRequestHandler implements MultipartRequestHandler, 
     if (request instanceof MultipartHttpServletRequest) {
       Collection<MultipartFile> multipartFiles = (Collection<MultipartFile>) ((MultipartHttpServletRequest) request).getFileMap().values();
       for (MultipartFile multipartFile : multipartFiles) {
-        dataHandlers.add(new DataHandler(new MultipartFileDataSource(multipartFile)));
+        MultipartFileDataSource dataSource = new MultipartFileDataSource(multipartFile, getContentTypeSupport(), request);
+
+        dataHandlers.add(new DataHandler(dataSource));
       }
     }
     else {

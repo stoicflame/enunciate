@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,11 +27,22 @@ import java.io.InputStream;
  */
 public class MultipartFileDataSource extends RESTRequestDataSource {
 
+  private final ContentTypeSupport contentTypeSupport;
   private final MultipartFile multipartFile;
+  private final HttpServletRequest request;
 
   public MultipartFileDataSource(MultipartFile multipartFile) {
     super(null, multipartFile.getOriginalFilename());
     this.multipartFile = multipartFile;
+    this.contentTypeSupport = null;
+    this.request = null;
+  }
+
+  public MultipartFileDataSource(MultipartFile multipartFile, ContentTypeSupport contentTypeSupport, HttpServletRequest request) {
+    super(null, multipartFile.getOriginalFilename());
+    this.multipartFile = multipartFile;
+    this.contentTypeSupport = contentTypeSupport;
+    this.request = request;
   }
 
   @Override
@@ -48,4 +60,48 @@ public class MultipartFileDataSource extends RESTRequestDataSource {
     return multipartFile.getSize();
   }
 
+  /**
+   * Unmarshal this data source based on its content type.
+   *
+   * @return The unmarshalled data source.
+   */
+  public Object unmarshal() throws Exception {
+    return unmarshalAs(getContentType());
+  }
+
+  /**
+   * Unmarshal this data source as the specified content type.
+   *
+   * @param contentType The content type.
+   * @return The unmarshalled object.
+   */
+  public Object unmarshalAs(String contentType) throws Exception {
+    if (getContentTypeSupport() == null) {
+      throw new UnsupportedOperationException("Cannot unmarshal this data source: no support for content type " + contentType + ".");
+    }
+
+    if (getRequest() == null) {
+      throw new UnsupportedOperationException("Cannot unmarshal this data source: no reference to the original request.");
+    }
+
+    return getContentTypeSupport().lookupHandlerByContentType(contentType).read(getRequest());
+  }
+
+  /**
+   * The content type support.
+   *
+   * @return The content type support.
+   */
+  public ContentTypeSupport getContentTypeSupport() {
+    return contentTypeSupport;
+  }
+
+  /**
+   * The request from which this file was parsed.
+   *
+   * @return The request from which this file was parsed.
+   */
+  public HttpServletRequest getRequest() {
+    return request;
+  }
 }

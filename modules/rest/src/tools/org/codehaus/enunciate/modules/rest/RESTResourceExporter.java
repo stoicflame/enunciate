@@ -23,22 +23,25 @@ import org.codehaus.enunciate.rest.annotations.VerbType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
 import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A exporter for a REST resource.
@@ -75,17 +78,11 @@ public class RESTResourceExporter extends AbstractController {
     }
 
     if (this.multipartRequestHandler == null) {
-      Map resolverBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), MultipartRequestHandler.class);
-      if (resolverBeans.size() > 0) {
-        //todo: add a configuration element to specify which one to use.
-        this.multipartRequestHandler = (MultipartRequestHandler) resolverBeans.values().iterator().next();
-      }
-      else {
-        DefaultMultipartRequestHandler defaultMultipartHandler = new DefaultMultipartRequestHandler();
-        if (getApplicationContext() instanceof WebApplicationContext) {
-          defaultMultipartHandler.setServletContext(getServletContext());
-        }
-        this.multipartRequestHandler = defaultMultipartHandler;
+      this.multipartRequestHandler = new DefaultMultipartRequestHandler();
+      Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), AutowiredAnnotationBeanPostProcessor.class);
+      if (!beans.isEmpty()) {
+        AutowiredAnnotationBeanPostProcessor processor = (AutowiredAnnotationBeanPostProcessor) beans.values().iterator().next();
+        processor.processInjection(this.multipartRequestHandler);
       }
     }
   }
@@ -125,11 +122,9 @@ public class RESTResourceExporter extends AbstractController {
     if (matcher.find()) {
       contentTypeId = matcher.group(1);
     }
-    else {
-      if (LOG.isErrorEnabled()) {
-        LOG.error("No content type id found in request context " + requestContext);
+    else if (LOG.isInfoEnabled()) {
+        LOG.info("No content type id found in request context " + requestContext);
       }
-    }
     return contentTypeId;
   }
 
@@ -397,6 +392,7 @@ public class RESTResourceExporter extends AbstractController {
    *
    * @param multipartRequestHandler The multipart request handler.
    */
+  @Autowired( required = false )
   public void setMultipartRequestHandler(MultipartRequestHandler multipartRequestHandler) {
     this.multipartRequestHandler = multipartRequestHandler;
   }
