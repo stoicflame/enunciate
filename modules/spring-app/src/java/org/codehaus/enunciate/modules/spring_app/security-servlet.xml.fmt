@@ -17,6 +17,13 @@
   [#if securityConfig.enableFormBasedLogin]
 
         <entry key="${securityConfig.formBasedLoginConfig.loginPageURL}">
+    [#if securityConfig.formBasedLoginConfig.loginPageController?exists]
+      [#if securityConfig.formBasedLoginConfig.loginPageController.beanName?exists]
+          <ref bean="${securityConfig.formBasedLoginConfig.loginPageController.beanName}"/>
+      [#else]
+          <bean class="${securityConfig.formBasedLoginConfig.loginPageController.className}"/>
+      [/#if]
+    [#else]
           <bean class="org.codehaus.enunciate.modules.spring_app.StaticModelViewController">
             <property name="view">
               <bean class="org.springframework.web.servlet.view.JstlView">
@@ -30,11 +37,19 @@
               </map>
             </property>
           </bean>
+    [/#if]
         </entry>
   [/#if]
   [#if securityConfig.enableOAuth]
 
         <entry key="${securityConfig.OAuthConfig.accessConfirmationURL}">
+    [#if securityConfig.OAuthConfig.confirmAccessPageController?exists]
+      [#if securityConfig.OAuthConfig.confirmAccessPageController.beanName?exists]
+          <ref bean="${securityConfig.OAuthConfig.confirmAccessPageController.beanName}"/>
+      [#else]
+          <bean class="${securityConfig.OAuthConfig.confirmAccessPageController.className}"/>
+      [/#if]
+    [#else]
           <bean class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessController">
             <property name="view">
               <bean class="org.springframework.web.servlet.view.JstlView">
@@ -48,9 +63,17 @@
               </map>
             </property>
           </bean>
+    [/#if]
         </entry>
 
         <entry key="${securityConfig.OAuthConfig.accessConfirmedURL}">
+    [#if securityConfig.OAuthConfig.accessConfirmedPageController?exists]
+      [#if securityConfig.OAuthConfig.accessConfirmedPageController.beanName?exists]
+          <ref bean="${securityConfig.OAuthConfig.accessConfirmedPageController.beanName}"/>
+      [#else]
+          <bean class="${securityConfig.OAuthConfig.accessConfirmedPageController.className}"/>
+      [/#if]
+    [#else]
           <bean class="org.codehaus.enunciate.modules.spring_app.StaticModelViewController">
             <property name="view">
               <bean class="org.springframework.web.servlet.view.JstlView">
@@ -63,6 +86,7 @@
               </map>
             </property>
           </bean>
+    [/#if]
         </entry>
 
         <entry key="${securityConfig.OAuthConfig.infoURL}">

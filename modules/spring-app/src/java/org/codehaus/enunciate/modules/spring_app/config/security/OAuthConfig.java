@@ -28,8 +28,10 @@ public class OAuthConfig {
   private String requestTokenURL = "/oauth/request_token";
   private String accessConfirmationURL = "/oauth/confirm_access";
   private String confirmAccessPageFile = null;
+  private BeanReference confirmAccessPageController = null;
   private String accessConfirmedURL = "/oauth/access_confirmed";
   private String accessConfirmedPageFile = null;
+  private BeanReference accessConfirmedPageController = null;
   private String grantAccessURL = "/oauth/authorize";
   private String accessTokenURL = "/oauth/access_token";
   private BeanReference tokenServices;
@@ -126,6 +128,24 @@ public class OAuthConfig {
   }
 
   /**
+   * Custom controller for rendering the confirm access page.
+   *
+   * @return Custom controller for rendering the confirm access page.
+   */
+  public BeanReference getConfirmAccessPageController() {
+    return confirmAccessPageController;
+  }
+
+  /**
+   * Custom controller for rendering the confirm access page.
+   *
+   * @param confirmAccessPageController Custom controller for rendering the confirm access page.
+   */
+  public void setConfirmAccessPageController(BeanReference confirmAccessPageController) {
+    this.confirmAccessPageController = confirmAccessPageController;
+  }
+
+  /**
    * The URL to which the user will be redirected if access was granted an no callback was provided.
    *
    * @return The URL to which the user will be redirected if access was granted an no callback was provided.
@@ -159,6 +179,24 @@ public class OAuthConfig {
    */
   public void setAccessConfirmedPageFile(String accessConfirmedPageFile) {
     this.accessConfirmedPageFile = accessConfirmedPageFile;
+  }
+
+  /**
+   * Custom controller for rendering the access confirmed page.
+   *
+   * @return Custom controller for rendering the access confirmed page.
+   */
+  public BeanReference getAccessConfirmedPageController() {
+    return accessConfirmedPageController;
+  }
+
+  /**
+   * Custom controller for rendering the access confirmed page.
+   *
+   * @param accessConfirmedPageController Custom controller for rendering the access confirmed page.
+   */
+  public void setAccessConfirmedPageController(BeanReference accessConfirmedPageController) {
+    this.accessConfirmedPageController = accessConfirmedPageController;
   }
 
   /**

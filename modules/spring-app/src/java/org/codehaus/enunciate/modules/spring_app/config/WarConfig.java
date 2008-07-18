@@ -38,7 +38,9 @@ public class WarConfig {
   private final List<IncludeExcludeLibs> excludeLibs = new ArrayList<IncludeExcludeLibs>();
   private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
   private String name;
+  private String webXMLTransform;
   private URL webXMLTransformURL;
+  private String mergeWebXML;
   private URL mergeWebXMLURL;
   private String preBase;
   private String postBase;
@@ -181,10 +183,19 @@ public class WarConfig {
   /**
    * The (optional) stylesheet transformation through which to pass the generated web.xml file.
    *
+   * @return The (optional) stylesheet transformation through which to pass the generated web.xml file.
+   */
+  public String getWebXMLTransform() {
+    return webXMLTransform;
+  }
+
+  /**
+   * The (optional) stylesheet transformation through which to pass the generated web.xml file.
+   *
    * @param stylesheet The stylesheet transformation through which to pass the generated web.xml file.
    */
-  public void setWebXMLTransform(File stylesheet) throws MalformedURLException {
-    this.webXMLTransformURL = stylesheet.toURL();
+  public void setWebXMLTransform(String stylesheet) throws MalformedURLException {
+    this.webXMLTransform = stylesheet;
   }
 
   /**
@@ -208,10 +219,19 @@ public class WarConfig {
   /**
    * The web xml file to merge.
    *
+   * @return The web xml file to merge.
+   */
+  public String getMergeWebXML() {
+    return mergeWebXML;
+  }
+
+  /**
+   * The web xml file to merge.
+   *
    * @param mergeWebXML The web xml file to merge.
    */
-  public void setMergeWebXML(File mergeWebXML) throws MalformedURLException {
-    this.mergeWebXMLURL = mergeWebXML.toURL();
+  public void setMergeWebXML(String mergeWebXML) throws MalformedURLException {
+    this.mergeWebXML = mergeWebXML;
   }
 
   /**

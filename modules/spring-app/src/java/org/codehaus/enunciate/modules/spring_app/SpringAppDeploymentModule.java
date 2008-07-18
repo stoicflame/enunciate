@@ -780,8 +780,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       File mergedWebXml = webXML;
-      if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null)) {
+      if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null || this.warConfig.getMergeWebXML() != null)) {
         URL webXmlToMerge = this.warConfig.getMergeWebXMLURL();
+        if (webXmlToMerge == null) {
+          webXmlToMerge = enunciate.resolvePath(this.warConfig.getMergeWebXML()).toURL();
+        }
+        
         NodeModel source1;
         try {
           source1 = NodeModel.parse(new InputSource(webXmlToMerge.openStream()));
@@ -816,8 +820,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         mergedWebXml = mergeTarget;
       }
 
-      if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
+      if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null || this.warConfig.getWebXMLTransform() != null)) {
         URL transformURL = this.warConfig.getWebXMLTransformURL();
+        if (transformURL == null) {
+          transformURL = enunciate.resolvePath(this.warConfig.getWebXMLTransform()).toURL();
+        }
+        
         info("web.xml transform has been specified as %s.", transformURL);
         try {
           StreamSource source = new StreamSource(transformURL.openStream());

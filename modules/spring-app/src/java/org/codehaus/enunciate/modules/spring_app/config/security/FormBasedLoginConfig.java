@@ -28,6 +28,7 @@ public class FormBasedLoginConfig {
   private String redirectOnFailureUrl = "/login.jsp";
   private String loginPageURL = "/login.jsp";
   private String loginPageFile;
+  private BeanReference loginPageController;
 
   /**
    * The URL of the form-based login endpoint.
@@ -117,5 +118,23 @@ public class FormBasedLoginConfig {
    */
   public void setLoginPageFile(String loginPageFile) {
     this.loginPageFile = loginPageFile;
+  }
+
+  /**
+   * The controller that handles the login page.
+   *
+   * @return The controller that handles the login page.
+   */
+  public BeanReference getLoginPageController() {
+    return loginPageController;
+  }
+
+  /**
+   * The controller that handles the login page.
+   *
+   * @param loginPageController The controller that handles the login page.
+   */
+  public void setLoginPageController(BeanReference loginPageController) {
+    this.loginPageController = loginPageController;
   }
 }

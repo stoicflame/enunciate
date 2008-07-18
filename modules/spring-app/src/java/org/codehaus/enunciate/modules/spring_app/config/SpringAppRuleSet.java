@@ -103,6 +103,14 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security/oauth");
     digester.addSetNext("enunciate/modules/spring-app/security/oauth", "setOAuthConfig");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/security/oauth/confirmAccessPageController", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/oauth/confirmAccessPageController");
+    digester.addSetNext("enunciate/modules/spring-app/security/oauth/confirmAccessPageController", "setConfirmAccessPageController");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/oauth/accessConfirmedPageController", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/oauth/accessConfirmedPageController");
+    digester.addSetNext("enunciate/modules/spring-app/security/oauth/accessConfirmedPageController", "setAccessConfirmedPageController");
+
     digester.addObjectCreate("enunciate/modules/spring-app/security/oauth/tokenServices", BeanReference.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/oauth/tokenServices");
     digester.addSetNext("enunciate/modules/spring-app/security/oauth/tokenServices", "setTokenServices");
@@ -118,6 +126,10 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/spring-app/security/formBasedLogin", FormBasedLoginConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/formBasedLogin");
     digester.addSetNext("enunciate/modules/spring-app/security/formBasedLogin", "setFormBasedLoginConfig");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/security/formBasedLogin/loginPageController", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/formBasedLogin/loginPageController");
+    digester.addSetNext("enunciate/modules/spring-app/security/formBasedLogin/loginPageController", "setLoginPageController");
 
     digester.addObjectCreate("enunciate/modules/spring-app/security/formBasedLogout", FormBasedLogoutConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/formBasedLogout");
