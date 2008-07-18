@@ -18,6 +18,8 @@ package org.codehaus.enunciate;
 
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Indicates that a type should be ignored by Enunciate.
@@ -25,7 +27,10 @@ import java.lang.annotation.ElementType;
  * @author Ryan Heaton
  */
 @Target (
-  ElementType.TYPE
+  { ElementType.TYPE, ElementType.PACKAGE }
+)
+@Retention (
+  RetentionPolicy.RUNTIME
 )
 public @interface XmlTransient {
 }

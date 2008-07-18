@@ -39,6 +39,7 @@ public class WarConfig {
   private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
   private String name;
   private URL webXMLTransformURL;
+  private URL mergeWebXMLURL;
   private String preBase;
   private String postBase;
   private String docsDir;
@@ -184,6 +185,33 @@ public class WarConfig {
    */
   public void setWebXMLTransform(File stylesheet) throws MalformedURLException {
     this.webXMLTransformURL = stylesheet.toURL();
+  }
+
+  /**
+   * The web xml file to merge.
+   *
+   * @return The web xml file to merge.
+   */
+  public URL getMergeWebXMLURL() {
+    return mergeWebXMLURL;
+  }
+
+  /**
+   * The web xml file to merge.
+   *
+   * @param mergeWebXMLURL The web xml file to merge.
+   */
+  public void setMergeWebXMLURL(URL mergeWebXMLURL) {
+    this.mergeWebXMLURL = mergeWebXMLURL;
+  }
+
+  /**
+   * The web xml file to merge.
+   *
+   * @param mergeWebXML The web xml file to merge.
+   */
+  public void setMergeWebXML(File mergeWebXML) throws MalformedURLException {
+    this.mergeWebXMLURL = mergeWebXML.toURL();
   }
 
   /**

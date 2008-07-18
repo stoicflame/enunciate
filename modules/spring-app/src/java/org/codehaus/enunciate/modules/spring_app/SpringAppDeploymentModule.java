@@ -17,11 +17,12 @@
 package org.codehaus.enunciate.modules.spring_app;
 
 import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
+import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
@@ -29,10 +30,11 @@ import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
-import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
+import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
 import org.springframework.util.AntPathMatcher;
+import org.xml.sax.InputSource;
 import sun.misc.Service;
 
 import javax.xml.transform.Transformer;
@@ -145,6 +147,7 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&lt;modules&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app contextLoaderListenerClass="..."&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mergeWebXML="..." mergeWebXMLURL="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
@@ -226,6 +229,10 @@ import java.util.jar.Manifest;
  * directory.  No tranformation will be applied if none is specified.</li>
  * <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
  * directory.  No tranformation will be applied if none is specified.</li>
+ * <li>The "<b>mergeWebXML</b>" attribute specifies the web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
+ * none is specified.</li>
+ * <li>The "<b>mergeWebXMLURL</b>" attribute specifies the URL to a web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
+ * none is specified.</li>
  * <li>The "<b>preBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
  * the building war directory <i>before</i> it is provided with any Enunciate-specific files and directories.</li>
  * <li>The "<b>postBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
@@ -408,6 +415,13 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected URL getWebXmlTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("web.xml.fmt");
+  }
+
+  /**
+   * @return The URL to "web.xml.fmt"
+   */
+  protected URL getMergeWebXmlTemplateURL() {
+    return SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt");
   }
 
   @Override
@@ -765,21 +779,58 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         throw new EnunciateException("Error processing web.xml template file.", e);
       }
 
+      File mergedWebXml = webXML;
+      if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null)) {
+        URL webXmlToMerge = this.warConfig.getMergeWebXMLURL();
+        NodeModel source1;
+        try {
+          source1 = NodeModel.parse(new InputSource(webXmlToMerge.openStream()));
+        }
+        catch (Exception e) {
+          throw new EnunciateException("Error parsing web.xml file for merging", e);
+        }
+
+        NodeModel source2;
+        try {
+          source2 = NodeModel.parse(new InputSource(new FileInputStream(webXML)));
+        }
+        catch (Exception e) {
+          throw new EnunciateException("Error parsing web.xml file for merging", e);
+        }
+
+        try {
+          model.put("source1", source1.getChildNodes().get(0));
+          model.put("source2", source2.getChildNodes().get(0));
+          processTemplate(getMergeWebXmlTemplateURL(), model);
+        }
+        catch (TemplateException e) {
+          throw new EnunciateException("Error while merging web xml files.", e);
+        }
+
+        File mergeTarget = new File(getConfigGenerateDir(), "merged-web.xml");
+        if (!mergeTarget.exists()) {
+          throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
+        }
+        
+        info("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
+        mergedWebXml = mergeTarget;
+      }
+
       if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null)) {
         URL transformURL = this.warConfig.getWebXMLTransformURL();
         info("web.xml transform has been specified as %s.", transformURL);
         try {
           StreamSource source = new StreamSource(transformURL.openStream());
           Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-          info("Transforming %s to %s.", webXML, destWebXML);
-          transformer.transform(new StreamSource(new FileReader(webXML)), new StreamResult(destWebXML));
+          info("Transforming %s to %s.", mergedWebXml, destWebXML);
+          transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
         }
         catch (TransformerException e) {
-          throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + webXML + ")", e);
+          throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + mergedWebXml + ")", e);
         }
       }
       else {
-        enunciate.copyFile(webXML, destWebXML);
+        enunciate.copyFile(mergedWebXml, destWebXML);
       }
     }
   }

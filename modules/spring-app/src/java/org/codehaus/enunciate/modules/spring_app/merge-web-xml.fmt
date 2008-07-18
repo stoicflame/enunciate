@@ -1,0 +1,192 @@
+[#ftl]
+[@file name="merged-web.xml"]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+  [#if source1["icon"]?size > 0]
+  <icon>${source1["icon"]}</icon>
+
+  [#elseif source2["icon"]?size > 0]
+  <icon>${source2["icon"]}</icon>
+
+  [/#if]
+  [#if source1["display-name"]?size > 0]
+  <display-name>${source1["display-name"]}</display-name>
+
+  [#elseif source2["display-name"]?size > 0]
+  <display-name>${source2["display-name"]}</display-name>
+
+  [/#if]
+  [#if source1["description"]?size > 0]
+  <description>${source1["description"]}</description>
+
+  [#elseif source2["description"]?size > 0]
+  <description>${source2["description"]}</description>
+
+  [/#if]
+  [#if source1["distributable"]?size > 0]
+  <distributable>${source1["distributable"]}</distributable>
+
+  [#elseif source2["distributable"]?size > 0]
+  <distributable>${source2["distributable"]}</distributable>
+
+  [/#if]
+  [#list source1["context-param"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["context-param"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["filter"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["filter"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["filter-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["filter-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["listener"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["listener"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["servlet"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["servlet"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["servlet-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["servlet-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#if source1["session-config"]?size > 0]
+  ${source1["session-config"].@@markup}
+
+  [#elseif source2["session-config"]?size > 0]
+  ${source2["session-config"].@@markup}
+
+  [/#if]
+  [#list source1["mime-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["mime-mapping"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#if source1["welcome-file-list"]?size > 0]
+  ${source1["welcome-file-list"].@@markup}
+
+  [#elseif source2["welcome-file-list"]?size > 0]
+  ${source2["welcome-file-list"].@@markup}
+
+  [/#if]
+  [#list source1["error-page"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["error-page"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["taglib"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["taglib"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["resource-env-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["resource-env-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["resource-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["resource-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["security-constraint"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["security-constraint"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["security-constraint"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["security-constraint"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#if source1["login-config"]?size > 0]
+  ${source1["login-config"].@@markup}
+
+  [#elseif source2["login-config"]?size > 0]
+  ${source2["login-config"].@@markup}
+
+  [/#if]
+  [#list source1["security-role"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["security-role"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["env-entry"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["env-entry"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["ejb-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["ejb-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["ejb-local-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["ejb-local-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+</web-app>
+[/@file]

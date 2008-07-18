@@ -296,6 +296,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       return false;
     }
 
+    if ((declaration.getPackage() != null) && (declaration.getPackage().getAnnotation(XmlTransient.class) != null)) {
+      debug("%s isn't a potential schema type because its package is annotated as XmlTransient.", declaration.getQualifiedName());
+      return false;
+    }
+
     Collection<AnnotationMirror> annotationMirrors = declaration.getAnnotationMirrors();
     boolean explicitXMLTypeOrElement = false;
     for (AnnotationMirror mirror : annotationMirrors) {
@@ -306,8 +311,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (XmlTransient.class.getName().equals(fqn)
           || "javax.xml.bind.annotation.XmlTransient".equals(fqn)
           || fqn.startsWith("javax.xml.ws")
-          || fqn.startsWith("javax.jws")
-          || ((declaration.getPackage() != null) && (declaration.getPackage().getAnnotation(XmlTransient.class) != null))) {
+          || fqn.startsWith("javax.jws")) {
           debug("%s isn't a potential schema type because of annotation %s.", declaration.getQualifiedName(), fqn);
           return false;
         }

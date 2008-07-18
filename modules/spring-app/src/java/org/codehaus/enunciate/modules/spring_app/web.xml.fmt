@@ -197,13 +197,14 @@
   [/#list]
   [#if securityEnabled]
     [#if securityConfig.enableFormBasedLogin]
+
   <servlet-mapping>
     <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.formBasedLoginConfig.loginPageURL}</url-pattern>
   </servlet-mapping>
-
     [/#if]
     [#if securityConfig.enableOAuth]
+
   <servlet-mapping>
     <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.infoURL}</url-pattern>
@@ -218,7 +219,6 @@
     <servlet-name>security</servlet-name>
     <url-pattern>${securityConfig.OAuthConfig.accessConfirmedURL}</url-pattern>
   </servlet-mapping>
-
     [/#if]
   [/#if]
   [#list webAppFragments as fragment]
