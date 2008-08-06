@@ -16,13 +16,13 @@
 
 package org.codehaus.enunciate.modules.gwt;
 
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -35,18 +35,17 @@ import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.modules.gwt.config.GWTApp;
 import org.codehaus.enunciate.modules.gwt.config.GWTAppModule;
+import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.Declaration;
 
 /**
  * <h1>GWT Module</h1>
@@ -544,16 +543,16 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       commandArray[styleArgIndex] = style;
       commandArray[outArgIndex] = out;
 
-      for (GWTAppModule appModule : gwtApp.getModules()) {
-        String moduleName = appModule.getName();
-        String outputPath = appModule.getOutputPath();
-        File moduleOutputDir = appDir;
-        if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
-          moduleOutputDir = new File(appDir, outputPath);
-        }
+      boolean upToDate = enunciate.isUpToDate(getClientSideGenerateDir(), appDir) && enunciate.isUpToDate(appSource, appDir);
+      if (!upToDate) {
+        for (GWTAppModule appModule : gwtApp.getModules()) {
+          String moduleName = appModule.getName();
+          String outputPath = appModule.getOutputPath();
+          File moduleOutputDir = appDir;
+          if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
+            moduleOutputDir = new File(appDir, outputPath);
+          }
 
-        boolean upToDate = enunciate.isUpToDate(getClientSideGenerateDir(), moduleOutputDir) && enunciate.isUpToDate(appSource, moduleOutputDir);
-        if (!upToDate) {
           commandArray[moduleNameIndex] = moduleName;
           info("Executing GWTCompile for module '%s'...", moduleName);
           if (enunciate.isDebug()) {
@@ -640,26 +639,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           writer.write(noServerShellCommand.toString());
           writer.flush();
           writer.close();
-        }
-        else {
-          info("Skipping GWT compile for module %s as everything appears up-to-date...", moduleName);
-        }
 
-        File shellFile = getShellScriptFile(appName, moduleName);
-        if (shellFile.exists()) {
-          StringBuilder scriptArtifactId = new StringBuilder();
-          if ((appName != null) && (appName.trim().length() > 0)) {
-            scriptArtifactId.append(appName).append('.');
+          File shellFile = getShellScriptFile(appName, moduleName);
+          if (shellFile.exists()) {
+            StringBuilder scriptArtifactId = new StringBuilder();
+            if ((appName != null) && (appName.trim().length() > 0)) {
+              scriptArtifactId.append(appName).append('.');
+            }
+            scriptArtifactId.append(moduleName).append(".shell");
+            getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.toString(), shellFile));
+            getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.append(".noserver").toString(), noServerScriptFile));
           }
-          scriptArtifactId.append(moduleName).append(".shell");
-          getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.toString(), shellFile));
-
-          File noServerScriptFile = new File(shellFile.getParentFile(), shellFile.getName() + "-noserver");
-          getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.append(".noserver").toString(), noServerScriptFile));
+          else {
+            info("No GWT shell script file exists at %s.  No artifact added.", shellFile);
+          }
         }
-        else {
-          info("No GWT shell script file exists at %s.  No artifact added.", shellFile);
-        }
+      }
+      else {
+        info("Skipping GWT compile for app %s as everything appears up-to-date...", appName);
       }
     }
   }
@@ -714,7 +711,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     //base webapp dir...
     File webappDir = new File(getBuildDir(), "webapp");
     webappDir.mkdirs();
-    
+
     File gwtCompileDir = getAppGenerateDir();
     if ((this.gwtApps.size() > 0) && (gwtCompileDir != null) && (gwtCompileDir.exists())) {
       File gwtAppDir = webappDir;
@@ -924,7 +921,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   /**
    * Get the GWT shell script file for the specified module, app.
    *
-   * @param appName The app name.
+   * @param appName    The app name.
    * @param moduleName The module name.
    * @return The shell script file.
    */
