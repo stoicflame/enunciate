@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>enunciate-build-support</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Enunciate - Build Support</name>
+  <description>The Enunciate Build support is simply a collection of tools that Enunciate uses to build itself.</description>
+  <packaging>pom</packaging>
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+        <version>1.0-beta-2</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>module.docs.fmt</file>
+                  <type>fmt</type>
+                  <classifier>module-template</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <distributionManagement>
+    <repository>
+      <id>codehaus.org</id>
+      <name>XFire Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
+    </repository>
+    <snapshotRepository>
+      <id>codehaus.org</id>
+      <name>XFire Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
+  </dependencies>
+
+</project>

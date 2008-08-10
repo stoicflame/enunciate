@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.8-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-docs</artifactId>
+  <name>Enunciate - Docs Module</name>
+  <description>The Enunciate docs module generates the Web service interface documentation.</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--<debugForkedProcess>true</debugForkedProcess>-->
+          <systemProperties>
+            <property>
+              <name>in.apt.src.test.dir</name>
+              <value>${basedir}/src/main/samples/docs</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--
+        we need to generate some xfire client-side classes for testing purposes.
+        we'll use the Enunciate ant task to do it.
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <!--the docs module uses a default base.-->
+            <phase>process-classes</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="${project.build.outputDirectory}"/>
+
+                <zip destfile="${project.build.outputDirectory}/docs.base.zip" basedir="${basedir}/template">
+                  <exclude name="*.html"/>
+                </zip>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

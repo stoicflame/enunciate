@@ -1,0 +1,591 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>enunciate-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>1.8-SNAPSHOT</version>
+  <name>Enunciate - Parent</name>
+
+  <modules>
+    <module>core-rt</module>
+    <module>core</module>
+    <module>xml</module>
+    <module>jaxws</module>
+    <module>spring-app-rt</module>
+    <module>spring-app</module>
+    <module>rest-rt</module>
+    <module>rest</module>
+    <module>xfire-rt</module>
+    <module>xfire</module>
+    <module>xfire-client-rt</module>
+    <module>xfire-client</module>
+    <module>docs</module>
+    <module>amf-rt</module>
+    <module>amf</module>
+    <module>gwt-rt</module>
+    <module>gwt</module>
+    <module>top-rt</module>
+    <module>top</module>
+    <module>maven-enunciate-plugin</module>
+    <module>integration-test-support</module>
+    <module>integration-tests</module>
+  </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-idea-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <downloadSources>true</downloadSources>
+          <downloadJavadocs>true</downloadJavadocs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.2</version>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <spring.version>2.5.4</spring.version>
+    <spring.security.version>2.0.1</spring.security.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>ant</groupId>
+        <artifactId>ant</artifactId>
+        <version>1.6.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>backport-util-concurrent</groupId>
+        <artifactId>backport-util-concurrent</artifactId>
+        <version>3.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.adobe.blazeds</groupId>
+        <artifactId>blazeds-common</artifactId>
+        <version>3.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.adobe.blazeds</groupId>
+        <artifactId>blazeds-core</artifactId>
+        <version>3.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.adobe.blazeds</groupId>
+        <artifactId>blazeds-remoting</artifactId>
+        <version>3.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-servlet</artifactId>
+        <version>1.4.60</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun</groupId>
+        <artifactId>tools</artifactId>
+        <version>1.5.0</version>
+
+        <scope>system</scope>
+        <systemPath>${java.home}/../lib/tools.jar</systemPath>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>2.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jsr173_api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.xml</groupId>
+            <artifactId>jsr173</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.xsom</groupId>
+        <artifactId>xsom</artifactId>
+        <version>20070323</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>1.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.7.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-digester</groupId>
+        <artifactId>commons-digester</artifactId>
+        <version>1.7</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.2.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-httpclient</groupId>
+        <artifactId>commons-httpclient</artifactId>
+        <version>3.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-jxpath</groupId>
+        <artifactId>commons-jxpath</artifactId>
+        <version>1.2</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>2.3.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>httpunit</groupId>
+        <artifactId>httpunit</artifactId>
+        <version>1.6.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.activation</groupId>
+        <artifactId>activation</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.mail</groupId>
+        <artifactId>mail</artifactId>
+        <version>1.4</version>
+        <exclusions>
+          <exclusion>
+            <!--We'll depend on enunciate's version of activation. Not Mail's.-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>2.0</version>
+        <exclusions>
+          <exclusion>
+            <!--We'll explicitly depend on Enunciate's version of activation. Not JAXB's.-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jsr173_api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.xml</groupId>
+            <artifactId>jsr173</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.xml.ws</groupId>
+        <artifactId>jaxws-api</artifactId>
+        <version>2.0</version>
+        <exclusions>
+          <exclusion>
+            <!--we're going to explicitly depend on jaxb elsewhere.-->
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>jdom</groupId>
+        <artifactId>jdom</artifactId>
+        <version>1.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.15</version>
+        <exclusions>
+          <!--irritating dependencies introduced with 1.2.15...-->
+          <exclusion>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jmx</groupId>
+            <artifactId>jmxri</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sf.apt-jelly</groupId>
+        <artifactId>apt-jelly</artifactId>
+        <version>2.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>annotations-api</artifactId>
+        <version>6.0.14</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jettison</groupId>
+        <artifactId>jettison</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.spring-security-oauth</groupId>
+        <artifactId>spring-security-oauth</artifactId>
+        <version>2.3</version>
+        <exclusions>
+          <!--we'll depend on enunciate's version of these artifacts.-->
+          <exclusion>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core-tiger</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.xfire</groupId>
+        <artifactId>xfire-all</artifactId>
+        <version>1.2.2</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-aegis</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-plexus</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-ws-security</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-picocontainer</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-xmpp</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-jaxb2</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-jms</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-java5</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-generator</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-xmlbeans</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-castor</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-annotations</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-jaxb</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-jaxws</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-loom</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-spring</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.codehaus.xfire</groupId>
+            <artifactId>xfire-jibx</artifactId>
+          </exclusion>
+          <exclusion>
+            <!--We'll depend on enunciate's version of activation. Not XFire's.-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20070829</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jetty</artifactId>
+        <version>6.1.7</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-aop</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core-tiger</artifactId>
+        <version>${spring.security.version}</version>
+        <exclusions>
+          <!--we'll depend on enunciate's version of these artifacts.-->
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-dao</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>relaxngDatatype</groupId>
+        <artifactId>relaxngDatatype</artifactId>
+        <version>20020414</version>
+      </dependency>
+
+      <dependency>
+        <groupId>stax</groupId>
+        <artifactId>stax-api</artifactId>
+        <version>1.0.1</version>
+      </dependency>
+
+      <dependency>
+        <!--this dependency doesn't have anything to do with xfire.  It's just xfire's build of the jsr181 annotations.-->
+        <groupId>xfire</groupId>
+        <artifactId>xfire-jsr181-api</artifactId>
+        <version>1.0-M1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>woodstox</groupId>
+        <artifactId>wstx-asl</artifactId>
+        <version>2.9.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>wsdl4j</groupId>
+        <artifactId>wsdl4j</artifactId>
+        <version>1.5.2</version>
+      </dependency>
+
+    </dependencies>
+
+  </dependencyManagement>
+
+  <distributionManagement>
+
+    <repository>
+      <id>codehaus.org</id>
+      <name>XFire Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>codehaus.org</id>
+      <name>XFire Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
+    </snapshotRepository>
+
+  </distributionManagement>
+
+</project>
