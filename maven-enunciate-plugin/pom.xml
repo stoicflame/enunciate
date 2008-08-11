@@ -30,7 +30,7 @@
     </dependency>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-full</artifactId>
+      <artifactId>enunciate-top</artifactId>
       <version>1.8-SNAPSHOT</version>
     </dependency>
   </dependencies>

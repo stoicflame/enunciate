@@ -159,7 +159,7 @@
       <dependency>
         <groupId>com.sun.xsom</groupId>
         <artifactId>xsom</artifactId>
-        <version>20070323</version>
+        <version>20070407</version>
       </dependency>
       
       <dependency>
