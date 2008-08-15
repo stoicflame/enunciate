@@ -16,6 +16,8 @@
     <module>spring-app</module>
     <module>rest-rt</module>
     <module>rest</module>
+    <module>jersey-rt</module>
+    <module>jersey</module>
     <module>xfire-rt</module>
     <module>xfire</module>
     <module>xfire-client-rt</module>
@@ -63,6 +65,31 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-intel-xml-exists</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce-once</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>(,1.6)</version>
+                  <message>
+                    Although Enunciate is fully compatible with Java 1.6 and above,
+                    we want to make sure Enunciate is built with compatibility for
+                    Java 5. Please use Java 5 to build Enunciate.
+                  </message>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -104,6 +131,12 @@
       </dependency>
 
       <dependency>
+        <groupId>cglib</groupId>
+        <artifactId>cglib-nodep</artifactId>
+        <version>2.1_3</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.adobe.blazeds</groupId>
         <artifactId>blazeds-common</artifactId>
         <version>3.0</version>
@@ -137,6 +170,32 @@
       </dependency>
 
       <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>0.9-ea-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-spring</artifactId>
+        <version>0.9-ea-SNAPSHOT</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
         <version>2.0</version>
@@ -161,7 +220,7 @@
         <artifactId>xsom</artifactId>
         <version>20070407</version>
       </dependency>
-      
+
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>

@@ -21,6 +21,7 @@
   [#if handlerInterceptors?exists]
 
   <!-- global handler mapping interceptors -->
+  <!-- specifically named 'interceptors' so they can be autowired by name to basic spring handler mappings -->
   <util:list id="interceptors">
     [#list handlerInterceptors as interceptor]
       [#if interceptor.interceptorClass?exists]
@@ -31,16 +32,10 @@
     [/#list]
   </util:list>
   [/#if]
-  [@forEachServiceEndpoint]
 
-  <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
-    <qualifier value="enunciate-service-bean"/>
-    <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
-    <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
-    [#if endpoint.serviceEndpointDefaultImplementation?exists]
-    <property name="defaultImplementationClass" value="${endpoint.serviceEndpointDefaultImplementation.qualifiedName}"/>
-    [/#if]
-    <property name="interceptors">
+  <bean name="service-bean-interceptors" class="java.util.ArrayList">
+    <qualifier value="enunciate-service-bean-interceptors"/>
+    <constructor-arg>
       <list>
     [#if globalServiceInterceptors?exists]
       [#list globalServiceInterceptors as interceptor]
@@ -51,11 +46,22 @@
         [/#if]
       [/#list]
     [/#if]
-    [#if securityEnabled && hasSecureMethod(endpoint.serviceEndpointInterface)]
+    [#if securityEnabled]
         <ref bean="enunciate-security-interceptor"/>
     [/#if]
       </list>
-    </property>
+    </constructor-arg>
+  </bean>
+  [@forEachServiceEndpoint]
+
+  <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
+    <qualifier value="enunciate-service-bean"/>
+    <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
+    <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
+    [#if endpoint.serviceEndpointDefaultImplementation?exists]
+    <property name="defaultImplementationClass" value="${endpoint.serviceEndpointDefaultImplementation.qualifiedName}"/>
+    [/#if]
+    <property name="interceptors" ref="service-bean-interceptors"/>
   </bean>
   [/@forEachServiceEndpoint]
 </beans>

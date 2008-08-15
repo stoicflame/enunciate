@@ -425,6 +425,13 @@ public class DefaultValidator implements Validator, ConfigurableRules {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = validateTypeDefinition(complexType);
 
+    try {
+      complexType.getBaseType();
+    }
+    catch (ValidationException e) {
+      result.addError(complexType, e.getMessage());
+    }
+
     if (complexType.getValue() != null) {
       if (!complexType.isBaseObject()) {
         result.addError(complexType, "A type with an @XmlValue must not extend another object (other than java.lang.Object).");
@@ -446,13 +453,18 @@ public class DefaultValidator implements Validator, ConfigurableRules {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = validateTypeDefinition(simpleType);
 
-    XmlType baseType = simpleType.getBaseType();
-    if (baseType == null) {
-      result.addError(simpleType, "No base type specified.");
+    try {
+      XmlType baseType = simpleType.getBaseType();
+      if (baseType == null) {
+        result.addError(simpleType, "No base type specified.");
+      }
+      else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
+        result.addError(simpleType, "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
+          + " is a complex type.");
+      }
     }
-    else if ((baseType instanceof XmlClassType) && (((XmlClassType) baseType).getTypeDefinition() instanceof ComplexTypeDefinition)) {
-      result.addError(simpleType, "A simple type must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
-        + " is a complex type.");
+    catch (ValidationException e) {
+      result.addError(simpleType, e.getMessage());
     }
 
     return result;

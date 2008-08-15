@@ -481,7 +481,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
       //spring security configuration:
       model.put("securityEnabled", isEnableSecurity());
-      model.put("hasSecureMethod", new HasSecureMethod());
       model.put("servletPatternToAntPattern", new ServletPatternToAntPattern());
       SecurityConfig securityConfig = getSecurityConfig();
       if (securityConfig.getRealmName() == null) {

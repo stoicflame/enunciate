@@ -319,7 +319,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
             if (!isGWTTransient(ei)) {
               String pckg = ei.getPackage().getQualifiedName();
               if (!conversions.containsKey(pckg)) {
-                conversions.put(pckg, pckg + "." + clientNamespace);
+                conversions.put(pckg, clientNamespace + "." + pckg);
               }
               for (WebMethod webMethod : ei.getWebMethods()) {
                 for (WebFault webFault : webMethod.getWebFaults()) {
@@ -333,7 +333,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           if (!isGWTTransient(webFault)) {
             String pckg = webFault.getPackage().getQualifiedName();
             if (!conversions.containsKey(pckg)) {
-              conversions.put(pckg, pckg + "." + clientNamespace);
+              conversions.put(pckg, clientNamespace + "." + pckg);
             }
           }
         }
@@ -342,7 +342,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
             if (!isGWTTransient(typeDefinition)) {
               String pckg = typeDefinition.getPackage().getQualifiedName();
               if (!conversions.containsKey(pckg)) {
-                conversions.put(pckg, pckg + "." + clientNamespace);
+                conversions.put(pckg, clientNamespace + "." + pckg);
               }
             }
           }

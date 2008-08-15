@@ -17,15 +17,12 @@
 package org.codehaus.enunciate.modules.spring_app;
 
 import org.codehaus.enunciate.webapp.ComponentPostProcessor;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContext;
-import java.util.Map;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 /**
  * Component post processor for the spring application context.
@@ -64,10 +61,6 @@ public class SpringComponentPostProcessor implements ServletContextListener, Com
    * @param applicationContext the application context to use to autowire the component.
    */
   public static void autowire(Object component, WebApplicationContext applicationContext) {
-    Map beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, AutowiredAnnotationBeanPostProcessor.class);
-    if (!beans.isEmpty()) {
-      AutowiredAnnotationBeanPostProcessor processor = (AutowiredAnnotationBeanPostProcessor) beans.values().iterator().next();
-      processor.processInjection(component);
-    }
+    applicationContext.getAutowireCapableBeanFactory().autowireBean(component);
   }
 }
