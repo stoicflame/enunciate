@@ -37,6 +37,8 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
+
+      <!--just the annotations are used.-->
       <optional>true</optional>
     </dependency>
 

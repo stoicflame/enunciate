@@ -40,7 +40,7 @@ public class AssembleMojo extends ConfigMojo {
   /**
    * The target to step to.
    *
-   * @parameter
+   * @parameter expression="${enunciate.target}"
    */
   private String stepTo = null;
 
@@ -60,9 +60,6 @@ public class AssembleMojo extends ConfigMojo {
     }
 
     Enunciate.Target target = Enunciate.Target.PACKAGE;
-    if (stepTo == null) {
-      stepTo = project.getProperties().getProperty("enunciate.target");
-    }
 
     if (stepTo != null) {
       target = Enunciate.Target.valueOf(stepTo.toUpperCase());

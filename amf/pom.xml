@@ -25,6 +25,12 @@
     </dependency>
 
     <dependency>
+      <!--used to compile the generated code, which uses the spring annotations -->
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
       <version>${project.version}</version>

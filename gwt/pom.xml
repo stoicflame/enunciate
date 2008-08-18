@@ -26,24 +26,22 @@
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
-
-      <classifier>tests</classifier>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
 
     <dependency>
+      <!--used to compile the generated code, which uses the spring annotations -->
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
+    </dependency>
 
-      <!--just the annotations are used for the tests.-->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+
+      <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
 
