@@ -171,13 +171,13 @@
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
-        <version>0.9-ea-SNAPSHOT</version>
+        <version>0.10-ea-SNAPSHOT</version>
       </dependency>
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-spring</artifactId>
-        <version>0.9-ea-SNAPSHOT</version>
+        <version>0.10-ea-SNAPSHOT</version>
         <exclusions>
           <exclusion>
             <groupId>org.springframework</groupId>
@@ -313,6 +313,12 @@
             <artifactId>activation</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>0.10</version>
       </dependency>
 
       <dependency>

@@ -20,6 +20,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.AnnotationType;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
@@ -36,6 +37,7 @@ import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.template.freemarker.*;
@@ -43,6 +45,9 @@ import org.codehaus.enunciate.template.freemarker.*;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.ws.rs.Path;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -142,7 +147,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
       final boolean isRESTEndpoint = isRESTEndpoint(declaration);
       final boolean isContentTypeHandler = isRESTContentTypeHandler(declaration);
-      if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler) {
+      final boolean isJAXRSRootResource = isJAXRSRootResource(declaration);
+      final boolean isJAXRSSupport = isJAXRSSupport(declaration);
+      if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler || isJAXRSRootResource || isJAXRSSupport) {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
@@ -158,6 +165,22 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (isContentTypeHandler) {
           info("%s to be considered a content type handler.", declaration.getQualifiedName());
           model.addContentTypeHandler((ClassDeclaration) declaration);
+        }
+
+        if (isJAXRSRootResource) {
+          RootResource rootResource = new RootResource((ClassDeclaration) declaration);
+          info("%s to be considered as a JAX-RS root resource.", declaration.getQualifiedName());
+          model.add(rootResource);
+        }
+
+        if (isJAXRSSupport) {
+          if (declaration.getAnnotation(Provider.class) != null) {
+            info("%s to be considered as a JAX-RS provider.", declaration.getQualifiedName());
+            model.addJAXRSProvider(declaration);
+          }
+          else {
+            info("%s to be considered a JAX-RS support class.", declaration.getQualifiedName());
+          }
         }
       }
       else if (isPotentialSchemaType(declaration)) {
@@ -377,6 +400,44 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   /**
+   * Whether the specified type is a JAX-RS root resource.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified type is a JAX-RS root resource.
+   */
+  public boolean isJAXRSRootResource(TypeDeclaration declaration) {
+    return declaration.getAnnotation(XmlTransient.class) == null
+      && declaration instanceof ClassDeclaration
+      && declaration.getAnnotation(Path.class) != null;
+  }
+
+  /**
+   * Whether the specified type is a JAX-RS support class (resource and/or provider).
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified type is a JAX-RS support class.
+   */
+  public boolean isJAXRSSupport(TypeDeclaration declaration) {
+    if (declaration.getAnnotation(XmlTransient.class) == null) {
+      return false;
+    }
+
+    //it's a JAX-RS resource if any method has either a @Path or a resource method designator.
+    Collection<? extends MethodDeclaration> methods = declaration.getMethods();
+    for (MethodDeclaration method : methods) {
+      for (AnnotationMirror mirror : method.getAnnotationMirrors()) {
+        AnnotationType type = mirror.getAnnotationType();
+        if (type.getDeclaration() != null && type.getDeclaration().getAnnotation(HttpMethod.class) != null) {
+          return true;
+        }
+      }
+    }
+
+    //otherwise it's a JAX-RS provider if it's annotated as such.
+    return declaration.getAnnotation(Provider.class) != null;
+  }
+
+  /**
    * Find the type definition for a class given the class's declaration, or null if the class is xml transient.
    *
    * @param declaration The declaration.
@@ -493,6 +554,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     //rest transforms.
     transforms.add(new ForEachRESTEndpointTransform(namespace));
     transforms.add(new ForEachRESTNounTransform(namespace));
+    transforms.add(new ForEachResourceMethodTransform(namespace));
 
     //set up the enunciate file transform.
     EnunciateFileTransform fileTransform = new EnunciateFileTransform(namespace);

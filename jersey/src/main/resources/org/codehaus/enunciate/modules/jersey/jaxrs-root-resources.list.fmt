@@ -1,3 +1,6 @@
 [#ftl]
 [@file name="jaxrs-root-resources.list"]
+  [#list rootResources as rootResource]
+${rootResource.qualifiedName}
+  [/#list]
 [/@file]

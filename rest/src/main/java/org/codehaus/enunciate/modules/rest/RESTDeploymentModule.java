@@ -21,6 +21,7 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -36,10 +37,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * <h1>REST Module</h1>
@@ -426,10 +424,21 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     servletComponent.setName("rest");
     servletComponent.setClassname(DispatcherServlet.class.getName());
     TreeSet<String> urlMappings = new TreeSet<String>();
-    urlMappings.add(getRestSubcontext() + "*");
-    for (String contentTypeId : getModel().getContentTypesToIds().values()) {
-      urlMappings.add("/" + contentTypeId + "/*");
+    Map<RESTNoun, Set<String>> nouns2contentTypes = getModel().getNounsToContentTypes();
+    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
+    for (RESTNoun restNoun : nouns2contentTypes.keySet()) {
+      urlMappings.add(getRestSubcontext() + restNoun.getServletPattern());
+      for (String contentType : nouns2contentTypes.get(restNoun)) {
+        String contentTypeId = contentTypes2Ids.get(contentType);
+        if (contentTypeId != null) {
+          urlMappings.add("/" + contentTypeId + restNoun.getServletPattern());
+        }
+        else {
+          debug("No content id for type '%s'.  REST noun %s will not be mounted for that content type.", contentType, restNoun);
+        }
+      }
     }
+    nouns2contentTypes.keySet();
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     getEnunciate().addWebAppFragment(webappFragment);

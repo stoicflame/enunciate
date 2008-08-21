@@ -19,12 +19,12 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public class SpringComponentProvider extends com.sun.jersey.spi.spring.container.servlet.SpringServlet.SpringComponentProvider {
+public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.container.servlet.SpringServlet.SpringComponentProvider {
 
   private final Map<Class, AdvisedResourceFactory> resourceFactories = new HashMap<Class, AdvisedResourceFactory>();
   private List<Object> interceptors;
 
-  public SpringComponentProvider(WebApplicationContext applicationContext) {
+  public EnunciateSpringComponentProvider(WebApplicationContext applicationContext) {
     super((ConfigurableApplicationContext) applicationContext);
     applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
   }

@@ -34,10 +34,15 @@ public class RESTNoun {
   private final String context;
   private final String canonicalForm;
   private final String antPattern;
+  private final String servletPattern;
   private final List<String> contextParameters;
 
   RESTNoun(String name, String context) {
     this.name = name;
+    if (context == null) {
+      context = "";
+    }
+    
     if (context.startsWith("/")) {
       context = context.substring(1);
     }
@@ -53,6 +58,19 @@ public class RESTNoun {
     }
 
     this.antPattern = context.length() == 0 ? name : (context.replaceAll(CONTEXT_PARAM_PATTERN, "*") + "/" + name);
+    StringBuilder servletPattern = new StringBuilder();
+    servletPattern.append('/');
+    contextParameterMatcher.reset();
+    if (contextParameterMatcher.find()) {
+      servletPattern.append(context, 0, contextParameterMatcher.start()).append('*');
+    }
+    else {
+      if (context.length() > 0) {
+        servletPattern.append(context).append('/');
+      }
+      servletPattern.append(name);
+    }
+    this.servletPattern = servletPattern.toString();
 
     String canonicalContext = context;
     for (int i = 0; i < contextParameters.size(); i++) {
@@ -96,6 +114,15 @@ public class RESTNoun {
    */
   public String getAntPattern() {
     return antPattern;
+  }
+
+  /**
+   * The servlet pattern for matching this noun (appropriate for matching according to the rules of the servlet spec).
+   *
+   * @return The servlet pattern for matching this noun.
+   */
+  public String getServletPattern() {
+    return servletPattern;
   }
 
   @Override

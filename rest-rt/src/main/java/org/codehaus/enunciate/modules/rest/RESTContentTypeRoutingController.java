@@ -19,6 +19,8 @@ package org.codehaus.enunciate.modules.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -27,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.*;
 
 /**
  * REST controller that routes requests for specific content types.
@@ -35,13 +38,15 @@ import java.util.regex.Pattern;
  */
 public class RESTContentTypeRoutingController extends AbstractController {
 
-  private final String defaultContentType;
+  private static final Log LOG = LogFactory.getLog(RESTContentTypeRoutingController.class);
+
+  private final ContentType defaultContentType;
   private ContentTypeSupport contentTypeSupport;
   private Pattern replacePattern = Pattern.compile("^/?rest/");
   private String contentTypeParameter = "contentType";
 
   public RESTContentTypeRoutingController(RESTResource resource) {
-    this.defaultContentType = resource.getDefaultContentType();
+    this.defaultContentType = ContentType.parse(resource.getDefaultContentType());
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
@@ -57,29 +62,27 @@ public class RESTContentTypeRoutingController extends AbstractController {
       String requestContext = request.getRequestURI().substring(request.getContextPath().length());
       Matcher matcher = replacePattern.matcher(requestContext);
       if (matcher.find()) {
-        String contentType = getContentType(request);
+        List<String> contentTypes = getContentTypesByPreference(request);
 
-        String contentTypeId = null;
-        if (contentType != null) {
-          contentTypeId = lookupContentTypeId(contentType);
-        }
-
-        if (contentTypeId != null) {
-          String redirect = matcher.replaceFirst("/" + URLEncoder.encode(contentTypeId, "UTF-8") + "/");
-          RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
-          if (dispatcher != null) {
-            try {
-              dispatcher.forward(request, response);
-            }
-            catch (ServletException e) {
-              if (e.getRootCause() instanceof Exception) {
-                throw (Exception) e.getRootCause();
+        for (String contentType : contentTypes) {
+          String contentTypeId = lookupContentTypeId(contentType);
+          if (contentTypeId != null) {
+            String redirect = matcher.replaceFirst("/" + URLEncoder.encode(contentTypeId, "UTF-8") + "/");
+            RequestDispatcher dispatcher = request.getRequestDispatcher(redirect);
+            if (dispatcher != null) {
+              try {
+                dispatcher.forward(request, response);
               }
-              else {
-                throw e;
+              catch (ServletException e) {
+                if (e.getRootCause() instanceof Exception) {
+                  throw (Exception) e.getRootCause();
+                }
+                else {
+                  throw e;
+                }
               }
+              return null;
             }
-            return null;
           }
         }
       }
@@ -106,12 +109,46 @@ public class RESTContentTypeRoutingController extends AbstractController {
    * @param request The request.
    * @return The content type.
    */
-  protected String getContentType(HttpServletRequest request) {
-    String contentType = request.getParameter(getContentTypeParameter());
-    if (contentType == null) {
-      contentType = this.defaultContentType;
+  protected List<String> getContentTypesByPreference(HttpServletRequest request) {
+    if (request.getParameter(getContentTypeParameter()) != null) {
+      return Arrays.asList(request.getParameter(getContentTypeParameter()));
     }
-    return contentType;
+    else {
+      Set<ContentType> contentTypes = new TreeSet<ContentType>();
+      Enumeration acceptHeaders = request.getHeaders("Accept");
+      if (acceptHeaders != null) {
+        Float defaultQuality = null;
+        while (acceptHeaders.hasMoreElements()) {
+          String acceptHeader = (String) acceptHeaders.nextElement();
+          try {
+            ContentType acceptType = ContentType.parse(acceptHeader);
+            contentTypes.add(acceptType);
+            if (acceptType.isAcceptable(this.defaultContentType) && (defaultQuality == null || defaultQuality < acceptType.getQuality())) {
+              defaultQuality = acceptType.getQuality();
+            }
+          }
+          catch (Exception e) {
+            //ignore the invalid type in the "Accept" header
+            LOG.info(e.getMessage());
+          }
+        }
+
+        if (defaultQuality != null) {
+          contentTypes.add(new ContentType(defaultContentType.getType(), defaultContentType.getSubtype(), defaultQuality));
+        }
+      }
+      else {
+        //add the default content types at the end.
+        contentTypes.add(this.defaultContentType);
+      }
+
+
+      ArrayList<String> values = new ArrayList<String>();
+      for (ContentType contentType : contentTypes) {
+        values.add(contentType.toString());
+      }
+      return values;
+    }
   }
 
   /**

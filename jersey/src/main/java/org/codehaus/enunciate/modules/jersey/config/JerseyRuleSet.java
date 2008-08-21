@@ -25,10 +25,7 @@ import org.apache.commons.digester.Digester;
 public class JerseyRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
-    digester.addSetProperties("enunciate/modules/rest/json");
-
-    digester.addCallMethod("enunciate/modules/rest/content-type-handlers/handler", "putContentTypeHandler", 2);
-    digester.addCallParam("enunciate/modules/rest/content-type-handlers/handler", 0, "contentType");
-    digester.addCallParam("enunciate/modules/rest/content-type-handlers/handler", 1, "class");
+    digester.addSetProperties("enunciate/modules/jersey");
+    digester.addSetProperties("enunciate/modules/jersey/json");
   }
 }

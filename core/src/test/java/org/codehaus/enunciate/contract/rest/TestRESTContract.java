@@ -16,12 +16,10 @@
 
 package org.codehaus.enunciate.contract.rest;
 
-import junit.framework.TestCase;
-import org.codehaus.enunciate.InAPTTestCase;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import org.codehaus.enunciate.InAPTTestCase;
 
-import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
 

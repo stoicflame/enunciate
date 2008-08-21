@@ -21,16 +21,21 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxb.ContentType;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
 
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.TreeSet;
 import java.net.URL;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * <h1>Jersey Module</h1>
@@ -63,6 +68,9 @@ import java.net.URL;
  * @docFileName module_jersey.html
  */
 public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
+
+  private boolean useSubcontext = true;
+  private boolean usePathBasedConneg = true;
 
   /**
    * @return "jersey"
@@ -108,30 +116,100 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws EnunciateException, IOException {
     super.doBuild();
 
-//    File webappDir = getBuildDir();
-//    webappDir.mkdirs();
-//    File webinf = new File(webappDir, "WEB-INF");
-//    File webinfClasses = new File(webinf, "classes");
-//    getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-providers.list"), new File(webinfClasses, "jaxrs-providers.list"));
-//    getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-root-resources.list"), new File(webinfClasses, "jaxrs-root-resources.list"));
-//
-//    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
-//    webappFragment.setBaseDir(webappDir);
-//    WebAppComponent servletComponent = new WebAppComponent();
-//    servletComponent.setName("jersey");
-//    servletComponent.setClassname(SpringServlet.class.getName());
-//    TreeSet<String> urlMappings = new TreeSet<String>();
-//    urlMappings.add(getRestSubcontext() + "*");
-//    for (String contentTypeId : getModel().getContentTypesToIds().values()) {
-//      urlMappings.add("/" + contentTypeId + "/*");
-//    }
-//    servletComponent.setUrlMappings(urlMappings);
-//    webappFragment.setServlets(Arrays.asList(servletComponent));
-//    getEnunciate().addWebAppFragment(webappFragment);
+    File webappDir = getBuildDir();
+    webappDir.mkdirs();
+    File webinf = new File(webappDir, "WEB-INF");
+    File webinfClasses = new File(webinf, "classes");
+    getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-providers.list"), new File(webinfClasses, "jaxrs-providers.list"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-root-resources.list"), new File(webinfClasses, "jaxrs-root-resources.list"));
+
+    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
+    webappFragment.setBaseDir(webappDir);
+    WebAppComponent servletComponent = new WebAppComponent();
+    servletComponent.setName("jersey");
+    servletComponent.setClassname(EnunciateSpringServlet.class.getName());
+    TreeMap<String, String> initParams = new TreeMap<String, String>();
+    if (!isUsePathBasedConneg()) {
+      initParams.put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, Boolean.FALSE.toString());
+    }
+    if (isUseSubcontext()) {
+      initParams.put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, getRestSubcontext());
+    }
+    servletComponent.setInitParams(initParams);
+
+    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
+    TreeSet<String> urlMappings = new TreeSet<String>();
+    for (ResourceMethod resourceMethod : getModel().getResourceMethods()) {
+      String resourceMethodPattern = resourceMethod.getServletPattern();
+      String servletPattern = isUseSubcontext() ? getRestSubcontext() + resourceMethodPattern : resourceMethodPattern;
+      debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+            resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+      urlMappings.add(servletPattern);
+      if (isUsePathBasedConneg()) {
+        for (String produces : resourceMethod.getProducesMime()) {
+          MediaType mediaType = MediaType.valueOf(produces);
+          for (Map.Entry<String, String> entry : contentTypes2Ids.entrySet()) {
+            MediaType supportedType = MediaType.valueOf(entry.getKey());
+            if (mediaType.isCompatible(supportedType)) {
+              String connegServletPattern = '/' + entry.getKey() + resourceMethodPattern;
+              debug("Resource method %s of resource %s to be made accessible by servlet pattern %s because it produces %s/%s.",
+                    resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), connegServletPattern,
+                    mediaType.getType(), mediaType.getSubtype());
+              urlMappings.add(connegServletPattern);
+            }
+          }
+        }
+      }
+    }
+    servletComponent.setUrlMappings(urlMappings);
+    webappFragment.setServlets(Arrays.asList(servletComponent));
+    getEnunciate().addWebAppFragment(webappFragment);
+  }
+
+  protected String getRestSubcontext() {
+    String restSubcontext = getEnunciate().getConfig().getDefaultRestSubcontext();
+    //todo: override default rest subcontext?
+    return restSubcontext;
   }
 
   @Override
   public RuleSet getConfigurationRules() {
     return new JerseyRuleSet();
+  }
+
+  /**
+   * Whether to use the REST subcontext.
+   *
+   * @return Whether to use the REST subcontext.
+   */
+  public boolean isUseSubcontext() {
+    return useSubcontext;
+  }
+
+  /**
+   * Whether to use the REST subcontext.
+   *
+   * @param useSubcontext Whether to use the REST subcontext.
+   */
+  public void setUseSubcontext(boolean useSubcontext) {
+    this.useSubcontext = useSubcontext;
+  }
+
+  /**
+   * Whether to use path-based conneg.
+   *
+   * @return Whether to use path-based conneg.
+   */
+  public boolean isUsePathBasedConneg() {
+    return usePathBasedConneg;
+  }
+
+  /**
+   * Whether to use path-based conneg.
+   *
+   * @param usePathBasedConneg Whether to use path-based conneg.
+   */
+  public void setUsePathBasedConneg(boolean usePathBasedConneg) {
+    this.usePathBasedConneg = usePathBasedConneg;
   }
 }

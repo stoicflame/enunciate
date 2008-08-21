@@ -78,7 +78,7 @@
   [@forEachRESTEndpoint]
     [#list endpoint.RESTMethods as RESTMethod]
 
-        <entry key="${restSubcontext}${RESTMethod.noun.antPattern}/**">
+        <entry key="${restSubcontext}/${RESTMethod.noun.antPattern}/**">
           <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
             <constructor-arg ref="enunciate:noun:${RESTMethod.noun}"/>
             <property name="subcontext" value="${restSubcontext}"/>

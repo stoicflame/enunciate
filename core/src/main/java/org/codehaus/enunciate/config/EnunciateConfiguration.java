@@ -270,7 +270,7 @@ public class EnunciateConfiguration implements ErrorHandler {
       defaultSoapSubcontext = "/" + defaultSoapSubcontext;
     }
 
-    if (!defaultSoapSubcontext.endsWith("/")) {
+    if (defaultSoapSubcontext.endsWith("/")) {
       defaultSoapSubcontext = defaultSoapSubcontext + "/";
     }
 
@@ -304,8 +304,8 @@ public class EnunciateConfiguration implements ErrorHandler {
       defaultRestSubcontext = "/" + defaultRestSubcontext;
     }
 
-    if (!defaultRestSubcontext.endsWith("/")) {
-      defaultRestSubcontext = defaultRestSubcontext + "/";
+    while (defaultRestSubcontext.endsWith("/")) {
+      defaultRestSubcontext = defaultRestSubcontext.substring(0, defaultRestSubcontext.length() - 1);
     }
 
     this.defaultRestSubcontext = defaultRestSubcontext;

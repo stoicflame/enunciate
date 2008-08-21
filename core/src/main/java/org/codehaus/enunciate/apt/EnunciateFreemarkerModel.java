@@ -35,10 +35,16 @@ import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.Resource;
+import org.codehaus.enunciate.contract.jaxrs.SubResourceLocator;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
+import org.codehaus.enunciate.util.ResourceMethodComparator;
 
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.ws.rs.Produces;
 import java.io.File;
 import java.util.*;
 
@@ -62,13 +68,16 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
+  final List<RootResource> rootResources = new ArrayList<RootResource>();
+  final List<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
+  final List<TypeDeclaration> jaxrsProviders = new ArrayList<TypeDeclaration>();
   private File fileOutputDirectory = null;
   private String baseDeploymentAddress = null;
   private EnunciateConfiguration enunciateConfig = null;
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
-    this.contentTypesToIds = new HashMap<String, String>();
+    this.contentTypesToIds = loadKnownContentTypes();
     this.knownTypes = loadKnownTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
@@ -84,6 +93,20 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("nouns2methods", this.nounsToRESTMethods);
     setVariable("nouns2formats", this.nounsToContentTypes);
     setVariable("restEndpoints", this.restEndpoints);
+    setVariable("rootResources", this.rootResources);
+    setVariable("jaxrsProviders", this.jaxrsProviders);
+  }
+
+  /**
+   * Load the known content types (map of content type to id).
+   *
+   * @return The known content type.
+   */
+  protected HashMap<String, String> loadKnownContentTypes() {
+    HashMap<String, String> contentTypes = new HashMap<String, String>();
+    contentTypes.put("application/xml", "xml");
+    contentTypes.put("application/json", "json");
+    return contentTypes;
   }
 
   /**
@@ -217,6 +240,33 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public List<RESTEndpoint> getRESTEndpoints() {
     return restEndpoints;
+  }
+
+  /**
+   * The list of root resources.
+   *
+   * @return The list of root resources.
+   */
+  public List<RootResource> getRootResources() {
+    return rootResources;
+  }
+
+  /**
+   * The resource methods.
+   *
+   * @return The resource methods.
+   */
+  public List<ResourceMethod> getResourceMethods() {
+    return resourceMethods;
+  }
+
+  /**
+   * The list of JAX-RS providers.
+   *
+   * @return The list of JAX-RS providers.
+   */
+  public List<TypeDeclaration> getJAXRSProviders() {
+    return jaxrsProviders;
   }
 
   /**
@@ -390,6 +440,49 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * Add a root resource to the model.
+   *
+   * @param rootResource The root resource to add to the model.
+   */
+  public void add(RootResource rootResource) {
+    this.rootResources.add(rootResource);
+
+    ResourceMethodComparator comparator = new ResourceMethodComparator();
+    Stack<Resource> resources = new Stack<Resource>();
+    resources.add(rootResource);
+    while (!resources.isEmpty()) {
+      Resource resource = resources.pop();
+      for (ResourceMethod resourceMethod : resource.getResouceMethods()) {
+        int position = Collections.binarySearch(resourceMethods, resourceMethod, comparator);
+        if (position < 0) {
+          position = (-position - 1);
+        }
+        resourceMethods.add(position, resourceMethod);
+      }
+
+      for (SubResourceLocator locator : resource.getResourceLocators()) {
+        resources.add(locator.getResource());
+      }
+    }
+  }
+
+  /**
+   * Add a JAX-RS provider to the model.
+   *
+   * @param declaration The declaration of the provider.
+   */
+  public void addJAXRSProvider(TypeDeclaration declaration) {
+    this.jaxrsProviders.add(declaration);
+
+    Produces produces = declaration.getAnnotation(Produces.class);
+    if (produces != null) {
+      for (String contentType : produces.value()) {
+        addContentType(contentType);
+      }
+    }
+  }
+
+  /**
    * Add a content type handler to the model.
    *
    * @param declaration The definition of the content type handler.
@@ -479,22 +572,21 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Add a content type.
    *
    * @param contentType The content type to add.
-   * @return The id for the contentType.
    */
-  public String addContentType(String contentType) {
-    String id = contentTypesToIds.get(contentType);
-    if (id == null) {
-      id = getDefaultContentTypeId(contentType);
-      contentTypesToIds.put(contentType, id);
+  public void addContentType(String contentType) {
+    if (!contentTypesToIds.containsKey(contentType)) {
+      String id = getDefaultContentTypeId(contentType);
+      if (id != null) {
+        contentTypesToIds.put(contentType, id);
+      }
     }
-    return id;
   }
 
   /**
    * Get the default content type id for the specified content type.
    *
    * @param contentType The content type.
-   * @return The default content type id.
+   * @return The default content type id, or null if the content type is a wildcard type.
    */
   protected String getDefaultContentTypeId(String contentType) {
     String id = contentType;
@@ -517,7 +609,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       id = id.substring(0, plus);
     }
 
-    return id;
+    if (id.contains("*")) {
+      //wildcard types have no ids.
+      return null;
+    }
+    else {
+      return id;
+    }
   }
 
   /**

@@ -16,19 +16,79 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
-import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.ConstructorDeclaration;
+import com.sun.mirror.declaration.ParameterDeclaration;
+
+import javax.ws.rs.Path;
+import java.util.List;
+import java.util.Collection;
 
 /**
  * A JAX-RS root resource.
  * 
  * @author Ryan Heaton
  */
-public class RootResource extends DecoratedTypeDeclaration {
+public class RootResource extends Resource {
 
-  public RootResource(TypeDeclaration delegate) {
+  private final Path path;
+
+  public RootResource(ClassDeclaration delegate) {
     super(delegate);
 
+    this.path = delegate.getAnnotation(Path.class);
+    if (this.path == null) {
+      throw new IllegalArgumentException("A JAX-RS root resource must be annotated with @javax.ws.rs.Path.");
+    }
 
+  }
+
+  /**
+   * The path of the root resource.
+   *
+   * @return The path of the root resource.
+   */
+  public String getPath() {
+    return this.path.value();
+  }
+
+  /**
+   * @return null
+   */
+  public Resource getParent() {
+    return null;
+  }
+
+  /**
+   * The resource parameters for a root resource include the constructor params.
+   *
+   * @param delegate The declaration.
+   * @return The resource params.
+   */
+  @Override
+  protected List<ResourceParameter> getResourceParameters(TypeDeclaration delegate) {
+    List<ResourceParameter> resourceParams = super.getResourceParameters(delegate);
+
+    if (getDelegate() == delegate) {
+      //root resources also include constructor params.
+
+      Collection<ConstructorDeclaration> constructors = ((ClassDeclaration) delegate).getConstructors();
+      ConstructorDeclaration chosen = null;
+      for (ConstructorDeclaration constructor : constructors) {
+        //the one with the most params is the chosen one.
+        if (chosen == null || constructor.getParameters().size() > chosen.getParameters().size()) {
+          chosen = constructor;
+        }
+      }
+
+      if (chosen != null) {
+        for (ParameterDeclaration param : chosen.getParameters()) {
+          resourceParams.add(new ResourceParameter(param));
+        }
+      }
+    }
+
+    return resourceParams;
   }
 }

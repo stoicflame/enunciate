@@ -89,7 +89,7 @@ public class RESTResourceExporter extends AbstractController {
 
   protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
     request.setAttribute(RESTResource.class.getName(), getResource());
-    
+
     String contentTypeId = findContentTypeId(request);
     String contentType = getContentTypeSupport().lookupContentTypeById(contentTypeId);
     VerbType verb = getVerb(request);
@@ -123,8 +123,12 @@ public class RESTResourceExporter extends AbstractController {
       contentTypeId = matcher.group(1);
     }
     else if (LOG.isInfoEnabled()) {
-        LOG.info("No content type id found in request context " + requestContext);
-      }
+      LOG.info("No content type id found in request context " + requestContext);
+    }
+
+    //this exporter is mounted for a specific path-based content type id.
+    //we therefore don't need to consult the "Accept" header because the
+    //content type is explicit.
     return contentTypeId;
   }
 
@@ -133,7 +137,8 @@ public class RESTResourceExporter extends AbstractController {
    *
    * @param request The request.
    * @return The verb.
-   * @throws org.codehaus.enunciate.modules.rest.MethodNotAllowedException If the verb isn't recognized.
+   * @throws org.codehaus.enunciate.modules.rest.MethodNotAllowedException
+   *          If the verb isn't recognized.
    */
   public VerbType getVerb(HttpServletRequest request) throws MethodNotAllowedException {
     String httpMethod = request.getHeader("X-HTTP-Method-Override");
@@ -168,9 +173,9 @@ public class RESTResourceExporter extends AbstractController {
    * Handles a specific REST operation.
    *
    * @param operation The operation.
-   * @param handler The handler for the operation.
-   * @param request  The request.
-   * @param response The response.
+   * @param handler   The handler for the operation.
+   * @param request   The request.
+   * @param response  The response.
    * @return The model and view.
    */
   protected ModelAndView handleRESTOperation(RESTOperation operation, RESTRequestContentTypeHandler handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -329,8 +334,8 @@ public class RESTResourceExporter extends AbstractController {
 
     //successful invocation, set up the response...
     if (result instanceof DataHandler) {
-      response.setContentType(((DataHandler)result).getContentType());
-      ((DataHandler)result).writeTo(response.getOutputStream());
+      response.setContentType(((DataHandler) result).getContentType());
+      ((DataHandler) result).writeTo(response.getOutputStream());
     }
     else {
       response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
@@ -343,7 +348,7 @@ public class RESTResourceExporter extends AbstractController {
    * Convert a string to a specified type.
    *
    * @param value The value.
-   * @param type The type.
+   * @param type  The type.
    * @return The conversion.
    */
   protected Object convert(String value, Class type) {
@@ -392,7 +397,7 @@ public class RESTResourceExporter extends AbstractController {
    *
    * @param multipartRequestHandler The multipart request handler.
    */
-  @Autowired( required = false )
+  @Autowired ( required = false )
   public void setMultipartRequestHandler(MultipartRequestHandler multipartRequestHandler) {
     this.multipartRequestHandler = multipartRequestHandler;
   }

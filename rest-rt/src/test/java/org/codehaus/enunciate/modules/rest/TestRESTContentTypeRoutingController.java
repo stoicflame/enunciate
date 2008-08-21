@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Arrays;
 
 /**
  * @author Ryan Heaton
@@ -39,8 +41,8 @@ public class TestRESTContentTypeRoutingController extends TestCase {
     HashMap<String, RESTRequestContentTypeHandler> contentTypes2Handlers = new HashMap<String, RESTRequestContentTypeHandler>();
     RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun")) {
       @Override
-      protected String getContentType(HttpServletRequest request) {
-        return "application/data+xml";
+      protected List<String> getContentTypesByPreference(HttpServletRequest request) {
+        return Arrays.asList("application/data+xml");
       }
     };
     contentTypes2Ids.put("application/data+xml", "data");
@@ -87,7 +89,7 @@ public class TestRESTContentTypeRoutingController extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     expect(request.getParameter("contentType")).andReturn("application/xml");
     replay(request);
-    assertEquals("application/xml", controller.getContentType(request));
+    assertEquals("application/xml", controller.getContentTypesByPreference(request));
     verify(request);
     reset(request);
   }
