@@ -84,7 +84,11 @@ public class MultipartFileDataSource extends RESTRequestDataSource {
       throw new UnsupportedOperationException("Cannot unmarshal this data source: no reference to the original request.");
     }
 
-    return getContentTypeSupport().lookupHandlerByContentType(contentType).read(getRequest());
+    RESTRequestContentTypeHandler handler = getContentTypeSupport().lookupHandlerByContentType(contentType);
+    if (handler == null) {
+      throw new UnsupportedOperationException("Cannot unmarshal this data source: no content type handler found for content type " + contentType + ".");
+    }
+    return handler.read(getRequest());
   }
 
   /**

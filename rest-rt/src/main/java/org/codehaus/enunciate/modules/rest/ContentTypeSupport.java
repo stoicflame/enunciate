@@ -93,8 +93,6 @@ public class ContentTypeSupport {
    * @return The handler for the content type.
    */
   public RESTRequestContentTypeHandler lookupHandlerByContentType(String contentType) {
-
-    what about wildcards?
     return this.contentTypesToHandlers.get(contentType);
   }
 

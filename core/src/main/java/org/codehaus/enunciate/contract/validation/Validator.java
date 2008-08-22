@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.util.Map;
 import java.util.List;
@@ -52,6 +53,14 @@ public interface Validator {
    * @return The result of the validation.
    */
   ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI);
+
+  /**
+   * Validate the JAX-RS root resources.
+   *
+   * @param rootResources The root resources to validate.
+   * @return The result of the validation.
+   */
+  ValidationResult validateRootResources(List<RootResource> rootResources);
 
   /**
    * Validate the content type handlers.

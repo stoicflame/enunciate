@@ -17,11 +17,13 @@
 package org.codehaus.enunciate;
 
 import com.sun.mirror.apt.AnnotationProcessorFactory;
+import com.sun.tools.apt.main.Main;
 import static junit.framework.Assert.fail;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -86,7 +88,8 @@ public class EnunciateTestUtil {
 
     args.addAll(sourceFiles);
 
-    return com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
+    Main main = new Main("apt" + System.currentTimeMillis(), new PrintWriter(System.err, true));
+    return main.compile(args.toArray(new String[args.size()]), apf);
   }
 
   /**

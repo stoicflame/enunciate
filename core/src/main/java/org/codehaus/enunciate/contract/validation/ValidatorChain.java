@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,17 @@ public class ValidatorChain implements Validator {
 
     for (Validator validator : validators) {
       result.aggregate(validator.validateRESTAPI(restAPI));
+    }
+
+    return result;
+  }
+
+  // Inherited.
+  public ValidationResult validateRootResources(List<RootResource> rootResources) {
+    ValidationResult result = new ValidationResult();
+
+    for (Validator validator : validators) {
+      result.aggregate(validator.validateRootResources(rootResources));
     }
 
     return result;

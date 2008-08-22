@@ -22,6 +22,7 @@ import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
@@ -31,6 +32,7 @@ import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.RESTParameter;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.jaxrs.*;
 import org.codehaus.enunciate.rest.annotations.VerbType;
 
 import javax.activation.DataHandler;
@@ -39,6 +41,8 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.*;
 
 /**
@@ -303,6 +307,161 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       return isDataHandler((DecoratedTypeMirror) ((ArrayType) type).getComponentType());
     }
     return false;
+  }
+
+  public ValidationResult validateRootResources(List<RootResource> rootResources) {
+    ValidationResult result = new ValidationResult();
+    for (RootResource rootResource : rootResources) {
+      List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
+      CONSTRUCTOR_LOOP : for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
+        if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
+          for (ParameterDeclaration constructorParam : constructor.getParameters()) {
+            if (!isSuppliableByJAXRS(constructorParam)) {
+              //none of those annotation are available. not a candidate constructor.
+              continue CONSTRUCTOR_LOOP;
+            }
+          }
+
+          candidates.add(constructor);
+        }
+      }
+
+      if (candidates.isEmpty()) {
+        result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values.");
+      }
+      else {
+        while (!candidates.isEmpty()) {
+          ConstructorDeclaration candidate = candidates.remove(0);
+          for (ConstructorDeclaration other : candidates) {
+            if (candidate.getParameters().size() == other.getParameters().size()) {
+              result.addWarning(rootResource, "Ambiguous JAX-RS constructors (same parameter count).");
+            }
+          }
+        }
+      }
+
+      for (FieldDeclaration field : rootResource.getFields()) {
+        if (isSuppliableByJAXRS(field) && ((field.getAnnotation(javax.ws.rs.core.Context.class) != null) || isConvertableToStringByJAXRS(field.getType()))) {
+          result.addError(field, "Unsupported JAX-RS type.");
+        }
+      }
+
+      for (PropertyDeclaration prop : rootResource.getProperties()) {
+        if (isSuppliableByJAXRS(prop) && ((prop.getAnnotation(javax.ws.rs.core.Context.class) != null) || isConvertableToStringByJAXRS(prop.getPropertyType()))) {
+          result.addError(prop.getSetter(), "Unsupported JAX-RS type.");
+        }
+      }
+
+      Stack<Resource> resources = new Stack<Resource>();
+      resources.add(rootResource);
+      while (!resources.isEmpty()) {
+        Resource resource = resources.pop();
+        for (ResourceMethod resourceMethod : resource.getResouceMethods()) {
+          ParameterDeclaration entityParam = null;
+          boolean formParamFound = false;
+          for (ParameterDeclaration param : resourceMethod.getParameters()) {
+            if (ResourceParameter.isResourceParameter(param)) {
+              formParamFound |= param.getAnnotation(FormParam.class) != null;
+            }
+            else if (entityParam != null) {
+              result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with a JAX-RS resource parameter annotation).");
+            }
+            else {
+              entityParam = param;
+            }
+
+            if (entityParam != null && formParamFound) {
+              DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(entityParam.getType());
+              if (!decorated.isInstanceOf(MultivaluedMap.class.getName())) {
+                result.addError(entityParam, "An entity must be of type MultivaluedMap<String, String> if there is another parameter annotated with @FormParam.");
+              }
+            }
+          }
+          //todo: warn about resource methods that are not public?
+        }
+
+        for (SubResourceLocator locator : resource.getResourceLocators()) {
+          resources.add(locator.getResource());
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Whether the specified type is convertable from a String according to JAX-RS.
+   *
+   * @param type The type.
+   * @return Whether it's convertable.
+   */
+  protected boolean isConvertableToStringByJAXRS(TypeMirror type) {
+    //unwrap the lists first.
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type);
+    if (decorated.isInstanceOf("java.util.List") || decorated.isInstanceOf("java.util.Set") || decorated.isInstanceOf("java.util.SortedSet")) {
+      Collection<TypeParameterDeclaration> formalTypes = ((TypeDeclaration) ((DeclaredType) type).getDeclaration()).getFormalTypeParameters();
+      if (formalTypes != null && formalTypes.size() == 1) {
+        type = formalTypes.iterator().next().getBounds().iterator().next();
+      }
+      else {
+        return false;
+      }
+    }
+
+    if (type instanceof PrimitiveType) {
+      return true;
+    }
+    else if (isString(type)) {
+      return true;
+    }
+    else if (type instanceof DeclaredType) {
+      TypeDeclaration declaration = ((DeclaredType) type).getDeclaration();
+      if (declaration != null) {
+        if (declaration instanceof ClassDeclaration) {
+          for (ConstructorDeclaration constructor : ((ClassDeclaration) declaration).getConstructors()) {
+            if (constructor.getParameters().size() == 1) {
+              if (isString(constructor.getParameters().iterator().next().getType())) {
+                return true;
+              }
+            }
+          }
+        }
+
+        for (MethodDeclaration method : declaration.getMethods()) {
+          if (method.getModifiers().contains(Modifier.STATIC) && "valueOf".equals(method.getSimpleName()) && isString(method.getReturnType())) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Whether the type is a string.
+   *
+   * @param type The type.
+   * @return Whether the type is a string.
+   */
+  protected boolean isString(TypeMirror type) {
+    return type != null
+      && type instanceof DeclaredType 
+      && ((DeclaredType) type).getDeclaration() != null
+      && String.class.getName().equals(((DeclaredType) type).getDeclaration().getQualifiedName());
+  }
+
+  /**
+   * Whether the specified declaration is suppliable by JAX-RS.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified declaration is suppliable by JAX-RS.
+   */
+  protected boolean isSuppliableByJAXRS(Declaration declaration) {
+    return (declaration.getAnnotation(MatrixParam.class) != null)
+        || (declaration.getAnnotation(PathParam.class) != null)
+        || (declaration.getAnnotation(QueryParam.class) != null)
+        || (declaration.getAnnotation(CookieParam.class) != null)
+        || (declaration.getAnnotation(HeaderParam.class) != null)
+        || (declaration.getAnnotation(javax.ws.rs.core.Context.class) != null);
   }
 
   public ValidationResult validateWebMethod(WebMethod webMethod) {

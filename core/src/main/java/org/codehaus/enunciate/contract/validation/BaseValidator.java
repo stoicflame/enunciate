@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.util.Map;
 import java.util.List;
@@ -61,6 +62,13 @@ public class BaseValidator implements Validator {
    * @return An empty result.
    */
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
+    return new ValidationResult();
+  }
+
+  /**
+   * @return An empty result.
+   */
+  public ValidationResult validateRootResources(List<RootResource> rootResources) {
     return new ValidationResult();
   }
 

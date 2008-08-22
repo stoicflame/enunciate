@@ -158,6 +158,10 @@ public abstract class InAPTTestCase extends TestCase {
 
     private Throwable throwable = null;
 
+    protected APFInternal() {
+      this.round = 0; //todo: fix this in APT-Jelly.  What it really needs to do is listen to the rounds.
+    }
+
     @Override
     public Collection<String> supportedOptions() {
       return Collections.emptyList();

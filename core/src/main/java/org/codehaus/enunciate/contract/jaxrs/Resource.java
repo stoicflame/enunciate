@@ -19,6 +19,7 @@ package org.codehaus.enunciate.contract.jaxrs;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.InterfaceType;
+import com.sun.mirror.type.ClassType;
 import com.sun.mirror.util.Declarations;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
@@ -107,10 +108,13 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     }
 
     if (delegate instanceof ClassDeclaration) {
-      List<SubResourceLocator> superMethods = getSubresourceLocators(delegate);
-      for (SubResourceLocator superMethod : superMethods) {
-        if (!isOverridden(superMethod, resourceLocators)) {
-          resourceLocators.add(superMethod);
+      ClassType superclass = ((ClassDeclaration) delegate).getSuperclass();
+      if (superclass != null && superclass.getDeclaration() != null) {
+        List<SubResourceLocator> superMethods = getSubresourceLocators(superclass.getDeclaration());
+        for (SubResourceLocator superMethod : superMethods) {
+          if (!isOverridden(superMethod, resourceLocators)) {
+            resourceLocators.add(superMethod);
+          }
         }
       }
     }
@@ -124,18 +128,20 @@ public abstract class Resource extends DecoratedTypeDeclaration {
    * @param delegate The type.
    * @return The resource methods.
    */
-  protected List<ResourceMethod> getResourceMethods(TypeDeclaration delegate) {
+  protected List<ResourceMethod> getResourceMethods(final TypeDeclaration delegate) {
     if (delegate == null || delegate.getQualifiedName().equals(Object.class.getName())) {
       return Collections.emptyList();
     }
 
     ArrayList<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
     for (MethodDeclaration methodDeclaration : delegate.getMethods()) {
-      for (AnnotationMirror annotation : methodDeclaration.getAnnotationMirrors()) {
-        AnnotationTypeDeclaration annotationDeclaration = annotation.getAnnotationType().getDeclaration();
-        if (annotationDeclaration != null) {
-          if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
-            resourceMethods.add(new ResourceMethod(methodDeclaration, this));
+      if (methodDeclaration.getModifiers().contains(Modifier.PUBLIC)) {
+        for (AnnotationMirror annotation : methodDeclaration.getAnnotationMirrors()) {
+          AnnotationTypeDeclaration annotationDeclaration = annotation.getAnnotationType().getDeclaration();
+          if (annotationDeclaration != null) {
+            if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
+              resourceMethods.add(new ResourceMethod(methodDeclaration, this));
+            }
           }
         }
       }
@@ -152,10 +158,13 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     }
 
     if (delegate instanceof ClassDeclaration) {
-      List<ResourceMethod> superMethods = getResourceMethods(delegate);
-      for (ResourceMethod superMethod : superMethods) {
-        if (!isOverridden(superMethod, resourceMethods)) {
-          resourceMethods.add(superMethod);
+      ClassType superclass = ((ClassDeclaration) delegate).getSuperclass();
+      if (superclass != null && superclass.getDeclaration() != null) {
+        List<ResourceMethod> superMethods = getResourceMethods(superclass.getDeclaration());
+        for (ResourceMethod superMethod : superMethods) {
+          if (!isOverridden(superMethod, resourceMethods)) {
+            resourceMethods.add(superMethod);
+          }
         }
       }
     }
