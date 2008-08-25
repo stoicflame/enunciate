@@ -18,6 +18,9 @@ package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * A JAX-RS sub-resource.
  *
@@ -33,6 +36,14 @@ public class SubResource extends Resource {
     this.path = path;
     this.parent = parent;
   }
+
+  @Override
+  public List<ResourceParameter> getResourceParameters() {
+    ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>(super.getResourceParameters());
+    params.addAll(getParent().getResourceParameters());
+    return params;
+  }
+
 
   /**
    * The path to this subresource.

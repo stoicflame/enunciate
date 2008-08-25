@@ -22,7 +22,6 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
-import org.codehaus.enunciate.contract.jaxb.ContentType;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
@@ -71,6 +70,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean useSubcontext = true;
   private boolean usePathBasedConneg = true;
+  private boolean disableWildcardServletError = false;
 
   /**
    * @return "jersey"
@@ -103,7 +103,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new JerseyValidator();
+    return new JerseyValidator(!isUseSubcontext() && !isDisableWildcardServletError());
   }
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
@@ -211,5 +211,23 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setUsePathBasedConneg(boolean usePathBasedConneg) {
     this.usePathBasedConneg = usePathBasedConneg;
+  }
+
+  /**
+   * Whether to disable the greedy servlet pattern error.
+   *
+   * @return Whether to disable the greedy servlet pattern error.
+   */
+  public boolean isDisableWildcardServletError() {
+    return disableWildcardServletError;
+  }
+
+  /**
+   * Whether to disable the wildcard servlet pattern error.
+   *
+   * @param disableWildcardServletError Whether to disable the wildcard servlet pattern error.
+   */
+  public void setDisableWildcardServletError(boolean disableWildcardServletError) {
+    this.disableWildcardServletError = disableWildcardServletError;
   }
 }

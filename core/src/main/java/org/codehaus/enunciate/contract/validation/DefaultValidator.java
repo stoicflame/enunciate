@@ -352,37 +352,28 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         }
       }
 
-      Stack<Resource> resources = new Stack<Resource>();
-      resources.add(rootResource);
-      while (!resources.isEmpty()) {
-        Resource resource = resources.pop();
-        for (ResourceMethod resourceMethod : resource.getResouceMethods()) {
-          ParameterDeclaration entityParam = null;
-          boolean formParamFound = false;
-          for (ParameterDeclaration param : resourceMethod.getParameters()) {
-            if (ResourceParameter.isResourceParameter(param)) {
-              formParamFound |= param.getAnnotation(FormParam.class) != null;
-            }
-            else if (entityParam != null) {
-              result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with a JAX-RS resource parameter annotation).");
-            }
-            else {
-              entityParam = param;
-            }
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        ParameterDeclaration entityParam = null;
+        boolean formParamFound = false;
+        for (ParameterDeclaration param : resourceMethod.getParameters()) {
+          if (ResourceParameter.isResourceParameter(param)) {
+            formParamFound |= param.getAnnotation(FormParam.class) != null;
+          }
+          else if (entityParam != null) {
+            result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with a JAX-RS resource parameter annotation).");
+          }
+          else {
+            entityParam = param;
+          }
 
-            if (entityParam != null && formParamFound) {
-              DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(entityParam.getType());
-              if (!decorated.isInstanceOf(MultivaluedMap.class.getName())) {
-                result.addError(entityParam, "An entity must be of type MultivaluedMap<String, String> if there is another parameter annotated with @FormParam.");
-              }
+          if (entityParam != null && formParamFound) {
+            DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(entityParam.getType());
+            if (!decorated.isInstanceOf(MultivaluedMap.class.getName())) {
+              result.addError(entityParam, "An entity must be of type MultivaluedMap<String, String> if there is another parameter annotated with @FormParam.");
             }
           }
-          //todo: warn about resource methods that are not public?
         }
-
-        for (SubResourceLocator locator : resource.getResourceLocators()) {
-          resources.add(locator.getResource());
-        }
+        //todo: warn about resource methods that are not public?
       }
     }
     return result;

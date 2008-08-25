@@ -452,7 +452,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     resources.add(rootResource);
     while (!resources.isEmpty()) {
       Resource resource = resources.pop();
-      for (ResourceMethod resourceMethod : resource.getResouceMethods()) {
+      for (ResourceMethod resourceMethod : resource.getResourceMethods()) {
         int position = Collections.binarySearch(resourceMethods, resourceMethod, comparator);
         if (position < 0) {
           position = (-position - 1);

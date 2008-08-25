@@ -40,7 +40,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final List<ResourceParameter> resourceParameters;
-  private final List<ResourceMethod> resouceMethods;
+  private final List<ResourceMethod> resourceMethods;
   private final List<SubResourceLocator> resourceLocators;
 
   public Resource(TypeDeclaration delegate) {
@@ -66,7 +66,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     }
     this.producesMime = Collections.unmodifiableSet(produces);
     this.resourceParameters = Collections.unmodifiableList(getResourceParameters(delegate));
-    this.resouceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
+    this.resourceMethods = Collections.unmodifiableList(getResourceMethods(delegate));
     this.resourceLocators = Collections.unmodifiableList(getSubresourceLocators(delegate));
   }
 
@@ -88,7 +88,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
           AnnotationTypeDeclaration annotationDeclaration = annotation.getAnnotationType().getDeclaration();
           if (annotationDeclaration != null) {
             if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
-              break METHOD_LOOP;
+              continue METHOD_LOOP;
             }
           }
         }
@@ -317,8 +317,35 @@ public abstract class Resource extends DecoratedTypeDeclaration {
    *
    * @return The resource methods.
    */
-  public List<ResourceMethod> getResouceMethods() {
-    return resouceMethods;
+  public List<ResourceMethod> getResourceMethods() {
+    return resourceMethods;
+  }
+
+  /**
+   * The resource methods.
+   *
+   * @param loadDescendants Whether to include the resource methods of all sub-resources.
+   * @return The resource methods.
+   */
+  public List<ResourceMethod> getResourceMethods(boolean loadDescendants) {
+    if (!loadDescendants) {
+      return resourceMethods;
+    }
+    else {
+      List<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
+      Stack<Resource> resources = new Stack<Resource>();
+      resources.add(this);
+      while (!resources.isEmpty()) {
+        Resource resource = resources.pop();
+        resourceMethods.addAll(resource.getResourceMethods());
+
+        for (SubResourceLocator locator : resource.getResourceLocators()) {
+          resources.add(locator.getResource());
+        }
+      }
+
+      return resourceMethods;
+    }
   }
 
   /**

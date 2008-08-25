@@ -24,6 +24,9 @@ import javax.ws.rs.*;
 @Path ("root2")
 public class RootResource2Impl implements RootResource2 {
 
+  @QueryParam("field3")
+  private String field3;
+
   public String getTwo() {
     return null;
   }
@@ -37,4 +40,30 @@ public class RootResource2Impl implements RootResource2 {
   @HEAD
   public void deleteTwo() {
   }
+
+  @GET
+  @Path("three")
+  public String getThree() {
+    return null;
+  }
+
+  @POST
+  @Path("three/two/one")
+  public void setThree(String three) {
+  }
+
+  @PUT
+  @Path("three/{var}/one")
+  public void putThree(String three) {
+  }
+
+  @DELETE
+  public void deleteThree() {
+  }
+
+  @Path("subpath")
+  public RootResource1 getSubResource() {
+    return null;
+  }
+
 }

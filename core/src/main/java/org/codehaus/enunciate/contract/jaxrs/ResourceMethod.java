@@ -245,7 +245,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    * @return The list of resource parameters that this method requires to be invoked.
    */
   public List<ResourceParameter> getResourceParameters() {
-    return resourceParameters;
+    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
+    resourceParams.addAll(getParent().getResourceParameters());
+    return resourceParams;
   }
 
   /**
