@@ -42,16 +42,14 @@ import java.util.*;
  */
 public abstract class InAPTTestCase extends TestCase {
 
-  private static boolean IN_APT = false;
+//  private static boolean IN_APT = false;
 
   /**
    * Runs itself within APT.
    */
   @Override
   public final void runBare() throws Throwable {
-    boolean wrapInAPT = !IN_APT;
-
-    wrapInAPT &= getClass().getMethod(getName()).getAnnotation(OutsideAPTOkay.class) == null;
+    boolean wrapInAPT = getClass().getMethod(getName()).getAnnotation(OutsideAPTOkay.class) == null;
 
     if (wrapInAPT) {
       final InAPTTestCase testCase = this;
@@ -188,9 +186,7 @@ public abstract class InAPTTestCase extends TestCase {
 
     public void process() {
       try {
-        InAPTTestCase.IN_APT = true;
         processInternal();
-        InAPTTestCase.IN_APT = false;
       }
       catch (Throwable throwable) {
         this.throwable = throwable;

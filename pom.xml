@@ -31,7 +31,7 @@
     <module>top</module>
     <module>maven-enunciate-plugin</module>
     <module>integration-test-support</module>
-    <module>integration-tests</module>
+    <module>integration-tests/xfire-rest</module>
   </modules>
 
   <build>
@@ -69,7 +69,7 @@
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
-            <id>enforce-intel-xml-exists</id>
+            <id>enforce-java-5</id>
             <phase>validate</phase>
             <goals>
               <goal>enforce-once</goal>

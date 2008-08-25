@@ -40,13 +40,13 @@ public class RESTContentTypeRoutingController extends AbstractController {
 
   private static final Log LOG = LogFactory.getLog(RESTContentTypeRoutingController.class);
 
-  private final ContentType defaultContentType;
+  private final MimeType defaultMimeType;
   private ContentTypeSupport contentTypeSupport;
   private Pattern replacePattern = Pattern.compile("^/?rest/");
   private String contentTypeParameter = "contentType";
 
   public RESTContentTypeRoutingController(RESTResource resource) {
-    this.defaultContentType = ContentType.parse(resource.getDefaultContentType());
+    this.defaultMimeType = MimeType.parse(resource.getDefaultContentType());
     super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
   }
 
@@ -110,20 +110,21 @@ public class RESTContentTypeRoutingController extends AbstractController {
    * @return The content type.
    */
   protected List<String> getContentTypesByPreference(HttpServletRequest request) {
-    if (request.getParameter(getContentTypeParameter()) != null) {
-      return Arrays.asList(request.getParameter(getContentTypeParameter()));
+    String contentTypeParam = request.getParameter(getContentTypeParameter());
+    if (contentTypeParam != null) {
+      return Arrays.asList(contentTypeParam);
     }
     else {
-      Set<ContentType> contentTypes = new TreeSet<ContentType>();
+      Set<MimeType> mimeTypes = new TreeSet<MimeType>();
       Enumeration acceptHeaders = request.getHeaders("Accept");
       if (acceptHeaders != null) {
         Float defaultQuality = null;
         while (acceptHeaders.hasMoreElements()) {
           String acceptHeader = (String) acceptHeaders.nextElement();
           try {
-            ContentType acceptType = ContentType.parse(acceptHeader);
-            contentTypes.add(acceptType);
-            if (acceptType.isAcceptable(this.defaultContentType) && (defaultQuality == null || defaultQuality < acceptType.getQuality())) {
+            MimeType acceptType = MimeType.parse(acceptHeader);
+            mimeTypes.add(acceptType);
+            if (acceptType.isAcceptable(this.defaultMimeType) && (defaultQuality == null || defaultQuality < acceptType.getQuality())) {
               defaultQuality = acceptType.getQuality();
             }
           }
@@ -134,18 +135,18 @@ public class RESTContentTypeRoutingController extends AbstractController {
         }
 
         if (defaultQuality != null) {
-          contentTypes.add(new ContentType(defaultContentType.getType(), defaultContentType.getSubtype(), defaultQuality));
+          mimeTypes.add(new MimeType(defaultMimeType.getType(), defaultMimeType.getSubtype(), defaultQuality));
         }
       }
       else {
         //add the default content types at the end.
-        contentTypes.add(this.defaultContentType);
+        mimeTypes.add(this.defaultMimeType);
       }
 
 
       ArrayList<String> values = new ArrayList<String>();
-      for (ContentType contentType : contentTypes) {
-        values.add(contentType.toString());
+      for (MimeType mimeType : mimeTypes) {
+        values.add(mimeType.toString());
       }
       return values;
     }

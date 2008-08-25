@@ -127,42 +127,16 @@ public class TestPackageConversionMethods extends InAPTTestCase {
         assertEquals("org.codehaus.enunciate.other.pckg.and.nested.pckg.NestedPackageItem", component15For.convert(fieldDeclaration.getType()));
       }
       else if ("type".equals(fieldDeclaration.getSimpleName())) {
-        try {
-          component14For.convert(fieldDeclaration.getType());
-          fail("A component type should only be suppored for an array or collection type.");
-        }
-        catch (TemplateModelException e) {
-          //fall through.
-        }
-
-        try {
-          component15For.convert(fieldDeclaration.getType());
-          fail("A component type should only be suppored for an array or collection type.");
-        }
-        catch (TemplateModelException e) {
-          //fall through.
-        }
+        assertEquals("org.codehaus.enunciate.other.pckg.and.nested.pckg.NestedPackageEnum", component14For.convert(fieldDeclaration.getType()));
+        assertEquals("org.codehaus.enunciate.other.pckg.and.nested.pckg.NestedPackageEnum", component15For.convert(fieldDeclaration.getType()));
       }
     }
 
     classDeclaration = getDeclaration("org.codehaus.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageItem");
     for (FieldDeclaration fieldDeclaration : classDeclaration.getFields()) {
       if ("property1".equals(fieldDeclaration.getSimpleName())) {
-        try {
-          component14For.convert(fieldDeclaration.getType());
-          fail("A component type should only be suppored for an array or collection type.");
-        }
-        catch (TemplateModelException e) {
-          //fall through.
-        }
-
-        try {
-          component15For.convert(fieldDeclaration.getType());
-          fail("A component type should only be suppored for an array or collection type.");
-        }
-        catch (TemplateModelException e) {
-          //fall through.
-        }
+        assertEquals("boolean", component14For.convert(fieldDeclaration.getType()));
+        assertEquals("boolean", component15For.convert(fieldDeclaration.getType()));
       }
       else if ("property2".equals(fieldDeclaration.getSimpleName())) {
         assertEquals("int", component14For.convert(fieldDeclaration.getType()));

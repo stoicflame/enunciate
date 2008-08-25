@@ -88,8 +88,7 @@ public class EnunciateTestUtil {
 
     args.addAll(sourceFiles);
 
-    Main main = new Main("apt" + System.currentTimeMillis(), new PrintWriter(System.err, true));
-    return main.compile(args.toArray(new String[args.size()]), apf);
+    return com.sun.tools.apt.Main.process(apf, args.toArray(new String[args.size()]));
   }
 
   /**

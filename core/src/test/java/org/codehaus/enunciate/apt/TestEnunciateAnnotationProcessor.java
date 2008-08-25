@@ -18,6 +18,7 @@ package org.codehaus.enunciate.apt;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.apt.Messager;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import org.codehaus.enunciate.EnunciateException;
@@ -32,6 +33,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.easymock.EasyMock;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -151,6 +153,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     final ComplexTypeDefinition beanOne = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne"));
     final ComplexTypeDefinition beanTwo = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo"));
     final ComplexTypeDefinition beanThree = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree"));
+    final Messager messager = EasyMock.createNiceMock(Messager.class);
     RootElementDeclaration beanThreeElement = new RootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree"), beanThree);
 
     EnunciateConfiguration config = new EnunciateConfiguration();
@@ -176,7 +179,12 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
 
     Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setConfig(config);
-    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate);
+    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
+      @Override
+      protected Messager getMessager() {
+        return messager;
+      }
+    };
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     model.add(ei);
     model.add(beanOne);
@@ -221,6 +229,11 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
         result.addError(beanTwo, "test error");
         result.addError(beanTwo, "test error2");
         return result;
+      }
+
+      @Override
+      protected Messager getMessager() {
+        return messager;
       }
     };
 

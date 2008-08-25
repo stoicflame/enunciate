@@ -255,7 +255,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected void validate(EnunciateFreemarkerModel model) throws ModelValidationException {
     debug("Validating the model...");
-    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Messager messager = getMessager();
     ValidatorChain validator = new ValidatorChain();
     EnunciateConfiguration config = this.enunciate.getConfig();
     Validator coreValidator = config.getValidator();
@@ -278,10 +278,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       warn("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
         if (warning.getPosition() != null) {
-          env.getMessager().printWarning(warning.getPosition(), warning.getText());
+          messager.printWarning(warning.getPosition(), warning.getText());
         }
         else {
-          env.getMessager().printWarning(warning.getText());
+          messager.printWarning(warning.getText());
         }
       }
     }
@@ -290,15 +290,24 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       warn("Validation result has errors.");
       for (ValidationMessage error : validationResult.getErrors()) {
         if (error.getPosition() != null) {
-          env.getMessager().printError(error.getPosition(), error.getText());
+          messager.printError(error.getPosition(), error.getText());
         }
         else {
-          env.getMessager().printError(error.getText());
+          messager.printError(error.getText());
         }
       }
 
       throw new ModelValidationException();
     }
+  }
+
+  /**
+   * Get the messager for the current environment.
+   *
+   * @return The messager.
+   */
+  protected Messager getMessager() {
+    return Context.getCurrentEnvironment().getMessager();
   }
 
   //Inherited.
@@ -616,7 +625,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   protected void process(TemplateException e) {
     if (!(e instanceof ModelValidationException)) {
-      Messager messager = Context.getCurrentEnvironment().getMessager();
+      Messager messager = getMessager();
       StringWriter stackTrace = new StringWriter();
       e.printStackTrace(new PrintWriter(stackTrace));
       messager.printError(stackTrace.toString());

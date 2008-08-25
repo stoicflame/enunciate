@@ -16,19 +16,16 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.util.Types;
-import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
@@ -36,8 +33,8 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.util.MapTypeUtil;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -72,20 +69,30 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     }
 
     if ((faultInfoProperty != null) && (faultInfoProperty.getPropertyType() instanceof ClassType)) {
-      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
-      Types typeUtils = env.getTypeUtils();
-      DeclaredType stringType = typeUtils.getDeclaredType(env.getTypeDeclaration(String.class.getName()));
-      DeclaredType throwableType = typeUtils.getDeclaredType(env.getTypeDeclaration(Throwable.class.getName()));
       ClassType faultInfoType = (ClassType) faultInfoProperty.getPropertyType();
+      if (faultInfoType.getDeclaration() == null) {
+        throw new ValidationException(getPosition(), "Class not found: " + faultInfoType + ".");
+      }
 
       boolean messageConstructorFound = false;
       boolean messageAndThrowableConstructorFound = false;
       Collection<ConstructorDeclaration> constructors = getConstructors();
       for (ConstructorDeclaration constructor : constructors) {
         if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
-          ParameterDeclaration[] parameters = constructor.getParameters().toArray(new ParameterDeclaration[0]);
-          messageConstructorFound |= (parameters.length == 2 && parameters[0].getType().equals(stringType) && parameters[1].getType().equals(faultInfoType));
-          messageAndThrowableConstructorFound |= (parameters.length == 3 && parameters[0].getType().equals(stringType) && parameters[1].getType().equals(faultInfoType) && parameters[2].getType().equals(throwableType));
+          ParameterDeclaration[] parameters = constructor.getParameters().toArray(new ParameterDeclaration[constructor.getParameters().size()]);
+          if (parameters.length >= 2) {
+            DecoratedTypeMirror param0Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[0].getType());
+            DecoratedTypeMirror param1Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[1].getType());
+            if (parameters.length == 2) {
+              messageConstructorFound |= param0Type.isInstanceOf(String.class.getName()) && param1Type.isInstanceOf(faultInfoType.getDeclaration().getQualifiedName());
+            }
+            else if (parameters.length == 3) {
+              DecoratedTypeMirror param2Type = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(parameters[2].getType());
+              messageAndThrowableConstructorFound |= param0Type.isInstanceOf(String.class.getName())
+                && param1Type.isInstanceOf(faultInfoType.getDeclaration().getQualifiedName())
+                && param2Type.isInstanceOf(Throwable.class.getName());
+            }
+          }
         }
       }
 

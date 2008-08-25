@@ -23,13 +23,13 @@ import java.util.StringTokenizer;
  *
  * @author Ryan Heaton
  */
-public class ContentType implements Comparable<ContentType> {
+public class MimeType implements Comparable<MimeType> {
 
   private final String type;
   private final String subtype;
   private final float quality;
 
-  public static ContentType parse(String spec) {
+  public static MimeType parse(String spec) {
     float quality = 1;
     String type;
     String subType;
@@ -61,14 +61,14 @@ public class ContentType implements Comparable<ContentType> {
       throw new IllegalArgumentException("Illegal content type: " + typeAndSubtype);
     }
 
-    return new ContentType(type, subType, quality);
+    return new MimeType(type, subType, quality);
   }
 
-  public ContentType(String type, String subtype) {
+  public MimeType(String type, String subtype) {
     this(type, subtype, 1);
   }
 
-  public ContentType(String type, String subtype, float quality) {
+  public MimeType(String type, String subtype, float quality) {
     if (type == null) {
       type = "*";
     }
@@ -100,7 +100,7 @@ public class ContentType implements Comparable<ContentType> {
    * @param other Content type to compare to.
    * @return The comparison.
    */
-  public int compareTo(ContentType other) {
+  public int compareTo(MimeType other) {
     if (this.quality == other.quality) {
       int comparison = getType().compareTo(other.getType());
       if (comparison == 0) {
@@ -124,12 +124,12 @@ public class ContentType implements Comparable<ContentType> {
   /**
    * Whether the specified content type is acceptable by this content type.
    *
-   * @param contentType The content type.
+   * @param mimeType The content type.
    * @return Whether the specified content type is acceptable by this content type.
    */
-  public boolean isAcceptable(ContentType contentType) {
-    boolean typeMatches = "*".equals(getType()) || getType().equals(contentType.getType());
-    boolean subtypeMatches = "*".equals(getSubtype()) || getSubtype().equals(contentType.getSubtype());
+  public boolean isAcceptable(MimeType mimeType) {
+    boolean typeMatches = "*".equals(getType()) || getType().equals(mimeType.getType());
+    boolean subtypeMatches = "*".equals(getSubtype()) || getSubtype().equals(mimeType.getSubtype());
     return typeMatches && subtypeMatches;
   }
 }

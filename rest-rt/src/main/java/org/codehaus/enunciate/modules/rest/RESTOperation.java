@@ -283,11 +283,11 @@ public class RESTOperation {
     }
 
     String charset = "utf-8";
-    ContentType contentTypeInfo = method.getAnnotation(ContentType.class);
+    org.codehaus.enunciate.rest.annotations.ContentType contentTypeInfo = method.getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class);
     if (contentTypeInfo == null) {
-      contentTypeInfo = method.getDeclaringClass().getAnnotation(ContentType.class);
+      contentTypeInfo = method.getDeclaringClass().getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class);
       if (contentTypeInfo == null) {
-        contentTypeInfo = method.getDeclaringClass().getPackage().getAnnotation(ContentType.class);
+        contentTypeInfo = method.getDeclaringClass().getPackage().getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class);
       }
     }
     if (contentTypeInfo != null) {

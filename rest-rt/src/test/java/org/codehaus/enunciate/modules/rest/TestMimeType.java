@@ -23,38 +23,38 @@ import java.util.Arrays;
 /**
  * @author Ryan Heaton
  */
-public class TestContentType extends TestCase {
+public class TestMimeType extends TestCase {
 
   /**
    * tests parse
    */
-  public void testContentType() throws Exception {
-    ContentType contentType = ContentType.parse("*/*;q=0.8");
-    assertEquals("*", contentType.getType());
-    assertEquals("*", contentType.getSubtype());
-    assertEquals(0.8f, contentType.getQuality());
+  public void testMimeType() throws Exception {
+    MimeType mimeType = MimeType.parse("*/*;q=0.8");
+    assertEquals("*", mimeType.getType());
+    assertEquals("*", mimeType.getSubtype());
+    assertEquals(0.8f, mimeType.getQuality());
 
-    contentType = ContentType.parse("text/xml");
-    assertEquals("text", contentType.getType());
-    assertEquals("xml", contentType.getSubtype());
-    assertEquals(1f, contentType.getQuality());
+    mimeType = MimeType.parse("text/xml");
+    assertEquals("text", mimeType.getType());
+    assertEquals("xml", mimeType.getSubtype());
+    assertEquals(1f, mimeType.getQuality());
 
-    contentType = ContentType.parse("application/atom+xml");
-    assertEquals("application", contentType.getType());
-    assertEquals("atom+xml", contentType.getSubtype());
-    assertEquals(1f, contentType.getQuality());
+    mimeType = MimeType.parse("application/atom+xml");
+    assertEquals("application", mimeType.getType());
+    assertEquals("atom+xml", mimeType.getSubtype());
+    assertEquals(1f, mimeType.getQuality());
 
-    assertTrue(ContentType.parse("*/*").isAcceptable(contentType));
-    assertTrue(ContentType.parse("application/*").isAcceptable(contentType));
-    assertTrue(ContentType.parse("*/atom+xml").isAcceptable(contentType));
+    assertTrue(MimeType.parse("*/*").isAcceptable(mimeType));
+    assertTrue(MimeType.parse("application/*").isAcceptable(mimeType));
+    assertTrue(MimeType.parse("*/atom+xml").isAcceptable(mimeType));
 
-    ContentType[] sorted = new ContentType[6];
-    sorted[0] = ContentType.parse("*/*;q=0.2");
-    sorted[1] = ContentType.parse("application/xml");
-    sorted[2] = ContentType.parse("application/atom+xml;q=0.9");
-    sorted[3] = ContentType.parse("image/png");
-    sorted[4] = ContentType.parse("image/jpg");
-    sorted[5] = ContentType.parse("image/gif;q=0.8");
+    MimeType[] sorted = new MimeType[6];
+    sorted[0] = MimeType.parse("*/*;q=0.2");
+    sorted[1] = MimeType.parse("application/xml");
+    sorted[2] = MimeType.parse("application/atom+xml;q=0.9");
+    sorted[3] = MimeType.parse("image/png");
+    sorted[4] = MimeType.parse("image/jpg");
+    sorted[5] = MimeType.parse("image/gif;q=0.8");
 
     Arrays.sort(sorted);
 

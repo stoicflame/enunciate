@@ -113,7 +113,7 @@ public class AdapterUtil {
         }
 
         AdapterType adapterType = new AdapterType(adapterTypeMirror);
-        if (!adaptedType.equals(adapterType.getAdaptedType())) {
+        if (!adapterType.canAdapt((DeclaredType) adaptedType)) {
           throw new ValidationException(referer.getPosition(), "Adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
         }
         return adapterType;

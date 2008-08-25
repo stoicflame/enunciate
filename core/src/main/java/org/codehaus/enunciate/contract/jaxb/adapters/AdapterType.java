@@ -21,6 +21,8 @@ import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Collection;
@@ -81,6 +83,17 @@ public class AdapterType extends DecoratedClassType {
     }
 
     return findXmlAdapterType(superClass.getDeclaration());
+  }
+
+  /**
+   * Whether this adapter can adapt the specified type.
+   *
+   * @param type The type.
+   * @return Whether this adapter can adapt the specified type.
+   */
+  public boolean canAdapt(DeclaredType type) {
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type);
+    return getAdaptedType().getDeclaration() != null && decorated.isInstanceOf(getAdaptedType().getDeclaration().getQualifiedName());
   }
 
   /**

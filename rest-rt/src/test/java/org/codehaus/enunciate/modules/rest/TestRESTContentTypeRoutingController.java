@@ -89,7 +89,7 @@ public class TestRESTContentTypeRoutingController extends TestCase {
     HttpServletRequest request = createMock(HttpServletRequest.class);
     expect(request.getParameter("contentType")).andReturn("application/xml");
     replay(request);
-    assertEquals("application/xml", controller.getContentTypesByPreference(request));
+    assertEquals("application/xml", controller.getContentTypesByPreference(request).get(0));
     verify(request);
     reset(request);
   }

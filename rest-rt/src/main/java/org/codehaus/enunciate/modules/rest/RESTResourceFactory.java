@@ -87,7 +87,9 @@ public class RESTResourceFactory extends ApplicationObjectSupport {
               supportedContentTypes.add("application/json");
 
               String defaultContentType = null;
-              ContentType contentTypeInfo = endpointType.getPackage() != null ? endpointType.getPackage().getAnnotation(ContentType.class) : null;
+              org.codehaus.enunciate.rest.annotations.ContentType contentTypeInfo = endpointType.getPackage() != null ?
+                endpointType.getPackage().getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class)
+                : null;
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
@@ -99,7 +101,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport {
                 }
               }
 
-              contentTypeInfo = (ContentType) endpointType.getAnnotation(ContentType.class);
+              contentTypeInfo = (org.codehaus.enunciate.rest.annotations.ContentType) endpointType.getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class);
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
@@ -111,7 +113,7 @@ public class RESTResourceFactory extends ApplicationObjectSupport {
                 }
               }
 
-              contentTypeInfo = restMethod.getAnnotation(ContentType.class);
+              contentTypeInfo = restMethod.getAnnotation(org.codehaus.enunciate.rest.annotations.ContentType.class);
               if (contentTypeInfo != null) {
                 supportedContentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
                 supportedContentTypes.addAll(Arrays.asList(contentTypeInfo.value()));

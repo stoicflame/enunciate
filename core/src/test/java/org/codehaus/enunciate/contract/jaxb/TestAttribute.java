@@ -32,7 +32,6 @@ public class TestAttribute extends InAPTTestCase {
    * tests the general funcionality of the attribute.
    */
   public void testAttribute() throws Exception {
-    fail();
     SimpleTypeDefinition typeDef = new SimpleTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.AccessorFilterBean"));
 
     HashMap<String, String> attributeNames = new HashMap<String, String>();
