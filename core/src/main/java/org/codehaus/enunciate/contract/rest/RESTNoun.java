@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.rest;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -34,7 +35,7 @@ public class RESTNoun {
   private final String context;
   private final String canonicalForm;
   private final String antPattern;
-  private final String servletPattern;
+  private final List<String> servletPatterns;
   private final List<String> contextParameters;
 
   RESTNoun(String name, String context) {
@@ -63,14 +64,17 @@ public class RESTNoun {
     contextParameterMatcher.reset();
     if (contextParameterMatcher.find()) {
       servletPattern.append(context, 0, contextParameterMatcher.start()).append('*');
+      this.servletPatterns = Arrays.asList(servletPattern.toString());
     }
     else {
       if (context.length() > 0) {
         servletPattern.append(context).append('/');
       }
       servletPattern.append(name);
+
+      //this noun can be accessed by it's path AND by anything following its path.
+      this.servletPatterns = Arrays.asList(servletPattern.toString(), servletPattern.append("/*").toString());
     }
-    this.servletPattern = servletPattern.toString();
 
     String canonicalContext = context;
     for (int i = 0; i < contextParameters.size(); i++) {
@@ -117,12 +121,13 @@ public class RESTNoun {
   }
 
   /**
-   * The servlet pattern for matching this noun (appropriate for matching according to the rules of the servlet spec).
+   * The servlet patterns for matching this noun. Appropriate for matching according to the rules of the servlet spec.  Since
+   * the servlet spec is restrictive in its matching ability, the noun can be defined by multiple servlet patterns.
    *
-   * @return The servlet pattern for matching this noun.
+   * @return The servlet patterns for matching this noun.
    */
-  public String getServletPattern() {
-    return servletPattern;
+  public List<String> getServletPatterns() {
+    return servletPatterns;
   }
 
   @Override

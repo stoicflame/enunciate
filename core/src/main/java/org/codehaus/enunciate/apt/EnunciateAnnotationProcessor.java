@@ -343,6 +343,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (XmlTransient.class.getName().equals(fqn)
           || "javax.xml.bind.annotation.XmlTransient".equals(fqn)
           || fqn.startsWith("javax.xml.ws")
+          || fqn.startsWith("javax.ws.rs")
           || fqn.startsWith("javax.jws")) {
           debug("%s isn't a potential schema type because of annotation %s.", declaration.getQualifiedName(), fqn);
           return false;

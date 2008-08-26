@@ -36,10 +36,7 @@ import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,16 +50,36 @@ public class RESTResourceExporter extends AbstractController {
   public static final Log LOG = LogFactory.getLog(RESTResourceExporter.class);
 
   private final RESTResource resource;
-  private final Object endpoint;
+  private final Map<VerbType, Object> endpoints;
 
   private MultipartRequestHandler multipartRequestHandler;
   private ContentTypeSupport contentTypeSupport;
   private Pattern contentTypeIdPattern = Pattern.compile("^/?([^/]+)");
 
-  public RESTResourceExporter(RESTResource resource, Object endpoint) {
+  public RESTResourceExporter(RESTResource resource, Map<VerbType, Object> methodsToEndpoints) {
     this.resource = resource;
-    this.endpoint = endpoint;
-    super.setSupportedMethods(new String[]{"GET", "PUT", "POST", "DELETE"});
+    this.endpoints = methodsToEndpoints;
+    Set<String> supportedMethods = new TreeSet<String>();
+    for (VerbType verbType : methodsToEndpoints.keySet()) {
+      switch (verbType) {
+        case create:
+        case put:
+          supportedMethods.add("PUT");
+          break;
+        case delete:
+          supportedMethods.add("DELETE");
+          break;
+        case post:
+        case update:
+          supportedMethods.add("POST");
+          break;
+        case get:
+        case read:
+          supportedMethods.add("GET");
+          break;
+      }
+    }
+    super.setSupportedMethods(supportedMethods.toArray(new String[supportedMethods.size()]));
   }
 
   @Override
@@ -179,6 +196,9 @@ public class RESTResourceExporter extends AbstractController {
    * @return The model and view.
    */
   protected ModelAndView handleRESTOperation(RESTOperation operation, RESTRequestContentTypeHandler handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    if (!this.endpoints.containsKey(operation.getVerb())) {
+      throw new MethodNotAllowedException("Method not allowed.");
+    }
 
     if ((this.multipartRequestHandler != null) && (this.multipartRequestHandler.isMultipart(request))) {
       request = this.multipartRequestHandler.handleMultipartRequest(request);
@@ -330,7 +350,7 @@ public class RESTResourceExporter extends AbstractController {
       }
     }
 
-    Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue, this.endpoint);
+    Object result = operation.invoke(properNounValue, contextParameterValues, adjectives, nounValue, this.endpoints.get(operation.getVerb()));
 
     //successful invocation, set up the response...
     if (result instanceof DataHandler) {

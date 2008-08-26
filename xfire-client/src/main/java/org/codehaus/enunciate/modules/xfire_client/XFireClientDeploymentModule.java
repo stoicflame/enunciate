@@ -20,6 +20,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -948,5 +949,19 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   public List<String> getGeneratedTypeList() {
     return generatedTypeList;
+  }
+
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+      debug("XFire client module is disabled because there are no endpoint interfaces.");
+      return true;
+    }
+
+    return false;
   }
 }

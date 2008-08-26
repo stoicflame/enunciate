@@ -121,16 +121,19 @@ public class RESTContentTypeRoutingController extends AbstractController {
         Float defaultQuality = null;
         while (acceptHeaders.hasMoreElements()) {
           String acceptHeader = (String) acceptHeaders.nextElement();
-          try {
-            MimeType acceptType = MimeType.parse(acceptHeader);
-            mimeTypes.add(acceptType);
-            if (acceptType.isAcceptable(this.defaultMimeType) && (defaultQuality == null || defaultQuality < acceptType.getQuality())) {
-              defaultQuality = acceptType.getQuality();
+          for (StringTokenizer acceptTokens = new StringTokenizer(acceptHeader, ","); acceptTokens.hasMoreTokens();) {
+            String token = acceptTokens.nextToken();
+            try {
+              MimeType acceptType = MimeType.parse(token.trim());
+              mimeTypes.add(acceptType);
+              if (acceptType.isAcceptable(this.defaultMimeType) && (defaultQuality == null || defaultQuality < acceptType.getQuality())) {
+                defaultQuality = acceptType.getQuality();
+              }
             }
-          }
-          catch (Exception e) {
-            //ignore the invalid type in the "Accept" header
-            LOG.info(e.getMessage());
+            catch (Exception e) {
+              //ignore the invalid type in the "Accept" header
+              LOG.info(e.getMessage());
+            }
           }
         }
 

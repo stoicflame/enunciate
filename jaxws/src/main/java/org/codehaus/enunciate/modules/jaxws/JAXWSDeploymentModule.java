@@ -31,6 +31,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 /**
  * <h1>JAX-WS Module</h1>
  *
@@ -129,4 +131,17 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
     return new JAXWSValidator();
   }
 
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+      debug("JAX-WS module is disabled because there are no endpoint interfaces.");
+      return true;
+    }
+
+    return false;
+  }
 }

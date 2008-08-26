@@ -102,8 +102,27 @@ public class MimeType implements Comparable<MimeType> {
    */
   public int compareTo(MimeType other) {
     if (this.quality == other.quality) {
+      if (getType().contains("*")) {
+        //more specific types first.
+        if (!other.getType().contains("*")) {
+          return 1;
+        }
+      }
+      else if (other.getType().contains("*")) {
+        return -1;
+      }
+
       int comparison = getType().compareTo(other.getType());
       if (comparison == 0) {
+        if (getSubtype().contains("*")) {
+          if (!other.getSubtype().contains("*")) {
+            return 1;
+          }
+        }
+        else if (other.getSubtype().contains("*")) {
+          return -1;
+        }
+        
         comparison = getSubtype().compareTo(other.getSubtype());
       }
       return comparison;

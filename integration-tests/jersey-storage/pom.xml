@@ -3,24 +3,13 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-integration-xfire-rest</artifactId>
+  <artifactId>enunciate-integration-jersey-storage</artifactId>
   <version>1.8-SNAPSHOT</version>
-  <name>Enunciate - XFire/REST Integration Tests</name>
-  <description>Integration tests for Enunciate, testing the xfire + REST combo.</description>
+  <name>Enunciate - Jersey Integration Tests</name>
+  <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>
 
   <build>
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/samples/full</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -29,25 +18,6 @@
           <source>1.5</source>
           <target>1.5</target>
         </configuration>
-      </plugin>
-      <plugin>
-        <!--now we need to add the generated sources we're testing to the test classpath-->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/main/samples/full</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
@@ -115,9 +85,6 @@
             <append>false</append>
           </container>
           <configuration>
-            <properties>
-              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
-            </properties>
             <home>${project.build.directory}/tomcat5x</home>
             <deployables>
               <deployable>

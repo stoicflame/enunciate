@@ -388,8 +388,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     public void loadMavenConfiguration() throws IOException {
-      List<DeploymentModule> modules = getConfig().getEnabledModules();
-      for (DeploymentModule module : modules) {
+      for (DeploymentModule module : getConfig().getAllModules()) {
         if (!module.isDisabled()) {
           if (module instanceof GWTDeploymentModule) {
             configureGWTDeploymentModule((GWTDeploymentModule) module);
@@ -430,10 +429,10 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     @Override
-    protected void doGenerate(List<DeploymentModule> modules) throws IOException, EnunciateException {
-      super.doGenerate(modules);
+    protected void doGenerate() throws IOException, EnunciateException {
+      super.doGenerate();
 
-      for (DeploymentModule module : modules) {
+      for (DeploymentModule module : getConfig().getAllModules()) {
         if (!module.isDisabled()) {
           if (module instanceof GWTDeploymentModule) {
             afterGWTGenerate((GWTDeploymentModule) module);
@@ -537,8 +536,8 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     @Override
-    protected void doClose(List<DeploymentModule> list) throws EnunciateException, IOException {
-      super.doClose(list);
+    protected void doClose() throws EnunciateException, IOException {
+      super.doClose();
 
       if (warArtifactId != null) {
         org.codehaus.enunciate.main.Artifact warArtifact = null;

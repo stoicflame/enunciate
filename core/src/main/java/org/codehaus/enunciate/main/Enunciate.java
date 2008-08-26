@@ -168,13 +168,17 @@ public class Enunciate {
    * Logic for handling the closing of the Enunciate mechanism.  Closes the modules and exports
    * the artifacts.
    *
-   * @param deploymentModules The deployment modules to close.
    */
-  protected void doClose(List<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
+  protected void doClose() throws EnunciateException, IOException {
     info("\n\nClosing Enunciate mechanism.");
-    for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Closing module %s.", deploymentModule.getName());
-      deploymentModule.close();
+    for (DeploymentModule deploymentModule : this.config.getAllModules()) {
+      if (!deploymentModule.isDisabled()) {
+        debug("Closing module %s.", deploymentModule.getName());
+        deploymentModule.close();
+      }
+      else {
+        debug("Not closing module %s (module is disabled).", deploymentModule.getName());
+      }
     }
 
     HashSet<String> exportedArtifacts = new HashSet<String>();
@@ -198,9 +202,8 @@ public class Enunciate {
   /**
    * Do the package logic.
    *
-   * @param deploymentModules The deployment modules to use.
    */
-  protected void doPackage(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+  protected void doPackage() throws IOException, EnunciateException {
     File packageDir = getPackageDir();
     if (packageDir == null) {
       packageDir = createTempDir();
@@ -213,18 +216,22 @@ public class Enunciate {
         "(BTW, if you don't specify a package output directory, a suitable temp directory wil be created for you.)");
     }
 
-    for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Invoking %s step for module %s", Target.PACKAGE, deploymentModule.getName());
-      deploymentModule.step(Target.PACKAGE);
+    for (DeploymentModule deploymentModule : this.config.getAllModules()) {
+      if (!deploymentModule.isDisabled()) {
+        debug("Invoking %s step for module %s", Target.PACKAGE, deploymentModule.getName());
+        deploymentModule.step(Target.PACKAGE);
+      }
+      else {
+        debug("Not invoking %s step for module %s (module is disabled).", Target.PACKAGE, deploymentModule.getName());
+      }
     }
   }
 
   /**
    * Do the build logic.
    *
-   * @param deploymentModules The deployment modules to use.
    */
-  protected void doBuild(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+  protected void doBuild() throws IOException, EnunciateException {
     File buildDir = getBuildDir();
     if (buildDir == null) {
       buildDir = createTempDir();
@@ -237,18 +244,22 @@ public class Enunciate {
         "(BTW, if you don't specify a build output directory, a suitable temp directory wil be created for you.)");
     }
 
-    for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Invoking %s step for module %s", Target.BUILD, deploymentModule.getName());
-      deploymentModule.step(Target.BUILD);
+    for (DeploymentModule deploymentModule : this.config.getAllModules()) {
+      if (!deploymentModule.isDisabled()) {
+        debug("Invoking %s step for module %s", Target.BUILD, deploymentModule.getName());
+        deploymentModule.step(Target.BUILD);
+      }
+      else {
+        debug("Not invoking %s step for module %s (module is disabled).", Target.BUILD, deploymentModule.getName());
+      }
     }
   }
 
   /**
    * Do the compile logic.
    *
-   * @param deploymentModules The deployment modules to use.
    */
-  protected void doCompile(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+  protected void doCompile() throws IOException, EnunciateException {
     File destdir = getCompileDir();
     if (destdir == null) {
       destdir = createTempDir();
@@ -261,18 +272,22 @@ public class Enunciate {
         "(BTW, if you don't specify a compile output directory, a suitable temp directory wil be created for you.)");
     }
 
-    for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Invoking %s step for module %s", Target.COMPILE, deploymentModule.getName());
-      deploymentModule.step(Target.COMPILE);
+    for (DeploymentModule deploymentModule : this.config.getAllModules()) {
+      if (!deploymentModule.isDisabled()) {
+        debug("Invoking %s step for module %s", Target.COMPILE, deploymentModule.getName());
+        deploymentModule.step(Target.COMPILE);
+      }
+      else {
+        debug("Not invoking %s step for module %s (module is disabled).", Target.COMPILE, deploymentModule.getName());
+      }
     }
   }
 
   /**
    * Do the generate logic.
    *
-   * @param deploymentModules The deployment modules to use.
    */
-  protected void doGenerate(List<DeploymentModule> deploymentModules) throws IOException, EnunciateException {
+  protected void doGenerate() throws IOException, EnunciateException {
     File genDir = getGenerateDir();
     if (genDir == null) {
       genDir = createTempDir();
@@ -360,7 +375,7 @@ public class Enunciate {
    *
    * @return The deployment modules that were loaded and initialized.
    */
-  protected List<DeploymentModule> doInit() throws EnunciateException, IOException {
+  protected void doInit() throws EnunciateException, IOException {
     if (isJavacCheck()) {
       invokeJavac(createTempDir(), getSourceFiles());
     }
@@ -369,9 +384,7 @@ public class Enunciate {
       this.config = loadConfig();
     }
 
-    List<DeploymentModule> deploymentModules = this.config.getEnabledModules();
-    initModules(deploymentModules);
-    return deploymentModules;
+    initModules(this.config.getEnabledModules());
   }
 
   /**
@@ -1375,11 +1388,10 @@ public class Enunciate {
    */
   public final class Stepper {
 
-    private final List<DeploymentModule> deploymentModules;
     private Target nextTarget;
 
     private Stepper() throws EnunciateException, IOException {
-      deploymentModules = doInit();
+      doInit();
       this.nextTarget = Target.GENERATE;
     }
 
@@ -1404,19 +1416,19 @@ public class Enunciate {
 
       switch (this.nextTarget) {
         case GENERATE:
-          doGenerate(this.deploymentModules);
+          doGenerate();
           this.nextTarget = Target.COMPILE;
           break;
         case COMPILE:
-          doCompile(this.deploymentModules);
+          doCompile();
           this.nextTarget = Target.BUILD;
           break;
         case BUILD:
-          doBuild(this.deploymentModules);
+          doBuild();
           this.nextTarget = Target.PACKAGE;
           break;
         case PACKAGE:
-          doPackage(this.deploymentModules);
+          doPackage();
           this.nextTarget = null;
           break;
         default:
@@ -1444,7 +1456,7 @@ public class Enunciate {
      * Closes the stepper and the underlying enunciate mechanism.
      */
     public synchronized void close() throws EnunciateException, IOException {
-      doClose(this.deploymentModules);
+      doClose();
     }
 
   }

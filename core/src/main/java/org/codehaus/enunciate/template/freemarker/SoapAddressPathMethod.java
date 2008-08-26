@@ -51,7 +51,7 @@ public class SoapAddressPathMethod implements TemplateMethodModelEx {
 
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
     EnunciateConfiguration config = model.getEnunciateConfig();
-    String path = config.getDefaultSoapSubcontext() + endpointInterface.getServiceName();
+    String path = config.getDefaultSoapSubcontext() + '/' + endpointInterface.getServiceName();
     if (config.getSoapServices2Paths().containsKey(endpointInterface.getServiceName())) {
       path = config.getSoapServices2Paths().get(endpointInterface.getServiceName());
     }

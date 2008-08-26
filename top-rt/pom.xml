@@ -26,6 +26,12 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-jersey-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xfire-rt</artifactId>
       <version>${project.version}</version>
     </dependency>

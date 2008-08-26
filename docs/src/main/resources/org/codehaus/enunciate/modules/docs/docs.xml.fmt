@@ -160,7 +160,7 @@
   </soap>
   <rest baseAddress="${baseAddress}">
     <resources>
-[#list nouns2methods?values as methodList]
+[#list nouns2methods.values() as methodList]
   [#assign noun=(methodList?first).noun]
       <resource name="${noun}">
   [#list uniqueContentTypes(methodList) as contentType]

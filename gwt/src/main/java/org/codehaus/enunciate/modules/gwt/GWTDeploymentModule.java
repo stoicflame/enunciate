@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -1241,5 +1242,19 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setGwtAppDir(String gwtAppDir) {
     this.gwtAppDir = gwtAppDir;
+  }
+
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+      debug("GWT module is disabled because there are no endpoint interfaces.");
+      return true;
+    }
+
+    return false;
   }
 }

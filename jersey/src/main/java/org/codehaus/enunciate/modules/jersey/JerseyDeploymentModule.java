@@ -36,6 +36,8 @@ import java.util.TreeSet;
 import java.util.Arrays;
 import java.util.Map;
 
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 /**
  * <h1>Jersey Module</h1>
  *
@@ -229,5 +231,19 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDisableWildcardServletError(boolean disableWildcardServletError) {
     this.disableWildcardServletError = disableWildcardServletError;
+  }
+
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
+      debug("Jersey module is disabled because there are no root resources.");
+      return true;
+    }
+
+    return false;
   }
 }

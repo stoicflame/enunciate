@@ -29,15 +29,20 @@ public class TestRESTNoun extends TestCase {
   public void testPatterns() throws Exception {
     RESTNoun noContext = new RESTNoun("beast", "");
     assertEquals("beast", noContext.getAntPattern());
-    assertEquals("/beast", noContext.getServletPattern());
+    assertEquals(2, noContext.getServletPatterns().size());
+    assertTrue(noContext.getServletPatterns().contains("/beast"));
+    assertTrue(noContext.getServletPatterns().contains("/beast/*"));
 
     RESTNoun withContext = new RESTNoun("beast", "some/context/applied");
     assertEquals("some/context/applied/beast", withContext.getAntPattern());
-    assertEquals("/some/context/applied/beast", withContext.getServletPattern());
+    assertEquals(2, withContext.getServletPatterns().size());
+    assertTrue(withContext.getServletPatterns().contains("/some/context/applied/beast"));
+    assertTrue(withContext.getServletPatterns().contains("/some/context/applied/beast/*"));
 
     RESTNoun withContextParams = new RESTNoun("beast", "some/{params}/applied");
     assertEquals("some/*/applied/beast", withContextParams.getAntPattern());
-    assertEquals("/some/*", withContextParams.getServletPattern());
+    assertEquals(1, withContextParams.getServletPatterns().size());
+    assertEquals("/some/*", withContextParams.getServletPatterns().get(0));
   }
 
 }

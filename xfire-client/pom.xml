@@ -63,7 +63,7 @@
                 <mkdir dir="${project.build.directory}/enunciate/gen"/>
                 <mkdir dir="${project.build.directory}/enunciate/compile"/>
 
-                <enunciate verbose="true" target="generate"
+                <enunciate verbose="true" debug="true" target="generate"
                            basedir="${basedir}/src/main/samples/schema"
                            configFile="${basedir}/src/main/samples/schema/enunciate.xml"
                            generateDir="${project.build.directory}/enunciate/gen">

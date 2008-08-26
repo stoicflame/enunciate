@@ -75,26 +75,31 @@
     <property name="alwaysUseFullPath" value="true"/>
     <property name="urlMap">
       <map>
-  [@forEachRESTEndpoint]
-    [#list endpoint.RESTMethods as RESTMethod]
-
-        <entry key="${restSubcontext}/${RESTMethod.noun.antPattern}/**">
+  [@forEachRESTNoun]
+        <entry key="${restSubcontext}/${noun.antPattern}/**">
           <bean class="org.codehaus.enunciate.modules.rest.RESTContentTypeRoutingController">
-            <constructor-arg ref="enunciate:noun:${RESTMethod.noun}"/>
+            <constructor-arg ref="enunciate:noun:${noun}"/>
             <property name="subcontext" value="${restSubcontext}"/>
           </bean>
         </entry>
-      [#list RESTMethod.contentTypes as contentType]
+    [#list nouns2ContentTypes.get(noun) as contentType]
 
-        <entry key="/${contentTypes2Ids[contentType]}/${RESTMethod.noun.antPattern}/**">
+        <entry key="/${contentTypes2Ids[contentType]}/${noun.antPattern}/**">
           <bean class="org.codehaus.enunciate.modules.rest.RESTResourceExporter">
-            <constructor-arg ref="enunciate:noun:${RESTMethod.noun}"/>
-            <constructor-arg ref="${endpointBeanId(RESTMethod)}"/>
+            <constructor-arg ref="enunciate:noun:${noun}"/>
+            <constructor-arg>
+              <map>
+      [#list nouns2methods.get(noun) as method]
+        [#list method.verbs as verb]
+                <entry key="${verb}" value-ref="${endpointBeanId(method)}"/>
+        [/#list]
+      [/#list]
+              </map>
+            </constructor-arg>
           </bean>
         </entry>
-      [/#list]
     [/#list]
-  [/@forEachRESTEndpoint]
+  [/@forEachRESTNoun]
       </map>
     </property>
   </bean>

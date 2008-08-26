@@ -83,7 +83,7 @@ public class TestRESTResourceExporter extends TestCase {
     final ModelAndView mv = new ModelAndView();
     final HashMap<String, String> contentTypesToIds = new HashMap<String, String>();
     final HashMap<String, RESTRequestContentTypeHandler> contentTypesToHandlers = new HashMap<String, RESTRequestContentTypeHandler>();
-    RESTResourceExporter exporter = new RESTResourceExporter(restResource, null) {
+    RESTResourceExporter exporter = new RESTResourceExporter(restResource, new HashMap<VerbType, Object>()) {
       @Override
       protected ModelAndView handleRESTOperation(RESTOperation operation, RESTRequestContentTypeHandler handler, HttpServletRequest request, HttpServletResponse response) throws Exception {
         return mv;
@@ -141,7 +141,7 @@ public class TestRESTResourceExporter extends TestCase {
    * test getVerb
    */
   public void testGetVerb() throws Exception {
-    RESTResourceExporter exporter = new RESTResourceExporter(null, null);
+    RESTResourceExporter exporter = new RESTResourceExporter(null, new HashMap<VerbType, Object>());
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     expect(request.getHeader("X-HTTP-Method-Override")).andReturn(null);
@@ -169,7 +169,7 @@ public class TestRESTResourceExporter extends TestCase {
    * test findContentTypeId
    */
   public void testFindContentTypeId() throws Exception {
-    RESTResourceExporter exporter = new RESTResourceExporter(null, null);
+    RESTResourceExporter exporter = new RESTResourceExporter(null, new HashMap<VerbType, Object>());
     HttpServletRequest request = createMock(HttpServletRequest.class);
     expect(request.getRequestURI()).andReturn("/context/of/my/request");
     expect(request.getContextPath()).andReturn("/context");
@@ -200,7 +200,9 @@ public class TestRESTResourceExporter extends TestCase {
     };
 
     resource.addOperation("text/xml", VerbType.update, MockRESTEndpoint.class.getMethod("updateExample", String.class, RootElementExample.class, Integer.TYPE, String[].class, String.class, String.class));
-    RESTResourceExporter controller = new RESTResourceExporter(resource, new MockRESTEndpoint());
+    HashMap<VerbType, Object> endpoints = new HashMap<VerbType, Object>();
+    endpoints.put(VerbType.update, new MockRESTEndpoint());
+    RESTResourceExporter controller = new RESTResourceExporter(resource, endpoints);
     controller.setContentTypeSupport(new ContentTypeSupport(null, null));
     controller.setApplicationContext(new GenericApplicationContext());
     controller.setMultipartRequestHandler(null); //not testing multipart request handling yet...

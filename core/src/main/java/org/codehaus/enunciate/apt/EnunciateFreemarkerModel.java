@@ -41,6 +41,7 @@ import org.codehaus.enunciate.contract.jaxrs.Resource;
 import org.codehaus.enunciate.contract.jaxrs.SubResourceLocator;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.util.ResourceMethodComparator;
+import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
 
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlTransient;
@@ -90,8 +91,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("ns2schema", this.namespacesToSchemas);
     setVariable("ns2wsdl", this.namespacesToWsdls);
     setVariable("contentTypes2Ids", this.contentTypesToIds);
-    setVariable("nouns2methods", this.nounsToRESTMethods);
-    setVariable("nouns2formats", this.nounsToContentTypes);
+    setVariable("nouns2methods", new ObjectReferenceMap(this.nounsToRESTMethods));
+    setVariable("nouns2ContentTypes", new ObjectReferenceMap(this.nounsToContentTypes));
     setVariable("restEndpoints", this.restEndpoints);
     setVariable("rootResources", this.rootResources);
     setVariable("jaxrsProviders", this.jaxrsProviders);

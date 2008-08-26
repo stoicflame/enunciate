@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.EnumDeclaration;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
@@ -30,6 +31,7 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
+import org.codehaus.enunciate.modules.DeploymentModule;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -91,9 +93,15 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
       protected void writeTypesFile(File typesFile) throws EnunciateException, FileNotFoundException {
         //fall through...
       }
+
+      // Inherited.
+      @Override
+      public boolean isDisabled() {
+        return false;
+      }
     };
 
-    Enunciate enunciate = new Enunciate(new String[0]);
+    Enunciate enunciate = new Enunciate(new String[0], new EnunciateConfiguration(Arrays.asList((DeploymentModule) module)));
     module.init(enunciate);
     ClientPackageConversion conversion = new ClientPackageConversion();
     conversion.setFrom("net.nothing");

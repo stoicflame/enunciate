@@ -25,7 +25,6 @@ import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +80,7 @@ public class TestXMLDeploymentModule extends TestCase {
     final ArrayList<URL> processList = new ArrayList<URL>(Arrays.asList(XMLDeploymentModule.class.getResource("xml.fmt")));
     XMLDeploymentModule module = new XMLDeploymentModule() {
       @Override
-      public EnunciateFreemarkerModel getModel() throws IOException {
+      public EnunciateFreemarkerModel getModel() {
         return model;
       }
 

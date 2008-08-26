@@ -108,16 +108,20 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
    *
    * @return The model for processing.
    */
-  public EnunciateFreemarkerModel getModel() throws IOException {
-    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+  public EnunciateFreemarkerModel getModel() {
+    EnunciateFreemarkerModel model = getModelInternal();
 
     if (model == null) {
-      throw new IOException("A model must be established.");
+      throw new IllegalStateException("A model must be established.");
     }
 
     model.setObjectWrapper(getObjectWrapper());
     model.setFileOutputDirectory(getGenerateDir());
     return model;
+  }
+
+  protected EnunciateFreemarkerModel getModelInternal() {
+    return (EnunciateFreemarkerModel) FreemarkerModel.get();
   }
 
   /**

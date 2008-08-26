@@ -38,6 +38,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.TreeSet;
 
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 /**
  * <h1>XFire Module</h1>
  *
@@ -171,7 +173,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
         EnunciateConfiguration config = getEnunciate().getConfig();
-        String path = getSoapSubcontext() + endpointInterface.getServiceName();
+        String path = getSoapSubcontext() + '/' + endpointInterface.getServiceName();
         if (config.getSoapServices2Paths().containsKey(endpointInterface.getServiceName())) {
           path = config.getSoapServices2Paths().get(endpointInterface.getServiceName());
         }
@@ -203,4 +205,17 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     return new XFireValidator();
   }
 
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+      debug("XFire module is disabled because there are no endpoint interfaces.");
+      return true;
+    }
+
+    return false;
+  }
 }

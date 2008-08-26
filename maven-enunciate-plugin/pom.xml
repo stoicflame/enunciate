@@ -9,7 +9,7 @@
 
   <artifactId>maven-enunciate-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>Enunciate Maven Plugin</name>
+  <name>Enunciate - Maven Plugin</name>
   <description>Maven 2 plugin for invoking Enunciate.</description>
 
   <dependencies>

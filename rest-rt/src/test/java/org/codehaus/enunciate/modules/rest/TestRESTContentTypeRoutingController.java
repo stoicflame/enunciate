@@ -27,6 +27,7 @@ import javax.servlet.RequestDispatcher;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author Ryan Heaton
@@ -85,13 +86,47 @@ public class TestRESTContentTypeRoutingController extends TestCase {
    * test getContentType
    */
   public void testGetContentType() throws Exception {
-    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun"));
+    RESTContentTypeRoutingController controller = new RESTContentTypeRoutingController(new RESTResource("noun") {
+      @Override
+      public String getDefaultContentType() {
+        return "application/xml";
+      }
+    });
     HttpServletRequest request = createMock(HttpServletRequest.class);
     expect(request.getParameter("contentType")).andReturn("application/xml");
     replay(request);
     assertEquals("application/xml", controller.getContentTypesByPreference(request).get(0));
     verify(request);
     reset(request);
+
+    List<String> preferenceOrder;
+
+    expect(request.getParameter("contentType")).andReturn(null);
+    expect(request.getHeaders("Accept")).andReturn(Collections.enumeration(Arrays.asList("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")));
+    replay(request);
+    preferenceOrder = controller.getContentTypesByPreference(request);
+    verify(request);
+    reset(request);
+    assertEquals(4, preferenceOrder.size());
+    assertTrue(preferenceOrder.subList(0, 2).contains("text/html"));
+    assertTrue(preferenceOrder.subList(0, 2).contains("application/xhtml+xml"));
+    assertEquals("application/xml", preferenceOrder.get(2));
+    assertEquals("*/*", preferenceOrder.get(3));
+
+    expect(request.getParameter("contentType")).andReturn(null);
+    expect(request.getHeaders("Accept")).andReturn(Collections.enumeration(Arrays.asList("text/html,application/xhtml+xml,*/*;q=0.8,application/*;q=0.9")));
+    replay(request);
+    preferenceOrder = controller.getContentTypesByPreference(request);
+    verify(request);
+    reset(request);
+    assertEquals(5, preferenceOrder.size());
+    assertTrue(preferenceOrder.subList(0, 2).contains("text/html"));
+    assertTrue(preferenceOrder.subList(0, 2).contains("application/xhtml+xml"));
+    assertEquals("application/xml", preferenceOrder.get(2));
+    assertEquals("application/*", preferenceOrder.get(3));
+    assertEquals("*/*", preferenceOrder.get(4));
+
+
   }
 
 }

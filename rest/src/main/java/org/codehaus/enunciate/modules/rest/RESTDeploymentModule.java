@@ -39,6 +39,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
 /**
  * <h1>REST Module</h1>
  *
@@ -427,14 +429,16 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     Map<RESTNoun, Set<String>> nouns2contentTypes = getModel().getNounsToContentTypes();
     Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
     for (RESTNoun restNoun : nouns2contentTypes.keySet()) {
-      urlMappings.add(getRestSubcontext() + restNoun.getServletPattern());
-      for (String contentType : nouns2contentTypes.get(restNoun)) {
-        String contentTypeId = contentTypes2Ids.get(contentType);
-        if (contentTypeId != null) {
-          urlMappings.add("/" + contentTypeId + restNoun.getServletPattern());
-        }
-        else {
-          debug("No content id for type '%s'.  REST noun %s will not be mounted for that content type.", contentType, restNoun);
+      for (String servletPattern : restNoun.getServletPatterns()) {
+        urlMappings.add(getRestSubcontext() + servletPattern);
+        for (String contentType : nouns2contentTypes.get(restNoun)) {
+          String contentTypeId = contentTypes2Ids.get(contentType);
+          if (contentTypeId != null) {
+            urlMappings.add("/" + contentTypeId + servletPattern);
+          }
+          else {
+            debug("No content id for type '%s'.  REST noun %s will not be mounted for that content type.", contentType, restNoun);
+          }
         }
       }
     }
@@ -527,5 +531,20 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public RuleSet getConfigurationRules() {
     return new RESTRuleSet();
+  }
+
+  // Inherited.
+  @Override
+  public boolean isDisabled() {
+    if (super.isDisabled()) {
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getRESTEndpoints().isEmpty()) {
+      debug("REST module is disabled because there are no REST endpoints.");
+      return true;
+    }
+
+    return false;
+
   }
 }

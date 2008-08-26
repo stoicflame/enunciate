@@ -47,8 +47,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private String deploymentProtocol = "http";
   private String deploymentHost = "localhost:8080";
   private String deploymentContext = null;
-  private String defaultSoapSubcontext = "/soap/";
-  private String defaultRestSubcontext = "/rest/";
+  private String defaultSoapSubcontext = "/soap";
+  private String defaultRestSubcontext = "/rest";
   private Validator validator = new DefaultValidator();
   private final SortedSet<DeploymentModule> modules;
   private final Map<String, String> namespaces = new HashMap<String, String>();
@@ -270,8 +270,8 @@ public class EnunciateConfiguration implements ErrorHandler {
       defaultSoapSubcontext = "/" + defaultSoapSubcontext;
     }
 
-    if (defaultSoapSubcontext.endsWith("/")) {
-      defaultSoapSubcontext = defaultSoapSubcontext + "/";
+    while (defaultSoapSubcontext.endsWith("/")) {
+      defaultSoapSubcontext = defaultSoapSubcontext.substring(0, defaultSoapSubcontext.length() - 1);
     }
 
     this.defaultSoapSubcontext = defaultSoapSubcontext;
@@ -327,12 +327,12 @@ public class EnunciateConfiguration implements ErrorHandler {
         throw new IllegalArgumentException("A relative path for the custom soap location must be provided for the service name '" + serviceName + "'.");
       }
 
-      if (relativePath.endsWith("/")) {
-        throw new IllegalArgumentException("A custom relative path must not end with a '/'.");
-      }
-
       if (!relativePath.startsWith("/")) {
         relativePath = "/" + relativePath;
+      }
+
+      while (relativePath.endsWith("/")) {
+        relativePath = relativePath.substring(0, relativePath.length() - 1);
       }
 
       this.soapServices2Paths.put(serviceName, relativePath);
