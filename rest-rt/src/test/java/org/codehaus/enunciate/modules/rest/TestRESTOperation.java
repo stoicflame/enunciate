@@ -41,19 +41,6 @@ public class TestRESTOperation extends TestCase {
   }
 
   /**
-   * tests the "badReturnType" method as a REST operation.
-   */
-  public void testBadReturnType() throws Exception {
-    try {
-      new RESTOperation(null, "text/xml", VerbType.read, RESTOperationExamples.class.getMethod("badReturnType"), null);
-      fail("shouldn't have accepted a return type that isn't an XML root element.");
-    }
-    catch (IllegalStateException e) {
-      //fall through...
-    }
-  }
-
-  /**
    * tests the "properNoun" method as a REST operation.
    */
   public void testProperNoun() throws Exception {
@@ -107,19 +94,6 @@ public class TestRESTOperation extends TestCase {
     assertNotNull(nounValueType);
     assertEquals(RootElementExample.class, nounValueType);
     assertEquals(RootElementExample.class, operation.getResultType());
-  }
-
-  /**
-   * tests the "badNounValue" method as a REST operation.
-   */
-  public void testBadNounValue() throws Exception {
-    try {
-      new RESTOperation(null, "text/xml", VerbType.update, RESTOperationExamples.class.getMethod("badNounValue", Object.class), null);
-      fail("shouldn't have allowed a non-root xml noun value type.");
-    }
-    catch (IllegalStateException e) {
-
-    }
   }
 
   /**

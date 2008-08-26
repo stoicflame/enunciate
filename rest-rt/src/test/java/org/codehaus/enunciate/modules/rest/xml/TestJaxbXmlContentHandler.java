@@ -25,9 +25,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletOutputStream;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author Ryan Heaton
@@ -100,5 +104,15 @@ public class TestJaxbXmlContentHandler extends TestCase {
     reset(request, response);
     assertTrue(Arrays.equals(assertedBytes.toByteArray(), writtenBytes.toByteArray()));
   }
+
+//  /**
+//   * tests preparing for a JAXB marshalling
+//   */
+//  public void testPrepareForJAXBMarshalling() throws Exception {
+//    Marshaller marshaller = JAXBContext.newInstance(RootElementExample.class, Collection.class).createMarshaller();
+//    RootElementExample ex = new RootElementExample();
+//    marshaller.marshal(new JAXBElement(new QName("", "hi"), RootElementExample.class, ex), System.out);
+//    marshaller.marshal(new JAXBElement(new QName("", "hi"), Collection.class, Arrays.asList(ex, new RootElementExample(), new RootElementExample())), System.out);
+//  }
 
 }

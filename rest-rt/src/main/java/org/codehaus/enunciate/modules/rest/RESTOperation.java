@@ -18,10 +18,13 @@ package org.codehaus.enunciate.modules.rest;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchema;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -32,6 +35,8 @@ import java.util.*;
  * @author Ryan Heaton
  */
 public class RESTOperation {
+
+  private static final Log LOG = LogFactory.getLog(RESTOperation.class);
 
   private final RESTResource resource;
   private final VerbType verb;
@@ -53,6 +58,7 @@ public class RESTOperation {
   private final String contentType;
   private final String charset;
   private final String JSONPParameter;
+  private final String defaultNamespace;
   private final Set<Class> contextClasses;
 
   /**
@@ -139,10 +145,11 @@ public class RESTOperation {
         else if (annotation instanceof NounValue) {
           if ((!parameterType.isAnnotationPresent(XmlRootElement.class)) && (!parameterType.equals(DataHandler.class)) &&
               (!(parameterType.isArray() && parameterType.getComponentType().equals(DataHandler.class)))) {
-            throw new IllegalStateException("Noun values must be either XML root elements, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.  Invalid noun value for parameter " + i + " of method " +
-              method.getDeclaringClass().getName() + "." + method.getName() + ": " + parameterType.getName() + ".");
+            LOG.warn("Enunciate doesn't support unmarshalling objects of type " + parameterType.getName() + 
+              ". Unless a custom content type handler is provided, this operation (" + method.getDeclaringClass() + "." + method.getName() + ") will fail.");
           }
-          else if (nounValue == null) {
+
+          if (nounValue == null) {
             if (((NounValue) annotation).optional()) {
               if (parameterType.isPrimitive()) {
                 throw new IllegalStateException("An optional noun value cannot be a primitive type for method " +
@@ -243,8 +250,8 @@ public class RESTOperation {
       returnType = method.getReturnType();
 
       if (!returnType.isAnnotationPresent(XmlRootElement.class) && (!DataHandler.class.isAssignableFrom(returnType))) {
-        throw new IllegalStateException("REST operation results must be xml root elements or instances of javax.activation.DataHandler.  Invalid return type for method " +
-          method.getDeclaringClass() + "." + method.getName() + ".");
+        LOG.warn("Enunciate doesn't support marshalling objects of type " + returnType.getName() +
+          ". Unless a custom content type handler is provided, this operation (" + method.getDeclaringClass() + "." + method.getName() + ") will fail.");
       }
 
       contextClasses.add(returnType);
@@ -294,6 +301,11 @@ public class RESTOperation {
       charset = contentTypeInfo.charset();
     }
 
+    String defaultNamespace = "";
+    if (method.getDeclaringClass().getPackage() != null && method.getDeclaringClass().getPackage().isAnnotationPresent(XmlSchema.class)) {
+      defaultNamespace = method.getDeclaringClass().getPackage().getAnnotation(XmlSchema.class).namespace();
+    }
+
     this.properNounType = properNoun;
     this.properNounIndex = properNounIndex;
     this.properNounOptional = properNounOptional;
@@ -305,6 +317,7 @@ public class RESTOperation {
     this.JSONPParameter = jsonpParameter;
     this.contextClasses = contextClasses;
     this.contentTypeParameterIndex = contentTypeParameterIndex;
+    this.defaultNamespace = defaultNamespace;
   }
 
   /**
@@ -608,4 +621,12 @@ public class RESTOperation {
     return JSONPParameter;
   }
 
+  /**
+   * The default namespace for the result of this REST operation.
+   *
+   * @return The default namespace for the result of this REST operation.
+   */
+  public String getDefaultNamespace() {
+    return defaultNamespace;
+  }
 }

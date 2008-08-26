@@ -140,9 +140,11 @@ public class JsonContentHandler extends JaxbXmlContentHandler {
         xstream.toXML(data, outStream);
         break;
       case xmlMapped:
+        data = prepareForJAXBMarshalling(data, request);
         marshaller.marshal(data, new MappedXMLOutputFactory(getNamespacesToPrefixes()).createXMLStreamWriter(outStream));
         break;
       case badgerfish:
+        data = prepareForJAXBMarshalling(data, request);
         marshaller.marshal(data, new BadgerFishXMLOutputFactory().createXMLStreamWriter(outStream));
         break;
       default:

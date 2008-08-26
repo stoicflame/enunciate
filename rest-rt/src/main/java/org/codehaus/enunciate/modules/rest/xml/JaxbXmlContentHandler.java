@@ -27,6 +27,8 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.util.HashSet;
 import java.util.Map;
@@ -75,6 +77,7 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
   public void write(Object data, HttpServletRequest request, HttpServletResponse response) throws Exception {
     if (data != null) {
       RESTResource resource = (RESTResource) request.getAttribute(RESTResource.class.getName());
+      resource.getNoun();
       JAXBContext context = loadContext(resource);
       if (context == null) {
         //if a context wasn't specified, we'll just attempt to create one dynamically.
@@ -110,7 +113,15 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
     if (context == null) {
       Set<Class> classes = new HashSet<Class>();
       for (RESTOperation operation : resource.getOperations()) {
-        classes.addAll(operation.getContextClasses());
+        Set<Class> contextClasses = operation.getContextClasses();
+        for (Class contextClass : contextClasses) {
+          if (!contextClass.isInterface()) {
+            //interfaces are sometimes allowed
+            //for the sake of custom content handlers.
+            classes.add(contextClass);
+          }
+        }
+        classes.addAll(contextClasses);
       }
       context = JAXBContext.newInstance(classes.toArray(new Class[classes.size()]));
       this.resourcesToContexts.put(resource, context);
@@ -162,7 +173,40 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
    * @param response The response.
    */
   protected void marshal(Object data, Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    data = prepareForJAXBMarshalling(data, request);
     marshaller.marshal(data, response.getOutputStream());
+  }
+
+  /**
+   * Prepare the object for JAXB marshalling.
+   *
+   * @param data The data.
+   * @param request The request.
+   * @return The data.
+   */
+  protected Object prepareForJAXBMarshalling(Object data, HttpServletRequest request) {
+    if (data == null) {
+      return null;
+    }
+    else if (data.getClass().getAnnotation(XmlRootElement.class) != null) {
+      return data;
+    }
+    else {
+      Class xmlType = data.getClass();
+      String elementName = xmlType.getSimpleName();
+      RESTResource resource = (RESTResource) request.getAttribute(RESTResource.class.getName());
+      if (resource != null) {
+        elementName = resource.getNoun();
+      }
+
+      String elementNamespace = "";
+      RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
+      if (operation != null) {
+        elementNamespace = operation.getDefaultNamespace();
+      }
+
+      return new JAXBElement(new QName(elementNamespace, elementName), xmlType, data);
+    }
   }
 
   /**

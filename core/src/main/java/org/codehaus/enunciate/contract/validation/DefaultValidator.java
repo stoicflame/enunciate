@@ -19,30 +19,29 @@ package org.codehaus.enunciate.contract.validation;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.ResourceParameter;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
-import org.codehaus.enunciate.contract.rest.RESTParameter;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.jaxrs.*;
-import org.codehaus.enunciate.rest.annotations.VerbType;
 
-import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.*;
 
 /**
@@ -162,122 +161,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
    * @return The result of the validation.
    */
   public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
-    ValidationResult result = new ValidationResult();
-
-    for (RESTNoun noun : restAPI.keySet()) {
-      Map<String, Set<VerbType>> contentTypes2Verbs = new TreeMap<String, Set<VerbType>>();
-      List<RESTMethod> methods = restAPI.get(noun);
-      for (RESTMethod method : methods) {
-        Collection<VerbType> verbList = Arrays.asList(method.getVerbs());
-        for (String contentType : method.getContentTypes()) {
-          Set<VerbType> verbs = contentTypes2Verbs.get(contentType);
-          if (verbs == null) {
-            verbs = EnumSet.noneOf(VerbType.class);
-            contentTypes2Verbs.put(contentType, verbs);
-          }
-          
-          for (VerbType verb : verbList) {
-            if (!verbs.add(verb)) {
-              result.addError(method, "Duplicate verb '" + verb + "' for content type '" + contentType + "' of REST noun '" + noun + "'.");
-            }
-          }
-        }
-
-        RESTParameter properNoun = method.getProperNoun();
-        if (properNoun != null) {
-          XmlType nounType = properNoun.getXmlType();
-          if (properNoun.isCollectionType()) {
-            result.addError(properNoun, "A proper noun is not allowed to be a collection or an array.");
-          }
-
-          if ((properNoun.isOptional()) && (properNoun.getType() instanceof PrimitiveType)) {
-            result.addError(properNoun, "An optional proper noun parameter cannot be a primitive type.");
-          }
-        }
-
-        HashSet<String> adjectives = new HashSet<String>();
-        for (RESTParameter adjective : method.getAdjectives()) {
-          if (!adjectives.add(adjective.getAdjectiveName())) {
-            result.addError(adjective, "Duplicate adjective name '" + adjective.getAdjectiveName() + "'.");
-          }
-
-          if (!adjective.isComplexAdjective()) {
-            if ((adjective.isOptional()) && (adjective.getType() instanceof PrimitiveType)) {
-              result.addError(adjective, "An optional adjective parameter cannot be a primitive type.");
-            }
-
-            if (adjective.getAdjectiveName().equals(method.getJSONPParameter())) {
-              result.addError(adjective, "Invalid adjective name '" + adjective.getAdjectiveName() + "': conflicts with the JSONP parameter name.");
-            }
-          }
-        }
-
-        HashSet<String> contextParameters = new HashSet<String>();
-        for (RESTParameter contextParam : method.getContextParameters()) {
-          if (!contextParameters.add(contextParam.getContextParameterName())) {
-            result.addError(contextParam, "Duplicate context parameter name '" + contextParam.getContextParameterName() + "'.");
-          }
-
-          boolean parameterFound = false;
-          for (String contextParameter : noun.getContextParameters()) {
-            if (contextParam.getContextParameterName().equals(contextParameter)) {
-              parameterFound = true;
-              break;
-            }
-          }
-
-          if (!parameterFound) {
-            result.addError(contextParam, "No context parameter named '" + contextParam.getContextParameterName() + "' is found in the context (" + noun.toString() + ")");
-          }
-        }
-
-        if (!method.getContentTypeParameters().isEmpty()) {
-          if (method.getContentTypeParameters().size() > 1) {
-            result.addError(method, "Multiple content type parameters.");
-          }
-          else {
-            RESTParameter restParameter = method.getContentTypeParameters().iterator().next();
-            if (!((DecoratedTypeMirror) restParameter.getType()).isInstanceOf(String.class.getName())) {
-              result.addError(restParameter, "Content type parameter must be a String.");
-            }
-          }
-        }
-
-        RESTParameter nounValue = method.getNounValue();
-        if (nounValue != null) {
-          if ((verbList.contains(VerbType.read)) || (verbList.contains(VerbType.delete))) {
-            result.addError(method, "The verbs 'read' and 'delete' do not support a noun value.");
-          }
-
-          DecoratedTypeMirror decoratedNounValueType = (DecoratedTypeMirror) nounValue.getType();
-          if (!isDataHandler(decoratedNounValueType) && !isDataHandlers(decoratedNounValueType)) {
-            XmlType nounValueType = nounValue.getXmlType();
-            if ((!(nounValueType instanceof XmlClassType)) || (((XmlClassType) nounValueType).getTypeDefinition().getAnnotation(XmlRootElement.class) == null)) {
-              result.addError(nounValue, "A noun value must be either a JAXB 2.0 root element, javax.activation.DataHandler, javax.activation.DataHandler[], or a collection of javax.activation.DataHandler.");
-            }
-          }
-
-          if ((nounValue.isOptional()) && (nounValue.getType() instanceof PrimitiveType)) {
-            result.addError(nounValue, "An optional noun value parameter cannot be a primitive type.");
-          }
-        }
-
-        DecoratedTypeMirror returnType = ((DecoratedTypeMirror) method.getReturnType());
-        if ((!returnType.isVoid()) && (!returnType.isInstanceOf(DataHandler.class.getName()))) {
-          boolean isValidRESTReturnType = false;
-          if (method.getReturnType() instanceof DeclaredType) {
-            TypeDeclaration declaration = ((DeclaredType) method.getReturnType()).getDeclaration();
-            isValidRESTReturnType = declaration.getAnnotation(XmlRootElement.class) != null;
-          }
-
-          if (!isValidRESTReturnType) {
-            result.addError(method, "REST operation results must be xml root elements or instances of " + DataHandler.class.getName() + ". " + method.getReturnType() + " is not annotated with @XmlRootElement nor is it an instance of " + DataHandler.class.getName() + ".");
-          }
-        }
-      }
-    }
-
-    return result;
+    return new ValidationResult();
   }
 
   /**
@@ -288,25 +172,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
    */
   public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
     return new ValidationResult();
-  }
-
-  private boolean isDataHandler(DecoratedTypeMirror type) {
-    return type.isDeclared()
-      && ((DeclaredType) type).getDeclaration() != null
-      && "javax.activation.DataHandler".equals(((DeclaredType) type).getDeclaration().getQualifiedName());
-  }
-
-  private boolean isDataHandlers(DecoratedTypeMirror type) {
-    if (type.isCollection()) {
-      Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
-      if ((typeArgs != null) && (typeArgs.size() == 1)) {
-        return isDataHandler((DecoratedTypeMirror) typeArgs.iterator().next());
-      }
-    }
-    else if (type.isArray()) {
-      return isDataHandler((DecoratedTypeMirror) ((ArrayType) type).getComponentType());
-    }
-    return false;
   }
 
   public ValidationResult validateRootResources(List<RootResource> rootResources) {

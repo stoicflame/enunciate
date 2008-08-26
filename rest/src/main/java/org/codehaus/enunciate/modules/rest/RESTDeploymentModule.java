@@ -39,8 +39,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-
 /**
  * <h1>REST Module</h1>
  *
@@ -217,10 +215,14 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * <h3>Java Return Types</h3>
  *
  * <p>By default, the return type of the Java method defines the payload of the response.  In order support the default content type handlers (see
- * "Content Types" above), the return type of the Java method must be an XML root element. The exception to this is that Enunciate
- * also allows the return type of a Java method to be javax.activation.DataHandler, which defines its own payload and content type. In the case where
- * the return type is a DataHandler, consider using the @ContentType (see "Content Types" above) annotation to specify which content types the
+ * "Content Types" above), the return type of the Java method must be compatible with JAXB. This means that the return type should be a class (as opposed to an
+ * interface) and unless the return type is annotated with @XmlRootElement, the element name of the XML will be the name of the noun. The exception to this
+ * is that Enunciate also allows the return type of a Java method to be javax.activation.DataHandler, which defines its own payload and content type. In the
+ * case where the return type is a DataHandler, consider using the @ContentType (see "Content Types" above) annotation to specify which content types the
  * DataHandler supports and which content types are not supported.</p>
+ *
+ * <p>Since it is possible to provide your own content type handlers that override the default JAXB content type handlers, you can disable the requirement
+ * that the return type be JAXB-compatible in the <a href="#config">configuration</a> of this module.</p>
  *
  * <h3>Java Method Parameters</h3>
  *
@@ -240,10 +242,11 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * <p><u>Noun Value Types</u></p>
  *
  * <p>By default, a method parameter that is identified as a noun value is deserialized from the request body from the content type handler (see "Content Types"
- * above).  This means that the noun value parameter must be an XML root element to support the default content type handlers. Like the return type, there is an
- * exception to this rule: a noun value parameter can be of type javax.activation.DataHandler or an array/collection of javax.activation.DataHandler. In the
- * case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler will become a handler to the InputStream
- * of the request payload. The DataSource of the DataHandler will be an instance of <i>org.codehaus.enunciate.modules.rest.RESTRequestDataSource</i>.</p>
+ * above).  This means that the noun value parameter must be compatible with JAXB (i.e. must not be an interface) to support the default content type handlers.
+ * Like the return type, there is an exception to this rule: a noun value parameter can be of type javax.activation.DataHandler or an array/collection of
+ * javax.activation.DataHandler. In the case of javax.activation.DataHandler, the request payload is considered to be of a "custom type" and the DataHandler
+ * will become a handler to the InputStream of the request payload. The DataSource of the DataHandler will be an instance of
+ * <i>org.codehaus.enunciate.modules.rest.RESTRequestDataSource</i>.</p>
  *
  * <p>In the case of an array/collection of javax.activation.DataHandler, the REST method will be considered able to handle a multipart file upload as defined
  * in <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>. However, in order for a REST request to be able to be parsed as a multipart file upload,
@@ -301,6 +304,9 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * <ul>
  *   <li>The "defaultContentTypeHandler" attribute is used to define the default content type handler when no others are found for a given content type.
  *       The default value is "org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler".</li>
+ *   <li>The "requireJAXBCompatibility" attribute is used to disable the requirement that return types and noun values be JAXB-compatible. Since Enunciate
+ *       uses JAXB by default for marshalling and umarshalling, this requirement should only be disabled if you have provided your own content type
+ *       handlers.</li>
  * </ul>
  *
  * <h3>The "json" element</h3>
@@ -333,6 +339,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   private String xstreamReferenceAction = XStreamReferenceAction.relative_references.toString();
   private Map<String, String> contentTypeHandlers = new TreeMap<String, String>();
   private String defaultJsonSerialization = JsonSerializationMethod.xmlMapped.toString();
+  private boolean requireJAXBCompatibility = true;
 
   /**
    * @return "rest"
@@ -347,7 +354,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new RESTValidator(getContentTypeHandlers());
+    return new RESTValidator(getContentTypeHandlers(), isRequireJAXBCompatibility());
   }
 
   /**
@@ -526,6 +533,24 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDefaultJsonSerialization(String defaultJsonSerialization) {
     this.defaultJsonSerialization = JsonSerializationMethod.valueOf(defaultJsonSerialization).toString();
+  }
+
+  /**
+   * Whether to require JAXB compatibility with the return types and noun values.
+   *
+   * @return Whether to require JAXB compatibility with the return types and noun values.
+   */
+  public boolean isRequireJAXBCompatibility() {
+    return requireJAXBCompatibility;
+  }
+
+  /**
+   * Whether to require JAXB compatibility with the return types and noun values.
+   *
+   * @param requireJAXBCompatibility Whether to require JAXB compatibility with the return types and noun values.
+   */
+  public void setRequireJAXBCompatibility(boolean requireJAXBCompatibility) {
+    this.requireJAXBCompatibility = requireJAXBCompatibility;
   }
 
   @Override
