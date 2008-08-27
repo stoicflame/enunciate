@@ -343,7 +343,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
 
   /**
    * @return "rest"
-   */
+    */
   @Override
   public String getName() {
     return "rest";

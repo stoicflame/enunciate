@@ -114,7 +114,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (!enunciate.isModuleEnabled("jaxws")) {
+    if (!isDisabled() && !enunciate.isModuleEnabled("jaxws")) {
       throw new EnunciateException("The XFire module requires an enabled JAXWS module.");
     }
   }

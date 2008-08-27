@@ -21,6 +21,7 @@ import freemarker.template.*;
 import freemarker.core.Environment;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateModelAware;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.io.IOException;
@@ -35,7 +36,9 @@ import java.net.URL;
  *
  * @author Ryan Heaton
  */
-public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
+public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule implements EnunciateModelAware {
+  
+  private EnunciateFreemarkerModel model = null;
 
   /**
    * Processes the template.  Declared final because we don't ever want to do more than process
@@ -121,7 +124,7 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
   }
 
   protected EnunciateFreemarkerModel getModelInternal() {
-    return (EnunciateFreemarkerModel) FreemarkerModel.get();
+    return this.model;
   }
 
   /**
@@ -179,4 +182,15 @@ public abstract class FreemarkerDeploymentModule extends BasicDeploymentModule {
     };
   }
 
+  @Override
+  public void close() throws EnunciateException {
+    super.close();
+    
+    this.model = null;
+  }
+
+  // Inherited.
+  public void initModel(EnunciateFreemarkerModel model) {
+    this.model = model;
+  }
 }

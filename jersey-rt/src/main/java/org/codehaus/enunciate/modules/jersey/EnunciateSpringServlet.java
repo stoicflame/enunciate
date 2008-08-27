@@ -45,6 +45,7 @@ public class EnunciateSpringServlet extends ServletContainer {
         String line = reader.readLine();
         while (line != null) {
           rc.getClasses().add(ClassUtils.forName(line));
+          line = reader.readLine();
         }
       }
       catch (Throwable e) {
@@ -59,6 +60,7 @@ public class EnunciateSpringServlet extends ServletContainer {
         String line = reader.readLine();
         while (line != null) {
           rc.getClasses().add(ClassUtils.forName(line));
+          line = reader.readLine();
         }
       }
       catch (Throwable e) {

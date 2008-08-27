@@ -58,7 +58,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageClass"));
     EnumTypeDefinition enumType = new EnumTypeDefinition((EnumDeclaration) getDeclaration("org.codehaus.enunciate.samples.xfire_client.with.a.nested.pckg.NestedPackageEnum"));
     SimpleTypeDefinition simpleType = new SimpleTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.xfire_client.with.a.nested.pckg.NestedSimpleType"));
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    final EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     model.add(ei1);
     model.add(ei2);
     model.add(complexType);
@@ -98,6 +98,11 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
       @Override
       public boolean isDisabled() {
         return false;
+      }
+
+      @Override
+      protected EnunciateFreemarkerModel getModelInternal() {
+        return model;
       }
     };
 

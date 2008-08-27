@@ -46,7 +46,7 @@ public interface DeploymentModule {
   Validator getValidator();
 
   /**
-   * Initialize this deployment module with the specified enunciate mechanism.
+   * Initialize this deployment module with the specified enunciate mechanism. This will be called even if this module is {@link #isDisabled() disabled}.
    *
    * @param enunciate The enunciate mechanism.
    */
@@ -60,7 +60,7 @@ public interface DeploymentModule {
   void step(Enunciate.Target target) throws EnunciateException, IOException;
 
   /**
-   * Close this enunciate module.
+   * Close this enunciate module. This will be called even if this module is {@link #isDisabled() disabled}.
    */
   void close() throws EnunciateException;
 

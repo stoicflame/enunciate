@@ -89,7 +89,7 @@
             <deployables>
               <deployable>
                 <properties>
-                  <context>full</context>
+                  <context>storage</context>
                 </properties>
               </deployable>
             </deployables>

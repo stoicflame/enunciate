@@ -16,23 +16,23 @@ package org.codehaus.enunciate;
  * limitations under the License.
  */
 
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.apache.maven.model.Resource;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.rest.RESTDeploymentModule;
-import org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule;
 import org.codehaus.enunciate.modules.amf.AMFDeploymentModule;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.gwt.GWTDeploymentModule;
 import org.codehaus.enunciate.modules.gwt.config.GWTApp;
+import org.codehaus.enunciate.modules.rest.RESTDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.IncludeExcludeLibs;
 import org.codehaus.enunciate.modules.spring_app.config.WarConfig;
+import org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -413,7 +413,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     @Override
-    protected void initModules(List<DeploymentModule> modules) throws EnunciateException, IOException {
+    protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
       super.initModules(modules);
 
       for (DeploymentModule module : modules) {

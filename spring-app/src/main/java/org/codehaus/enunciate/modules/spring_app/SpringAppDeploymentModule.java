@@ -428,21 +428,23 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    //spit out any deprecation warnings...
-    if (getDefaultDependencyCheck() != null) {
-      warn("As of Enunciate 1.8, defaultDependencyCheck is no longer supported.");
-    }
+    if (!isDisabled()) {
+      //spit out any deprecation warnings...
+      if (getDefaultDependencyCheck() != null) {
+        warn("As of Enunciate 1.8, defaultDependencyCheck is no longer supported.");
+      }
 
-    if (getDefaultAutowire() != null) {
-      warn("As of Enunciate 1.8, defaultAutowire is no longer supported.");
-    }
+      if (getDefaultAutowire() != null) {
+        warn("As of Enunciate 1.8, defaultAutowire is no longer supported.");
+      }
 
-    if (getDispatcherServletClass() != null) {
-      warn("As of Enunciate 1.8, specifying the dispatcherServletClass is no longer supported.");
-    }
+      if (getDispatcherServletClass() != null) {
+        warn("As of Enunciate 1.8, specifying the dispatcherServletClass is no longer supported.");
+      }
 
-    if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-      warn("As of Enunciate 1.8, the \"docsDir\" attribute is no longer supported on the spring-app war config.  (It was moved to the docs module war config.)");
+      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
+        warn("As of Enunciate 1.8, the \"docsDir\" attribute is no longer supported on the spring-app war config.  (It was moved to the docs module war config.)");
+      }
     }
   }
 

@@ -228,23 +228,25 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (this.flexHome == null) {
-      throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
-    }
-
-    for (FlexApp flexApp : flexApps) {
-      if (flexApp.getName() == null) {
-        throw new EnunciateException("A flex app must have a name.");
+    if (!isDisabled()) {
+      if (this.flexHome == null) {
+        throw new EnunciateException("To compile a flex app you must specify the Flex SDK home directory, either in configuration, by setting the FLEX_HOME environment variable, or setting the 'flex.home' system property.");
       }
 
-      String srcPath = flexApp.getSrcDir();
-      if (srcPath == null) {
-        throw new EnunciateException("A source directory for the flex app '" + flexApp.getName() + "' must be supplied with the 'srcDir' attribute.");
-      }
+      for (FlexApp flexApp : flexApps) {
+        if (flexApp.getName() == null) {
+          throw new EnunciateException("A flex app must have a name.");
+        }
 
-      File srcDir = enunciate.resolvePath(srcPath);
-      if (!srcDir.exists()) {
-        throw new EnunciateException("Source directory for the flex app '" + flexApp.getName() + "' doesn't exist.");
+        String srcPath = flexApp.getSrcDir();
+        if (srcPath == null) {
+          throw new EnunciateException("A source directory for the flex app '" + flexApp.getName() + "' must be supplied with the 'srcDir' attribute.");
+        }
+
+        File srcDir = enunciate.resolvePath(srcPath);
+        if (!srcDir.exists()) {
+          throw new EnunciateException("Source directory for the flex app '" + flexApp.getName() + "' doesn't exist.");
+        }
       }
     }
   }

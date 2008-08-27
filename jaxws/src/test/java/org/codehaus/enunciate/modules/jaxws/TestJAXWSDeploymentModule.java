@@ -73,6 +73,11 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
       protected boolean isUpToDate(File genDir) {
         return false;
       }
+
+      @Override
+      protected EnunciateFreemarkerModel getModelInternal() {
+        return model;
+      }
     };
     module.init(enunciate);
     module.doFreemarkerGenerate();
@@ -245,7 +250,12 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     Enunciate enunciate = new Enunciate(new String[0]);
     File genDir = enunciate.createTempDir();
     enunciate.setGenerateDir(genDir);
-    JAXWSDeploymentModule module = new JAXWSDeploymentModule();
+    JAXWSDeploymentModule module = new JAXWSDeploymentModule() {
+      @Override
+      protected EnunciateFreemarkerModel getModelInternal() {
+        return (EnunciateFreemarkerModel) FreemarkerModel.get();
+      }
+    };
     module.init(enunciate);
     EnunciateFreemarkerModel model = module.getModel();
     model.put("file", new SpecifiedOutputDirectoryFileTransform(genDir));

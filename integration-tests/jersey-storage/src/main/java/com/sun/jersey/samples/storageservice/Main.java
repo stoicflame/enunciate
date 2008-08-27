@@ -37,6 +37,8 @@
 
 package com.sun.jersey.samples.storageservice;
 
+import org.codehaus.enunciate.XmlTransient;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -50,6 +52,7 @@ import java.net.URL;
  *
  * @author Paul.Sandoz@Sun.Com
  */
+@XmlTransient
 public class Main {
     
     public static void main(String[] args) throws Exception {

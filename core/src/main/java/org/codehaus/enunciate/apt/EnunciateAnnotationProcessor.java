@@ -96,9 +96,15 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   public void process() {
     try {
-      getRootModel();
+      EnunciateFreemarkerModel model = getRootModel();
 
       EnunciateConfiguration config = this.enunciate.getConfig();
+      for (DeploymentModule module : config.getAllModules()) {
+        if (module instanceof EnunciateModelAware) {
+          ((EnunciateModelAware)module).initModel(model);
+        }
+      }
+
       for (DeploymentModule module : config.getEnabledModules()) {
         debug("Invoking %s step for module %s", Enunciate.Target.GENERATE, module.getName());
         module.step(Enunciate.Target.GENERATE);

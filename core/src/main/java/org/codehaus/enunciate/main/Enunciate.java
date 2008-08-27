@@ -172,13 +172,8 @@ public class Enunciate {
   protected void doClose() throws EnunciateException, IOException {
     info("\n\nClosing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
-      if (!deploymentModule.isDisabled()) {
-        debug("Closing module %s.", deploymentModule.getName());
-        deploymentModule.close();
-      }
-      else {
-        debug("Not closing module %s (module is disabled).", deploymentModule.getName());
-      }
+      debug("Closing module %s.", deploymentModule.getName());
+      deploymentModule.close();
     }
 
     HashSet<String> exportedArtifacts = new HashSet<String>();
@@ -372,8 +367,6 @@ public class Enunciate {
 
   /**
    * Do the initialization logic.  Loads and initializes the deployment modules.
-   *
-   * @return The deployment modules that were loaded and initialized.
    */
   protected void doInit() throws EnunciateException, IOException {
     if (isJavacCheck()) {
@@ -384,7 +377,7 @@ public class Enunciate {
       this.config = loadConfig();
     }
 
-    initModules(this.config.getEnabledModules());
+    initModules(this.config.getAllModules());
   }
 
   /**
@@ -392,7 +385,7 @@ public class Enunciate {
    *
    * @param deploymentModules The deployment modules.
    */
-  protected void initModules(List<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
+  protected void initModules(Collection<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
     info("\n\nInitializing Enunciate mechanism.");
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("Initializing module %s.", deploymentModule.getName());

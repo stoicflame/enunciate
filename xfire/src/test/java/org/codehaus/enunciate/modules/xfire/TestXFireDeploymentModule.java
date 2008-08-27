@@ -37,7 +37,7 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
    * tests doing the generate part.
    */
   public void testDoGenerate() throws Exception {
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    final EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     FreemarkerModel.set(model);
     EndpointInterface ei = new EndpointInterface(getDeclaration("org.codehaus.modules.xfire.SimpleEI"));
     model.add(ei);
@@ -54,6 +54,11 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
       @Override
       protected boolean isUpToDate() {
         return false;
+      }
+
+      @Override
+      protected EnunciateFreemarkerModel getModelInternal() {
+        return model;
       }
     };
 
