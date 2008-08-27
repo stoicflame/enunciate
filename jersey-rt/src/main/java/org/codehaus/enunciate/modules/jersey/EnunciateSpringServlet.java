@@ -12,10 +12,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
@@ -27,16 +30,17 @@ public class EnunciateSpringServlet extends ServletContainer {
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
-    try {
-      //attempt to load the JSON providers.
-      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONRootElementProvider"));
-      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONJAXBElementProvider"));
-      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONArrayProvider"));
-      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONObjectProvider"));
-    }
-    catch (Throwable e) {
-      LOG.info("Apparently, no JSON providers are on the classpath (" + e.getMessage() + ").");
-    }
+    //todo: uncomment when issues 101 and 102 are resolved.
+//    try {
+//      //attempt to load the JSON providers.
+//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONRootElementProvider"));
+//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONJAXBElementProvider"));
+//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONArrayProvider"));
+//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONObjectProvider"));
+//    }
+//    catch (Throwable e) {
+//      LOG.info("Apparently, no JSON providers are on the classpath (" + e.getMessage() + ").");
+//    }
 
     InputStream stream = getClass().getResourceAsStream("/jaxrs-providers.list");
     if (stream != null) {
@@ -77,6 +81,20 @@ public class EnunciateSpringServlet extends ServletContainer {
     String servletPath = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH);
     if (servletPath != null) {
       rc.getProperties().put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, servletPath);
+    }
+
+    stream = getClass().getResourceAsStream("/media-type-mappings.properties");
+    if (stream != null) {
+      try {
+        Properties mappings = new Properties();
+        mappings.load(stream);
+        for (Map.Entry<Object, Object> entry : mappings.entrySet()) {
+          rc.getMediaTypeMappings().put(String.valueOf(entry.getKey()), MediaType.valueOf(String.valueOf(entry.getValue())));
+        }
+      }
+      catch (IOException e) {
+        //fall through...
+      }
     }
 
     super.configure(sc, rc, wa);

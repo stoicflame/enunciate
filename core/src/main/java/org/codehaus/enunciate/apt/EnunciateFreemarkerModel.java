@@ -26,26 +26,22 @@ import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMessage;
 import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
-import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
-import org.codehaus.enunciate.contract.jaxrs.Resource;
-import org.codehaus.enunciate.contract.jaxrs.SubResourceLocator;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
-import org.codehaus.enunciate.util.ResourceMethodComparator;
 import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
+import javax.ws.rs.Produces;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.ws.rs.Produces;
 import java.io.File;
 import java.util.*;
 
@@ -70,7 +66,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
   final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
   final List<RootResource> rootResources = new ArrayList<RootResource>();
-  final List<ResourceMethod> resourceMethods = new ArrayList<ResourceMethod>();
   final List<TypeDeclaration> jaxrsProviders = new ArrayList<TypeDeclaration>();
   private File fileOutputDirectory = null;
   private String baseDeploymentAddress = null;
@@ -250,15 +245,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public List<RootResource> getRootResources() {
     return rootResources;
-  }
-
-  /**
-   * The resource methods.
-   *
-   * @return The resource methods.
-   */
-  public List<ResourceMethod> getResourceMethods() {
-    return resourceMethods;
   }
 
   /**
@@ -447,24 +433,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(RootResource rootResource) {
     this.rootResources.add(rootResource);
-
-    ResourceMethodComparator comparator = new ResourceMethodComparator();
-    Stack<Resource> resources = new Stack<Resource>();
-    resources.add(rootResource);
-    while (!resources.isEmpty()) {
-      Resource resource = resources.pop();
-      for (ResourceMethod resourceMethod : resource.getResourceMethods()) {
-        int position = Collections.binarySearch(resourceMethods, resourceMethod, comparator);
-        if (position < 0) {
-          position = (-position - 1);
-        }
-        resourceMethods.add(position, resourceMethod);
-      }
-
-      for (SubResourceLocator locator : resource.getResourceLocators()) {
-        resources.add(locator.getResource());
-      }
-    }
   }
 
   /**

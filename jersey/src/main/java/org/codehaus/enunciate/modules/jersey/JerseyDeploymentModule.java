@@ -20,8 +20,9 @@ import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
@@ -30,13 +31,9 @@ import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileOutputStream;
 import java.net.URL;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Arrays;
-import java.util.Map;
-
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import java.util.*;
 
 /**
  * <h1>Jersey Module</h1>
@@ -112,6 +109,16 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
     processTemplate(getRootResourceListTemplateURL(), model);
     processTemplate(getProvidersListTemplateURL(), model);
+    Map<String, String> conentTypesToIds = model.getContentTypesToIds();
+    Properties mappings = new Properties();
+    for (Map.Entry<String, String> contentTypeToId : conentTypesToIds.entrySet()) {
+      mappings.put(contentTypeToId.getValue(), contentTypeToId.getKey());
+    }
+    File file = new File(getGenerateDir(), "media-type-mappings.properties");
+    FileOutputStream out = new FileOutputStream(file);
+    mappings.store(out, "JAX-RS media type mappings.");
+    out.flush();
+    out.close();
   }
 
   @Override
@@ -124,6 +131,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     File webinfClasses = new File(webinf, "classes");
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-providers.list"), new File(webinfClasses, "jaxrs-providers.list"));
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-root-resources.list"), new File(webinfClasses, "jaxrs-root-resources.list"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "media-type-mappings.properties"), new File(webinfClasses, "media-type-mappings.properties"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
@@ -141,22 +149,39 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
 
     Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
     TreeSet<String> urlMappings = new TreeSet<String>();
-    for (ResourceMethod resourceMethod : getModel().getResourceMethods()) {
-      String resourceMethodPattern = resourceMethod.getServletPattern();
+    Map<String, List<MediaType>> servletPatterns = new TreeMap<String, List<MediaType>>();
+    for (RootResource rootResource : getModel().getRootResources()) {
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        String servletPattern = resourceMethod.getServletPattern();
+        debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+              resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+        List<MediaType> mediaTypes = servletPatterns.get(servletPattern);
+        if (mediaTypes == null) {
+          mediaTypes = new ArrayList<MediaType>();
+          servletPatterns.put(servletPattern, mediaTypes);
+        }
+
+        for (String producesMime : resourceMethod.getProducesMime()) {
+          MediaType mediaType = MediaType.valueOf(producesMime);
+          if (!mediaTypes.contains(mediaType)) {
+            mediaTypes.add(mediaType);
+          }
+        }
+      }
+    }
+
+    for (Map.Entry<String, List<MediaType>> resourcePattern : servletPatterns.entrySet()) {
+      String resourceMethodPattern = resourcePattern.getKey();
       String servletPattern = isUseSubcontext() ? getRestSubcontext() + resourceMethodPattern : resourceMethodPattern;
-      debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
-            resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
       urlMappings.add(servletPattern);
       if (isUsePathBasedConneg()) {
-        for (String produces : resourceMethod.getProducesMime()) {
-          MediaType mediaType = MediaType.valueOf(produces);
+        for (MediaType mediaType : resourcePattern.getValue()) {
           for (Map.Entry<String, String> entry : contentTypes2Ids.entrySet()) {
             MediaType supportedType = MediaType.valueOf(entry.getKey());
             if (mediaType.isCompatible(supportedType)) {
-              String connegServletPattern = '/' + entry.getKey() + resourceMethodPattern;
-              debug("Resource method %s of resource %s to be made accessible by servlet pattern %s because it produces %s/%s.",
-                    resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), connegServletPattern,
-                    mediaType.getType(), mediaType.getSubtype());
+              String connegServletPattern = '/' + entry.getValue() + resourceMethodPattern;
+              debug("Servlet pattern %s of to be made also accessible by servlet pattern %s because it produces %s/%s.",
+                    resourceMethodPattern, connegServletPattern, mediaType.getType(), mediaType.getSubtype());
               urlMappings.add(connegServletPattern);
             }
           }

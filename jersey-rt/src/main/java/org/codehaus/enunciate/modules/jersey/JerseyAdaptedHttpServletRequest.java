@@ -32,6 +32,7 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
   public static final String PROPERTY_SERVLET_PATH = "org.codehaus.enunciate.modules.jersey.config.ServletPath";
   public static final String FEATURE_PATH_BASED_CONNEG = "org.codehaus.enunciate.modules.jersey.config.PathBasedConneg";
 
+  private final String rawpath;
   private final String servletPath;
   private final String mediaKey;
   private final MediaType mediaType;
@@ -47,9 +48,10 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
 
     String mediaKey = null;
     MediaType mediaType = null;
+    this.rawpath = UriBuilder.fromUri(request.getRequestURL().toString()).build().getRawPath();
     if (resourceConfig.getFeature(FEATURE_PATH_BASED_CONNEG)) {
+      String path = rawpath;
       //if we're doing path-based conneg, we're going to look for the media-type mapping key on the URL after the context path.
-      String path = UriBuilder.fromUri(request.getRequestURL().toString()).build().getRawPath();
       if (path.startsWith(request.getContextPath())) {
         path = path.substring(request.getContextPath().length());
       }
@@ -75,6 +77,11 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
     this.servletPath = servletPath;
     this.mediaKey = mediaKey;
     this.mediaType = mediaType;
+  }
+
+  @Override
+  public String getPathInfo() {
+    return this.rawpath.substring(getContextPath().length() + getServletPath().length());
   }
 
   /**
