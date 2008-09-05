@@ -57,6 +57,13 @@ import java.util.*;
  *
  * <h1><a name="model">REST Model</a></h1>
  *
+ * <p><i>It should be noted that this documentation applies to the Enunciate-specific REST model.  Enunciate also supports
+ * the <a href="https://jsr311.dev.java.net/">JAX-RS</a> REST model, which was developed and released separately from the
+ * Enunciate REST model. The two models are different, each with their own advantages and disadvantages, but now that the
+ * JAX-RS spec has been finalized, most developers will want to use the "standard" JAX-RS model.  However, if you need
+ * better support for multipart file upload and documentation of errors, you may still want to consider using Enunciate's
+ * REST model.</i></p>
+ *
  * <p>We start by defining a model for the REST API.  A REST API is comprised of a set of <i>resources</i>
  * on which a constrained set of <i>operations</i> can act.  Borrowing terms from english grammar, Enunciate
  * identifies each REST resource as a <i>noun</i> (with an associated <i>noun context</i>) and the REST operations
