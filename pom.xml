@@ -114,6 +114,7 @@
   <properties>
     <spring.version>2.5.4</spring.version>
     <spring.security.version>2.0.1</spring.security.version>
+    <jersey.version>0.10-ea-SNAPSHOT</jersey.version>
   </properties>
 
   <dependencyManagement>
@@ -171,20 +172,26 @@
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-client</artifactId>
+        <version>${jersey.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-json</artifactId>
-        <version>0.10-ea-SNAPSHOT</version>
+        <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
-        <version>0.10-ea-SNAPSHOT</version>
+        <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-spring</artifactId>
-        <version>0.10-ea-SNAPSHOT</version>
+        <version>${jersey.version}</version>
         <exclusions>
           <exclusion>
             <groupId>org.springframework</groupId>

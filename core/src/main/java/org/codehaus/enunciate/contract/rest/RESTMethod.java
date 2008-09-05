@@ -26,8 +26,9 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.ServiceEndpoint;
+import org.codehaus.enunciate.contract.*;
 import org.codehaus.enunciate.rest.annotations.*;
+import org.codehaus.enunciate.rest.MimeType;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
@@ -39,7 +40,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEndpoint {
+public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEndpoint, RESTResource {
 
   private final RESTNoun noun;
   private final RESTParameter properNoun;
@@ -140,20 +141,62 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
 
     ContentType contentTypeInfo = delegate.getDeclaringType().getPackage() != null ? delegate.getDeclaringType().getPackage().getAnnotation(ContentType.class) : null;
     if (contentTypeInfo != null) {
-      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+      for (String supported : contentTypeInfo.value()) {
+        try {
+          this.contentTypes.add(MimeType.parse(supported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
+      for (String unsupported : contentTypeInfo.unsupported()) {
+        try {
+          this.contentTypes.remove(MimeType.parse(unsupported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
     }
 
     contentTypeInfo = delegate.getDeclaringType().getAnnotation(ContentType.class);
     if (contentTypeInfo != null) {
-      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+      for (String supported : contentTypeInfo.value()) {
+        try {
+          this.contentTypes.add(MimeType.parse(supported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
+      for (String unsupported : contentTypeInfo.unsupported()) {
+        try {
+          this.contentTypes.remove(MimeType.parse(unsupported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
     }
 
     contentTypeInfo = getAnnotation(ContentType.class);
     if (contentTypeInfo != null) {
-      this.contentTypes.addAll(Arrays.asList(contentTypeInfo.value()));
-      this.contentTypes.removeAll(Arrays.asList(contentTypeInfo.unsupported()));
+      for (String supported : contentTypeInfo.value()) {
+        try {
+          this.contentTypes.add(MimeType.parse(supported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
+      for (String unsupported : contentTypeInfo.unsupported()) {
+        try {
+          this.contentTypes.remove(MimeType.parse(unsupported).toString());
+        }
+        catch (Exception e) {
+          throw new ValidationException(getPosition(), e.getMessage());
+        }
+      }
     }
   }
 
@@ -306,5 +349,79 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
    */
   public Set<String> getContentTypes() {
     return contentTypes;
+  }
+
+  // Inherited.
+  public String getPath() {
+    StringBuilder builder = new StringBuilder("/");
+    builder.append(getNoun().toString());
+    if (getProperNoun() != null) {
+      builder.append("/{").append(getProperNoun().getSimpleName()).append('}');
+    }
+    return builder.toString();
+  }
+
+  // Inherited.
+  public Set<String> getSupportedOperations() {
+    TreeSet<String> ops = new TreeSet<String>();
+    for (VerbType verb : getVerbs()) {
+      switch (verb) {
+        case create:
+          ops.add("PUT");
+          break;
+        case read:
+          ops.add("GET");
+          break;
+        case update:
+          ops.add("POST");
+          break;
+        default:
+          ops.add(verb.toString().toUpperCase());
+      }
+    }
+    return ops;
+  }
+
+  // Inherited.
+  public List<RESTResourceParameter> getResourceParameters() {
+    ArrayList<RESTResourceParameter> params = new ArrayList<RESTResourceParameter>();
+    if (getProperNoun() != null) {
+      params.add(getProperNoun());
+    }
+
+    params.addAll(getContextParameters());
+    params.addAll(getAdjectives());
+    return params;
+  }
+
+  // Inherited.
+  public List<SupportedContentType> getSupportedContentTypes() {
+    ArrayList<SupportedContentType> supported = new ArrayList<SupportedContentType>(contentTypes.size());
+    for (String contentType : getContentTypes()) {
+      SupportedContentType supportedContentType = new SupportedContentType();
+      supportedContentType.setType(contentType);
+      supportedContentType.setProduceable(true);
+      supportedContentType.setConsumable(true);
+      supported.add(supportedContentType);
+    }
+    return supported;
+  }
+
+  // Inherited.
+  public RESTResourcePayload getInputPayload() {
+    return getNounValue() != null ? getNounValue() : null;
+  }
+
+  // Inherited.
+  public RESTResourcePayload getOutputPayload() {
+    DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
+    return returnType.isVoid() ? null : new ResourcePayloadTypeAdapter(returnType);
+  }
+
+  // Inherited.
+  public List<RESTResourceError> getResourceErrors() {
+    ArrayList<RESTResourceError> errors = new ArrayList<RESTResourceError>();
+    errors.addAll(getRESTErrors());
+    return errors;
   }
 }

@@ -20,6 +20,8 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 
+import org.codehaus.enunciate.rest.MimeType;
+
 /**
  * @author Ryan Heaton
  */

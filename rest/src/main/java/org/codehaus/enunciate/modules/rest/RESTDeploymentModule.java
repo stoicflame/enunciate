@@ -122,6 +122,7 @@ import java.util.*;
  * a specific user of a specific group, we could identify the "group id" as a context parameter, the user as the noun, and the user id as the proper
  * noun.</p>
  *
+ * <a name="contentTypes">&nbsp;</a>
  * <h3>Content Types</h3>
  *
  * <p>Each REST noun is represented by a set of content types (i.e. MIME types).  By default, Enunciate represents each noun with both the "application/xml"

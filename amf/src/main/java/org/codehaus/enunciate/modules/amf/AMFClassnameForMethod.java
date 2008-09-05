@@ -39,29 +39,6 @@ public class AMFClassnameForMethod extends org.codehaus.enunciate.template.freem
       //special case for primitive arrays.
       return super.convert(((ArrayType) typeMirror).getComponentType()) + "[]";
     }
-    else if (typeMirror instanceof PrimitiveType) {
-      //convert each primitive type to its wrapper class for reading/wring to ObjectInputStream.
-      switch (((PrimitiveType) typeMirror).getKind()) {
-        case BOOLEAN:
-          return Boolean.class.getName();
-        case BYTE:
-          return Byte.class.getName();
-        case CHAR:
-          return Character.class.getName();
-        case DOUBLE:
-          return Double.class.getName();
-        case FLOAT:
-          return Float.class.getName();
-        case INT:
-          return Integer.class.getName();
-        case LONG:
-          return Long.class.getName();
-        case SHORT:
-          return Short.class.getName();
-        default:
-          throw new IllegalArgumentException();
-      }
-    }
     else if (typeMirror instanceof EnumType) {
       return String.class.getName();
     }

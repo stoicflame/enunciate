@@ -18,12 +18,15 @@ package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import javax.ws.rs.Path;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * A sub-resource locator.  Invoked on a JAX-RS resource in order to locate a subresource.
@@ -35,26 +38,42 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
   private final Path path;
   private final SubResource resource;
   private final Resource parent;
+  private final List<ResourceParameter> resourceParameters;
+  private final ParameterDeclaration entityParameter;
 
-  public SubResourceLocator(MethodDeclaration methodDeclaration, Resource parent) {
-    super(methodDeclaration);
+  public SubResourceLocator(MethodDeclaration delegate, Resource parent) {
+    super(delegate);
     this.parent = parent;
 
-    this.path = methodDeclaration.getAnnotation(Path.class);
+    this.path = delegate.getAnnotation(Path.class);
     if (this.path == null) {
       throw new IllegalArgumentException("A subresource locator must specify a path with the @javax.ws.rs.Path annotation.");
     }
 
     SubResource resource;
-    TypeMirror returnType = methodDeclaration.getReturnType();
+    TypeMirror returnType = delegate.getReturnType();
     if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).getDeclaration() != null) {
       TypeDeclaration declaration = ((DeclaredType) returnType).getDeclaration();
-      resource = new SubResource(declaration, getPath(), parent);
+      resource = new SubResource(declaration, getPath(), this);
     }
     else {
-      resource = new SubResource(Context.getCurrentEnvironment().getTypeDeclaration(Object.class.getName()), getPath(), parent);
+      resource = new SubResource(Context.getCurrentEnvironment().getTypeDeclaration(Object.class.getName()), getPath(), this);
     }
     this.resource = resource;
+
+    ParameterDeclaration entityParameter = null;
+    List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
+    for (ParameterDeclaration parameterDeclaration : delegate.getParameters()) {
+      if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
+        resourceParameters.add(new ResourceParameter(parameterDeclaration));
+      }
+      else {
+        entityParameter = parameterDeclaration;
+      }
+    }
+
+    this.entityParameter = entityParameter;
+    this.resourceParameters = resourceParameters;
   }
 
   /**
@@ -83,4 +102,25 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
   public Resource getParent() {
     return parent;
   }
+
+  /**
+   * The list of resource parameters that this method requires to be invoked.
+   *
+   * @return The list of resource parameters that this method requires to be invoked.
+   */
+  public List<ResourceParameter> getResourceParameters() {
+    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
+    resourceParams.addAll(getParent().getResourceParameters());
+    return resourceParams;
+  }
+
+  /**
+   * The entity parameter.
+   *
+   * @return The entity parameter, or null if none.
+   */
+  public ParameterDeclaration getEntityParameter() {
+    return entityParameter;
+  }
+
 }

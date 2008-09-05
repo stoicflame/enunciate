@@ -41,25 +41,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void writeExternal(java.io.ObjectOutput out) throws java.io.IOException {
     [#if !baseobject]super.writeExternal(out);[/#if]
   [#list type.attributes as attribute]
-    [#if attribute.accessorType.primitive]
-    out.write${attribute.accessorType.kind?string?lower_case?cap_first}(this.${attribute.simpleName});
-    [#else]
-    out.writeObject(this.${attribute.simpleName});
-    [/#if]
+[@accessorOutput accessor=attribute/]
   [/#list]
   [#if type.value?exists]
-    [#if value.accessorType.primitive]
-    out.write${value.accessorType.kind?string?lower_case?cap_first}(this.${value.simpleName});
-    [#else]
-    out.writeObject(this.${value.simpleName});
-    [/#if]
+[@accessorOutput accessor=type.value/]
   [#else]
     [#list type.elements as element]
-      [#if element.accessorType.primitive]
-    out.write${element.accessorType.kind?string?lower_case?cap_first}(this.${element.simpleName});
-      [#else]
-    out.writeObject(this.${element.simpleName});
-      [/#if]
+[@accessorOutput accessor=element/]
     [/#list]
   [/#if]
   }
@@ -67,25 +55,13 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
   public void readExternal(java.io.ObjectInput in) throws java.io.IOException, ClassNotFoundException {
     [#if !baseobject]super.readExternal(in);[/#if]
   [#list type.attributes as attribute]
-    [#if attribute.accessorType.primitive]
-    this.${attribute.simpleName} = (${classnameFor(attribute)}) in.read${attribute.accessorType.kind?string?lower_case?cap_first}();
-    [#else]
-    this.${attribute.simpleName} = (${classnameFor(attribute)}) in.readObject();
-    [/#if]
+[@accessorInput accessor=attribute/]
   [/#list]
   [#if type.value?exists]
-    [#if value.accessorType.primitive]
-    this.${value.simpleName} = (${classnameFor(value)}) in.read${value.accessorType.kind?string?lower_case?cap_first}();
-    [#else]
-    this.${value.simpleName} = (${classnameFor(value)}) in.readObject();
-    [/#if]
+[@accessorInput accessor=type.value/]
   [#else]
     [#list type.elements as element]
-      [#if element.accessorType.primitive]
-    this.${element.simpleName} = (${classnameFor(element)}) in.read${element.accessorType.kind?string?lower_case?cap_first}();
-      [#else]
-    this.${element.simpleName} = (${classnameFor(element)}) in.readObject();
-      [/#if]
+[@accessorInput accessor=element/]
     [/#list]
   [/#if]
   }
@@ -131,5 +107,36 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
 [#macro propertyField property]
   [#if !property.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
   private ${classnameFor(property)} ${property.simpleName};
+  [/#if]
+[/#macro]
+[#macro accessorOutput accessor]
+  [#if !accessor.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if accessor.accessorType.primitive]
+      [#if ("char" = accessor.accessorType.kind?string?lower_case)]
+    out.writeObject(String.valueOf(this.${accessor.simpleName}));
+      [#elseif ("long" = accessor.accessorType.kind?string?lower_case)]
+    out.writeDouble(this.${accessor.simpleName});
+      [#else]
+    out.write${accessor.accessorType.kind?string?lower_case?cap_first}(this.${accessor.simpleName});
+      [/#if]
+    [#else]
+    out.writeObject(this.${accessor.simpleName});
+    [/#if]
+  [/#if]
+[/#macro]
+[#macro accessorInput accessor]
+  [#if !accessor.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if accessor.accessorType.primitive]
+      [#if ("char" = accessor.accessorType.kind?string?lower_case)]
+    _${accessor.simpleName}_holder = (java.lang.String) in.readObject();
+    this.${accessor.simpleName} = _${accessor.simpleName}_holder == null || _${accessor.simpleName}_holder.length() == 0 ? '\0' : _${accessor.simpleName}_holder.charAt(0);
+      [#elseif ("long" = accessor.accessorType.kind?string?lower_case)]
+    this.${accessor.simpleName} = (${classnameFor(accessor)}) in.readDouble();
+      [#else]
+    this.${accessor.simpleName} = (${classnameFor(accessor)}) in.read${accessor.accessorType.kind?string?lower_case?cap_first}();
+      [/#if]
+    [#else]
+    this.${accessor.simpleName} = (${classnameFor(accessor)}) in.readObject();
+    [/#if]
   [/#if]
 [/#macro]

@@ -447,8 +447,11 @@
       </xs:documentation>
     </xs:annotation>
 
+    <xs:attribute name="id" type="xs:string"/>
     <xs:attribute name="type" type="xs:string"/>
-    <xs:attribute name="path" type="xs:string"/>
+    <xs:attribute name="path" type="xs:string" use="optional"/>
+    <xs:attribute name="produceable" type="xs:boolean"/>
+    <xs:attribute name="consumable" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="operation">
@@ -461,11 +464,14 @@
     <xs:complexContent>
       <xs:extension base="taggedDocumentation">
         <xs:sequence>
+          <xs:element name="alias" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="contentType" type="contentType" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="parameter" type="restParameter" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="inValue" type="inValue" minOccurs="0" maxOccurs="1"/>
           <xs:element name="outValue" type="outValue" minOccurs="0" maxOccurs="1"/>
           <xs:element name="error" type="restError" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restOp"/>
         <xs:attribute name="requiresResourceId" type="xs:boolean"/>
       </xs:extension>
@@ -491,9 +497,21 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="type" type="restParameterType"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+
+  <xs:simpleType name="restParameterType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="matrix"/>
+      <xs:enumeration value="query"/>
+      <xs:enumeration value="path"/>
+      <xs:enumeration value="cookie"/>
+      <xs:enumeration value="header"/>
+      <xs:enumeration value="form"/>
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:complexType name="restError">
     <xs:annotation>

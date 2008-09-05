@@ -1,0 +1,11 @@
+[#ftl]
+[@file name="jaxrs-jaxb-types.list"]
+  [#list ns2schema?values as schema]
+    [#list schema.typeDefinitions as typeDef]
+${typeDef.qualifiedName}
+    [/#list]
+    [#list schema.globalElements as element]
+${element.qualifiedName}
+    [/#list]
+  [/#list]
+[/@file]

@@ -29,18 +29,18 @@ import java.util.ArrayList;
 public class SubResource extends Resource {
 
   private final String path;
-  private final Resource parent;
+  private final SubResourceLocator locator;
 
-  public SubResource(TypeDeclaration delegate, String path, Resource parent) {
+  public SubResource(TypeDeclaration delegate, String path, SubResourceLocator locator) {
     super(delegate);
     this.path = path;
-    this.parent = parent;
+    this.locator = locator;
   }
 
   @Override
   public List<ResourceParameter> getResourceParameters() {
     ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>(super.getResourceParameters());
-    params.addAll(getParent().getResourceParameters());
+    params.addAll(getLocator().getResourceParameters());
     return params;
   }
 
@@ -55,11 +55,21 @@ public class SubResource extends Resource {
   }
 
   /**
+   * The subresource locator.
+   *
+   * @return The subresource locator.
+   */
+  public SubResourceLocator getLocator() {
+    return locator;
+  }
+
+  /**
    * The parent resource.
    *
    * @return The parent resource.
    */
   public Resource getParent() {
-    return parent;
+    return getLocator().getParent();
   }
+
 }

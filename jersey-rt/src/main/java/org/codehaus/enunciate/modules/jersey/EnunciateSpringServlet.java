@@ -41,6 +41,7 @@ public class EnunciateSpringServlet extends ServletContainer {
 //    catch (Throwable e) {
 //      LOG.info("Apparently, no JSON providers are on the classpath (" + e.getMessage() + ").");
 //    }
+    rc.getClasses().add(EnunciateJAXBContextResolver.class);
 
     InputStream stream = getClass().getResourceAsStream("/jaxrs-providers.list");
     if (stream != null) {

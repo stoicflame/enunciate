@@ -38,6 +38,7 @@ import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
+import org.codehaus.enunciate.rest.MimeType;
 
 import javax.ws.rs.Produces;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -446,7 +447,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
       for (String contentType : produces.value()) {
-        addContentType(contentType);
+        try {
+          addContentType(MimeType.parse(contentType).toString());
+        }
+        catch (Exception e) {
+          addContentType(contentType);
+        }
       }
     }
   }

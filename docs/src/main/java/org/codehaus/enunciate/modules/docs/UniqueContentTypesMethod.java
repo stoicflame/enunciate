@@ -20,11 +20,12 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.RESTResource;
+import org.codehaus.enunciate.contract.SupportedContentType;
 
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.Collection;
 
 /**
  * Rest resource path of the given REST noun.
@@ -39,20 +40,30 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
     }
 
     Object object = BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(0));
-    List<RESTMethod> methodList;
-    if (object instanceof List) {
-      methodList = (List<RESTMethod>) object;
+    Collection<RESTResource> resourceList;
+    if (object instanceof Collection) {
+      resourceList = (Collection<RESTResource>) object;
     }
     else {
-      throw new TemplateModelException("The uniqueContentTypes method take a list of REST methods.  Not " + object.getClass().getName());
+      throw new TemplateModelException("The uniqueContentTypes method take a list of REST resources.  Not " + object.getClass().getName());
     }
 
-    Set<String> contentTypes = new TreeSet<String>();
-    for (RESTMethod restMethod : methodList) {
-      contentTypes.addAll(restMethod.getContentTypes());
+    TreeMap<String, SupportedContentType> supported = new TreeMap<String, SupportedContentType>();
+    for (RESTResource resource : resourceList) {
+      for (SupportedContentType contentType : resource.getSupportedContentTypes()) {
+        SupportedContentType type = supported.get(contentType.getType());
+        if (type == null) {
+          type = new SupportedContentType();
+          type.setType(contentType.getType());
+          supported.put(contentType.getType(), type);
+        }
+
+        type.setProduceable(type.isProduceable() || contentType.isProduceable());
+        type.setConsumable(type.isConsumable() || contentType.isConsumable());
+      }
     }
 
-    return contentTypes;
+    return supported.values();
   }
 
 }

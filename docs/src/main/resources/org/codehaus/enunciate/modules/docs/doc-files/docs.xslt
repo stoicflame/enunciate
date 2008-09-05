@@ -16,6 +16,9 @@
   <!--Whether this API contains REST endpoints.-->
   <xsl:variable name="restful" select="boolean(/api-docs/rest/resources/resource)"/>
 
+  <!--The characters to translate from a REST name.-->
+  <xsl:variable name="rest_translate_chars">/{}</xsl:variable>
+
   <!--The global side navigation (the navigation that is always there).-->
   <xsl:variable name="global-sidnav">
     <h1>Home</h1>
@@ -53,8 +56,7 @@
       <h1>REST</h1>
       <ul>
         <xsl:for-each select="/api-docs/rest/resources/resource">
-          <xsl:sort select="@name"/>
-          <li><a href="rest_{translate(@name,'/','.')}.html"><xsl:value-of select="@name"/></a></li>
+          <li><a href="rest_{translate(@name,$rest_translate_chars,'.')}.html"><xsl:value-of select="@name"/></a></li>
         </xsl:for-each>
       </ul>
     </xsl:if>
@@ -151,10 +153,12 @@
 
                     <xsl:choose>
                       <xsl:when test="string-length($ns) = 0">
-                        <h1>Default Namespace<xsl:if test="@file"> (<a href="{@file}">wsdl</a>)</xsl:if>:</h1>
+                        <h3>Default Namespace</h3>
+                        <xsl:if test="@file"><p>(<a href="{@file}">wsdl here</a>)</p></xsl:if>
                       </xsl:when>
                       <xsl:otherwise>
-                        <h1>Namespace <u><xsl:value-of select="@namespace"/></u><xsl:if test="@file"> (<a href="{@file}">wsdl</a>)</xsl:if>:</h1>
+                        <h3>Namespace <u><xsl:value-of select="@namespace"/></u>:</h3>
+                        <xsl:if test="@file"><p>(<a href="{@file}">wsdl here</a>)</p></xsl:if>
                       </xsl:otherwise>
                     </xsl:choose>
 
@@ -200,8 +204,7 @@
 
                   <ul>
                     <xsl:for-each select="/api-docs/rest/resources/resource">
-                      <xsl:sort select="@name"/>
-                      <li><a href="rest_{translate(@name,'/','.')}.html"><xsl:value-of select="@name"/></a></li>
+                      <li><a href="rest_{translate(@name,$rest_translate_chars,'.')}.html"><xsl:value-of select="@name"/></a></li>
                       <xsl:call-template name="rest-resource"/>
                     </xsl:for-each>
                   </ul>
@@ -226,10 +229,12 @@
 
                     <xsl:choose>
                       <xsl:when test="string-length($ns) = 0">
-                        <h1>Default Namespace<xsl:if test="@file"> (<a href="{@file}">schema</a>)</xsl:if>:</h1>
+                        <h3>Default Namespace</h3>
+                        <xsl:if test="@file"><p>(<a href="{@file}">schema here</a>)</p></xsl:if>
                       </xsl:when>
                       <xsl:otherwise>
-                        <h1>Namespace <u><xsl:value-of select="@namespace"/></u><xsl:if test="@file"> (<a href="{@file}">schema</a>)</xsl:if>:</h1>
+                        <h3>Namespace <u><xsl:value-of select="@namespace"/></u></h3>
+                        <xsl:if test="@file"><p>(<a href="{@file}">schema here</a>)</p></xsl:if>
                       </xsl:otherwise>
                     </xsl:choose>
 
@@ -636,7 +641,7 @@
 
   <!--The page for a REST resource.-->
   <xsl:template name="rest-resource">
-    <redirect:write file="{$output-dir}/rest_{translate(@name,'/','.')}.html">
+    <redirect:write file="{$output-dir}/rest_{translate(@name,$rest_translate_chars,'.')}.html">
       <html>
 
         <head>
@@ -666,7 +671,7 @@
 
                   <xsl:if test="operation">
                     <p>
-                      The following methods are supported on this resource:
+                      The following operations are supported on this resource:
                     </p>
 
                     <ul>
@@ -675,62 +680,39 @@
                           <xsl:choose>
                             <xsl:when test="tag[@name='deprecated']">
                               <font style="text-decoration:line-through;">
-                                <a href="#{@type}"><xsl:value-of select="@type"/></a>
+                                <a href="#{@name}"><xsl:value-of select="@name"/></a>
                               </font>
+                              <xsl:for-each select="alias">
+                                <font style="text-decoration:line-through;">
+                                  <a href="#{../@name}"><xsl:value-of select="."/></a>
+                                </font>
+                              </xsl:for-each>
                             </xsl:when>
                             <xsl:otherwise>
-                              <a href="#{@type}"><xsl:value-of select="@type"/></a>
+                              <a href="#{@name}"><xsl:value-of select="@name"/></a>
+                              <xsl:for-each select="alias">
+                                <a href="#{../@name}"><xsl:value-of select="."/></a>
+                              </xsl:for-each>
                             </xsl:otherwise>
                           </xsl:choose>
                         </li>
                       </xsl:for-each>
                     </ul>
                   </xsl:if>
-
-                  <xsl:if test="contentType">
-                    <h2>Content Types</h2>
-
-                    <p>This resource is available in the following content types:</p>
-
-                    <table>
-                      <tr>
-                        <th>content type</th>
-                        <th>mount point<xsl:if test="contains(../../@baseAddress, 'localhost:8080')">*</xsl:if></th>
-                      </tr>
-                      <xsl:for-each select="contentType">
-                        <tr>
-                          <td><xsl:value-of select="@type"/></td>
-                          <td><a href="{concat(../../../@baseAddress, @path)}"><xsl:value-of select="concat(../../../@baseAddress, @path)"/></a></td>
-                        </tr>
-                      </xsl:for-each>
-                    </table>
-
-                    <xsl:if test="contains(../../@baseAddress, 'localhost:8080')"><p>*Note that you may need to adjust the host, port, and application context</p></xsl:if>
-                  </xsl:if>
-
                 </div>
 
                 <xsl:for-each select="operation">
                   <div class="item">
 
-                    <h1><a name="{@type}"><xsl:value-of select="@type"/></a></h1>
+                    <h1><a name="{@name}"><xsl:value-of select="@name"/></a></h1>
+
+                    <xsl:if test="alias">
+                      <p>Aliases: <xsl:for-each select="alias"><xsl:value-of select="."/> </xsl:for-each></p>
+                    </xsl:if>
 
                     <xsl:if test="tag[@name='deprecated']">
                       <p class="deprecated">
                         This method has been deprecated.  <xsl:value-of select="tag[@name='deprecated']" disable-output-escaping="yes"/>.
-                      </p>
-                    </xsl:if>
-
-                    <xsl:if test="@requiresResourceId='true'">
-                      <p>
-                        This method requires a resource id on the URL.
-                        <xsl:choose>
-                          <xsl:when test="@type='read'">(e.g. "GET <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
-                          <xsl:when test="@type='create'">(e.g. "PUT <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
-                          <xsl:when test="@type='update'">(e.g. "POST <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
-                          <xsl:when test="@type='delete'">(e.g. "DELETE <xsl:value-of select="concat(../@xmlResource, '/{id-goes-here}')"/>".)</xsl:when>
-                          <xsl:otherwise></xsl:otherwise>
-                        </xsl:choose>
                       </p>
                     </xsl:if>
 
@@ -741,17 +723,19 @@
                     </xsl:if>
 
                     <xsl:if test="parameter">
-                      <h2>Possible HTTP Parameters</h2>
+                      <h2>Parameters</h2>
                       <table>
                         <tr>
                           <th>name</th>
                           <!--todo: put the type of the parameter.-->
                           <th>description</th>
+                          <th>type</th>
                         </tr>
                         <xsl:for-each select="parameter">
                           <tr>
                             <td><xsl:value-of select="@name"/></td>
                             <td><xsl:value-of select="." disable-output-escaping="yes"/></td>
+                            <td><xsl:value-of select="@type"/></td>
                           </tr>
                         </xsl:for-each>
                       </table>
@@ -759,20 +743,33 @@
 
                     <xsl:if test="inValue">
                       <h2>Input Payload</h2>
-                      <!--todo: put the type of the payload.-->
-
                       <p>
                         <xsl:value-of select="inValue" disable-output-escaping="yes"/>
                       </p>
+
+                      <xsl:if test="contentType[@consumable='true']">
+                        <p>Consumable MIME types:</p>
+                        <ul>
+                          <xsl:for-each select="contentType[@consumable='true']">
+                            <li><xsl:value-of select="@type"/></li>
+                          </xsl:for-each>
+                        </ul>
+                      </xsl:if>
                     </xsl:if>
 
                     <xsl:if test="outValue">
                       <h2>Output Payload</h2>
-                      <!--todo: put the type of the payload.-->
-
                       <p>
                         <xsl:value-of select="outValue" disable-output-escaping="yes"/>
                       </p>
+                      <xsl:if test="contentType[@produceable='true']">
+                        <p>Produceable MIME types:</p>
+                        <ul>
+                          <xsl:for-each select="contentType[@produceable='true']">
+                            <li><xsl:value-of select="@type"/><xsl:if test="@id"> (id: <xsl:value-of select="@id"/>)</xsl:if></li>
+                          </xsl:for-each>
+                        </ul>
+                      </xsl:if>
                     </xsl:if>
 
                     <xsl:if test="error">
@@ -805,11 +802,11 @@
                     <xsl:choose>
                       <xsl:when test="tag[@name='deprecated']">
                         <font style="text-decoration:line-through;">
-                          <a href="#{@type}"><xsl:value-of select="@type"/></a>
+                          <a href="#{@name}"><xsl:value-of select="@name"/></a>
                         </font>
                       </xsl:when>
                       <xsl:otherwise>
-                        <a href="#{@type}"><xsl:value-of select="@type"/></a>
+                        <a href="#{@name}"><xsl:value-of select="@name"/></a>
                       </xsl:otherwise>
                     </xsl:choose>
                   </li>

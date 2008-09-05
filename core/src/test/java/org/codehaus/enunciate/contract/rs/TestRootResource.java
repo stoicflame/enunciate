@@ -46,19 +46,19 @@ public class TestRootResource extends InAPTTestCase {
     for (ResourceMethod resourceMethod : root1.getResourceMethods()) {
       assertEquals("/root1", resourceMethod.getFullpath());
       assertEquals(3, resourceMethod.getResourceParameters().size());
-      if ("GET".equals(resourceMethod.getHttpMethod())) {
+      if (resourceMethod.getHttpMethods().contains("GET")) {
         getFound = true;
         assertEquals("getOne", resourceMethod.getSimpleName());
       }
-      else if ("POST".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("POST")) {
         postFound = true;
         assertEquals("setOne", resourceMethod.getSimpleName());
       }
-      else if ("PUT".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("PUT")) {
         putFound = true;
         assertEquals("putOne", resourceMethod.getSimpleName());
       }
-      else if ("DELETE".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("DELETE")) {
         deleteFound = true;
         assertEquals("deleteOne", resourceMethod.getSimpleName());
       }
@@ -94,49 +94,56 @@ public class TestRootResource extends InAPTTestCase {
       assertEquals(1, resourceMethod.getResourceParameters().size());
       if ("getTwo".equals(resourceMethod.getSimpleName())) {
         getFound = true;
-        assertEquals("GET", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("GET", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2", resourceMethod.getFullpath());
         assertEquals("/root2", resourceMethod.getServletPattern());
       }
       else if ("setTwo".equals(resourceMethod.getSimpleName())) {
         postFound = true;
-        assertEquals("POST", resourceMethod.getHttpMethod());
+        assertEquals("POST", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2", resourceMethod.getFullpath());
         assertEquals("/root2", resourceMethod.getServletPattern());
       }
       else if ("putTwo".equals(resourceMethod.getSimpleName())) {
         putFound = true;
-        assertEquals("PUT", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("PUT", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2", resourceMethod.getFullpath());
         assertEquals("/root2", resourceMethod.getServletPattern());
       }
       else if ("deleteTwo".equals(resourceMethod.getSimpleName())) {
         headFound = true;
-        assertEquals("HEAD", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("HEAD", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2", resourceMethod.getFullpath());
         assertEquals("/root2", resourceMethod.getServletPattern());
       }
       if ("getThree".equals(resourceMethod.getSimpleName())) {
         get2Found = true;
-        assertEquals("GET", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("GET", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2/three", resourceMethod.getFullpath());
         assertEquals("/root2/three", resourceMethod.getServletPattern());
       }
       else if ("setThree".equals(resourceMethod.getSimpleName())) {
         post2Found = true;
-        assertEquals("POST", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("POST", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2/three/two/one", resourceMethod.getFullpath());
         assertEquals("/root2/three/two/one", resourceMethod.getServletPattern());
       }
       else if ("putThree".equals(resourceMethod.getSimpleName())) {
         put2Found = true;
-        assertEquals("PUT", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("PUT", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2/three/{var}/one", resourceMethod.getFullpath());
         assertEquals("/root2/three/*", resourceMethod.getServletPattern());
       }
       else if ("deleteThree".equals(resourceMethod.getSimpleName())) {
         delete2Found = true;
-        assertEquals("DELETE", resourceMethod.getHttpMethod());
+        assertEquals(1, resourceMethod.getHttpMethods().size());
+        assertEquals("DELETE", resourceMethod.getHttpMethods().iterator().next());
         assertEquals("/root2", resourceMethod.getFullpath());
         assertEquals("/root2", resourceMethod.getServletPattern());
       }
@@ -157,19 +164,19 @@ public class TestRootResource extends InAPTTestCase {
     for (ResourceMethod resourceMethod : root1.getResourceMethods()) {
       assertEquals(4, resourceMethod.getResourceParameters().size());
       assertEquals("/root2/subpath", resourceMethod.getFullpath());
-      if ("GET".equals(resourceMethod.getHttpMethod())) {
+      if (resourceMethod.getHttpMethods().contains("GET")) {
         get3Found = true;
         assertEquals("getOne", resourceMethod.getSimpleName());
       }
-      else if ("POST".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("POST")) {
         post3Found = true;
         assertEquals("setOne", resourceMethod.getSimpleName());
       }
-      else if ("PUT".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("PUT")) {
         put3Found = true;
         assertEquals("putOne", resourceMethod.getSimpleName());
       }
-      else if ("DELETE".equals(resourceMethod.getHttpMethod())) {
+      else if (resourceMethod.getHttpMethods().contains("DELETE")) {
         delete3Found = true;
         assertEquals("deleteOne", resourceMethod.getSimpleName());
       }

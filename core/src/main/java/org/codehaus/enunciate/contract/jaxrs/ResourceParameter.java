@@ -16,10 +16,12 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
-import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
-import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
+import com.sun.mirror.declaration.Declaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import org.codehaus.enunciate.contract.RESTResourceParameter;
+import org.codehaus.enunciate.contract.RESTResourceParameterType;
 
 import javax.ws.rs.*;
 
@@ -28,7 +30,7 @@ import javax.ws.rs.*;
  *
  * @author Ryan Heaton
  */
-public class ResourceParameter extends DecoratedDeclaration {
+public class ResourceParameter extends DecoratedDeclaration implements RESTResourceParameter {
 
   private final String parameterName;
   private final String defaultValue;
@@ -193,5 +195,35 @@ public class ResourceParameter extends DecoratedDeclaration {
    */
   public boolean isFormParam() {
     return formParam;
+  }
+
+  // Inherited.
+  public String getResourceParameterName() {
+    return getParameterName();
+  }
+
+  // Inherited.
+  public RESTResourceParameterType getResourceParameterType() {
+    if (isPathParam()) {
+      return RESTResourceParameterType.PATH;
+    }
+    else if (isQueryParam()) {
+      return RESTResourceParameterType.QUERY;
+    }
+    else if (isHeaderParam()) {
+      return RESTResourceParameterType.HEADER;
+    }
+    else if (isFormParam()) {
+      return RESTResourceParameterType.FORM;
+    }
+    else if (isMatrixParam()) {
+      return RESTResourceParameterType.MATRIX;
+    }
+    else if (isCookieParam()) {
+      return RESTResourceParameterType.COOKIE;
+    }
+    else {
+      return null;
+    }
   }
 }

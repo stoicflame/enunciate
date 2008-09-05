@@ -160,64 +160,59 @@
   </soap>
   <rest baseAddress="${baseAddress}">
     <resources>
-[#list nouns2methods.values() as methodList]
-  [#assign noun=(methodList?first).noun]
-      <resource name="${noun}">
-  [#list uniqueContentTypes(methodList) as contentType]
-        <contentType type="${contentType}" path="/${contentTypes2Ids[contentType]}/${noun}"/>
+[@forEachRESTResourceListByPath]
+      <resource name="${(resources?first).path}">
+  [#list uniqueContentTypes(resources) as contentType]
+        <contentType type="${contentType.type}"[#if contentTypes2Ids[contentType.type]?exists] id="${contentTypes2Ids[contentType.type]}" path="/${contentTypes2Ids[contentType.type]}${resources?first.path}"[/#if] consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
   [/#list]
-  [#list methodList as method]
-    [#list method.verbs as verb]
-        <operation type="${verb}" requiresResourceId="${method.properNoun?exists?string}">
-      [#if method.docValue?exists]
+  [#list resources as resource]
+    [#if resource.supportedOperations?size > 0]
+        <operation name="${resource.supportedOperations?first}"[#if resource.verbs?exists] type="${resource.verbs?first}"[/#if]>
+      [#if resource.docValue?exists]
           <documentation>
-            <![CDATA[${method.docValue}]]>
+            <![CDATA[${resource.docValue}]]>
           </documentation>
       [/#if]
-      [#list method.javaDoc?keys as tag]
+      [#list resource.javaDoc?keys as tag]
         [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-          [#list method.javaDoc[tag] as tagValue]
+          [#list resource.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
           [/#list]
         [/#if]
       [/#list]
-      [#list method.adjectives as parameter]
-          <parameter name="${parameter.adjectiveName}">
+      [#if resource.supportedOperations?size > 1]
+        [#list resource.supportedOperations[1..] as alias]
+          <alias>${alias}</alias>
+        [/#list]
+      [/#if]
+      [#list resource.supportedContentTypes as contentType]
+          <contentType type="${contentType.type}"[#if contentTypes2Ids[contentType.type]?exists] id="${contentTypes2Ids[contentType.type]}" path="/${contentTypes2Ids[contentType.type]}${resource.path}"[/#if] consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+      [/#list]
+      [#list resource.resourceParameters as parameter]
+          <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}">
             <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
           </parameter>
       [/#list]
-      [#if method.nounValue?exists]
-        [#if !method.nounValue.customType]
-          <inValue custom="false" typeNamespace="${method.nounValue.xmlType.namespace?default("")}" typeName="${method.nounValue.xmlType.name?default("")}">
-            <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
-          </inValue>
-        [#else]
+      [#if resource.inputPayload?exists]
           <inValue custom="true">
-            <![CDATA[${method.nounValue.docValue?default("(no documentation provided)")}]]>
+            <![CDATA[${resource.inputPayload.docValue?default("(no documentation provided)")}]]>
           </inValue>
-        [/#if]
       [/#if]
-      [#if !method.returnType.void]
-        [#if !method.customType]
-          <outValue custom="false" typeNamespace="${method.XMLReturnType.namespace?default("")}" typeName="${method.XMLReturnType.name?default("")}">
-            <![CDATA[${method.returnType.docValue?default("")}]]>
-          </outValue>
-        [#else]
+      [#if resource.outputPayload?exists]
           <outValue custom="true">
-            <![CDATA[${method.returnType.docValue?default("")}]]>
+            <![CDATA[${resource.outputPayload.docValue?default("(no documentation provided)")}]]>
           </outValue>
-        [/#if]
       [/#if]
-      [#list method.thrownTypes as error]
-          <error code="${method.RESTErrors[error_index].errorCode}">
+      [#list resource.resourceErrors as error]
+          <error code="${error.errorCode}">
             <![CDATA[${error.docValue?default("")}]]>
           </error>
       [/#list]
         </operation>
-    [/#list]
+    [/#if]
   [/#list]
       </resource>
-[/#list]
+[/@forEachRESTResourceListByPath]
     </resources>
   </rest>
   <packages>

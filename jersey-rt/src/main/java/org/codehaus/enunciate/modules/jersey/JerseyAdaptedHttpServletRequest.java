@@ -151,7 +151,7 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
 
     while (headerNames.hasMoreElements()) {
       String headerName = (String) headerNames.nextElement();
-      if (mediaType != null && !"Accept".equalsIgnoreCase(headerName)) {
+      if (mediaType == null || !"Accept".equalsIgnoreCase(headerName)) {
         copy.add(headerName);
       }
     }

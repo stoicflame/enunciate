@@ -23,6 +23,9 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.contract.RESTResourceParameter;
+import org.codehaus.enunciate.contract.RESTResourceParameterType;
+import org.codehaus.enunciate.contract.RESTResourcePayload;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.DeclaredType;
@@ -42,7 +45,7 @@ import java.util.Collection;
  * 
  * @author Ryan Heaton
  */
-public class RESTParameter extends DecoratedParameterDeclaration {
+public class RESTParameter extends DecoratedParameterDeclaration implements RESTResourceParameter, RESTResourcePayload {
 
 
   public RESTParameter(ParameterDeclaration delegate) {
@@ -201,4 +204,13 @@ public class RESTParameter extends DecoratedParameterDeclaration {
     return false;
   }
 
+  // Inherited.
+  public String getResourceParameterName() {
+    return isProperNoun() ? getSimpleName() : isContextParam() ? getContextParameterName() : getAdjectiveName();
+  }
+
+  // Inherited.
+  public RESTResourceParameterType getResourceParameterType() {
+    return isProperNoun() || isContextParam() ? RESTResourceParameterType.PATH : RESTResourceParameterType.QUERY;
+  }
 }

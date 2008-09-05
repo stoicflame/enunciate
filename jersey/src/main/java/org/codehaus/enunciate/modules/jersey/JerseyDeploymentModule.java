@@ -42,10 +42,41 @@ import java.util.*;
  * <a href="https://jsr311.dev.java.net/">JSR-311</a>, using <a href="https://jersey.dev.java.net/">Jersey</a>.</p>
  *
  * <ul>
+ *   <li><a href="#app">Jersey Application</a></li>
  *   <li><a href="#steps">steps</a></li>
  *   <li><a href="#config">configuration</a></li>
  *   <li><a href="#artifacts">artifacts</a></li>
  * </ul>
+ *
+ * <h1><a name="app">Jersey Application</a></h1>
+ *
+ * <p>We direct you do the documentation for <a href="https://jsr311.dev.java.net/">JAX-RS</a> and <a href="https://jersey.dev.java.net/">Jersey</a> to
+ * learn how to build a REST application using these technologies. However, it is important to note a few idiosyncrasies of the Enunciate-supported
+ * Jersey application.</p>
+ *
+ * <h3>REST subcontext</h3>
+ *
+ * <p>Because the Jersey application is presumably deployed along with other Enunciate-supported applications (XFire for SOAP, API documentation, etc.),
+ * it will, by default, be mounted at a specific subcontext as defined in the Enunciate configuration (attribute "defaultRestSubcontext" of the
+ * "enunciate/services/rest" element). This means that a JAX-RS resource applied at path "mypath" will actually be mounted at "rest/mypath", assuming
+ * that "rest" is the subcontext (which it is by default).</p>
+ *
+ * <p>While is it recommended that the subcontext be preserved, you can disable it in the <a href="#config">configuration</a> for this module. Note, however,
+ * that this increases the chance of the paths of your REST resources conflicting with the paths of your documentation, SOAP endpoints, etc.  Enunciate
+ * provides an additional check to see if a REST resource is too greedy because it has a <a href="https://jsr311.dev.java.net/nonav/javadoc/javax/ws/rs/Path.html">path
+ * parameter</a> in the first path segment.  This can also be disabled in configuration, but doing so will effectively disable the Enunciate-generated
+ * documentation and other web service endpoints.</p>
+ *
+ * <h3>Content Negotiation</h3>
+ *
+ * <p>Enuncite provides content type negotiation (conneg) to Jersey that conforms to the <a href="module_rest.html#contentTypes">content type negotiation of
+ * the Enunciate REST module</a>.  This means that each resource is mounted from the REST subcontext (see above) but ALSO from a subcontext that conforms to the
+ * id of each content type that the resource supports.  So, if the content type id of the "application/xml" content type is "xml" then the resource at path
+ * "mypath" will be mounted at both "/rest/mypath" and "/xml/mypath".</p>
+ *
+ * <p>The content types for each JAX-RS resource are declared by the @Produces annotation. The content type ids are customized with the
+ * "enunciate/services/rest/content-types" element in the Enunciate configuration. Enunciate supplies providers for the "application/xml" and "application/json"
+ * content types by default.</p>
  *
  * <h1><a name="steps">Steps</a></h1>
  *
@@ -57,6 +88,11 @@ import java.util.*;
  *
  * <p>The Jersey module supports the following attributes:</p>
  *
+ * <ul>
+ *   <li>The "useSubcontext" attribute is used is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ *   <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
+ *   <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
+ * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -98,6 +134,15 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The jaxb types template URL.
+   *
+   * @return The jaxb types template URL.
+   */
+  public URL getJaxbTypesTemplateURL() {
+    return JerseyDeploymentModule.class.getResource("jaxrs-jaxb-types.list.fmt");
+  }
+
+  /**
    * @return A new {@link JerseyValidator}.
    */
   @Override
@@ -109,6 +154,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     EnunciateFreemarkerModel model = getModel();
     processTemplate(getRootResourceListTemplateURL(), model);
     processTemplate(getProvidersListTemplateURL(), model);
+    processTemplate(getJaxbTypesTemplateURL(), model);
     Map<String, String> conentTypesToIds = model.getContentTypesToIds();
     Properties mappings = new Properties();
     for (Map.Entry<String, String> contentTypeToId : conentTypesToIds.entrySet()) {
@@ -131,6 +177,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     File webinfClasses = new File(webinf, "classes");
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-providers.list"), new File(webinfClasses, "jaxrs-providers.list"));
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-root-resources.list"), new File(webinfClasses, "jaxrs-root-resources.list"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-jaxb-types.list"), new File(webinfClasses, "jaxrs-jaxb-types.list"));
     getEnunciate().copyFile(new File(getGenerateDir(), "media-type-mappings.properties"), new File(webinfClasses, "media-type-mappings.properties"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());

@@ -9,6 +9,16 @@
   <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>
 
+  <repositories>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>
@@ -125,6 +135,14 @@
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>0.10-ea-SNAPSHOT</version>
+
+      <scope>test</scope>
     </dependency>
 
     <dependency>

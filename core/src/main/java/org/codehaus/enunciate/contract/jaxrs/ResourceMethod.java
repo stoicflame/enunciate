@@ -17,6 +17,9 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
@@ -30,17 +33,20 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.codehaus.enunciate.contract.*;
+import org.codehaus.enunciate.rest.MimeType;
+
 /**
  * A JAX-RS resource method.
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedMethodDeclaration {
+public class ResourceMethod extends DecoratedMethodDeclaration implements RESTResource {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
   private final String subpath;
-  private final String httpMethod;
+  private final Set<String> httpMethods;
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final Resource parent;
@@ -50,23 +56,23 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
 
-    String httpMethod = null;
+    Set<String> httpMethods = new TreeSet<String>();
     Collection<AnnotationMirror> mirrors = delegate.getAnnotationMirrors();
     for (AnnotationMirror mirror : mirrors) {
       AnnotationTypeDeclaration annotationDeclaration = mirror.getAnnotationType().getDeclaration();
       HttpMethod httpMethodInfo = annotationDeclaration.getAnnotation(HttpMethod.class);
       if (httpMethodInfo != null) {
         //request method designator found.
-        httpMethod = httpMethodInfo.value();
+        httpMethods.add(httpMethodInfo.value());
         break;
       }
     }
 
-    if (httpMethod == null) {
+    if (httpMethods.isEmpty()) {
       throw new IllegalStateException("A resource method must specify an HTTP method by using a request method designator annotation.");
     }
 
-    this.httpMethod = httpMethod;
+    this.httpMethods = httpMethods;
 
     Set<String> consumes;
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
@@ -112,12 +118,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   }
 
   /**
-   * The HTTP method for invoking the method.
+   * The HTTP methods for invoking the method.
    *
-   * @return The HTTP method for invoking the method.
+   * @return The HTTP methods for invoking the method.
    */
-  public String getHttpMethod() {
-    return httpMethod;
+  public Set<String> getHttpMethods() {
+    return httpMethods;
   }
 
   /**
@@ -257,5 +263,72 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    */
   public ParameterDeclaration getEntityParameter() {
     return entityParameter;
+  }
+
+  // Inherited.
+  public String getPath() {
+    return getFullpath();
+  }
+
+  // Inherited.
+  public Set<String> getSupportedOperations() {
+    return getHttpMethods();
+  }
+
+  // Inherited.
+  public List<SupportedContentType> getSupportedContentTypes() {
+    HashMap<String, SupportedContentType> supportedTypes = new HashMap<String, SupportedContentType>();
+    for (String consumesMime : getConsumesMime()) {
+      String type;
+      try {
+        type = MimeType.parse(consumesMime).toString();
+      }
+      catch (Exception e) {
+        type = consumesMime;
+      }
+
+      SupportedContentType supportedType = supportedTypes.get(type);
+      if (supportedType == null) {
+        supportedType = new SupportedContentType();
+        supportedType.setType(type);
+        supportedTypes.put(type, supportedType);
+      }
+      supportedType.setConsumable(true);
+    }
+    for (String producesMime : getProducesMime()) {
+      String type;
+      try {
+        type = MimeType.parse(producesMime).toString();
+      }
+      catch (Exception e) {
+        type = producesMime;
+      }
+
+      SupportedContentType supportedType = supportedTypes.get(type);
+      if (supportedType == null) {
+        supportedType = new SupportedContentType();
+        supportedType.setType(type);
+        supportedTypes.put(type, supportedType);
+      }
+      supportedType.setProduceable(true);
+    }
+
+    return new ArrayList<SupportedContentType>(supportedTypes.values());
+  }
+
+  // Inherited.
+  public RESTResourcePayload getInputPayload() {
+    return getEntityParameter() != null ? new ResourcePayloadDeclarationAdapter((DecoratedDeclaration) DeclarationDecorator.decorate(getEntityParameter())) : null;
+  }
+
+  // Inherited.
+  public RESTResourcePayload getOutputPayload() {
+    DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
+    return returnType.isVoid() ? null : new ResourcePayloadTypeAdapter(returnType);
+  }
+
+  // Inherited.
+  public List<? extends RESTResourceError> getResourceErrors() {
+    return Collections.emptyList();
   }
 }

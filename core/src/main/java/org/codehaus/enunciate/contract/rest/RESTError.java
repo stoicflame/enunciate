@@ -18,13 +18,14 @@ package org.codehaus.enunciate.contract.rest;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
+import org.codehaus.enunciate.contract.RESTResourceError;
 
 /**
  * An error that can be thrown as a result of a REST method invocation.
  * 
  * @author Ryan Heaton
  */
-public class RESTError extends DecoratedClassDeclaration {
+public class RESTError extends DecoratedClassDeclaration implements RESTResourceError {
 
   public RESTError(ClassDeclaration delegate) {
     super(delegate);

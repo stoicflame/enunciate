@@ -100,25 +100,13 @@ package ${packageFor(type)} {
     public [#if !baseobject]override [/#if]function writeExternal(output:IDataOutput):void {
       [#if !baseobject]super.writeExternal(output);[/#if]
   [#list type.attributes as attribute]
-    [#if attribute.accessorType.primitive && !("char" = attribute.accessorType.kind?string)]
-      output.write${attribute.accessorType.kind?string?lower_case?cap_first}(_${attribute.simpleName});
-    [#else]
-      output.writeObject(_${attribute.simpleName});
-    [/#if]
+[@accessorOutput accessor=attribute/]
   [/#list]
   [#if type.value?exists]
-    [#if type.value.accessorType.primitive && !("char" = type.value.accessorType.kind?string)]
-      output.write${type.value.accessorType.kind?string?lower_case?cap_first}(_${type.value.simpleName});
-    [#else]
-      output.writeObject(_${type.value.simpleName});
-    [/#if]
+[@accessorOutput accessor=type.value/]
   [#else]
     [#list type.elements as element]
-      [#if element.accessorType.primitive && !("char" = element.accessorType.kind?string)]
-      output.write${element.accessorType.kind?string?lower_case?cap_first}(_${element.simpleName});
-      [#else]
-      output.writeObject(_${element.simpleName});
-      [/#if]
+[@accessorOutput accessor=element/]
     [/#list]
   [/#if]
     }
@@ -126,25 +114,13 @@ package ${packageFor(type)} {
     public [#if !baseobject]override [/#if]function readExternal(input:IDataInput):void {
       [#if !baseobject]super.readExternal(input);[/#if]
   [#list type.attributes as attribute]
-    [#if attribute.accessorType.primitive && !("char" = attribute.accessorType.kind?string)]
-      _${attribute.simpleName} = input.read${attribute.accessorType.kind?string?lower_case?cap_first}();
-    [#else]
-      _${attribute.simpleName} = input.readObject() as ${classnameFor(attribute)};
-    [/#if]
+[@accessorInput accessor=attribute/]
   [/#list]
   [#if type.value?exists]
-    [#if type.value.accessorType.primitive && !("char" = type.value.accessorType.kind?string)]
-      _${type.value.simpleName} = input.read${type.value.accessorType.kind?string?lower_case?cap_first}();
-    [#else]
-      _${type.value.simpleName} = input.readObject() as ${classnameFor(type.value)};
-    [/#if]
+[@accessorInput accessor=type.value/]
   [#else]
     [#list type.elements as element]
-      [#if element.accessorType.primitive && !("char" = element.accessorType.kind?string)]
-      _${element.simpleName} = input.read${element.accessorType.kind?string?lower_case?cap_first}();
-      [#else]
-      _${element.simpleName} = input.readObject() as ${classnameFor(element)};
-      [/#if]
+[@accessorInput accessor=element/]
     [/#list]
   [/#if]
     }
@@ -167,5 +143,31 @@ package ${packageFor(type)} {
     public function set ${property.simpleName}(${property.simpleName}:${classnameFor(property)}):void {
       _${property.simpleName} = ${property.simpleName};
     }
+  [/#if]
+[/#macro]
+[#macro accessorInput accessor]
+  [#if !accessor.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if accessor.accessorType.primitive && !("char" = accessor.accessorType.kind?string?lower_case)]
+      [#if ("long" = accessor.accessorType.kind?string?lower_case)]
+    _${accessor.simpleName} = input.readDouble();
+      [#else]
+    _${accessor.simpleName} = input.read${accessor.accessorType.kind?string?lower_case?cap_first}();
+      [/#if]
+    [#else]
+    _${accessor.simpleName} = input.readObject() as ${classnameFor(accessor)};
+    [/#if]
+  [/#if]
+[/#macro]
+[#macro accessorOutput accessor]
+  [#if !accessor.annotations["org.codehaus.enunciate.modules.amf.AMFTransient"]?exists]
+    [#if accessor.accessorType.primitive && !("char" = accessor.accessorType.kind?string?lower_case)]
+      [#if ("long" = accessor.accessorType.kind?string?lower_case)]
+      output.writeDouble(_${accessor.simpleName});
+      [#else]
+      output.write${accessor.accessorType.kind?string?lower_case?cap_first}(_${accessor.simpleName});
+      [/#if]
+    [#else]
+      output.writeObject(_${accessor.simpleName});
+    [/#if]
   [/#if]
 [/#macro]
