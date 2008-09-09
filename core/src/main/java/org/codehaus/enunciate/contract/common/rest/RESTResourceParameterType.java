@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 /**
- * Payload for a REST resource.
+ * The REST resource parameter type.
  * 
  * @author Ryan Heaton
  */
-public interface RESTResourcePayload {
+public enum RESTResourceParameterType {
+
+  MATRIX,
+
+  QUERY,
+
+  PATH,
+
+  COOKIE,
+
+  HEADER,
+
+  FORM
+  
 }

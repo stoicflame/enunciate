@@ -20,12 +20,10 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.RESTResource;
-import org.codehaus.enunciate.contract.SupportedContentType;
+import org.codehaus.enunciate.contract.common.rest.RESTResource;
+import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
 
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * Rest resource path of the given REST noun.
@@ -44,22 +42,32 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
     if (object instanceof Collection) {
       resourceList = (Collection<RESTResource>) object;
     }
+    else if (object instanceof RESTResource) {
+      resourceList = Arrays.asList((RESTResource) object);
+    }
     else {
       throw new TemplateModelException("The uniqueContentTypes method take a list of REST resources.  Not " + object.getClass().getName());
     }
 
-    TreeMap<String, SupportedContentType> supported = new TreeMap<String, SupportedContentType>();
+    TreeMap<String, SupportedContentTypeAtSubcontext> supported = new TreeMap<String, SupportedContentTypeAtSubcontext>();
     for (RESTResource resource : resourceList) {
       for (SupportedContentType contentType : resource.getSupportedContentTypes()) {
-        SupportedContentType type = supported.get(contentType.getType());
+        SupportedContentTypeAtSubcontext type = supported.get(contentType.getType());
         if (type == null) {
-          type = new SupportedContentType();
+          type = new SupportedContentTypeAtSubcontext();
           type.setType(contentType.getType());
           supported.put(contentType.getType(), type);
         }
 
         type.setProduceable(type.isProduceable() || contentType.isProduceable());
         type.setConsumable(type.isConsumable() || contentType.isConsumable());
+
+        if (contentType.isProduceable()) {
+          Map<String, String> subcontextMap = (Map<String, String>) resource.getMetaData().get("subcontexts");
+          if (subcontextMap != null) {
+            type.setSubcontext(subcontextMap.get(contentType.getType()));
+          }
+        }
       }
     }
 

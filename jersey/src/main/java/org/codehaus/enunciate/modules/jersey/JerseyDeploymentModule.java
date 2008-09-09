@@ -152,19 +152,55 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
-    processTemplate(getRootResourceListTemplateURL(), model);
-    processTemplate(getProvidersListTemplateURL(), model);
-    processTemplate(getJaxbTypesTemplateURL(), model);
-    Map<String, String> conentTypesToIds = model.getContentTypesToIds();
-    Properties mappings = new Properties();
-    for (Map.Entry<String, String> contentTypeToId : conentTypesToIds.entrySet()) {
-      mappings.put(contentTypeToId.getValue(), contentTypeToId.getKey());
+    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
+
+    for (RootResource resource : model.getRootResources()) {
+      for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+        Map<String, String> subcontextsByContentType = new HashMap<String, String>();
+        String subcontext = isUseSubcontext() ? getRestSubcontext() : "";
+        debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
+              resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
+        subcontextsByContentType.put(null, subcontext);
+        resourceMethod.putMetaData("defaultSubcontext", subcontext);
+
+        if (isUsePathBasedConneg()) {
+          for (String producesMime : resourceMethod.getProducesMime()) {
+            MediaType producesType = MediaType.valueOf(producesMime);
+
+            for (Map.Entry<String, String> contentTypeToId : contentTypes2Ids.entrySet()) {
+              MediaType type = MediaType.valueOf(contentTypeToId.getKey());
+              if (producesType.isCompatible(type)) {
+                String id = '/' + contentTypeToId.getValue();
+                debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
+                      resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
+                subcontextsByContentType.put(String.format("%s/%s", producesType.getType(), producesType.getSubtype()), id);
+              }
+            }
+          }
+        }
+
+        resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
+      }
     }
-    File file = new File(getGenerateDir(), "media-type-mappings.properties");
-    FileOutputStream out = new FileOutputStream(file);
-    mappings.store(out, "JAX-RS media type mappings.");
-    out.flush();
-    out.close();
+    
+    if (!isUpToDate()) {
+      processTemplate(getRootResourceListTemplateURL(), model);
+      processTemplate(getProvidersListTemplateURL(), model);
+      processTemplate(getJaxbTypesTemplateURL(), model);
+      Map<String, String> conentTypesToIds = model.getContentTypesToIds();
+      Properties mappings = new Properties();
+      for (Map.Entry<String, String> contentTypeToId : conentTypesToIds.entrySet()) {
+        mappings.put(contentTypeToId.getValue(), contentTypeToId.getKey());
+      }
+      File file = new File(getGenerateDir(), "media-type-mappings.properties");
+      FileOutputStream out = new FileOutputStream(file);
+      mappings.store(out, "JAX-RS media type mappings.");
+      out.flush();
+      out.close();
+    }
+    else {
+      info("Skipping generation of JAX-RS support files because everything appears up-to-date.");
+    }
   }
 
   @Override
@@ -194,47 +230,27 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     }
     servletComponent.setInitParams(initParams);
 
-    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
     TreeSet<String> urlMappings = new TreeSet<String>();
-    Map<String, List<MediaType>> servletPatterns = new TreeMap<String, List<MediaType>>();
     for (RootResource rootResource : getModel().getRootResources()) {
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        String servletPattern = resourceMethod.getServletPattern();
-        debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
-              resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
-        List<MediaType> mediaTypes = servletPatterns.get(servletPattern);
-        if (mediaTypes == null) {
-          mediaTypes = new ArrayList<MediaType>();
-          servletPatterns.put(servletPattern, mediaTypes);
-        }
+        String resourceMethodPattern = resourceMethod.getServletPattern();
+        for (String subcontext : ((Map<String,String>) resourceMethod.getMetaData().get("subcontexts")).values()) {
+          String servletPattern;
+          if ("".equals(subcontext)) {
+            servletPattern = resourceMethodPattern;
+          }
+          else {
+            servletPattern = subcontext + resourceMethodPattern;
+          }
 
-        for (String producesMime : resourceMethod.getProducesMime()) {
-          MediaType mediaType = MediaType.valueOf(producesMime);
-          if (!mediaTypes.contains(mediaType)) {
-            mediaTypes.add(mediaType);
+          if (urlMappings.add(servletPattern)) {
+            debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+                  resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
           }
         }
       }
     }
-
-    for (Map.Entry<String, List<MediaType>> resourcePattern : servletPatterns.entrySet()) {
-      String resourceMethodPattern = resourcePattern.getKey();
-      String servletPattern = isUseSubcontext() ? getRestSubcontext() + resourceMethodPattern : resourceMethodPattern;
-      urlMappings.add(servletPattern);
-      if (isUsePathBasedConneg()) {
-        for (MediaType mediaType : resourcePattern.getValue()) {
-          for (Map.Entry<String, String> entry : contentTypes2Ids.entrySet()) {
-            MediaType supportedType = MediaType.valueOf(entry.getKey());
-            if (mediaType.isCompatible(supportedType)) {
-              String connegServletPattern = '/' + entry.getValue() + resourceMethodPattern;
-              debug("Servlet pattern %s of to be made also accessible by servlet pattern %s because it produces %s/%s.",
-                    resourceMethodPattern, connegServletPattern, mediaType.getType(), mediaType.getSubtype());
-              urlMappings.add(connegServletPattern);
-            }
-          }
-        }
-      }
-    }
+    
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     getEnunciate().addWebAppFragment(webappFragment);
@@ -249,6 +265,15 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public RuleSet getConfigurationRules() {
     return new JerseyRuleSet();
+  }
+
+  /**
+   * Whether the generated sources are up-to-date.
+   *
+   * @return Whether the generated sources are up-to-date.
+   */
+  protected boolean isUpToDate() {
+    return enunciate.isUpToDateWithSources(getGenerateDir());
   }
 
   /**

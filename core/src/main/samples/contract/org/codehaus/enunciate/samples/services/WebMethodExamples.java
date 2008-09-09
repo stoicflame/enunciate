@@ -118,7 +118,7 @@ public class WebMethodExamples {
     parameterStyle = SOAPBinding.ParameterStyle.BARE
   )
   public Boolean docBareWithHeadersMethod(
-    @WebParam ( header = true )
+    @WebParam ( header = true , name = "bool1" )
     Boolean bool1, Boolean bool2) {
     return Boolean.TRUE;
   }

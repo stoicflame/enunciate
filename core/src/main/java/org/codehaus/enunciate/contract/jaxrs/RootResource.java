@@ -22,8 +22,7 @@ import com.sun.mirror.declaration.ConstructorDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 
 import javax.ws.rs.Path;
-import java.util.List;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A JAX-RS root resource.
@@ -91,4 +90,5 @@ public class RootResource extends Resource {
 
     return resourceParams;
   }
+
 }

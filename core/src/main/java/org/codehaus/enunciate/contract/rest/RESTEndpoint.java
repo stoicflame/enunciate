@@ -25,10 +25,7 @@ import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A class declaration decorated as a REST endpoint.
@@ -42,7 +39,6 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
   private final Set<TypeDeclaration> definingInterfaces;
   private final Collection<RESTMethod> RESTMethods;
   private final String name;
-  private String baseURL;
 
   public RESTEndpoint(ClassDeclaration delegate) {
     super(delegate);
@@ -121,24 +117,6 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
    */
   public String getName() {
     return name;
-  }
-
-  /**
-   * The base URL for REST endpoints.
-   *
-   * @return The base URL for REST endpoints.
-   */
-  public String getBaseURL() {
-    return baseURL;
-  }
-
-  /**
-   * The base URL for REST endpoints.
-   *
-   * @param baseURL The base URL for REST endpoints.
-   */
-  public void setBaseURL(String baseURL) {
-    this.baseURL = baseURL;
   }
 
   /**

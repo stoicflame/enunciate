@@ -18,7 +18,7 @@ package org.codehaus.enunciate.contract.rest;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.contract.RESTResourceError;
+import org.codehaus.enunciate.contract.common.rest.RESTResourceError;
 
 /**
  * An error that can be thrown as a result of a REST method invocation.

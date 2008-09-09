@@ -20,15 +20,14 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
@@ -36,7 +35,10 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.xfire_client.config.XFireClientRuleSet;
-import org.codehaus.enunciate.template.freemarker.*;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.xfire.annotations.HandlerChainAnnotation;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -53,8 +55,8 @@ import java.util.*;
  * <p>The XFire client deployment module generates the client-side libraries that will access the
  * deployed web app using <a href="http://xfire.codehaus.org"/>XFire</a>.</p>
  *
- * <p>The order of the XFire client deployment module is 0, as it doesn't depend on any artifacts exported
- * by any other module.</p>
+ * <p>The order of the XFire client deployment module is 50, so as to allow the XFire module to apply
+ * metadata to the endpoints before processing the client.</p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -149,6 +151,14 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     return "xfire-client";
   }
 
+  /**
+   * @return 50
+   */
+  @Override
+  public int getOrder() {
+    return 50;
+  }
+
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File commonJdkGenerateDir = getCommonJdkGenerateDir();
@@ -183,7 +193,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       model.put("classnameFor", classnameFor);
       model.put("componentTypeFor", componentTypeFor);
       model.put("collectionTypeFor", collectionTypeFor);
-      model.put("soapAddressLocation", new SoapAddressLocationMethod());
 
       String uuid = this.uuid;
       model.put("uuid", uuid);

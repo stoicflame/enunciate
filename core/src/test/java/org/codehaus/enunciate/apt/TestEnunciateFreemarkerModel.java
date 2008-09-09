@@ -163,7 +163,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     knownType = knownTypes.get(javax.xml.datatype.XMLGregorianCalendar.class.getName());
     assertNotNull("javax.xml.datatype.XMLGregorianCalendar should have a known type.", knownType);
     assertEquals("http://www.w3.org/2001/XMLSchema", knownType.getNamespace());
-    assertEquals("anySimpleType", knownType.getName());
+    assertEquals("dateTime", knownType.getName());
     knownType = knownTypes.get(javax.xml.datatype.Duration.class.getName());
     assertNotNull("javax.xml.datatype.Duration should have a known type.", knownType);
     assertEquals("http://www.w3.org/2001/XMLSchema", knownType.getNamespace());

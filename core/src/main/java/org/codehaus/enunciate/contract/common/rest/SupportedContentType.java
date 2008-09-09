@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 /**
  * A supported content type (specific to a REST resource).

@@ -18,7 +18,7 @@ package org.codehaus.enunciate.template.strategies.rest;
 
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
-import org.codehaus.enunciate.contract.RESTResource;
+import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;

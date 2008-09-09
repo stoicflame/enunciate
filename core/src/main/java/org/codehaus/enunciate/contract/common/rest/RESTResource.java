@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 import java.util.Set;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A rest resource (common interface between different REST implementations).
@@ -74,4 +75,11 @@ public interface RESTResource {
    * @return The potential errors.
    */
   List<? extends RESTResourceError> getResourceErrors();
+
+  /**
+   * The metadata associated with this resource.
+   *
+   * @return The metadata associated with this resource.
+   */
+  Map<String, Object> getMetaData();
 }

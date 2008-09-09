@@ -16,11 +16,12 @@
 
 package org.codehaus.enunciate.modules.jersey;
 
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
-import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 /**
@@ -38,20 +39,29 @@ public class JerseyValidator extends BaseValidator {
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
     ValidationResult result = new ValidationResult();
 
-      for (RootResource rootResource : rootResources) {
-        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-          if ("/*".equals(resourceMethod.getServletPattern())) {
-            if (!allowWildcardServlet) {
-              result.addError(resourceMethod, "This JAX-RS resource method is designed to catch all requests (including requests to " +
-                "Enunciate-generated documentation and other static files). If this is what you want, then please set 'disableWildcardServletError' to 'true'" +
-                "in the Enunciate config for the Jersey module.  Otherwise, enable the rest subcontext or adjust the @Path annotation to be more specific.");
-            }
-            else {
-              result.addWarning(resourceMethod, "JAX-RS resource method is designed to catch all requests.");
-            }
+    for (RootResource rootResource : rootResources) {
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        if ("/*".equals(resourceMethod.getServletPattern())) {
+          if (!allowWildcardServlet) {
+            result.addError(resourceMethod, "This JAX-RS resource method is designed to catch all requests (including requests to " +
+              "Enunciate-generated documentation and other static files). If this is what you want, then please set 'disableWildcardServletError' to 'true'" +
+              "in the Enunciate config for the Jersey module.  Otherwise, enable the rest subcontext or adjust the @Path annotation to be more specific.");
+          }
+          else {
+            result.addWarning(resourceMethod, "JAX-RS resource method is designed to catch all requests.");
+          }
+        }
+
+        for (String producesMime : resourceMethod.getProducesMime()) {
+          try {
+            MediaType.valueOf(producesMime);
+          }
+          catch (Exception e) {
+            result.addError(resourceMethod, "Invalid produces MIME type: " + producesMime + "(" + e.getMessage() + ").");
           }
         }
       }
+    }
 
     return result;
   }

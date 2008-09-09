@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.AnnotationMirror;

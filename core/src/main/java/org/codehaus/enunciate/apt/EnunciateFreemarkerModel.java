@@ -43,6 +43,7 @@ import org.codehaus.enunciate.rest.MimeType;
 import javax.ws.rs.Produces;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.util.*;
 
@@ -92,6 +93,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("restEndpoints", this.restEndpoints);
     setVariable("rootResources", this.rootResources);
     setVariable("jaxrsProviders", this.jaxrsProviders);
+    setVariable("baseDeploymentAddress", "");
   }
 
   /**
@@ -155,7 +157,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put(java.util.Date.class.getName(), KnownXmlType.DATE_TIME);
     knownTypes.put(javax.xml.namespace.QName.class.getName(), KnownXmlType.QNAME);
     knownTypes.put(java.net.URI.class.getName(), KnownXmlType.STRING);
-    knownTypes.put(javax.xml.datatype.XMLGregorianCalendar.class.getName(), KnownXmlType.ANY_SIMPLE_TYPE);
     knownTypes.put(javax.xml.datatype.Duration.class.getName(), KnownXmlType.DURATION);
     knownTypes.put(java.lang.Object.class.getName(), KnownXmlType.ANY_TYPE);
     knownTypes.put(byte[].class.getName(), KnownXmlType.BASE64_BINARY);
@@ -163,6 +164,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownTypes.put("javax.activation.DataHandler", KnownXmlType.BASE64_BINARY);
     knownTypes.put(javax.xml.transform.Source.class.getName(), KnownXmlType.BASE64_BINARY);
     knownTypes.put(java.util.UUID.class.getName(), KnownXmlType.STRING);
+    knownTypes.put(XMLGregorianCalendar.class.getName(), KnownXmlType.DATE_TIME); //JAXB spec says it maps to anySimpleType, but we can just assume dateTime...
+    knownTypes.put(GregorianCalendar.class.getName(), KnownXmlType.DATE_TIME);
 
     return knownTypes;
   }
@@ -712,6 +715,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void setBaseDeploymentAddress(String baseDeploymentAddress) {
     this.baseDeploymentAddress = baseDeploymentAddress;
+    setVariable("baseDeploymentAddress", baseDeploymentAddress);
   }
 
   /**

@@ -335,8 +335,8 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(webMethod, "Enunciate doesn't support ENCODED-use web methods.");
     }
 
-    int inParams = 0;
-    int outParams = 0;
+    Collection<WebMessage> inParams = new ArrayList<WebMessage>();
+    Collection<WebMessage> outParams = new ArrayList<WebMessage>();
     boolean oneway = webMethod.isOneWay();
     SOAPBinding.ParameterStyle parameterStyle = webMethod.getSoapParameterStyle();
     SOAPBinding.Style soapBindingStyle = webMethod.getSoapBindingStyle();
@@ -366,13 +366,22 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       }
 
       if (!webMessage.isHeader()) {
-        inParams = webMessage.isInput() ? inParams + 1 : inParams;
-        outParams = webMessage.isOutput() ? outParams + 1 : outParams;
+        if (webMessage.isInput()) {
+          inParams.add(webMessage);
+        }
+
+        if (webMessage.isOutput()) {
+          outParams.add(webMessage);
+        }
       }
       else {
         //if it's a header, it's either a web result or a web param.
         if (webMessage instanceof WebResult) {
-          DecoratedTypeMirror type = (DecoratedTypeMirror) ((WebResult) webMessage).getType();
+          WebResult webResult = (WebResult) webMessage;
+          if ("".equals(webResult.getElementName())) {
+            result.addError(webResult.getWebMethod(), "A header web result that is a header must specify a name with the @WebResult annotation.");
+          }
+          DecoratedTypeMirror type = (DecoratedTypeMirror) webResult.getType();
 
           if ((type.isCollection()) || (type.isArray())) {
             String description = type.isCollection() ? "an instance of java.util.Collection" : "an array";
@@ -382,6 +391,10 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         }
         else {
           WebParam webParam = (WebParam) webMessage;
+          if ("".equals(webParam.getElementName())) {
+            result.addError(webParam, "A header parameter must specify a name using the @WebParam annotation.");
+          }
+
           DecoratedTypeMirror type = (DecoratedTypeMirror) webParam.getType();
 
           if (type.isCollection() || (type.isArray())) {
@@ -407,15 +420,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           //todo: throw a runtime exception?  This is a problem with the engine, not the user.
           result.addError(webMethod, "A BARE web method shouldn't have a response wrapper.");
         }
-
-        if (inParams > 1) {
-          result.addError(webMethod, "A BARE web method must not have more than one 'in' parameter.");
-        }
-
-        if (outParams > 1) {
-          result.addError(webMethod, "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
-            "thrown exceptions, out parameters, or in/out parameters).");
-        }
       }
       else if (soapBindingStyle == SOAPBinding.Style.RPC) {
         Collection<WebMessagePart> parts = webMessage.getParts();
@@ -430,6 +434,23 @@ public class DefaultValidator implements Validator, ConfigurableRules {
             }
           }
         }
+      }
+    }
+
+    if (parameterStyle == SOAPBinding.ParameterStyle.BARE) {
+      if (inParams.size() > 1) {
+        result.addError(webMethod, "A BARE web method must not have more than one 'in' parameter.");
+      }
+      else if (inParams.isEmpty()) {
+        result.addError(webMethod, "A BARE web method must have one IN parameter.");
+      }
+
+      if (outParams.size() > 1) {
+        result.addError(webMethod, "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
+          "thrown exceptions, out parameters, or in/out parameters).");
+      }
+      else if (outParams.isEmpty() && !webMethod.isOneWay()) {
+        result.addError(webMethod, "A BARE web method that is not one-way must have one OUT parameter.");
       }
     }
 

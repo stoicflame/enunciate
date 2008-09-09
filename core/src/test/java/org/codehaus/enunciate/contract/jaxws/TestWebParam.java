@@ -88,7 +88,7 @@ public class TestWebParam extends InAPTTestCase {
     assertNull(param1.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, param1.getParticleType());
     assertEquals(new QName("urn:web-method-examples", "hah"), param1.getParticleQName());
-    assertTrue(param1.isImplicitSchemaElement());
+    assertFalse(param1.isImplicitSchemaElement());//not bare
     assertEquals(KnownXmlType.BOOLEAN.getQname(), param1.getTypeQName());
     assertEquals(1, param1.getMinOccurs());
     assertEquals("1", param1.getMaxOccurs());
@@ -112,7 +112,7 @@ public class TestWebParam extends InAPTTestCase {
     assertNull(param2.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, param2.getParticleType());
     assertEquals(new QName("urn:web-method-examples", "i"), param2.getParticleQName());
-    assertTrue(param2.isImplicitSchemaElement());
+    assertFalse(param2.isImplicitSchemaElement()); //not bare...
     assertEquals(KnownXmlType.INT.getQname(), param2.getTypeQName());
     assertEquals(1, param2.getMinOccurs());
     assertEquals("1", param2.getMaxOccurs());
@@ -131,11 +131,11 @@ public class TestWebParam extends InAPTTestCase {
     }
 
     WebParam param3 = paramIt.next();
-    assertEquals("s", param3.getElementName());
+    assertEquals("", param3.getElementName());
     assertEquals("s", param3.getPartName());
     assertEquals("WebMethodExamples.docLitWrappedMethod.s", param3.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, param3.getParticleType());
-    assertEquals(new QName("urn:web-method-examples", "s"), param3.getParticleQName());
+    assertEquals(new QName("urn:web-method-examples", ""), param3.getParticleQName());
     assertTrue(param3.isImplicitSchemaElement());
     assertEquals(KnownXmlType.SHORT.getQname(), param3.getTypeQName());
     assertEquals(1, param3.getMinOccurs());
@@ -154,7 +154,7 @@ public class TestWebParam extends InAPTTestCase {
     assertNull(param4.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, param4.getParticleType());
     assertEquals(new QName("urn:web-method-examples", "c"), param4.getParticleQName());
-    assertTrue(param4.isImplicitSchemaElement());
+    assertFalse(param4.isImplicitSchemaElement());
     assertEquals(KnownXmlType.FLOAT.getQname(), param4.getTypeQName());
     assertEquals(1, param4.getMinOccurs());
     assertEquals("1", param4.getMaxOccurs());
@@ -221,12 +221,12 @@ public class TestWebParam extends InAPTTestCase {
     }
 
     param3 = paramIt.next();
-    assertEquals("s", param3.getElementName());
+    assertEquals("", param3.getElementName());
     assertEquals("s", param3.getPartName());
     assertEquals("WebMethodExamples.rpcLitWrappedMethod.s", param3.getMessageName());
-    assertSame(WebMessagePart.ParticleType.TYPE, param3.getParticleType());
-    assertEquals(KnownXmlType.SHORT.getQname(), param3.getParticleQName());
-    assertFalse(param3.isImplicitSchemaElement());
+    assertSame(WebMessagePart.ParticleType.ELEMENT, param3.getParticleType());
+    assertEquals(new QName("urn:web-method-examples", ""), param3.getParticleQName());
+    assertTrue(param3.isImplicitSchemaElement());
     assertEquals(KnownXmlType.SHORT.getQname(), param3.getTypeQName());
     assertEquals(1, param3.getMinOccurs());
     assertEquals("1", param3.getMaxOccurs());

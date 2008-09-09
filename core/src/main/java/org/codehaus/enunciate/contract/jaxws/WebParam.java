@@ -16,14 +16,11 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
-import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
@@ -32,11 +29,10 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.util.MapTypeUtil;
 
 import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
 import java.util.ArrayList;
@@ -79,7 +75,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The element name of this web param.
    */
   public String getElementName() {
-    String name = getSimpleName();
+    String name = isHeader() ? "" : getSimpleName();
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
@@ -162,47 +158,32 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The particle type.
    */
   public ParticleType getParticleType() {
-    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? ParticleType.TYPE : ParticleType.ELEMENT;
+    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? isHeader() ? ParticleType.ELEMENT : ParticleType.TYPE : ParticleType.ELEMENT;
   }
 
   /**
    * The qname of the particle for this parameter.  If the {@link #getParticleType() particle type} is
-   * TYPE then it's the qname of the xml type.  Otherwise, if the parameter type is an xml root element,
-   * the qname of the root xml element is returned.  Otherwise, it's the qname of the implicit schema
+   * TYPE then it's the qname of the xml type.  Otherwise, it's the qname of the implicit schema
    * element.
    *
    * @return The qname of the particle for this part.
    */
   public QName getParticleQName() {
-    TypeMirror parameterType = getType();
-    if (parameterType instanceof DeclaredType) {
-      TypeDeclaration parameterTypeDeclaration = ((DeclaredType) parameterType).getDeclaration();
-      if ((method.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT) && (parameterTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
-        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) parameterTypeDeclaration, null);
-        return new QName(rootElement.getNamespace(), rootElement.getName());
-      }
-    }
-
-    if (method.getSoapBindingStyle() == SOAPBinding.Style.RPC) {
+    if (method.getSoapBindingStyle() == SOAPBinding.Style.RPC && !isHeader()) {
       return getTypeQName();
     }
-
-    return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    else {
+      return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    }
   }
 
   /**
-   * This web parameter defines an implicit schema element if it is DOCUMENT binding style and it
-   * is NOT of a class type that is an xml root element.
+   * This web parameter defines an implicit schema element if it is DOCUMENT binding style and either BARE or a header.
    *
    * @return Whether this web parameter is an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    if (method.getSoapBindingStyle() != SOAPBinding.Style.RPC) {
-      TypeMirror parameterType = getType();
-      return !((parameterType instanceof DeclaredType) && (((DeclaredType) parameterType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
-    }
-
-    return false;
+    return isHeader() || (method.getSoapBindingStyle() != SOAPBinding.Style.RPC && method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE);
   }
 
   /**

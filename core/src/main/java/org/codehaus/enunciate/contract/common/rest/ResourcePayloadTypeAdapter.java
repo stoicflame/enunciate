@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;

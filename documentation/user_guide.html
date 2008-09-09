@@ -174,6 +174,18 @@
           <p>The "label" attribute of the root element specifies a label for your Enunciate project.</p>
         </li>
         <li>
+          <h3><a name="config_include_exclude">api-classes</a></h3>
+          <p>When Enunciate is invoked on a set of source files, Enunciate will (by default) attempt to determine whether each file is either an Web service
+          endpoint or a JAXB type.  If the class is not a Web service endpoint, Enunciate assumes it is a JAXB type and validates it as such. Often, there
+          exist "utility classes" in the project that should not be considered part of the public Web service API.  These classes
+          <a href="http://docs.codehaus.org/display/ENUNCIATE/Excluding+a+class+from+the+public+API">can be marked with @XmlTransient</a>, but sometimes this
+          is cumbersome.</p>
+          <p>The api-classes element can take an arbitrary number of "include" and "exclude" elements that can be used to give more control over what classes
+          are considered part of the API. Each "include" and "exclude" element takes a single attriute, "pattern" that specifies the Ant-style pattern of the
+          classes to match.  Note that the pattern is matched against the fully-qualified class name, so the path separator is ".".  By default, all classes are
+          included and no classes are excluded.</p>
+        </li>
+        <li>
           <h3><a name="config_additional_classes">api-import</a></h3>
           <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
           The 'class' attribute of this element specified the FQN of an external class on which your API depends. By default Enunciate will scan the classpath

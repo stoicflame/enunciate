@@ -39,6 +39,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
   private final Collection<EndpointImplementation> impls;
+  private final Map<String, Object> metaData = new HashMap<String, Object>();
 
   public EndpointInterface(TypeDeclaration delegate) {
     super(delegate);
@@ -315,6 +316,25 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
   // Inherited.
   public boolean isAnnotatedType() {
     return (getDelegate() instanceof AnnotationTypeDeclaration);
+  }
+
+  /**
+   * The metadata associated with this endpoint interface.
+   *
+   * @return The metadata associated with this endpoint interface.
+   */
+  public Map<String, Object> getMetaData() {
+    return Collections.unmodifiableMap(this.metaData);
+  }
+
+  /**
+   * Set the metadata associated with this endpoint interface.
+   *
+   * @param name The name of the metadata.
+   * @param data The data.
+   */
+  public void putMetaData(String name, Object data) {
+    this.metaData.put(name, data);
   }
 
   /**

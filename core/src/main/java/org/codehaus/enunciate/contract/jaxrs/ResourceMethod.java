@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.codehaus.enunciate.contract.*;
+import org.codehaus.enunciate.contract.common.rest.*;
 import org.codehaus.enunciate.rest.MimeType;
 
 /**
@@ -52,6 +52,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
   private final ParameterDeclaration entityParameter;
+  private final Map<String, Object> metaData = new HashMap<String, Object>();
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
@@ -331,4 +332,20 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   public List<? extends RESTResourceError> getResourceErrors() {
     return Collections.emptyList();
   }
+
+  // Inherited.
+  public Map<String, Object> getMetaData() {
+    return Collections.unmodifiableMap(this.metaData);
+  }
+
+  /**
+   * Put metadata associated with this resource.
+   *
+   * @param name The name of the metadata.
+   * @param data The data.
+   */
+  public void putMetaData(String name, Object data) {
+    this.metaData.put(name, data);
+  }
+
 }

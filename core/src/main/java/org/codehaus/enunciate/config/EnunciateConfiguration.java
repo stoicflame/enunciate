@@ -56,6 +56,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Map<String, String> soapServices2Paths = new HashMap<String, String>();
   private final List<APIImport> apiImports = new ArrayList<APIImport>();
   private final Set<String> disabledRules = new TreeSet<String>();
+  private final Set<String> apiIncludePatterns = new TreeSet<String>();
+  private final Set<String> apiExcludePatterns = new TreeSet<String>();
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -156,6 +158,46 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * The patterns for API includes.
+   *
+   * @return The patterns for API includes.
+   */
+  public Set<String> getApiIncludePatterns() {
+    return apiIncludePatterns;
+  }
+
+  /**
+   * The API include pattern.
+   *
+   * @param pattern The API include pattern.
+   */
+  public void addApiIncludePattern(String pattern) {
+    if (pattern != null) {
+      this.apiIncludePatterns.add(pattern);
+    }
+  }
+
+  /**
+   * The patterns for API excludes.
+   *
+   * @return The patterns for API excludes.
+   */
+  public Set<String> getApiExcludePatterns() {
+    return apiExcludePatterns;
+  }
+
+  /**
+   * The API exclude pattern.
+   *
+   * @param pattern The API exclude pattern.
+   */
+  public void addApiExcludePattern(String pattern) {
+    if (pattern != null) {
+      this.apiExcludePatterns.add(pattern);
+    }
+  }
+
+  /**
    * The protocol that will be used when the app is deployed.  Default: "http".
    *
    * @return The protocol that will be used when the app is deployed.  Default: "http".
@@ -215,7 +257,7 @@ public class EnunciateConfiguration implements ErrorHandler {
         deploymentContext = "/" + deploymentContext;
       }
 
-      if (deploymentContext.endsWith("/")) {
+      while (deploymentContext.endsWith("/")) {
         deploymentContext = deploymentContext.substring(0, deploymentContext.length() - 1);
       }
     }
@@ -447,9 +489,15 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addObjectCreate("enunciate/validator", "class", DefaultValidator.class);
     digester.addSetNext("enunciate/validator", "setValidator");
 
+    //set up the include/excludes
+    digester.addCallMethod("enunciate/api-classes/include", "addApiIncludePattern", 1);
+    digester.addCallParam("enunciate/api-classes/include", 0, "pattern");
+    digester.addCallMethod("enunciate/api-classes/exclude", "addApiExcludePattern", 1);
+    digester.addCallParam("enunciate/api-classes/exclude", 0, "pattern");
+
     //set up the ability to disable certain rules
     digester.addCallMethod("enunciate/validator/disable-rule", "addDisabledRule", 1);
-    digester.addCallParam("enunciate/validator", 0, "id");
+    digester.addCallParam("enunciate/validator/disable-rule", 0, "id");
 
     //allow for classes and packages to be imported for JAXB.
     digester.addObjectCreate("enunciate/api-import", APIImport.class);

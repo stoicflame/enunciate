@@ -104,7 +104,6 @@ public class TestWebMethod extends InAPTTestCase {
     assertEquals("There should be 6 web messages: 1 for in, 1 for out, 2 for faults, 2 for header.", 6, docLitWrappedMethod.getMessages().size());
     referencedNamespaces = docLitWrappedMethod.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("urn:web-method-examples"));
-    assertTrue(referencedNamespaces.remove("")); //empty namespace for the return type header
     assertTrue(referencedNamespaces.isEmpty());
     assertEquals("", docLitWrappedMethod.getAction());
     assertFalse(docLitWrappedMethod.isOneWay());

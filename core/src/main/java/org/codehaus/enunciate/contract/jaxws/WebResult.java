@@ -16,25 +16,20 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.TypeVisitor;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 
 import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +44,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
 
   private final boolean header;
   private final String name;
+  private final String elementName;
   private final String targetNamespace;
   private final String partName;
   private final WebMethod method;
@@ -59,12 +55,6 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     this.method = method;
 
     javax.jws.WebResult annotation = method.getAnnotation(javax.jws.WebResult.class);
-
-    String name = "return";
-    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
-      name = annotation.name();
-    }
-    this.name = name;
 
     String targetNamespace = method.getDeclaringEndpointInterface().getTargetNamespace();
     if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
@@ -79,6 +69,19 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     this.partName = partName;
     this.header = ((annotation != null) && (annotation.header()));
     this.adapterType = AdapterUtil.findAdapterType(method);
+
+    String name = method.getSimpleName() + "Response";
+    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
+      name = annotation.name();
+      this.elementName = name;
+    }
+    else if (this.header) {
+      this.elementName = "";
+    }
+    else {
+      this.elementName = name;
+    }
+    this.name = name;
   }
 
   public void accept(TypeVisitor typeVisitor) {
@@ -200,47 +203,33 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The particle type.
    */
   public ParticleType getParticleType() {
-    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? ParticleType.TYPE : ParticleType.ELEMENT;
+    return this.method.getSoapBindingStyle() == SOAPBinding.Style.RPC ? isHeader() ? ParticleType.ELEMENT : ParticleType.TYPE : ParticleType.ELEMENT;
   }
 
   /**
    * The qname of the particle for this web result.  If the {@link #getParticleType() particle type} is
-   * TYPE then it's the qname of the xml type.  Otherwise, if the parameter type is an xml root element,
-   * the qname of the root xml element is returned.  Otherwise, it's the qname of the implicit schema
+   * TYPE then it's the qname of the xml type.  Otherwise, it's the qname of the implicit schema
    * element.
    *
    * @return The qname of the particle for this web result as a part.
    */
   public QName getParticleQName() {
-    TypeMirror returnType = getType();
-    if (returnType instanceof DeclaredType) {
-      TypeDeclaration returnTypeDeclaration = ((DeclaredType) returnType).getDeclaration();
-      if ((method.getSoapBindingStyle() == SOAPBinding.Style.DOCUMENT) && (returnTypeDeclaration.getAnnotation(XmlRootElement.class) != null)) {
-        RootElementDeclaration rootElement = new RootElementDeclaration((ClassDeclaration) returnTypeDeclaration, null);
-        return new QName(rootElement.getNamespace(), rootElement.getName());
-      }
-    }
-
-    if (method.getSoapBindingStyle() == SOAPBinding.Style.RPC) {
+    if (method.getSoapBindingStyle() == SOAPBinding.Style.RPC && !isHeader()) {
       return getTypeQName();
     }
-
-    return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    else {      
+      return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+    }
   }
 
   /**
    * This web result defines an implicit schema element if it is of DOCUMENT binding style and it is
-   * NOT of a class type that is an xml root element.
+   * either BARE or a header.
    *
    * @return Whether this web result is an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    if (method.getSoapBindingStyle() != SOAPBinding.Style.RPC) {
-      TypeMirror returnType = getType();
-      return !((returnType instanceof DeclaredType) && (((DeclaredType) returnType).getDeclaration().getAnnotation(XmlRootElement.class) != null));
-    }
-
-    return false;
+    return isHeader() || (method.getSoapBindingStyle() != SOAPBinding.Style.RPC && method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE);
   }
 
   // Inherited.
@@ -305,7 +294,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The element name.
    */
   public String getElementName() {
-    return getName();
+    return this.elementName;
   }
 
   /**

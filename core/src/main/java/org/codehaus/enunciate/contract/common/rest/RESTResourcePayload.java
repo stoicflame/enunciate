@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 /**
+ * Payload for a REST resource.
+ * 
  * @author Ryan Heaton
  */
-public interface RESTResourceError {
-
-  /**
-   * The error code.
-   *
-   * @return The error code.
-   */
-  int getErrorCode();
+public interface RESTResourcePayload {
 }

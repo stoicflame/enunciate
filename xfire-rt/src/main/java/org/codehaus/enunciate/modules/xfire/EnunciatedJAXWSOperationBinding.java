@@ -27,13 +27,12 @@ import org.codehaus.xfire.fault.XFireFault;
 import org.codehaus.xfire.jaxb2.AttachmentMarshaller;
 import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
 import org.codehaus.xfire.service.OperationInfo;
+import org.codehaus.xfire.service.MessageInfo;
 import org.codehaus.xfire.util.ClassLoaderUtils;
 
 import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.jws.WebParam;
+import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.RequestWrapper;
@@ -44,6 +43,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,7 +101,34 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
 
     if (paramStyle == SOAPBinding.ParameterStyle.BARE) {
       //return a bare operation info.
-      return new OperationBeanInfo(method.getParameterTypes()[0], null);
+      //it's not necessarily the first parameter type! there could be a header or OUT parameter...
+      int paramIndex;
+      WebParam annotation = null;
+      Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+      if (parameterAnnotations.length == 0) {
+        throw new IllegalStateException("A BARE web service must have input parameters.");
+      }
+      
+      PARAM_ANNOTATIONS : for (paramIndex = 0; paramIndex < parameterAnnotations.length; paramIndex++) {
+        Annotation[] annotations = parameterAnnotations[paramIndex];
+        for (Annotation candidate : annotations) {
+          if (candidate instanceof WebParam && !((WebParam) candidate).header()) {
+            WebParam.Mode mode = ((WebParam) candidate).mode();
+            switch(mode) {
+              case OUT:
+              case INOUT:
+                annotation = (WebParam) candidate;
+                break PARAM_ANNOTATIONS;
+            }
+          }
+        }
+      }
+
+      if (annotation == null) {
+        paramIndex = 0;
+      }
+
+      return new OperationBeanInfo(method.getParameterTypes()[paramIndex], null, op.getInputMessage());
     }
     else {
       String requestWrapperClassName;
@@ -131,7 +158,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
         return null;
       }
       
-      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
+      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass), op.getInputMessage());
     }
 
   }
@@ -158,7 +185,8 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
 
     if (paramStyle == SOAPBinding.ParameterStyle.BARE) {
       //bare return type.
-      return new OperationBeanInfo(method.getReturnType(), null);
+      //todo: it's not necessarily the return type! it could be an OUT parameter...
+      return new OperationBeanInfo(method.getReturnType(), null, op.getOutputMessage());
     }
     else {
       String responseWrapperClassName;
@@ -188,7 +216,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
         return null;
       }
 
-      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass));
+      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass), op.getOutputMessage());
     }
   }
 
@@ -245,7 +273,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     try {
       Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
       unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshaller(context));
-      bean = unmarshaller.unmarshal(message.getXMLStreamReader());
+      bean = unmarshaller.unmarshal(message.getXMLStreamReader(), this.requestInfo.getBeanClass()).getValue();
     }
     catch (JAXBException e) {
       throw new XFireRuntimeException("Unable to unmarshal type.", e);
@@ -283,7 +311,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     Object bean;
     if (this.responseInfo.isBare()) {
       //bare response.  we don't need to wrap it up.
-      bean = params[0];
+      bean = new JAXBElement(this.responseInfo.getMessageInfo().getName(), this.responseInfo.getBeanClass(), params[0]);
     }
     else {
       try {
@@ -343,10 +371,12 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
 
     private Class beanClass;
     private PropertyDescriptor[] propertyOrder;
+    private MessageInfo messageInfo;
 
-    public OperationBeanInfo(Class wrapperClass, PropertyDescriptor[] properties) {
+    public OperationBeanInfo(Class wrapperClass, PropertyDescriptor[] properties, MessageInfo message) {
       this.beanClass = wrapperClass;
       this.propertyOrder = properties;
+      this.messageInfo = message;
     }
 
     /**
@@ -376,6 +406,14 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
       return propertyOrder;
     }
 
+    /**
+     * The message info.
+     *
+     * @return The message info.
+     */
+    public MessageInfo getMessageInfo() {
+      return messageInfo;
+    }
   }
 
 }

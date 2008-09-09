@@ -22,6 +22,7 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -382,6 +383,26 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     EnunciateFreemarkerModel model = getModel();
 
+    Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
+    Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
+
+    for (Map.Entry<RESTNoun, List<RESTMethod>> nounMethodEntry : model.getNounsToRESTMethods().entrySet()) {
+      Map<String, String> subcontexts = new HashMap<String, String>();
+      RESTNoun restNoun = nounMethodEntry.getKey();
+      subcontexts.put(null, getRestSubcontext());
+      for (String contentType : nouns2contentTypes.get(restNoun)) {
+        String contentTypeId = contentTypes2Ids.get(contentType);
+        if (contentTypeId != null) {
+          subcontexts.put(contentType, "/" + contentTypeId);
+        }
+      }
+
+      for (RESTMethod restMethod : nounMethodEntry.getValue()) {
+        restMethod.putMetaData("defaultSubcontext", getRestSubcontext());
+        restMethod.putMetaData("subcontexts", subcontexts);
+      }
+    }
+
     //set up the model with the content type handlers.
     Map<String, String> knownContentTypeHandlers = new TreeMap<String, String>();
     knownContentTypeHandlers.put("text/xml", JaxbXmlContentHandler.class.getName());
@@ -457,7 +478,6 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
     }
-    nouns2contentTypes.keySet();
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     getEnunciate().addWebAppFragment(webappFragment);

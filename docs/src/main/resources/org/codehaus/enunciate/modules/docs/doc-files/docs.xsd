@@ -343,6 +343,7 @@
         <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="package" type="xs:string"/>
+        <xs:attribute name="path" type="xs:string" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -438,6 +439,7 @@
     </xs:sequence>
 
     <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="subcontext" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="contentType">
@@ -447,11 +449,11 @@
       </xs:documentation>
     </xs:annotation>
 
-    <xs:attribute name="id" type="xs:string"/>
     <xs:attribute name="type" type="xs:string"/>
-    <xs:attribute name="path" type="xs:string" use="optional"/>
     <xs:attribute name="produceable" type="xs:boolean"/>
     <xs:attribute name="consumable" type="xs:boolean"/>
+    <xs:attribute name="path" type="xs:string" use="optional"/>
+    <xs:attribute name="subcontext" type="xs:string" use="optional"/>
   </xs:complexType>
 
   <xs:complexType name="operation">

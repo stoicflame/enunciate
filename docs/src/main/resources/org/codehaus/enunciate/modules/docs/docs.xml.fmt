@@ -110,7 +110,7 @@
 [@forEachWsdl]
       <wsdl namespace="${wsdl.targetNamespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface wsdl=wsdl]
-        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}">
+        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath?exists] path="${endpointInterface.metaData.soapPath}"[/#if]>
     [#if endpointInterface.docValue?exists]
           <documentation>
             <![CDATA[${endpointInterface.docValue}]]>
@@ -158,12 +158,12 @@
 [/@forEachWsdl]
     </wsdls>
   </soap>
-  <rest baseAddress="${baseAddress}">
+  <rest baseAddress="${baseDeploymentAddress}">
     <resources>
 [@forEachRESTResourceListByPath]
-      <resource name="${(resources?first).path}">
+      <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext?default("/rest")}">
   [#list uniqueContentTypes(resources) as contentType]
-        <contentType type="${contentType.type}"[#if contentTypes2Ids[contentType.type]?exists] id="${contentTypes2Ids[contentType.type]}" path="/${contentTypes2Ids[contentType.type]}${resources?first.path}"[/#if] consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+        <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"[#if contentType.produceable && contentType.subcontext?exists] subcontext="${contentType.subcontext}" path="${contentType.subcontext}${resources?first.path}"[/#if]/>
   [/#list]
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
@@ -185,8 +185,8 @@
           <alias>${alias}</alias>
         [/#list]
       [/#if]
-      [#list resource.supportedContentTypes as contentType]
-          <contentType type="${contentType.type}"[#if contentTypes2Ids[contentType.type]?exists] id="${contentTypes2Ids[contentType.type]}" path="/${contentTypes2Ids[contentType.type]}${resource.path}"[/#if] consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+      [#list uniqueContentTypes(resource) as contentType]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"[#if contentType.produceable && contentType.subcontext?exists] subcontext="${contentType.subcontext}" path="${contentType.subcontext}${resources?first.path}"[/#if]/>
       [/#list]
       [#list resource.resourceParameters as parameter]
           <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}">

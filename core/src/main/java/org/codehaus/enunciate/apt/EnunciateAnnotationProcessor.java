@@ -31,6 +31,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.XmlTransient;
+import org.codehaus.enunciate.util.AntPatternMatcher;
 import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
@@ -51,10 +52,7 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Root annotation processor for enunciate.  Initializes the model and signals the modules to generate.
@@ -133,6 +131,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   @Override
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
+    EnunciateConfiguration config = this.enunciate.getConfig();
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
 
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
@@ -148,6 +147,63 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         }
       }
     }
+
+    AntPatternMatcher matcher = new AntPatternMatcher();
+    matcher.setPathSeparator(".");
+    if (!config.getApiIncludePatterns().isEmpty()) {
+      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
+      while (typeDeclarationIt.hasNext()) {
+        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
+        boolean include = false;
+        if (config.getApiIncludePatterns().contains(typeDeclaration.getQualifiedName())) {
+          include = true;
+          debug("%s was explicitly included.", typeDeclaration.getQualifiedName());
+        }
+        else {
+          for (String includePattern : config.getApiIncludePatterns()) {
+            if (matcher.match(includePattern, typeDeclaration.getQualifiedName())) {
+              include = true;
+              debug("%s matches include pattern %s.", typeDeclaration.getQualifiedName(), includePattern);
+              break;
+            }
+          }
+        }
+
+        if (!include) {
+          debug("%s NOT to be included as an API class because it didn't match any include pattern.", typeDeclaration);
+          typeDeclarationIt.remove();
+        }
+      }
+    }
+
+    if (!config.getApiIncludePatterns().isEmpty()) {
+      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
+      while (typeDeclarationIt.hasNext()) {
+        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
+        boolean exclude = false;
+        if (config.getApiExcludePatterns().contains(typeDeclaration.getQualifiedName())) {
+          exclude = true;
+          debug("%s was explicitly excluded.", typeDeclaration.getQualifiedName());
+        }
+        else {
+          for (String excludePattern : config.getApiExcludePatterns()) {
+            if (matcher.match(excludePattern, typeDeclaration.getQualifiedName())) {
+              exclude = true;
+              debug("%s matches exclude pattern %s.", typeDeclaration.getQualifiedName(), excludePattern);
+              break;
+            }
+          }
+        }
+
+        if (exclude) {
+          typeDeclarationIt.remove();
+        }
+        else {
+          debug("%s NOT to be excluded as an API class because it didn't match any exclude pattern.", typeDeclaration);
+        }
+      }
+    }
+
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -198,7 +254,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    EnunciateConfiguration config = this.enunciate.getConfig();
     //override any namespace prefix mappings as specified in the config.
     for (String ns : config.getNamespacesToPrefixes().keySet()) {
       String prefix = config.getNamespacesToPrefixes().get(ns);

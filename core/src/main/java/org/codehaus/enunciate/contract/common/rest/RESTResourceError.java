@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract;
+package org.codehaus.enunciate.contract.common.rest;
 
 /**
- * The REST resource parameter type.
- * 
  * @author Ryan Heaton
  */
-public enum RESTResourceParameterType {
+public interface RESTResourceError {
 
-  MATRIX,
-
-  QUERY,
-
-  PATH,
-
-  COOKIE,
-
-  HEADER,
-
-  FORM
-  
+  /**
+   * The error code.
+   *
+   * @return The error code.
+   */
+  int getErrorCode();
 }

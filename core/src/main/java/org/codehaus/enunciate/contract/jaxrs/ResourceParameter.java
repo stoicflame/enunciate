@@ -20,8 +20,8 @@ import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
-import org.codehaus.enunciate.contract.RESTResourceParameter;
-import org.codehaus.enunciate.contract.RESTResourceParameterType;
+import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
+import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
 
 import javax.ws.rs.*;
 

@@ -19,12 +19,8 @@ package org.codehaus.enunciate.modules.xfire_client;
 import org.codehaus.enunciate.modules.xfire_client.annotations.RequestWrapperAnnotation;
 import org.codehaus.enunciate.modules.xfire_client.annotations.ResponseWrapperAnnotation;
 import org.codehaus.enunciate.modules.xfire_client.annotations.WebFaultAnnotation;
-import org.codehaus.enunciate.modules.xfire_client.annotations.XmlRootElementAnnotation;
 import org.codehaus.xfire.XFireRuntimeException;
-import org.codehaus.xfire.annotations.AnnotationServiceFactory;
-import org.codehaus.xfire.annotations.WebAnnotations;
-import org.codehaus.xfire.annotations.WebMethodAnnotation;
-import org.codehaus.xfire.annotations.WebServiceAnnotation;
+import org.codehaus.xfire.annotations.*;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.fault.XFireFault;
@@ -220,14 +216,20 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
       return new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
     }
     else if (soapBinding.getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE) {
-      //document/literal bare
-      XmlRootElementAnnotation rootElementAnnotation = annotations.getXmlRootElementAnnotation(method.getParameterTypes()[0]);
-
-      if (rootElementAnnotation == null) {
-        throw new XFireRuntimeException("Unable to create the input message name: no root element metadata about " + method.getParameterTypes()[0].getName());
+      WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(method.getDeclaringClass());
+      if (webServiceAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the input message name: no metadata was found about " + method.getDeclaringClass().getName());
       }
 
-      return new QName(rootElementAnnotation.namespace(), rootElementAnnotation.name());
+      //document/literal bare
+      for (int i = 0; i < method.getParameterTypes().length; i++) {
+        WebParamAnnotation annotation = annotations.getWebParamAnnotation(method, i);
+        if (!annotation.isHeader() && annotation.getMode() != WebParamAnnotation.MODE_OUT) {
+          return new QName(webServiceAnnotation.getTargetNamespace(), annotation.getName());
+        }
+      }
+
+      throw new XFireRuntimeException("Unable to create the input message name: no web param metadata about " + method.getParameterTypes()[0].getName());
     }
     else {
       //document/literal wrapped.
@@ -269,14 +271,25 @@ public class ExplicitJAXWSAnnotationServiceFactory extends AnnotationServiceFact
       return new QName(webServiceAnnotation.getTargetNamespace(), webMethodAnnotation.getOperationName());
     }
     else if (soapBinding.getParameterStyle() == SOAPBindingAnnotation.PARAMETER_STYLE_BARE) {
-      //document/literal bare
-      XmlRootElementAnnotation rootElementAnnotation = annotations.getXmlRootElementAnnotation(method.getReturnType());
-
-      if (rootElementAnnotation == null) {
-        throw new XFireRuntimeException("Unable to create the output message name: no root element metadata about " + method.getReturnType().getName());
+      WebServiceAnnotation webServiceAnnotation = annotations.getWebServiceAnnotation(method.getDeclaringClass());
+      if (webServiceAnnotation == null) {
+        throw new XFireRuntimeException("Unable to create the output message name: no metadata was found about " + method.getDeclaringClass().getName());
       }
 
-      return new QName(rootElementAnnotation.namespace(), rootElementAnnotation.name());
+      if (method.getReturnType() == Void.TYPE) {
+        for (int i = 0; i < method.getParameterTypes().length; i++) {
+          WebParamAnnotation annotation = annotations.getWebParamAnnotation(method, i);
+          if (!annotation.isHeader() && annotation.getMode() != WebParamAnnotation.MODE_IN) {
+            return new QName(webServiceAnnotation.getTargetNamespace(), annotation.getName());
+          }
+        }
+      }
+      else {
+        WebResultAnnotation annotation = annotations.getWebResultAnnotation(method);
+        return new QName(webServiceAnnotation.getTargetNamespace(), annotation.getName());
+      }
+
+      throw new XFireRuntimeException("Unable to create the output message name: insufficient metadata about " + method.getName());
     }
     else {
       //document/literal wrapped.

@@ -60,7 +60,7 @@ public class TestWebResult extends InAPTTestCase {
     }
 
     WebResult webResult = docLitBareMethod.getWebResult();
-    assertEquals("return", webResult.getName());
+    assertEquals("docLitBareMethodResponse", webResult.getName());
     assertEquals("urn:web-method-examples", webResult.getTargetNamespace());
     assertEquals("return", webResult.getPartName());
     assertEquals("WebMethodExamples.docLitBareMethodResponse", webResult.getMessageName());
@@ -70,14 +70,14 @@ public class TestWebResult extends InAPTTestCase {
     assertFalse(webResult.isFault());
     assertNull(webResult.getPartDocs());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webResult.getParticleType());
-    assertEquals(new QName("urn:web-method-examples", "return"), webResult.getParticleQName());
+    assertEquals(new QName("urn:web-method-examples", "docLitBareMethodResponse"), webResult.getParticleQName());
     assertTrue(webResult.isImplicitSchemaElement());
     assertEquals(1, webResult.getParts().size());
     assertTrue(webResult.getParts().contains(webResult));
     assertEquals(new QName(null, "beanOne"), webResult.getTypeQName());
     assertEquals(1, webResult.getMinOccurs());
     assertEquals("1", webResult.getMaxOccurs());
-    assertEquals("return", webResult.getElementName());
+    assertEquals("docLitBareMethodResponse", webResult.getElementName());
 
     webResult = docLitWrappedMethod.getWebResult();
     assertEquals("doc-lit-wrapped-return", webResult.getName());
@@ -89,8 +89,8 @@ public class TestWebResult extends InAPTTestCase {
     assertTrue(webResult.isHeader());
     assertFalse(webResult.isFault());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webResult.getParticleType());
-    assertEquals(new QName(null, "beanThree"), webResult.getParticleQName());
-    assertFalse(webResult.isImplicitSchemaElement());
+    assertEquals(new QName("urn:web-method-examples", "doc-lit-wrapped-return"), webResult.getParticleQName());
+    assertTrue(webResult.isImplicitSchemaElement());
     assertEquals(1, webResult.getParts().size());
     assertEquals(new QName(null, "beanThree"), webResult.getTypeQName());
     assertEquals(1, webResult.getMinOccurs());
@@ -98,7 +98,7 @@ public class TestWebResult extends InAPTTestCase {
     assertEquals("doc-lit-wrapped-return", webResult.getElementName());
 
     webResult = rpcLitWrappedMethod.getWebResult();
-    assertEquals("return", webResult.getName());
+    assertEquals("rpcLitWrappedMethodResponse", webResult.getName());
     assertEquals("urn:web-method-examples", webResult.getTargetNamespace());
     assertEquals("return", webResult.getPartName());
     assertNull(webResult.getMessageName());
@@ -118,7 +118,7 @@ public class TestWebResult extends InAPTTestCase {
     assertEquals(new QName(null, "beanThree"), webResult.getTypeQName());
     assertEquals(1, webResult.getMinOccurs());
     assertEquals("1", webResult.getMaxOccurs());
-    assertEquals("return", webResult.getElementName());
+    assertEquals("rpcLitWrappedMethodResponse", webResult.getElementName());
   }
   
   public static Test suite() {

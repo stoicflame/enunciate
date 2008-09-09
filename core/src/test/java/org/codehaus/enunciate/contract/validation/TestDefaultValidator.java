@@ -210,7 +210,7 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertTrue("A doc/bare method shouldn't be valid if it has 2 params.", validator.validateWebMethod(docBare2ParamMethod).hasErrors());
     assertTrue("A doc/bare method shouldn't be valid if it has 2 outputs.", validator.validateWebMethod(docBare2OutputMethod).hasErrors());
     assertFalse("A doc/bare method should be allowed to have headers.", validator.validateWebMethod(docBareWithHeadersMethod).hasErrors());
-    assertFalse("A doc/bare void method should be valid.", validator.validateWebMethod(docBareVoidMethod).hasErrors());
+    assertTrue("A doc/bare void method should NOT be valid.", validator.validateWebMethod(docBareVoidMethod).hasErrors());
     assertTrue("A doc/bare method shouldn't be valid if it has 2 outputs.", validator.validateWebMethod(docBareVoid2OutputMethod).hasErrors());
     assertTrue("An rpc method with a collection or array parameter should be warned.", validator.validateWebMethod(rpcCollectionParam).hasWarnings());
     assertTrue("An INOUT parameter must be a holder.", validator.validateWebMethod(invalidInOutParameter).hasErrors());

@@ -19,7 +19,7 @@ package org.codehaus.enunciate.util;
 import java.util.Comparator;
 
 /**
- * Sorts the path of {@link org.codehaus.enunciate.contract.RESTResource}s by path, then alphabetically.
+ * Sorts the path of {@link org.codehaus.enunciate.contract.common.rest.RESTResource}s by path, then alphabetically.
  *
  * @author Ryan Heaton
  */

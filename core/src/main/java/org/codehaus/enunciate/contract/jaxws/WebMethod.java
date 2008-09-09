@@ -116,7 +116,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
             messages.add(webParam);
           }
         }
-        if ((!isOneWay()) && (!(getReturnType() instanceof VoidType))) {
+        if (!isOneWay() && !(getReturnType() instanceof VoidType) && !webResult.isHeader()) {
           messages.add(webResult);
         }
 

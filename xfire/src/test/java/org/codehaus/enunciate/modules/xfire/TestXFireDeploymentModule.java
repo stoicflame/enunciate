@@ -19,6 +19,8 @@ package org.codehaus.enunciate.modules.xfire;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.main.Enunciate;
@@ -27,6 +29,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author Ryan Heaton
@@ -61,6 +64,7 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
         return model;
       }
     };
+    model.setEnunciateConfig(new EnunciateConfiguration(Arrays.asList((DeploymentModule) module)));
 
     Enunciate enunciate = new Enunciate(new String[0]);
     enunciate.setGenerateDir(enunciate.createTempDir());
@@ -73,7 +77,8 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
     }
     module.doFreemarkerGenerate();
 
-    assertEquals(3, processedTemplates.size());
+    assertEquals(4, processedTemplates.size());
+    assertTrue(processedTemplates.contains(module.getParameterNamesTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCRequestBeanTemplateURL()));
     assertTrue(processedTemplates.contains(module.getRPCResponseBeanTemplateURL()));
     assertTrue(processedTemplates.contains(module.getXfireServletTemplateURL()));

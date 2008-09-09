@@ -165,9 +165,9 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals(0, annotations.class2HandlerChain.size());
     assertEquals("There should be a property order set for each request and response bean.", 8, annotations.class2PropertyOrder.size());
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithADate"), new String[]{"date"}));
-    assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithADateResponse"), new String[]{"return"}));
+    assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithADateResponse"), new String[]{"doSomethingWithADateResponse"}));
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithAString"), new String[]{"string"}));
-    assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithAStringResponse"), new String[]{"return"}));
+    assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithAStringResponse"), new String[]{"doSomethingWithAStringResponse"}));
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("net.something.BoolOpRequest"), new String[]{"param1"}));
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("net.something.BoolOpResponse"), new String[]{"boolResult"}));
     assertTrue(Arrays.equals((String[]) annotations.class2PropertyOrder.get("org.codehaus.enunciate.samples.xfire_client.jaxws.FloatOp"), new String[]{"d", "l"}));
@@ -268,12 +268,12 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals(4, annotations.method2WebResult.size());
     SerializableWebResultAnnotation webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate");
     assertNotNull(webResultInfo);
-    assertEquals("return", webResultInfo.getName());
+    assertEquals("doSomethingWithADateResponse", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
     assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
     webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithAString");
     assertNotNull(webResultInfo);
-    assertEquals("return", webResultInfo.getName());
+    assertEquals("doSomethingWithAStringResponse", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
     assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
     webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEITwo.boolOp");
@@ -283,7 +283,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertEquals("urn:boolOpResult", webResultInfo.getTargetNamespace());
     webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEITwo.floatOp");
     assertNotNull(webResultInfo);
-    assertEquals("return", webResultInfo.getName());
+    assertEquals("floatOpResponse", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
     assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
 

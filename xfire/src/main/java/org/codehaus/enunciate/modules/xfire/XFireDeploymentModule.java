@@ -18,7 +18,6 @@ package org.codehaus.enunciate.modules.xfire;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.SoapAddressPathMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -37,8 +36,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.TreeSet;
-
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
  * <h1>XFire Module</h1>
@@ -110,6 +107,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     return XFireDeploymentModule.class.getResource("xfire-servlet.xml.fmt");
   }
 
+  /**
+   * @return The URL to "xfire-servlet.xml.fmt"
+   */
+  protected URL getParameterNamesTemplateURL() {
+    return XFireDeploymentModule.class.getResource("enunciate-soap-parameter-names.properties.fmt");
+  }
+
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
@@ -121,9 +125,23 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    if (!isUpToDate()) {
-      EnunciateFreemarkerModel model = getModel();
+    EnunciateFreemarkerModel model = getModel();
+    EnunciateConfiguration config = model.getEnunciateConfig();
+    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        String path = "/soap/" + ei.getServiceName();
+        if (config != null) {
+          path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+          if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+            path = config.getSoapServices2Paths().get(ei.getServiceName());
+          }
+        }
 
+        ei.putMetaData("soapPath", path);
+      }
+    }
+
+    if (!isUpToDate()) {
       //generate the rpc request/response beans.
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -142,10 +160,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
-      model.put("soapAddressPath", new SoapAddressPathMethod());
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getXfireServletTemplateURL(), model);
+      processTemplate(getParameterNamesTemplateURL(), model);
     }
     else {
       info("Skipping generation of XFire support classes as everything appears up-to-date....");
@@ -163,6 +181,8 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
     getEnunciate().copyFile(new File(getGenerateDir(), "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "enunciate-soap-parameter-names.properties"),
+                            new File(new File(webinf, "classes"), "enunciate-soap-parameter-names.properties"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);

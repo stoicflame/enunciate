@@ -423,9 +423,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
         model.setVariable("title", this.title);
       }
 
-      model.setVariable("baseAddress", model.getBaseDeploymentAddress());
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
-
       processTemplate(getDocsTemplateURL(), model);
     }
     else {
@@ -593,6 +591,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       File buildDir = getDocsBuildDir();
       buildDir.mkdirs();
       transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
+      transformer.setParameter("api-relative-path", getRelativePathToRootDir());
       File indexPage = new File(buildDir, "index.html");
       debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));
@@ -601,6 +600,34 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       throw new EnunciateException("Error during transformation of the documentation (stylesheet " + xsltURL +
         ", document " + new File(getGenerateDir(), "docs.xml") + ")", e);
     }
+  }
+
+  /**
+   * Get the relative path to the root directory from the docs directory.
+   *
+   * @return the relative path to the root directory.
+   */
+  protected String getRelativePathToRootDir() {
+    String relativePath = ".";
+    String docsDir = getDocsDir();
+    if (docsDir != null) {
+      StringBuilder builder = new StringBuilder();
+      StringTokenizer pathTokens = new StringTokenizer(docsDir.replace(File.separatorChar, '/'), "/");
+      if (pathTokens.hasMoreTokens()) {
+        while (pathTokens.hasMoreTokens()) {
+          builder.append("..");
+          pathTokens.nextToken();
+          if (pathTokens.hasMoreTokens()) {
+            builder.append('/');
+          }
+        }
+      }
+      else {
+        builder.append('.');
+      }
+      relativePath = builder.toString();
+    }
+    return relativePath;
   }
 
   /**

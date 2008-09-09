@@ -27,6 +27,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.*;
+import org.codehaus.enunciate.contract.common.rest.*;
 import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.rest.MimeType;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
@@ -52,6 +53,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
   private final String jsonpParameter;
   private final Set<String> contentTypes;
   private final RESTEndpoint endpoint;
+  private final Map<String, Object> metaData = new HashMap<String, Object>();
 
   public RESTMethod(MethodDeclaration delegate, RESTEndpoint endpoint) {
     super(delegate);
@@ -424,4 +426,20 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
     errors.addAll(getRESTErrors());
     return errors;
   }
+
+  // Inherited.
+  public Map<String, Object> getMetaData() {
+    return Collections.unmodifiableMap(this.metaData);
+  }
+
+  /**
+   * Put metadata on this resource.
+   *
+   * @param name The name of the metadata.
+   * @param data The data.
+   */
+  public void putMetaData(String name, Object data) {
+    this.metaData.put(name, data);
+  }
+
 }

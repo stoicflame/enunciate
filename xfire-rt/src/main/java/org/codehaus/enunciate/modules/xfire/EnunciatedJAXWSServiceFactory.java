@@ -17,7 +17,6 @@
 package org.codehaus.enunciate.modules.xfire;
 
 import org.codehaus.xfire.XFireFactory;
-import org.codehaus.xfire.XFireRuntimeException;
 import org.codehaus.xfire.annotations.AnnotationException;
 import org.codehaus.xfire.annotations.AnnotationServiceFactory;
 import org.codehaus.xfire.annotations.WebAnnotations;
@@ -34,17 +33,19 @@ import org.codehaus.xfire.soap.AbstractSoapBinding;
 import org.codehaus.xfire.soap.SoapConstants;
 
 import javax.jws.WebMethod;
-import javax.jws.WebService;
+import javax.jws.WebParam;
 import javax.jws.WebResult;
+import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.namespace.QName;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.beans.Introspector;
 import java.util.Map;
+import java.util.Properties;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * The enunciate implementation of the JAXWS service factory.
@@ -53,6 +54,8 @@ import java.util.Map;
  */
 public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
 
+  private final Properties paramNames = new Properties();
+
   /**
    * An annotation service factory that is initialized with the {@link org.codehaus.xfire.annotations.jsr181.Jsr181WebAnnotations} and
    * the default transport manager.
@@ -60,6 +63,16 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
   public EnunciatedJAXWSServiceFactory() {
     super(new Jsr181WebAnnotations(),
           XFireFactory.newInstance().getXFire().getTransportManager());
+
+    InputStream in = getClass().getResourceAsStream("/enunciate-soap-parameter-names.properties");
+    if (in != null) {
+      try {
+        paramNames.load(in);
+      }
+      catch (IOException e) {
+        //fall through....
+      }
+    }
   }
 
 
@@ -208,26 +221,36 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
       return new QName(namespace, operationName);
     }
     else if (paramStyle == SOAPBinding.ParameterStyle.BARE) {
-      // for a bare parameter style, the message name of the name of the
-      // xml root element that must be the first (and only) parameter.
-      Class bareType = method.getParameterTypes()[0];
-      XmlRootElement rootElement = (XmlRootElement) bareType.getAnnotation(XmlRootElement.class);
-      if (rootElement == null) {
-        throw new XFireRuntimeException("Unable to create the message name for " + method + ": " + bareType.getName() + " is not a root element!");
+      String namespace = ((WebService) ei.getAnnotation(WebService.class)).targetNamespace();
+      if ("".equals(namespace)) {
+        namespace = calculateNamespaceURI(ei);
       }
 
-      String namespace = rootElement.namespace();
-      if ("##default".equals(namespace)) {
-        namespace = "";
-        Package pckg = bareType.getPackage();
-        if ((pckg != null) && (pckg.isAnnotationPresent(XmlSchema.class))) {
-          namespace = pckg.getAnnotation(XmlSchema.class).namespace();
+      //find the first "in" param.  Presumably, there are no more, since we're BARE.
+      WebParam annotation = null;
+      int paramIndex;
+      Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+      PARAM_ANNOTATIONS : for (paramIndex = 0; paramIndex < parameterAnnotations.length; paramIndex++) {
+        Annotation[] annotations = parameterAnnotations[paramIndex];
+        for (Annotation candidate : annotations) {
+          if (candidate instanceof WebParam && !((WebParam) candidate).header()) {
+            WebParam.Mode mode = ((WebParam) candidate).mode();
+            switch(mode) {
+              case IN:
+              case INOUT:
+                annotation = (WebParam) candidate;
+                break PARAM_ANNOTATIONS;
+            }
+          }
         }
       }
 
-      String name = rootElement.name();
-      if ("##default".equals(name)) {
-        name = Introspector.decapitalize(bareType.getSimpleName());
+      String name;
+      if (annotation == null || !"".equals(annotation.name())) {
+        name = loadParamName(ei, method, annotation == null ? 0 : paramIndex);
+      }
+      else {
+        name = annotation.name();
       }
 
       return new QName(namespace, name);
@@ -254,6 +277,39 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
 
       return new QName(namespace, name);
     }
+  }
+
+  /**
+   * Loads the parameter name for the specified parameter.
+   *
+   * @param ei The endpoint interface.
+   * @param method The method.
+   * @param paramIndex The parameter index.
+   * @return The parameter name.
+   */
+  protected String loadParamName(Class ei, Method method, int paramIndex) {
+    String operationName = method.getName();
+    if (method.isAnnotationPresent(WebMethod.class)) {
+      WebMethod wm = method.getAnnotation(WebMethod.class);
+      if (wm.operationName().length() > 0) {
+        operationName = wm.operationName();
+      }
+    }
+
+    String paramName = null;
+    String paramNames = (String) this.paramNames.get(ei.getName() + "#" + operationName);
+    if (paramNames != null) {
+      String[] paramsNames = paramNames.split(",");
+      if (paramsNames.length > paramIndex) {
+        paramName = paramsNames[paramIndex];
+      }
+    }
+
+    if (paramName == null) {
+      throw new IllegalStateException("Unknown parameter name for parameter '" + paramIndex + "' of web method " + ei.getName() + "#" + operationName);
+    }
+    
+    return paramName;
   }
 
   @Override
@@ -292,28 +348,44 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
       return new QName(namespace, operationName);
     }
     else if (paramStyle == SOAPBinding.ParameterStyle.BARE) {
-      // for a bare parameter style, the message name of the name of the
-      // xml root element that must be the return type.
-      Class bareType = method.getReturnType();
-      XmlRootElement rootElement = (XmlRootElement) bareType.getAnnotation(XmlRootElement.class);
-      if (rootElement == null) {
-        throw new XFireRuntimeException("Unable to create the message name for " + method + ": " + bareType.getName() + " is not a root element!");
+      String namespace = ((WebService) ei.getAnnotation(WebService.class)).targetNamespace();
+      if ("".equals(namespace)) {
+        namespace = calculateNamespaceURI(ei);
       }
 
-      String namespace = rootElement.namespace();
-      if ("##default".equals(namespace)) {
-        namespace = "";
-        Package pckg = bareType.getPackage();
-        if ((pckg != null) && (pckg.isAnnotationPresent(XmlSchema.class))) {
-          namespace = pckg.getAnnotation(XmlSchema.class).namespace();
+      String name;
+      if (method.getReturnType() == Void.TYPE) {
+        //find the first "out" param.  Presumably, there are no more, since we're BARE.
+        WebParam annotation = null;
+        int paramIndex;
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        PARAM_ANNOTATIONS : for (paramIndex = 0; paramIndex < parameterAnnotations.length; paramIndex++) {
+          Annotation[] annotations = parameterAnnotations[paramIndex];
+          for (Annotation candidate : annotations) {
+            if (candidate instanceof WebParam && !((WebParam) candidate).header()) {
+              WebParam.Mode mode = ((WebParam) candidate).mode();
+              switch(mode) {
+                case OUT:
+                case INOUT:
+                  annotation = (WebParam) candidate;
+                  break PARAM_ANNOTATIONS;
+              }
+            }
+          }
+        }
+
+        if (annotation == null || !"".equals(annotation.name())) {
+          name = loadParamName(ei, method, annotation == null ? 0 : paramIndex);
+        }
+        else {
+          name = annotation.name();
         }
       }
-
-      String name = rootElement.name();
-      if ("##default".equals(name)) {
-        name = Introspector.decapitalize(bareType.getSimpleName());
+      else {
+        WebResult annotation = method.getAnnotation(WebResult.class);
+        name = annotation == null || "".equals(annotation.name()) ? method.getName() + "Response" : annotation.name();
       }
-
+      
       return new QName(namespace, name);
     }
     else {

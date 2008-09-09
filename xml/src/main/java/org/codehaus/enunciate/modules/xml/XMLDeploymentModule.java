@@ -27,7 +27,6 @@ import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
 import org.codehaus.enunciate.modules.xml.config.XMLRuleSet;
 import org.codehaus.enunciate.main.FileArtifact;
-import org.codehaus.enunciate.template.freemarker.SoapAddressLocationMethod;
 import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
@@ -43,8 +42,8 @@ import java.util.Map;
  *
  * <p>The XML deployment module generates the consolidated WSDLs and schemas for the API.</a>.
  *
- * <p>The order of the XML deployment module is 0, as it doesn't depend on any artifacts exported
- * by any other module.</p>
+ * <p>The order of the XML deployment module is 50 so as to allow other modules to apply metadata
+ * to the endpoints and classes.</p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -114,6 +113,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public String getName() {
     return "xml";
+  }
+
+  /**
+   * @return 50
+   */
+  @Override
+  public int getOrder() {
+    return 50;
   }
 
   /**
@@ -199,7 +206,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     model.put("prefix", new PrefixMethod());
-    model.put("soapAddressLocation", new SoapAddressLocationMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);
