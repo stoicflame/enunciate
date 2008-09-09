@@ -8,6 +8,7 @@
   <name>Enunciate - Parent</name>
 
   <modules>
+    <module>core-annotations</module>
     <module>core-rt</module>
     <module>core</module>
     <module>xml</module>

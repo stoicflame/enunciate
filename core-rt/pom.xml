@@ -23,6 +23,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core-annotations</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>xfire</groupId>
       <artifactId>xfire-jsr181-api</artifactId>
     </dependency>
