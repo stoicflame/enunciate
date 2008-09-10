@@ -68,6 +68,13 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagBase>https://svn.codehaus.org/enunciate/tags/</tagBase>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
           <execution>
@@ -102,6 +109,12 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <scm>
+    <connection>scm:svn:http://svn.codehaus.org/enunciate/trunk/enunciate/</connection>
+    <developerConnection>scm:svn:https://svn.codehaus.org/enunciate/trunk/enunciate</developerConnection>
+    <url>http://svn.codehaus.org/enunciate/trunk/enunciate/</url>
+  </scm>
 
   <dependencies>
     <dependency>
