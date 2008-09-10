@@ -126,6 +126,11 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
       PropertyDescriptor jaxbProperty = pds[0];
       PropertyDescriptor amfProperty = pds[1];
       Method getter = jaxbProperty.getReadMethod();
+      if (getter == null) {
+        throw new AMFMappingException("In order to convert from JAXB classes to AMF, you must provide a getter for property '"
+          + jaxbProperty.getName() + "' on class " + jaxbProperty.getWriteMethod().getDeclaringClass());
+      }
+
       Object propertyValue;
       try {
         propertyValue = getter.invoke(jaxbObject);
@@ -159,7 +164,11 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
    * @return The type adapter, or null if none was found.
    */
   private XmlJavaTypeAdapter findTypeAdapter(PropertyDescriptor jaxbProperty) {
-    XmlJavaTypeAdapter adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
+    XmlJavaTypeAdapter adapterInfo = null;
+
+    if (jaxbProperty.getReadMethod() != null) {
+      adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
+    }
 
     if ((adapterInfo == null) && (jaxbProperty.getWriteMethod() != null)) {
       adapterInfo = jaxbProperty.getWriteMethod().getAnnotation(XmlJavaTypeAdapter.class);
@@ -193,7 +202,11 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
    * @return The xml element metadata, or null if none found.
    */
   private XmlElement findXmlElement(PropertyDescriptor property){
-    XmlElement xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+    XmlElement xmlElement = null;
+
+    if (property.getReadMethod() != null) {
+      xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+    }
 
     if ((xmlElement == null) && (property.getWriteMethod() != null)) {
       xmlElement = property.getWriteMethod().getAnnotation(XmlElement.class);
@@ -238,16 +251,22 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
         continue;
       }
 
+      Method setter = jaxbProperty.getWriteMethod();
+      if (setter == null) {
+        throw new AMFMappingException("In order to convert from AMF back to JAXB classes, you must provide a setter for property '"
+          + jaxbProperty.getName() + "' on class " + jaxbProperty.getReadMethod().getDeclaringClass());
+      }
+
       AMFMapper mapper;
       if (propertyValue instanceof AMFMapperAware) {
         mapper = ((AMFMapperAware) propertyValue).loadAMFMapper();
       }
       else {
-        mapper = AMFMapperIntrospector.getAMFMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
+        mapper = AMFMapperIntrospector.getAMFMapper(setter.getGenericParameterTypes()[0], findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       }
       
       try {
-        jaxbProperty.getWriteMethod().invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
+        setter.invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }
       catch (Exception e) {
         throw new AMFMappingException("Unable to set property " + jaxbProperty.getName() + " for the amf bean " + amfClass.getName(), e);

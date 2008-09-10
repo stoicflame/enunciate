@@ -126,6 +126,11 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
       PropertyDescriptor jaxbProperty = pds[0];
       PropertyDescriptor gwtProperty = pds[1];
       Method getter = jaxbProperty.getReadMethod();
+      if (getter == null) {
+        throw new GWTMappingException("In order to convert from JAXB classes to GWT, you must provide a getter for property '"
+          + jaxbProperty.getName() + "' on class " + jaxbProperty.getWriteMethod().getDeclaringClass());
+      }
+
       Object propertyValue;
       try {
         propertyValue = getter.invoke(jaxbObject);
@@ -138,9 +143,8 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
         continue;
       }
 
-      XmlJavaTypeAdapter adapterInfo = findTypeAdapter(jaxbProperty);
-      XmlElement xmlElement = findXmlElement(jaxbProperty);
-      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(propertyValue.getClass(), getter.getGenericReturnType(), adapterInfo, xmlElement);
+      GWTMapper mapper = GWTMapperIntrospector.getGWTMapper(propertyValue.getClass(), getter.getGenericReturnType(),
+                                                            findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       try {
         gwtProperty.getWriteMethod().invoke(gwtObject, mapper.toGWT(propertyValue, context));
       }
@@ -159,24 +163,36 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
    * @return The type adapter, or null if none was found.
    */
   private XmlJavaTypeAdapter findTypeAdapter(PropertyDescriptor jaxbProperty) {
-    XmlJavaTypeAdapter adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
+    XmlJavaTypeAdapter adapterInfo = null;
+
+    if (jaxbProperty.getReadMethod() != null) {
+      adapterInfo = jaxbProperty.getReadMethod().getAnnotation(XmlJavaTypeAdapter.class);
+    }
 
     if ((adapterInfo == null) && (jaxbProperty.getWriteMethod() != null)) {
       adapterInfo = jaxbProperty.getWriteMethod().getAnnotation(XmlJavaTypeAdapter.class);
     }
 
     if (adapterInfo == null) {
-      Package pckg = jaxbProperty.getReadMethod().getDeclaringClass().getPackage();
-      Class<?> returnType = jaxbProperty.getReadMethod().getReturnType();
+      Package pckg;
+      Class<?> propertyType;
+      if (jaxbProperty.getReadMethod() != null) {
+        pckg = jaxbProperty.getReadMethod().getDeclaringClass().getPackage();
+        propertyType = jaxbProperty.getReadMethod().getReturnType();
+      }
+      else {
+        pckg = jaxbProperty.getWriteMethod().getDeclaringClass().getPackage();
+        propertyType = jaxbProperty.getWriteMethod().getParameterTypes()[0];
+      }
 
       XmlJavaTypeAdapter possibleAdapterInfo = pckg.getAnnotation(XmlJavaTypeAdapter.class);
-      if ((possibleAdapterInfo != null) && (returnType.equals(possibleAdapterInfo.type()))) {
+      if ((possibleAdapterInfo != null) && (propertyType.equals(possibleAdapterInfo.type()))) {
         adapterInfo = possibleAdapterInfo;
       }
       else if (pckg.isAnnotationPresent(XmlJavaTypeAdapters.class)) {
         XmlJavaTypeAdapters adapters = pckg.getAnnotation(XmlJavaTypeAdapters.class);
         for (XmlJavaTypeAdapter possibility : adapters.value()) {
-          if (returnType.equals(possibility.type())) {
+          if (propertyType.equals(possibility.type())) {
             adapterInfo = possibility;
           }
         }
@@ -193,7 +209,11 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
    * @return The xml element metadata, or null if none found.
    */
   private XmlElement findXmlElement(PropertyDescriptor property){
-    XmlElement xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+    XmlElement xmlElement = null;
+
+    if (property.getReadMethod() != null) {
+      xmlElement = property.getReadMethod().getAnnotation(XmlElement.class);
+    }
 
     if ((xmlElement == null) && (property.getWriteMethod() != null)) {
       xmlElement = property.getWriteMethod().getAnnotation(XmlElement.class);
@@ -239,12 +259,18 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
       }
 
       GWTMapper mapper = GWTMapperIntrospector.getGWTMapperForGWTObject(propertyValue);
+      Method setter = jaxbProperty.getWriteMethod();
+      if (setter == null) {
+        throw new GWTMappingException("In order to convert from GWT back to JAXB classes, you must provide a setter for property '"
+          + jaxbProperty.getName() + "' on class " + jaxbProperty.getReadMethod().getDeclaringClass());
+      }
+      
       if (mapper == null) {
-        mapper = GWTMapperIntrospector.getGWTMapper(jaxbProperty.getReadMethod().getGenericReturnType(), findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
+        mapper = GWTMapperIntrospector.getGWTMapper(setter.getGenericParameterTypes()[0], findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       }
 
       try {
-        jaxbProperty.getWriteMethod().invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
+        setter.invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }
       catch (Exception e) {
         throw new GWTMappingException("Unable to set property " + jaxbProperty.getName() + " for the gwt bean " + gwtClass.getName(), e);
