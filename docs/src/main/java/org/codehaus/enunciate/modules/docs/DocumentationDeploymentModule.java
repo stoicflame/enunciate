@@ -123,18 +123,16 @@ import java.util.*;
  *
  * <h3>The "download" element</h3>
  *
- * <p>There is only one child element of the "docs" element.  This element is named "download".  There can be any number of "download" elements
- * specified.  This element is used to indicate another file or Enunciate artifact that is to be included in the "downloads" page.  The download
- * element supports the following attributes:</p>
+ * <p>There can be any number of "download" elements specified.  This element is used to indicate another file or Enunciate artifact
+ * that is to be included in the "downloads" page.  The download element supports the following attributes:</p>
  *
  * <ul>
  *   <li>The "name" attribute specifies a name for the download.</li>
- *   <li>The "artifact" attribute specifies the id of an Enunciate artifact that
- *       is to be included as a download.</li>
- *   <li>The "file" attribute specifies a file on the filesystem that is to be included as a download.
- * This attribute is ignored if the "artifact" attribute is set.</li>
+ *   <li>The "artifact" attribute specifies the id of an Enunciate artifact that is to be included as a download.</li>
+ *   <li>The "file" attribute specifies a file on the filesystem that is to be included as a download. This attribute is
+ *       ignored if the "artifact" attribute is set.</li>
  *   <li>The "description" attribute includes a description of the download.  This attribute is ignored if
- * the "artifact" attribute is set.</li>
+ *       the "artifact" attribute is set.</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -151,7 +149,7 @@ import java.util.*;
  * <h3>docs</h3>
  *
  * <p>The documentation deployment module exports only one artifact: the build directory for the documentation.
- * The artifact id is "docs", and it is exported during the "build" step.
+ * The artifact id is "docs", and it is exported during the "build" step.</p>
  *
  * @author Ryan Heaton
  * @docFileName module_docs.html

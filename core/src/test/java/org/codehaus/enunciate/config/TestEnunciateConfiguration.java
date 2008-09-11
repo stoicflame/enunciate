@@ -18,7 +18,6 @@ package org.codehaus.enunciate.config;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 
@@ -41,13 +40,8 @@ public class TestEnunciateConfiguration extends TestCase {
 
     //load a file that doesn't validate against the schema.
     config = new EnunciateConfiguration(new ArrayList<DeploymentModule>());
-    try {
-      config.load(getClass().getResourceAsStream("invalid.config.xml"));
-      fail("Should have thrown a validation error.");
-    }
-    catch (SAXException e) {
-      //fall through...
-    }
+    //as of 1.8, doesn't throw an exception.
+    config.load(getClass().getResourceAsStream("invalid.config.xml"));
 
     //validate the "module" element processing...
     ArrayList<DeploymentModule> list = new ArrayList<DeploymentModule>();

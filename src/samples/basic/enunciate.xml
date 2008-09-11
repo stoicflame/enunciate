@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<enunciate label="basic">
+<enunciate label="basic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.8.xsd">
   <namespaces>
     <namespace id="pets" uri="http://org.codehaus.enunciate/samples/petclinic/pets"/>
     <namespace id="owners" uri="http://org.codehaus.enunciate/samples/petclinic/owners"/>
@@ -18,8 +19,5 @@
         <convert from="org.codehaus.enunciate.samples.petclinic" to="org.codehaus.enunciate.samples.petclinic.client"/>
       </package-conversions>
     </xfire-client>
-    <xfire uuid="basic.example">
-      <war name="basic.war"/>
-    </xfire>
   </modules>
 </enunciate>

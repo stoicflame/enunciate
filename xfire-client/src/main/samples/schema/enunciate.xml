@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<enunciate label="shapes">
+<enunciate label="shapes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.8.xsd">
   <modules>
     <xfire-client uuid="shapes">
       <package-conversions>

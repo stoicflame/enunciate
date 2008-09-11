@@ -478,8 +478,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   public void load(InputStream in) throws IOException, SAXException {
     Digester digester = createDigester();
     digester.setErrorHandler(this);
-    digester.setValidating(true);
-    digester.setSchema(EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
+    digester.setValidating(false);
+//    digester.setSchema(EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
     digester.push(this);
 
     //set any root-level attributes
@@ -562,12 +562,12 @@ public class EnunciateConfiguration implements ErrorHandler {
     try {
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setNamespaceAware(false);
-      factory.setValidating(true);
+      factory.setValidating(false);
 
       Properties properties = new Properties();
       properties.put("SAXParserFactory", factory);
-      properties.put("schemaLocation", EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
-      properties.put("schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+//      properties.put("schemaLocation", EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
+//      properties.put("schemaLanguage", "http://www.w3.org/2001/XMLSchema");
       
       SAXParser parser = GenericParser.newSAXParser(properties);
       return new Digester(parser);

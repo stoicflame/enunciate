@@ -89,7 +89,7 @@ import java.util.*;
  * <p>The Jersey module supports the following attributes:</p>
  *
  * <ul>
- *   <li>The "useSubcontext" attribute is used is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ *   <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  *   <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
  *   <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
  * </ul>

@@ -333,7 +333,7 @@ import java.util.*;
  * <h3>The "content-type-handlers" element</h3>
  *
  * <p>The "content-type-handlers" child element of the rest module configuration element supports configuration of the content type handler for a specific
- * content type. The "contentType" attribute identifies the content type.  The "class" element is the fully-qualified classname of the content handler.</p>
+ * content type. Each "handler" child element identifies the handler.  The "contentType" attribute identifies the content type.  The "class" element is the fully-qualified classname of the content handler.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *

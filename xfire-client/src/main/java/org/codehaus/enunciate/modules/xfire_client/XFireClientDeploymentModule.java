@@ -59,9 +59,9 @@ import java.util.*;
  * metadata to the endpoints before processing the client.</p>
  *
  * <ul>
- *   <li><a href="#steps">steps</a></li>
- *   <li><a href="#config">configuration</a></li>
- *   <li><a href="#artifacts">artifacts</a></li>
+ * <li><a href="#steps">steps</a></li>
+ * <li><a href="#config">configuration</a></li>
+ * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
  * <h1><a name="steps">Steps</a></h1>
@@ -93,8 +93,9 @@ import java.util.*;
  * enunciate configuration file.  It supports the following attributes:</p>
  *
  * <ul>
- *   <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
+ * <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
+ * <li>The "disable14Client" attributes disables the generation of the JDK 1.4 client.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -105,10 +106,10 @@ import java.util.*;
  * the following attributes:</p>
  *
  * <ul>
- *   <li>The "from" attribute specifies the package that is to be converted.  This package will match
+ * <li>The "from" attribute specifies the package that is to be converted.  This package will match
  * all classes in the package as well as any subpackages of the package.  This means that if "org.enunciate"
  * were specified, it would match "org.enunciate", "org.enunciate.api", and "org.enunciate.api.impl".</li>
- *   <li>The "to" attribute specifies what the package is to be converted to.  Only the part of the package
+ * <li>The "to" attribute specifies what the package is to be converted to.  Only the part of the package
  * that matches the "from" attribute will be converted.</li>
  * </ul>
  *
@@ -117,10 +118,10 @@ import java.util.*;
  * <p>The XFire client deployment module exports the following artifacts:</p>
  *
  * <ul>
- *   <li>The JDK 1.4 libraries and sources are exported under the id "client.jdk14.library".  (Note that this is a
+ * <li>The JDK 1.4 libraries and sources are exported under the id "client.jdk14.library".  (Note that this is a
  * bundle, so if exporting to a directory multiple files will be exported.  If exporting to a file, the bundle will
  * be zipped first.)</li>
- *   <li>The JDK 1.5 libraries and sources are exported under the id "client.jdk15.library".  (Note that this is a
+ * <li>The JDK 1.5 libraries and sources are exported under the id "client.jdk15.library".  (Note that this is a
  * bundle, so if exporting to a directory multiple files will be exported.  If exporting to a file, the bundle will
  * be zipped first.)</li>
  * </ul>
@@ -136,6 +137,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   private String uuid;
   private ExplicitWebAnnotations generatedAnnotations = null;
   private List<String> generatedTypeList = null;
+  private boolean disable14Client = false;
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
@@ -291,37 +293,42 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.remove("rootElementName");
 
-      //Now, generate the jdk14-compatable client-side stubs.
-      info("Generating the XFire client classes for jdk 1.4.");
-      model.setFileOutputDirectory(jdk14GenerateDir);
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          model.put("endpointInterface", ei);
+      if (!isDisable14Client()) {
+        //Now, generate the jdk14-compatable client-side stubs.
+        info("Generating the XFire client classes for jdk 1.4.");
+        model.setFileOutputDirectory(jdk14GenerateDir);
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            model.put("endpointInterface", ei);
 
-          processTemplate(eiTemplate, model);
-          processTemplate(soapImplTemplate, model);
+            processTemplate(eiTemplate, model);
+            processTemplate(soapImplTemplate, model);
+          }
+        }
+
+        for (WebFault webFault : allFaults.values()) {
+          ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+          if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+            model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+          }
+          else {
+            model.remove("superFault");
+          }
+
+          model.put("fault", webFault);
+          processTemplate(faultTemplate, model);
+        }
+
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+            processTemplate(template, model);
+          }
         }
       }
-
-      for (WebFault webFault : allFaults.values()) {
-        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
-        }
-        else {
-          model.remove("superFault");
-        }
-
-        model.put("fault", webFault);
-        processTemplate(faultTemplate, model);
-      }
-
-      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? jdk14EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-          processTemplate(template, model);
-        }
+      else {
+        info("Java 1.4 client generation has been disabled.  Skipping generation of 1.4 client classes.");
       }
 
       //Now enable jdk-15 compatability and generate those client-side stubs.
@@ -372,13 +379,13 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * Whether the specified directories are up to date.
    *
    * @param commonJdkGenerateDir The common jdk generate directory.
-   * @param jdk14GenerateDir The jdk14 generate directory.
-   * @param jdk15GenerateDir The jdk15 generate directory.
+   * @param jdk14GenerateDir     The jdk14 generate directory.
+   * @param jdk15GenerateDir     The jdk15 generate directory.
    * @return Whether the directories are up-to-date.
    */
   protected boolean isUpToDate(File commonJdkGenerateDir, File jdk14GenerateDir, File jdk15GenerateDir) {
     return enunciate.isUpToDateWithSources(commonJdkGenerateDir) &&
-      enunciate.isUpToDateWithSources(jdk14GenerateDir) &&
+      (isDisable14Client() || enunciate.isUpToDateWithSources(jdk14GenerateDir)) &&
       enunciate.isUpToDateWithSources(jdk15GenerateDir);
   }
 
@@ -501,7 +508,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * Adds explicit elements for the specified root element.
    *
    * @param rootElement The root element.
-   * @param conversion The conversion to use.
+   * @param conversion  The conversion to use.
    */
   protected void addExplicitAnnotations(RootElementDeclaration rootElement, ClientClassnameForMethod conversion) {
     String classname = conversion.convert(rootElement);
@@ -528,16 +535,21 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     Collection<String> typeFiles = enunciate.getJavaFiles(typesDir);
 
     //Compile the jdk14 files.
-    File jdk14CompileDir = getJdk14CompileDir();
-    if (!enunciate.isUpToDateWithSources(jdk14CompileDir)) {
-      Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
-      jdk14Files.addAll(typeFiles);
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", jdk14CompileDir, new ArrayList<String>(), jdk14Files.toArray(new String[jdk14Files.size()]));
-      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk14CompileDir, uuid + ".types"));
-      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk14CompileDir, uuid + ".annotations"));
+    if (!isDisable14Client()) {
+      File jdk14CompileDir = getJdk14CompileDir();
+      if (!enunciate.isUpToDateWithSources(jdk14CompileDir)) {
+        Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
+        jdk14Files.addAll(typeFiles);
+        enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", jdk14CompileDir, new ArrayList<String>(), jdk14Files.toArray(new String[jdk14Files.size()]));
+        enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk14CompileDir, uuid + ".types"));
+        enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk14CompileDir, uuid + ".annotations"));
+      }
+      else {
+        info("Skipping compilation of JDK 1.4 client classes as everything appears up-to-date...");
+      }
     }
     else {
-      info("Skipping compilation of JDK 1.4 client classes as everything appears up-to-date...");
+      info("1.4 client code generation has been disabled.  Skipping compilation of 1.4 sources.");
     }
 
     //Compile the jdk15 files.
@@ -613,24 +625,6 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       jarName = label + "-client.jar";
     }
 
-    File jdk14Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4.jar"));
-    if (!enunciate.isUpToDate(getJdk14CompileDir(), jdk14Jar)) {
-      enunciate.zip(jdk14Jar, getJdk14CompileDir());
-      enunciate.setProperty("client.jdk14.jar", jdk14Jar);
-    }
-    else {
-      info("Skipping creation of JDK 1.4 client jar as everything appears up-to-date...");
-    }
-
-    File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-src.jar"));
-    if (!enunciate.isUpToDate(getJdk14GenerateDir(), jdk14Sources)) {
-      enunciate.zip(jdk14Sources, getJdk14GenerateDir());
-      enunciate.setProperty("client.jdk14.sources", jdk14Sources);
-    }
-    else {
-      info("Skipping creation of the JDK 1.4 client source jar as everything appears up-to-date...");
-    }
-
     List<ArtifactDependency> clientDeps = new ArrayList<ArtifactDependency>();
     MavenDependency xfireClientDependency = new MavenDependency();
     xfireClientDependency.setId("enunciate-xfire-client-tools");
@@ -654,6 +648,13 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     dep.setArtifactType("jar");
     dep.setVersion("1.0.1");
     dep.setDescription("The stax APIs.");
+    clientDeps.add(dep);
+
+    dep = new BaseArtifactDependency();
+    dep.setId("jaxws-api");
+    dep.setArtifactType("jar");
+    dep.setVersion("2.0");
+    dep.setDescription("The JAX-WS API.");
     clientDeps.add(dep);
 
     dep = new BaseArtifactDependency();
@@ -705,24 +706,47 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     dep.setVersion("1.1");
     clientDeps.add(dep);
 
-    //todo: generate the javadocs?
+    if (!isDisable14Client()) {
+      File jdk14Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4.jar"));
+      if (!enunciate.isUpToDate(getJdk14CompileDir(), jdk14Jar)) {
+        enunciate.zip(jdk14Jar, getJdk14CompileDir());
+        enunciate.setProperty("client.jdk14.jar", jdk14Jar);
+      }
+      else {
+        info("Skipping creation of JDK 1.4 client jar as everything appears up-to-date...");
+      }
 
-    ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
-    jdk14ArtifactBundle.setPlatform("Java (Version 1.4+)");
-    //read in the description from file:
-    jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
-    NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
-    jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
-    jdk14BinariesJar.setPublic(false);
-    jdk14ArtifactBundle.addArtifact(jdk14BinariesJar);
-    NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
-    jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
-    jdk14SourcesJar.setPublic(false);
-    jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
-    jdk14ArtifactBundle.setDependencies(clientDeps);
-    enunciate.addArtifact(jdk14BinariesJar);
-    enunciate.addArtifact(jdk14SourcesJar);
-    enunciate.addArtifact(jdk14ArtifactBundle);
+      File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-src.jar"));
+      if (!enunciate.isUpToDate(getJdk14GenerateDir(), jdk14Sources)) {
+        enunciate.zip(jdk14Sources, getJdk14GenerateDir());
+        enunciate.setProperty("client.jdk14.sources", jdk14Sources);
+      }
+      else {
+        info("Skipping creation of the JDK 1.4 client source jar as everything appears up-to-date...");
+      }
+
+      //todo: generate the javadocs?
+
+      ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
+      jdk14ArtifactBundle.setPlatform("Java (Version 1.4+)");
+      //read in the description from file:
+      jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
+      NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
+      jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
+      jdk14BinariesJar.setPublic(false);
+      jdk14ArtifactBundle.addArtifact(jdk14BinariesJar);
+      NamedFileArtifact jdk14SourcesJar = new NamedFileArtifact(getName(), "client.jdk14.library.sources", jdk14Sources);
+      jdk14SourcesJar.setDescription("The sources for the JDK 1.4 client library.");
+      jdk14SourcesJar.setPublic(false);
+      jdk14ArtifactBundle.addArtifact(jdk14SourcesJar);
+      jdk14ArtifactBundle.setDependencies(clientDeps);
+      enunciate.addArtifact(jdk14BinariesJar);
+      enunciate.addArtifact(jdk14SourcesJar);
+      enunciate.addArtifact(jdk14ArtifactBundle);
+    }
+    else {
+      info("No artifact generated for the Java 1.4 client because it was disabled.");
+    }
 
     File jdk15Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5.jar"));
     if (!enunciate.isUpToDate(getJdk15CompileDir(), jdk15Jar)) {
@@ -859,6 +883,24 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setJarName(String jarName) {
     this.jarName = jarName;
+  }
+
+  /**
+   * Whether to disable the Java 1.4 client.
+   *
+   * @return Whether to disable the Java 1.4 client.
+   */
+  public boolean isDisable14Client() {
+    return disable14Client;
+  }
+
+  /**
+   * Whether to disable the Java 1.4 client.
+   *
+   * @param disable14Client Whether to disable the Java 1.4 client.
+   */
+  public void setDisable14Client(boolean disable14Client) {
+    this.disable14Client = disable14Client;
   }
 
   /**

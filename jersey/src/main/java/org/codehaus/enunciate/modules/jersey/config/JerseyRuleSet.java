@@ -26,6 +26,5 @@ public class JerseyRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
     digester.addSetProperties("enunciate/modules/jersey");
-    digester.addSetProperties("enunciate/modules/jersey/json");
   }
 }

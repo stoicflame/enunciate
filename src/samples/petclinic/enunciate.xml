@@ -1,4 +1,5 @@
-<enunciate>
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.8.xsd">
   <services>
     <rest>
       <content-types>

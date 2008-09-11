@@ -242,7 +242,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String gwtHome = System.getProperty("gwt.home") == null ? System.getenv("GWT_HOME") : System.getProperty("gwt.home");
   private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
   private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
-  private String gwtSubcontext = "/gwt/";
+  private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
 
   public GWTDeploymentModule() {
@@ -745,7 +745,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         gwtServlet.setClassname(ei.getPackage().getQualifiedName() + ".gwt.GWT" + ei.getSimpleName() + "Impl");
         gwtServlet.setName("GWT" + ei.getSimpleName());
         TreeSet<String> urlMappings = new TreeSet<String>();
-        urlMappings.add(getGwtSubcontext() + ei.getServiceName());
+        urlMappings.add(getGwtSubcontext() + '/' + ei.getServiceName());
         gwtServlet.setUrlMappings(urlMappings);
         servlets.add(gwtServlet);
       }
@@ -1221,8 +1221,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       gwtSubcontext = "/" + gwtSubcontext;
     }
 
-    if (!gwtSubcontext.endsWith("/")) {
-      gwtSubcontext = gwtSubcontext + "/";
+    while (gwtSubcontext.endsWith("/")) {
+      gwtSubcontext = gwtSubcontext.substring(gwtSubcontext.length() - 1);
     }
 
     this.gwtSubcontext = gwtSubcontext;

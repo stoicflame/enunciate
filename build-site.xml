@@ -216,7 +216,7 @@
     </javadoc>
   </target>
 
-  <target name="docs" description="generate documentation and javadoc (global)" depends="copy-static-docs, javadoc, getting-started-examples"/>
+  <target name="docs" description="generate documentation and javadoc (global)" depends="copy-static-docs, javadoc, getting-started-examples, schemas"/>
 
   <target name="full-jar" depends="init" description="Creates the full jar.">
     <mkdir dir="target/full-classes"/>
@@ -300,6 +300,15 @@
       </filterset>
     </copy>
 
+  </target>
+
+  <target name="schemas" depends="init">
+    <mkdir dir="${docs.dir}/schemas"/>
+    <copy todir="${docs.dir}/schemas">
+      <fileset dir="top/src/main/resources/META-INF">
+        <include name="*.xsd"/>
+      </fileset>
+    </copy>
   </target>
 
   <target name="dist" depends="docs, scripts, copy-dist-libs, full-jar" description="Creates the distribution bundle.">

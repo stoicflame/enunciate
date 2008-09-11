@@ -195,7 +195,7 @@ import java.util.*;
  *
  * <h3>anonymous</h3>
  *
- * <p>The "anonymousConfig" child element is used to configure the anonymous identity processing.  The "userId" attribute specifies the id of the anonymous user.
+ * <p>The "anonymous" child element is used to configure the anonymous identity processing.  The "userId" attribute specifies the id of the anonymous user.
  * The default value is "anonymous".  The "roles" attribute is used to specify the (comma-separated) roles that are applied to the anonymous identity.
  * The default value is "ANONYMOUS".  The "key" attribute specified the anonymous authentication key. If no key is supplied, the key supplied in the general
  * security configuration will be used.</p>
@@ -204,7 +204,7 @@ import java.util.*;
  *
  * <h3>basicAuth</h3>
  *
- * <p>The "basicAuthConfig" child element is used to configure HTTP Basic Auth.  The "realmName" attribute specifies the authentication realm name. The default
+ * <p>The "basicAuth" child element is used to configure HTTP Basic Auth.  The "realmName" attribute specifies the authentication realm name. The default
  * value is the realm name of the general security configuration.</p>
  *
  * <p>For more information about basic authentication configuration, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/basicauth/BasicProcessingFilter.html">org.springframework.security.ui.basicauth.BasicProcessingFilter</a>.</p>
@@ -260,7 +260,7 @@ import java.util.*;
  *
  * <h3>formBasedLogin</h3>
  *
- * <p>The "formBasedLoginConfig" child element is used to configure the form-based login endpoint.  The "url" attribute specifies the URL where the form-based
+ * <p>The "formBasedLogin" child element is used to configure the form-based login endpoint.  The "url" attribute specifies the URL where the form-based
  * login will be mounted.  The default is "/form/login".  The "loginPageFile" attribute is used to specify a JSP file on the filesystem that will be
  * used to display the login page. If none is provided, a default will be supplied. The "loginPageURL" is the URL at which said loginPageFile will be mounted.
  * The default is "login.jsp". The "redirectOnSuccessUrl" specifies the URL to which a successful 
@@ -271,7 +271,7 @@ import java.util.*;
  *
  * <h3>formBasedLogout</h3>
  *
- * <p>The "formBasedLogoutConfig" child element is used to configure the form-based logout endpoint.  The "url" attribute specifies the URL where the form-based
+ * <p>The "formBasedLogout" child element is used to configure the form-based logout endpoint.  The "url" attribute specifies the URL where the form-based
  * logout will be mounted.  The default is "/form/logout".  The "redirectOnSuccessUrl" specifies the URL to which a successful logout will be redirected. The
  * default value is "/".</p>
  *
@@ -279,7 +279,7 @@ import java.util.*;
  *
  * <h3>rememberMe</h3>
  *
- * <p>The "rememberMeConfig" child element is used to configure the remember-me identity processing.  The "key" attribute specifies the security key that will
+ * <p>The "rememberMe" child element is used to configure the remember-me identity processing.  The "key" attribute specifies the security key that will
  * be used to encode the remember-me token.  The default value is the key supplied in the general security configuration.</p>
  *
  * <p>For more information about remember-me identity processing, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/rememberme/TokenBasedRememberMeServices.html">org.springframework.security.ui.rememberme.TokenBasedRememberMeServices</a>.</p>
