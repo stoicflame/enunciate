@@ -21,7 +21,6 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -244,6 +243,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
+  private Boolean enableGWT15;
 
   public GWTDeploymentModule() {
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
@@ -289,6 +289,33 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
               + ("".equals(gwtApp.getName()) ? "." : " '" + gwtApp.getName() + "'."));
           }
         }
+      }
+
+      if (getEnableGWT15() == null) {
+        boolean useGWT15 = false;
+        if (this.gwtHome != null) {
+          File about = new File(gwtHome, "about.txt");
+          if (about.exists()) {
+            try {
+              BufferedReader reader = new BufferedReader(new FileReader(about));
+              String line = reader.readLine();
+              if (line != null) {
+                useGWT15 = line.contains("1.5");
+                if (useGWT15) {
+                  debug("It appears GWT 1.5 is being used, according to %s.", about);
+                }
+                else {
+                  debug("It appears GWT 1.5 is NOT being used, according to %s.", about);
+                }
+              }
+              reader.close();
+            }
+            catch (IOException e) {
+              //fall through...
+            }
+          }
+        }
+        setEnableGWT15(useGWT15);
       }
     }
   }
@@ -352,9 +379,15 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
+      if (getEnableGWT15()) {
+        info("Generating source code targeting GWT 1.5.");
+      }
+
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+      classnameFor.setJdk15(getEnableGWT15());
       ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
       CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
+      model.put("use15", getEnableGWT15());
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
       model.put("componentTypeFor", componentTypeFor);
@@ -697,7 +730,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       info("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getEnableGWT15() ? "1.5" : "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
       info("Skipping compile of GWT client-side files because everything appears up-to-date...");
@@ -1244,6 +1277,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setGwtAppDir(String gwtAppDir) {
     this.gwtAppDir = gwtAppDir;
+  }
+
+  /**
+   * Whether we're using GWT 1.5.
+   *
+   * @return Whether we're using GWT 1.5.
+   */
+  public Boolean getEnableGWT15() {
+    return enableGWT15;
+  }
+
+  /**
+   * Whether we're using GWT 1.5.
+   *
+   * @param enableGWT15 Whether we're using GWT 1.5.
+   */
+  public void setEnableGWT15(Boolean enableGWT15) {
+    this.enableGWT15 = enableGWT15;
   }
 
   // Inherited.

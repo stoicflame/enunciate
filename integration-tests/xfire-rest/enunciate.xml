@@ -31,6 +31,6 @@
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
       <download name="License" file="dummy-license.txt" description="The license file governing these downloads."/>
     </docs>
-    <gwt disabled="true" rpcModuleName="org.codehaus.enunciate.samples.genealogy.Genealogy"/>
+    <gwt disabled="false" rpcModuleName="org.codehaus.enunciate.samples.genealogy.Genealogy"/>
   </modules>
 </enunciate>
