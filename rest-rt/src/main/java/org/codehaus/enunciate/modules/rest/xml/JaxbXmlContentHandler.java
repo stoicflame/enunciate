@@ -27,6 +27,7 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.*;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
@@ -48,6 +49,7 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
   protected final Map<RESTResource, JAXBContext> resourcesToContexts = new TreeMap<RESTResource, JAXBContext>();
   private NamespacePrefixLookup namespaceLookup;
   private Object prefixMapper;
+  private ValidationEventHandler validationEventHandler = new DefaultValidationEventHandler();
 
   /**
    * Read the object from the request.
@@ -63,6 +65,7 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
     }
 
     Unmarshaller unmarshaller = context.createUnmarshaller();
+    unmarshaller.setEventHandler(getValidationEventHandler());
     unmarshaller.setAttachmentUnmarshaller(RESTAttachmentUnmarshaller.INSTANCE);
     return unmarshal(unmarshaller, request);
   }
@@ -248,4 +251,22 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
     this.prefixMapper = prefixMapper;
   }
 
+  /**
+   * The validation event handler.
+   *
+   * @return The validation event handler.
+   */
+  public ValidationEventHandler getValidationEventHandler() {
+    return validationEventHandler;
+  }
+
+  /**
+   * The validation event handler.
+   *
+   * @param validationEventHandler The validation event handler.
+   */
+  @Autowired( required = false )
+  public void setValidationEventHandler(ValidationEventHandler validationEventHandler) {
+    this.validationEventHandler = validationEventHandler;
+  }
 }

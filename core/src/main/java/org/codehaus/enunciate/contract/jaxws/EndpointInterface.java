@@ -41,7 +41,13 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
   private final Collection<EndpointImplementation> impls;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
 
-  public EndpointInterface(TypeDeclaration delegate) {
+  /**
+   * Construct an endoint interface.
+   *
+   * @param delegate The delegate.
+   * @param implementationCandidates The type declarations to be considered as implementation candidates (the ones that can't be seen by APT.)
+   */
+  public EndpointInterface(TypeDeclaration delegate, TypeDeclaration... implementationCandidates) {
     super(delegate);
 
     annotation = getAnnotation(javax.jws.WebService.class);
@@ -52,7 +58,12 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
         impls.add(new EndpointImplementation((ClassDeclaration) getDelegate(), this));
       }
       else {
-        for (TypeDeclaration declaration : getAnnotationProcessorEnvironment().getTypeDeclarations()) {
+        List<TypeDeclaration> potentialImpls = new ArrayList<TypeDeclaration>();
+        potentialImpls.addAll(getAnnotationProcessorEnvironment().getTypeDeclarations());
+        if (implementationCandidates != null) {
+          potentialImpls.addAll(Arrays.asList(implementationCandidates));
+        }
+        for (TypeDeclaration declaration : potentialImpls) {
           if (isEndpointImplementation(declaration)) {
             WebService ws = declaration.getAnnotation(WebService.class);
             if (getQualifiedName().equals(ws.endpointInterface())) {

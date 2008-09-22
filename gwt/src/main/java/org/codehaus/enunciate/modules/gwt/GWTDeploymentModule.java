@@ -41,6 +41,7 @@ import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
@@ -390,6 +391,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       model.put("use15", getEnableGWT15());
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
+      model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("componentTypeFor", componentTypeFor);
       model.put("collectionTypeFor", collectionTypeFor);
 

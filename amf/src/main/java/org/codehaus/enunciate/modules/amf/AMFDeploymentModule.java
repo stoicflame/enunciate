@@ -40,6 +40,7 @@ import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
 import org.codehaus.enunciate.modules.amf.config.License;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 
 import java.io.*;
 import java.net.URL;
@@ -296,7 +297,9 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       info("Generating the AMF externalizable types and their associated mappers...");
-      model.put("classnameFor", new AMFClassnameForMethod(amfTypePackageConversions));
+      AMFClassnameForMethod amfClassnameForMethod = new AMFClassnameForMethod(amfTypePackageConversions);
+      model.put("simpleNameFor", new SimpleNameWithParamsMethod(amfClassnameForMethod));
+      model.put("classnameFor", amfClassnameForMethod);
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isAMFTransient(typeDefinition)) {

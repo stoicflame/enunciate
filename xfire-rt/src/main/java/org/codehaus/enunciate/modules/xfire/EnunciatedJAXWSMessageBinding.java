@@ -17,17 +17,18 @@
 package org.codehaus.enunciate.modules.xfire;
 
 import org.codehaus.xfire.MessageContext;
-import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.exchange.InMessage;
 import org.codehaus.xfire.exchange.MessageSerializer;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.fault.XFireFault;
+import org.codehaus.xfire.service.MessageInfo;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.Service;
-import org.codehaus.xfire.service.MessageInfo;
 import org.codehaus.xfire.util.STAXUtils;
 import org.codehaus.xfire.util.stax.DepthXMLStreamReader;
 
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 public class EnunciatedJAXWSMessageBinding implements MessageSerializer {
 
   private final HashMap<OperationInfo, EnunciatedJAXWSOperationBinding> op2Binding = new HashMap<OperationInfo, EnunciatedJAXWSOperationBinding>();
+  private ValidationEventHandler validationEventHandler = new DefaultValidationEventHandler();
 
   /**
    * Reads a message.  Because this is a server-side message binding, the messages we will be *reading*
@@ -74,6 +76,7 @@ public class EnunciatedJAXWSMessageBinding implements MessageSerializer {
     EnunciatedJAXWSOperationBinding binding = op2Binding.get(opInfo);
     if (binding == null) {
       binding = new EnunciatedJAXWSOperationBinding(opInfo);
+      binding.setValidationEventHandler(getValidationEventHandler());
       op2Binding.put(opInfo, binding);
     }
 
@@ -101,6 +104,7 @@ public class EnunciatedJAXWSMessageBinding implements MessageSerializer {
     EnunciatedJAXWSOperationBinding binding = op2Binding.get(op);
     if (binding == null) {
       binding = new EnunciatedJAXWSOperationBinding(op);
+      binding.setValidationEventHandler(getValidationEventHandler());
       op2Binding.put(op, binding);
     }
 
@@ -128,4 +132,21 @@ public class EnunciatedJAXWSMessageBinding implements MessageSerializer {
     return null;
   }
 
+  /**
+   * The validation event handler.
+   *
+   * @return The validation event handler.
+   */
+  public ValidationEventHandler getValidationEventHandler() {
+    return validationEventHandler;
+  }
+
+  /**
+   * The validation event handler.
+   *
+   * @param validationEventHandler The validation event handler.
+   */
+  public void setValidationEventHandler(ValidationEventHandler validationEventHandler) {
+    this.validationEventHandler = validationEventHandler;
+  }
 }

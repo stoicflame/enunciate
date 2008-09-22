@@ -135,7 +135,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   }
 
   @Override
-  public String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) throws TemplateModelException {
     String convertedPackage;
     PackageDeclaration pckg = declaration.getPackage();
     if (pckg == null) {

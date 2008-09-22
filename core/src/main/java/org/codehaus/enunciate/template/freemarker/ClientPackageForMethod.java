@@ -18,9 +18,11 @@ package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.TypeVariable;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
@@ -106,6 +108,13 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     else if (typeMirror instanceof ArrayType) {
       conversion = convert(((ArrayType) typeMirror).getComponentType());
     }
+    else if (typeMirror instanceof TypeVariable) {
+      conversion = "Object";
+      TypeParameterDeclaration parameterDeclaration = ((TypeVariable) typeMirror).getDeclaration();
+      if (parameterDeclaration != null && parameterDeclaration.getBounds() != null && parameterDeclaration.getBounds().size() > 0) {
+        conversion = convert(parameterDeclaration.getBounds().iterator().next());
+      }
+    }
     else {
       conversion = String.valueOf(typeMirror);
     }
@@ -118,7 +127,7 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @param declaration The declaration.
    * @return The client-side package value for the declaration.
    */
-  public String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) throws TemplateModelException {
     return convert(declaration.getPackage());
   }
 

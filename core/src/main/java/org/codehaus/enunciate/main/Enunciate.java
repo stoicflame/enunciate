@@ -308,8 +308,8 @@ public class Enunciate {
       URL url = exportResources.nextElement();
       BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
       String line = reader.readLine();
-      info("Importing class %s, which was automatically imported from %s...", line, url);
       while (line != null) {
+        info("Importing class %s, which was automatically imported from %s...", line, url);
         imports2seekSource.put(line, true);
         line = reader.readLine();
       }
@@ -354,9 +354,9 @@ public class Enunciate {
 
     if (sourceFiles.isEmpty()) {
       //no source files (all imports are on the classpath).  Since APT requires at least one, we'll write it out ourselves....
-      File tempSource = File.createTempFile("EnunciateMockClass", "java");
+      File tempSource = File.createTempFile("EnunciateMockClass", ".java");
       FileWriter writer = new FileWriter(tempSource);
-      writer.write(String.format("public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
+      writer.write(String.format("@org.codehaus.enunciate.XmlTransient public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
       writer.flush();
       writer.close();
       sourceFiles.add(tempSource.getAbsolutePath());
@@ -869,9 +869,8 @@ public class Enunciate {
    * @return Whether the destination file is up-to-date.
    */
   public boolean isUpToDate(File sourceFile, File destFile) {
-    if ((sourceFile == null) || (!sourceFile.exists())) {
-      debug("%s is up-to-date because %s doesn't exist.", destFile, sourceFile);
-      return true;
+    if (sourceFile == null) {
+      throw new IllegalArgumentException();
     }
     else if (!sourceFile.isDirectory()) {
       return isUpToDate(Arrays.asList(sourceFile), destFile);
@@ -911,11 +910,7 @@ public class Enunciate {
    */
   protected boolean isUpToDate(List<File> sourceFiles, File destFile) {
     List<File> destFiles;
-    if ((sourceFiles == null) || (sourceFiles.isEmpty())) {
-      debug("%s is up-to-date because the list of source files is empty.", destFile);
-      return true;
-    }
-    else if ((destFile == null) || (!destFile.exists())) {
+    if ((destFile == null) || (!destFile.exists())) {
       debug("%s is NOT up-to-date because it doesn't exist.", destFile);
       return false;
     }
@@ -930,6 +925,10 @@ public class Enunciate {
     if (destFiles.isEmpty()) {
       debug("%s is NOT up-to-date because it's an empty directory.", destFile);
       return false;
+    }
+    else if ((sourceFiles == null) || (sourceFiles.isEmpty())) {
+      debug("%s is up-to-date because the list of source files is empty.", destFile);
+      return true;
     }
     else {
       File youngestSource = getYoungest(sourceFiles);

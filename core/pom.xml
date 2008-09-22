@@ -58,7 +58,7 @@
 
     <dependency>
       <groupId>net.sf.apt-jelly</groupId>
-      <artifactId>apt-jelly</artifactId>
+      <artifactId>apt-jelly-freemarker</artifactId>
     </dependency>
 
     <dependency>

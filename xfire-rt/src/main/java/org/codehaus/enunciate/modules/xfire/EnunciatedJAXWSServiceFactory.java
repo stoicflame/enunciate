@@ -31,6 +31,7 @@ import org.codehaus.xfire.service.binding.PostInvocationHandler;
 import org.codehaus.xfire.service.binding.ServiceInvocationHandler;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
 import org.codehaus.xfire.soap.SoapConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -40,6 +41,8 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+import javax.xml.bind.ValidationEventHandler;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -55,6 +58,7 @@ import java.io.IOException;
 public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
 
   private final Properties paramNames = new Properties();
+  private ValidationEventHandler validationEventHandler = new DefaultValidationEventHandler();
 
   /**
    * An annotation service factory that is initialized with the {@link org.codehaus.xfire.annotations.jsr181.Jsr181WebAnnotations} and
@@ -166,14 +170,16 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
   }
 
   /**
-   * The serializer for a SOAP message.  For enunciated it is a {@link org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSMessageBinding}.
+   * The serializer for a SOAP message.  For Enunciate it is a {@link org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSMessageBinding}.
    *
    * @param binding The binding.
    * @return The default serializer for the binding.
    */
   @Override
   protected MessageSerializer getSerializer(AbstractSoapBinding binding) {
-    return new EnunciatedJAXWSMessageBinding();
+    EnunciatedJAXWSMessageBinding messageBinding = new EnunciatedJAXWSMessageBinding();
+    messageBinding.setValidationEventHandler(getValidationEventHandler());
+    return messageBinding;
   }
 
   /**
@@ -483,4 +489,22 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
     return uri;
   }
 
+  /**
+   * The validation event handler.
+   *
+   * @return The validation event handler.
+   */
+  public ValidationEventHandler getValidationEventHandler() {
+    return validationEventHandler;
+  }
+
+  /**
+   * The validation event handler.
+   *
+   * @param validationEventHandler The validation event handler.
+   */
+  @Autowired( required = false )
+  public void setValidationEventHandler(ValidationEventHandler validationEventHandler) {
+    this.validationEventHandler = validationEventHandler;
+  }
 }

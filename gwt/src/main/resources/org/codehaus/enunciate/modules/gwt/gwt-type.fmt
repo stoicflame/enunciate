@@ -8,7 +8,7 @@ package ${packageFor(type)};
 /**
  * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements com.google.gwt.user.client.rpc.IsSerializable [/#if]{
+public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !baseobject]extends ${classnameFor(type.superclass)} [#else]implements com.google.gwt.user.client.rpc.IsSerializable [/#if]{
 
   [#list type.attributes as attribute]
 [@propertyField property=attribute/]

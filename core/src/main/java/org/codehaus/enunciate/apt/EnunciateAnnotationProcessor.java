@@ -134,20 +134,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     EnunciateConfiguration config = this.enunciate.getConfig();
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
 
+    TypeDeclaration[] additionalApiDefinitions = loadAdditionalApiDefinitions();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = new ArrayList<TypeDeclaration>(env.getTypeDeclarations());
-    if (this.additionalApiClasses != null) {
-      for (String additionalApiClass : this.additionalApiClasses) {
-        TypeDeclaration declaration = env.getTypeDeclaration(additionalApiClass);
-        if (declaration != null) {
-          typeDeclarations.add(declaration);
-        }
-        else {
-          this.enunciate.warn("Unable to load type definition for additional API class '%s'.", additionalApiClass);
-        }
-      }
-    }
-
+    typeDeclarations.addAll(Arrays.asList(additionalApiDefinitions));
     AntPatternMatcher matcher = new AntPatternMatcher();
     matcher.setPathSeparator(".");
     if (!config.getApiIncludePatterns().isEmpty()) {
@@ -213,7 +203,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       final boolean isJAXRSSupport = isJAXRSSupport(declaration);
       if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler || isJAXRSRootResource || isJAXRSSupport) {
         if (isEndpointInterface) {
-          EndpointInterface endpointInterface = new EndpointInterface(declaration);
+          EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
           model.add(endpointInterface);
         }
@@ -282,6 +272,28 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     validate(model);
 
     return model;
+  }
+
+  /**
+   * Loads the type declarations for the additional API definitions.
+   *
+   * @return The type declarations.
+   */
+  protected TypeDeclaration[] loadAdditionalApiDefinitions() {
+    AnnotationProcessorEnvironment environment = Context.getCurrentEnvironment();
+    Collection<TypeDeclaration> additionalApiDefinitions = new ArrayList<TypeDeclaration>();
+    if (this.additionalApiClasses != null) {
+      for (String additionalApiClass : this.additionalApiClasses) {
+        TypeDeclaration declaration = environment.getTypeDeclaration(additionalApiClass);
+        if (declaration != null) {
+          additionalApiDefinitions.add(declaration);
+        }
+        else {
+          this.enunciate.warn("Unable to load type definition for additional API class '%s'.", additionalApiClass);
+        }
+      }
+    }
+    return additionalApiDefinitions.toArray(new TypeDeclaration[additionalApiDefinitions.size()]);
   }
 
   /**

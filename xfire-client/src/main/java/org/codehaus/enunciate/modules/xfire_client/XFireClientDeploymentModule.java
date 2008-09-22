@@ -35,10 +35,7 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.xfire_client.config.XFireClientRuleSet;
-import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
-import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
+import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.xfire.annotations.HandlerChainAnnotation;
 import org.codehaus.xfire.annotations.WebParamAnnotation;
 import org.codehaus.xfire.annotations.soap.SOAPBindingAnnotation;
@@ -193,6 +190,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
+      model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("componentTypeFor", componentTypeFor);
       model.put("collectionTypeFor", collectionTypeFor);
 
@@ -389,7 +387,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       enunciate.isUpToDateWithSources(jdk15GenerateDir);
   }
 
-  protected void addExplicitAnnotations(EndpointInterface ei, ClientClassnameForMethod conversion) {
+  protected void addExplicitAnnotations(EndpointInterface ei, ClientClassnameForMethod conversion) throws TemplateModelException {
     String clazz = conversion.convert(ei);
 
     SerializableWebServiceAnnotation wsAnnotation = new SerializableWebServiceAnnotation();
@@ -409,7 +407,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     HandlerChainAnnotation hcAnnotation = null; //todo: support this?
   }
 
-  protected void addExplicitAnnotations(WebMethod webMethod, ClientClassnameForMethod conversion) {
+  protected void addExplicitAnnotations(WebMethod webMethod, ClientClassnameForMethod conversion) throws TemplateModelException {
     String classname = conversion.convert(webMethod.getDeclaringEndpointInterface());
     String methodName = webMethod.getSimpleName();
     String methodKey = String.format("%s.%s", classname, methodName);
@@ -510,7 +508,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @param rootElement The root element.
    * @param conversion  The conversion to use.
    */
-  protected void addExplicitAnnotations(RootElementDeclaration rootElement, ClientClassnameForMethod conversion) {
+  protected void addExplicitAnnotations(RootElementDeclaration rootElement, ClientClassnameForMethod conversion) throws TemplateModelException {
     String classname = conversion.convert(rootElement);
     this.generatedAnnotations.class2XmlRootElement.put(classname, new XmlRootElementAnnotation(rootElement.getNamespace(), rootElement.getName()));
   }

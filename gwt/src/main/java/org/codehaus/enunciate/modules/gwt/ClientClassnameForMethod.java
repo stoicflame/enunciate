@@ -71,7 +71,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
   }
 
   @Override
-  public String convert(TypeDeclaration declaration) {
+  public String convert(TypeDeclaration declaration) throws TemplateModelException {
     if (classConversions.containsKey(declaration.getQualifiedName())) {
       return classConversions.get(declaration.getQualifiedName());
     }

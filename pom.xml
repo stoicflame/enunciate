@@ -437,8 +437,8 @@
 
       <dependency>
         <groupId>net.sf.apt-jelly</groupId>
-        <artifactId>apt-jelly</artifactId>
-        <version>2.3</version>
+        <artifactId>apt-jelly-freemarker</artifactId>
+        <version>2.4</version>
       </dependency>
 
       <dependency>

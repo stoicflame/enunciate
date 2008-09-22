@@ -33,6 +33,7 @@ import org.codehaus.xfire.util.ClassLoaderUtils;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.WebParam;
 import javax.xml.bind.*;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.RequestWrapper;
@@ -59,6 +60,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
   private final JAXBContext jaxbContext;
   private final OperationBeanInfo requestInfo;
   private final OperationBeanInfo responseInfo;
+  private ValidationEventHandler validationEventHandler = new DefaultValidationEventHandler();
 
   public EnunciatedJAXWSOperationBinding(OperationInfo op) throws XFireFault {
     this.requestInfo = getRequestInfo(op);
@@ -272,6 +274,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     Object bean;
     try {
       Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+      unmarshaller.setEventHandler(getValidationEventHandler());
       unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshaller(context));
       bean = unmarshaller.unmarshal(message.getXMLStreamReader(), this.requestInfo.getBeanClass()).getValue();
     }
@@ -362,6 +365,24 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
    */
   private String capitalize(String string) {
     return Character.toString(string.charAt(0)).toUpperCase() + string.substring(1);
+  }
+
+  /**
+   * The validation event handler.
+   *
+   * @return The validation event handler.
+   */
+  public ValidationEventHandler getValidationEventHandler() {
+    return validationEventHandler;
+  }
+
+  /**
+   * The validation event handler.
+   *
+   * @param validationEventHandler The validation event handler.
+   */
+  public void setValidationEventHandler(ValidationEventHandler validationEventHandler) {
+    this.validationEventHandler = validationEventHandler;
   }
 
   /**
