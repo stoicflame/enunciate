@@ -322,7 +322,7 @@ public class TestFullAPI extends TestCase {
             List outputEls = operation.getBindingOutput().getExtensibilityElements();
             assertEquals(2, outputEls.size());
             soapHeader = (SOAPHeader) outputEls.get(0);
-            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.return"), soapHeader.getMessage());
+            assertEquals(new QName(FULL_NAMESPACE, "SourceService.addEvents.resultOfAddingEvents"), soapHeader.getMessage());
             assertEquals("return", soapHeader.getPart());
             soapBody = (SOAPBody) outputEls.get(1);
             assertEquals("literal", soapBody.getUse());
@@ -576,10 +576,10 @@ public class TestFullAPI extends TestCase {
         assertEquals(new QName(FULL_NAMESPACE, "addEventsResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }
-      else if ("SourceService.addEvents.return".equals(messageName)) {
+      else if ("SourceService.addEvents.resultOfAddingEvents".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("return");
-        assertEquals(new QName(FULL_NAMESPACE, "return"), part.getElementName());
+        assertEquals(new QName(FULL_NAMESPACE, "resultOfAddingEvents"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else {
