@@ -22,11 +22,16 @@ import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.codehaus.enunciate.samples.genealogy.cite.Note;
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
+import org.codehaus.enunciate.rest.annotations.*;
 import org.joda.time.DateTime;
 
 import javax.jws.WebService;
+import javax.jws.WebMethod;
+import javax.activation.DataHandler;
 import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * @author Ryan Heaton
@@ -87,5 +92,32 @@ public class PersonServiceImpl implements PersonService {
     child.setId(personId);
     pedigree.put(RelationshipType.child, child);
     return pedigree;
+  }
+
+  public void uploadFiles(DataHandler[] files, String length) throws ServiceException {
+    String[] params = length.split(";");
+    int fileCount = Integer.parseInt(params[0]);
+    if (files.length != fileCount) {
+      throw new RuntimeException("File length doesn't match.");
+    }
+
+    for (int i = 0; i < files.length; i++) {
+      DataHandler file = files[i];
+      int fileLength = Integer.parseInt(params[i + 1]);
+      byte[] bytes = new byte[fileLength];
+      try {
+        InputStream in = file.getInputStream();
+        int len = in.read(bytes);
+        if (len < fileLength) {
+          throw new RuntimeException("Non-matching file length.  Was " + len + " expected " + fileLength);
+        }
+        if (in.read() >= 0) {
+          throw new RuntimeException("Non-matching file length.  Was bigger than " + fileLength);
+        }
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

@@ -87,7 +87,8 @@ public interface SourceService {
    * @throws ServiceException If the events couldn't be added to the infoset.
    */
   @WebResult (
-    header = true
+    header = true,
+    name = "resultOfAddingEvents"
   )
   String addEvents(String infoSetId, Event[] assertions, @WebParam (header = true, name="contributorId") String contributorId) throws ServiceException;
 }

@@ -21,7 +21,9 @@ import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
+import javax.jws.WebMethod;
 import javax.jws.soap.SOAPBinding;
+import javax.activation.DataHandler;
 import java.util.Collection;
 import java.util.Map;
 
@@ -77,6 +79,19 @@ public interface PersonService {
     context = "remover/pedigree"
   )
   void deletePerson(@ProperNoun String personId) throws ServiceException;
+
+  /**
+   * Uploads some files.
+   *
+   * @param files The files
+   * @param length The length(s) of the files.
+   */
+  @WebMethod ( exclude = true )
+  @Verb ( VerbType.post )
+  @Noun (
+    value = "file"
+  )
+  void uploadFiles(@NounValue DataHandler[] files, String length) throws ServiceException;
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.
