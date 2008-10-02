@@ -44,10 +44,16 @@ import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.UploadFileSpec;
+import com.meterware.httpunit.WebResponse;
 
 /**
  * A very big test of the functionality of the full API deployed with the XFire client and server modules.
@@ -350,6 +356,23 @@ public class TestFullAPI extends TestCase {
     }
 
     assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
+
+    String fileConnectString = String.format("http://localhost:%s/%s/rest/pedigree/file", port, context);
+    WebConversation wc = new WebConversation();
+    PostMethodWebRequest post = new PostMethodWebRequest(fileConnectString);
+    byte[] bytes1 = "this is some text for file 1".getBytes("utf-8");
+    UploadFileSpec upload1 = new UploadFileSpec("file1.txt", new ByteArrayInputStream(bytes1), "text/plain");
+    byte[] bytes2 = "this is some text for file 2".getBytes("utf-8");
+    UploadFileSpec upload2 = new UploadFileSpec("file2.txt", new ByteArrayInputStream(bytes2), "text/plain");
+    byte[] bytes3 = "this is some text for file 3".getBytes("utf-8");
+    UploadFileSpec upload3 = new UploadFileSpec("file3.txt", new ByteArrayInputStream(bytes3), "text/plain");
+    post.setMimeEncoded(true);
+    post.setParameter("up1", new UploadFileSpec[] { upload1 });
+    post.setParameter("up2", new UploadFileSpec[] { upload2 });
+    post.setParameter("up3", new UploadFileSpec[] { upload3 });
+    post.setParameter("length", "3;" + bytes1.length + ";" + bytes2.length + ";" + bytes3.length);
+    WebResponse response = wc.getResponse(post);
+    assertEquals(200, response.getResponseCode());
 
     personConnectString = String.format("http://localhost:%s/%s/rest/remover/pedigree/person", port, context);
     url = new URL(personConnectString + "/SPECIAL");

@@ -29,6 +29,13 @@ import java.util.UUID;
 public class TestGWTEndpointImpl extends TestCase {
 
   /**
+   * tests escaping a line
+   */
+  public void testLineEscape() throws Exception {
+    assertEquals("hi%%20", "hi%20".replaceAll("%", "%%"));
+  }
+
+  /**
    * Tests invoking an operation on a GWT endpoint.
    */
   public void testInvokeOperation() throws Exception {

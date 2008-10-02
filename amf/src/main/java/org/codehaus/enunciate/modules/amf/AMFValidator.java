@@ -183,7 +183,7 @@ public class AMFValidator extends BaseValidator {
         return supported;
       }
       else {
-        return !unsupportedTypes.contains(declaredType.getDeclaration().getQualifiedName());
+        return declaredType.getDeclaration() != null && !unsupportedTypes.contains(declaredType.getDeclaration().getQualifiedName());
       }
     }
 

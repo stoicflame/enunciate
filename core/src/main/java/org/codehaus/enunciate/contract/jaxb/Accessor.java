@@ -209,6 +209,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
   public boolean isSwaRef() {
     return (getAnnotation(XmlAttachmentRef.class) != null)
       && (getAccessorType() instanceof DeclaredType)
+      && (((DeclaredType) getAccessorType()).getDeclaration() != null)
       && ("javax.activation.DataHandler".equals(((DeclaredType) getAccessorType()).getDeclaration().getQualifiedName()));
   }
 

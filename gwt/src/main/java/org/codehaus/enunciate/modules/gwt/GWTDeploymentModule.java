@@ -46,6 +46,7 @@ import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -337,6 +338,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       URL faultTemplate = getTemplateURL("gwt-fault.fmt");
       URL typeTemplate = getTemplateURL("gwt-type.fmt");
       URL enumTypeTemplate = getTemplateURL("gwt-enum-type.fmt");
+      URL enum15TypeTemplate = getTemplateURL("gwt-enum-15-type.fmt");
 
       //set up the model, first allowing for jdk 14 compatability.
       EnunciateFreemarkerModel model = getModel();
@@ -429,7 +431,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isGWTTransient(typeDefinition)) {
             model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
+            URL template = typeDefinition.isEnum() ? getEnableGWT15() ? enum15TypeTemplate : enumTypeTemplate : typeTemplate;
             processTemplate(template, model);
           }
         }
@@ -607,6 +609,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
           String line = procReader.readLine();
           while (line != null) {
+            line = URLDecoder.decode(line, "utf-8").replaceAll("%", "%%").trim(); //GWT URL-encodes spaces and other weird Windows characters.
             info(line);
             line = procReader.readLine();
           }

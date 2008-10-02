@@ -63,7 +63,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       }
     }
 
-    if (typeMirror instanceof EnumType) {
+    if (!isJdk15() && typeMirror instanceof EnumType) {
       return String.class.getName();
     }
 

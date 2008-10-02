@@ -379,7 +379,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         if (webMessage instanceof WebResult) {
           WebResult webResult = (WebResult) webMessage;
           if ("".equals(webResult.getElementName())) {
-            result.addError(webResult.getWebMethod(), "A header web result that is a header must specify a name with the @WebResult annotation.");
+            result.addError(webResult.getWebMethod(), "A web result that is a header must specify a name with the @WebResult annotation.");
           }
           DecoratedTypeMirror type = (DecoratedTypeMirror) webResult.getType();
 

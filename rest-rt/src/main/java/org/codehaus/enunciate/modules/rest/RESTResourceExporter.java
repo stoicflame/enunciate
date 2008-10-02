@@ -59,27 +59,7 @@ public class RESTResourceExporter extends AbstractController {
   public RESTResourceExporter(RESTResource resource, Map<VerbType, Object> methodsToEndpoints) {
     this.resource = resource;
     this.endpoints = methodsToEndpoints;
-    Set<String> supportedMethods = new TreeSet<String>();
-    for (VerbType verbType : methodsToEndpoints.keySet()) {
-      switch (verbType) {
-        case create:
-        case put:
-          supportedMethods.add("PUT");
-          break;
-        case delete:
-          supportedMethods.add("DELETE");
-          break;
-        case post:
-        case update:
-          supportedMethods.add("POST");
-          break;
-        case get:
-        case read:
-          supportedMethods.add("GET");
-          break;
-      }
-    }
-    super.setSupportedMethods(supportedMethods.toArray(new String[supportedMethods.size()]));
+    super.setSupportedMethods(null);
   }
 
   @Override

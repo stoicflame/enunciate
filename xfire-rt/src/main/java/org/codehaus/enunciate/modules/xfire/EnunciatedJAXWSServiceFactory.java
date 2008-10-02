@@ -459,7 +459,7 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
     QName parameterName = super.getOutParameterName(service, op, method, paramNumber, doc);
 
     if (paramNumber == -1) {
-      WebResult webResult = method.getReturnType().getAnnotation(WebResult.class);
+      WebResult webResult = method.getAnnotation(WebResult.class);
       if ((webResult == null) || ("".equals(webResult.name()))) {
         parameterName = new QName(parameterName.getNamespaceURI(), "return");
       }
