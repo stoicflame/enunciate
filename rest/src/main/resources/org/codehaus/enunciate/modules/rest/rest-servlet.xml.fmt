@@ -10,7 +10,7 @@
   <context:annotation-config/>
 
   <!-- The REST error handler -->
-  <bean id="handlerExceptionResolver" class="org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler"/>
+  <bean id="handlerExceptionResolver" class="${handlerExceptionResolver}"/>
 
   <!-- the namespace-to-prefix support. -->
   <bean id="namespacePrefixLookup" class="org.codehaus.enunciate.modules.rest.NamespacePrefixLookup">

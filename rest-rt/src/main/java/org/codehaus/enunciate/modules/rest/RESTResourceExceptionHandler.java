@@ -22,9 +22,9 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 
+import javax.activation.DataHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.activation.DataHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +64,7 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
         statusCode = errorInfo.errorCode();
       }
 
-      String message = exception.getMessage();
+      String message = getMessage(exception);
       if ((message == null) && (statusCode == 404)) {
         message = request.getRequestURI();
       }
@@ -101,7 +101,7 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
 
       if (result instanceof DataHandler) {
         response.setContentType(((DataHandler) result).getContentType());
-        ((DataHandler)result).writeTo(response.getOutputStream());
+        ((DataHandler) result).writeTo(response.getOutputStream());
       }
       else {
         RESTOperation operation = (RESTOperation) request.getAttribute(RESTOperation.class.getName());
@@ -114,5 +114,15 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
     else {
       response.sendError(statusCode);
     }
+  }
+
+  /**
+   * Allows you to override the message (e.g. so you can localize things).
+   *
+   * @param exception you want to localize
+   * @return a message to display to the user
+   */
+  protected String getMessage(Exception exception) {
+    return exception.getMessage();
   }
 }

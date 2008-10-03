@@ -316,6 +316,7 @@ import java.util.*;
  *   <li>The "requireJAXBCompatibility" attribute is used to disable the requirement that return types and noun values be JAXB-compatible. Since Enunciate
  *       uses JAXB by default for marshalling and umarshalling, this requirement should only be disabled if you have provided your own content type
  *       handlers.</li>
+ *   <li>The "handlerExceptionResolver" attribute is used to specify the handler exception resolver to use to map REST exceptions to the error body.</li>
  * </ul>
  *
  * <h3>The "json" element</h3>
@@ -340,6 +341,7 @@ import java.util.*;
  * <p>The REST deployment module exports no artifacts.</p>
  *
  * @author Ryan Heaton
+ * @author Jason Holmes
  * @docFileName module_rest.html
  */
 public class RESTDeploymentModule extends FreemarkerDeploymentModule {
@@ -349,7 +351,8 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   private Map<String, String> contentTypeHandlers = new TreeMap<String, String>();
   private String defaultJsonSerialization = JsonSerializationMethod.xmlMapped.toString();
   private boolean requireJAXBCompatibility = true;
-
+  private String handlerExceptionResolver = RESTResourceExceptionHandler.class.getName();
+ 
   /**
    * @return "rest"
     */
@@ -420,7 +423,8 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     model.put("xstreamReferenceAction", getXstreamReferenceAction());
     model.put("restSubcontext", getRestSubcontext());
     model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
-
+    model.put("handlerExceptionResolver", getHandlerExceptionResolver());
+ 
     //populate the content-type-to-handler map.
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
     if (!enunciate.isUpToDateWithSources(paramNameFile)) {
@@ -580,6 +584,24 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   public void setRequireJAXBCompatibility(boolean requireJAXBCompatibility) {
     this.requireJAXBCompatibility = requireJAXBCompatibility;
   }
+
+	/**
+	 * The exception handler to use for marshalling exceptions to the response
+	 *
+	 * @return The exception handler to use for marshalling exceptions to the response
+	 */
+	public String getHandlerExceptionResolver() {
+		return handlerExceptionResolver;
+	}
+
+	/**
+	 * The exception handler to use for marshalling exceptions to the response
+	 *
+	 * @param handlerExceptionResolver The exception handler to use for marshalling exceptions to the response
+	 */
+	public void setHandlerExceptionResolver(String handlerExceptionResolver) {
+		this.handlerExceptionResolver = handlerExceptionResolver;
+	}
 
   @Override
   public RuleSet getConfigurationRules() {
