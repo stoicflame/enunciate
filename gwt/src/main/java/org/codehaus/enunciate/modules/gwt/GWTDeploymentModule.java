@@ -330,6 +330,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     if (!upToDate) {
       //load the references to the templates....
       URL typeMapperTemplate = getTemplateURL("gwt-type-mapper.fmt");
+      URL enum15TypeMapperTemplate = getTemplateURL("gwt-enum-15-type-mapper.fmt");
       URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
       URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
 
@@ -455,10 +456,17 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       info("Generating the GWT type mappers...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if ((!typeDefinition.isEnum()) && (!isGWTTransient(typeDefinition))) {
-            model.put("type", typeDefinition);
-            processTemplate(typeMapperTemplate, model);
-            gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+          if (!isGWTTransient(typeDefinition)) {
+            if (!typeDefinition.isEnum()) {
+              model.put("type", typeDefinition);
+              processTemplate(typeMapperTemplate, model);
+              gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+            }
+            else if (typeDefinition.isEnum() && getEnableGWT15()) {
+              model.put("type", typeDefinition);
+              processTemplate(enum15TypeMapperTemplate, model);
+              gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+            }
           }
         }
       }
@@ -670,6 +678,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           }
 
           File scriptFile = getShellScriptFile(appName, moduleName);
+          scriptFile.getParentFile().mkdirs();
           FileWriter writer = new FileWriter(scriptFile);
           writer.write(shellCommand.toString());
           writer.flush();

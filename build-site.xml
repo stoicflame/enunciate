@@ -77,6 +77,10 @@
     <path id="module.docs.classpath">
       <path refid="dist.libs.path"/>
       <path refid="optional.jars.path"/>
+      <path location="${java.home}/../lib/tools.jar"/>
+      <fileset dir="${ant.home}/lib">
+        <include name="*.jar"/>
+      </fileset>
     </path>
 
     <java classname="com.sun.tools.apt.Main" failonerror="true" fork="true">

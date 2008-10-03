@@ -254,7 +254,12 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
    * A quick check to see if a declaration is an endpoint implementation.
    */
   protected boolean isEndpointImplementation(TypeDeclaration declaration) {
-    return ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(WebService.class) != null));
+    if (declaration instanceof ClassDeclaration && !declaration.getQualifiedName().equals(getQualifiedName())) {
+      WebService webServiceInfo = declaration.getAnnotation(WebService.class);
+      return webServiceInfo != null && getQualifiedName().equals(webServiceInfo.endpointInterface());
+    }
+
+    return false;
   }
 
   /**

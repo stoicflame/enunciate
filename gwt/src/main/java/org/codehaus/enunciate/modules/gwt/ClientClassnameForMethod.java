@@ -76,6 +76,6 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       return classConversions.get(declaration.getQualifiedName());
     }
     
-    return declaration instanceof EnumDeclaration ? String.class.getName() : super.convert(declaration);
+    return super.convert(declaration);
   }
 }
