@@ -36,6 +36,7 @@ import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
@@ -205,6 +206,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions);
           info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
+          for (EndpointImplementation implementation : endpointInterface.getEndpointImplementations()) {
+            info("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());
+          }
           model.add(endpointInterface);
         }
 

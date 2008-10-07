@@ -54,7 +54,7 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
   }
 
   @org.springframework.beans.factory.annotation.Autowired ( required = false )
-  public void setServiceBean(@org.springframework.beans.factory.annotation.Qualifier( "enunciate-service-bean" ) ${endpointInterface.qualifiedName} serviceBean) {
+  public void setServiceBean(@org.springframework.beans.factory.annotation.Qualifier( "service-oriented-endpoint" ) ${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
 }

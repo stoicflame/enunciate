@@ -18,6 +18,8 @@ package org.codehaus.enunciate.contract;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 
+import java.util.List;
+
 /**
  * Common interface for service endpoints.
  *
@@ -38,4 +40,11 @@ public interface ServiceEndpoint {
    * @return The default implementation of the service endpoint.
    */
   TypeDeclaration getServiceEndpointDefaultImplementation();
+
+  /**
+   * Additional qualifiers for this endpoint (used to identify the endpoint from other endpoints of the same type).
+   *
+   * @return Additional qualifiers for this endpoint (used to identify the endpoint from other endpoints of the same type).
+   */
+  List<String> getEndpointQualifiers();
 }

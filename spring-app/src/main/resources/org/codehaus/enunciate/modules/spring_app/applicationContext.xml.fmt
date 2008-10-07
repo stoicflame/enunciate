@@ -55,7 +55,11 @@
   [@forEachServiceEndpoint]
 
   <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
-    <qualifier value="enunciate-service-bean"/>
+    [#if endpoint.endpointQualifiers?exists]
+      [#list endpoint.endpointQualifiers as qualifier]
+    <qualifier value="${qualifier}"/>
+      [/#list]
+    [/#if]
     <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
     <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
     [#if endpoint.serviceEndpointDefaultImplementation?exists]

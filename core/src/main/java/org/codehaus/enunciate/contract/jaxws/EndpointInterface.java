@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
@@ -58,7 +59,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
         impls.add(new EndpointImplementation((ClassDeclaration) getDelegate(), this));
       }
       else {
-        List<TypeDeclaration> potentialImpls = new ArrayList<TypeDeclaration>();
+        Set<TypeDeclaration> potentialImpls = new TreeSet<TypeDeclaration>(new TypeDeclarationComparator());
         potentialImpls.addAll(getAnnotationProcessorEnvironment().getTypeDeclarations());
         if (implementationCandidates != null) {
           potentialImpls.addAll(Arrays.asList(implementationCandidates));
@@ -312,6 +313,10 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
     }
 
     return style;
+  }
+
+  public List<String> getEndpointQualifiers() {
+    return Arrays.asList("service-oriented-endpoint");
   }
 
   // Inherited.

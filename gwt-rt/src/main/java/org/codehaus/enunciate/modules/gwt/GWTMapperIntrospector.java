@@ -193,9 +193,6 @@ public class GWTMapperIntrospector {
           else if (specifiedType != null) {
             mapper = getGWTMapper(specifiedType);
           }
-          else if (Enum.class.isAssignableFrom(jaxbClass)) {
-            mapper = new EnumGWTMapper(jaxbClass);
-          }
           else if (jaxbClass.isPrimitive()) {
             mapper = DefaultGWTMapper.INSTANCE;
           }
@@ -204,10 +201,10 @@ public class GWTMapperIntrospector {
               mapper = loadCustomMapperClass(jaxbClass).newInstance();
             }
             catch (ClassNotFoundException e) {
-              mapper = DefaultGWTMapper.INSTANCE;
+              mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
             }
             catch (NoClassDefFoundError e) {
-              mapper = DefaultGWTMapper.INSTANCE;
+              mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
             }
             catch (Throwable e) {
               throw new GWTMappingException("Unable to instantiate class '" + jaxbClass.getPackage().getName() + ".gwt." + jaxbClass.getSimpleName() + "GWTMapper'.", e);

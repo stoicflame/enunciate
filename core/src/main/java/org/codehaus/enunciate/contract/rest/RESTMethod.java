@@ -226,6 +226,10 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
     return getRESTEndpoint();
   }
 
+  public List<String> getEndpointQualifiers() {
+    return Arrays.asList("resource-oriented-endpoint");
+  }
+
   /**
    * The noun for this method.
    *

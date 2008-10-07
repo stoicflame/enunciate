@@ -7,7 +7,7 @@ package ${packageFor(type)};
 /**
  * ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public enum ${type.simpleName} {
+public enum ${type.simpleName} implements com.google.gwt.user.client.rpc.IsSerializable {
   [#assign enumValueMap=type.enumValues/]
   [#list type.delegate.enumConstants as constant]
 
