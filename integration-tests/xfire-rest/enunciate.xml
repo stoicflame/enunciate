@@ -20,7 +20,7 @@
     </xfire-client>
     <spring-app>
       <springImport file="custom_spring.xml"/>
-      <copyResources dir="../../../../src/samples/full" pattern="**/*.txt"/>
+      <copyResources dir="${basedir}/src/main/samples/full" pattern="**/*.txt"/>
       <globalServiceInterceptor beanName="globalServiceAdvice"/>
       <war>
         <manifest>

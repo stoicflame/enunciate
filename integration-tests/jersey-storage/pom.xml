@@ -140,7 +140,7 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>0.10-ea-SNAPSHOT</version>
+      <version>1.0-ea-SNAPSHOT</version>
 
       <scope>test</scope>
     </dependency>

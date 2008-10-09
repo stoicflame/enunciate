@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.container.servlet.SpringServlet.SpringComponentProvider {
+public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.container.servlet.SpringComponentProvider {
 
   private final Map<Class, AdvisedResourceFactory> resourceFactories = new HashMap<Class, AdvisedResourceFactory>();
   private List<Object> interceptors;

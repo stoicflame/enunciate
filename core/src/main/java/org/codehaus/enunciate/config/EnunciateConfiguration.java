@@ -29,10 +29,7 @@ import sun.misc.Service;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -476,6 +473,15 @@ public class EnunciateConfiguration implements ErrorHandler {
    * @param in The stream.
    */
   public void load(InputStream in) throws IOException, SAXException {
+    load(new InputStreamReader(in, "utf-8"));
+  }
+
+  /**
+   * Loads the configuration specified by the given stream.
+   *
+   * @param in The stream.
+   */
+  public void load(Reader in) throws IOException, SAXException {
     Digester digester = createDigester();
     digester.setErrorHandler(this);
     digester.setValidating(false);
@@ -568,7 +574,7 @@ public class EnunciateConfiguration implements ErrorHandler {
       properties.put("SAXParserFactory", factory);
 //      properties.put("schemaLocation", EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
 //      properties.put("schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-      
+
       SAXParser parser = GenericParser.newSAXParser(properties);
       return new Digester(parser);
     }

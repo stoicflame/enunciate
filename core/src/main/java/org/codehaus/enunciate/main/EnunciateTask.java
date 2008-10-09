@@ -16,20 +16,22 @@
 
 package org.codehaus.enunciate.main;
 
-import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.modules.DeploymentModule;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.filters.ExpandProperties;
 import org.apache.tools.ant.taskdefs.MatchingTask;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.modules.DeploymentModule;
 import org.xml.sax.SAXException;
 import sun.misc.Service;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -108,7 +110,9 @@ public class EnunciateTask extends MatchingTask {
 
       if (this.configFile != null) {
         getProject().log("Loading config " + this.configFile);
-        config.load(this.configFile);
+        ExpandProperties reader = new ExpandProperties(new FileReader(this.configFile));
+        reader.setProject(getProject());
+        config.load(reader);
         proxy.setConfigFile(this.configFile);
       }
 
