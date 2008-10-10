@@ -66,8 +66,8 @@ public class TestTypeDefinition extends InAPTTestCase {
     FieldDeclaration anyElement = findField(declaration, "anyElementProperty");
     FieldDeclaration anyAttribute = findField(declaration, "anyAttributeProperty");
     assertTrue(typeDef.isUnsupported(mixed));
-    assertTrue(typeDef.isUnsupported(anyElement));
-    assertTrue(typeDef.isUnsupported(anyAttribute));
+    assertFalse(typeDef.isUnsupported(anyElement));
+    assertFalse(typeDef.isUnsupported(anyAttribute));
   }
 
   /**

@@ -131,7 +131,7 @@ public class ElementRef extends Element {
    * @param typedef       The type definition.
    * @param xmlElementRef The specific element ref annotation.
    */
-  private ElementRef(MemberDeclaration delegate, TypeDefinition typedef, XmlElementRef xmlElementRef) {
+  protected ElementRef(MemberDeclaration delegate, TypeDefinition typedef, XmlElementRef xmlElementRef) {
     super(delegate, typedef);
     this.xmlElementRef = xmlElementRef;
     this.choices = new ArrayList<ElementRef>();

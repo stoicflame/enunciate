@@ -22,7 +22,6 @@ import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.ClassType;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -45,6 +44,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final Collection<Attribute> attributes;
   private final Value xmlValue;
   private final Accessor xmlID;
+  private final boolean hasAnyAttribute;
+  private final AnyElement anyElement;
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
@@ -62,6 +63,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     accessors.addAll(getFields());
     accessors.addAll(getProperties());
     Accessor xmlID = null;
+    AnyElement anyElement = null;
+    boolean hasAnyAttribute = false;
     for (MemberDeclaration accessor : accessors) {
       if (filter.accept(accessor)) {
         Accessor added;
@@ -84,6 +87,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
             throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
           }
           added = elementRef;
+        }
+        else if (isAnyAttribute(accessor)) {
+          hasAnyAttribute = true;
+          continue;
+        }
+        else if (isAnyElement(accessor)) {
+          anyElement = new AnyElement(accessor, this);
+          continue;
         }
         else if (isUnsupported(accessor)) {
           throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
@@ -112,6 +123,8 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.attributes = Collections.unmodifiableCollection(attributeAccessors);
     this.xmlValue = value;
     this.xmlID = xmlID;
+    this.hasAnyAttribute = hasAnyAttribute;
+    this.anyElement = anyElement;
   }
 
   /**
@@ -146,6 +159,26 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   }
 
   /**
+   * Whether the member declaration is XmlAnyAttribute.
+   *
+   * @param declaration The declaration.
+   * @return Whether the member declaration is XmlAnyAttribute.
+   */
+  protected boolean isAnyAttribute(MemberDeclaration declaration) {
+    return declaration.getAnnotation(XmlAnyAttribute.class) != null;
+  }
+
+  /**
+   * Whether the member declaration is XmlAnyElement.
+   *
+   * @param declaration The declaration.
+   * @return Whether the member declaration is XmlAnyElement.
+   */
+  protected boolean isAnyElement(MemberDeclaration declaration) {
+    return declaration.getAnnotation(XmlAnyElement.class) != null;
+  }
+
+  /**
    * Whether a declaration is an xml-mixed property.
    *
    * @param declaration The declaration to check.
@@ -153,9 +186,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   protected boolean isUnsupported(MemberDeclaration declaration) {
     //todo: support xml-mixed?
-    return (declaration.getAnnotation(XmlMixed.class) != null)
-      || (declaration.getAnnotation(XmlAnyElement.class) != null)
-      || (declaration.getAnnotation(XmlAnyAttribute.class) != null);
+    return (declaration.getAnnotation(XmlMixed.class) != null);
   }
 
   /**
@@ -279,6 +310,24 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
 
     return order;
+  }
+
+  /**
+   * Whether this type definition has an "anyAttribute" definition.
+   *
+   * @return Whether this type definition has an "anyAttribute" definition.
+   */
+  public boolean isHasAnyAttribute() {
+    return hasAnyAttribute;
+  }
+
+  /**
+   * The "anyElement" element.
+   *
+   * @return The "anyElement" element.
+   */
+  public AnyElement getAnyElement() {
+    return anyElement;
   }
 
   /**

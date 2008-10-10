@@ -89,13 +89,13 @@
     <url-pattern>${securityConfig.formBasedLoginConfig.url}</url-pattern>
   </filter-mapping>
     [/#if]
-  [#if securityConfig.enableFormBasedLogout]
+    [#if securityConfig.enableFormBasedLogout]
 
   <filter-mapping>
     <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>${securityConfig.formBasedLogoutConfig.url}</url-pattern>
   </filter-mapping>
-  [/#if]
+    [/#if]
     [#if securityConfig.enableOAuth]
 
   <filter-mapping>

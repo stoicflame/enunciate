@@ -774,6 +774,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         model.put("envEntries", envEntries);
         model.put("resourceEnvRefs", resourceEnvRefs);
         model.put("resourceRefs", resourceRefs);
+        model.put("securityEnabled", isEnableSecurity());
+        model.put("securityConfig", getSecurityConfig());
         processTemplate(getWebXmlTemplateURL(), model);
       }
       catch (TemplateException e) {

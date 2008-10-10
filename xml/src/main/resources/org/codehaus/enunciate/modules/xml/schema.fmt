@@ -209,6 +209,18 @@
         </${xs}:element>
           [/#if]
         [/#list]
+        [#if typeDef.anyElement?exists]
+          [#if typeDef.anyElement.elementRefs.empty]
+        <xs:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"[#if typeDef.anyElement.collectionType] minOccurs="0" maxOccurs="unbounded"[/#if]/>
+          [#else]
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            [#list typeDef.anyElement.elementRefs as elementRef]
+          <xs:element ref="${elementRef.ref}"/>
+            [/#list]
+          <xs:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"/>
+        </xs:choice>
+          [/#if]
+        [/#if]
       </${xs}:${typeDef.compositorName}>
       [/#if]
 [#t]
