@@ -30,8 +30,8 @@ import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -42,10 +42,10 @@ import java.util.*;
  * <a href="https://jsr311.dev.java.net/">JSR-311</a>, using <a href="https://jersey.dev.java.net/">Jersey</a>.</p>
  *
  * <ul>
- *   <li><a href="#app">Jersey Application</a></li>
- *   <li><a href="#steps">steps</a></li>
- *   <li><a href="#config">configuration</a></li>
- *   <li><a href="#artifacts">artifacts</a></li>
+ * <li><a href="#app">Jersey Application</a></li>
+ * <li><a href="#steps">steps</a></li>
+ * <li><a href="#config">configuration</a></li>
+ * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
  * <h1><a name="app">Jersey Application</a></h1>
@@ -89,9 +89,9 @@ import java.util.*;
  * <p>The Jersey module supports the following attributes:</p>
  *
  * <ul>
- *   <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
- *   <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
- *   <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
+ * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ * <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
+ * <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
  * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
@@ -156,11 +156,11 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
 
     for (RootResource resource : model.getRootResources()) {
       for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
-        Map<String, String> subcontextsByContentType = new HashMap<String, String>();
+        Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
         String subcontext = isUseSubcontext() ? getRestSubcontext() : "";
         debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
               resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
-        subcontextsByContentType.put(null, subcontext);
+        subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
         resourceMethod.putMetaData("defaultSubcontext", subcontext);
 
         if (isUsePathBasedConneg()) {
@@ -173,7 +173,13 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
                 String id = '/' + contentTypeToId.getValue();
                 debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
                       resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
-                subcontextsByContentType.put(String.format("%s/%s", producesType.getType(), producesType.getSubtype()), id);
+                String contentTypeValue = String.format("%s/%s", producesType.getType(), producesType.getSubtype());
+                Set<String> subcontextList = subcontextsByContentType.get(contentTypeValue);
+                if (subcontextList == null) {
+                  subcontextList = new TreeSet<String>();
+                  subcontextsByContentType.put(contentTypeValue, subcontextList);
+                }
+                subcontextList.add(id);
               }
             }
           }
@@ -182,7 +188,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
         resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
       }
     }
-    
+
     if (!isUpToDate()) {
       processTemplate(getRootResourceListTemplateURL(), model);
       processTemplate(getProvidersListTemplateURL(), model);
@@ -234,23 +240,25 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     for (RootResource rootResource : getModel().getRootResources()) {
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
         String resourceMethodPattern = resourceMethod.getServletPattern();
-        for (String subcontext : ((Map<String,String>) resourceMethod.getMetaData().get("subcontexts")).values()) {
-          String servletPattern;
-          if ("".equals(subcontext)) {
-            servletPattern = resourceMethodPattern;
-          }
-          else {
-            servletPattern = subcontext + resourceMethodPattern;
-          }
+        for (Set<String> subcontextList : ((Map<String, Set<String>>) resourceMethod.getMetaData().get("subcontexts")).values()) {
+          for (String subcontext : subcontextList) {
+            String servletPattern;
+            if ("".equals(subcontext)) {
+              servletPattern = resourceMethodPattern;
+            }
+            else {
+              servletPattern = subcontext + resourceMethodPattern;
+            }
 
-          if (urlMappings.add(servletPattern)) {
-            debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
-                  resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+            if (urlMappings.add(servletPattern)) {
+              debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+                    resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+            }
           }
         }
       }
     }
-    
+
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     getEnunciate().addWebAppFragment(webappFragment);

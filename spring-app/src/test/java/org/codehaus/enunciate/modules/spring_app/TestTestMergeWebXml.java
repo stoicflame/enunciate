@@ -25,6 +25,7 @@ import org.codehaus.enunciate.template.freemarker.EnunciateFileTransform;
 import org.codehaus.enunciate.template.strategies.EnunciateFileStrategy;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 
 /**
@@ -53,19 +54,50 @@ public class TestTestMergeWebXml extends TestCase {
       }
     };
     model.put("file", transform);
-    NodeModel node = NodeModel.parse(new InputSource(TestTestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source1", node.getChildNodes().get(0));
-    node = NodeModel.parse(new InputSource(TestTestMergeWebXml.class.getResourceAsStream("web.2.xml")));
-    model.put("source2", node.getChildNodes().get(0));
+    model.put("source1", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.2.xml")));
     module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
-    node = NodeModel.parse(new InputSource(TestTestMergeWebXml.class.getResourceAsStream("web.3.xml")));
-    model.put("source2", node.getChildNodes().get(0));
+    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.3.xml")));
     module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?
     assertTrue(bytesOut.size() > 0);
     //uncomment to see what's being written.
-    //System.out.println(bytesOut.toString("utf-8"));
+    System.out.println(bytesOut.toString("utf-8"));
+  }
+
+  /**
+   * tests merging two web.xml files.
+   */
+  public void testMergePetclinicWebXml() throws Exception {
+    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+    final PrintWriter out = new PrintWriter(bytesOut);
+
+    SpringAppDeploymentModule module = new SpringAppDeploymentModule();
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    EnunciateFileTransform transform = new EnunciateFileTransform(null) {
+      @Override
+      public FileStrategy newStrategy() {
+        return new EnunciateFileStrategy(null) {
+          @Override
+          public PrintWriter getWriter() throws IOException, MissingParameterException {
+            return out;
+          }
+        };
+      }
+    };
+    model.put("file", transform);
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    builderFactory.setNamespaceAware(false);
+    NodeModel.setDocumentBuilderFactory(builderFactory);
+    model.put("source1", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("petclinic.web.xml")));
+    module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
+
+    //todo: better tests?
+    assertTrue(bytesOut.size() > 0);
+    //uncomment to see what's being written.
+//    System.out.println(bytesOut.toString("utf-8"));
   }
 
 }

@@ -34,9 +34,10 @@ import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginC
 import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
 import org.springframework.util.AntPathMatcher;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
 import sun.misc.Service;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
@@ -788,26 +789,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         if (webXmlToMerge == null) {
           webXmlToMerge = enunciate.resolvePath(this.warConfig.getMergeWebXML()).toURL();
         }
-        
-        NodeModel source1;
-        try {
-          source1 = NodeModel.parse(new InputSource(webXmlToMerge.openStream()));
-        }
-        catch (Exception e) {
-          throw new EnunciateException("Error parsing web.xml file for merging", e);
-        }
-
-        NodeModel source2;
-        try {
-          source2 = NodeModel.parse(new InputSource(new FileInputStream(webXML)));
-        }
-        catch (Exception e) {
-          throw new EnunciateException("Error parsing web.xml file for merging", e);
-        }
 
         try {
-          model.put("source1", source1.getChildNodes().get(0));
-          model.put("source2", source2.getChildNodes().get(0));
+          model.put("source1", loadMergeXmlModel(webXmlToMerge.openStream()));
+          model.put("source2", loadMergeXmlModel(new FileInputStream(webXML)));
           processTemplate(getMergeWebXmlTemplateURL(), model);
         }
         catch (TemplateException e) {
@@ -843,6 +828,25 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       else {
         enunciate.copyFile(mergedWebXml, destWebXML);
       }
+    }
+  }
+
+  /**
+   * Loads the node model for merging xml.
+   *
+   * @param inputStream The input stream of the xml.
+   * @return The node model.
+   */
+  protected NodeModel loadMergeXmlModel(InputStream inputStream) throws EnunciateException {
+    try {
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(false); //no namespace for the merging...
+      Document doc = builderFactory.newDocumentBuilder().parse(inputStream);
+      NodeModel.simplify(doc);
+      return NodeModel.wrap(doc.getDocumentElement());
+    }
+    catch (Exception e) {
+      throw new EnunciateException("Error parsing web.xml file for merging", e);
     }
   }
 

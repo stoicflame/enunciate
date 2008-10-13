@@ -163,7 +163,13 @@
 [@forEachRESTResourceListByPath]
       <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext?default("/rest")}">
   [#list uniqueContentTypes(resources) as contentType]
-        <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"[#if contentType.produceable && contentType.subcontext?exists] subcontext="${contentType.subcontext}" path="${contentType.subcontext}${resources?first.path}"[/#if]/>
+    [#if contentType.produceable && contentType.subcontexts?exists]
+      [#list contentType.subcontexts as subcontext]
+        <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.path}"/>
+      [/#list]
+    [#else]
+        <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+    [/#if]
   [/#list]
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
@@ -186,7 +192,13 @@
         [/#list]
       [/#if]
       [#list uniqueContentTypes(resource) as contentType]
-          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"[#if contentType.produceable && contentType.subcontext?exists] subcontext="${contentType.subcontext}" path="${contentType.subcontext}${resources?first.path}"[/#if]/>
+        [#if contentType.produceable && contentType.subcontexts?exists]
+          [#list contentType.subcontexts as subcontext]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.path}"/>
+          [/#list]
+        [#else]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+        [/#if]
       [/#list]
       [#list resource.resourceParameters as parameter]
           <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}">

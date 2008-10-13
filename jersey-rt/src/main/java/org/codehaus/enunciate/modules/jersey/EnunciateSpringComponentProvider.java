@@ -33,7 +33,7 @@ public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.
   public <T> T getInstance(Scope scope, Constructor<T> constructor, Object[] parameters) throws InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
     T instance;
 
-    instance = super.getInstance(null, scope, constructor.getDeclaringClass());
+    instance = super.getInstance(null, Scope.Undefined, constructor.getDeclaringClass());
 
     if (instance == null) {
       instance = constructor.newInstance(parameters);
@@ -44,7 +44,7 @@ public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.
 
   // Inherited.
   public <T> T getInstance(ComponentContext cc, Scope scope, Class<T> clazz) throws InstantiationException, IllegalAccessException {
-    T instance = super.getInstance(cc, scope, clazz);
+    T instance = super.getInstance(cc, Scope.Undefined, clazz);
 
     if (instance == null) {
       instance = clazz.newInstance();

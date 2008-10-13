@@ -63,9 +63,9 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
         type.setConsumable(type.isConsumable() || contentType.isConsumable());
 
         if (contentType.isProduceable()) {
-          Map<String, String> subcontextMap = (Map<String, String>) resource.getMetaData().get("subcontexts");
+          Map<String, Set<String>> subcontextMap = (Map<String, Set<String>>) resource.getMetaData().get("subcontexts");
           if (subcontextMap != null) {
-            type.setSubcontext(subcontextMap.get(contentType.getType()));
+            type.setSubcontexts(subcontextMap.get(contentType.getType()));
           }
         }
       }

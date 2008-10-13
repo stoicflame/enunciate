@@ -18,6 +18,8 @@ package org.codehaus.enunciate.modules.docs;
 
 import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
 
+import java.util.Set;
+
 /**
  * A supported content type that is at a specific subcontext.
  *
@@ -25,23 +27,23 @@ import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
  */
 public class SupportedContentTypeAtSubcontext extends SupportedContentType {
 
-  private String subcontext;
+  private Set<String> subcontexts;
 
   /**
    * The subcontext at which the content type is explicitly invoked.
    *
    * @return The subcontext at which the content type is explicitly invoked.
    */
-  public String getSubcontext() {
-    return subcontext;
+  public Set<String> getSubcontexts() {
+    return subcontexts;
   }
 
   /**
    * The subcontext at which the content type is explicitly invoked.
    *
-   * @param subcontext The subcontext at which the content type is explicitly invoked.
+   * @param subcontexts The subcontext at which the content type is explicitly invoked.
    */
-  public void setSubcontext(String subcontext) {
-    this.subcontext = subcontext;
+  public void setSubcontexts(Set<String> subcontexts) {
+    this.subcontexts = subcontexts;
   }
 }

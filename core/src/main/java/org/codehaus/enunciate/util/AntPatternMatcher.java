@@ -70,8 +70,9 @@ public class AntPatternMatcher {
       return false;
     }
 
-    String[] pattDirs = pattern.split(this.pathSeparator);
-    String[] pathDirs = path.split(this.pathSeparator);
+    String pathSeparatorSplitPattern = ".".equals(this.pathSeparator) ? "\\." : this.pathSeparator; //escape the special '.' for regexp splitting.
+    String[] pattDirs = pattern.split(pathSeparatorSplitPattern);
+    String[] pathDirs = path.split(pathSeparatorSplitPattern);
 
     int pattIdxStart = 0;
     int pattIdxEnd = pattDirs.length - 1;

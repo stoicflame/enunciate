@@ -71,9 +71,13 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="include" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="exclude" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="include" type="includeExcludeClass" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="exclude" type="includeExcludeClass" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="includeExcludeClass">
+    <xs:attribute name="pattern" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="deployment">
@@ -776,7 +780,7 @@
               </xs:attribute>
             </xs:complexType>
           </xs:element>
-          <xs:element name="war">
+          <xs:element name="war" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation>used to configure the webapp that will host the documenation.</xs:documentation>
             </xs:annotation>
@@ -789,6 +793,11 @@
             </xs:complexType>
           </xs:element>
         </xs:sequence>
+        <xs:attribute name="docsDir" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The directory in the war to which the documentation will be put.  The default is the root of the war.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="splashPackage" type="xs:string">
           <xs:annotation>
             <xs:documentation>the package that contains the documentation to use as the introduction to the API documentation. By default, no text is used for
