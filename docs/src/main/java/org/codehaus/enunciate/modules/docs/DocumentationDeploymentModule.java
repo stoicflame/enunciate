@@ -22,6 +22,8 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedPackageDeclaration;
+import net.sf.jelly.apt.util.JavaDocTagHandler;
+import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -119,6 +121,8 @@ import java.util.*;
  * documentation XML to generate the HTML docs.  If no XSLT is specified, a default one will be used.</p>
  *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the documentation base.  If none is supplied, a default
  * base will be provided.
+ *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN of an instance of
+ *       <tt>net.sf.jelly.apt.util.JavaDocTagHandler</tt></li>
  * </ul>
  *
  * <h3>The "download" element</h3>
@@ -165,6 +169,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   private File base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
   private String docsDir = null;
+  private String javadocTagHandling;
 
   /**
    * @return "docs"
@@ -234,6 +239,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  /**
+   * JavaDoc tag handing.
+   *
+   * @return The javadoc tag handling.
+   */
+  public String getJavadocTagHandling() {
+    return javadocTagHandling;
+  }
+
+  /**
+   * The javadoc tag handling.
+   *
+   * @param javadocTagHandling The javadoc tag handling.
+   */
+  public void setJavadocTagHandling(String javadocTagHandling) {
+    this.javadocTagHandling = javadocTagHandling;
   }
 
   /**
@@ -392,6 +415,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
 
     //some application components might want to reference their documentation, so we'll put a reference to the configured docs dir.
     enunciate.setProperty("docs.webapp.dir", getDocsDir());
+    if (getJavadocTagHandling() == null) {
+      JavaDocTagHandlerFactory.setTagHandler(new DocumentationJavaDocTagHandler());
+    }
+    else if (!"OFF".equalsIgnoreCase(getJavadocTagHandling())) {
+      try {
+        JavaDocTagHandlerFactory.setTagHandler((JavaDocTagHandler) Class.forName(getJavadocTagHandling()).newInstance());
+      }
+      catch (Throwable e) {
+        throw new EnunciateException(e);
+      }
+    }
   }
 
   /**
