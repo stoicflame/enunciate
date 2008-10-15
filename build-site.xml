@@ -28,7 +28,7 @@
     <echo message="Current version is: ${parent.pom.version}"/>
     <property name="dist.name" value="enunciate-${parent.pom.version}"/>
     <property name="full.jar.name" value="enunciate-full-${parent.pom.version}.jar"/>
-    <property name="full.sources.jar.name" value="enunciate-full-${version}-sources.jar"/>
+    <property name="full.sources.jar.name" value="enunciate-full-${parent.pom.version}-sources.jar"/>
 
     <artifact:pom id="top.pom" file="${basedir}/top/pom.xml"/>
     <fail message="Top pom version (${top.pom.version}) is not the same as the project pom version (${parent.pom.version}).">

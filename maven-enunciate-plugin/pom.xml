@@ -39,9 +39,9 @@
       <version>1.5.6</version>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-top</artifactId>
-      <version>1.8-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
