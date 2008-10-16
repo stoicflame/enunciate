@@ -7,26 +7,27 @@
     2a. Make sure the parent pom includes any new modules.
     2b. Make sure the top pom includes any new modules.
     2c. Make sure the rt pom includes any new modules.
-3. for each module, starting with parent:
-    3a. change the pom to the new version.
-    3b. mvn install
-4. svn revert -R . (to roll back the poms to the release plugin can put them back)
-5. mvn release:prepare
-6. mvn release:perform
+3. mvn release:prepare (it will fail, but your poms will be up-to-date)
+4. mvn release:clean (cleans up bad files)
+5. for each module, starting with parent:
+    5a. mvn -DskipTests=true install
+6. svn revert -R . (to roll back the poms to the release plugin can put them back)
+7. mvn release:prepare
+8. mvn release:perform
 
 (Your new version should now be deployed.)
 
-7. Build the distribution (e.g. "ant -f build-site.xml dist")
-8. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
-9. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
-10. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
-    10a. Make sure the links you have on the downloads page are correct.
-11. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
-12. Make your announcements.
-    12a. Codehaus news
-    12b. Java.net
-    12c. Webcohesion?
-    12d. Mailing lists.
-    12e. Serverside.com?
-    12f. Javalobby?
-13. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+9. Build the distribution (e.g. "ant -f build-site.xml dist")
+10. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
+11. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
+12. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
+    12a. Make sure the links you have on the downloads page are correct.
+13. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
+14. Make your announcements.
+    14a. Codehaus news
+    14b. Java.net
+    14c. Webcohesion?
+    14d. Mailing lists.
+    14e. Serverside.com?
+    14f. Javalobby?
+14. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
