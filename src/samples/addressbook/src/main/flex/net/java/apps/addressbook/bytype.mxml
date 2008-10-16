@@ -6,7 +6,7 @@
      import mx.rpc.events.ResultEvent;
      import mx.rpc.remoting.RemoteObject;
      import net.java.ws.addressbook.services.AddressBook;
-     import net.java.ws.addressbook.services.AddressBook.FindContactsByTypeResultEvent;
+     import net.java.ws.addressbook.services.events.AddressBook.FindContactsByTypeResultEvent;
      import net.java.ws.addressbook.domain.ContactType;
      import net.java.ws.addressbook.domain.ContactList;
      import net.java.ws.addressbook.domain.Contact;

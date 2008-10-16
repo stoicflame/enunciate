@@ -7,7 +7,7 @@
     2a. Make sure the parent pom includes any new modules.
     2b. Make sure the top pom includes any new modules.
     2c. Make sure the rt pom includes any new modules.
-3. "mvn release:prepare"
+3. "mvn release:prepare" maybe "mvn release:branch" just to create the branch?
 4. "mvn release:perform"
 
 (Your new version should now be deployed.)

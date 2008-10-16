@@ -8,7 +8,7 @@
      import org.codehaus.enunciate.samples.petclinic.schema.Vet;
      import org.codehaus.enunciate.samples.petclinic.schema.Specialty;
      import org.codehaus.enunciate.samples.petclinic.services.Clinic;
-     import org.codehaus.enunciate.samples.petclinic.services.Clinic.GetVetsResultEvent;
+     import org.codehaus.enunciate.samples.petclinic.services.events.Clinic.GetVetsResultEvent;
 
      var clinic:Clinic = new Clinic();
 
