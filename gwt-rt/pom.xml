@@ -14,9 +14,8 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-rt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>

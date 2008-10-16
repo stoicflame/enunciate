@@ -41,7 +41,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-top</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

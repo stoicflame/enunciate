@@ -16,13 +16,11 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-gwt-rt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -39,7 +37,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

@@ -15,67 +15,56 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-docs</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-jaxws</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rest</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-jersey</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xml</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xfire</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xfire-client</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-gwt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-amf</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

@@ -107,19 +107,16 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-xfire-client-rt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

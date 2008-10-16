@@ -63,7 +63,7 @@ public class TestTestMergeWebXml extends TestCase {
     //todo: better tests?
     assertTrue(bytesOut.size() > 0);
     //uncomment to see what's being written.
-    System.out.println(bytesOut.toString("utf-8"));
+//    System.out.println(bytesOut.toString("utf-8"));
   }
 
   /**

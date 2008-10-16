@@ -15,7 +15,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-rt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -68,7 +67,6 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.2.1</version>
     </dependency>
 
     <!--

@@ -120,7 +120,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-rt</artifactId>
       <version>${project.version}</version>
     </dependency>

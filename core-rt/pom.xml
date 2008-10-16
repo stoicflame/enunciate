@@ -25,7 +25,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>

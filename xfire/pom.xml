@@ -33,26 +33,22 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-xfire-rt</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <!--the XFire module depends on the spring app-->
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>
