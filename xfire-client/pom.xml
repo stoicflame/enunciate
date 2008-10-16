@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
   </parent>
 
   <artifactId>enunciate-xfire-client</artifactId>
@@ -52,23 +51,20 @@
             <configuration>
               <tasks>
                 <path id="enunciate.classpath">
-                  <path refid="maven.test.classpath"/>
-                  <pathelement location="${java.home}/../lib/tools.jar"/>
+                  <path refid="maven.test.classpath" />
+                  <pathelement location="${java.home}/../lib/tools.jar" />
                 </path>
 
                 <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-                  <classpath refid="enunciate.classpath"/>
+                  <classpath refid="enunciate.classpath" />
                 </taskdef>
 
-                <mkdir dir="${project.build.directory}/enunciate/gen"/>
-                <mkdir dir="${project.build.directory}/enunciate/compile"/>
+                <mkdir dir="${project.build.directory}/enunciate/gen" />
+                <mkdir dir="${project.build.directory}/enunciate/compile" />
 
-                <enunciate verbose="true" debug="true" target="generate"
-                           basedir="${basedir}/src/main/samples/schema"
-                           configFile="${basedir}/src/main/samples/schema/enunciate.xml"
-                           generateDir="${project.build.directory}/enunciate/gen">
-                  <include name="**/*.java"/>
-                  <classpath refid="enunciate.classpath"/>
+                <enunciate verbose="true" debug="true" target="generate" basedir="${basedir}/src/main/samples/schema" configFile="${basedir}/src/main/samples/schema/enunciate.xml" generateDir="${project.build.directory}/enunciate/gen">
+                  <include name="**/*.java" />
+                  <classpath refid="enunciate.classpath" />
                 </enunciate>
               </tasks>
             </configuration>

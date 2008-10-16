@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
   </parent>
 
   <artifactId>enunciate-docs</artifactId>
@@ -39,10 +39,10 @@
             <phase>process-classes</phase>
             <configuration>
               <tasks>
-                <mkdir dir="${project.build.outputDirectory}"/>
+                <mkdir dir="${project.build.outputDirectory}" />
 
                 <zip destfile="${project.build.outputDirectory}/docs.base.zip" basedir="${basedir}/template">
-                  <exclude name="*.html"/>
+                  <exclude name="*.html" />
                 </zip>
               </tasks>
             </configuration>
