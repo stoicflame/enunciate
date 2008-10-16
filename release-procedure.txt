@@ -7,27 +7,28 @@
     2a. Make sure the parent pom includes any new modules.
     2b. Make sure the top pom includes any new modules.
     2c. Make sure the rt pom includes any new modules.
-3. mvn release:prepare (it will fail, but your poms will be up-to-date)
-4. mvn release:clean (cleans up bad files)
-5. for each module, starting with parent:
-    5a. mvn -DskipTests=true install
-6. svn revert -R . (to roll back the poms to the release plugin can put them back)
-7. mvn release:prepare
-8. mvn release:perform
+3. rev the parent, install, and revert the pom changes
+4. mvn release:prepare (it will fail, but your poms will be up-to-date)
+5. mvn release:clean (cleans up bad files)
+6. for each module, (except the parent, which has already been done):
+    6a. mvn -DskipTests=true install
+7. svn revert -R . (to roll back the poms to the release plugin can put them back)
+8. mvn release:prepare
+9. mvn release:perform
 
 (Your new version should now be deployed.)
 
-9. Build the distribution (e.g. "ant -f build-site.xml dist")
-10. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
-11. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
-12. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
+10. Build the distribution (e.g. "ant -f build-site.xml dist")
+11. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
+12. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
+13. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
     12a. Make sure the links you have on the downloads page are correct.
-13. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
-14. Make your announcements.
-    14a. Codehaus news
-    14b. Java.net
-    14c. Webcohesion?
-    14d. Mailing lists.
-    14e. Serverside.com?
-    14f. Javalobby?
-14. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+14. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
+15. Make your announcements.
+    15a. Codehaus news
+    15b. Java.net
+    15c. Webcohesion?
+    15d. Mailing lists.
+    15e. Serverside.com?
+    15f. Javalobby?
+16. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
