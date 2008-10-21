@@ -60,11 +60,6 @@
     </dependency>
 
     <dependency>
-      <groupId>freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>commons-digester</groupId>
       <artifactId>commons-digester</artifactId>
     </dependency>

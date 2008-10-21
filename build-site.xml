@@ -40,8 +40,9 @@
     </fail>
 
     <artifact:dependencies filesetId="dist.libs.fileset" sourcesFilesetId="dist.sources.fileset" pathId="dist.libs.path" pomRefId="top.pom"/>
-    <artifact:dependencies pathId="optional.jars.path">
+    <artifact:dependencies pathId="optional.jars.path" filesetId="optional.jars.fileset">
       <dependency groupId="commons-fileupload" artifactId="commons-fileupload" version="1.2.1"/>
+      <dependency groupId="commons-io" artifactId="commons-io" version="1.3.2"/>
       <dependency groupId="org.springframework" artifactId="spring-tx" version="2.5.4"/>
       <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.1"/>
       <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.3"/>
@@ -250,14 +251,13 @@
     <mkdir dir="target/full-classes/META-INF/enunciate"/>
     <echo file="target/full-classes/META-INF/enunciate/preserve-in-war" message="This file is used simply to mark the enunciate-full jar as a jar to be preserved when building the war."/>
 
-    <jar destfile="target/enunciate-full.jar" basedir="target/full-classes"/>
-
-    <jar destfile="target/enunciate-full-sources.jar" basedir="target/full-sources"/>
-
+    <jar destfile="target/${full.jar.name}" basedir="target/full-classes"/>
+    <jar destfile="target/${full.sources.jar.name}" basedir="target/full-sources"/>
   </target>
 
   <target name="copy-dist-libs" depends="init">
     <mkdir dir="target/lib"/>
+    <mkdir dir="target/lib/optional"/>
     <mkdir dir="target/module-libs"/>
 
     <!--load the maven tasks for handling dependencies-->
@@ -271,6 +271,14 @@
         <include name="enunciate-*"/>
       </fileset>
     </move>
+
+    <copy todir="target/lib/optional">
+      <fileset refid="optional.jars.fileset"/>
+      <mapper type="flatten"/>
+    </copy>
+    <echo file="target/lib/optional/README.txt">
+This directory contains jars that are optional for Enunciate because they support optional features such as security and REST file uploads.
+    </echo>
   </target>
 
   <target name="scripts" depends="copy-dist-libs" description="Generates the executable scripts.">

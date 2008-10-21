@@ -13,7 +13,7 @@
         <include name="**/*.jar"/>
       </fileset>
       <fileset dir="${enunciate.home}">
-        <include name="enunciate-full-*.jar"/>
+        <include name="enunciate-full*.jar"/>
       </fileset>
     </path>
 

@@ -15,7 +15,7 @@
         <include name="**/*.jar"/>
       </fileset>
       <fileset dir="${enunciate.home}">
-        <include name="enunciate-full-*.jar"/>
+        <include name="enunciate-full*.jar"/>
       </fileset>
       <fileset dir="${gwt.home}">
         <include name="gwt-user*.jar"/>
