@@ -48,8 +48,20 @@
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <version>1.4.60</version>
+<!--
+      change version to use GWT 1.5
+      <version>1.5.2</version>
+-->
     </dependency>
 
+<!--
+    uncomment to use GWT 1.5
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+      <version>1.5.2</version>
+    </dependency>
+-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

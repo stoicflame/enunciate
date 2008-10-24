@@ -91,7 +91,7 @@ public class AddressBookApp implements EntryPoint {
               contactGrid.setWidget(++i, 0, new Label("City:"));
               contactGrid.setWidget(i, 1, new Label(contact.getCity()));
               contactGrid.setWidget(++i, 0, new Label("Type:"));
-              contactGrid.setWidget(i, 1, new Label(contact.getContactType()));
+              contactGrid.setWidget(i, 1, new Label(String.valueOf(contact.getContactType())));
               contactGrid.setWidget(++i, 0, new HTML("<hr/>"));
               contactGrid.setWidget(i, 1, new HTML("<hr/>"));
             }

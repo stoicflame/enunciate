@@ -16,8 +16,6 @@
 
 package org.codehaus.enunciate.modules.spring_app.config;
 
-import java.io.File;
-
 /**
  * Configuration element used to add spring configuration to the module.
  * 
