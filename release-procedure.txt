@@ -9,9 +9,8 @@
     2c. Make sure the rt pom includes any new modules.
 3. mvn release:prepare (it will fail, but your poms will be up-to-date)
 4. mvn release:clean (cleans up bad files)
-5. for each module, starting with parent:
-    5a. mvn -N -DskipTests=true install
-6. svn revert -R . (to roll back the poms to the release plugin can put them back)
+5. ./local_install_new_version.sh
+6. svn revert -R . (to roll back the poms so the release plugin can put them back)
 7. mvn release:prepare
 8. mvn release:perform
 

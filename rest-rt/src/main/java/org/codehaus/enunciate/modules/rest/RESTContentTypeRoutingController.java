@@ -118,7 +118,7 @@ public class RESTContentTypeRoutingController extends AbstractController {
     else {
       Set<MimeType> mimeTypes = new TreeSet<MimeType>();
       Enumeration acceptHeaders = request.getHeaders("Accept");
-      if (acceptHeaders != null) {
+      if (acceptHeaders != null && acceptHeaders.hasMoreElements()) {
         Float defaultQuality = null;
         while (acceptHeaders.hasMoreElements()) {
           String acceptHeader = (String) acceptHeaders.nextElement();

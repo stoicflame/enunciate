@@ -135,6 +135,10 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
       [#else]
     this.${accessor.simpleName} = (${classnameFor(accessor)}) in.read${accessor.accessorType.kind?string?lower_case?cap_first}();
       [/#if]
+    [#elseif accessor.accessorType.isInstanceOf("java.lang.Long")]
+    this.${accessor.simpleName} = new java.lang.Long(((java.lang.Number) in.readObject()).longValue());
+    [#elseif accessor.accessorType.isInstanceOf("java.lang.Float")]
+    this.${accessor.simpleName} = new java.lang.Float(((java.lang.Number) in.readObject()).floatValue());
     [#else]
     this.${accessor.simpleName} = (${classnameFor(accessor)}) in.readObject();
     [/#if]
