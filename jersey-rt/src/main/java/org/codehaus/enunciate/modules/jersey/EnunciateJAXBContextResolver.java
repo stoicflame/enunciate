@@ -45,7 +45,7 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
 
   public Set<Class> loadTypes() {
     HashSet<Class> types = new HashSet<Class>();
-    InputStream stream = getClass().getResourceAsStream("/jaxrs-jaxb-types.list");
+    InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/jaxrs-jaxb-types.list");
     if (stream != null) {
       try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));

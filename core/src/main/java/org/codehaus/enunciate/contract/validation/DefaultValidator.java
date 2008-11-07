@@ -206,13 +206,13 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       }
 
       for (FieldDeclaration field : rootResource.getFields()) {
-        if (isSuppliableByJAXRS(field) && ((field.getAnnotation(javax.ws.rs.core.Context.class) != null) || isConvertableToStringByJAXRS(field.getType()))) {
+        if (isSuppliableByJAXRS(field) && ((field.getAnnotation(javax.ws.rs.core.Context.class) == null) && !isConvertableToStringByJAXRS(field.getType()))) {
           result.addError(field, "Unsupported JAX-RS type.");
         }
       }
 
       for (PropertyDeclaration prop : rootResource.getProperties()) {
-        if (isSuppliableByJAXRS(prop) && ((prop.getAnnotation(javax.ws.rs.core.Context.class) != null) || isConvertableToStringByJAXRS(prop.getPropertyType()))) {
+        if (isSuppliableByJAXRS(prop) && ((prop.getAnnotation(javax.ws.rs.core.Context.class) == null) && !isConvertableToStringByJAXRS(prop.getPropertyType()))) {
           result.addError(prop.getSetter(), "Unsupported JAX-RS type.");
         }
       }
@@ -221,6 +221,10 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         ParameterDeclaration entityParam = null;
         boolean formParamFound = false;
         for (ParameterDeclaration param : resourceMethod.getParameters()) {
+          if (param.getAnnotation(javax.ws.rs.core.Context.class) != null) {
+            continue;
+          }
+          
           if (ResourceParameter.isResourceParameter(param)) {
             formParamFound |= param.getAnnotation(FormParam.class) != null;
           }

@@ -2,7 +2,9 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" exclude-result-prefixes="#default" xmlns:redirect="http://xml.apache.org/xalan/redirect" extension-element-prefixes="redirect">
 
   <!--Our output is XHTML, so XML will do...-->
-  <xsl:output method="xml" omit-xml-declaration="yes" indent="yes" />
+  <xsl:output method="xml" omit-xml-declaration="no" indent="yes"
+              doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+              doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" />
 
   <!--Whether the XML file describing the downloads exists.-->
   <xsl:param name="downloads-exists" select="false()"/>

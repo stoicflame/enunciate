@@ -90,8 +90,9 @@ public class EnunciateTask extends MatchingTask {
       if (classpath != null) {
         proxy.setClasspath(classpath.toString());
 
-        //if the classpath is set, we need to load the modules using Ant's classloader, or it won't work.  Not totally sure why, though....
+        //set up the classloader for the Enunciate invocation.
         AntClassLoader loader = new AntClassLoader(Enunciate.class.getClassLoader(), getProject(), this.classpath, true);
+        Thread.currentThread().setContextClassLoader(loader);
         ArrayList<DeploymentModule> modules = new ArrayList<DeploymentModule>();
         Iterator discoveredModules = Service.providers(DeploymentModule.class, loader);
         getProject().log("Loading modules from the specified classpath....");
@@ -392,7 +393,7 @@ public class EnunciateTask extends MatchingTask {
 
     @Override
     public void debug(String message, Object... formatArgs) {
-      getProject().log(String.format(message, formatArgs), Project.MSG_DEBUG);
+      getProject().log(String.format(message, formatArgs), Project.MSG_VERBOSE);
     }
 
     @Override

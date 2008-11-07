@@ -24,6 +24,8 @@ import org.codehaus.enunciate.contract.validation.ValidationResult;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+
 /**
  * @author Ryan Heaton
  */
@@ -58,6 +60,20 @@ public class JerseyValidator extends BaseValidator {
           }
           catch (Exception e) {
             result.addError(resourceMethod, "Invalid produces MIME type: " + producesMime + "(" + e.getMessage() + ").");
+          }
+        }
+
+        if (resourceMethod.getHttpMethods().size() > 1) {
+          result.addError(resourceMethod, "You must not apply multiple HTTP operations to the same method: " + resourceMethod.getHttpMethods());
+        }
+
+        for (String method : resourceMethod.getHttpMethods()) {
+          if ("GET".equalsIgnoreCase(method) && ((DecoratedTypeMirror)resourceMethod.getReturnType()).isVoid()) {
+            result.addError(resourceMethod, "A resource method that is mapped to HTTP GET must not return void.");
+          }
+
+          if ("GET".equalsIgnoreCase(method) && resourceMethod.getEntityParameter() != null) {
+            result.addError(resourceMethod, "A resource method that is mapped to HTTP GET must not specify an entity parameter.");
           }
         }
       }

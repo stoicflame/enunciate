@@ -167,7 +167,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
-    if (!config.getApiIncludePatterns().isEmpty()) {
+    if (!config.getApiExcludePatterns().isEmpty()) {
       Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
       while (typeDeclarationIt.hasNext()) {
         TypeDeclaration typeDeclaration = typeDeclarationIt.next();
@@ -677,6 +677,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     debug("Validating the REST API...");
     validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));
     validationResult.aggregate(validator.validateContentTypeHandlers(model.getContentTypeHandlers()));
+    validationResult.aggregate(validator.validateRootResources(model.getRootResources()));
 
     //validate unique content type ids.
     Set<String> uniqueContentTypeIds = new TreeSet<String>();

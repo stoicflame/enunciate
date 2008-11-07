@@ -32,6 +32,7 @@ import org.codehaus.xfire.service.binding.ServiceInvocationHandler;
 import org.codehaus.xfire.soap.AbstractSoapBinding;
 import org.codehaus.xfire.soap.SoapConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ClassUtils;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -68,7 +69,7 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
     super(new Jsr181WebAnnotations(),
           XFireFactory.newInstance().getXFire().getTransportManager());
 
-    InputStream in = getClass().getResourceAsStream("/enunciate-soap-parameter-names.properties");
+    InputStream in = ClassUtils.getDefaultClassLoader().getResourceAsStream("/enunciate-soap-parameter-names.properties");
     if (in != null) {
       try {
         paramNames.load(in);

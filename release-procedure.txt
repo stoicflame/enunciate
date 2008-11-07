@@ -30,3 +30,10 @@
     14e. Serverside.com?
     14f. Javalobby?
 15. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+
+(To create a branch.)
+
+1. From the SVN head:
+   mvn release:branch -DbranchName=1.8.1 -DupdateBranchVersions=true
+2. svn co http://path/to/new/branch
+3. follow steps above.

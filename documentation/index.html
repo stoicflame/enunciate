@@ -44,9 +44,8 @@
 
       <h1>The Basics</h1>
 
-      <p>Enunciate is an engine for creating, maintaining, and deploying your Web service API for the Java
-        platform, with a particular focus on support for <a href="http://sites.google.com/a/thinserverarchitecture.com/home/Home">Thin Server Architectures and
-        SOFEA</a>.</p>
+      <p>Enunciate is an engine for creating, maintaining, and deploying your rich Web service API for the Java
+        platform.</p>
 
       <p>If that sounds complicated, it's not. All you have to do is define your service interfaces in Java source
         code. Make sure it's well-documented and that the <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/annotations.html">metadata</a> is
@@ -125,10 +124,12 @@
         </li>
         <li>
           <h3>Multiple Endpoints: SOAP, REST, JSON, GWT-RPC, AMF, etc.</h3>
-          <p>Enunciate will publish your endpoint class as a <b>SOAP endpoint</b> as defined by the JAX-WS annotations (powered by <a
-            href="http://xfire.codehaus.org/">XFire</a>).  By supplying additional metadata, the same endpoint class will be published
+          <p>Enunciate will publish your endpoint class as a <b>SOAP endpoint</b> as defined by the JAX-WS annotations.
+            By supplying additional metadata, the same endpoint class will be published
             as a <b>XML REST endpoint</b> at a different URL.  Furthermore, certain REST endpoints will be automatically available as JSON
-            endpoints at yet another URL. See the <a href="module_rest.html">REST module documentation</a> for more information.
+            endpoints at yet another URL. Enunciate supports both <a href="https://jsr311.dev.java.net/">JAX-RS</a> metadata or its own set
+            of metadata, so take your pick or mix and match. See the <a href="module_jersey.html">Jersey module documentation</a> or the
+            <a href="module_rest.html">REST module documentation</a> for more information.
           </p>
           <p>
             By enabling the <a href="module_gwt.html">GWT module</a>, your endpoints will be published via
@@ -161,9 +162,7 @@
             associated schema is inline, the semantic constructs (i.e. namespaces, message names, argument ids, etc.) are awkward
             and inconsistent, and the scope is limited to that specific endpoint.  The XML contract is difficult to interpret (especially
             when being consumed for client-side stubs) and doesn't give a consolidated picture of the whole API because it has no reference
-            to other endpoints and schema data that service the same namespace
-            (<a href="http://tssblog.techtarget.com/index.php/uncategorized/a-rant-of-sorts-on-multiple-net-web-references/">click here for a more
-            complete discussion</a>).
+            to other endpoints and schema data that service the same namespace.
           </p>
           <p>
             Enunciate generates the formalized XML contract at compile-time, providing for a <b>consolidated, efficient XML definition</b>.

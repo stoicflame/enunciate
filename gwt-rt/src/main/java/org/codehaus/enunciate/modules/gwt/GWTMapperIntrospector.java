@@ -49,8 +49,20 @@ public class GWTMapperIntrospector {
     MAPPERS.put(UUID.class, new UUIDGWTMapper());
     MAPPERS.put(XMLGregorianCalendar.class, new XMLGregorianCalendarGWTMapper());
 
+    ClassLoader loader;
     try {
-      InputStream mappings = GWTMapperIntrospector.class.getResourceAsStream("/gwt-to-jaxb-mappings.properties");
+      loader = Thread.currentThread().getContextClassLoader();
+    }
+    catch (Exception e) {
+      loader = null;
+    }
+
+    if (loader == null) {
+      loader = GWTMapperIntrospector.class.getClassLoader();
+    }
+
+    try {
+      InputStream mappings = loader.getResourceAsStream("/gwt-to-jaxb-mappings.properties");
       if (mappings != null) {
         GWT2JAXBMAPPINGS.load(mappings);
       }

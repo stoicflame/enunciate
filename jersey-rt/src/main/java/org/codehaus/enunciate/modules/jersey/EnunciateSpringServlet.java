@@ -43,7 +43,7 @@ public class EnunciateSpringServlet extends ServletContainer {
 //    }
     rc.getClasses().add(EnunciateJAXBContextResolver.class);
 
-    InputStream stream = getClass().getResourceAsStream("/jaxrs-providers.list");
+    InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/jaxrs-providers.list");
     if (stream != null) {
       try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
@@ -58,7 +58,7 @@ public class EnunciateSpringServlet extends ServletContainer {
       }
     }
 
-    stream = getClass().getResourceAsStream("/jaxrs-root-resources.list");
+    stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/jaxrs-root-resources.list");
     if (stream != null) {
       try {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
@@ -84,7 +84,7 @@ public class EnunciateSpringServlet extends ServletContainer {
       rc.getProperties().put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, servletPath);
     }
 
-    stream = getClass().getResourceAsStream("/media-type-mappings.properties");
+    stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/media-type-mappings.properties");
     if (stream != null) {
       try {
         Properties mappings = new Properties();
