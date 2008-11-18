@@ -34,6 +34,14 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-cxf-rt</artifactId>
+
+      <!--optional because XFire is default-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app-rt</artifactId>
     </dependency>
 

@@ -453,7 +453,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!enunciate.isUpToDateWithSources(getConfigGenerateDir())) {
       EnunciateFreemarkerModel model = getModel();
-      model.setFileOutputDirectory(getConfigGenerateDir());
 
       //standard spring configuration:
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
@@ -498,6 +497,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.put("securityConfig", securityConfig);
 
+      model.setFileOutputDirectory(getConfigGenerateDir());
       processTemplate(getApplicationContextTemplateURL(), model);
       if (isEnableSecurity()) {
         processTemplate(getSecurityServletTemplateURL(), model);
@@ -741,7 +741,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       //copy the extra spring import files to the WEB-INF directory to be imported.
       if (springImport.getFile() != null) {
         File importFile = enunciate.resolvePath(springImport.getFile());
-        enunciate.copyFile(importFile, new File(webinf, importFile.getName()));
+        String name = importFile.getName();
+        name = resolveSpringImportFileName(name);
+        enunciate.copyFile(importFile, new File(webinf, name));
       }
     }
   }
@@ -756,78 +758,76 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     webinf.mkdirs();
     File destWebXML = new File(webinf, "web.xml");
 
-    if (!enunciate.isUpToDateWithSources(destWebXML)) {
-      File configDir = getConfigGenerateDir();
-      File webXML = new File(configDir, "web.xml");
-      EnunciateFreemarkerModel model = getModel();
-      model.setFileOutputDirectory(configDir);
+    File configDir = getConfigGenerateDir();
+    File webXML = new File(configDir, "web.xml");
+    EnunciateFreemarkerModel model = getModel();
+    model.setFileOutputDirectory(configDir);
+    try {
+      //delayed to the "build" phase to enable modules to supply their web app fragments.
+      model.put("webAppFragments", enunciate.getWebAppFragments());
+      List<WebAppResource> envEntries = Collections.<WebAppResource>emptyList();
+      List<WebAppResource> resourceEnvRefs = Collections.<WebAppResource>emptyList();
+      List<WebAppResource> resourceRefs = Collections.<WebAppResource>emptyList();
+      if (this.warConfig != null) {
+        envEntries = this.warConfig.getEnvEntries();
+        resourceEnvRefs = this.warConfig.getResourceEnvRefs();
+        resourceRefs = this.warConfig.getResourceRefs();
+      }
+      model.put("envEntries", envEntries);
+      model.put("resourceEnvRefs", resourceEnvRefs);
+      model.put("resourceRefs", resourceRefs);
+      model.put("securityEnabled", isEnableSecurity());
+      model.put("securityConfig", getSecurityConfig());
+      processTemplate(getWebXmlTemplateURL(), model);
+    }
+    catch (TemplateException e) {
+      throw new EnunciateException("Error processing web.xml template file.", e);
+    }
+
+    File mergedWebXml = webXML;
+    if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null || this.warConfig.getMergeWebXML() != null)) {
+      URL webXmlToMerge = this.warConfig.getMergeWebXMLURL();
+      if (webXmlToMerge == null) {
+        webXmlToMerge = enunciate.resolvePath(this.warConfig.getMergeWebXML()).toURL();
+      }
+
       try {
-        //delayed to the "build" phase to enable modules to supply their web app fragments.
-        model.put("webAppFragments", enunciate.getWebAppFragments());
-        List<WebAppResource> envEntries = Collections.<WebAppResource>emptyList();
-        List<WebAppResource> resourceEnvRefs = Collections.<WebAppResource>emptyList();
-        List<WebAppResource> resourceRefs = Collections.<WebAppResource>emptyList();
-        if (this.warConfig != null) {
-          envEntries = this.warConfig.getEnvEntries();
-          resourceEnvRefs = this.warConfig.getResourceEnvRefs();
-          resourceRefs = this.warConfig.getResourceRefs();
-        }
-        model.put("envEntries", envEntries);
-        model.put("resourceEnvRefs", resourceEnvRefs);
-        model.put("resourceRefs", resourceRefs);
-        model.put("securityEnabled", isEnableSecurity());
-        model.put("securityConfig", getSecurityConfig());
-        processTemplate(getWebXmlTemplateURL(), model);
+        model.put("source1", loadMergeXmlModel(webXmlToMerge.openStream()));
+        model.put("source2", loadMergeXmlModel(new FileInputStream(webXML)));
+        processTemplate(getMergeWebXmlTemplateURL(), model);
       }
       catch (TemplateException e) {
-        throw new EnunciateException("Error processing web.xml template file.", e);
+        throw new EnunciateException("Error while merging web xml files.", e);
       }
 
-      File mergedWebXml = webXML;
-      if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null || this.warConfig.getMergeWebXML() != null)) {
-        URL webXmlToMerge = this.warConfig.getMergeWebXMLURL();
-        if (webXmlToMerge == null) {
-          webXmlToMerge = enunciate.resolvePath(this.warConfig.getMergeWebXML()).toURL();
-        }
-
-        try {
-          model.put("source1", loadMergeXmlModel(webXmlToMerge.openStream()));
-          model.put("source2", loadMergeXmlModel(new FileInputStream(webXML)));
-          processTemplate(getMergeWebXmlTemplateURL(), model);
-        }
-        catch (TemplateException e) {
-          throw new EnunciateException("Error while merging web xml files.", e);
-        }
-
-        File mergeTarget = new File(getConfigGenerateDir(), "merged-web.xml");
-        if (!mergeTarget.exists()) {
-          throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
-        }
-        
-        info("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
-        mergedWebXml = mergeTarget;
+      File mergeTarget = new File(getConfigGenerateDir(), "merged-web.xml");
+      if (!mergeTarget.exists()) {
+        throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
       }
 
-      if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null || this.warConfig.getWebXMLTransform() != null)) {
-        URL transformURL = this.warConfig.getWebXMLTransformURL();
-        if (transformURL == null) {
-          transformURL = enunciate.resolvePath(this.warConfig.getWebXMLTransform()).toURL();
-        }
-        
-        info("web.xml transform has been specified as %s.", transformURL);
-        try {
-          StreamSource source = new StreamSource(transformURL.openStream());
-          Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-          info("Transforming %s to %s.", mergedWebXml, destWebXML);
-          transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
-        }
-        catch (TransformerException e) {
-          throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + mergedWebXml + ")", e);
-        }
+      info("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
+      mergedWebXml = mergeTarget;
+    }
+
+    if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null || this.warConfig.getWebXMLTransform() != null)) {
+      URL transformURL = this.warConfig.getWebXMLTransformURL();
+      if (transformURL == null) {
+        transformURL = enunciate.resolvePath(this.warConfig.getWebXMLTransform()).toURL();
       }
-      else {
-        enunciate.copyFile(mergedWebXml, destWebXML);
+
+      info("web.xml transform has been specified as %s.", transformURL);
+      try {
+        StreamSource source = new StreamSource(transformURL.openStream());
+        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+        info("Transforming %s to %s.", mergedWebXml, destWebXML);
+        transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
       }
+      catch (TransformerException e) {
+        throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + mergedWebXml + ")", e);
+      }
+    }
+    else {
+      enunciate.copyFile(mergedWebXml, destWebXML);
     }
   }
 
@@ -1087,7 +1087,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
           throw new IllegalStateException("A spring import configuration must specify a file or a URI, but not both.");
         }
 
-        springImportURIs.add(new File(springImport.getFile()).getName());
+        String fileName = new File(springImport.getFile()).getName();
+        fileName = resolveSpringImportFileName(fileName);
+        springImportURIs.add(fileName);
       }
       else if (springImport.getUri() != null) {
         springImportURIs.add(springImport.getUri());
@@ -1097,6 +1099,19 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     return springImportURIs;
+  }
+
+  /**
+   * Resolves the application context file name (in case there's a conflict).
+   *
+   * @param fileName The file name.
+   * @return The resolved file name.
+   */
+  protected String resolveSpringImportFileName(String fileName) {
+    if ("applicationContext.xml".equalsIgnoreCase(fileName)) {
+      fileName = "applicationContext-" + getModel().getEnunciateConfig().getLabel() + ".xml";
+    }
+    return fileName;
   }
 
   /**

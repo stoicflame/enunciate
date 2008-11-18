@@ -19,7 +19,7 @@
       </package-conversions>
     </xfire-client>
     <spring-app>
-      <springImport file="custom_spring.xml"/>
+      <springImport file="src/conf/custom_spring.xml"/>
       <copyResources dir="${basedir}/src/main/samples/full" pattern="**/*.txt"/>
       <globalServiceInterceptor beanName="globalServiceAdvice"/>
       <war>
@@ -29,7 +29,7 @@
       </war>
     </spring-app>
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
-      <download name="License" file="dummy-license.txt" description="The license file governing these downloads."/>
+      <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>
     </docs>
     <gwt disabled="true" rpcModuleName="org.codehaus.enunciate.samples.genealogy.Genealogy"/>
   </modules>

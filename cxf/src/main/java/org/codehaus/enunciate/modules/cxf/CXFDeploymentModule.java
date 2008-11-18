@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xfire;
+package org.codehaus.enunciate.modules.cxf;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.apache.cxf.transport.servlet.CXFServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,15 +37,9 @@ import java.util.Arrays;
 import java.util.TreeSet;
 
 /**
- * <h1>XFire Module</h1>
+ * <h1>CXF Module</h1>
  *
- * <p>The XFire deployment module is a simple module that generates the request/response beans
- * for rpc/lit SOAP operations.</p>
- *
- * <p>The XFire module <i>used</i> to be the primary module for assembing the app.  As of release 1.5,
- * this functionality has been separated into the spring-app module. However, the XFire module still
- * depends on the spring-app module to function, as it assumes that the endpoint beans are defined
- * in the Spring root application context.</i>
+ * <p>The CXF module assembles a CXF-based server-side application for hosting the SOAP endpoints.</i>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -58,60 +51,38 @@ import java.util.TreeSet;
  *
  * <h3>generate</h3>
  * 
- * <p>The "generate" step generates the source beans and the spring configuration file.  And the spring
- * servlet file for the XFire soap servlet.</p>
+ * <p>The "generate" step generates the spring configuration file.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>There are no additional configuration elements for the XFire module.</p>
+ * <p>There are no additional configuration elements for the CXF module.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
- * <p>The XFire deployment module exports the following artifacts:</p>
- *
- * <ul>
- *   <li>The "xfire-server.src.dir" artifact is the directory where the beans are generated.</li>
- * </ul>
+ * <p>The CXF deployment module exports no artifacts.</p>
  *
  * @author Ryan Heaton
- * @docFileName module_xfire.html
+ * @docFileName module_cxf.html
  */
-public class XFireDeploymentModule extends FreemarkerDeploymentModule {
+public class CXFDeploymentModule extends FreemarkerDeploymentModule {
+
+  public CXFDeploymentModule() {
+    setDisabled(true); //disabled by default; still using XFire.
+  }
 
   /**
-   * @return "xfire"
+   * @return "cxf"
    */
   @Override
   public String getName() {
-    return "xfire";
+    return "cxf";
   }
 
   /**
-   * @return The URL to "rpc-request-bean.fmt"
+   * @return The URL to "cxf-servlet.xml.fmt"
    */
-  protected URL getRPCRequestBeanTemplateURL() {
-    return XFireDeploymentModule.class.getResource("rpc-request-bean.fmt");
-  }
-
-  /**
-   * @return The URL to "rpc-response-bean.fmt"
-   */
-  protected URL getRPCResponseBeanTemplateURL() {
-    return XFireDeploymentModule.class.getResource("rpc-response-bean.fmt");
-  }
-
-  /**
-   * @return The URL to "xfire-servlet.xml.fmt"
-   */
-  protected URL getXfireServletTemplateURL() {
-    return XFireDeploymentModule.class.getResource("xfire-servlet.xml.fmt");
-  }
-
-  /**
-   * @return The URL to "xfire-servlet.xml.fmt"
-   */
-  protected URL getParameterNamesTemplateURL() {
-    return XFireDeploymentModule.class.getResource("enunciate-soap-parameter-names.properties.fmt");
+  protected URL getCXFServletTemplateURL() {
+    return CXFDeploymentModule.class.getResource("cxf-servlet.xml.fmt");
   }
 
   @Override
@@ -119,7 +90,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     super.init(enunciate);
 
     if (!isDisabled() && !enunciate.isModuleEnabled("jaxws")) {
-      throw new EnunciateException("The XFire module requires an enabled JAXWS module.");
+      throw new EnunciateException("The CXF module requires an enabled JAXWS module.");
     }
   }
 
@@ -142,35 +113,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     if (!isUpToDate()) {
-      //generate the rpc request/response beans.
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          for (WebMethod webMethod : ei.getWebMethods()) {
-            for (WebMessage webMessage : webMethod.getMessages()) {
-              if (webMessage instanceof RPCInputMessage) {
-                model.put("message", webMessage);
-                processTemplate(getRPCRequestBeanTemplateURL(), model);
-              }
-              else if (webMessage instanceof RPCOutputMessage) {
-                model.put("message", webMessage);
-                processTemplate(getRPCResponseBeanTemplateURL(), model);
-              }
-            }
-          }
-        }
-      }
-
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
-      processTemplate(getXfireServletTemplateURL(), model);
-      processTemplate(getParameterNamesTemplateURL(), model);
+      processTemplate(getCXFServletTemplateURL(), model);
     }
     else {
-      info("Skipping generation of XFire support classes as everything appears up-to-date....");
+      info("Skipping generation of CXF config as everything appears up-to-date....");
     }
-
-    getEnunciate().addArtifact(new FileArtifact(getName(), "xfire-server.src.dir", getGenerateDir()));
-    getEnunciate().addAdditionalSourceRoot(getGenerateDir());
   }
 
   @Override
@@ -180,15 +129,13 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     File webappDir = getBuildDir();
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
-    getEnunciate().copyFile(new File(getGenerateDir(), "xfire-servlet.xml"), new File(webinf, "xfire-servlet.xml"));
-    getEnunciate().copyFile(new File(getGenerateDir(), "enunciate-soap-parameter-names.properties"),
-                            new File(new File(webinf, "classes"), "enunciate-soap-parameter-names.properties"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "cxf-servlet.xml"), new File(webinf, "cxf-servlet.xml"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
     WebAppComponent servletComponent = new WebAppComponent();
-    servletComponent.setName("xfire");
-    servletComponent.setClassname(DispatcherServlet.class.getName());
+    servletComponent.setName("cxf");
+    servletComponent.setClassname(CXFServlet.class.getName());
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
@@ -211,7 +158,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public Validator getValidator() {
-    return new XFireValidator();
+    return new CXFValidator();
   }
 
   // Inherited.
@@ -221,7 +168,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       return true;
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
-      debug("XFire module is disabled because there are no endpoint interfaces.");
+      debug("CXF module is disabled because there are no endpoint interfaces.");
       return true;
     }
 
