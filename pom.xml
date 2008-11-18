@@ -34,6 +34,7 @@
     <module>maven-enunciate-plugin</module>
     <module>integration-test-support</module>
     <module>integration-tests/xfire-rest</module>
+    <module>integration-tests/cxf-rest</module>
     <module>integration-tests/jersey-storage</module>
   </modules>
 
