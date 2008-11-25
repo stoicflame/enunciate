@@ -1115,6 +1115,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The list of spring imports.
+   *
+   * @return The list of spring imports.
+   */
+  public List<SpringImport> getSpringImports() {
+    return springImports;
+  }
+
+  /**
    * Add a spring import.
    *
    * @param springImports The spring import to add.

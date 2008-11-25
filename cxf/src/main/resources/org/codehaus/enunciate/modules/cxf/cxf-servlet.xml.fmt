@@ -6,17 +6,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-  <import resource="classpath:META-INF/cxf/cxf.xml"/>
-  <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/>
-  <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
-
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]
       [#list endpointInterface.endpointImplementations as impl]
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         [#--todo: what about eis with the same name, different namespace?--]
-  <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${endpointBeanId(endpointInterface)}" address="${endpointInterface.metaData.soapPath}" wsdlLocation="/${docsDir}${wsdl.properties.filename}" implementorClass="${impl.qualifiedName}"/>
+  <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${endpointBeanId(endpointInterface)}" address="${endpointInterface.metaData.soapPath}" implementorClass="${endpointInterface.qualifiedName}"[#if wsdl.properties.filename?exists] wsdlLocation="/${docsDir?default("")}${wsdl.properties.filename}"[/#if]/>
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

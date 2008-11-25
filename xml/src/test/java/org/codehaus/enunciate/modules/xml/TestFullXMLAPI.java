@@ -28,6 +28,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.w3c.dom.Element;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -54,7 +55,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class TestFullAPI extends TestCase {
+public class TestFullXMLAPI extends TestCase {
 
   public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
   public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";
@@ -84,6 +85,7 @@ public class TestFullAPI extends TestCase {
     xmlModule.addWsdlConfig(wsdlConfig);
 
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) xmlModule));
+    config.setValidator(new BaseValidator());
     config.setDeploymentHost("www.thebestgenealogywebsite.com");
     config.setDeploymentContext("/genealogy");
     config.setDeploymentProtocol("https");

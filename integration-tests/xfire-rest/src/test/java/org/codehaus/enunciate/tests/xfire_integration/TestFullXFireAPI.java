@@ -63,7 +63,7 @@ import com.meterware.httpunit.WebResponse;
  *
  * @author Ryan Heaton
  */
-public class TestFullAPI extends TestCase {
+public class TestFullXFireAPI extends TestCase {
 
   public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
   public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";

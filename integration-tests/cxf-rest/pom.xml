@@ -2,10 +2,10 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-integration-xfire-rest</artifactId>
+  <artifactId>enunciate-integration-cxf-rest</artifactId>
   <version>1.9-SNAPSHOT</version>
-  <name>Enunciate - XFire/REST Integration Tests</name>
-  <description>Integration tests for Enunciate, testing the xfire + REST combo.</description>
+  <name>Enunciate - CXF/REST Integration Tests</name>
+  <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
   <packaging>war</packaging>
 
   <build>
@@ -115,7 +115,7 @@
           </container>
           <configuration>
             <properties>
-              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+              <cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>
             </properties>
             <home>${project.build.directory}/tomcat5x</home>
             <deployables>

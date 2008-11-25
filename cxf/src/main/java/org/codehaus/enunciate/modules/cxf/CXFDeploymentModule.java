@@ -27,7 +27,10 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
+import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
+import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
 import org.apache.cxf.transport.servlet.CXFServlet;
 
 import java.io.File;
@@ -35,6 +38,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.List;
 
 /**
  * <h1>CXF Module</h1>
@@ -92,6 +96,21 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     if (!isDisabled() && !enunciate.isModuleEnabled("jaxws")) {
       throw new EnunciateException("The CXF module requires an enabled JAXWS module.");
     }
+
+    if (!isDisabled() && !enunciate.isModuleEnabled("spring-app")) {
+      throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
+    }
+    else if (!isDisabled()) {
+      List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
+      for (DeploymentModule enabledModule : enabledModules) {
+        if (enabledModule instanceof SpringAppDeploymentModule) {
+          SpringImport cxfImport = new SpringImport();
+          cxfImport.setUri("classpath:cxf-boilerplate.xml");
+          ((SpringAppDeploymentModule) enabledModule).getSpringImports().add(cxfImport);
+        }
+      }
+    }
+
   }
 
   @Override
@@ -126,6 +145,8 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
   protected void doBuild() throws EnunciateException, IOException {
     super.doBuild();
 
+    Enunciate enunciate = getEnunciate();
+
     File webappDir = getBuildDir();
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
@@ -136,6 +157,9 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("cxf");
     servletComponent.setClassname(CXFServlet.class.getName());
+    WebAppComponent filterComponent = new WebAppComponent();
+    filterComponent.setName("cxf-filter");
+    filterComponent.setClassname(CXFAdaptedServletFilter.class.getName());
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
@@ -143,8 +167,10 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     servletComponent.setUrlMappings(urlMappings);
+    filterComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
-    getEnunciate().addWebAppFragment(webappFragment);
+    webappFragment.setFilters(Arrays.asList(filterComponent));
+    enunciate.addWebAppFragment(webappFragment);
   }
 
   /**

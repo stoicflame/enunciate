@@ -90,8 +90,17 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(delegate, "Enums cannot be endpoint interfaces.");
     }
 
+    SOAPBinding.Style style = null;
     TreeSet<WebMethod> uniquelyNamedWebMethods = new TreeSet<WebMethod>();
     for (WebMethod webMethod : ei.getWebMethods()) {
+      if (style == null) {
+        style = webMethod.getSoapBindingStyle();
+      }
+      else if (style != webMethod.getSoapBindingStyle()) {
+        result.addError(webMethod, "Mixed-style endpoint interfaces break conformity to the WS-I Basic Profile.  The '" + webMethod.getSimpleName() +
+          "' method has " + webMethod.getSoapBindingStyle() + " style, which isn't the same as other methods on the endpoint.");
+      }
+
       if (!uniquelyNamedWebMethods.add(webMethod)) {
         result.addError(webMethod, "Web methods must have unique operation names.  Use annotations to disambiguate.");
       }
