@@ -31,14 +31,15 @@ import java.util.ArrayList;
 @WebService
 public class RelationshipService {
 
-  public List<Relationship> getRelationships(String personId) throws RelationshipException, OutsideException {
+  public List<Relationship> getRelationships(String personId) throws RelationshipException {
     if ("throw".equals(personId)) {
       throw new RelationshipException("hi");
     }
 
-    if ("outthrow".equals(personId)) {
-      throw new OutsideException("outside message");
-    }
+//    todo: uncomment when CXF handles this
+//    if ("outthrow".equals(personId)) {
+//      throw new OutsideException("outside message");
+//    }
     
     ArrayList<Relationship> list = new ArrayList<Relationship>();
     for (int i = 0; i < 3; i++) {

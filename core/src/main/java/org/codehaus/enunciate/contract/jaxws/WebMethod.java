@@ -66,8 +66,9 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
 
     Collection<ParameterDeclaration> parameters = getParameters();
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());
+    int parameterIndex = 0;
     for (ParameterDeclaration parameter : parameters) {
-      webParameters.add(new WebParam(parameter, this));
+      webParameters.add(new WebParam(parameter, this, parameterIndex++));
     }
     this.webParams = webParameters;
 

@@ -33,6 +33,7 @@
       </xs:sequence>
       <xs:attribute name="label" type="xs:string"/>
       <xs:attribute name="description" type="xs:string"/>
+      <xs:attribute name="forceJAXWSSpecCompliance" type="xs:boolean" default="false"/>
     </xs:complexType>
 
   </xs:element>

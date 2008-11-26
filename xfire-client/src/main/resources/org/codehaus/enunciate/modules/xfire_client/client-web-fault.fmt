@@ -40,6 +40,11 @@ public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(s
 
   protected ${fault.simpleName}(String message) {
     super(message);
+    [#list fault.childElements as childElement]
+      [#if childElement.property.simpleName = "message"]
+    this.message = message;
+      [/#if]
+    [/#list]
   }
 
   public ${fault.simpleName}(${beanfqn} faultInfo) {
@@ -50,6 +55,13 @@ public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(s
   public ${fault.simpleName}(String message, ${beanfqn} faultInfo) {
     super(message);
     init(faultInfo);
+    [#list fault.childElements as childElement]
+      [#if childElement.property.simpleName = "message"]
+    if (message != null) {
+      this.message = message;
+    }
+      [/#if]
+    [/#list]
   }
 
   protected void init(${beanfqn} faultInfo) {

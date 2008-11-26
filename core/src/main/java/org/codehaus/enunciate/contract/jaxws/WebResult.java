@@ -70,10 +70,13 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     this.header = ((annotation != null) && (annotation.header()));
     this.adapterType = AdapterUtil.findAdapterType(method);
 
-    String name = method.getSimpleName() + "Response";
+    String name = "return";
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
       this.elementName = name;
+    }
+    else if (!isHeader() && isImplicitSchemaElement()) {
+      this.elementName = method.getSimpleName() + "Response";
     }
     else if (this.header) {
       this.elementName = "";

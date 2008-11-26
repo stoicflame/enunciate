@@ -21,6 +21,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
@@ -31,6 +32,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
@@ -47,17 +49,32 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
   private final javax.jws.WebParam annotation;
   private final WebMethod method;
   private final AdapterType adapterType;
+  private final boolean forceSpecCompliance;
+  private final int parameterIndex;
 
-  protected WebParam(ParameterDeclaration delegate, WebMethod method) {
+  protected WebParam(ParameterDeclaration delegate, WebMethod method, int parameterIndex) {
     super(delegate);
 
     this.method = method;
+    this.parameterIndex = parameterIndex;
     if (this.method == null) {
       throw new IllegalArgumentException("A web method must be provided.");
     }
 
     annotation = delegate.getAnnotation(javax.jws.WebParam.class);
     this.adapterType = AdapterUtil.findAdapterType(this);
+    EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
+    this.forceSpecCompliance = model != null && model.getEnunciateConfig() != null && model.getEnunciateConfig().isForceJAXWSSpecCompliance();
+  }
+
+  /**
+   * If we're forcing JAX-WS compliance, we make the simple name look like "arg0" according to the spec.
+   *
+   * @return The simple name.
+   */
+  @Override
+  public String getSimpleName() {
+    return this.forceSpecCompliance ? "arg" + this.parameterIndex : super.getSimpleName();
   }
 
   /**
@@ -79,6 +96,9 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
+    }
+    else if (!isHeader() && isImplicitSchemaElement()) {
+      name = this.method.getSimpleName();
     }
 
     return name;

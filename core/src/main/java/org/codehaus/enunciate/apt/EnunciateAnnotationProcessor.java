@@ -134,6 +134,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   protected EnunciateFreemarkerModel getRootModel() throws TemplateModelException {
     EnunciateConfiguration config = this.enunciate.getConfig();
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
+    model.setEnunciateConfig(config);
 
     TypeDeclaration[] additionalApiDefinitions = loadAdditionalApiDefinitions();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
@@ -271,7 +272,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       baseURL += ("/" + config.getLabel());
     }
     model.setBaseDeploymentAddress(baseURL);
-    model.setEnunciateConfig(config);
 
     validate(model);
 

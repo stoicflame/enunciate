@@ -254,7 +254,7 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
 
       String name;
       if (annotation == null || !"".equals(annotation.name())) {
-        name = loadParamName(ei, method, annotation == null ? 0 : paramIndex);
+        name = method.getName();
       }
       else {
         name = annotation.name();
@@ -382,7 +382,7 @@ public class EnunciatedJAXWSServiceFactory extends AnnotationServiceFactory {
         }
 
         if (annotation == null || !"".equals(annotation.name())) {
-          name = loadParamName(ei, method, annotation == null ? 0 : paramIndex);
+          name = method.getName() + "Response";
         }
         else {
           name = annotation.name();

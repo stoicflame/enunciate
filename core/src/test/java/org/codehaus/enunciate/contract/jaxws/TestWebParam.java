@@ -63,11 +63,11 @@ public class TestWebParam extends InAPTTestCase {
 
     Collection<WebParam> params = docLitBareMethod.getWebParameters();
     WebParam bareParam = params.iterator().next();
-    assertEquals("beanTwo", bareParam.getElementName());
+    assertEquals("docLitBareMethod", bareParam.getElementName());
     assertEquals("beanTwo", bareParam.getPartName());
     assertEquals("WebMethodExamples.docLitBareMethod", bareParam.getMessageName());
     assertSame(WebMessagePart.ParticleType.ELEMENT, bareParam.getParticleType());
-    assertEquals(new QName("urn:web-method-examples", "beanTwo"), bareParam.getParticleQName());
+    assertEquals(new QName("urn:web-method-examples", "docLitBareMethod"), bareParam.getParticleQName());
     assertTrue(bareParam.isImplicitSchemaElement());
     assertEquals(new QName(null, "beanTwo"), bareParam.getTypeQName());
     assertEquals(1, bareParam.getMinOccurs());

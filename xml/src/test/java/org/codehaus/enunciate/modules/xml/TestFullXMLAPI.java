@@ -482,7 +482,7 @@ public class TestFullXMLAPI extends TestCase {
       else if ("PersonService.storePerson".equals(messageName)) {
         assertEquals(1, message.getParts().size());
         Part part = message.getPart("person");
-        assertEquals(new QName(FULL_NAMESPACE, "person"), part.getElementName());
+        assertEquals(new QName(FULL_NAMESPACE, "storePerson"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("PersonService.readPersons".equals(messageName)) {

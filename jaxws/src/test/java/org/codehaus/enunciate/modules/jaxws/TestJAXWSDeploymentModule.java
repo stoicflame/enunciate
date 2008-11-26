@@ -163,18 +163,18 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     assertEquals(responseWrapper.getElementNamespace(), typeInfo.namespace());
     assertEquals(responseWrapper.getElementName(), typeInfo.name());
     assertEquals(1, typeInfo.propOrder().length);
-    assertEquals("notConflictingMethodResponse", typeInfo.propOrder()[0]);
+    assertEquals("return", typeInfo.propOrder()[0]);
 
     Map<String, Object> properties = new HashMap<String, Object>();
     Double doubleValue = Double.valueOf(12345.6789);
-    properties.put("notConflictingMethodResponse", doubleValue);
+    properties.put("return", doubleValue);
 
     Object responseBean = generatedClass.newInstance();
     BeanUtils.populate(responseBean, properties);
     Map description = BeanUtils.describe(responseBean);
     description.remove("class");
     assertEquals(1, description.size());
-    assertEquals(doubleValue.toString(), description.get("notConflictingMethodResponse"));
+    assertEquals(doubleValue.toString(), description.get("return"));
   }
 
   /**

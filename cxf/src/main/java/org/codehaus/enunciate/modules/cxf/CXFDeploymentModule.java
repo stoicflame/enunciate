@@ -93,22 +93,30 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (!isDisabled() && !enunciate.isModuleEnabled("jaxws")) {
-      throw new EnunciateException("The CXF module requires an enabled JAXWS module.");
-    }
+    if (!isDisabled()) {
+      if (enunciate.isModuleEnabled("xfire")) {
+        throw new EnunciateException("The CXF module requires you to disable the XFire module.");
+      }
 
-    if (!isDisabled() && !enunciate.isModuleEnabled("spring-app")) {
-      throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
-    }
-    else if (!isDisabled()) {
-      List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
-      for (DeploymentModule enabledModule : enabledModules) {
-        if (enabledModule instanceof SpringAppDeploymentModule) {
-          SpringImport cxfImport = new SpringImport();
-          cxfImport.setUri("classpath:cxf-boilerplate.xml");
-          ((SpringAppDeploymentModule) enabledModule).getSpringImports().add(cxfImport);
+      if (enunciate.isModuleEnabled("jaxws")) {
+        throw new EnunciateException("The CXF module requires you to disable the JAX-WS module.");
+      }
+
+      if (!enunciate.isModuleEnabled("spring-app")) {
+        throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
+      }
+      else {
+        List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
+        for (DeploymentModule enabledModule : enabledModules) {
+          if (enabledModule instanceof SpringAppDeploymentModule) {
+            SpringImport cxfImport = new SpringImport();
+            cxfImport.setUri("classpath:cxf-boilerplate.xml");
+            ((SpringAppDeploymentModule) enabledModule).getSpringImports().add(cxfImport);
+          }
         }
       }
+
+      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
     }
 
   }

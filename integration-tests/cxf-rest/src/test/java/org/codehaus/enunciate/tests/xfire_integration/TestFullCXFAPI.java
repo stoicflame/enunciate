@@ -16,6 +16,10 @@
 
 package org.codehaus.enunciate.tests.xfire_integration;
 
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.UploadFileSpec;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
@@ -25,19 +29,10 @@ import org.codehaus.enunciate.samples.genealogy.client.data.Event;
 import org.codehaus.enunciate.samples.genealogy.client.data.Person;
 import org.codehaus.enunciate.samples.genealogy.client.data.PersonXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Relationship;
-import org.codehaus.enunciate.samples.genealogy.client.exceptions.OutsideException;
 import org.codehaus.enunciate.samples.genealogy.client.services.*;
-import org.codehaus.enunciate.samples.genealogy.client.services.RelationshipService;
-import org.codehaus.enunciate.samples.genealogy.client.services.UnknownSourceException;
-import org.codehaus.enunciate.samples.genealogy.client.services.PersonService;
-import org.codehaus.enunciate.samples.genealogy.client.services.RelationshipException;
-import org.codehaus.enunciate.samples.genealogy.client.services.UnknownSourceBean;
-import org.codehaus.enunciate.samples.genealogy.client.services.ServiceException;
-import org.codehaus.enunciate.samples.genealogy.client.services.SourceService;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.RelationshipServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
-import org.codehaus.enunciate.samples.genealogy.services.*;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.stax.ElementReader;
 import org.codehaus.xfire.aegis.stax.ElementWriter;
@@ -46,35 +41,28 @@ import org.codehaus.xfire.aegis.type.TypeMapping;
 import org.codehaus.xfire.exchange.MessageExchange;
 import org.codehaus.xfire.exchange.OutMessage;
 import org.codehaus.xfire.soap.SoapConstants;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
-import com.meterware.httpunit.WebResponse;
-
 /**
- * A very big test of the functionality of the full API deployed with the XFire client and server modules.
+ * A very big test of the functionality of the full API deployed with the CXF client and server modules.
  * Since this test depends on the generated client API, it is assumed that the full API has already been
  * enunciated.  A system property named "enunciated.full.war" pointing to the war file created by the
  * process must also be provided.
  *
  * @author Ryan Heaton
  */
-public class TestFullAPI extends TestCase {
+public class TestFullCXFAPI extends TestCase {
 
   public static final String FULL_NAMESPACE = "http://enunciate.codehaus.org/samples/full";
   public static final String DATA_NAMESPACE = "http://enunciate.codehaus.org/samples/genealogy/data";
@@ -94,11 +82,13 @@ public class TestFullAPI extends TestCase {
       context = System.getProperty("container.test.context");
     }
 
-    ClassPathXmlApplicationContext appcontext = new ClassPathXmlApplicationContext(new String[] {"/org/codehaus/enunciate/tests/xfire_integration/cxf_client.xml"});
-    org.codehaus.enunciate.samples.genealogy.services.SourceService ss = (org.codehaus.enunciate.samples.genealogy.services.SourceService) appcontext.getBean("client");
-    ss.getSource("valid");
+//    ClassPathXmlApplicationContext appcontext = new ClassPathXmlApplicationContext(new String[] {"/org/codehaus/enunciate/tests/xfire_integration/cxf_client.xml"});
+//    org.codehaus.enunciate.samples.genealogy.services.SourceService ss = (org.codehaus.enunciate.samples.genealogy.services.SourceService) appcontext.getBean("client");
+//    ss.getSource("valid");
 
-    SourceService sourceService = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/sources/source");
+    SourceServiceImpl impl = new SourceServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/sources/source");
+//    impl.setMTOMEnabled(false);
+    SourceService sourceService = impl;
     Source source = sourceService.getSource("valid");
     assertEquals("valid", source.getId());
     assertEquals(URI.create("uri:some-uri"), source.getLink());
@@ -124,13 +114,14 @@ public class TestFullAPI extends TestCase {
       assertEquals(888, bean.getErrorCode());
     }
 
-    long begin = System.currentTimeMillis();
-    sourceService.addSource(new Source());
-    sourceService.addSource(new Source());
-    sourceService.addSource(new Source());
-    long end = System.currentTimeMillis();
-    long elapsed = (end - begin);
-    assertTrue("Since this is a one-way operation, we expected the operations to take less than 15 seconds, even though the time it takes on the server to add a source is > 30 seconds per operation.  Took " + elapsed + " ms.", elapsed < 15000);
+//    todo: uncomment if CXF ever applies server-side one-way operations.
+//    long begin = System.currentTimeMillis();
+//    sourceService.addSource(new Source());
+//    sourceService.addSource(new Source());
+//    sourceService.addSource(new Source());
+//    long end = System.currentTimeMillis();
+//    long elapsed = (end - begin);
+//    assertTrue("Since this is a one-way operation, we expected the operations to take less than 15 seconds, even though the time it takes on the server to add a source is > 30 seconds per operation.  Took " + elapsed + " ms.", elapsed < 15000);
 
     assertEquals("newid", sourceService.addInfoSet("somesource", new InfoSet()));
     assertEquals("okay", sourceService.addInfoSet("othersource", new InfoSet()));
@@ -147,18 +138,18 @@ public class TestFullAPI extends TestCase {
     }
 
     //test SOAP headers.
-    Event event1 = new Event();
-    Event event2 = new Event();
-    Event event3 = new Event();
-    assertEquals("good", sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "good"));
+//    Event event1 = new Event();
+//    Event event2 = new Event();
+//    Event event3 = new Event();
+//    assertEquals("good", sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "good"));
 
-    try {
-      sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "illegal");
-      fail("should have required a valid contributor id.");
-    }
-    catch (ServiceException e) {
-      //fall through...
-    }
+//    try {
+//      sourceService.addEvents("infoSetId", new Event[]{event1, event2, event3}, "illegal");
+//      fail("should have required a valid contributor id.");
+//    }
+//    catch (ServiceException e) {
+//      //fall through...
+//    }
 
     PersonService personService = new PersonServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/PersonServiceService");
     ArrayList<String> ids = new ArrayList<String>(Arrays.asList("id1", "id2", "id3", "id4"));
@@ -256,13 +247,14 @@ public class TestFullAPI extends TestCase {
       assertEquals("hi", e.getMessage());
     }
 
-    try {
-      relationshipService.getRelationships("outthrow");
-      fail("Should have thrown the outside exception.");
-    }
-    catch (OutsideException e) {
-      assertEquals("outside message", e.getMessage());
-    }
+//    todo: uncomment when CXF handles this
+//    try {
+//      relationshipService.getRelationships("outthrow");
+//      fail("Should have thrown the outside exception.");
+//    }
+//    catch (OutsideException e) {
+//      assertEquals("outside message", e.getMessage());
+//    }
 
     relationshipService.touch();
 

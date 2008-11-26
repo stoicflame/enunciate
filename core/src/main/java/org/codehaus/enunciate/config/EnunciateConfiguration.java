@@ -55,6 +55,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Set<String> disabledRules = new TreeSet<String>();
   private final Set<String> apiIncludePatterns = new TreeSet<String>();
   private final Set<String> apiExcludePatterns = new TreeSet<String>();
+  private boolean forceJAXWSSpecCompliance = false;
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -228,6 +229,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setDeploymentHost(String deploymentHost) {
     this.deploymentHost = deploymentHost;
+  }
+
+  /**
+   * Whether to force parameter names to be JAX-WS compliant.
+   *
+   * @return Whether to force parameter names to be JAX-WS compliant.
+   */
+  public boolean isForceJAXWSSpecCompliance() {
+    return forceJAXWSSpecCompliance;
+  }
+
+  /**
+   * Whether to force parameter names to be JAX-WS compliant.
+   *
+   * @param forceJAXWSSpecCompliance Whether to force parameter names to be JAX-WS compliant.
+   */
+  public void setForceJAXWSSpecCompliance(boolean forceJAXWSSpecCompliance) {
+    this.forceJAXWSSpecCompliance = forceJAXWSSpecCompliance;
   }
 
   /**

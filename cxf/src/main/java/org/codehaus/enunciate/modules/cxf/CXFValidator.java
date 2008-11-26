@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.cxf;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
+import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
@@ -50,6 +51,24 @@ public class CXFValidator extends BaseValidator {
         if ((webParam.isHeader()) && ("".equals(webParam.getAnnotation(javax.jws.WebParam.class).name()))) {
           //todo: lift this constraint by serializing the parameter names to some file you can load for metadata...
           result.addError(webParam, "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
+        }
+      }
+
+      for (WebFault webFault : webMethod.getWebFaults()) {
+        if (webFault.getExplicitFaultBean() != null) {
+          if (!webFault.getSimpleName().equals(webFault.getExplicitFaultBean().getName())) {
+            result.addError(webMethod, "Because of some inconsistencies with the JAX-WS implementation of CXF, the CXF module cannot have methods that " +
+              "throw exceptions that are named differently than the element name of their explicit fault beans. Apply @XmlRootElement ( name = \""
+              + webFault.getSimpleName() + "\" ) to  explicit fault bean " + webFault.getExplicitFaultBean().getQualifiedName() + " to apply the workaround.");
+          }
+        }
+        else {
+          String ns = webFault.getTargetNamespace() == null ? "" : webFault.getTargetNamespace();
+          String eins = ei.getTargetNamespace() == null ? "" : ei.getTargetNamespace();
+          if (!ns.equals(eins)) {
+            result.addError(webMethod, "CXF doesn't handle throwing exceptions that are defined in a different namespace " +
+              "from the namespace of the endpoint interface.");
+          }
         }
       }
     }
