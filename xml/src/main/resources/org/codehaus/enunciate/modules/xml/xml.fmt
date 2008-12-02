@@ -5,7 +5,7 @@
 
 [#--first generate each wsdl.--]
 [@forEachWsdl]
-  [@file name=wsdl.filename]
+  [@file name=wsdl.filename charset="utf-8"]
     [#compress]
       [@libWsdl.processWsdl wsdl=wsdl/]
     [/#compress]
@@ -14,7 +14,7 @@
 
 [#--then generate each schema.--]
 [@forEachSchema]
-  [@file name=schema.filename]
+  [@file name=schema.filename charset="utf-8"]
     [#compress]
       [@libSchema.processSchema schema=schema/]
     [/#compress]

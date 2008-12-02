@@ -35,21 +35,21 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 
 /**
- * Strategy for looping through the (unique) AMF imports for a given declaration.  If a {@link org.codehaus.enunciate.contract.jaxws.WebMethod},
+ * Strategy for looping through the (unique) AS3 imports for a given declaration.  If a {@link org.codehaus.enunciate.contract.jaxws.WebMethod},
  * then the imports are those for the associated result event.  If a {@link org.codehaus.enunciate.contract.jaxws.EndpointInterface} then the
  * unique imports include the result events and parameters. If a {@link org.codehaus.enunciate.contract.jaxb.TypeDefinition}, then the unique
  * imports include each of the type's properties.
  *
  * @author Ryan Heaton
  */
-public class AMFImportStrategy extends EnunciateTemplateLoopStrategy<String> {
+public class AS3ImportStrategy extends EnunciateTemplateLoopStrategy<String> {
 
-  private String var = "amfImport";
+  private String var = "as3Import";
   private DecoratedMemberDeclaration declaration;
   private final ClientClassnameForMethod classnameFor;
   private boolean includeComponentTypes = true;
 
-  public AMFImportStrategy(ClientClassnameForMethod classnameFor) {
+  public AS3ImportStrategy(ClientClassnameForMethod classnameFor) {
     this.classnameFor = classnameFor;
   }
 

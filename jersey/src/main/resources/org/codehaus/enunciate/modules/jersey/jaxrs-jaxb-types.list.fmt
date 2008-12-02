@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="jaxrs-jaxb-types.list"]
+[@file name="jaxrs-jaxb-types.list" charset="utf-8"]
   [#list ns2schema?values as schema]
     [#list schema.typeDefinitions as typeDef]
 ${typeDef.qualifiedName}

@@ -21,7 +21,6 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -331,7 +330,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
       model.put("classnameFor", classnameFor);
       model.put("componentTypeFor", new ComponentTypeForMethod(conversions));
-      model.put("forEachAMFImport", new ForEachAMFImportTransform(null, classnameFor));
+      model.put("amfClassnameFor", amfClassnameForMethod);
+      model.put("amfComponentTypeFor", new ComponentTypeForMethod(amfTypePackageConversions));
+      model.put("forEachAS3Import", new ForEachAS3ImportTransform(null, classnameFor));
+      model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
       model.put("as3Aliases", as3Aliases);
 
       info("Generating the ActionScript types...");

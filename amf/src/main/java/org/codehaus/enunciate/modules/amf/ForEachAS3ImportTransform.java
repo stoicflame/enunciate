@@ -21,17 +21,17 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 /**
  * @author Ryan Heaton
  */
-public class ForEachAMFImportTransform extends FreemarkerTransform<AMFImportStrategy> {
+public class ForEachAS3ImportTransform extends FreemarkerTransform<AS3ImportStrategy> {
 
   private final ClientClassnameForMethod classnameFor;
 
-  public ForEachAMFImportTransform(String namespace, ClientClassnameForMethod classnameFor) {
+  public ForEachAS3ImportTransform(String namespace, ClientClassnameForMethod classnameFor) {
     super(namespace);
 
     this.classnameFor = classnameFor;
   }
 
-  public AMFImportStrategy newStrategy() {
-    return new AMFImportStrategy(this.classnameFor);
+  public AS3ImportStrategy newStrategy() {
+    return new AS3ImportStrategy(this.classnameFor);
   }
 }

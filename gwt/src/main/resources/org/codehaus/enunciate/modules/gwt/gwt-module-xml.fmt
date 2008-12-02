@@ -1,7 +1,7 @@
 [#ftl]
 [#assign moduleNamespace=gwtModuleName[0..(gwtModuleName?last_index_of(".") - 1)]/]
 [#assign simpleModuleName=gwtModuleName[(gwtModuleName?last_index_of(".") + 1)..]/]
-[@file name=(simpleModuleName + ".gwt.xml") package=moduleNamespace]
+[@file name=(simpleModuleName + ".gwt.xml") package=moduleNamespace charset="utf-8"]
 <module>
 
   <inherits name='com.google.gwt.user.User'/>

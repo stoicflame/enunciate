@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="downloads.xml"]
+[@file name="downloads.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 <downloads>
   [#list downloads as download]

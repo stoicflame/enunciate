@@ -70,7 +70,7 @@ public class ElementComparator implements Comparator<Element> {
     //If no order is specified, it's undefined. We'll put it in source order.
     SourcePosition position1 = accessor1.getPosition();
     SourcePosition position2 = accessor2.getPosition();
-    int comparison = 0;
+    int comparison;
     if ((position1 != null) && (position2 != null)) {
       comparison = position1.line() - position2.line();
       if (comparison == 0) {

@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="jaxrs-root-resources.list"]
+[@file name="jaxrs-root-resources.list" charset="utf-8"]
   [#list rootResources as rootResource]
 ${rootResource.qualifiedName}
   [/#list]

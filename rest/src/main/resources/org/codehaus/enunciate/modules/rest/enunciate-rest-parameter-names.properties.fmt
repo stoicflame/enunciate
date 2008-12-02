@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="enunciate-rest-parameter-names.properties"]
+[@file name="enunciate-rest-parameter-names.properties" charset="utf-8"]
   [@forEachRESTEndpoint]
     [#list endpoint.RESTMethods as method]
 [#list method.verbs as verb]${method.noun}/${verb}=[#list method.parameters as param]${param.simpleName}[#if param_has_next],[/#if][/#list][/#list]

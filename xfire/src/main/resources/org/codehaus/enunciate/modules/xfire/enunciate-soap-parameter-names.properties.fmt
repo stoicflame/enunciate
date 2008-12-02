@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="enunciate-soap-parameter-names.properties"]
+[@file name="enunciate-soap-parameter-names.properties" charset="utf-8"]
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]
       [@forEachWebMethod endpointInterface=endpointInterface]

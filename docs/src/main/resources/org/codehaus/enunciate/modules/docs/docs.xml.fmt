@@ -1,5 +1,5 @@
 [#ftl]
-[@file name="docs.xml"]
+[@file name="docs.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 <api-docs[#if copyright?exists] copyright="${copyright}"[/#if][#if licenseFile?exists] licenseFile="${licenseFile}"[/#if][#if title?exists] title="${title}"[/#if]>
 [#if apiDoc?exists]

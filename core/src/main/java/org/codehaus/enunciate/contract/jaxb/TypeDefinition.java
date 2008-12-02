@@ -16,11 +16,15 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.util.Declarations;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
@@ -101,6 +105,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
         }
         else {
           //its an element accessor.
+
+          if (accessor instanceof PropertyDeclaration) {
+            //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
+            if (overrides(((PropertyDeclaration)accessor).getGetter()) || overrides(((PropertyDeclaration)accessor).getSetter())) {
+              continue;
+            }
+          }
+
           Element element = new Element(accessor, this);
           if (!elementAccessors.add(element)) {
             throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
@@ -125,6 +137,44 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.xmlID = xmlID;
     this.hasAnyAttribute = hasAnyAttribute;
     this.anyElement = anyElement;
+  }
+
+  /**
+   * Whether the given method declaration overrides any method.
+   *
+   * @param method The method declaration.
+   * @return Whether the given method declaration overrides any method.
+   */
+  protected boolean overrides(DecoratedMethodDeclaration method) {
+    AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+    Declarations decls = env.getDeclarationUtils();
+
+    Declaration unwrappedMethod = method.getDelegate();
+    while (unwrappedMethod instanceof DecoratedDeclaration) {
+      unwrappedMethod = ((DecoratedDeclaration) unwrappedMethod).getDelegate();
+    }
+
+    TypeDeclaration declaringType = method.getDeclaringType();
+    if (declaringType instanceof ClassDeclaration) {
+      declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
+      while (declaringType instanceof ClassDeclaration && !Object.class.getName().equals(declaringType.getQualifiedName())) {
+        Collection<? extends MethodDeclaration> methods = declaringType.getMethods();
+        for (Declaration candidate : methods) {
+          while (candidate instanceof DecoratedDeclaration) {
+            //unwrap the candidate.
+            candidate = ((DecoratedDeclaration) candidate).getDelegate();
+          }
+
+          if (decls.overrides((MethodDeclaration) candidate, (MethodDeclaration) unwrappedMethod)) {
+            return true;
+          }
+        }
+
+        declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
+      }
+    }
+
+    return false;
   }
 
   /**
