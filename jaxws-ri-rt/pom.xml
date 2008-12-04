@@ -7,11 +7,28 @@
     <version>1.9-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-cxf-rt</artifactId>
-  <name>Enunciate - CXF Runtime</name>
-  <description>The Enunciate CXF runtime libraries support the CXF-backed SOAP endpoints.</description>
+  <artifactId>enunciate-jaxws-ri-rt</artifactId>
+  <name>Enunciate - JAX-WS Reference Implementation Runtime</name>
+  <description>The Enunciate JAX-WS Reference Implementation runtime libraries support the JAX-WS RI-backed SOAP endpoints.</description>
+
+  <repositories>
+    <repository>
+      <id>java.net.1</id>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+    </repository>
+    <repository>
+      <id>java.net.2</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
+  </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core-rt</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -28,35 +45,14 @@
     </dependency>
 
     <dependency>
-      <groupId>wsdl4j</groupId>
-      <artifactId>wsdl4j</artifactId>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core-rt</artifactId>
+      <groupId>org.jvnet.jax-ws-commons.spring</groupId>
+      <artifactId>jaxws-spring</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-frontend-jaxws</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-rt-transports-http</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>

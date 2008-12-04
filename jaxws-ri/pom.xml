@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -7,9 +8,9 @@
     <version>1.9-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-cxf</artifactId>
-  <name>Enunciate - CXF Module</name>
-  <description>The Enunciate CXF module provides support for CXF on the server-side.</description>
+  <artifactId>enunciate-jaxws-ri</artifactId>
+  <name>Enunciate - JAX-WS Reference Implementation Module</name>
+  <description>The Enunciate JAX-WS Reference Implementation module provides support for JAX-WS RI on the server-side.</description>
 
   <dependencies>
     <dependency>
@@ -19,11 +20,10 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-cxf-rt</artifactId>
+      <artifactId>enunciate-jaxws-ri-rt</artifactId>
     </dependency>
-
     <dependency>
-      <!--the CXF module depends on the spring app-->
+      <!--the JAX-WS module depends on the spring app-->
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app</artifactId>
     </dependency>

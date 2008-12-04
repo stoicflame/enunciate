@@ -1,0 +1,25 @@
+[#ftl]
+[@file name="jaxws-servlet.xml" charset="utf-8"]
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ws="http://jax-ws.dev.java.net/spring/core"
+  xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd
+                      http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/servlet.xsd">
+
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+      [#list endpointInterface.endpointImplementations as impl]
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+
+        [#--todo: what about eis with the same name, different namespace?--]
+  <wss:binding url="${endpointInterface.metaData.soapPath}" service="#jaxws-service-${endpointInterface.serviceName}" />
+  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${endpointInterface.qualifiedName}" bean="#${endpointBeanId(endpointInterface)}"[#if wsdl.properties.filename?exists] primaryWsdl="/${docsDir?default("")}${wsdl.properties.filename}"[/#if]/>
+        [/#if]
+      [/#list]
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+
+</beans>
+[/@file]

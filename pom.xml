@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
@@ -22,6 +23,8 @@
     <module>xfire</module>
     <module>cxf-rt</module>
     <module>cxf</module>
+    <module>jaxws-ri-rt</module>
+    <module>jaxws-ri</module>
     <module>xfire-client-rt</module>
     <module>xfire-client</module>
     <module>docs</module>
@@ -35,6 +38,7 @@
     <module>integration-test-support</module>
     <module>integration-tests/xfire-rest</module>
     <module>integration-tests/cxf-rest</module>
+    <module>integration-tests/jaxws-ri-rest</module>
     <module>integration-tests/jersey-storage</module>
   </modules>
 
@@ -197,6 +201,55 @@
       </dependency>
 
       <dependency>
+        <groupId>org.jvnet.jax-ws-commons.spring</groupId>
+        <artifactId>jaxws-spring</artifactId>
+        <version>1.8</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of spring-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of spring-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of spring-->
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of jsr181-->
+            <groupId>javax.jws</groupId>
+            <artifactId>jsr181-api</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of jaxb-->
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of activation-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+
+        </exclusions>
+      </dependency>
+
+      <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-client</artifactId>
         <version>${jersey.version}</version>
@@ -307,7 +360,7 @@
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.1.1</version>
+        <version>1.0.4</version>
       </dependency>
 
       <dependency>
@@ -531,6 +584,18 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>enunciate-jaxws-ri</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>enunciate-jaxws-ri-rt</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>enunciate-jersey</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -745,6 +810,13 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-core</artifactId>
         <version>${spring.version}</version>
+
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
