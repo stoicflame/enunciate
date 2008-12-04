@@ -64,6 +64,7 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
             }
           }
         }
+        declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
       }
     }
 
