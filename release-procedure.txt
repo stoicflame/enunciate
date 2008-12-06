@@ -1,4 +1,4 @@
-1. Update the documentation to reflect any changes.
+  1. Update the documentation to reflect any changes.
     1a. Make sure you've updated the insert sidebox on the index page.
     1b. Make sure you've updated the downloads page to reflect where the new files will be.
     1c. Make sure you've also updated the version in the executables.html page.
