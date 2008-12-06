@@ -109,6 +109,10 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
    * @return The mapped AMF object.
    */
   public G toAMF(J jaxbObject, AMFMappingContext context) throws AMFMappingException {
+    if (jaxbObject == null) {
+      return null;
+    }
+
     if (context.getMappedObjects().containsKey(jaxbObject)) {
       return (G) context.getMappedObjects().get(jaxbObject);
     }

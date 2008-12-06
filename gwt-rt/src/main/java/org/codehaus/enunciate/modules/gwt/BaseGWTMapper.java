@@ -109,6 +109,10 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
    * @return The mapped GWT object.
    */
   public G toGWT(J jaxbObject, GWTMappingContext context) throws GWTMappingException {
+    if (jaxbObject == null) {
+      return null;
+    }
+
     if (context.getMappedObjects().containsKey(jaxbObject)) {
       return (G) context.getMappedObjects().get(jaxbObject);
     }
