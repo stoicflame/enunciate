@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
@@ -51,6 +52,7 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
   private Object serviceImplementationBean;
   private String defaultImplementationBeanName;
   private Class defaultImplementationClass;
+  private boolean requireInstanceOfImpl = false;
 
   public ServiceEndpointFactoryBean(Class serviceInterface) {
     if (serviceInterface == null) {
@@ -62,6 +64,10 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
   @Override
   protected void initApplicationContext(ApplicationContext context) throws BeansException {
+    if (isRequireInstanceOfImpl() && getDefaultImplementationClass() == null) {
+      throw new ApplicationContextException("The service bean is required to implement a class that isn't supplied.");
+    }
+
     Map adviceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, EnunciateServiceAdvice.class);
     for (Object advice : adviceBeans.values()) {
       addInterceptor(advice);
@@ -127,6 +133,9 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
       catch (Exception e) {
         throw new ApplicationContextException("Unable to instantiate " + defaultImplementationClass.getName(), e);
       }
+    }
+    else if (isRequireInstanceOfImpl() && !defaultImplementationClass.isInstance(serviceImplementationBean)) {
+      throw new ApplicationContextException("Found service implementation bean is not an instance of " + defaultImplementationClass.getName());      
     }
 
     initialized = true;
@@ -204,31 +213,45 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
    * @param endpointImpl The implementation.
    * @return The wrapped endpoint.
    */
-  public Object wrapEndpoint(Class iface, Object endpointImpl) throws Exception {
+  public Object wrapEndpoint(final Class iface, Object endpointImpl) throws Exception {
     Object endpoint = endpointImpl;
 
-    if (iface.isInterface()) {
-      if (interceptors.size() > 0) {
-        ProxyFactory proxyFactory = new ProxyFactory();
+    final boolean isInterface = iface.isInterface();
+    final boolean requireInstanceOfImpl = isRequireInstanceOfImpl();
+
+    if (interceptors.size() > 0) {
+      ProxyFactory proxyFactory = new ProxyFactory();
+      if (!isInterface || requireInstanceOfImpl) {
+        proxyFactory.setProxyTargetClass(true);
+        proxyFactory.setTargetSource(new SingletonTargetSource(endpointImpl) {
+          @Override
+          public Class getTargetClass() {
+            return requireInstanceOfImpl ? getDefaultImplementationClass() : iface;
+          }
+        });
+      }
+      else {
         proxyFactory.setTarget(endpointImpl);
         proxyFactory.setInterfaces(new Class[]{iface});
-        for (Object interceptor : interceptors) {
-          if (interceptor instanceof Advice) {
-            proxyFactory.addAdvice((Advice) interceptor);
-          }
-          else if (interceptor instanceof Advisor) {
-            proxyFactory.addAdvisor((Advisor) interceptor);
-          }
-          else {
-            throw new ApplicationContextException("Attempt to inject an interceptor that is neither advice nor an advisor (class: " + interceptor.getClass() + ").");
-          }
-        }
-
-        endpoint = proxyFactory.getProxy();
       }
-    }
-    else {
-      LOG.info(iface.getName() + " is not an interface, so it won't be proxied (interceptors won't be applied).");
+
+      for (Object interceptor : interceptors) {
+        if (interceptor instanceof Advice) {
+          proxyFactory.addAdvice((Advice) interceptor);
+        }
+        else if (interceptor instanceof Advisor) {
+          proxyFactory.addAdvisor((Advisor) interceptor);
+        }
+        else {
+          throw new ApplicationContextException("Attempt to inject an interceptor that is neither advice nor an advisor (class: " + interceptor.getClass() + ").");
+        }
+      }
+
+      endpoint = proxyFactory.getProxy();
+
+      if (requireInstanceOfImpl && !getDefaultImplementationClass().isInstance(endpoint)) {
+        throw new ApplicationContextException("Created proxy is not an instance of " + getDefaultImplementationClass().getName());
+      }
     }
 
     return endpoint;
@@ -295,5 +318,23 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
    */
   public void setDefaultImplementationClass(Class defaultImplementationClass) {
     this.defaultImplementationClass = defaultImplementationClass;
+  }
+
+  /**
+   * Whether to require that the service bean instance be an instance of the default implementation class.
+   *
+   * @return Whether to require that the service bean instance be an instance of the default implementation class.
+   */
+  public boolean isRequireInstanceOfImpl() {
+    return requireInstanceOfImpl;
+  }
+
+  /**
+   * Whether to require that the service bean instance be an instance of the default implementation class.
+   *
+   * @param requireInstanceOfImpl Whether to require that the service bean instance be an instance of the default implementation class.
+   */
+  public void setRequireInstanceOfImpl(boolean requireInstanceOfImpl) {
+    this.requireInstanceOfImpl = requireInstanceOfImpl;
   }
 }

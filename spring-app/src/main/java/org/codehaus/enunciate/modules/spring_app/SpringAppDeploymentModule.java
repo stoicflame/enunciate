@@ -380,6 +380,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private boolean doLibCopy = true;
   private boolean doPackage = true;
   private boolean enableSecurity = false;
+  private boolean requireEndpointInstancesOfImplemenationClass = false;
   private SecurityConfig securityConfig = new SecurityConfig();
 
   /**
@@ -497,6 +498,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.put("securityConfig", securityConfig);
 
+      model.put("requireEndpointInstancesOfImplemenationClass", isRequireEndpointInstancesOfImplemenationClass());
       model.setFileOutputDirectory(getConfigGenerateDir());
       processTemplate(getApplicationContextTemplateURL(), model);
       if (isEnableSecurity()) {
@@ -1319,6 +1321,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setSecurityConfig(SecurityConfig securityConfig) {
     this.securityConfig = securityConfig;
+  }
+
+  /**
+   * Whether to require the endpoint instances to be of the endopint implementation type (instead of just the endpoint interface type).
+   *
+   * @return Whether to require the endpoint instances to be of the endopint implementation type (instead of just the endpoint interface type).
+   */
+  public boolean isRequireEndpointInstancesOfImplemenationClass() {
+    return requireEndpointInstancesOfImplemenationClass;
+  }
+
+  /**
+   * Whether to require the endpoint instances to be of the endopint implementation type (instead of just the endpoint interface type).
+   *
+   * @param requireEndpointInstancesOfImplemenationClass Whether to require the endpoint instances to be of the endopint implementation type (instead of just the endpoint interface type).
+   */
+  public void setRequireEndpointInstancesOfImplemenationClass(boolean requireEndpointInstancesOfImplemenationClass) {
+    this.requireEndpointInstancesOfImplemenationClass = requireEndpointInstancesOfImplemenationClass;
   }
 
   /**

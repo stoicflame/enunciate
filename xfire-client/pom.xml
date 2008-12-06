@@ -130,7 +130,7 @@
 
   <profiles>
     <profile>
-      <!--Starting with JDK 1.6, JAXB implementation and STaX is shipped with the JDK.-->
+      <!--Starting with JDK 1.6, JAXB implementation and activation is shipped with the JDK.-->
       <activation>
         <jdk>1.5</jdk>
       </activation>
@@ -142,6 +142,10 @@
         <dependency>
           <groupId>javax.activation</groupId>
           <artifactId>activation</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId>
         </dependency>
       </dependencies>
     </profile>

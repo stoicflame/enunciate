@@ -31,12 +31,14 @@ import org.codehaus.xfire.util.stax.JDOMStreamWriter;
 import org.codehaus.xfire.aegis.AegisBindingProvider;
 import org.codehaus.xfire.aegis.MessageReader;
 import org.codehaus.xfire.aegis.MessageWriter;
+import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
 import org.codehaus.xfire.aegis.type.Type;
 import org.jdom.Element;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
+import javax.xml.stream.XMLStreamWriter;
 import java.lang.reflect.Method;
 import java.beans.PropertyDescriptor;
 import java.beans.Introspector;
@@ -233,7 +235,16 @@ public class TestEnunciatedClientOperationBinding extends TestCase {
     //property order will be: and, back, in, of, order, out
 
     EnunciatedClientOperationBinding.OperationBeanInfo operationInfo = new EnunciatedClientOperationBinding.OperationBeanInfo(DummyMethod.class, pds);
-    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, operationInfo, null);
+    EnunciatedClientOperationBinding binding = new EnunciatedClientOperationBinding(annotations, operationInfo, null) {
+      @Override
+      protected ElementWriter newElementWriter(XMLStreamWriter writer) {
+        return new ElementWriter(writer) {
+          @Override
+          public void close() {
+          }
+        };
+      }
+    };
     OutMessage outMessage = new OutMessage("uri:out");
     outMessage.setBody(new Object[] {new Short((short) 10), new Float(9), new Double(8), Boolean.FALSE, "dummy", new Integer(7)});
     MessageContext context = new MessageContext();

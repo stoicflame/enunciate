@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.modules.jaxws_ri;
 
-import com.sun.xml.ws.transport.http.servlet.WSSpringServlet;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -105,8 +104,16 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
       if (!enunciate.isModuleEnabled("spring-app")) {
         throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
       }
+      else {
+        List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
+        for (DeploymentModule enabledModule : enabledModules) {
+          if (enabledModule instanceof SpringAppDeploymentModule) {
+            ((SpringAppDeploymentModule) enabledModule).setRequireEndpointInstancesOfImplemenationClass(true);
+          }
+        }
+      }
 
-//      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
     }
 
   }
@@ -138,15 +145,6 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping generation of CXF config as everything appears up-to-date....");
     }
 
-    //add the spring import...
-    List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
-    for (DeploymentModule enabledModule : enabledModules) {
-      if (enabledModule instanceof SpringAppDeploymentModule) {
-        SpringImport beanImport = new SpringImport();
-        beanImport.setFile(new File(getGenerateDir(), "jaxws-servlet.xml").getAbsolutePath());
-        ((SpringAppDeploymentModule) enabledModule).getSpringImports().add(beanImport);
-      }
-    }
   }
 
   @Override
@@ -157,6 +155,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
 
     File webappDir = getBuildDir();
     webappDir.mkdirs();
+    File webinf = new File(webappDir, "WEB-INF");
+    getEnunciate().copyFile(new File(getGenerateDir(), "jaxws-servlet.xml"), new File(webinf, "jaxws-servlet.xml"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);

@@ -313,7 +313,19 @@ public class EnunciatedClientOperationBinding implements MessageSerializer {
     Service service = context.getService();
     AegisBindingProvider provider = (AegisBindingProvider) service.getBindingProvider();
     Type type = provider.getType(service, beanClass);
-    type.writeObject(bean, new ElementWriter(writer), context);
+    ElementWriter elementWriter = newElementWriter(writer);
+    type.writeObject(bean, elementWriter, context);
+    elementWriter.close();
+  }
+
+  /**
+   * Create a new element writer.
+   *
+   * @param writer The writer.
+   * @return The element writer.
+   */
+  protected ElementWriter newElementWriter(XMLStreamWriter writer) {
+    return new ElementWriter(writer);
   }
 
   /**

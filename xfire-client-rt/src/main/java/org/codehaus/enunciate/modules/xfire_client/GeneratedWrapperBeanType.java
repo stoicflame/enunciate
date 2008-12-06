@@ -270,7 +270,6 @@ public class GeneratedWrapperBeanType extends Type {
         }
       }
     }
-    writer.close();
   }
 
 }
