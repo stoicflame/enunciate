@@ -98,4 +98,12 @@ public class Attribute extends Accessor {
 
     return required;
   }
+
+  /**
+   * @return true
+   */
+  @Override
+  public boolean isAttribute() {
+    return true;
+  }
 }

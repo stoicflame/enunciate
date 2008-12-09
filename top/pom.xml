@@ -69,6 +69,11 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-jaxws-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-gwt</artifactId>
     </dependency>
 

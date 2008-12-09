@@ -27,6 +27,7 @@
     <module>jaxws-ri</module>
     <module>xfire-client-rt</module>
     <module>xfire-client</module>
+    <module>jaxws-client</module>
     <module>docs</module>
     <module>amf-rt</module>
     <module>amf</module>
@@ -635,6 +636,12 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>enunciate-jaxws</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>enunciate-jaxws-client</artifactId>
         <version>${project.version}</version>
       </dependency>
 

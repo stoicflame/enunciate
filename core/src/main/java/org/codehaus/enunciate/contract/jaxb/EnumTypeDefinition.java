@@ -18,7 +18,11 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.MirroredTypeException;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
@@ -34,6 +38,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import net.sf.jelly.apt.Context;
 
 /**
  * An enum type definition.
@@ -92,6 +98,66 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   }
 
   /**
+   * The enum base class.
+   *
+   * @return The enum base class.
+   */
+  public TypeMirror getEnumBaseClass() {
+    try {
+      Class enumClass = xmlEnum == null ? String.class : xmlEnum.value();
+      return getEnumBaseClass(enumClass);
+    }
+    catch (MirroredTypeException e) {
+      return e.getTypeMirror();
+    }
+  }
+
+  /**
+   * @param enumClass The enum class.
+   *
+   * @return The enum base class for the specified class.
+   */
+  protected TypeMirror getEnumBaseClass(Class enumClass) {
+    if (enumClass.isPrimitive()) {
+      if (Integer.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.INT);
+      }
+      else if (Boolean.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BOOLEAN);
+      }
+      else if (Character.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.CHAR);
+      }
+      else if (Byte.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.BYTE);
+      }
+      else if (Short.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.SHORT);
+      }
+      else if (Long.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.LONG);
+      }
+      else if (Float.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.FLOAT);
+      }
+      else if (Double.TYPE == enumClass) {
+        return getEnv().getTypeUtils().getPrimitiveType(PrimitiveType.Kind.DOUBLE);
+      }
+      else {
+        throw new IllegalStateException();
+      }
+    }
+    else if (enumClass.isArray()) {
+      TypeMirror componentType = getEnumBaseClass(enumClass.getComponentType());
+      return getEnv().getTypeUtils().getArrayType(componentType);
+    }
+    else {
+      TypeDeclaration decl = getEnv().getTypeDeclaration(enumClass.getName());
+      return getEnv().getTypeUtils().getDeclaredType(decl);
+    }
+  }
+
+  /**
    * The map of constant declarations (simple names) to their enum constant values.
    *
    * @return The map of constant declarations to their enum constant values.
@@ -113,6 +179,15 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
   @Override
   public ValidationResult accept(Validator validator) {
     return validator.validateEnumType(this);
+  }
+
+  /**
+   * The current environment.
+   *
+   * @return The current environment.
+   */
+  protected AnnotationProcessorEnvironment getEnv() {
+    return Context.getCurrentEnvironment();
   }
 
 }

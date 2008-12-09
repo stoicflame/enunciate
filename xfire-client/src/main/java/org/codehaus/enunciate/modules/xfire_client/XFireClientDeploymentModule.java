@@ -50,7 +50,7 @@ import java.util.*;
  * <h1>XFire Client Module</h1>
  *
  * <p>The XFire client deployment module generates the client-side libraries that will access the
- * deployed web app using <a href="http://xfire.codehaus.org"/>XFire</a>.</p>
+ * deployed web app using <a href="http://xfire.codehaus.org">XFire</a>.</p>
  *
  * <p>The order of the XFire client deployment module is 50, so as to allow the XFire module to apply
  * metadata to the endpoints before processing the client.</p>

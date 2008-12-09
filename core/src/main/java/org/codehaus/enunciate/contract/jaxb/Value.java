@@ -47,4 +47,8 @@ public class Value extends Accessor {
     return getTypeDefinition().getNamespace();
   }
 
+  @Override
+  public boolean isValue() {
+    return true;
+  }
 }

@@ -1,0 +1,103 @@
+[#ftl]
+[#macro writeTypeMetadata typeDef]
+[#if typeDef.accessorOrder?string != "UNDEFINED"]
+@javax.xml.bind.annotation.XmlAccessorOrder (
+  javax.xml.bind.annotation.XmlAccessOrder.${typeDef.accessorOrder}
+)
+[/#if]
+[#if typeDef.accessType?string != "PUBLIC_MEMBER"]
+@javax.xml.bind.annotation.XmlAccessorType (
+  javax.xml.bind.annotation.XmlAccessType.${typeDef.accessorType}
+)
+[/#if]
+@javax.xml.bind.annotation.XmlType (
+  name = "${typeDef.name}",
+  namespace = "${typeDef.namespace?default("")}"[#if typeDef.propertyOrder?exists],
+  propOrder = {[#list typeDef.propertyOrder as property]"${property}"[#if property_has_next], [/#if][/#list]}[/#if]
+)
+[/#macro]
+[#macro writeAccessorMetadata accessor]
+[#if accessor.annotations["javax.xml.bind.annotation.XmlAnyAttribute"]?exists]
+  @javax.xml.bind.annotation.XmlAnyAttribute
+[/#if]
+[#if accessor.annotations["javax.xml.bind.annotation.XmlAnyElement"]?exists]
+  [#assign annotation=accessor.annotations["javax.xml.bind.annotation.XmlAnyElement"] /]
+  @javax.xml.bind.annotation.XmlAnyElement (
+  [#if annotation.lax?exists && annotation.lax]lax = true[/#if]
+  )
+[/#if]
+[#if accessor.annotations["javax.xml.bind.annotation.XmlAttachmentRef"]?exists]
+  @javax.xml.bind.annotation.XmlAttachmentRef
+[/#if]
+[#if accessor.attribute]
+  @javax.xml.bind.annotation.XmlAttribute (
+    name = "${accessor.name}",
+    namespace = "${accessor.namespace?default("")}",
+    required = ${accessor.required?string}
+  )
+[#elseif accessor.value]
+  @javax.xml.bind.annotation.XmlValue
+[#elseif accessor.elementRefs?default(false)]
+  @javax.xml.bind.annotation.XmlElementRefs ( {
+  [#list accessor.choices as choice]
+    @javax.xml.bind.annotation.XmlElementRef (
+      name = "${choice.ref.localPart}",
+      namespace = "${choice.ref.namespaceURI}",
+      type = ${classnameFor(choice)}.class
+    )[#if choice_has_next], [/#if]
+  [/#list]
+  } )
+[#elseif accessor.elementRef]
+  @javax.xml.bind.annotation.XmlElementRef (
+    name = "${accessor.ref.localPart}",
+    namespace = "${accessor.ref.namespaceURI}",
+    type = ${classnameFor(accessor)}.class
+  )
+[#elseif accessor.choices?size > 1]
+  @javax.xml.bind.annotation.XmlElements ( {
+    [#list accessor.choices as choice]
+    @javax.xml.bind.annotation.XmlElement (
+      name = "${choice.name}",
+      namespace = "${choice.namespace?default("")}",
+      type = ${classnameFor(choice)}.class[#if choice.nillable?exists && choice.nillable],
+      nillable = true[/#if][#if choice.required?exists && choice.required],
+      required = true[/#if]
+    )[#if choice_has_next], [/#if]
+    [/#list]
+  } )
+[#elseif accessor.accessorType.map?default(false)]
+  [#--can't do an @XmlElementAnnotation on a map--]
+[#else]
+  @javax.xml.bind.annotation.XmlElement (
+    name = "${accessor.name}",
+    namespace = "${accessor.namespace?default("")}"[#if accessor.nillable?exists && accessor.nillable],
+    nillable = true[/#if][#if accessor.required?exists && accessor.required],
+    required = true[/#if]
+  )
+[/#if]
+[#if accessor.wrapped?default(false)]
+  @javax.xml.bind.annotation.XmlElementWrapper (
+    name = "${accessor.wrapperName}",
+    namespace = "${accessor.wrapperNamespace?default("")}"[#if accessor.wrapperNillable],
+    nillable = true[/#if]
+  )
+[/#if]
+[#if accessor.xmlID]
+  @javax.xml.bind.annotation.XmlID
+[/#if]
+[#if accessor.xmlIDREF]
+  @javax.xml.bind.annotation.XmlIDREF
+[/#if]
+[#if accessor.annotations["javax.xml.bind.annotation.XmlInlineBinaryData"]?exists]
+  @javax.xml.bind.annotation.XmlInlineBinaryData
+[/#if]
+[#if accessor.xmlList]
+  @javax.xml.bind.annotation.XmlList
+[/#if]
+[#if accessor.mimeType?exists]
+  @javax.xml.bind.annotation.XmlMimeType ( "${accessor.mimeType}" )
+[/#if]
+[#if accessor.annotations["javax.xml.bind.annotation.XmlMixed"]?exists]
+  @javax.xml.bind.annotation.XmlMixed
+[/#if]
+[/#macro]

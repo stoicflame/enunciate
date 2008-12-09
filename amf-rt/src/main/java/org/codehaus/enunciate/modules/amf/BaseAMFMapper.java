@@ -108,7 +108,7 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
    * @param context The mapping context.
    * @return The mapped AMF object.
    */
-  public G toAMF(J jaxbObject, AMFMappingContext context) throws AMFMappingException {
+  public G toAMF(final J jaxbObject, AMFMappingContext context) throws AMFMappingException {
     if (jaxbObject == null) {
       return null;
     }
@@ -227,6 +227,10 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
    * @return The JAXB object.
    */
   public J toJAXB(G amfObject, AMFMappingContext context) throws AMFMappingException {
+    if (amfObject == null) {
+      return null;
+    }
+    
     if (context.getMappedObjects().containsKey(amfObject)) {
       return (J) context.getMappedObjects().get(amfObject);
     }
@@ -268,7 +272,7 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
       else {
         mapper = AMFMapperIntrospector.getAMFMapper(setter.getGenericParameterTypes()[0], findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       }
-      
+
       try {
         setter.invoke(jaxbObject, mapper.toJAXB(propertyValue, context));
       }

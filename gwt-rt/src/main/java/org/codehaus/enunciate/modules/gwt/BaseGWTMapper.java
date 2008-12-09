@@ -234,6 +234,10 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
    * @return The JAXB object.
    */
   public J toJAXB(G gwtObject, GWTMappingContext context) throws GWTMappingException {
+    if (gwtObject == null) {
+      return null;
+    }
+    
     if (context.getMappedObjects().containsKey(gwtObject)) {
       return (J) context.getMappedObjects().get(gwtObject);
     }
@@ -268,7 +272,7 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
         throw new GWTMappingException("In order to convert from GWT back to JAXB classes, you must provide a setter for property '"
           + jaxbProperty.getName() + "' on class " + jaxbProperty.getReadMethod().getDeclaringClass());
       }
-      
+
       if (mapper == null) {
         mapper = GWTMapperIntrospector.getGWTMapper(setter.getGenericParameterTypes()[0], findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
       }

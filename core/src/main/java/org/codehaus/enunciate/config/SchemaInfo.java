@@ -303,7 +303,7 @@ public class SchemaInfo {
    */
   public List<SchemaInfo> getImportedSchemas() {
     Set<String> importedNamespaces = getReferencedNamespaces();
-    importedNamespaces.remove(getNamespace());
+    importedNamespaces.remove(getNamespace() == null ? "" : getNamespace());
     List<SchemaInfo> schemas = new ArrayList<SchemaInfo>();
     for (String ns : importedNamespaces) {
       SchemaInfo schema = lookupSchema(ns);

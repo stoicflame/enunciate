@@ -362,4 +362,8 @@ public class ElementRef extends Element {
     return Context.getCurrentEnvironment();
   }
 
+  @Override
+  public boolean isElementRef() {
+    return true;
+  }
 }

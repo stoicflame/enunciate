@@ -343,4 +343,31 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
   public AdapterType getAdapterType() {
     return this.adapterType;
   }
+
+  /**
+   * Whether this accessor is an attribute.
+   *
+   * @return Whether this accessor is an attribute.
+   */
+  public boolean isAttribute() {
+    return false;
+  }
+
+  /**
+   * Whether this accessor is a value.
+   *
+   * @return Whether this accessor is a value.
+   */
+  public boolean isValue() {
+    return false;
+  }
+
+  /**
+   * Whether this accessor is an element ref.
+   *
+   * @return Whether this accessor is an element ref.
+   */
+  public boolean isElementRef() {
+    return false;
+  }
 }
