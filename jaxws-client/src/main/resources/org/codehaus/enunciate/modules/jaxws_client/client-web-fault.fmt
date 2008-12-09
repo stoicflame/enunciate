@@ -7,18 +7,19 @@ package ${packageFor(fault)};
 /**
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(superFault)}[#else]Exception[/#if] {
+public class ${fault.simpleName} extends Exception {
   [#if !fault.implicitSchemaElement]
     [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
 
   private ${beanfqn} faultInfo;
 
-  public ${fault.simpleName}(${beanfqn} faultInfo) {
+  public ${fault.simpleName}(String message, ${beanfqn} faultInfo) {
+    super(message);
     this.faultInfo = faultInfo;
   }
 
-  public ${fault.simpleName}(String message, ${beanfqn} faultInfo) {
-    super(message);
+  public ${fault.simpleName}(String message, ${beanfqn} faultInfo, Throwable cause) {
+    super(message, cause);
     this.faultInfo = faultInfo;
   }
 
@@ -34,26 +35,22 @@ public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(s
     [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
     [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
     [#assign beanfqn=(beanPackage + "." + simpleBeanName)/]
-  protected ${fault.simpleName}() {
-    super();
-  }
+  private ${beanfqn} faultInfo;
 
-  protected ${fault.simpleName}(String message) {
+  public ${fault.simpleName}(String message, ${beanfqn} faultInfo) {
     super(message);
+    init(faultInfo);
     [#list fault.childElements as childElement]
       [#if childElement.property.simpleName = "message"]
-    this.message = message;
+    if (message != null) {
+      this.message = message;
+    }
       [/#if]
     [/#list]
   }
 
-  public ${fault.simpleName}(${beanfqn} faultInfo) {
-    super();
-    init(faultInfo);
-  }
-
-  public ${fault.simpleName}(String message, ${beanfqn} faultInfo) {
-    super(message);
+  public ${fault.simpleName}(String message, ${beanfqn} faultInfo, Throwable cause) {
+    super(message, cause);
     init(faultInfo);
     [#list fault.childElements as childElement]
       [#if childElement.property.simpleName = "message"]
@@ -71,6 +68,12 @@ public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(s
     [/#list]
   }
 
+  /**
+   * The fault info for this exception.
+   */
+  public ${beanfqn} getFaultInfo() {
+    return this.faultInfo;
+  }
     [#list fault.childElements as childElement]
       [#assign element=childElement.property/]
 

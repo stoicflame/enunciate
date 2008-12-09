@@ -6,12 +6,10 @@ package ${packageFor(endpointInterface) + ".impl"};
 
 import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 
-import org.codehaus.enunciate.modules.xfire_client.EnunciatedSOAPWebServiceImpl;
-
 /**
  * Implementation of the {@link ${endpointInterface.simpleName}}.
  */
-public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServiceImpl implements ${endpointInterface.simpleName} {
+public class ${endpointInterface.simpleName}Impl extends javax.xml.ws.Service implements ${endpointInterface.simpleName} {
 
   private final ${endpointInterface.simpleName} proxy;
 
@@ -29,10 +27,11 @@ public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServic
    * @param port The port.
    */
   public ${endpointInterface.simpleName}Impl(String host, int port) {
-    this("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
+    super(null, new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"));
+    this.proxy = (${endpointInterface.simpleName}) getPort(${endpointInterface.simpleName}.class);
     try {
-      java.net.URL baseUrl = new java.net.URL(getXFireClient().getUrl());
-      getXFireClient().setUrl(new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
+      java.net.URL baseUrl = new java.net.URL("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
+      _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
     }
     catch (java.net.MalformedURLException e) {
       throw new IllegalStateException(e);
@@ -45,8 +44,16 @@ public class ${endpointInterface.simpleName}Impl extends EnunciatedSOAPWebServic
    * @param endpoint The endpoint to point to.
    */
   public ${endpointInterface.simpleName}Impl(String endpoint) {
-    super(${endpointInterface.simpleName}.class, "${uuid}", endpoint);
-    this.proxy = (${endpointInterface.simpleName}) getProxy();
+    super(null, new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"));
+    this.proxy = (${endpointInterface.simpleName}) getPort(${endpointInterface.simpleName}.class);
+    _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
+  }
+
+  /**
+   * Get the binding provider supporting this service.
+   */
+  public javax.xml.ws.BindingProvider _getBindingProvider() {
+    return (javax.xml.ws.BindingProvider) this.proxy;
   }
 
   [@forEachWebMethod endpointInterface=endpointInterface]

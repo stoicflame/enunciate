@@ -7,13 +7,60 @@ package ${packageFor(endpointInterface)};
 /**
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
+ @javax.jws.WebService (
+   name = "${endpointInterface.simpleName}",
+   targetNamespace = "${endpointInterface.targetNamespace}"
+ )
+ @javax.xml.bind.annotation.XmlSeeAlso ( {
+  [#list seeAlsoBeans as seeAlso]
+  ${seeAlso}.class[#if seeAlso_has_next],[/#if]
+  [/#list]
+ } )
 public interface ${endpointInterface.simpleName} {
   [@forEachWebMethod endpointInterface=endpointInterface]
 
   /**
    * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
-  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
+  @javax.jws.WebMethod (
+    operationName = "${webMethod.operationName}",
+    action = "${webMethod.action}"
+  )
+  @javax.jws.WebResult (
+    name = "${webMethod.webResult.name}",
+    targetNamespace = "${webMethod.webResult.targetNamespace}",
+    header = ${webMethod.webResult.header?string},
+    partName = ${webMethod.webResult.partName}
+  )
+  [#if webMethod.requestWrapper?exists]
+    [#assign beanfqn=webMethod.requestWrapper.requestBeanName/]
+    [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
+    [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
+  @javax.xml.ws.RequestWrapper (
+    localName = "${webMethod.requestWrapper.elementName}",
+    targetNamespace = "${webMethod.requestWrapper.elementNamespace}",
+    className = "${beanPackage}.${simpleBeanName}"
+  )
+  [/#if]
+  [#if webMethod.responseWrapper?exists]
+    [#assign beanfqn=message.responseBeanName/]
+    [#assign beanPackage=packageFor(beanfqn[0..(beanfqn?last_index_of(".") - 1)])/]
+    [#assign simpleBeanName=beanfqn[(beanfqn?last_index_of(".") + 1)..]/]
+  @javax.xml.ws.ResponseWrapper (
+    localName = "${webMethod.responseWrapper.elementName}",
+    targetNamespace = "${webMethod.responseWrapper.elementNamespace}",
+    className = "${beanPackage}.${simpleBeanName}"
+  )
+  [/#if]
+  @javax.jws.soap.SOAPBinding (
+    style = javax.jws.soap.SOAPBinding.Style.${webMethod.soapBindingStyle?string},
+    use = javax.jws.soap.SOAPBinding.Use.${webMethod.soapUse?string},
+    parameterStyle = javax.jws.soap.SOAPBinding.ParameterStyle.${webMethod.soapParameterStyle?string}
+  )
+  [#if webMethod.oneWay]
+  @javax.jws.Oneway
+  [/#if]
+  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@javax.jws.WebParam( name = "${param.elementName}", mode = javax.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" ) ${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
   [/@forEachWebMethod]
 
 }

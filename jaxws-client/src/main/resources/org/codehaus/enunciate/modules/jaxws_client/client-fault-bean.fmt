@@ -12,7 +12,16 @@ import javax.xml.namespace.QName;
 /**
  * Fault bean for the ${fault.elementName} fault.
  */
-public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_client.GeneratedWrapperBean {
+ @javax.xml.bind.annotation.XmlRootElement (
+   name = "${fault.elementName}",
+   namespace = "${fault.targetNamespace}"
+ )
+ @javax.xml.bind.annotation.XmlType (
+   name = "${fault.elementName}",
+   namespace = "${fault.targetNamespace}",
+   propOrder = {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
+ )
+public class ${simpleBeanName} {
 
   [#list fault.childElements as childElement]
   private ${classnameFor(childElement)} ${childElement.elementName};
@@ -33,55 +42,6 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
     this.${childElement.elementName} = ${childElement.elementName};
   }
 
-    [#if childElement.type.map?default(false)]
-  /**
-   * Puts an entry into the ${childElement.elementName} map.
-   */
-  public void putIn${childElement.elementName?cap_first}(${classnameFor(childElement.type.keyType)} key, ${classnameFor(childElement.type.valueType)} value) {
-    if (this.${childElement.elementName} == null) {
-      this.${childElement.elementName} = (${classnameFor(childElement)}) new java.util.HashMap();
-    }
-
-    this.${childElement.elementName}.put(key, value);
-  }
-    [#elseif childElement.type.array && !(childElement.type.componentType.primitive && ("byte" = childElement.type.componentType.kind?string?lower_case))]
-  /**
-   * Adds an item to the ${childElement.elementName} array.
-   */
-  public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
-    if (this.${childElement.elementName} == null) {
-      this.${childElement.elementName} = new ${componentTypeFor(childElement.type)}[1];
-    }
-    else {
-      Object[] oldArray = this.${childElement.elementName};
-      this.${childElement.elementName} = new ${componentTypeFor(childElement.type)}[this.${childElement.elementName}.length + 1];
-      System.arraycopy(oldArray, 0, this.${childElement.elementName}, 0, oldArray.length);
-    }
-
-    this.${childElement.elementName}[this.${childElement.elementName}.length - 1] = item;
-  }
-    [#elseif childElement.type.collection]
-  /**
-   * Adds an item to the ${childElement.elementName} collection.
-   */
-  public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
-    if (this.${childElement.elementName} == null) {
-      this.${childElement.elementName} = (${classnameFor(childElement)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${collectionTypeFor(childElement)}.class);
-    }
-
-    this.${childElement.elementName}.add(item);
-  }
-    [/#if]
   [/#list]
-
-  // Inherited.
-  public QName getWrapperQName() {
-    return new QName("${fault.targetNamespace}", "${fault.elementName}");
-  }
-
-  // Inherited.
-  public String[] getPropertyOrder() {
-    return new String[] {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] };
-  }
 }
 [/@file]

@@ -12,7 +12,16 @@ import javax.xml.namespace.QName;
 /**
  * Response bean for the ${message.elementName} operation.
  */
-public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_client.GeneratedWrapperBean {
+ @javax.xml.bind.annotation.XmlRootElement (
+   name = "${message.elementName}",
+   namespace = "${message.elementNamespace}"
+ )
+ @javax.xml.bind.annotation.XmlType (
+   name = "${message.elementName}",
+   namespace = "${message.elementNamespace}",
+   propOrder = {[#list message.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
+ )
+public class ${simpleBeanName} {
 
   [#list message.childElements as childElement]
     [#if "return" = childElement.elementName]
@@ -42,55 +51,6 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
     this.${varname} = value;
   }
 
-    [#if childElement.type.map?default(false)]
-  /**
-   * Puts an entry into the ${childElement.elementName} map.
-   */
-  public void putIn${childElement.elementName?cap_first}(${classnameFor(childElement.type.keyType)} key, ${classnameFor(childElement.type.valueType)} value) {
-    if (this.${varname} == null) {
-      this.${varname} = (${classnameFor(childElement)}) new java.util.HashMap();
-    }
-
-    this.${varname}.put(key, value);
-  }
-    [#elseif childElement.type.array && !(childElement.type.componentType.primitive && ("byte" = childElement.type.componentType.kind?string?lower_case))]
-  /**
-   * Adds an item to the ${childElement.elementName} array.
-   */
-  public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
-    if (this.${varname} == null) {
-      this.${varname} = new ${componentTypeFor(childElement.type)}[1];
-    }
-    else {
-      Object[] oldArray = this.${varname};
-      this.${varname} = new ${componentTypeFor(childElement.type)}[this.${varname}.length + 1];
-      System.arraycopy(oldArray, 0, this.${varname}, 0, oldArray.length);
-    }
-
-    this.${varname}[this.${varname}.length - 1] = item;
-  }
-    [#elseif childElement.type.collection]
-  /**
-   * Adds an item to the ${childElement.elementName} collection.
-   */
-  public void addTo${childElement.elementName?cap_first}(${componentTypeFor(childElement.type)} item) {
-    if (this.${varname} == null) {
-      this.${varname} = (${classnameFor(childElement)}) org.codehaus.enunciate.modules.xfire_client.ListParser.newCollectionInstance(${collectionTypeFor(childElement)}.class);
-    }
-
-    this.${varname}.add(item);
-  }
-    [/#if]
   [/#list]
-
-  // Inherited.
-  public QName getWrapperQName() {
-    return new QName("${message.elementNamespace}", "${message.elementName}");
-  }
-
-  // Inherited.
-  public String[] getPropertyOrder() {
-    return new String[] {[#list message.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] };
-  }
 }
 [/@file]

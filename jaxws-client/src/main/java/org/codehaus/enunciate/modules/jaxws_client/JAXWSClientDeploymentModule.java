@@ -23,8 +23,10 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
+import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.NamedFileArtifact;
@@ -35,10 +37,9 @@ import org.codehaus.enunciate.template.freemarker.*;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import com.sun.mirror.declaration.ClassDeclaration;
 
 /**
  * <h1>JAX-WS Client Module</h1>
@@ -117,12 +118,10 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
   private String jarName = null;
   private final Map<String, String> clientPackageConversions;
   private final JAXWSClientRuleSet configurationRules;
-  private String uuid;
 
   public JAXWSClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
     this.configurationRules = new JAXWSClientRuleSet();
-    this.uuid = String.valueOf(System.currentTimeMillis());
     setDisabled(true); //disable by default, for now.
   }
 
@@ -163,90 +162,81 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
       Map<String, String> conversions = getClientPackageConversions();
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
-      classnameFor.setJdk15(true);
       ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
       CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
+      classnameFor.setJdk15(true);
+      componentTypeFor.setJdk15(true);
+      collectionTypeFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("componentTypeFor", componentTypeFor);
       model.put("collectionTypeFor", collectionTypeFor);
 
-      String uuid = this.uuid;
-      model.put("uuid", uuid);
-
       info("Generating the JAX-WS client classes...");
       model.setFileOutputDirectory(generateDir);
-//      HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
-//
-//      // Process the annotations, the request/response beans, and gather the set of web faults
-//      // for each endpoint interface.
-//      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-//        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-//          for (WebMethod webMethod : ei.getWebMethods()) {
-//            for (WebMessage webMessage : webMethod.getMessages()) {
-//              if (webMessage instanceof RequestWrapper) {
-//                model.put("message", webMessage);
-//                processTemplate(requestBeanTemplate, model);
-//              }
-//              else if (webMessage instanceof ResponseWrapper) {
-//                model.put("message", webMessage);
-//                processTemplate(responseBeanTemplate, model);
-//              }
-//              else if (webMessage instanceof RPCInputMessage) {
-//                RPCInputMessage rpcInputMessage = ((RPCInputMessage) webMessage);
-//                model.put("message", new RPCInputRequestBeanAdapter(rpcInputMessage));
-//                processTemplate(requestBeanTemplate, model);
-//                generatedTypeList.add(getBeanName(classnameFor, rpcInputMessage.getRequestBeanName()));
-//              }
-//              else if (webMessage instanceof RPCOutputMessage) {
-//                RPCOutputMessage outputMessage = ((RPCOutputMessage) webMessage);
-//                model.put("message", new RPCOutputResponseBeanAdapter(outputMessage));
-//                processTemplate(responseBeanTemplate, model);
-//                generatedTypeList.add(getBeanName(classnameFor, outputMessage.getResponseBeanName()));
-//              }
-//              else if (webMessage instanceof WebFault) {
-//                WebFault fault = (WebFault) webMessage;
-//                allFaults.put(fault.getQualifiedName(), fault);
-//              }
-//            }
-//          }
-//        }
-//      }
-//
-//      //gather the annotation information and process the possible beans for each web fault.
-//      for (WebFault webFault : allFaults.values()) {
-//        boolean implicit = webFault.isImplicitSchemaElement();
-//        if (implicit) {
-//          model.put("fault", webFault);
-//          processTemplate(faultBeanTemplate, model);
-//        }
-//      }
-//
-//      classnameFor.setJdk15(true);
-//      componentTypeFor.setJdk15(true);
-//      collectionTypeFor.setJdk15(true);
-//      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-//        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-//          model.put("endpointInterface", ei);
-//
-//          processTemplate(eiTemplate, model);
-//          processTemplate(soapImplTemplate, model);
-//        }
-//      }
-//
-//      for (WebFault webFault : allFaults.values()) {
-//        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-//        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-//          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
-//        }
-//        else {
-//          model.remove("superFault");
-//        }
-//
-//        model.put("fault", webFault);
-//        processTemplate(faultTemplate, model);
-//      }
+      HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
+
+      Set<String> seeAlsos = new TreeSet<String>();
+      // Process the annotations, the request/response beans, and gather the set of web faults
+      // for each endpoint interface.
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          for (WebMethod webMethod : ei.getWebMethods()) {
+            for (WebMessage webMessage : webMethod.getMessages()) {
+              if (webMessage instanceof RequestWrapper) {
+                model.put("message", webMessage);
+                processTemplate(requestBeanTemplate, model);
+                seeAlsos.add(getBeanName(classnameFor, ((RequestWrapper) webMessage).getRequestBeanName()));
+              }
+              else if (webMessage instanceof ResponseWrapper) {
+                model.put("message", webMessage);
+                processTemplate(responseBeanTemplate, model);
+                seeAlsos.add(getBeanName(classnameFor, ((ResponseWrapper) webMessage).getResponseBeanName()));
+              }
+              else if (webMessage instanceof WebFault) {
+                WebFault fault = (WebFault) webMessage;
+                allFaults.put(fault.getQualifiedName(), fault);
+              }
+            }
+          }
+        }
+      }
+
+      //gather the annotation information and process the possible beans for each web fault.
+      for (WebFault webFault : allFaults.values()) {
+        boolean implicit = webFault.isImplicitSchemaElement();
+        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+        seeAlsos.add(faultBean);
+
+        if (implicit) {
+          model.put("fault", webFault);
+          processTemplate(faultBeanTemplate, model);
+        }
+      }
+
+      model.put("seeAlsoBeans", seeAlsos);
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          model.put("endpointInterface", ei);
+
+          processTemplate(eiTemplate, model);
+          processTemplate(soapImplTemplate, model);
+        }
+      }
+
+      for (WebFault webFault : allFaults.values()) {
+        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+        }
+        else {
+          model.remove("superFault");
+        }
+
+        model.put("fault", webFault);
+        processTemplate(faultTemplate, model);
+      }
 
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -262,6 +252,19 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
     }
   }
 
+  /**
+   * Get the bean name for a specified string.
+   *
+   * @param conversion The conversion to use.
+   * @param preconvert The pre-converted fqn.
+   * @return The converted fqn.
+   */
+  protected String getBeanName(ClientClassnameForMethod conversion, String preconvert) {
+    String pckg = conversion.convert(preconvert.substring(0, preconvert.lastIndexOf('.')));
+    String simpleName = preconvert.substring(preconvert.lastIndexOf('.') + 1);
+    return pckg + "." + simpleName;
+  }
+
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
@@ -274,7 +277,6 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
       Collection<String> jdk15Files = enunciate.getJavaFiles(generateDir);
       jdk15Files.addAll(typeFiles);
       enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", compileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
-      enunciate.copyFile(new File(generateDir, uuid + ".types"), new File(compileDir, uuid + ".types"));
     }
     else {
       info("Skipping compilation of JAX-WS client classes as everything appears up-to-date...");
@@ -384,24 +386,6 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setJarName(String jarName) {
     this.jarName = jarName;
-  }
-
-  /**
-   * A unique id to associate with this build of the jaxws client.
-   *
-   * @return A unique id to associate with this build of the jaxws client.
-   */
-  public String getUuid() {
-    return uuid;
-  }
-
-  /**
-   * A unique id to associate with this build of the jaxws client.
-   *
-   * @param uuid A unique id to associate with this build of the jaxws client.
-   */
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
   }
 
   /**

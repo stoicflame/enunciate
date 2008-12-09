@@ -50,6 +50,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
   private final Collection<WebParam> webParams;
   private final Collection<WebFault> webFaults;
   private final Collection<WebMessage> messages;
+  private final RequestWrapper requestWrapper;
+  private final ResponseWrapper responseWrapper;
 
   public WebMethod(MethodDeclaration delegate, EndpointInterface endpointInterface) {
     super(delegate);
@@ -102,12 +104,16 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
       messages.add(webResult);
     }
 
+    RequestWrapper requestWrapper = null;
+    ResponseWrapper responseWrapper = null;
     if (bindingStyle == SOAPBinding.Style.DOCUMENT) {
       SOAPBinding.ParameterStyle parameterStyle = getSoapParameterStyle();
       if (parameterStyle == SOAPBinding.ParameterStyle.WRAPPED) {
-        messages.add(new RequestWrapper(this));
+        requestWrapper = new RequestWrapper(this);
+        messages.add(requestWrapper);
         if (!isOneWay()) {
-          messages.add(new ResponseWrapper(this));
+          responseWrapper = new ResponseWrapper(this);
+          messages.add(responseWrapper);
         }
         messages.addAll(webFaults);
       }
@@ -131,6 +137,8 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     }
 
     this.messages = messages;
+    this.requestWrapper = requestWrapper;
+    this.responseWrapper = responseWrapper;
   }
 
 
@@ -178,6 +186,24 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
    */
   public Collection<WebMessage> getMessages() {
     return this.messages;
+  }
+
+  /**
+   * The request wrapper.
+   *
+   * @return The request wrapper, or null if none.
+   */
+  public RequestWrapper getRequestWrapper() {
+    return requestWrapper;
+  }
+
+  /**
+   * The response wrapper, or null if none.
+   *
+   * @return The response wrapper, or null if none.
+   */
+  public ResponseWrapper getResponseWrapper() {
+    return responseWrapper;
   }
 
   /**
