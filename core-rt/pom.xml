@@ -41,6 +41,14 @@
       <groupId>javax.xml.ws</groupId>
       <artifactId>jaxws-api</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+
+      <!--just for the wsdl filter-->
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <profiles>

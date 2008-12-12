@@ -34,6 +34,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.NamedArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
@@ -123,6 +124,7 @@ import java.util.*;
  * base will be provided.
  *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN of an instance of
  *       <tt>net.sf.jelly.apt.util.JavaDocTagHandler</tt></li>
+ *   <li>The "<b>applyWsdlFilter</b>" attribute specifies whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically. Default: "true".</li>
  * </ul>
  *
  * <h3>The "download" element</h3>
@@ -170,6 +172,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
   private String docsDir = null;
   private String javadocTagHandling;
+  private boolean applyWsdlFilter = true;
 
   /**
    * @return "docs"
@@ -396,6 +399,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.
+   *
+   * @return Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.
+   */
+  public boolean isApplyWsdlFilter() {
+    return applyWsdlFilter;
+  }
+
+  /**
+   * Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.
+   *
+   * @param applyWsdlFilter Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.
+   */
+  public void setApplyWsdlFilter(boolean applyWsdlFilter) {
+    this.applyWsdlFilter = applyWsdlFilter;
+  }
+
+  /**
    * The directory into which the documentation is put.
    *
    * @return The directory into which the documentation is put.
@@ -484,7 +505,34 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     mimeMappings.put("wsdl", "text/xml");
     mimeMappings.put("xsd", "text/xml");
     webAppFragment.setMimeMappings(mimeMappings);
+    if (isApplyWsdlFilter()) {
+      WebAppComponent wsdlFilter = new WebAppComponent();
+      wsdlFilter.setName("wsdl-filter");
+      wsdlFilter.setClassname("org.codehaus.enunciate.webapp.WSDLFilter");
+      HashMap<String, String> initParams = new HashMap<String, String>();
+      initParams.put("assumed-base-address", getModel().getBaseDeploymentAddress());
+      wsdlFilter.setInitParams(initParams);
+      TreeSet<String> wsdls = new TreeSet<String>();
+      String docsDir = getDocsDir() == null ? "" : getDocsDir();
+      if (!docsDir.startsWith("/")) {
+        docsDir = "/" + docsDir;
+      }
+      while (docsDir.endsWith("/")) {
+        docsDir = docsDir.substring(0, docsDir.length() - 1);
+      }
+
+      for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+        Object filename = wsdlInfo.getProperty("filename");
+        if (filename != null) {
+
+          wsdls.add(docsDir + "/" + filename);
+        }
+      }
+      wsdlFilter.setUrlMappings(wsdls);
+      webAppFragment.setFilters(Arrays.asList(wsdlFilter));
+    }
     getEnunciate().addWebAppFragment(webAppFragment);
+
   }
 
   /**
