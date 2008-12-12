@@ -58,9 +58,9 @@ public class WSDLFilter implements Filter {
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
     if (this.assumedBaseAddress != null) {
       HttpServletRequest request = (HttpServletRequest) servletRequest;
-      String requestURI = request.getRequestURI();
+      StringBuffer requestURI = request.getRequestURL();
       String contextPath = request.getContextPath();
-      if (requestURI.contains(contextPath)) {
+      if (requestURI.indexOf(contextPath) >= 0) {
         int splitIndex = requestURI.indexOf(contextPath) + contextPath.length();
         String fullContextPath = requestURI.substring(0, splitIndex);
         String postContextPath = requestURI.substring(splitIndex);

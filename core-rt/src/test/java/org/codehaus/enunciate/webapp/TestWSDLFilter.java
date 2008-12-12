@@ -50,7 +50,7 @@ public class TestWSDLFilter extends TestCase {
     HttpServletRequest req = createMock(HttpServletRequest.class);
     HttpServletResponse res = createMock(HttpServletResponse.class);
     FilterChain chain = createMock(FilterChain.class);
-    expect(req.getRequestURI()).andReturn("http://myhost.com/mycontext/something/test.wsdl");
+    expect(req.getRequestURL()).andReturn(new StringBuffer("http://myhost.com/mycontext/something/test.wsdl"));
     expect(req.getContextPath()).andReturn("/mycontext");
     expect(context.getResourceAsStream("/something/test.wsdl")).andReturn(new ByteArrayInputStream(wsdl.getBytes("utf-8")));
     StringWriter writer = new StringWriter();
