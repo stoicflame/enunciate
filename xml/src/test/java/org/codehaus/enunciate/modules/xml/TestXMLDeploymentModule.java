@@ -109,6 +109,7 @@ public class TestXMLDeploymentModule extends TestCase {
     File generateDir = enunciate.createTempDir();
     enunciate.setGenerateDir(generateDir);
     module.init(enunciate);
+    module.initModel(model);
     module.doFreemarkerGenerate();
 
     assertTrue("Not all templates were processed.  Unprocessed templates: " + processList.toString(), processList.isEmpty());

@@ -56,7 +56,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
 
     javax.jws.WebResult annotation = method.getAnnotation(javax.jws.WebResult.class);
 
-    String targetNamespace = method.getDeclaringEndpointInterface().getTargetNamespace();
+    String targetNamespace = "";
     if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
       targetNamespace = annotation.targetNamespace();
     }

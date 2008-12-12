@@ -60,15 +60,6 @@ public class PersonServiceImpl implements PersonService {
       Event event = new Event();
       event.setDate(new DateTime(1L));
       person.setEvents(Arrays.asList(event));
-
-      HashMap<String, Note> notes = new HashMap<String, Note>();
-      Note note1 = new Note();
-      note1.setText("text1");
-      notes.put("contributor1", note1);
-      Note note2 = new Note();
-      note2.setText("text2");
-      notes.put("contributor2", note2);
-      person.setNotes(notes);
     }
 
     return persons;

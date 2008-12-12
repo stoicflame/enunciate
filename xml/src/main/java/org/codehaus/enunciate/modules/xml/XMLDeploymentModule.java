@@ -42,9 +42,6 @@ import java.util.Map;
  *
  * <p>The XML deployment module generates the consolidated WSDLs and schemas for the API.</a>.
  *
- * <p>The order of the XML deployment module is 50 so as to allow other modules to apply metadata
- * to the endpoints and classes.</p>
- *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
  *   <li><a href="#config">configuration</a></li>
@@ -116,14 +113,6 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return 50
-   */
-  @Override
-  public int getOrder() {
-    return 50;
-  }
-
-  /**
    * The URL to "xml.fmt".
    *
    * @return The URL to "xml.fmt".
@@ -150,9 +139,10 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     this.wsdlConfigs.add(config);
   }
 
+  // Inherited.
   @Override
-  public void doFreemarkerGenerate() throws IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
 
     Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
     Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
@@ -204,6 +194,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());
       }
     }
+  }
+
+  @Override
+  public void doFreemarkerGenerate() throws IOException, TemplateException {
+    EnunciateFreemarkerModel model = getModel();
+
+    Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
+    Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
     model.put("prefix", new PrefixMethod());
     File artifactDir = getGenerateDir();

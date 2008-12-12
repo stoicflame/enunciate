@@ -68,13 +68,12 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
   }
 
   /**
-   * If we're forcing JAX-WS compliance, we make the simple name look like "arg0" according to the spec.
+   * The base param name.
    *
-   * @return The simple name.
+   * @return The base param name.
    */
-  @Override
-  public String getSimpleName() {
-    return this.forceSpecCompliance ? "arg" + this.parameterIndex : super.getSimpleName();
+  public String getBaseParamName() {
+    return this.forceSpecCompliance ? "arg" + this.parameterIndex : getSimpleName();
   }
 
   /**
@@ -92,7 +91,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The element name of this web param.
    */
   public String getElementName() {
-    String name = isHeader() ? "" : getSimpleName();
+    String name = isHeader() ? "" : getBaseParamName();
 
     if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
       name = annotation.name();
@@ -119,7 +118,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    * @return The part name of the message for this parameter.
    */
   public String getPartName() {
-    String partName = getSimpleName();
+    String partName = getBaseParamName();
 
     if ((annotation != null) && (annotation.partName() != null) && (!"".equals(annotation.partName()))) {
       partName = annotation.partName();
@@ -140,7 +139,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
       messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName();
     }
     else if (isHeader()) {
-      messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getSimpleName();
+      messageName = method.getDeclaringEndpointInterface().getSimpleName() + "." + method.getSimpleName() + "." + getBaseParamName();
     }
 
     return messageName;

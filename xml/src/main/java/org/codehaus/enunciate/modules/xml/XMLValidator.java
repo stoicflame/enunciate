@@ -37,31 +37,6 @@ public class XMLValidator extends BaseValidator {
     HashMap<String, WebMethod> implicitElementNames = new HashMap<String, WebMethod>();
     for (WebMethod webMethod : ei.getWebMethods()) {
       for (WebMessage webMessage : webMethod.getMessages()) {
-        if (webMessage instanceof RequestWrapper) {
-          javax.xml.ws.RequestWrapper annotation = webMethod.getAnnotation(javax.xml.ws.RequestWrapper.class);
-          if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-            if (!webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(annotation.targetNamespace())) {
-              // the reason for this is that the wsdl we generate includes all request and response wrappers inline,
-              // and the schemas we generate don't take into account request and response wrappers.
-              result.addError(webMethod, "Enunciate doesn't allow declaring a target namespace for a request wrapper that is different " +
-                "from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root element from " +
-                "another namespace for the parameter.");
-            }
-          }
-        }
-        else if (webMessage instanceof ResponseWrapper) {
-          javax.xml.ws.ResponseWrapper annotation = webMethod.getAnnotation(javax.xml.ws.ResponseWrapper.class);
-          if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-            // the reason for this is that the wsdl we generate includes all request and response wrappers inline,
-            // and the schemas we generate don't take into account request and response wrappers.
-            if (!webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(annotation.targetNamespace())) {
-              result.addError(webMethod, "Enunciate doesn't allow declaring a target namespace for a response wrapper that is " +
-                "different from the target namespace of the endpoint interface.  If you really must, declare the parameter style BARE and use an xml root " +
-                "element from another namespace for the return value.");
-            }
-          }
-        }
-
         for (WebMessagePart webMessagePart : webMessage.getParts()) {
           if (!(webMessagePart instanceof WebFault) && (webMessagePart.isImplicitSchemaElement())) {
             ImplicitSchemaElement el = ((ImplicitSchemaElement) webMessagePart);
@@ -72,27 +47,6 @@ public class XMLValidator extends BaseValidator {
             }
           }
         }
-      }
-
-      for (WebParam webParam : webMethod.getWebParameters()) {
-        javax.jws.WebParam annotation = webParam.getAnnotation(javax.jws.WebParam.class);
-        if ((annotation != null) && (!"".equals(annotation.targetNamespace()))) {
-          // the reason for this is that the wsdl we generate includes all parameter elements inline,
-          // and the schemas we generate don't take into account the parameter elements.
-          if (!annotation.targetNamespace().equals(webParam.getWebMethod().getDeclaringEndpointInterface().getTargetNamespace())) {
-            result.addError(webParam, "Enunciate doesn't allow declaring a target namespace for a web parameter that is different from the " +
-              "target namespace of the endpoint interface.  If you really want to, declare the parameter style BARE and use an xml root element from another " +
-              "namespace for the parameter.");
-          }
-        }
-      }
-
-      if (!webMethod.getDeclaringEndpointInterface().getTargetNamespace().equals(webMethod.getWebResult().getTargetNamespace())) {
-        // the reason for this is that the wsdl we generate includes all return elements inline,
-        // and the schemas we generate don't take into account the return elements.
-        result.addError(webMethod, "Enunciate doesn't allow methods to return a web result with a target namespace that is " +
-          "declared different from the target namespace of its endpoint interface.  If you really want to, declare the parameter style BARE and use " +
-          "an xml root element from another namespace for the return value.");
       }
     }
 

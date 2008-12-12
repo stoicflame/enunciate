@@ -158,10 +158,6 @@ public class TestFullJAXWSRIAPI extends TestCase {
       Person person = (Person) o;
       assertTrue(ids.remove(person.getId()));
       assertEquals(new Date(1L), ((Event) person.getEvents().iterator().next()).getDate());
-
-      Map notes = person.getNotes();
-      assertEquals("text1", ((Note) notes.get("contributor1")).getText());
-      assertEquals("text2", ((Note) notes.get("contributor2")).getText());
     }
 
     assertNull(personService.readPersons(null));

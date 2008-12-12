@@ -27,6 +27,8 @@ import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
+import org.codehaus.enunciate.modules.jaxws_client.JAXWSClientDeploymentModule;
 import org.codehaus.enunciate.modules.amf.AMFDeploymentModule;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.gwt.GWTDeploymentModule;
@@ -134,11 +136,18 @@ public class ConfigMojo extends AbstractMojo {
   private boolean addActionscriptSources = true;
 
   /**
-   * Whether to add the actionscript sources to the project test sources.
+   * Whether to add the XFire client sources to the project test sources.
    *
    * @parameter
    */
   private boolean addXFireClientSourcesToTestClasspath = false;
+
+  /**
+   * Whether to add the JAXWS client sources to the project test sources.
+   *
+   * @parameter
+   */
+  private boolean addJAXWSClientSourcesToTestClasspath = false;
 
   /**
    * The GWT home.
@@ -480,6 +489,9 @@ public class ConfigMojo extends AbstractMojo {
           else if (module instanceof XFireClientDeploymentModule) {
             afterXFireClientGenerate((XFireClientDeploymentModule) module);
           }
+          else if (module instanceof JAXWSClientDeploymentModule) {
+            afterJAXWSClientGenerate((JAXWSClientDeploymentModule) module);
+          }
           else if (module instanceof RESTDeploymentModule) {
             afterRESTGenerate((RESTDeploymentModule) module);
           }
@@ -523,6 +535,21 @@ public class ConfigMojo extends AbstractMojo {
         //include any properties, types, annotations files
         xfireClientResources.setDirectory(clientModule.getCommonJdkGenerateDir().getAbsolutePath());
         project.addTestResource(xfireClientResources);
+      }
+    }
+
+    protected void afterJAXWSClientGenerate(JAXWSClientDeploymentModule clientModule) {
+      if (addJAXWSClientSourcesToTestClasspath) {
+        project.addTestCompileSourceRoot(clientModule.getGenerateDir().getAbsolutePath());
+
+        for (DeploymentModule module : getConfig().getEnabledModules()) {
+          if (module instanceof XMLDeploymentModule) {
+            Resource jaxwsClientResources = new Resource();
+            //include any properties, types, annotations files
+            jaxwsClientResources.setDirectory(((XMLDeploymentModule)module).getGenerateDir().getAbsolutePath());
+            project.addTestResource(jaxwsClientResources);
+          }
+        }
       }
     }
 

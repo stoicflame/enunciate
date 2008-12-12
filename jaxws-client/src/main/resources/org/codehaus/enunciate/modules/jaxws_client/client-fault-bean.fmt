@@ -12,19 +12,23 @@ import javax.xml.namespace.QName;
 /**
  * Fault bean for the ${fault.elementName} fault.
  */
- @javax.xml.bind.annotation.XmlRootElement (
-   name = "${fault.elementName}",
-   namespace = "${fault.targetNamespace}"
- )
- @javax.xml.bind.annotation.XmlType (
-   name = "${fault.elementName}",
-   namespace = "${fault.targetNamespace}",
-   propOrder = {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
- )
+@javax.xml.bind.annotation.XmlRootElement (
+  name = "${fault.elementName}",
+  namespace = "${fault.targetNamespace}"
+)
+@javax.xml.bind.annotation.XmlType (
+  name = "${fault.elementName}",
+  namespace = "${fault.targetNamespace}",
+  propOrder = {[#list fault.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
+)
+@javax.xml.bind.annotation.XmlAccessorType ( javax.xml.bind.annotation.XmlAccessType.FIELD )
 public class ${simpleBeanName} {
 
   [#list fault.childElements as childElement]
-  private ${classnameFor(childElement)} ${childElement.elementName};
+  @javax.xml.bind.annotation.XmlElement (
+    name = "${childElement.elementName}"
+  )
+  protected ${classnameFor(childElement)} ${childElement.elementName};
   [/#list]
   [#list fault.childElements as childElement]
 

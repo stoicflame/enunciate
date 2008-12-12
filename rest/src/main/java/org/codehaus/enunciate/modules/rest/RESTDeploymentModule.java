@@ -383,8 +383,10 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     return RESTDeploymentModule.class.getResource("rest-servlet.xml.fmt");
   }
 
-  public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
+  // Inherited.
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
 
     Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
     Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
@@ -405,6 +407,10 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
         restMethod.putMetaData("subcontexts", subcontexts);
       }
     }
+  }
+
+  public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
+    EnunciateFreemarkerModel model = getModel();
 
     //set up the model with the content type handlers.
     Map<String, String> knownContentTypeHandlers = new TreeMap<String, String>();

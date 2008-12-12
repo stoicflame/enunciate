@@ -150,10 +150,12 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     return new JerseyValidator(!isUseSubcontext() && !isDisableWildcardServletError());
   }
 
-  public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
-    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
+  // Inherited.
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
 
+    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
     for (RootResource resource : model.getRootResources()) {
       for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
         Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
@@ -188,8 +190,11 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
         resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
       }
     }
+  }
 
+  public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     if (!isUpToDate()) {
+      EnunciateFreemarkerModel model = getModel();
       processTemplate(getRootResourceListTemplateURL(), model);
       processTemplate(getProvidersListTemplateURL(), model);
       processTemplate(getJaxbTypesTemplateURL(), model);

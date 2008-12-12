@@ -12,22 +12,26 @@ import javax.xml.namespace.QName;
 /**
  * Response bean for the ${message.elementName} operation.
  */
- @javax.xml.bind.annotation.XmlRootElement (
-   name = "${message.elementName}",
-   namespace = "${message.elementNamespace}"
- )
- @javax.xml.bind.annotation.XmlType (
-   name = "${message.elementName}",
-   namespace = "${message.elementNamespace}",
-   propOrder = {[#list message.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
- )
+@javax.xml.bind.annotation.XmlRootElement (
+  name = "${message.elementName}",
+  namespace = "${message.elementNamespace}"
+)
+@javax.xml.bind.annotation.XmlType (
+  name = "${message.elementName}",
+  namespace = "${message.elementNamespace}",
+  propOrder = {[#list message.childElements as childElement][#if "return" = childElement.elementName] "_retval"[#else] "${childElement.elementName}"[/#if][#if childElement_has_next],[/#if][/#list] }
+)
+ @javax.xml.bind.annotation.XmlAccessorType ( javax.xml.bind.annotation.XmlAccessType.FIELD )
 public class ${simpleBeanName} {
 
   [#list message.childElements as childElement]
+  @javax.xml.bind.annotation.XmlElement (
+    name = "${childElement.elementName}"
+  )
     [#if "return" = childElement.elementName]
-  private ${classnameFor(childElement)} _retval;
+  protected ${classnameFor(childElement)} _retval;
     [#else]
-  private ${classnameFor(childElement)} ${childElement.elementName};
+  protected ${classnameFor(childElement)} ${childElement.elementName};
     [/#if]
   [/#list]
   [#list message.childElements as childElement]

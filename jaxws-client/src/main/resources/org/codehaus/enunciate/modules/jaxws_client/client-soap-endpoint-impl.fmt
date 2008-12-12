@@ -9,7 +9,7 @@ import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 /**
  * Implementation of the {@link ${endpointInterface.simpleName}}.
  */
-public class ${endpointInterface.simpleName}Impl extends javax.xml.ws.Service implements ${endpointInterface.simpleName} {
+public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.simpleName} {
 
   private final ${endpointInterface.simpleName} proxy;
 
@@ -27,8 +27,7 @@ public class ${endpointInterface.simpleName}Impl extends javax.xml.ws.Service im
    * @param port The port.
    */
   public ${endpointInterface.simpleName}Impl(String host, int port) {
-    super(null, new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"));
-    this.proxy = (${endpointInterface.simpleName}) getPort(${endpointInterface.simpleName}.class);
+    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate(getClass().getResource("/${wsdlFileName}"), new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class);
     try {
       java.net.URL baseUrl = new java.net.URL("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
       _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
@@ -44,8 +43,7 @@ public class ${endpointInterface.simpleName}Impl extends javax.xml.ws.Service im
    * @param endpoint The endpoint to point to.
    */
   public ${endpointInterface.simpleName}Impl(String endpoint) {
-    super(null, new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"));
-    this.proxy = (${endpointInterface.simpleName}) getPort(${endpointInterface.simpleName}.class);
+    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate(getClass().getResource("/${wsdlFileName}"), new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class);
     _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
   }
 

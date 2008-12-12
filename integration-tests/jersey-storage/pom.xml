@@ -89,7 +89,7 @@
             <containerId>tomcat5x</containerId>
             <zipUrlInstaller>
               <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
-              <installDir>${project.build.directory}/cargo-installs</installDir>
+              <installDir>${basedir}/cargo-installs</installDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>

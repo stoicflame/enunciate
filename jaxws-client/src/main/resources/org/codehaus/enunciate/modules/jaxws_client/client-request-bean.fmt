@@ -12,19 +12,23 @@ import javax.xml.namespace.QName;
 /**
  * Request bean for the ${message.elementName} operation.
  */
- @javax.xml.bind.annotation.XmlRootElement (
-   name = "${message.elementName}",
-   namespace = "${message.elementNamespace}"
- )
- @javax.xml.bind.annotation.XmlType (
-   name = "${message.elementName}",
-   namespace = "${message.elementNamespace}",
-   propOrder = {[#list message.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
- )
-public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_client.GeneratedWrapperBean {
+@javax.xml.bind.annotation.XmlRootElement (
+  name = "${message.elementName}",
+  namespace = "${message.elementNamespace}"
+)
+@javax.xml.bind.annotation.XmlType (
+  name = "${message.elementName}",
+  namespace = "${message.elementNamespace}",
+  propOrder = {[#list message.childElements as childElement] "${childElement.elementName}"[#if childElement_has_next],[/#if][/#list] }
+)
+@javax.xml.bind.annotation.XmlAccessorType ( javax.xml.bind.annotation.XmlAccessType.FIELD )
+public class ${simpleBeanName} {
 
   [#list message.childElements as childElement]
-  private ${classnameFor(childElement)} ${childElement.elementName};
+  @javax.xml.bind.annotation.XmlElement (
+    name = "${childElement.elementName}"
+  )
+  protected ${classnameFor(childElement)} ${childElement.elementName};
   [/#list]
   [#list message.childElements as childElement]
 

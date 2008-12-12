@@ -15,7 +15,7 @@
 
         [#--todo: what about eis with the same name, different namespace?--]
   <wss:binding url="${endpointInterface.metaData.soapPath}" service="#jaxws-service-${endpointInterface.serviceName}" />
-  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${impl.qualifiedName}" bean="#${endpointBeanId(endpointInterface)}"[#if wsdl.properties.filename?exists] primaryWsdl="/${docsDir?default("")}${wsdl.properties.filename}"[/#if]/>
+  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${impl.qualifiedName}" bean="#${endpointBeanId(endpointInterface)}"/>
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

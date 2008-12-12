@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.modules.jaxws_client;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
@@ -25,21 +27,22 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
 import org.codehaus.enunciate.modules.jaxws_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.jaxws_client.config.JAXWSClientRuleSet;
 import org.codehaus.enunciate.template.freemarker.*;
+import org.codehaus.enunciate.util.AntPatternMatcher;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-
-import com.sun.mirror.declaration.ClassDeclaration;
 
 /**
  * <h1>JAX-WS Client Module</h1>
@@ -100,6 +103,16 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * that matches the "from" attribute will be converted.</li>
  * </ul>
  *
+ * <h3>The "server-side-type" element</h3>
+ *
+ * <p>An arbitrary number of "server-side-type" elements are allowed as child elements of the "jaxws-client" element.  The "server-side-type" element
+ * can be used to specify a server-side type that is to be ported directly over to the client-side library (as opposed to <i>generating</i> the client-side type
+ * from the server-side type). This can be useful to provide more useful client-side capabilities, but requires that there be no package conversions for types
+ * and web faults.</p>
+ *
+ * <p>The "server-side-type" element supports one attribute, "pattern" that defines an ant-style pattern of the type(s) that are to be included (using a '.'
+ * for separating the package name).</p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The JAX-WS client deployment module exports the following artifacts:</p>
@@ -118,10 +131,12 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
   private String jarName = null;
   private final Map<String, String> clientPackageConversions;
   private final JAXWSClientRuleSet configurationRules;
+  private final Set<String> serverSideTypesToUse;
 
   public JAXWSClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
     this.configurationRules = new JAXWSClientRuleSet();
+    this.serverSideTypesToUse = new TreeSet<String>();
     setDisabled(true); //disable by default, for now.
   }
 
@@ -139,6 +154,15 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public int getOrder() {
     return 50;
+  }
+
+  @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    if (!isDisabled() && !enunciate.isModuleEnabled("xml")) {
+      throw new EnunciateException("The JAX-WS Client module requires you to enable the XML module.");
+    }
   }
 
   @Override
@@ -217,6 +241,11 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
 
       model.put("seeAlsoBeans", seeAlsos);
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        if (wsdlInfo.getProperty("filename") == null) {
+          throw new EnunciateException("WSDL " + wsdlInfo.getId() + " doesn't have a filename.");
+        }
+        model.put("wsdlFileName", wsdlInfo.getProperty("filename"));
+
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           model.put("endpointInterface", ei);
 
@@ -225,31 +254,82 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
+      AntPatternMatcher matcher = new AntPatternMatcher();
+      matcher.setPathSeparator(".");
       for (WebFault webFault : allFaults.values()) {
-        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+        if (useServerSide(webFault, matcher)) {
+          File sourceFile = webFault.getPosition().file();
+          getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, webFault));
         }
         else {
-          model.remove("superFault");
-        }
+          ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+          if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+            model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+          }
+          else {
+            model.remove("superFault");
+          }
 
-        model.put("fault", webFault);
-        processTemplate(faultTemplate, model);
+          model.put("fault", webFault);
+          processTemplate(faultTemplate, model);
+        }
       }
 
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          model.put("rootEl", model.findRootElementDeclaration(typeDefinition));
-          model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-          processTemplate(template, model);
+          if (useServerSide(typeDefinition, matcher)) {
+            File sourceFile = typeDefinition.getPosition().file();
+            getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, typeDefinition));
+          }
+          else {
+            model.put("rootEl", model.findRootElementDeclaration(typeDefinition));
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+            processTemplate(template, model);
+          }
         }
       }
     }
     else {
       info("Skipping generation of JAX-WS Client sources as everything appears up-to-date...");
     }
+  }
+
+  /**
+   * Get the destination for the specified declaration if the server-side type is to be used.
+   *
+   * @param sourceFile  The source file.
+   * @param declaration The declaration.
+   * @return The destination file.
+   */
+  protected File getServerSideDestFile(File sourceFile, TypeDeclaration declaration) {
+    File destDir = getGenerateDir();
+    String packageName = declaration.getPackage().getQualifiedName();
+    for (StringTokenizer packagePaths = new StringTokenizer(packageName, "."); packagePaths.hasMoreTokens();) {
+      String packagePath = packagePaths.nextToken();
+      destDir = new File(destDir, packagePath);
+    }
+    destDir.mkdirs();
+    return new File(destDir, sourceFile.getName());
+  }
+
+  /**
+   * Whether to use the server-side declaration for this declaration.
+   *
+   * @param declaration The declaration.
+   * @param matcher     The matcher.
+   * @return Whether to use the server-side declaration for this declaration.
+   */
+  protected boolean useServerSide(TypeDeclaration declaration, AntPatternMatcher matcher) {
+    boolean useServerSide = false;
+
+    for (String pattern : serverSideTypesToUse) {
+      if (matcher.match(pattern, declaration.getQualifiedName())) {
+        useServerSide = true;
+        break;
+      }
+    }
+    return useServerSide;
   }
 
   /**
@@ -277,6 +357,13 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
       Collection<String> jdk15Files = enunciate.getJavaFiles(generateDir);
       jdk15Files.addAll(typeFiles);
       enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", compileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
+
+      for (DeploymentModule module : enunciate.getConfig().getEnabledModules()) {
+        if (module instanceof XMLDeploymentModule) {
+          XMLDeploymentModule xmlModule = (XMLDeploymentModule) module;
+          enunciate.copyDir(xmlModule.getGenerateDir(), compileDir);
+        }
+      }
     }
     else {
       info("Skipping compilation of JAX-WS client classes as everything appears up-to-date...");
@@ -405,7 +492,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
    */
   @Override
   public Validator getValidator() {
-    return new JAXWSClientValidator();
+    return new JAXWSClientValidator(getServerSideTypesToUse(), getClientPackageConversions());
   }
 
   @Override
@@ -449,6 +536,24 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     this.clientPackageConversions.put(from, to);
+  }
+
+  /**
+   * The server-side types that are to be used for the client-side libraries.
+   *
+   * @return The server-side types that are to be used for the client-side libraries.
+   */
+  public Set<String> getServerSideTypesToUse() {
+    return serverSideTypesToUse;
+  }
+
+  /**
+   * Add a server-side type to use for the client-side library.
+   *
+   * @param serverSideTypeToUse The server-side type to use.
+   */
+  public void addServerSideTypeToUse(String serverSideTypeToUse) {
+    this.serverSideTypesToUse.add(serverSideTypeToUse);
   }
 
   // Inherited.

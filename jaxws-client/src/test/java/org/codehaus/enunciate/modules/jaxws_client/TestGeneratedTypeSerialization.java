@@ -214,7 +214,6 @@ public class TestGeneratedTypeSerialization extends TestCase {
     Circle rider4 = new Circle();
     rider4.setRadius(4);
     riders.put(4, rider4);
-    bus.setRiders(riders);
 
     JAXBContext context = JAXBContext.newInstance(Bus.class);
     Marshaller marshaller = context.createMarshaller();
@@ -264,11 +263,6 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(2, clientWindows[2].getHeight());
     assertEquals(shapes.Color.BLUE, clientWindows[2].getColor());
     assertEquals(shapes.LineStyle.solid, clientWindows[2].getLineStyle());
-    Map clientRiders = clientBus.getRiders();
-    shapes.Circle clientRider3 = (shapes.Circle) clientRiders.get(new Integer(3));
-    assertEquals(3, clientRider3.getRadius());
-    shapes.Circle clientRider4 = (shapes.Circle) clientRiders.get(new Integer(4));
-    assertEquals(4, clientRider4.getRadius());
 
     out = new ByteArrayOutputStream();
     clientMarshaller.marshal(clientBus, out);
@@ -304,9 +298,6 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
-    riders = bus.getRiders();
-    assertEquals(3, riders.get(3).getRadius());
-    assertEquals(4, riders.get(4).getRadius());
 
     //todo: test an element wrapper around elementRefs
   }

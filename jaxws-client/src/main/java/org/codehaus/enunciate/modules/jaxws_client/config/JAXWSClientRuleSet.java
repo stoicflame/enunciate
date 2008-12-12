@@ -31,5 +31,8 @@ public class JAXWSClientRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/jaxws-client/package-conversions/convert", ClientPackageConversion.class);
     digester.addSetProperties("enunciate/modules/jaxws-client/package-conversions/convert");
     digester.addSetNext("enunciate/modules/jaxws-client/package-conversions/convert", "addClientPackageConversion");
+
+    digester.addCallMethod("enunciate/modules/jaxws-client/server-side-type", "addServerSideTypeToUse", 1);
+    digester.addCallParam("enunciate/modules/jaxws-client/server-side-type", 0, "pattern");
   }
 }

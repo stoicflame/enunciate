@@ -61,7 +61,7 @@ public class TestWebResult extends InAPTTestCase {
 
     WebResult webResult = docLitBareMethod.getWebResult();
     assertEquals("return", webResult.getName());
-    assertEquals("urn:web-method-examples", webResult.getTargetNamespace());
+    assertEquals("", webResult.getTargetNamespace());
     assertEquals("return", webResult.getPartName());
     assertEquals("WebMethodExamples.docLitBareMethodResponse", webResult.getMessageName());
     assertFalse(webResult.isInput());
@@ -99,7 +99,7 @@ public class TestWebResult extends InAPTTestCase {
 
     webResult = rpcLitWrappedMethod.getWebResult();
     assertEquals("return", webResult.getName());
-    assertEquals("urn:web-method-examples", webResult.getTargetNamespace());
+    assertEquals("", webResult.getTargetNamespace());
     assertEquals("return", webResult.getPartName());
     assertNull(webResult.getMessageName());
     assertFalse(webResult.isInput());

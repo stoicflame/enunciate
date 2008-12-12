@@ -20,6 +20,11 @@
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>
       </package-conversions>
     </xfire-client>
+    <jaxws-client disabled="false">
+      <package-conversions>
+        <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
+      </package-conversions>
+    </jaxws-client>
     <spring-app>
       <springImport file="src/conf/custom_spring.xml"/>
       <copyResources dir="${basedir}/src/main/samples/full" pattern="**/*.txt"/>

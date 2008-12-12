@@ -123,9 +123,11 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     }
   }
 
+  // Inherited.
   @Override
-  public void doFreemarkerGenerate() throws IOException, TemplateException {
-    EnunciateFreemarkerModel model = getModel();
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
     EnunciateConfiguration config = model.getEnunciateConfig();
     for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
       for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -140,8 +142,12 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
         ei.putMetaData("soapPath", path);
       }
     }
+  }
 
+  @Override
+  public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
+      EnunciateFreemarkerModel model = getModel();
       //generate the rpc request/response beans.
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {

@@ -93,11 +93,19 @@ public class AdapterUtil {
     XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {
       if (typeAdapterInfo == null) {
-        typeAdapterInfo = ((DeclaredType) adaptedType).getDeclaration().getAnnotation(XmlJavaTypeAdapter.class);
+        TypeDeclaration typeDeclaration = ((DeclaredType) adaptedType).getDeclaration();
+        if (typeDeclaration == null) {
+          throw new IllegalStateException("Class not found: " + adaptedType);
+        }
+        typeAdapterInfo = typeDeclaration.getAnnotation(XmlJavaTypeAdapter.class);
       }
 
       if ((typeAdapterInfo == null) && (pckg != null)) {
-        typeAdapterInfo = getAdaptersOfPackage(pckg).get(((DeclaredType) adaptedType).getDeclaration().getQualifiedName());
+        TypeDeclaration typeDeclaration = ((DeclaredType) adaptedType).getDeclaration();
+        if (typeDeclaration == null) {
+          throw new IllegalStateException("Class not found: " + adaptedType);
+        }
+        typeAdapterInfo = getAdaptersOfPackage(pckg).get(typeDeclaration.getQualifiedName());
       }
 
       if (typeAdapterInfo != null) {
@@ -169,7 +177,11 @@ public class AdapterUtil {
             if (!(adaptedType instanceof DeclaredType)) {
               throw new ValidationException(pckg.getPosition(), "Unadaptable type: " + adaptedType);
             }
-            typeFqn = ((DeclaredType) adaptedType).getDeclaration().getQualifiedName();
+            TypeDeclaration typeDeclaration = ((DeclaredType) adaptedType).getDeclaration();
+            if (typeDeclaration == null) {
+              throw new IllegalStateException("Class not found: " + adaptedType);
+            }
+            typeFqn = typeDeclaration.getQualifiedName();
           }
 
           adaptersOfPackage.put(typeFqn, adaptedTypeInfo);

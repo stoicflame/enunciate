@@ -38,7 +38,7 @@
           [#if wsdl.properties.filename?exists && docsDir?exists]
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">
-                <property name="url" value="/${docsDir}${wsdl.properties.filename}"/>
+                <property name="url" value="/${docsDir}/${wsdl.properties.filename}"/>
                 <property name="contextRelative" value="true"/>
               </bean>
             </property>

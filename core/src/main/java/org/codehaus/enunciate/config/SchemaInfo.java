@@ -260,12 +260,14 @@ public class SchemaInfo {
     }
 
     for (Element element : typeDefinition.getElements()) {
-      QName ref = element.getRef();
-      if (ref != null) {
-        referencedNamespaces.add(ref.getNamespaceURI());
-      }
-      else {
-        addReferencedNamespaces(element.getBaseType(), referencedNamespaces);
+      for (Element choice : element.getChoices()) {
+        QName ref = choice.getRef();
+        if (ref != null) {
+          referencedNamespaces.add(ref.getNamespaceURI());
+        }
+        else {
+          addReferencedNamespaces(choice.getBaseType(), referencedNamespaces);
+        }
       }
     }
 

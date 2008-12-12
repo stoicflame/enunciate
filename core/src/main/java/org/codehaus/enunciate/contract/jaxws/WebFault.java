@@ -38,10 +38,7 @@ import org.codehaus.enunciate.util.MapTypeUtil;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * A fault that is declared potentially thrown in some web service call.
@@ -309,7 +306,11 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       return Collections.emptyList();
     }
 
-    Collection<ImplicitChildElement> childElements = new ArrayList<ImplicitChildElement>();
+    Set<ImplicitChildElement> childElements = new TreeSet<ImplicitChildElement>(new Comparator<ImplicitChildElement>() {
+      public int compare(ImplicitChildElement o1, ImplicitChildElement o2) {
+        return o1.getElementName().compareTo(o2.getElementName());
+      }
+    });
 
     for (PropertyDeclaration property : getAllProperties(this)) {
       String propertyName = property.getPropertyName();

@@ -270,12 +270,12 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertNotNull(webResultInfo);
     assertEquals("return", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
-    assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
+    assertEquals("", webResultInfo.getTargetNamespace());
     webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithAString");
     assertNotNull(webResultInfo);
     assertEquals("return", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
-    assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
+    assertEquals("", webResultInfo.getTargetNamespace());
     webResultInfo = (SerializableWebResultAnnotation) annotations.method2WebResult.get("org.codehaus.enunciate.samples.xfire_client.BasicEITwo.boolOp");
     assertNotNull(webResultInfo);
     assertEquals("boolResult", webResultInfo.getName());
@@ -285,7 +285,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     assertNotNull(webResultInfo);
     assertEquals("return", webResultInfo.getName());
     assertEquals("return", webResultInfo.getPartName());
-    assertEquals("urn:xfire_client", webResultInfo.getTargetNamespace());
+    assertEquals("", webResultInfo.getTargetNamespace());
 
     assertEquals(5, annotations.method2WebParam.size());
     SerializableWebParamAnnotation webParamInfo = (SerializableWebParamAnnotation) annotations.method2WebParam.get("org.codehaus.enunciate.samples.xfire_client.BasicEIOne.doSomethingWithADate.0");
