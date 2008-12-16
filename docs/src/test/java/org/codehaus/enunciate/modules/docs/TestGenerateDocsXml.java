@@ -26,6 +26,9 @@ import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -92,6 +95,11 @@ public class TestGenerateDocsXml extends TestCase {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setValidating(false);
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
+    builder.setEntityResolver(new EntityResolver() {
+      public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        return null;
+      }
+    });
     Document document = builder.parse(docsXml);
     XPath xpath = XPathFactory.newInstance().newXPath();
 

@@ -56,6 +56,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Set<String> apiIncludePatterns = new TreeSet<String>();
   private final Set<String> apiExcludePatterns = new TreeSet<String>();
   private boolean forceJAXWSSpecCompliance = false;
+  private boolean allowEmptyNamespace = true;
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -247,6 +248,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setForceJAXWSSpecCompliance(boolean forceJAXWSSpecCompliance) {
     this.forceJAXWSSpecCompliance = forceJAXWSSpecCompliance;
+  }
+
+  /**
+   * Whether to allow the empty namespace on type/element definitions.
+   *
+   * @return Whether to allow the empty namespace on type/element definitions.
+   */
+  public boolean isAllowEmptyNamespace() {
+    return allowEmptyNamespace;
+  }
+
+  /**
+   * Whether to allow the empty namespace on type/element definitions.
+   *
+   * @param allowEmptyNamespace Whether to allow the empty namespace on type/element definitions.
+   */
+  public void setAllowEmptyNamespace(boolean allowEmptyNamespace) {
+    this.allowEmptyNamespace = allowEmptyNamespace;
   }
 
   /**

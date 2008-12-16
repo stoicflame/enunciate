@@ -254,12 +254,12 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
   }
 
   /**
-   * The min occurs of this parameter as a child element.  Always 1.
+   * The min occurs of this parameter as a child element.  Always 0.
    *
-   * @return 1
+   * @return 0
    */
   public int getMinOccurs() {
-    return 1;
+    return 0;
   }
 
   /**

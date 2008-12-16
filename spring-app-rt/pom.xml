@@ -82,8 +82,8 @@
 
     <dependency>
       <!--depdency contains @RolesAllowed, @RolesDenied, etc.-->
-      <groupId>org.apache.tomcat</groupId>
-      <artifactId>annotations-api</artifactId>
+      <groupId>javax.annotation</groupId>
+      <artifactId>jsr250-api</artifactId>
       <optional>true</optional>
     </dependency>
   </dependencies>

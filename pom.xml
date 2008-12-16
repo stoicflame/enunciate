@@ -277,6 +277,14 @@
         <groupId>org.jvnet.staxex</groupId>
         <artifactId>stax-ex</artifactId>
         <version>1.2</version>
+
+        <exclusions>
+          <exclusion>
+            <!--we'll use enunciate's version of stax-->
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -412,6 +420,12 @@
       </dependency>
 
       <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>jsr250-api</artifactId>
+        <version>1.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>javax.mail</groupId>
         <artifactId>mail</artifactId>
         <version>1.4</version>
@@ -536,6 +550,36 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
           </exclusion>
+
+          <exclusion>
+            <!--don't need activation; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-activation_1.1_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need stax; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need common annotations; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-annotation_1.0_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need mail; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-javamail_1.4_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of woodstox-->
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-asl</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -549,6 +593,36 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
           </exclusion>
+
+          <exclusion>
+            <!--don't need activation; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-activation_1.1_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need mail; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-javamail_1.4_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need jax-ws; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jaxws_2.1_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need ws-metadata; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--don't need ws-metadata; we've already got it-->
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -556,12 +630,6 @@
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-rt-transports-http</artifactId>
         <version>${cxf.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>annotations-api</artifactId>
-        <version>6.0.14</version>
       </dependency>
 
       <dependency>
@@ -962,7 +1030,7 @@
       <dependency>
         <groupId>woodstox</groupId>
         <artifactId>wstx-asl</artifactId>
-        <version>2.9.3</version>
+        <version>3.2.7</version>
       </dependency>
 
       <dependency>

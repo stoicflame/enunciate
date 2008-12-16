@@ -273,12 +273,12 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   }
 
   /**
-   * The min occurs of a web result is 1.
+   * The min occurs of a web result is 0.
    *
-   * @return 1
+   * @return 0
    */
   public int getMinOccurs() {
-    return 1;
+    return 0;
   }
 
   /**

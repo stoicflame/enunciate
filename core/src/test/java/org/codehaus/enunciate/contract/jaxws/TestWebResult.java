@@ -75,7 +75,7 @@ public class TestWebResult extends InAPTTestCase {
     assertEquals(1, webResult.getParts().size());
     assertTrue(webResult.getParts().contains(webResult));
     assertEquals(new QName(null, "beanOne"), webResult.getTypeQName());
-    assertEquals(1, webResult.getMinOccurs());
+    assertEquals(0, webResult.getMinOccurs());
     assertEquals("1", webResult.getMaxOccurs());
     assertEquals("docLitBareMethodResponse", webResult.getElementName());
 
@@ -93,7 +93,7 @@ public class TestWebResult extends InAPTTestCase {
     assertTrue(webResult.isImplicitSchemaElement());
     assertEquals(1, webResult.getParts().size());
     assertEquals(new QName(null, "beanThree"), webResult.getTypeQName());
-    assertEquals(1, webResult.getMinOccurs());
+    assertEquals(0, webResult.getMinOccurs());
     assertEquals("1", webResult.getMaxOccurs());
     assertEquals("doc-lit-wrapped-return", webResult.getElementName());
 
@@ -116,7 +116,7 @@ public class TestWebResult extends InAPTTestCase {
     catch (UnsupportedOperationException e) {
     }
     assertEquals(new QName(null, "beanThree"), webResult.getTypeQName());
-    assertEquals(1, webResult.getMinOccurs());
+    assertEquals(0, webResult.getMinOccurs());
     assertEquals("1", webResult.getMaxOccurs());
     assertEquals("return", webResult.getElementName());
   }

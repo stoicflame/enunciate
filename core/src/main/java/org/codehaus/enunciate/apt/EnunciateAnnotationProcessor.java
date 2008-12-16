@@ -349,6 +349,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
+    if (!config.isAllowEmptyNamespace()) {
+      validator.addValidator(new EmptyNamespaceValidator());
+    }
+
     ValidationResult validationResult = validate(model, validator);
 
     if (validationResult.hasWarnings()) {
