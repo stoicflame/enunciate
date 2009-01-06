@@ -198,6 +198,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
       processTemplate(getRootResourceListTemplateURL(), model);
       processTemplate(getProvidersListTemplateURL(), model);
       processTemplate(getJaxbTypesTemplateURL(), model);
+
       Map<String, String> conentTypesToIds = model.getContentTypesToIds();
       Properties mappings = new Properties();
       for (Map.Entry<String, String> contentTypeToId : conentTypesToIds.entrySet()) {
@@ -206,6 +207,17 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
       File file = new File(getGenerateDir(), "media-type-mappings.properties");
       FileOutputStream out = new FileOutputStream(file);
       mappings.store(out, "JAX-RS media type mappings.");
+      out.flush();
+      out.close();
+
+      Map<String, String> ns2prefixes = model.getNamespacesToPrefixes();
+      mappings = new Properties();
+      for (Map.Entry<String, String> ns2prefix : ns2prefixes.entrySet()) {
+        mappings.put(ns2prefix.getValue(), ns2prefix.getKey() == null ? "" : ns2prefix.getKey());
+      }
+      file = new File(getGenerateDir(), "ns2prefix.properties");
+      out = new FileOutputStream(file);
+      mappings.store(out, "Namespace to prefix mappings.");
       out.flush();
       out.close();
     }
@@ -226,6 +238,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-root-resources.list"), new File(webinfClasses, "jaxrs-root-resources.list"));
     getEnunciate().copyFile(new File(getGenerateDir(), "jaxrs-jaxb-types.list"), new File(webinfClasses, "jaxrs-jaxb-types.list"));
     getEnunciate().copyFile(new File(getGenerateDir(), "media-type-mappings.properties"), new File(webinfClasses, "media-type-mappings.properties"));
+    getEnunciate().copyFile(new File(getGenerateDir(), "ns2prefix.properties"), new File(webinfClasses, "ns2prefix.properties"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);

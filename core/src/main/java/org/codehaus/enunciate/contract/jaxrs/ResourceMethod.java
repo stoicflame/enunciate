@@ -53,6 +53,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final List<ResourceParameter> resourceParameters;
   private final ParameterDeclaration entityParameter;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
+  private final List<? extends RESTResourceError> errors;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
@@ -81,9 +82,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       consumes = new TreeSet<String>(Arrays.asList(consumesInfo.value()));
     }
     else {
-      consumes = parent.getConsumesMime();
+      consumes = new TreeSet<String>(parent.getConsumesMime());
     }
-    this.consumesMime = Collections.unmodifiableSet(consumes);
+    this.consumesMime = consumes;
 
     Set<String> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
@@ -91,9 +92,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       produces = new TreeSet<String>(Arrays.asList(producesInfo.value()));
     }
     else {
-      produces = parent.getProducesMime();
+      produces = new TreeSet<String>(parent.getProducesMime());
     }
-    this.producesMime = Collections.unmodifiableSet(produces);
+    this.producesMime = produces;
 
     String subpath = null;
     Path pathInfo = delegate.getAnnotation(Path.class);
@@ -116,6 +117,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
+    this.errors = new ArrayList<RESTResourceError>();
   }
 
   /**
@@ -330,7 +332,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
 
   // Inherited.
   public List<? extends RESTResourceError> getResourceErrors() {
-    return Collections.emptyList();
+    return this.errors;
   }
 
   // Inherited.

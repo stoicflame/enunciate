@@ -49,7 +49,7 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
     String mediaKey = null;
     MediaType mediaType = null;
     this.rawpath = UriBuilder.fromUri(request.getRequestURL().toString()).build().getRawPath();
-    if (resourceConfig.getFeature(FEATURE_PATH_BASED_CONNEG)) {
+    if (resourceConfig != null && resourceConfig.getFeature(FEATURE_PATH_BASED_CONNEG)) {
       String path = rawpath;
       //if we're doing path-based conneg, we're going to look for the media-type mapping key on the URL after the context path.
       if (path.startsWith(request.getContextPath())) {
@@ -70,7 +70,7 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
     }
 
     String servletPath = null;
-    if (resourceConfig.getProperty(PROPERTY_SERVLET_PATH) != null) {
+    if (resourceConfig != null && resourceConfig.getProperty(PROPERTY_SERVLET_PATH) != null) {
       servletPath = (String) resourceConfig.getProperty(PROPERTY_SERVLET_PATH);
     }
 

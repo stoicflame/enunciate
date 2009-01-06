@@ -23,15 +23,20 @@ import org.springframework.util.ClassUtils;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.PropertyException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.JAXBException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.Properties;
 
 /**
  * Context resolver for JAXB.
- * 
+ *
  * @author Ryan Heaton
  */
 @Provider
@@ -64,16 +69,52 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
         LOG.error("Error reading jaxb types for jersey.", e);
       }
     }
+
+
     return types;
   }
 
   public EnunciateJAXBContextResolver() throws Exception {
-      this.types = loadTypes();
-      this.context = JAXBContext.newInstance(this.types.toArray(new Class[types.size()]));
+    this.types = loadTypes();
+    JAXBContext context = JAXBContext.newInstance(this.types.toArray(new Class[types.size()]));
+    final Object prefixMapper = loadPrefixMapper();
+    if (prefixMapper != null) {
+      context = new DelegatingJAXBContext(context) {
+        @Override
+        public Marshaller createMarshaller() throws JAXBException {
+          Marshaller marshaller = super.createMarshaller();
+          try {
+            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
+          }
+          catch (PropertyException e) {
+            //fall through...
+          }
+          return marshaller;
+        }
+      };
+    }
+    this.context = context;
+  }
+
+  protected Object loadPrefixMapper() {
+    InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/ns2prefix.properties");
+    Object prefixMapper = null;
+    if (stream != null) {
+      try {
+        //we want to support a prefix mapper, but don't want to break those on JDK 6 that don't have the prefix mapper on the classpath.
+        Properties ns2prefix = new Properties();
+        ns2prefix.load(stream);
+        prefixMapper = Class.forName("org.codehaus.enunciate.modules.jersey.PrefixMapper").getConstructor(Map.class).newInstance(ns2prefix);
+      }
+      catch (Throwable e) {
+        prefixMapper = null;
+      }
+    }
+    return prefixMapper;
   }
 
   public JAXBContext getContext(Class<?> objectType) {
-      return (types.contains(objectType)) ? context : null;
+    return (types.contains(objectType)) ? context : null;
   }
 
 }

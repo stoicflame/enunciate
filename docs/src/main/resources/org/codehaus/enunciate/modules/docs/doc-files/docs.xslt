@@ -191,7 +191,6 @@
                     <p>
                       The SOAP API is also accessible by client-side libraries that can be downloaded from the <a href="downloads.html">download page</a>.
                     </p>
-                    <xsl:call-template name="downloads"/>
                   </xsl:if>
 
                 </div>
@@ -299,6 +298,9 @@
       </body>
 
     </html>
+    <xsl:if test="$downloads-exists">
+      <xsl:call-template name="downloads"/>
+    </xsl:if>
   </xsl:template>
 
 
