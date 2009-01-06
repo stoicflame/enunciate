@@ -213,7 +213,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
       Map<String, String> ns2prefixes = model.getNamespacesToPrefixes();
       mappings = new Properties();
       for (Map.Entry<String, String> ns2prefix : ns2prefixes.entrySet()) {
-        mappings.put(ns2prefix.getValue(), ns2prefix.getKey() == null ? "" : ns2prefix.getKey());
+        mappings.put(ns2prefix.getKey() == null ? "" : ns2prefix.getKey(), ns2prefix.getValue());
       }
       file = new File(getGenerateDir(), "ns2prefix.properties");
       out = new FileOutputStream(file);

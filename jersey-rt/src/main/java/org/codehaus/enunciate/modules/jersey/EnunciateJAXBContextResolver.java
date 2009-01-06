@@ -104,7 +104,7 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
         //we want to support a prefix mapper, but don't want to break those on JDK 6 that don't have the prefix mapper on the classpath.
         Properties ns2prefix = new Properties();
         ns2prefix.load(stream);
-        prefixMapper = Class.forName("org.codehaus.enunciate.modules.jersey.PrefixMapper").getConstructor(Map.class).newInstance(ns2prefix);
+        prefixMapper = Class.forName("org.codehaus.enunciate.modules.jersey.PrefixMapper").getConstructor(Properties.class).newInstance(ns2prefix);
       }
       catch (Throwable e) {
         prefixMapper = null;

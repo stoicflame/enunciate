@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.jersey;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import java.util.Properties;
+import java.util.Map;
 
 /**
  * A namespace prefix mapper.
@@ -29,11 +30,13 @@ public class PrefixMapper extends NamespacePrefixMapper {
 
   private final Properties ns2prefix;
 
-  public PrefixMapper(Properties ns2prefix) {
-    if (ns2prefix == null) {
-      ns2prefix = new Properties();
+  public PrefixMapper(Properties prefix2ns) {
+    this.ns2prefix = new Properties();
+    if (prefix2ns != null) {
+      for (Map.Entry<Object, Object> entry : prefix2ns.entrySet()) {
+        this.ns2prefix.put(entry.getValue() == null ? "" : entry.getValue(), entry.getKey());
+      }
     }
-    this.ns2prefix = ns2prefix;
   }
 
   public String getPreferredPrefix(String nsuri, String suggestion, boolean defaultPossible) {

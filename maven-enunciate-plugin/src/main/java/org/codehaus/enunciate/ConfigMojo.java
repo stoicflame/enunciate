@@ -27,6 +27,7 @@ import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.docs.DocumentationDeploymentModule;
 import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
 import org.codehaus.enunciate.modules.jaxws_client.JAXWSClientDeploymentModule;
 import org.codehaus.enunciate.modules.amf.AMFDeploymentModule;
@@ -280,6 +281,11 @@ public class ConfigMojo extends AbstractMojo {
       if (!module.isDisabled()) {
         if (module instanceof SpringAppDeploymentModule) {
           warConfig = ((SpringAppDeploymentModule) module).getWarConfig();
+        }
+        if (module instanceof DocumentationDeploymentModule) {
+          if (project.getName() != null && !"".equals(project.getName().trim())) {
+            ((DocumentationDeploymentModule) module).setTitle(this.project.getName());
+          }
         }
       }
     }
