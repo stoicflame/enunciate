@@ -44,6 +44,11 @@
 --]
 [#macro processSchemaBody schema]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
+[#if schema.namespace?exists]
+  [#assign tns=prefix(schema.namespace)]
+[#else]
+  [#assign tns=""]
+[/#if]
   [#list schema.globalElements as globalElement]
     [#if globalElement.typeDefinition.anonymous]
   <${xs}:element name="${globalElement.name}">
@@ -316,7 +321,8 @@
 
   [#else]
     [#assign childElements=implicitElement.childElements]
-<${xs}:element name="${implicitElement.elementName}">
+<${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"/>
+<${xs}:complexType name="${implicitElement.elementName}">
     [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -324,27 +330,23 @@
     </${xs}:documentation>
   </${xs}:annotation>
     [/#if]
-    [#if childElements?size > 0]
-  <${xs}:complexType>
-    <${xs}:sequence>
+  <${xs}:sequence>
       [#list childElements as childElement]
-      <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
         [#if childElement.elementDocs?exists]
-        <${xs}:annotation>
-          <${xs}:documentation>
-            <![CDATA[${childElement.elementDocs?trim}]]>
-          </${xs}:documentation>
-        </${xs}:annotation>
+      <${xs}:annotation>
+        <${xs}:documentation>
+          <![CDATA[${childElement.elementDocs?trim}]]>
+        </${xs}:documentation>
+      </${xs}:annotation>
         [/#if]
         [#if childElement.xmlType.anonymous]
           [@processAnonymousType type=childElement.xmlType/]
         [/#if]
-      </${xs}:element>
+    </${xs}:element>
       [/#list]
-    </${xs}:sequence>
-  </${xs}:complexType>
-    [/#if]
-</${xs}:element>
+  </${xs}:sequence>
+</${xs}:complexType>
   [/#if]
 [/#macro]
 [#macro processImplicitAttribute implicitAttribute]

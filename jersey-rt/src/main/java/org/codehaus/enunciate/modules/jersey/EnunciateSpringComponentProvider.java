@@ -23,10 +23,12 @@ public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.
 
   private final Map<Class, AdvisedResourceFactory> resourceFactories = new HashMap<Class, AdvisedResourceFactory>();
   private List<Object> interceptors;
+  private final WebApplicationContext springApplicationContext;
 
   public EnunciateSpringComponentProvider(WebApplicationContext applicationContext) {
     super((ConfigurableApplicationContext) applicationContext);
     applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+    this.springApplicationContext = applicationContext;
   }
 
   // Inherited.
@@ -37,6 +39,7 @@ public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.
 
     if (instance == null) {
       instance = constructor.newInstance(parameters);
+      this.springApplicationContext.getAutowireCapableBeanFactory().autowireBean(instance);
     }
 
     return (T) getResourceFactory(constructor.getDeclaringClass()).createAdvisedResource(instance);
@@ -48,6 +51,7 @@ public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.
 
     if (instance == null) {
       instance = clazz.newInstance();
+      this.springApplicationContext.getAutowireCapableBeanFactory().autowireBean(instance);
     }
 
     return (T) getResourceFactory(clazz).createAdvisedResource(instance);

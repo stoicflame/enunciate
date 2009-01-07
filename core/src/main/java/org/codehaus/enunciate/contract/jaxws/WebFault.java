@@ -19,6 +19,8 @@ package org.codehaus.enunciate.contract.jaxws;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.ArrayType;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
@@ -390,7 +392,15 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
       this.adaperType = AdapterUtil.findAdapterType(property.getGetter());
       int minOccurs = propertyType.isPrimitive() ? 1 : 0;
-      String maxOccurs = propertyType.isArray() || propertyType.isCollection() ? "unbounded" : "1";
+      boolean unbounded = propertyType.isCollection() || propertyType.isArray();
+      if (propertyType.isArray()) {
+        TypeMirror componentType = ((ArrayType) propertyType).getComponentType();
+        //special case for byte[]
+        if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+          unbounded = false;
+        }
+      }
+      String maxOccurs = unbounded ? "unbounded" : "1";
 
       this.property = property;
       this.minOccurs = minOccurs;

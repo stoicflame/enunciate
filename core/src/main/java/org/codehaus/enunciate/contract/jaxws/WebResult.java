@@ -17,6 +17,8 @@
 package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -273,12 +275,13 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   }
 
   /**
-   * The min occurs of a web result is 0.
+   * The min occurs of a web result.
    *
-   * @return 0
+   * @return 1 if primitive.  0 otherwise.
    */
   public int getMinOccurs() {
-    return 0;
+    DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate);
+    return typeMirror.isPrimitive() ? 1 : 0;
   }
 
   /**
@@ -288,7 +291,15 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    */
   public String getMaxOccurs() {
     DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.delegate);
-    return typeMirror.isArray() || typeMirror.isCollection() ? "unbounded" : "1";
+    boolean unbounded = typeMirror.isCollection() || typeMirror.isArray();
+    if (typeMirror.isArray()) {
+      TypeMirror componentType = ((ArrayType) typeMirror).getComponentType();
+      //special case for byte[]
+      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+        unbounded = false;
+      }
+    }
+    return unbounded ? "unbounded" : "1";
   }
 
   /**

@@ -90,7 +90,7 @@ public class TestWebParam extends InAPTTestCase {
     assertEquals(new QName("urn:web-method-examples", "hah"), param1.getParticleQName());
     assertFalse(param1.isImplicitSchemaElement());//not bare
     assertEquals(KnownXmlType.BOOLEAN.getQname(), param1.getTypeQName());
-    assertEquals(0, param1.getMinOccurs());
+    assertEquals(1, param1.getMinOccurs());
     assertEquals("1", param1.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, param1.getMode());
     assertFalse(param1.isHeader());
@@ -114,7 +114,7 @@ public class TestWebParam extends InAPTTestCase {
     assertEquals(new QName("urn:web-method-examples", "i"), param2.getParticleQName());
     assertFalse(param2.isImplicitSchemaElement()); //not bare...
     assertEquals(KnownXmlType.INT.getQname(), param2.getTypeQName());
-    assertEquals(0, param2.getMinOccurs());
+    assertEquals(1, param2.getMinOccurs());
     assertEquals("1", param2.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, param2.getMode());
     assertFalse(param2.isHeader());
@@ -138,7 +138,7 @@ public class TestWebParam extends InAPTTestCase {
     assertEquals(new QName("urn:web-method-examples", ""), param3.getParticleQName());
     assertTrue(param3.isImplicitSchemaElement());
     assertEquals(KnownXmlType.SHORT.getQname(), param3.getTypeQName());
-    assertEquals(0, param3.getMinOccurs());
+    assertEquals(1, param3.getMinOccurs());
     assertEquals("1", param3.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, param3.getMode());
     assertTrue(param3.isHeader());
@@ -204,7 +204,7 @@ public class TestWebParam extends InAPTTestCase {
     assertEquals(KnownXmlType.INT.getQname(), param2.getParticleQName());
     assertFalse(param2.isImplicitSchemaElement());
     assertEquals(KnownXmlType.INT.getQname(), param2.getTypeQName());
-    assertEquals(0, param2.getMinOccurs());
+    assertEquals(1, param2.getMinOccurs());
     assertEquals("1", param2.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, param2.getMode());
     assertFalse(param2.isHeader());
@@ -228,7 +228,7 @@ public class TestWebParam extends InAPTTestCase {
     assertEquals(new QName("urn:web-method-examples", ""), param3.getParticleQName());
     assertTrue(param3.isImplicitSchemaElement());
     assertEquals(KnownXmlType.SHORT.getQname(), param3.getTypeQName());
-    assertEquals(0, param3.getMinOccurs());
+    assertEquals(1, param3.getMinOccurs());
     assertEquals("1", param3.getMaxOccurs());
     assertSame(javax.jws.WebParam.Mode.IN, param3.getMode());
     assertTrue(param3.isHeader());

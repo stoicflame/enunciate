@@ -19,6 +19,8 @@ package org.codehaus.enunciate.contract.jaxws;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.PrimitiveType;
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
@@ -254,12 +256,13 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
   }
 
   /**
-   * The min occurs of this parameter as a child element.  Always 0.
+   * The min occurs of this parameter as a child element.
    *
-   * @return 0
+   * @return 1 if primitive.  0 otherwise.
    */
   public int getMinOccurs() {
-    return 0;
+    DecoratedTypeMirror paramType = (DecoratedTypeMirror) getType();
+    return paramType.isPrimitive() ? 1 : 0;
   }
 
   /**
@@ -269,7 +272,15 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
    */
   public String getMaxOccurs() {
     DecoratedTypeMirror paramType = (DecoratedTypeMirror) getType();
-    return paramType.isArray() || paramType.isCollection() ? "unbounded" : "1";
+    boolean unbounded = paramType.isCollection() || paramType.isArray();
+    if (paramType.isArray()) {
+      TypeMirror componentType = ((ArrayType) paramType).getComponentType();
+      //special case for byte[]
+      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+        unbounded = false;
+      }
+    }
+    return unbounded ? "unbounded" : "1";
   }
 
   /**
