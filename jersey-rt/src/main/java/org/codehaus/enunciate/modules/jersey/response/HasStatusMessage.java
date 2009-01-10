@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.jersey;
-
-import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
-
-import java.util.Properties;
+package org.codehaus.enunciate.modules.jersey.response;
 
 /**
- * A namespace prefix mapper.
- *
+ * An interface for marking responses that have status messages (along with just the status code);
  * @author Ryan Heaton
  */
-public class PrefixMapper extends NamespacePrefixMapper {
+public interface HasStatusMessage {
 
-  private final Properties ns2prefix;
-
-  public PrefixMapper(Properties ns2prefix) {
-    this.ns2prefix = new Properties();
-    if (ns2prefix != null) {
-      this.ns2prefix.putAll(ns2prefix);
-    }
-  }
-
-  public String getPreferredPrefix(String nsuri, String suggestion, boolean defaultPossible) {
-    return this.ns2prefix.containsKey(nsuri) ? this.ns2prefix.getProperty(nsuri) : suggestion;
-  }
+  /**
+   * The status message.
+   *
+   * @return The status message.
+   */
+  String getStatusMessage();
 }

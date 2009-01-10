@@ -104,7 +104,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
 
     ParameterDeclaration entityParameter = null;
     List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
-    for (ParameterDeclaration parameterDeclaration : delegate.getParameters()) {
+    for (ParameterDeclaration parameterDeclaration : getParameters()) {
       if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
         resourceParameters.add(new ResourceParameter(parameterDeclaration));
       }

@@ -505,7 +505,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
     mimeMappings.put("wsdl", "text/xml");
     mimeMappings.put("xsd", "text/xml");
     webAppFragment.setMimeMappings(mimeMappings);
-    if (isApplyWsdlFilter()) {
+    if (isApplyWsdlFilter() && !getModelInternal().getNamespacesToWSDLs().isEmpty()) {
       WebAppComponent wsdlFilter = new WebAppComponent();
       wsdlFilter.setName("wsdl-filter");
       wsdlFilter.setClassname("org.codehaus.enunciate.webapp.WSDLFilter");
@@ -521,7 +521,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
         docsDir = docsDir.substring(0, docsDir.length() - 1);
       }
 
-      for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
         Object filename = wsdlInfo.getProperty("filename");
         if (filename != null) {
 

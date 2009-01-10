@@ -252,6 +252,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
           }
         }
         //todo: warn about resource methods that are not public?
+        //todo: error out with ambiguous resource methods (produce same thing at same path with same method)?
       }
     }
     return result;

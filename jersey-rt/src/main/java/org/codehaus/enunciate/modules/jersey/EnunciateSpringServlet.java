@@ -25,22 +25,14 @@ import java.util.Map;
  */
 public class EnunciateSpringServlet extends ServletContainer {
 
+  static final ThreadLocal<HttpServletRequest> CURRENT_REQUEST = new ThreadLocal<HttpServletRequest>();
+  static final ThreadLocal<HttpServletResponse> CURRENT_RESPONSE = new ThreadLocal<HttpServletResponse>();
+
   private static final Log LOG = LogFactory.getLog(EnunciateSpringServlet.class);
   private ResourceConfig resourceConfig;
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
-    //todo: uncomment when issues 101 and 102 are resolved.
-//    try {
-//      //attempt to load the JSON providers.
-//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONRootElementProvider"));
-//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONJAXBElementProvider"));
-//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONArrayProvider"));
-//      rc.getClasses().add(ClassUtils.forName("com.sun.jersey.impl.provider.entity.JSONObjectProvider"));
-//    }
-//    catch (Throwable e) {
-//      LOG.info("Apparently, no JSON providers are on the classpath (" + e.getMessage() + ").");
-//    }
     rc.getClasses().add(EnunciateJAXBContextResolver.class);
 
     InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/jaxrs-providers.list");
@@ -110,6 +102,19 @@ public class EnunciateSpringServlet extends ServletContainer {
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     request = new JerseyAdaptedHttpServletRequest(request, this.resourceConfig);
-    super.service(request, response);
+    try {
+      CURRENT_REQUEST.set(request);
+      CURRENT_RESPONSE.set(response);
+      super.service(request, response);
+    }
+    finally {
+      CURRENT_REQUEST.remove();
+      CURRENT_RESPONSE.remove();
+    }
+  }
+
+  @Override
+  protected WebApplication create() {
+    return new EnunciateWebApplication(super.create());
   }
 }
