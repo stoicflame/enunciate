@@ -16,22 +16,27 @@
 
 package org.codehaus.enunciate.modules.jaxws;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.ReferenceType;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
-import org.codehaus.enunciate.main.FileArtifact;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeSet;
-
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
  * <h1>JAX-WS Module</h1>
@@ -43,9 +48,9 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * by any other module.</p>
  *
  * <ul>
- *   <li><a href="#steps">steps</a></li>
- *   <li><a href="#config">configuration</a></li>
- *   <li><a href="#artifacts">artifacts</a></li>
+ * <li><a href="#steps">steps</a></li>
+ * <li><a href="#config">configuration</a></li>
+ * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
  * <h1><a name="steps">Steps</a></h1>
@@ -57,11 +62,11 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * <h1><a name="config">Configuration</a></h1>
  *
  * <p>There are no configuration options for the jaxws deployment module</p>
- * 
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The jaxws deployment module exports its source directory under artifact id "<b>jaxws.src.dir</b>" during the generate step.</p>
- * 
+ *
  * @author Ryan Heaton
  * @docFileName module_jaxws.html
  */
@@ -107,6 +112,30 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
           }
         }
       }
+
+      //we're going to process the JAX-RS thrown types annotated with @WebFault in case we ever want to serialize the fault beans as XML...
+      for (RootResource rootResource : model.getRootResources()) {
+        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+          for (ReferenceType referenceType : resourceMethod.getThrownTypes()) {
+            if (!(referenceType instanceof DeclaredType)) {
+              throw new ValidationException(resourceMethod.getPosition(), "Thrown type must be a declared type.");
+            }
+
+            TypeDeclaration declaration = ((DeclaredType) referenceType).getDeclaration();
+
+            if (declaration == null) {
+              throw new ValidationException(resourceMethod.getPosition(), "Unknown declaration for " + referenceType);
+            }
+            else if (declaration.getAnnotation(javax.xml.ws.WebFault.class) != null) {
+              WebFault fault = new WebFault((ClassDeclaration) declaration);
+              if (fault.isImplicitSchemaElement() && visitedFaults.add(fault)) {
+                model.put("message", fault);
+                processTemplate(faultBeanTemplate, model);
+              }
+            }
+          }
+        }
+      }
     }
     else {
       info("Skipping JAX-WS support generation as everything appears up-to-date...");
@@ -137,7 +166,7 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
     if (super.isDisabled()) {
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty() && getModelInternal().getRootResources().isEmpty()) {
       debug("JAX-WS module is disabled because there are no endpoint interfaces.");
       return true;
     }
