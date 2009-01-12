@@ -4,8 +4,9 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.8.xsd">
   <deployment host="www.ifyouwannabecool.com" context="api"/>
   <namespaces>
-    <namespace id="api" uri="http://api.ifyouwannabecool.com"/>
-    <namespace id="data" uri=""/>
+    <namespace id="api" uri="http://api.ifyouwannabecool.com/"/>
+    <namespace id="link" uri="http://api.ifyouwannabecool.com/link"/>
+    <namespace id="persona" uri="http://api.ifyouwannabecool.com/persona"/>
   </namespaces>
   <modules>
     <xfire-client>

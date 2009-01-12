@@ -23,6 +23,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Containers;
+import com.sun.jersey.samples.storageservice.Item;
 import junit.framework.TestCase;
 
 /**
@@ -76,9 +77,12 @@ public class TestJerseyStorageService extends TestCase {
 
     resource = getStorageResource("xml");
     assertEquals(200, resource.path("containers").get(ClientResponse.class).getStatus());
-    //todo: uncomment when issues 101 and 102 are resolved.
-//    resource = getStorageResource("json");
-//    assertEquals(200, resource.path("containers").get(ClientResponse.class).getStatus());
+
+    response = resource.path("spring/item").get(ClientResponse.class);
+    assertEquals(200, response.getStatus());
+    Item item = response.getEntity(Item.class);
+    assertEquals("SpringItem", item.getName());
+    assertEquals("urn:SpringItem", item.getUri());
   }
 
   protected WebResource getStorageResource() {

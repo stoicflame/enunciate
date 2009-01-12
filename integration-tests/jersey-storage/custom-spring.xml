@@ -1,0 +1,9 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="springManaged" class="com.sun.jersey.samples.storageservice.resources.SpringManagedResource">
+    <property name="itemName" value="SpringItem"/>
+    <property name="itemURI" value="urn:SpringItem"/>
+  </bean>
+
+</beans>
