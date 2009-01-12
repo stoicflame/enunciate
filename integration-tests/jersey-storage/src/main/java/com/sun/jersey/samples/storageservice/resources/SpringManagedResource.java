@@ -21,14 +21,15 @@ import com.sun.jersey.samples.storageservice.Item;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * @author Ryan Heaton
  */
 @Path ("/spring")
 public class SpringManagedResource {
 
-  private String itemName;
-  private String itemURI;
+  private Item specialItem;
 
   /**
    * Get an item.
@@ -37,23 +38,12 @@ public class SpringManagedResource {
    */
   @GET
   @Path ("/item")
-  public Item getItem() {
-    return new Item(getItemName(), getItemURI());
+  public Item getSpecialItem() {
+    return specialItem;
   }
 
-  public String getItemName() {
-    return itemName;
-  }
-
-  public void setItemName(String itemName) {
-    this.itemName = itemName;
-  }
-
-  public String getItemURI() {
-    return itemURI;
-  }
-
-  public void setItemURI(String itemURI) {
-    this.itemURI = itemURI;
+  @Autowired
+  public void setSpecialItem(Item specialItem) {
+    this.specialItem = specialItem;
   }
 }

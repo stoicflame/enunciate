@@ -1,9 +1,17 @@
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
-  <bean id="springManaged" class="com.sun.jersey.samples.storageservice.resources.SpringManagedResource">
-    <property name="itemName" value="SpringItem"/>
-    <property name="itemURI" value="urn:SpringItem"/>
+  <context:annotation-config/>
+
+  <bean id="springManaged" class="com.sun.jersey.samples.storageservice.resources.SpringManagedResource"/>
+  <bean id="autowiredItem" class="com.sun.jersey.samples.storageservice.Item">
+    <property name="name" value="SpringItem"/>
+    <property name="uri" value="urn:SpringItem"/>
   </bean>
 
 </beans>
