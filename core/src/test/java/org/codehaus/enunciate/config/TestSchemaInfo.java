@@ -56,6 +56,7 @@ public class TestSchemaInfo extends InAPTTestCase {
         return Arrays.asList(beanThreeElement, beanFourElement);
       }
     };
+    schemaInfo.setNamespace("http://my.ns");
 
     Set<String> referencedNamespaces = schemaInfo.getReferencedNamespaces();
     assertTrue(referencedNamespaces.remove("http://org.codehaus.enunciate/core/samples/another"));
@@ -63,6 +64,7 @@ public class TestSchemaInfo extends InAPTTestCase {
     assertTrue(referencedNamespaces.remove("urn:schema.BeanThree.property1"));
     assertTrue(referencedNamespaces.remove("urn:SimpleTypeComplexContentBean.Property2"));
     assertTrue(referencedNamespaces.remove("urn:SimpleTypeComplexContentBean.Property3"));
+    assertTrue(referencedNamespaces.remove("http://my.ns"));
     assertEquals(0, referencedNamespaces.size());
   }
 

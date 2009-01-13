@@ -231,6 +231,7 @@ public class SchemaInfo {
       }
     }
 
+    referencedNamespaces.add(getNamespace());
     //remove the obvious referenced namespace.
     referencedNamespaces.remove("http://www.w3.org/2001/XMLSchema");
 

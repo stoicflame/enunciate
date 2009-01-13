@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <!-- this log4j file is just so that commons digester won't output the "missing log4j" error. -->
+  <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.SimpleLayout"/>
+  </appender>
+
+  <root>
+    <level value ="error"/>
+    <appender-ref ref="ConsoleAppender"/>
+  </root>
+
+</log4j:configuration>
