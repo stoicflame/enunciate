@@ -48,10 +48,10 @@ import java.util.TreeSet;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="true"/>&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-ri disabled="false">&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="true"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-ri disabled="false"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;...
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/jaxws-ri>&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/jaxws-ri&gt;
  * &nbsp;&nbsp;&lt;/modules&gt;
  * &lt;/enunciate&gt;
  *

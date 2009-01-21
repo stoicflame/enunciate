@@ -406,7 +406,6 @@ This directory contains jars that are optional for Enunciate because they suppor
       <zipfileset dir="${basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <zipfileset dir="target/bin" prefix="${dist.name}/bin"/>
       <zipfileset dir="target/lib" prefix="${dist.name}/lib"/>
-      <zipfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <zipfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
       <zipfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
@@ -422,7 +421,6 @@ This directory contains jars that are optional for Enunciate because they suppor
       <tarfileset dir="${basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <tarfileset dir="target/bin" prefix="${dist.name}/bin" mode="766"/>
       <tarfileset dir="target/lib" prefix="${dist.name}/lib"/>
-      <tarfileset dir="target/module-libs" prefix="${dist.name}/modules" includes="*.jar"/>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <tarfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
       <tarfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>

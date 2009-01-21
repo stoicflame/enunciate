@@ -56,6 +56,17 @@ import java.util.*;
  * <p>The order of the JAX-WS client deployment module is 50, so as to allow the JAX-WS module to apply
  * metadata to the endpoints before processing the client.</p>
  *
+ * <p>Note that the JAX-WS Client module is disabled by default, so you must enable it in the enunciate configuration file, e.g.:</p>
+ *
+ * <code class="console">
+ * &lt;enunciate&gt;
+ * &nbsp;&nbsp;&lt;modules&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-client disabled="false"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/jaxws-client&gt;
+ * &nbsp;&nbsp;&lt;/modules&gt;
+ * &lt;/enunciate&gt;
+ *
  * <ul>
  * <li><a href="#steps">steps</a></li>
  * <li><a href="#config">configuration</a></li>
