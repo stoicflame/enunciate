@@ -163,7 +163,7 @@
               </${xs}:choice>
           [#else]
             [#if element.ref?exists]
-              <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
               [#if element.docValue?exists]
               <${xs}:annotation>
                 <${xs}:documentation>
@@ -173,7 +173,7 @@
               [/#if]
               </${xs}:element>
             [#elseif element.baseType.anonymous]
-              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
               [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
@@ -184,7 +184,7 @@
                 [@processAnonymousType type=element.baseType/]
               </${xs}:element>
             [#elseif element.xmlList]
-              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
               [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
@@ -197,7 +197,7 @@
                 </${xs}:simpleType>
               </${xs}:element>
             [#else]
-              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
               [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
@@ -287,18 +287,18 @@
         <${xs}:complexType>
           <${xs}:sequence>
             [#if mapType.keyType.anonymous]
-            <${xs}:element name="key" minOccurs="1" maxOccurs="1">
+            <${xs}:element name="key" minOccurs="1">
               [@processAnonymousType type=mapType.keyType/]
             </${xs}:element>
             [#else]
-            <${xs}:element name="key" minOccurs="1" maxOccurs="1" type="${mapType.keyType.qname}"/>
+            <${xs}:element name="key" minOccurs="1" type="${mapType.keyType.qname}"/>
             [/#if]
             [#if mapType.valueType.anonymous]
-            <${xs}:element name="value" minOccurs="1" maxOccurs="1">
+            <${xs}:element name="value" minOccurs="1">
               [@processAnonymousType type=mapType.valueType/]
             </${xs}:element>
             [#else]
-            <${xs}:element name="value" minOccurs="1" maxOccurs="1" type="${mapType.valueType.qname}"/>
+            <${xs}:element name="value" minOccurs="1" type="${mapType.valueType.qname}"/>
             [/#if]
           </${xs}:sequence>
         </${xs}:complexType>
@@ -332,7 +332,7 @@
     [/#if]
   <${xs}:sequence>
       [#list childElements as childElement]
-    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}" maxOccurs="${childElement.maxOccurs}">
+    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if]>
         [#if childElement.elementDocs?exists]
       <${xs}:annotation>
         <${xs}:documentation>

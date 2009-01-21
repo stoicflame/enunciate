@@ -221,7 +221,7 @@ public class TestFullXMLAPI extends TestCase {
           if ("storePerson".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
             assertEquals("literal", soapBody.getUse());
@@ -233,7 +233,7 @@ public class TestFullXMLAPI extends TestCase {
           else if ("readPersons".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
             assertEquals("literal", soapBody.getUse());
@@ -261,7 +261,7 @@ public class TestFullXMLAPI extends TestCase {
           else if ("deletePerson".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
             assertEquals("literal", soapBody.getUse());
@@ -285,7 +285,7 @@ public class TestFullXMLAPI extends TestCase {
           if ("addSource".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
             assertEquals("literal", soapBody.getUse());
@@ -297,7 +297,7 @@ public class TestFullXMLAPI extends TestCase {
           else if ("getSource".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             SOAPBody soapBody = (SOAPBody) operation.getBindingInput().getExtensibilityElements().get(0);
             assertEquals("literal", soapBody.getUse());
@@ -311,7 +311,7 @@ public class TestFullXMLAPI extends TestCase {
           else if ("addEvents".equals(operationName)) {
             SOAPOperation soapOp = (SOAPOperation) operation.getExtensibilityElements().get(0);
             assertEquals("", soapOp.getSoapActionURI());
-            assertEquals("document", soapOp.getStyle());
+            assertNull(soapOp.getStyle());
 
             List inputEls = operation.getBindingInput().getExtensibilityElements();
             assertEquals(2, inputEls.size());
@@ -487,7 +487,7 @@ public class TestFullXMLAPI extends TestCase {
       }
       else if ("PersonService.readPersons".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("readPersons");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "readPersons"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -499,7 +499,7 @@ public class TestFullXMLAPI extends TestCase {
 //      }
       else if ("PersonService.deletePerson".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("deletePerson");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "deletePerson"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -511,7 +511,7 @@ public class TestFullXMLAPI extends TestCase {
       }
       else if ("PersonService.readPersonsResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("readPersonsResponse");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "readPersonsResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -523,25 +523,25 @@ public class TestFullXMLAPI extends TestCase {
 //      }
       else if ("PersonService.deletePersonResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("deletePersonResponse");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "deletePersonResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("SourceService.addSource".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("addSource");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "addSource"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("SourceService.getSource".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("getSource");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "getSource"), part.getElementName());
         assertNull(part.getTypeName());
       }
       else if ("SourceService.addEvents".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("addEvents");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "addEvents"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -562,7 +562,7 @@ public class TestFullXMLAPI extends TestCase {
       }
       else if ("SourceService.getSourceResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("getSourceResponse");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "getSourceResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }
@@ -574,7 +574,7 @@ public class TestFullXMLAPI extends TestCase {
       }
       else if ("SourceService.addEventsResponse".equals(messageName)) {
         assertEquals(1, message.getParts().size());
-        Part part = message.getPart("addEventsResponse");
+        Part part = message.getPart("parameters");
         assertEquals(new QName(FULL_NAMESPACE, "addEventsResponse"), part.getElementName());
         assertNull(part.getTypeName());
       }

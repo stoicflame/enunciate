@@ -37,8 +37,8 @@
       <p>Enunciate can be invoked in a variety of different ways:</p>
 
       <ul>
-        <li><a href="#ant">Ant</a></li>
         <li><a href="#maven">Maven</a></li>
+        <li><a href="#ant">Ant</a></li>
         <li><a href="#command">Command-Line Scripts</a></li>
         <li><a href="#program">Programmatically in Java</a></li>
       </ul>
@@ -52,12 +52,215 @@
       fully-packaged war exported by the <a href="module_spring_app.html">spring app module</a>, so you'll want to export the artifact identified
       by the id "spring.war.file".</p>
 
+      <a name="maven"><div class="break">&nbsp;</div></a>
+      <h1>Maven</h1>
+
+      <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
+      the artifact is "maven-enunciate-plugin". There are actually two ways to use the Maven Enunciate plugin.  The first is by attaching a standard goal
+      named "assemble" to a phase in the build lifecycle. The second is by simply leveraging the "enunciate-app" packaging. Both methods provide the same result.
+      The former is for use with the Maven "war" packaging and leverages the Maven War plugin to package up the war. The latter uses Enunciate's internal
+      mechanisms to build and package the war.</p>
+
+      <h2>Classpath Setup</h2>
+
+      <p>Maven users should already be aware that there are (at least) two different classpaths that are in play when invoking a Maven plugin: the plugin classpath
+      and the project dependency classpath. The Maven Enunciate plugin already establishes its own plugin classpath, and this should rarely, if ever, have to be
+      manipulated. However, the project dependency classpath defines the libraries that are to be used to compile and run the application.</p>
+
+      <p>Enunciate provides a top-level runtime ("rt") POM that can be conveniently included in the project dependencies of an Enunciate project. The groupId
+      is "org.codehaus.enunciate" and the artifactId is "enunciate-rt". This is used to include the core libraries needed at runtime to drive the Enunciate
+      application, including the Jersey runtime, the XFire runtime, the Spring application runtime, etc.  As of version 1.9, there are alternatives to
+      the XFire runtime: <a href="module_jaxws_ri.html">JAX-WS RI</a> and <a href="module_cxf.html">CXF</a>.  If either of these modules are enabled, you will
+      want to exclude the XFire runtime ("org.codehaus.enunciate:xfire-rt") and include the runtimes of these modules ("org.codehaus.enunciate:jaxws-ri-rt"
+      and "org.codehaus.enunciate:cxf-rt" respectively).</p>
+
+      <h2>Configuration</h2>
+
+      <p>Note the following configuration parameters:</p>
+
+      <table cellspacing="0">
+        <tr>
+          <th>parameter</th>
+          <th>type</th>
+          <th class="last">description</th>
+        </tr>
+        <tr>
+          <td>configFile</td>
+          <td>File</td>
+          <td class="last">The enunciate configuration file.</td>
+        </tr>
+        <tr>
+          <td>generateDir</td>
+          <td>File</td>
+          <td class="last">The directory to use for the "generate" step.  The default is "${project.build.directory}/enunciate-generate" to make it available for IDEs.</td>
+        </tr>
+        <tr>
+          <td>compileDir</td>
+          <td>File</td>
+          <td class="last">The directory to use for the "compile" step.</td>
+        </tr>
+        <tr>
+          <td>buildDir</td>
+          <td>File</td>
+          <td class="last">The directory to use for the "build" step.</td>
+        </tr>
+        <tr>
+          <td>packageDir</td>
+          <td>File</td>
+          <td class="last">The directory to use for the "package" step.</td>
+        </tr>
+        <tr>
+          <td>outputDir</td>
+          <td>File</td>
+          <td class="last">The destintation directory for exports.  Defaults to the project build directory.</td>
+        </tr>
+        <tr>
+          <td>exports</td>
+          <td>Map</td>
+          <td class="last">The map of Enunciate artifacts to export.  Map of artifact id to destination.</td>
+        </tr>
+        <tr>
+          <td>artifacts</td>
+          <td>list of 'artifact'</td>
+          <td class="last">The list of artifacts to attach to the project.  Each 'artifact' element supports a 'enunciateArtifactId', 'classifier', and 'artifactType'.  This means that the enunciate artifact identified by 'enunciateArtifatId' will be attached to the project with as an artifact of type 'artifactType' and a classifier 'classifier'.</td>
+        </tr>
+        <tr>
+          <td>addGWTSources</td>
+          <td>boolean</td>
+          <td class="last">Whether the gwt source files (generated client-side classes and apps) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
+        </tr>
+        <tr>
+          <td>addActionscriptSources</td>
+          <td>boolean</td>
+          <td class="last">Whether the actionscript source files (generated client-side classes and services) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
+        </tr>
+        <tr>
+          <td>addXFireClientSourcesToTestClasspath</td>
+          <td>boolean</td>
+          <td class="last">Whether to add the generated XFire client-side code to the test classpath (for testing purposes).  Default: false.</td>
+        </tr>
+        <tr>
+          <td>addJAXWSClientSourcesToTestClasspath</td>
+          <td>boolean</td>
+          <td class="last">Whether to add the generated JAX-WS client-side code to the test classpath (for testing purposes).  Default: false.</td>
+        </tr>
+        <tr>
+          <td>gwtHome</td>
+          <td>String</td>
+          <td class="last">The path to the GWT home directory, in case you're developing GWT applications.</td>
+        </tr>
+        <tr>
+          <td>flexHome</td>
+          <td>String</td>
+          <td class="last">The path to the Flex home directory, in case you're developing Flex applications.</td>
+        </tr>
+        <tr>
+          <td>compileDebug</td>
+          <td>boolean</td>
+          <td class="last">Whether to compile with debug information.</td>
+        </tr>
+        <tr>
+          <td>warArtifactId</td>
+          <td>String</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "spring.war.file".</td>
+        </tr>
+        <tr>
+          <td>warArtifactName</td>
+          <td>String</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the primary Maven 2 artifact.  Defaults to the name of the Maven 2 project.</td>
+        </tr>
+        <tr>
+          <td>warArtifactClassifier</td>
+          <td>String</td>
+          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the classifier for the primary Maven 2 artifact (no default supplied).</td>
+        </tr>
+      </table>
+
+      <h2>Example</h2>
+
+      <p>The following is a pom for the enunciate application.  The enunciate configuration file is located at "path/to/enunciate.xml" relative to the
+      pom directory.  The JDK 1.4 client library jar (identified by artifact id "client.jdk14.library.binaries") is exported to "target/client.jar" during
+      the "package" phase.  Resources are copied and tests are run as usual with the Maven build lifecycle.</p>
+
+      <code>
+&lt;project ...&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;com.ifyouwannabecool.war&lt;/groupId&gt;
+  &lt;artifactId&gt;ifyouwannabecool&lt;/artifactId&gt;
+  &lt;packaging&gt;war&lt;/packaging&gt;
+  &lt;version&gt;1.9&lt;/version&gt;
+  &lt;name&gt;ifyouwannabecool&lt;/name&gt;
+  &lt;url&gt;http://www.ifyouwannabecool.com&lt;/url&gt;
+
+  &lt;build&gt;
+    &lt;plugins&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-enunciate-plugin&lt;/artifactId&gt;
+
+        &lt;configuration&gt;
+          &lt;configFile&gt;enunciate.xml&lt;/configFile&gt;
+          &lt;exports&gt;
+            &lt;client.jdk14.library.binaries&gt;client.jar&lt;/client.jdk14.library.binaries&gt;
+          &lt;/exports&gt;
+        &lt;/configuration&gt;
+        &lt;executions&gt;
+          &lt;execution&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;assemble&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/execution&gt;
+        &lt;/executions&gt;
+      &lt;/plugin&gt;
+      &lt;plugin&gt;
+        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+        &lt;configuration&gt;
+          &lt;source&gt;1.5&lt;/source&gt;
+          &lt;target&gt;1.5&lt;/target&gt;
+        &lt;/configuration&gt;
+      &lt;/plugin&gt;
+    &lt;/plugins&gt;
+  &lt;/build&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
+      &lt;artifactId&gt;enunciate-rt&lt;/artifactId&gt;
+      &lt;version&gt;1.9&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;junit&lt;/groupId&gt;
+      &lt;artifactId&gt;junit&lt;/artifactId&gt;
+      &lt;version&gt;3.8.1&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;
+      </code>
+
       <a name="ant"><div class="break">&nbsp;</div></a>
       <h1>Ant</h1>
 
       <p>There's an Ant task available, <a href="api/org/codehaus/enunciate/main/EnunciateTask.html">org.codehaus.enunciate.main.EnunciateTask</a>.  This task
         is an extension of a <a href="http://ant.apache.org/manual/api/org/apache/tools/ant/taskdefs/MatchingTask.html">MatchingTask</a>, so use the matching
-        task functionality to select the source files on which to invoke Enunciate. Here's a table of the additional attributes:</p>
+        task functionality to select the source files on which to invoke Enunciate.</p>
+
+      <h2>Defining the Enunciate Classpath</h2>
+
+      <p>In order to set up the Enunciate classpath from Ant, you will need to know which modules are to be enabled when Enunciate is invoked. All jars
+        necessary to support the Enunciate "core" modules are found in <tt>$ENUNCIATE_HOME/lib</tt>, where <tt>$ENUNCIATE_HOME</tt> is the path on the
+        filesystem where the Enunciate distribution was unpacked. These "core" modules include the Enunciate engine itself, the documentation module, the
+        Jersey module, the Enunciate REST module, the XML module, and the Spring app module.</p>
+
+      <p>Note the conspicuous abscense of any module dealing with the SOAP endpoints.  This is because as of Enunciate 1.9, there are multiple modules available
+        for processing the SOAP endpoints.  You'll have to take your pick of XFire, CXF, or JAX-WS RI. You'll also note that the GWT and AMF modules are not
+        included in the "core" Enunciate modules. Make sure you include on the Enunciate classpath any module libraries that are not included in the "core"
+      module libraries.  These are found in the <tt>$ENUNCIATE_HOME/lib/modules</tt> directory.</p>
+
+      <h2>Enunciate Task Attributes</h2>
+
+      <p>Here's a table of the additional attributes:</p>
 
       <table cellspacing="0">
         <tr>
@@ -163,10 +366,10 @@
 
 &lt;path id="enunciate.classpath"&gt;
   &lt;fileset dir="${enunciate.home}/lib"&gt;
-    &lt;include name="**/*.jar"/&gt;
+    &lt;include name="*.jar"/&gt;
   &lt;/fileset&gt;
-  &lt;fileset dir="${enunciate.home}"&gt;
-    &lt;include name="enunciate-full-*.jar"/&gt;
+  &lt;fileset dir="${enunciate.home}/lib/modules/xfire"&gt;
+    &lt;include name="*.jar"/&gt;
   &lt;/fileset&gt;
   &lt;fileset dir="${java.home}"&gt;
     &lt;include name="lib/tools.jar"/&gt;
@@ -190,179 +393,12 @@
       ${tomcat.home}/webapps/myapp.war, assuming ${enunciate.home} refers to the enunciate home directory. <u>Note
       that it's important to include $JAVA_HOME/lib/tools.jar on the classpath when invoking Enunciate.</u></p>
 
-      <a name="maven"><div class="break">&nbsp;</div></a>
-      <h1>Maven</h1>
-
-      <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
-      the artifact is "maven-enunciate-plugin". There are actually two ways to use the Maven Enunciate plugin.  The first is by attaching a standard goal
-      named "assemble" to a phase in the build lifecycle. The second is by simply leveraging the "enunciate-app" packaging. Both methods provide the same result.
-      The former is for use with the Maven "war" packaging and leverages the Maven War plugin to package up the war. The latter uses Enunciate's internal
-      mechanisms to build and package the war.</p>
-
-      <p>Note the following configuration parameters:</p>
-
-      <table cellspacing="0">
-        <tr>
-          <th>parameter</th>
-          <th>type</th>
-          <th class="last">description</th>
-        </tr>
-        <tr>
-          <td>configFile</td>
-          <td>File</td>
-          <td class="last">The enunciate configuration file.</td>
-        </tr>
-        <tr>
-          <td>generateDir</td>
-          <td>File</td>
-          <td class="last">The directory to use for the "generate" step.  The default is "${project.build.directory}/enunciate-generate" to make it available for IDEs.</td>
-        </tr>
-        <tr>
-          <td>compileDir</td>
-          <td>File</td>
-          <td class="last">The directory to use for the "compile" step.</td>
-        </tr>
-        <tr>
-          <td>buildDir</td>
-          <td>File</td>
-          <td class="last">The directory to use for the "build" step.</td>
-        </tr>
-        <tr>
-          <td>packageDir</td>
-          <td>File</td>
-          <td class="last">The directory to use for the "package" step.</td>
-        </tr>
-        <tr>
-          <td>outputDir</td>
-          <td>File</td>
-          <td class="last">The destintation directory for exports.  Defaults to the project build directory.</td>
-        </tr>
-        <tr>
-          <td>exports</td>
-          <td>Map</td>
-          <td class="last">The map of Enunciate artifacts to export.  Map of artifact id to destination.</td>
-        </tr>
-        <tr>
-          <td>artifacts</td>
-          <td>list of 'artifact'</td>
-          <td class="last">The list of artifacts to attach to the project.  Each 'artifact' element supports a 'enunciateArtifactId', 'classifier', and 'artifactType'.  This means that the enunciate artifact identified by 'enunciateArtifatId' will be attached to the project with as an artifact of type 'artifactType' and a classifier 'classifier'.</td>
-        </tr>
-        <tr>
-          <td>addGWTSources</td>
-          <td>boolean</td>
-          <td class="last">Whether the gwt source files (generated client-side classes and apps) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
-        </tr>
-        <tr>
-          <td>addActionscriptSources</td>
-          <td>boolean</td>
-          <td class="last">Whether the actionscript source files (generated client-side classes and services) should be added to the compile source roots of the project.  This is useful for the IDE plugins.  Default: true.</td>
-        </tr>
-        <tr>
-          <td>addXFireClientSourcesToTestClasspath</td>
-          <td>boolean</td>
-          <td class="last">Whether to add the generated client-side code to the test classpath (for testing purposes).  Default: false.</td>
-        </tr>
-        <tr>
-          <td>gwtHome</td>
-          <td>String</td>
-          <td class="last">The path to the GWT home directory, in case you're developing GWT applications.</td>
-        </tr>
-        <tr>
-          <td>flexHome</td>
-          <td>String</td>
-          <td class="last">The path to the Flex home directory, in case you're developing Flex applications.</td>
-        </tr>
-        <tr>
-          <td>compileDebug</td>
-          <td>boolean</td>
-          <td class="last">Whether to compile with debug information.</td>
-        </tr>
-        <tr>
-          <td>warArtifactId</td>
-          <td>String</td>
-          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The id of the Enunciate artifact that is to be the primary Maven 2 artifact.  Default: "spring.war.file".</td>
-        </tr>
-        <tr>
-          <td>warArtifactName</td>
-          <td>String</td>
-          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the primary Maven 2 artifact.  Defaults to the name of the Maven 2 project.</td>
-        </tr>
-        <tr>
-          <td>warArtifactClassifier</td>
-          <td>String</td>
-          <td class="last">(<i>For use only with "enunciate-app" packaging.</i>) The name of the classifier for the primary Maven 2 artifact (no default supplied).</td>
-        </tr>
-      </table>
-
-      <h2>Example</h2>
-
-      <p>The following is a pom for the enunciate application.  The enunciate configuration file is located at "path/to/enunciate.xml" relative to the
-      pom directory.  The JDK 1.4 client library jar (identified by artifact id "client.jdk14.library.binaries") is exported to "target/client.jar" during
-      the "package" phase.  Resources are copied and tests are run as usual with the Maven build lifecycle.</p>
-
-      <code>
-&lt;project ...&gt;
-  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-  &lt;groupId&gt;com.ifyouwannabecool.war&lt;/groupId&gt;
-  &lt;artifactId&gt;ifyouwannabecool&lt;/artifactId&gt;
-  &lt;packaging&gt;war&lt;/packaging&gt;
-  &lt;version&gt;1.8&lt;/version&gt;
-  &lt;name&gt;ifyouwannabecool&lt;/name&gt;
-  &lt;url&gt;http://www.ifyouwannabecool.com&lt;/url&gt;
-
-  &lt;build&gt;
-    &lt;plugins&gt;
-      &lt;plugin&gt;
-        &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
-        &lt;artifactId&gt;maven-enunciate-plugin&lt;/artifactId&gt;
-
-        &lt;configuration&gt;
-          &lt;configFile&gt;enunciate.xml&lt;/configFile&gt;
-          &lt;exports&gt;
-            &lt;client.jdk14.library.binaries&gt;client.jar&lt;/client.jdk14.library.binaries&gt;
-          &lt;/exports&gt;
-        &lt;/configuration&gt;
-        &lt;executions&gt;
-          &lt;execution&gt;
-            &lt;goals&gt;
-              &lt;goal&gt;assemble&lt;/goal&gt;
-            &lt;/goals&gt;
-          &lt;/execution&gt;
-        &lt;/executions&gt;
-      &lt;/plugin&gt;
-      &lt;plugin&gt;
-        &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
-        &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
-        &lt;configuration&gt;
-          &lt;source&gt;1.5&lt;/source&gt;
-          &lt;target&gt;1.5&lt;/target&gt;
-        &lt;/configuration&gt;
-      &lt;/plugin&gt;
-    &lt;/plugins&gt;
-  &lt;/build&gt;
-
-  &lt;dependencies&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
-      &lt;artifactId&gt;enunciate-rt&lt;/artifactId&gt;
-      &lt;version&gt;1.8&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-      &lt;groupId&gt;junit&lt;/groupId&gt;
-      &lt;artifactId&gt;junit&lt;/artifactId&gt;
-      &lt;version&gt;3.8.1&lt;/version&gt;
-      &lt;scope&gt;test&lt;/scope&gt;
-    &lt;/dependency&gt;
-  &lt;/dependencies&gt;
-&lt;/project&gt;
-      </code>
-
       <a name="command"><div class="break">&nbsp;</div></a>
       <h1>Command-Line Scripts</h1>
 
       <p>In the distribution bundle, you can find a bash script and a batch file that you should be able to use to invoke Enunciate.  The script attempts
-      to invoke <a href="api/org/codehaus/enunciate/main/Main.html">org.codehaus.enunciate.main.Main</a> with the full classpath
-      (see <a href="deps.html">dependencies</a>).  The scripts rely on the following environment variables being set:</p>
+      to invoke <a href="api/org/codehaus/enunciate/main/Main.html">org.codehaus.enunciate.main.Main</a> with the full classpath.  The scripts rely on
+        the following environment variables being set:</p>
 
       <table cellspacing="0">
         <tr>

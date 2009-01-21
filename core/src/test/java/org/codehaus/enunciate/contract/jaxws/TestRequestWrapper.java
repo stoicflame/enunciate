@@ -70,7 +70,7 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(defaultAnnotatedWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".defaultAnnotated", defaultAnnotatedWrapper.getMessageName());
-    assertEquals("defaultAnnotated", defaultAnnotatedWrapper.getPartName());
+    assertEquals("parameters", defaultAnnotatedWrapper.getPartName());
 
     RequestWrapper fullyAnnotatedWrapper = new RequestWrapper(fullyAnnotated);
     assertEquals("fully-annotated", fullyAnnotatedWrapper.getElementName());
@@ -93,7 +93,7 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(fullyAnnotatedWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".fullyAnnotated", fullyAnnotatedWrapper.getMessageName());
-    assertEquals("fullyAnnotated", fullyAnnotatedWrapper.getPartName());
+    assertEquals("parameters", fullyAnnotatedWrapper.getPartName());
 
     RequestWrapper withHeaderWrapper = new RequestWrapper(withHeader);
     assertEquals("withHeader", withHeaderWrapper.getElementName());
@@ -116,7 +116,7 @@ public class TestRequestWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(withHeaderWrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".withHeader", withHeaderWrapper.getMessageName());
-    assertEquals("withHeader", withHeaderWrapper.getPartName());
+    assertEquals("parameters", withHeaderWrapper.getPartName());
   }
 
   public static Test suite() {

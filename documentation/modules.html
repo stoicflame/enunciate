@@ -39,6 +39,10 @@
       the REST endpoints, the xfire-client module generates the xfire client libraries, etc.  Since each module has a specific set of work to do, each module
       has also a separate set of configuration options.</p>
 
+      <p>As of Enunciate 1.9, there are three different modules for handling the SOAP endpoints of your application: <a href="module_xfire.html">XFire</a>,
+        <a href="module_jaxws_ri.html">JAX-WS RI</a>, and <a href="module_cxf.html">CXF</a>.  The current default is XFire; the others are disabled by
+        default. To use a different runtime stack, see <a href="executables.html">invoking Enunciate</a>.</p>
+
       <p>The modules that are to be included in the Enunciate mechanism are discovered at runtime using <a href="http://java.sun.com/j2se/1.3/docs/guide/jar/jar.html#Service%20Provider">Sun's
         discovery mechanism</a>.</p>
 
@@ -60,7 +64,15 @@
         </li>
         <li>
           <h3><a href="module_xfire.html">xfire</a></h3>
-          <p>Generates support classes for deploying SOAP endpoints (using <a href="http://xfire.codehaus.org/">XFire</a>).</p>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="http://xfire.codehaus.org/">XFire</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_jaxws_ri.html">JAX-WS RI</a></h3>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a> (disabled by default in deference to the XFire module).</p>
+        </li>
+        <li>
+          <h3><a href="module_cxf.html">CXF</a></h3>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="http://cxf.apache.org/">CXF</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
           <h3><a href="module_spring_app.html">spring-app</a></h3>

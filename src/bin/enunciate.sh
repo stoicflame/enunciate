@@ -52,4 +52,4 @@ if [ ! -f $ENUNCIATE_JAVA_HOME/lib/tools.jar ] ; then
   fi
 fi
 
-$ENUNCIATE_JAVA_HOME/bin/java -cp {UNIX_CLASSPATH}:$ENUNCIATE_HOME/{FULL_JAR_NAME}:$ENUNCIATE_JAVA_HOME/lib/tools.jar org.codehaus.enunciate.main.Main $@
+$ENUNCIATE_JAVA_HOME/bin/java -cp {UNIX_CLASSPATH}:$ENUNCIATE_JAVA_HOME/lib/tools.jar org.codehaus.enunciate.main.Main $@

@@ -123,7 +123,8 @@
         </li>
         <li>
           <h3><a href="module_jaxws.html">jaxws</a></h3>
-          <p>Generates the JAX-WS request/response/fault wrappers according to the JAX-WS specification</p>
+          <p>Generates and compiles the support files and classes necessary to support a REST application according to
+            <a href="https://jsr311.dev.java.net/">JSR-311</a>, using <a href="https://jersey.dev.java.net/">Jersey</a>.</p>
         </li>
         <li>
           <h3><a href="module_jersey.html">jersey</a></h3>
@@ -131,7 +132,15 @@
         </li>
         <li>
           <h3><a href="module_xfire.html">xfire</a></h3>
-          <p>Generates support classes for deploying SOAP endpoints (using <a href="http://xfire.codehaus.org/">XFire</a>).</p>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="http://xfire.codehaus.org/">XFire</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_jaxws_ri.html">JAX-WS RI</a></h3>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a> (disabled by default in deference to the XFire module).</p>
+        </li>
+        <li>
+          <h3><a href="module_cxf.html">CXF</a></h3>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="http://cxf.apache.org/">CXF</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
           <h3><a href="module_spring_app.html">spring-app</a></h3>
@@ -166,7 +175,7 @@
       <h1>Configuration</h1>
 
       <p>Configuration for the Enunciate engine (including any of its modules) is done in a single XML file that conforms to
-        <a href="schemas/enunciate-1.8.xsd">this schema</a>.  Here are some of the more interesting configuration options:</p>
+        <a href="schemas/enunciate-1.9.xsd">this schema</a>.  Here are some of the more interesting configuration options:</p>
 
       <ul>
         <li>

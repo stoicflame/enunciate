@@ -244,7 +244,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
    * @return The simple name of the method appended with "Response".
    */
   public String getPartName() {
-    return webMethod.getSimpleName() + "Response";
+    return "parameters";
   }
 
 }

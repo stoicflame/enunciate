@@ -179,7 +179,7 @@ Template library for WSDL.
     <${soap}:binding transport="http://schemas.xmlsoap.org/soap/http" style="${endpointInterface.soapBindingStyle?lower_case}"/>
       [@forEachWebMethod endpointInterface=endpointInterface]
     <${wsdldef}:operation name="${webMethod.operationName}">
-      <${soap}:operation soapAction="${webMethod.action}" style="${webMethod.soapBindingStyle?lower_case}"/>
+      <${soap}:operation soapAction="${webMethod.action}"[#if (webMethod.soapBindingStyle?lower_case) != (endpointInterface.soapBindingStyle?lower_case)] style="${webMethod.soapBindingStyle?lower_case}"[/#if]/>
       <${wsdldef}:input>
         [@forEachWebMessage webMethod=webMethod var="message" includeFaults=false includeOutput=false]
           [#if message.header]

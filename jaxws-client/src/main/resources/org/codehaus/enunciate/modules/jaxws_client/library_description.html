@@ -4,7 +4,13 @@
 
 <p>
   The JAX-WS client-side library may be used to access the SOAP API for this application via
-  the Java runtime, using <a href="https://jax-ws.dev.java.net/">JAX-WS</a>. This may reduce the
-  dependency bloat over the other Java libraries (as of Java 6, JAX-WS ships with the JDK), but
+  the Java runtime, using <a href="https://jax-ws.dev.java.net/">JAX-WS</a>. This is a slim, light,
+  client library with minimal dependency bloat (as of Java 6, JAX-WS ships with the JDK), but
   it requires Java 5+.
+</p>
+
+<p>
+  The JAX-WS client-side library is also used to provide the set of Java objects that can be serialized
+  to/from XML using <a href="https://jaxb.dev.java.net/">JAXB</a>.  This is useful for accessing the
+  REST endpoints that are published by this application.
 </p>

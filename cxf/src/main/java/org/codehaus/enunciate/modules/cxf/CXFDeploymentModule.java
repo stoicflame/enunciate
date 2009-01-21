@@ -43,7 +43,22 @@ import java.util.List;
 /**
  * <h1>CXF Module</h1>
  *
- * <p>The CXF module assembles a CXF-based server-side application for hosting the SOAP endpoints.</i>
+ * <p>The CXF module assembles a CXF-based server-side application for hosting the SOAP endpoints.</p>
+ *
+ * <p>Note that the CXF module is disabled by default, so you must enable it in the enunciate configuration file, e.g.:</p>
+ *
+ * <code class="console">
+ * &lt;enunciate&gt;
+ * &nbsp;&nbsp;&lt;modules&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="true"/>&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;cxf disabled="false">&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/jaxws-ri>&gt;
+ * &nbsp;&nbsp;&lt;/modules&gt;
+ * &lt;/enunciate&gt;
+ *
+ * <p>You should also be aware that the CXF module is not, by default, on the classpath when invoking Enunciate. For more information, 
+ * see <a href="executables.html">invoking Enunciate</a></p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>

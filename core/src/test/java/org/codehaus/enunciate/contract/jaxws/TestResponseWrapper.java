@@ -67,7 +67,7 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".fullyAnnotatedResponse", wrapper.getMessageName());
-    assertEquals("fullyAnnotatedResponse", wrapper.getPartName());
+    assertEquals("parameters", wrapper.getPartName());
 
     wrapper = new ResponseWrapper(defaultAnnotated);
     assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.DefaultAnnotatedResponse", wrapper.getResponseBeanName());
@@ -88,7 +88,7 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".defaultAnnotatedResponse", wrapper.getMessageName());
-    assertEquals("defaultAnnotatedResponse", wrapper.getPartName());
+    assertEquals("parameters", wrapper.getPartName());
 
     wrapper = new ResponseWrapper(withInOut);
     assertEquals(ei.getPackage().getQualifiedName() + ".jaxws.WithInOutResponse", wrapper.getResponseBeanName());
@@ -111,7 +111,7 @@ public class TestResponseWrapper extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(wrapper, parts.iterator().next());
     assertEquals(ei.getSimpleName() + ".withInOutResponse", wrapper.getMessageName());
-    assertEquals("withInOutResponse", wrapper.getPartName());
+    assertEquals("parameters", wrapper.getPartName());
 
   }
 

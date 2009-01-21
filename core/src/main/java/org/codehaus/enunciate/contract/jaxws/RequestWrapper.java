@@ -228,7 +228,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
    * @return The simple name of the method.
    */
   public String getPartName() {
-    return webMethod.getSimpleName();
+    return "parameters";
   }
 
 }
