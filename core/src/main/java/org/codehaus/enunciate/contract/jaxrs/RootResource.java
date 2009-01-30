@@ -74,9 +74,15 @@ public class RootResource extends Resource {
 
       Collection<ConstructorDeclaration> constructors = ((ClassDeclaration) delegate).getConstructors();
       ConstructorDeclaration chosen = null;
-      for (ConstructorDeclaration constructor : constructors) {
+      CONSTRUCTOR_LOOP : for (ConstructorDeclaration constructor : constructors) {
         //the one with the most params is the chosen one.
         if (chosen == null || constructor.getParameters().size() > chosen.getParameters().size()) {
+          //Has more constructor parameters.  See if they're all Jersey-provided.
+          for (ParameterDeclaration param : constructor.getParameters()) {
+            if (!ResourceParameter.isResourceParameter(param)) {
+              continue CONSTRUCTOR_LOOP;
+            }
+          }
           chosen = constructor;
         }
       }

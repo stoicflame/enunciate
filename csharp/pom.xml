@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.10-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-csharp</artifactId>
+  <name>Enunciate - C# Module</name>
+  <description>The Enunciate C# module generates the C# client code for accessing the Enunciate services.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>

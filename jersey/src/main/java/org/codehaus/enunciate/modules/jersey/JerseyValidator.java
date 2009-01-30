@@ -22,9 +22,12 @@ import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.*;
 import java.util.List;
+import java.util.ArrayList;
 
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import com.sun.mirror.declaration.*;
 
 /**
  * @author Ryan Heaton
@@ -42,6 +45,42 @@ public class JerseyValidator extends BaseValidator {
     ValidationResult result = new ValidationResult();
 
     for (RootResource rootResource : rootResources) {
+      List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
+      boolean springManaged = rootResource.getAnnotation(SpringManagedLifecycle.class) != null;
+      CONSTRUCTOR_LOOP : for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
+        if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
+          for (ParameterDeclaration constructorParam : constructor.getParameters()) {
+            if (springManaged) {
+              if (isSuppliableByJAXRS(constructorParam)) {
+                result.addWarning(constructorParam, "Constructor parameter will not be supplied by JAX-RS if the lifecycle of this resource is Spring-managed.");
+              }
+            }
+            else if (!isSuppliableByJAXRS(constructorParam)) {
+              //none of those annotation are available. not a candidate constructor.
+              continue CONSTRUCTOR_LOOP;
+            }
+          }
+
+          candidates.add(constructor);
+        }
+      }
+
+      if (candidates.isEmpty() && !springManaged) {
+        result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values. " +
+          "If the resource lifecycle is to be managed by Spring (which will handle the construction of the bean), then please apply the @" +
+          SpringManagedLifecycle.class.getName() + " annotation to the resource.");
+      }
+      else {
+        while (!candidates.isEmpty()) {
+          ConstructorDeclaration candidate = candidates.remove(0);
+          for (ConstructorDeclaration other : candidates) {
+            if (candidate.getParameters().size() == other.getParameters().size()) {
+              result.addWarning(rootResource, "Ambiguous JAX-RS constructors (same parameter count).");
+            }
+          }
+        }
+      }
+
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
         if ("/*".equals(resourceMethod.getServletPattern())) {
           if (!allowWildcardServlet) {
@@ -81,4 +120,20 @@ public class JerseyValidator extends BaseValidator {
 
     return result;
   }
+
+  /**
+   * Whether the specified declaration is suppliable by JAX-RS.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified declaration is suppliable by JAX-RS.
+   */
+  protected boolean isSuppliableByJAXRS(Declaration declaration) {
+    return (declaration.getAnnotation(MatrixParam.class) != null)
+        || (declaration.getAnnotation(PathParam.class) != null)
+        || (declaration.getAnnotation(QueryParam.class) != null)
+        || (declaration.getAnnotation(CookieParam.class) != null)
+        || (declaration.getAnnotation(HeaderParam.class) != null)
+        || (declaration.getAnnotation(javax.ws.rs.core.Context.class) != null);
+  }
+
 }

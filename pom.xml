@@ -28,6 +28,7 @@
     <module>xfire-client-rt</module>
     <module>xfire-client</module>
     <module>jaxws-client</module>
+    <module>csharp</module>
     <module>docs</module>
     <module>amf-rt</module>
     <module>amf</module>

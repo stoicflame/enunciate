@@ -187,34 +187,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
     ValidationResult result = new ValidationResult();
     for (RootResource rootResource : rootResources) {
-      List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
-      CONSTRUCTOR_LOOP : for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
-        if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
-          for (ParameterDeclaration constructorParam : constructor.getParameters()) {
-            if (!isSuppliableByJAXRS(constructorParam)) {
-              //none of those annotation are available. not a candidate constructor.
-              continue CONSTRUCTOR_LOOP;
-            }
-          }
-
-          candidates.add(constructor);
-        }
-      }
-
-      if (candidates.isEmpty()) {
-        result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values.");
-      }
-      else {
-        while (!candidates.isEmpty()) {
-          ConstructorDeclaration candidate = candidates.remove(0);
-          for (ConstructorDeclaration other : candidates) {
-            if (candidate.getParameters().size() == other.getParameters().size()) {
-              result.addWarning(rootResource, "Ambiguous JAX-RS constructors (same parameter count).");
-            }
-          }
-        }
-      }
-
       for (FieldDeclaration field : rootResource.getFields()) {
         if (isSuppliableByJAXRS(field) && ((field.getAnnotation(javax.ws.rs.core.Context.class) == null) && !isConvertableToStringByJAXRS(field.getType()))) {
           result.addError(field, "Unsupported JAX-RS type.");
