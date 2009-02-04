@@ -1,0 +1,84 @@
+[#ftl]
+[#import "csharp-metadata.fmt" as libCSharpMetadata/]
+[#--template for the client-side complex type.--]
+[#macro writeComplexType type]
+namespace ${namespaceFor(type)} {
+
+  /// <remarks>
+  ///  ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}
+  /// </remarks>
+  [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
+  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]class ${simpleNameFor(type)} [#if !type.contentType.implied]: ${classnameFor(type.superclass)} [/#if]{
+
+  [#list type.attributes as attribute]
+    [#if !accessorOverridesAnother(attribute)]
+    private ${classnameFor(attribute)} _${attribute.simpleName};
+    [/#if]
+  [/#list]
+  [#if type.value?exists]
+    [#if !accessorOverridesAnother(type.value)]
+    private ${classnameFor(type.value)} _${type.value.simpleName};
+    [/#if]
+  [#else]
+    [#list type.elements as element]
+      [#if !accessorOverridesAnother(element)]
+    private ${classnameFor(element)} _${element.simpleName};
+      [/#if]
+    [/#list]
+  [/#if]
+  [#list type.attributes as attribute]
+    [#if !accessorOverridesAnother(attribute)]
+
+    /// <summary>
+    ///  ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=attribute /]
+    public [#if accessorOverridesAnother(attribute)]override [/#if]${classnameFor(attribute)} ${attribute.simpleName?cap_first} {
+      get {
+        return this._${attribute.simpleName};
+      }
+      set {
+        this._${attribute.simpleName} = value;
+      }
+    }
+    [/#if]
+  [/#list]
+  [#if type.value?exists]
+    [#if !accessorOverridesAnother(type.value)]
+
+    /// <summary>
+    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
+    public [#if accessorOverridesAnother(type.value)]override [/#if]${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
+      get {
+        return this._${type.value.simpleName};
+      }
+      set {
+        this._${type.value.simpleName} = value;
+      }
+    }
+    [/#if]
+  [#else]
+    [#list type.elements as element]
+      [#if !accessorOverridesAnother(element)]
+
+    /// <summary>
+    ///  ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=element /]
+    public ${classnameFor(element)} ${element.simpleName?cap_first} {
+      get {
+        return this._${element.simpleName};
+      }
+      set {
+        this._${element.simpleName} = value;
+      }
+    }
+      [/#if]
+    [/#list]
+  [/#if]
+
+  }
+}  
+[/#macro]

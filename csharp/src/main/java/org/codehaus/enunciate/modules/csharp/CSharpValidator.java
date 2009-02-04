@@ -16,12 +16,12 @@
 
 package org.codehaus.enunciate.modules.csharp;
 
+import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-
-import java.util.Map;
-import java.util.HashMap;
+import org.codehaus.enunciate.util.MapType;
 
 /**
  * Validator for the C# module.
@@ -33,6 +33,18 @@ public class CSharpValidator extends BaseValidator {
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     return super.validateEndpointInterface(ei);
+  }
+
+  @Override
+  public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
+    ValidationResult result = super.validateComplexType(complexType);
+    for (Element element : complexType.getElements()) {
+      if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
+        result.addError(element, "C# doesn't have a built-in way of serializing a Map. So you're going to have to use @XmlJavaTypeAdapter to supply " +
+          "your own adapter for the Map, or disable the C# module.");
+      }
+    }
+    return result;
   }
 
 }

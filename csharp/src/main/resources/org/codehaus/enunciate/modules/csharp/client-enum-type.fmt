@@ -1,0 +1,25 @@
+[#ftl]
+[#--template for the client-side simple type.--]
+[#macro writeEnumType type]
+namespace ${namespaceFor(type)} {
+
+  /// <remarks>
+  ///  ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}
+  /// </remarks>
+  [#if findRootElement(type)?exists]
+  [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
+  [/#if]
+  public enum ${type.simpleName} {
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.delegate.enumConstants as constant]
+
+    /// <summary>
+    ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
+    [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
+    ${constant.simpleName}[#if constant_has_next],[/#if]
+    [/#list]
+  }
+}
+[/#macro]

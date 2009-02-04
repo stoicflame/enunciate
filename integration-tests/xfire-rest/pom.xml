@@ -51,6 +51,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
+        <version>${project.version}</version>
         <executions>
           <execution>
             <goals>

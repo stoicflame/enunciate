@@ -148,7 +148,6 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
     this.clientPackageConversions = new HashMap<String, String>();
     this.configurationRules = new JAXWSClientRuleSet();
     this.serverSideTypesToUse = new TreeSet<String>();
-    setDisabled(true); //disable by default, for now.
   }
 
   /**
@@ -197,16 +196,10 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
       Map<String, String> conversions = getClientPackageConversions();
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
-      ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
-      CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
       classnameFor.setJdk15(true);
-      componentTypeFor.setJdk15(true);
-      collectionTypeFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
-      model.put("componentTypeFor", componentTypeFor);
-      model.put("collectionTypeFor", collectionTypeFor);
 
       info("Generating the JAX-WS client classes...");
       model.setFileOutputDirectory(generateDir);

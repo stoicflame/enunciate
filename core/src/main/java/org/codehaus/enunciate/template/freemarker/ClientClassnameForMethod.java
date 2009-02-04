@@ -105,8 +105,8 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    boolean isArray = typeMirror instanceof ArrayType;
     String conversion = super.convert(typeMirror);
+    boolean isArray = typeMirror instanceof ArrayType;
 
     //if we're using converting to a java 5+ client code, take into account the type arguments.
     if ((isJdk15()) && (typeMirror instanceof DeclaredType)) {

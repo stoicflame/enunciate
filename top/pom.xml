@@ -74,6 +74,11 @@
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-csharp</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-gwt</artifactId>
     </dependency>
 

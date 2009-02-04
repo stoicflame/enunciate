@@ -40,6 +40,7 @@ import org.codehaus.enunciate.modules.amf.config.License;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 
 import java.io.*;
 import java.net.URL;
@@ -676,11 +677,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    * @param commandLine The command line.
    */
   protected void compileSwc(List<String> commandLine) throws IOException, EnunciateException {
-    ProcessBuilder processBuilder = new ProcessBuilder(commandLine.toArray(new String[commandLine.size()]));
     getSwcCompileDir().mkdirs();
-    processBuilder.directory(getSwcCompileDir());
-    processBuilder.redirectErrorStream(true);
-    Process process = processBuilder.start();
+    Process process = new ProcessBuilder(commandLine).directory(getSwcCompileDir()).redirectErrorStream(true).start();
     BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String line = procReader.readLine();
     while (line != null) {
