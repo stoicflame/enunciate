@@ -32,6 +32,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.jws.soap.SOAPBinding;
+import javax.jws.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,6 +137,15 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    */
   private boolean isBare() {
     return method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE;
+  }
+
+  /**
+   * The mode of this web result.
+   *
+   * @return The mode of this web result.
+   */
+  public javax.jws.WebParam.Mode getMode() {
+    return javax.jws.WebParam.Mode.OUT;
   }
 
   /**
@@ -342,5 +352,5 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   @Override
   public boolean isVoid() {
     return ((DecoratedTypeMirror) delegate).isVoid();
-  }
+  }  
 }

@@ -1,4 +1,5 @@
 [#ftl]
+[#import "client-endpoint-interface.fmt" as libEI/]
 [#import "client-complex-type.fmt" as libComplexType/]
 [#import "client-simple-type.fmt" as libSimpleType/]
 [#import "client-enum-type.fmt" as libEnumType/]
@@ -11,6 +12,7 @@ using System;
 
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]
+[@libEI.writeEndpointInterface endpointInterface=endpointInterface/]
     [/@forEachEndpointInterface]
   [/@forEachWsdl]
   [@forEachSchema]

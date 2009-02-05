@@ -33,7 +33,7 @@ namespace ${namespaceFor(type)} {
     ///  ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=attribute /]
-    public [#if accessorOverridesAnother(attribute)]override [/#if]${classnameFor(attribute)} ${attribute.simpleName?cap_first} {
+    public ${classnameFor(attribute)} ${attribute.simpleName?cap_first} {
       get {
         return this._${attribute.simpleName};
       }
@@ -50,7 +50,7 @@ namespace ${namespaceFor(type)} {
     ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
-    public [#if accessorOverridesAnother(type.value)]override [/#if]${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
+    public ${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
       get {
         return this._${type.value.simpleName};
       }
