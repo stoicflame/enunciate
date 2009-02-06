@@ -27,6 +27,9 @@ import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.ClientLibraryArtifact;
+import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.csharp.config.CSharpRuleSet;
 import org.codehaus.enunciate.modules.csharp.config.PackageNamespaceConversion;
@@ -36,10 +39,7 @@ import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.apache.commons.digester.RuleSet;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.net.URL;
 
@@ -64,8 +64,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  * attributes:</p>
  *
  * <ul>
- *   <li>The "label" attribute is the label for the C# API.  This is the name by which the files will be identified, producing [label].cs and [label].dll.
- *       By default the label is the same as the Enunciate project label.</li>
+ * <li>The "label" attribute is the label for the C# API.  This is the name by which the files will be identified, producing [label].cs and [label].dll.
+ * By default the label is the same as the Enunciate project label.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -91,7 +91,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   private boolean require = false;
   private String label = null;
   private String compileExecutable = null;
-  private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services %s";
+  private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s";
   private String generateXmlDocsCommand = null;
   private String generateHtmlDocsCommand = null;
   private final Map<String, String> packageToNamespaceConversions = new HashMap<String, String>();
@@ -157,7 +157,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
           throw new EnunciateException("C# client code generation is required, but there was no valid compile executable found. " +
             "Please supply one in the configuration file, or set it up on your system path.");
         }
-        
+
         setCompileExecutable(compileExectuable);
       }
     }
@@ -189,7 +189,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
           this.packageToNamespaceConversions.put(pckg, packageToNamespace(pckg));
         }
       }
-      
+
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           String pckg = typeDefinition.getPackage().getQualifiedName();
@@ -246,50 +246,135 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     File compileDir = getCompileDir();
-    if (!enunciate.isUpToDateWithSources(compileDir)) {
-      compileDir.mkdirs();
-      String compileExecutable = getCompileExecutable();
-      if (compileCommand == null) {
-        throw new IllegalStateException("Somehow the \"compile\" step was invoked on the C# module without a valid compile executable.");
-      }
+    Enunciate enunciate = getEnunciate();
+    String compileExecutable = getCompileExecutable();
+    if (getCompileExecutable() != null) {
+      if (!enunciate.isUpToDateWithSources(compileDir)) {
+        compileDir.mkdirs();
 
-      String compileCommand = getCompileCommand();
-      if (compileCommand == null) {
-        throw new IllegalStateException("Somehow the \"compile\" step was invoked on the C# module without a valid compile command.");
-      }
+        String compileCommand = getCompileCommand();
+        if (compileCommand == null) {
+          throw new IllegalStateException("Somehow the \"compile\" step was invoked on the C# module without a valid compile command.");
+        }
 
-      compileCommand = compileCommand.replace(' ', '\0'); //replace all spaces with the null character, so the command can be tokenized later.
-      compileCommand = String.format(compileCommand, compileExecutable,
-                                     new File(compileDir, getDLLFileName()).getAbsolutePath(),
-                                     new File(getGenerateDir(), getSourceFileName()).getAbsolutePath());
-      StringTokenizer tokenizer = new StringTokenizer(compileCommand, "\0"); //tokenize on the null character to preserve the spaces in the command.
-      List<String> command = new ArrayList<String>();
-      while (tokenizer.hasMoreElements()) {
-        command.add((String) tokenizer.nextElement());
-      }
+        compileCommand = compileCommand.replace(' ', '\0'); //replace all spaces with the null character, so the command can be tokenized later.
+        File dll = new File(compileDir, getDLLFileName());
+        File docXml = new File(compileDir, getDocXmlFileName());
+        File sourceFile = new File(getGenerateDir(), getSourceFileName());
+        compileCommand = String.format(compileCommand, compileExecutable,
+                                       dll.getAbsolutePath(),
+                                       docXml.getAbsolutePath(),
+                                       sourceFile.getAbsolutePath());
+        StringTokenizer tokenizer = new StringTokenizer(compileCommand, "\0"); //tokenize on the null character to preserve the spaces in the command.
+        List<String> command = new ArrayList<String>();
+        while (tokenizer.hasMoreElements()) {
+          command.add((String) tokenizer.nextElement());
+        }
 
-      Process process = new ProcessBuilder(command).redirectErrorStream(true).directory(compileDir).start();
-      BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      String line = procReader.readLine();
-      while (line != null) {
-        info(line);
-        line = procReader.readLine();
-      }
-      int procCode;
-      try {
-        procCode = process.waitFor();
-      }
-      catch (InterruptedException e1) {
-        throw new EnunciateException("Unexpected inturruption of the C# compile process.");
-      }
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).directory(compileDir).start();
+        BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = procReader.readLine();
+        while (line != null) {
+          info(line);
+          line = procReader.readLine();
+        }
+        int procCode;
+        try {
+          procCode = process.waitFor();
+        }
+        catch (InterruptedException e1) {
+          throw new EnunciateException("Unexpected inturruption of the C# compile process.");
+        }
 
-      if (procCode != 0) {
-        throw new EnunciateException("C# compile failed.");
+        if (procCode != 0) {
+          throw new EnunciateException("C# compile failed.");
+        }
+
+        enunciate.addArtifact(new FileArtifact(getName(), "csharp.assembly", dll));
+        if (docXml.exists()) {
+          enunciate.addArtifact(new FileArtifact(getName(), "csharp.docs.xml", docXml));
+        }
+      }
+      else {
+        info("Skipping C# compile because everything appears up-to-date.");
       }
     }
     else {
-      info("Skipping C# compile because everything appears up-to-date.");
+      info("Skipping C# compile because a compile executale was neither found nor provided.  The C# bundle will only include the sources.");
     }
+
+  }
+
+  @Override
+  protected void doBuild() throws EnunciateException, IOException {
+    Enunciate enunciate = getEnunciate();
+    File buildDir = getBuildDir();
+    if (!enunciate.isUpToDateWithSources(buildDir)) {
+      File compileDir = getCompileDir();
+      compileDir.mkdirs(); //might not exist if we couldn't actually compile.
+      //we want to zip up the source file, too, so we'll just copy it to the compile dir.
+      enunciate.copyFile(new File(getGenerateDir(), getSourceFileName()), new File(compileDir, getSourceFileName()));
+
+      buildDir.mkdirs();
+      File bundle = new File(buildDir, getBundleFileName());
+      enunciate.zip(bundle, compileDir);
+
+      ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "csharp.client.library", ".NET Client Library");
+      artifactBundle.setPlatform(".NET 2.0");
+
+      StringBuilder builder = new StringBuilder("C# source code");
+      boolean docsExist = new File(compileDir, getDocXmlFileName()).exists();
+      boolean dllExists = new File(compileDir, getDLLFileName()).exists();
+      if (docsExist && dllExists) {
+        builder.append(", the assembly, and the XML docs");
+      }
+      else if (dllExists) {
+        builder.append("and the assembly");
+      }
+
+      //read in the description from file:
+      String description = String.format(readResource("library_description.html"), builder.toString());
+      artifactBundle.setDescription(description);
+      NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "dotnet.client.bundle", bundle);
+      binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));
+      binariesJar.setPublic(false);
+      artifactBundle.addArtifact(binariesJar);
+      enunciate.addArtifact(artifactBundle);
+    }
+  }
+
+  /**
+   * Reads a resource into string form.
+   *
+   * @param resource The resource to read.
+   * @return The string form of the resource.
+   */
+  protected String readResource(String resource) throws IOException {
+    InputStream resourceIn = CSharpDeploymentModule.class.getResourceAsStream(resource);
+    if (resourceIn != null) {
+      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
+      StringWriter writer = new StringWriter();
+      PrintWriter out = new PrintWriter(writer);
+      String line;
+      while ((line = in.readLine()) != null) {
+        out.println(line);
+      }
+      out.flush();
+      out.close();
+      writer.close();
+      return writer.toString();
+    }
+    else {
+      return null;
+    }
+  }
+
+  protected String getBundleFileName() {
+    String label = getLabel();
+    if (label == null) {
+      label = getEnunciate().getConfig().getLabel();
+    }
+    return label + "-dotnet.zip";
   }
 
   /**
@@ -303,6 +388,19 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       label = getEnunciate().getConfig().getLabel();
     }
     return label + ".dll";
+  }
+
+  /**
+   * The name of the generated C# xml documentation.
+   *
+   * @return The name of the generated C# xml documentation.
+   */
+  protected String getDocXmlFileName() {
+    String label = getLabel();
+    if (label == null) {
+      label = getEnunciate().getConfig().getLabel();
+    }
+    return label + "-docs.xml";
   }
 
   /**
@@ -507,10 +605,6 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty() && getModelInternal().getNamespacesToSchemas().isEmpty()) {
       debug("C# module is disabled because there are no endpoint interfaces, nor any XML types.");
-      return true;
-    }
-    else if (getCompileExecutable() == null) {
-      debug("C# module is disabled there is no C# compile executable supplied, or Enunciate couldn't find one configured for the current environment.");
       return true;
     }
 

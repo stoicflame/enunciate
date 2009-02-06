@@ -18,6 +18,8 @@ package org.codehaus.enunciate.modules.csharp;
 
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.Element;
+import org.codehaus.enunciate.contract.jaxb.Attribute;
+import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
@@ -89,14 +91,43 @@ public class CSharpValidator extends BaseValidator {
   }
 
   @Override
+  public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
+    ValidationResult result = super.validateSimpleType(simpleType);
+    if (simpleType.getValue() != null && simpleType.getValue().isXmlIDREF()) {
+      result.addWarning(simpleType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                 "This may cause confusion to C# consumers.");
+    }
+    return result;
+  }
+
+  @Override
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = super.validateComplexType(complexType);
+    for (Attribute attribute : complexType.getAttributes()) {
+      if (attribute.isXmlIDREF()) {
+        result.addWarning(attribute, "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                   "This may cause confusion to C# consumers.");
+      }
+    }
+
+    if (complexType.getValue() != null && complexType.getValue().isXmlIDREF()) {
+      result.addWarning(complexType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                 "This may cause confusion to C# consumers.");
+    }
+
     for (Element element : complexType.getElements()) {
+      if (element.isXmlIDREF()) {
+        result.addWarning(element, "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                   "This may cause confusion to C# consumers.");
+      }
+
       if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
         result.addError(element, "C# doesn't have a built-in way of serializing a Map. So you're going to have to use @XmlJavaTypeAdapter to supply " +
           "your own adapter for the Map, or disable the C# module.");
       }
     }
+
+
     return result;
   }
 

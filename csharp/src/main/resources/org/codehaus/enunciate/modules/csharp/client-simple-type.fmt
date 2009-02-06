@@ -5,7 +5,7 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${type.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}
+  ///  <![CDATA[${type.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
   /// </remarks>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public sealed class ${type.simpleName} {
@@ -13,7 +13,7 @@ namespace ${namespaceFor(type)} {
     private ${classnameFor(type.value)} _${type.value.simpleName};
 
     /// <summary>
-    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}
+    ///  <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
     public ${classnameFor(type.value)} ${type.value.simpleName?cap_first} {

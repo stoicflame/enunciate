@@ -63,6 +63,31 @@
           </execution>
         </executions>
       </plugin>
+<!--
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1.1</version>
+        <executions>
+          <execution>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              -->
+<!--compile the nunit tests-->
+<!--
+              <executable>gmcs</executable>
+              <skip>${skipTests}</skip>
+              <arguments>
+                <argument></argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+-->
       <!-- skip unit test run, tests to be executed during integration-test -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

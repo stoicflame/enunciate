@@ -1,0 +1,54 @@
+<h1>
+  Introduction
+</h1>
+
+<p>
+  The .NET client-side library may be used to access the SOAP API for this application via
+  the .NET runtime. This library also defines the classes that can be (de)serialized to/from XML.
+  This is useful for accessing the REST endpoints that are published by this application.
+</p>
+
+<p>
+  This bundle contains %s.
+</p>
+
+<h1>
+    .NET Example
+</h1>
+
+<code>
+//instantiate a new service...
+Com.Company.PurchaseOrderService service =
+  new Com.Company.PurchaseOrderService();
+
+//make the remote call to read the purchase order...
+Com.Company.PurchaseOrder order =
+  service.ReadPurchaseOrder("123456");
+
+//handle the purchase order as needed...
+</code>
+
+<h1>
+  REST Example
+</h1>
+
+<code>
+//read a purchase order from a REST url
+Uri uri = new Uri(...);
+
+XmlSerializer s = new XmlSerializer(
+  typeof( Com.Company.PurchaseOrder )
+);
+
+  //Create the request object
+WebRequest req = WebRequest.Create(uri);
+WebResponse resp = req.GetResponse();
+Stream stream = resp.GetResponseStream();
+TextReader r = new StreamReader( stream );
+
+Com.Company.PurchaseOrder order =
+  (Com.Company.PurchaseOrder)
+  s.Deserialize( r );
+
+//handle the purchase order as needed...
+</code>

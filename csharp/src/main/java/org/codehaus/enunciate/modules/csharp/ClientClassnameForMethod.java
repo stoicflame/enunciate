@@ -29,6 +29,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.*;
 import java.net.URI;
 
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+
 /**
  * Conversion from java types to C# types.
  *
@@ -54,16 +56,16 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(java.math.BigDecimal.class.getName(), "Decimal");
     classConversions.put(Float.class.getName(), "float");
     classConversions.put(Character.class.getName(), "Char");
-    classConversions.put(Date.class.getName(), "DateTime");
+    classConversions.put(Date.class.getName(), "System.DateTime");
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(java.awt.Image.class.getName(), "byte[]");
     classConversions.put(javax.xml.transform.Source.class.getName(), "byte[]");
     classConversions.put(QName.class.getName(), "System.Xml.XmlQualifiedName");
-    classConversions.put(URI.class.getName(), "Uri");
+    classConversions.put(URI.class.getName(), "string");
     classConversions.put(UUID.class.getName(), "string");
     classConversions.put(XMLGregorianCalendar.class.getName(), "System.DateTime");
     classConversions.put(GregorianCalendar.class.getName(), "System.DateTime");
-    classConversions.put(Calendar.class.getName(), "DateTime");
+    classConversions.put(Calendar.class.getName(), "System.DateTime");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan");
     classConversions.put(Object.class.getName(), "object");
   }
@@ -79,6 +81,14 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     }
 
     return super.convert(declaration);
+  }
+
+  @Override
+  public String convert(Accessor accessor) throws TemplateModelException {
+    if (accessor.isXmlIDREF()) {
+      return "string";//C# doesn't support strict object reference resolution via IDREF.  The best we can do is (de)serialize the ID.
+    }
+    return super.convert(accessor);
   }
 
   protected boolean isCollection(TypeDeclaration declaration) {
