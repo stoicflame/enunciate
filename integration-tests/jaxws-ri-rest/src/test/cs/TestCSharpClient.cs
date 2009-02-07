@@ -15,7 +15,6 @@ namespace Jaxws.Ri.Rest {
       Source source = sourceService.GetSource("valid");
       Assert.IsNotNull(source);
       Assert.AreEqual("valid", source.Id);
-      Assert.Fail();
     }
   }
 }

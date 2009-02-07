@@ -59,35 +59,56 @@
             <configuration>
               <addXFireClientSourcesToTestClasspath>true</addXFireClientSourcesToTestClasspath>
               <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
+              <exports>
+                <csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>
+              </exports>
             </configuration>
           </execution>
         </executions>
       </plugin>
-<!--
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.1.1</version>
         <executions>
           <execution>
+            <id>compile-cs</id>
             <phase>test-compile</phase>
             <goals>
               <goal>exec</goal>
             </goals>
             <configuration>
-              -->
-<!--compile the nunit tests-->
-<!--
+              <!--compile the nunit tests-->
               <executable>gmcs</executable>
               <skip>${skipTests}</skip>
               <arguments>
-                <argument></argument>
+                <argument>${project.build.testSourceDirectory}/../cs/TestCSharpClient.cs</argument>
+                <argument>/out:${project.build.directory}/cstests/fulltests.dll</argument>
+                <argument>/target:library</argument>
+                <argument>/r:nunit.framework</argument>
+                <argument>/r:${project.build.directory}/cstests/full.dll</argument>
               </arguments>
+              <workingDirectory>${project.build.directory}</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>nunit</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!--compile the nunit tests-->
+              <executable>nunit-console</executable>
+              <skip>${skipTests}</skip>
+              <arguments>
+                <argument>${project.build.directory}/cstests/fulltests.dll</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
           </execution>
         </executions>
       </plugin>
--->
       <!-- skip unit test run, tests to be executed during integration-test -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -103,7 +124,7 @@
               <goal>test</goal>
             </goals>
             <configuration>
-              <skip>false</skip>
+              <skip>${skipTests}</skip>
             </configuration>
           </execution>
         </executions>
