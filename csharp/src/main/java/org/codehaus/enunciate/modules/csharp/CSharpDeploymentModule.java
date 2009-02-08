@@ -228,6 +228,8 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
       model.put("namespaceFor", new ClientPackageForMethod(this.packageToNamespaceConversions));
       model.put("findRootElement", new FindRootElementMethod());
+      model.put("requestDocumentQName", new RequestDocumentQNameMethod());
+      model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToNamespaceConversions);
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));

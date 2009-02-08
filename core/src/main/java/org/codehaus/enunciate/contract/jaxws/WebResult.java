@@ -135,7 +135,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    *
    * @return Whether this is a bare web result.
    */
-  private boolean isBare() {
+  public boolean isBare() {
     return method.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE;
   }
 

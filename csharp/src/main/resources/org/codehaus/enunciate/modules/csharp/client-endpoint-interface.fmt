@@ -18,7 +18,7 @@ namespace ${namespaceFor(endpointInterface)} {
   /// <remarks>
   ///  <![CDATA[${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
   /// </remarks>
-  [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace}")]
+  [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace?default("")}")]
   public class ${endpointInterface.simpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
 
   [@forEachWebMethod endpointInterface=endpointInterface]
@@ -73,12 +73,12 @@ namespace ${namespaceFor(endpointInterface)} {
     [/#if]
     [#assign isrpc=(webMethod.soapBindingStyle?string?lower_case = "rpc") /]
     [#if !isrpc]
-    [System.Web.Services.Protocols.SoapDocumentMethodAttribute(Action="${webMethod.action}",Use=System.Web.Services.Description.SoapBindingUse.${webMethod.soapUse?string?lower_case?cap_first},ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.${webMethod.soapParameterStyle?string?lower_case?cap_first}[#if webMethod.oneWay],OneWay=true[/#if][#if webMethod.requestWrapper?exists],RequestElementName="${webMethod.requestWrapper.elementName}",RequestNamespace="${webMethod.requestWrapper.elementNamespace}"[/#if][#if webMethod.responseWrapper?exists],ResponseElementName="${webMethod.responseWrapper.elementName}",ResponseNamespace="${webMethod.responseWrapper.elementNamespace}"[/#if])]
+    [System.Web.Services.Protocols.SoapDocumentMethodAttribute(Action="${webMethod.action}",Use=System.Web.Services.Description.SoapBindingUse.${webMethod.soapUse?string?lower_case?cap_first},ParameterStyle=System.Web.Services.Protocols.SoapParameterStyle.${webMethod.soapParameterStyle?string?lower_case?cap_first}[#if webMethod.oneWay],OneWay=true[/#if][#if requestDocumentQName(webMethod)?exists],RequestElementName="${requestDocumentQName(webMethod).localPart}",RequestNamespace="${requestDocumentQName(webMethod).namespaceURI}"[/#if][#if responseDocumentQName(webMethod)?exists],ResponseElementName="${responseDocumentQName(webMethod).localPart}",ResponseNamespace="${responseDocumentQName(webMethod).namespaceURI}"[/#if])]
       [#if !webMethod.webResult.void]
-    [return:System.Xml.Serialization.XmlElementAttribute(ElementName="${webMethod.webResult.elementName}",Namespace="${webMethod.webResult.targetNamespace?default("")}")]
+    [return:System.Xml.Serialization.XmlElementAttribute(ElementName="${webMethod.webResult.elementName}",Namespace="[#if webMethod.webResult.bare]${endpointInterface.targetNamespace?default("")}[#else]${webMethod.webResult.targetNamespace?default("")}[/#if]")]
       [/#if]
     [#else]
-    [System.Web.Services.Protocols.SoapRpcMethodAttribute(Action="${webMethod.action}",Use=System.Web.Services.Description.SoapBindingUse.${webMethod.soapUse?string?lower_case?cap_first}[#if webMethod.oneWay],OneWay=true[/#if],RequestElementName="${webMethod.operationName}",RequestNamespace="${endpointInterface.targetNamespace}",ResponseElementName="${webMethod.operationName}",ResponseNamespace="${endpointInterface.targetNamespace}")]
+    [System.Web.Services.Protocols.SoapRpcMethodAttribute(Action="${webMethod.action}",Use=System.Web.Services.Description.SoapBindingUse.${webMethod.soapUse?string?lower_case?cap_first}[#if webMethod.oneWay],OneWay=true[/#if],RequestElementName="${webMethod.operationName}",RequestNamespace="${endpointInterface.targetNamespace?default("")}",ResponseElementName="${webMethod.operationName}",ResponseNamespace="${endpointInterface.targetNamespace?default("")}")]
       [#if !webMethod.webResult.void && !webMethod.webResult.header]
     [return:System.Xml.Serialization.SoapElementAttribute(ElementName="${webMethod.webResult.elementName}")]
       [/#if]
@@ -89,7 +89,7 @@ namespace ${namespaceFor(endpointInterface)} {
       [/#if]
     [/#list]
     [#assign usecomma=false/]
-    public [#if webMethod.webResult.header]void[#else]${classnameFor(webMethod.webResult)}[/#if] ${webMethod.simpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if !param.implicitSchemaElement][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="")] [/#if][/#if]${classnameFor(param)} ${param.simpleName}[/#if][/#list]) {
+    public [#if webMethod.webResult.header]void[#else]${classnameFor(webMethod.webResult)}[/#if] ${webMethod.simpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="[#if param.implicitSchemaElement]${endpointInterface.targetNamespace?default("")}[/#if]")] [/#if]${classnameFor(param)} ${param.simpleName}[/#if][/#list]) {
     [#assign usecomma=false/]
       object[] results = this.Invoke("${webMethod.simpleName?cap_first}", new object[] { [#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/]${param.simpleName}[/#if][/#list] });
     [#if !webMethod.webResult.void && !webMethod.webResult.header]

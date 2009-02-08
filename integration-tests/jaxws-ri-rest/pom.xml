@@ -86,6 +86,7 @@
                 <argument>/out:${project.build.directory}/cstests/fulltests.dll</argument>
                 <argument>/target:library</argument>
                 <argument>/r:nunit.framework</argument>
+                <argument>/r:System.Web.Services</argument>
                 <argument>/r:${project.build.directory}/cstests/full.dll</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
