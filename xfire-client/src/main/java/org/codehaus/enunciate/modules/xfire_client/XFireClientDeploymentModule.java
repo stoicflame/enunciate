@@ -725,7 +725,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
       //todo: generate the javadocs?
 
-      ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "Java 1.4+ Client Library");
+      ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "XFire Client Library (Java 1.4 Compatible)");
       jdk14ArtifactBundle.setPlatform("Java (Version 1.4+)");
       //read in the description from file:
       jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
@@ -766,7 +766,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: generate the javadocs?
 
-    ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "Java 5 Client Library");
+    ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "XFire Client Library (Java 5+)");
     jdk15ArtifactBundle.setPlatform("Java (Version 5+)");
     //read in the description from file:
     jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
