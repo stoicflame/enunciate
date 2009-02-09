@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema;
+package org.codehaus.enunciate.examples.csharp.schema;
 
 /**
  * @author Ryan Heaton

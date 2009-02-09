@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema.animals;
+package org.codehaus.enunciate.examples.csharp.schema.animals;
 
-import org.codehaus.enunciate.examples.xfire_client.schema.*;
+import org.codehaus.enunciate.examples.csharp.schema.*;
 
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;

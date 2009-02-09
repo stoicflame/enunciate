@@ -120,7 +120,7 @@ public class Element extends Accessor {
   public String getNamespace() {
     String namespace = null;
 
-    if (getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
+    if (getForm() == XmlNsForm.QUALIFIED) {
       namespace = getTypeDefinition().getNamespace();
     }
 
@@ -132,6 +132,21 @@ public class Element extends Accessor {
   }
 
   /**
+   * The form of this element.
+   *
+   * @return The form of this element.
+   */
+  public XmlNsForm getForm() {
+    XmlNsForm elementForm = getTypeDefinition().getSchema().getElementFormDefault();
+
+    if (elementForm == null || elementForm == XmlNsForm.UNSET) {
+      elementForm = XmlNsForm.UNQUALIFIED;
+    }
+
+    return elementForm;
+  }
+
+  /**
    * The qname for the referenced element, if this element is a reference to a global element, or null if
    * this element is not a reference element.
    *
@@ -140,7 +155,7 @@ public class Element extends Accessor {
   public QName getRef() {
     QName ref = null;
 
-    boolean qualified = getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
+    boolean qualified = getForm() == XmlNsForm.QUALIFIED;
     String typeNamespace = getTypeDefinition().getNamespace();
     typeNamespace = typeNamespace == null ? "" : typeNamespace;
     String elementNamespace = isWrapped() ? getWrapperNamespace() : getNamespace();
@@ -416,7 +431,7 @@ public class Element extends Accessor {
   public String getWrapperNamespace() {
     String namespace = null;
 
-    if (getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED) {
+    if (getForm() == XmlNsForm.QUALIFIED) {
       namespace = getTypeDefinition().getNamespace();
     }
 

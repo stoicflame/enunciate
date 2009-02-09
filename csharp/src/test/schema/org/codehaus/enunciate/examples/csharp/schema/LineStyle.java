@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema;
+package org.codehaus.enunciate.examples.csharp.schema;
 
-import javax.jws.WebService;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 /**
  * @author Ryan Heaton
  */
-@WebService
-public class ShapeService {
+@XmlEnum (
+  Integer.class
+)
+public enum LineStyle {
+
+  @XmlEnumValue ("1")
+  solid,
+
+  @XmlEnumValue ("2")
+  dotted,
+
+  @XmlEnumValue ("3")
+  dashed
 }

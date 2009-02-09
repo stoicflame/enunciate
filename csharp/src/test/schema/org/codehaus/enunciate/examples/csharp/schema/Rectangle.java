@@ -14,25 +14,32 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema;
+package org.codehaus.enunciate.examples.csharp.schema;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Ryan Heaton
  */
-@XmlEnum (
-  Integer.class
-)
-public enum LineStyle {
+@XmlRootElement
+public class Rectangle extends Shape {
 
-  @XmlEnumValue ("1")
-  solid,
+  private int width;
+  private int height;
 
-  @XmlEnumValue ("2")
-  dotted,
+  public int getWidth() {
+    return width;
+  }
 
-  @XmlEnumValue ("3")
-  dashed
+  public void setWidth(int width) {
+    this.width = width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
+  }
 }

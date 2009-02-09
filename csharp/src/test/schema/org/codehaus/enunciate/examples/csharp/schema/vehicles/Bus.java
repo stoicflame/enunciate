@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema.vehicles;
+package org.codehaus.enunciate.examples.csharp.schema.vehicles;
 
-import org.codehaus.enunciate.examples.xfire_client.schema.Figure;
-import org.codehaus.enunciate.examples.xfire_client.schema.Rectangle;
-import org.codehaus.enunciate.examples.xfire_client.schema.Circle;
+import org.codehaus.enunciate.examples.csharp.schema.Figure;
+import org.codehaus.enunciate.examples.csharp.schema.Rectangle;
+import org.codehaus.enunciate.examples.csharp.schema.Circle;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,7 +35,6 @@ public class Bus extends Figure {
   private Circle[] wheels;
   private Collection<Rectangle> windows;
   private Rectangle door;
-  private Map<Integer, Circle> riders;
 
   public Rectangle getFrame() {
     return frame;
@@ -72,11 +71,4 @@ public class Bus extends Figure {
     this.door = door;
   }
 
-  public Map<Integer, Circle> getRiders() {
-    return riders;
-  }
-
-  public void setRiders(Map<Integer, Circle> riders) {
-    this.riders = riders;
-  }
 }

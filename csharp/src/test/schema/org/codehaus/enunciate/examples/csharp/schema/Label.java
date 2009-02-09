@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema.draw;
+package org.codehaus.enunciate.examples.csharp.schema;
 
 import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton
  */
-public class CanvasAttachment {
+public class Label {
 
-  private byte[] value;
+  private String value;
 
   @XmlValue
-  public byte[] getValue() {
+  public String getValue() {
     return value;
   }
 
-  public void setValue(byte[] value) {
+  public void setValue(String value) {
     this.value = value;
   }
 }

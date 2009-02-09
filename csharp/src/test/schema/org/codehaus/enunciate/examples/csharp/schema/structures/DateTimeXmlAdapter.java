@@ -14,32 +14,25 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema;
+package org.codehaus.enunciate.examples.csharp.schema.structures;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.joda.time.DateTime;
+import org.codehaus.enunciate.XmlTransient;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Date;
 
 /**
  * @author Ryan Heaton
  */
-@XmlRootElement
-public class Rectangle extends Shape {
+@XmlTransient
+public class DateTimeXmlAdapter extends XmlAdapter<Date, DateTime> {
 
-  private int width;
-  private int height;
-
-  public int getWidth() {
-    return width;
+  public DateTime unmarshal(Date date) throws Exception {
+    return new DateTime(date);
   }
 
-  public void setWidth(int width) {
-    this.width = width;
-  }
-
-  public int getHeight() {
-    return height;
-  }
-
-  public void setHeight(int height) {
-    this.height = height;
+  public Date marshal(DateTime dateTime) throws Exception {
+    return dateTime.toDate();
   }
 }

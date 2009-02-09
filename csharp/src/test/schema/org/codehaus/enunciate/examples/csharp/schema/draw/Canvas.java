@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema.draw;
+package org.codehaus.enunciate.examples.csharp.schema.draw;
 
-import org.codehaus.enunciate.examples.xfire_client.schema.structures.House;
-import org.codehaus.enunciate.examples.xfire_client.schema.animals.Cat;
-import org.codehaus.enunciate.examples.xfire_client.schema.vehicles.Bus;
-import org.codehaus.enunciate.examples.xfire_client.schema.*;
+import org.codehaus.enunciate.examples.csharp.schema.structures.House;
+import org.codehaus.enunciate.examples.csharp.schema.animals.Cat;
+import org.codehaus.enunciate.examples.csharp.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.csharp.schema.*;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.*;

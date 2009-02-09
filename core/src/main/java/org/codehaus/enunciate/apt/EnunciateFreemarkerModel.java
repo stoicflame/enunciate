@@ -366,7 +366,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   protected ImplicitSchemaElement getImplicitElement(Element element) {
     if (!(element instanceof ElementRef)) {
-      boolean qualified = element.getTypeDefinition().getSchema().getElementFormDefault() == XmlNsForm.QUALIFIED;
+      boolean qualified = element.getForm() == XmlNsForm.QUALIFIED;
       String typeNamespace = element.getTypeDefinition().getNamespace();
       typeNamespace = typeNamespace == null ? "" : typeNamespace;
       String elementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
@@ -387,7 +387,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @return The implicit attribute, or null if none.
    */
   protected ImplicitSchemaAttribute getImplicitAttribute(Attribute attribute) {
-    boolean qualified = attribute.getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
+    boolean qualified = attribute.getForm() == XmlNsForm.QUALIFIED;
     String typeNamespace = attribute.getTypeDefinition().getNamespace();
     typeNamespace = typeNamespace == null ? "" : typeNamespace;
     String attributeNamespace = attribute.getNamespace();

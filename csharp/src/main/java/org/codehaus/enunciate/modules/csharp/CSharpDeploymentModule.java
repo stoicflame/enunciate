@@ -49,7 +49,9 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 /**
  * <h1>C# Module</h1>
  *
- * <p>The C# module generates C# client code for accessing the SOAP endpoints and compiles the code for .NET.</p>
+ * <p>The C# module generates C# client code for accessing the SOAP endpoints and makes an attempt at compiling the code in a .NET assembly. If the the compile
+ * attempt is to be successful, then you must have a C# compiler available on your system path, or specify a "compileExecutable" attribute in the Enunciate
+ * configuration file. If the compile attempt fails, only the C# source code will be made available as a client artifact.</p>
  *
  * <p>The order of the JAXWS deployment module is 0, as it doesn't depend on any artifacts exported
  * by any other module.</p>
@@ -66,6 +68,11 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  * <ul>
  * <li>The "label" attribute is the label for the C# API.  This is the name by which the files will be identified, producing [label].cs and [label].dll.
  * By default the label is the same as the Enunciate project label.</li>
+ * <li>The "compileExecutable" attribute is the executable for invoking the C# compiler. If not supplied, an attempt will be made to find a C# compiler on the
+ * system path.  If the attempt fails, the C# code will not be compiled (but the source code will still be made available as a download artifact).</li>
+ * <li>The "compileCommand" is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax">Java format string</a> that represents the
+ * full command that is used to invoke the C# compiler. The string will be formatted with the following arguments: compile executable, assembly path,
+ * doc xml path, source doc path. The default value is "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s"</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -92,8 +99,6 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   private String label = null;
   private String compileExecutable = null;
   private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s";
-  private String generateXmlDocsCommand = null;
-  private String generateHtmlDocsCommand = null;
   private final Map<String, String> packageToNamespaceConversions = new HashMap<String, String>();
 
   public CSharpDeploymentModule() {
@@ -522,42 +527,6 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setCompileCommand(String compileCommand) {
     this.compileCommand = compileCommand;
-  }
-
-  /**
-   * The generate XML docs command.
-   *
-   * @return The generate XML docs command.
-   */
-  public String getGenerateXmlDocsCommand() {
-    return generateXmlDocsCommand;
-  }
-
-  /**
-   * The generate XML docs command.
-   *
-   * @param generateXmlDocsCommand The generate XML docs command.
-   */
-  public void setGenerateXmlDocsCommand(String generateXmlDocsCommand) {
-    this.generateXmlDocsCommand = generateXmlDocsCommand;
-  }
-
-  /**
-   * The generate HTML docs command.
-   *
-   * @return The generate HTML docs command.
-   */
-  public String getGenerateHtmlDocsCommand() {
-    return generateHtmlDocsCommand;
-  }
-
-  /**
-   * The generate HTML docs command.
-   *
-   * @param generateHtmlDocsCommand The generate HTML docs command.
-   */
-  public void setGenerateHtmlDocsCommand(String generateHtmlDocsCommand) {
-    this.generateHtmlDocsCommand = generateHtmlDocsCommand;
   }
 
   /**

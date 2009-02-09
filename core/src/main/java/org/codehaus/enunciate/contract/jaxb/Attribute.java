@@ -52,7 +52,7 @@ public class Attribute extends Accessor {
   public String getNamespace() {
     String namespace = null;
 
-    if (getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED) {
+    if (getForm() == XmlNsForm.QUALIFIED) {
       namespace = getTypeDefinition().getNamespace();
     }
 
@@ -63,6 +63,21 @@ public class Attribute extends Accessor {
     return namespace;
   }
 
+  /**
+   * The form of this attribute.
+   *
+   * @return The form of this attribute.
+   */
+  public XmlNsForm getForm() {
+    XmlNsForm form = getTypeDefinition().getSchema().getAttributeFormDefault();
+
+    if (form == null || form == XmlNsForm.UNSET) {
+      form = XmlNsForm.UNQUALIFIED;
+    }
+    
+    return form;
+  }
+
 
   /**
    * An attribute is a ref if its namespace differs from that of its type definition (JAXB spec 8.9.7.2).
@@ -71,7 +86,7 @@ public class Attribute extends Accessor {
    */
   @Override
   public QName getRef() {
-    boolean qualified = getTypeDefinition().getSchema().getAttributeFormDefault() == XmlNsForm.QUALIFIED;
+    boolean qualified = getForm() == XmlNsForm.QUALIFIED;
     String typeNamespace = getTypeDefinition().getNamespace();
     typeNamespace = typeNamespace == null ? "" : typeNamespace;
     String namespace = getNamespace();

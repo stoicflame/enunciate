@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema;
+package org.codehaus.enunciate.examples.csharp.schema;
 
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlList;
+import java.util.Collection;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class Shape {
+public abstract class Figure {
 
   private String id;
-  private Color color;
-  private LineStyle lineStyle;
-  private int positionX;
-  private int positionY;
+  private Collection<Label> labels;
 
   @XmlID
   @XmlAttribute
@@ -40,35 +39,12 @@ public abstract class Shape {
     this.id = id;
   }
 
-  public int getPositionX() {
-    return positionX;
+  @XmlList
+  public Collection<Label> getLabels() {
+    return labels;
   }
 
-  public void setPositionX(int positionX) {
-    this.positionX = positionX;
-  }
-
-  public int getPositionY() {
-    return positionY;
-  }
-
-  public void setPositionY(int positionY) {
-    this.positionY = positionY;
-  }
-
-  public Color getColor() {
-    return color;
-  }
-
-  public void setColor(Color color) {
-    this.color = color;
-  }
-
-  public LineStyle getLineStyle() {
-    return lineStyle;
-  }
-
-  public void setLineStyle(LineStyle lineStyle) {
-    this.lineStyle = lineStyle;
+  public void setLabels(Collection<Label> labels) {
+    this.labels = labels;
   }
 }

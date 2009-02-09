@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.xfire_client.schema.structures;
+package org.codehaus.enunciate.examples.csharp.schema;
 
-import org.joda.time.DateTime;
-import org.codehaus.enunciate.XmlTransient;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.util.Date;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Ryan Heaton
  */
-@XmlTransient
-public class DateTimeXmlAdapter extends XmlAdapter<Date, DateTime> {
+@XmlRootElement
+public class Circle extends Shape {
 
-  public DateTime unmarshal(Date date) throws Exception {
-    return new DateTime(date.getTime());
+  private int radius;
+
+  public int getRadius() {
+    return radius;
   }
 
-  public Date marshal(DateTime dateTime) throws Exception {
-    return new Date(dateTime.getMillis());
+  public void setRadius(int radius) {
+    this.radius = radius;
   }
 }
