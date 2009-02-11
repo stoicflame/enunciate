@@ -14,7 +14,7 @@ import java.util.Set;
  * For use with the "war" packaging.
  *
  * @goal assemble
- * @phase generate-sources
+ * @phase process-sources
  * @requiresDependencyResolution compile
 
  * @author Ryan Heaton
