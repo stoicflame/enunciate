@@ -113,7 +113,7 @@ public class ElementRef extends Element {
    * Determines whether the class declaration is an instance of the declared type of the given fully-qualified name.
    *
    * @param classDeclaration The class declaration.
-   * @param fqn The FQN.
+   * @param fqn              The FQN.
    * @return Whether the class declaration is an instance of the declared type of the given fully-qualified name.
    */
   protected boolean isInstanceOf(ClassDeclaration classDeclaration, String fqn) {
@@ -185,16 +185,28 @@ public class ElementRef extends Element {
       }
     }
 
-    RootElementDeclaration refElement;
-    if ((declaration instanceof ClassDeclaration) && (declaration.getAnnotation(XmlRootElement.class) != null)) {
-      ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
-      refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
-    }
-    else {
-      throw new ValidationException(getPosition(), elementDeclaration + " is not a root element declaration.");
+    QName refQName = null;
+    if (declaration instanceof ClassDeclaration) {
+      if (declaration.getQualifiedName().equals(JAXBElement.class.getName())) {
+        String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
+        String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
+        if (localName == null) {
+          throw new ValidationException(getPosition(), "@XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
+        }
+        refQName = new QName(namespace, localName);
+      }
+      else if (declaration.getAnnotation(XmlRootElement.class) != null) {
+        ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
+        RootElementDeclaration refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
+        refQName = new QName(refElement.getNamespace(), refElement.getName());
+      }
     }
 
-    return new QName(refElement.getNamespace(), refElement.getName());
+    if (refQName == null) {
+      throw new ValidationException(getPosition(), elementDeclaration + " is neither JAXBElement nor a root element declaration.");
+    }
+
+    return refQName;
   }
 
   /**
@@ -255,7 +267,6 @@ public class ElementRef extends Element {
    * There is no base type for an element ref.
    *
    * @throws UnsupportedOperationException Because there is no such things as a base type for an element ref.
-   *
    */
   @Override
   public XmlType getBaseType() {

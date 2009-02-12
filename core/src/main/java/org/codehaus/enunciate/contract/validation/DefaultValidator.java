@@ -434,7 +434,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
       if (outParams.size() > 1) {
         result.addError(webMethod, "A BARE web method must not have more than one 'out' message (i.e. non-void return values, " +
-          "thrown exceptions, out parameters, or in/out parameters).");
+          "out parameters, or in/out parameters).");
       }
       else if (outParams.isEmpty() && !webMethod.isOneWay()) {
         result.addError(webMethod, "A BARE web method that is not one-way must have one OUT parameter.");

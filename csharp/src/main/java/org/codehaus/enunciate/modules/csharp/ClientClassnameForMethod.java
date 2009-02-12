@@ -67,6 +67,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(GregorianCalendar.class.getName(), "System.DateTime");
     classConversions.put(Calendar.class.getName(), "System.DateTime");
     classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan");
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "object");
     classConversions.put(Object.class.getName(), "object");
   }
 

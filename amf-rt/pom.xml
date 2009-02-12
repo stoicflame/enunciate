@@ -11,6 +11,13 @@
   <name>Enunciate - AMF Runtime</name>
   <description>The Enunciate AMF Runtime libraries support the AMF endpoints on the server.</description>
 
+  <repositories>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -39,6 +46,14 @@
       <artifactId>spring-beans</artifactId>
 
       <!--just the annotations are used.-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+
+      <!--the JAXRS provider is optional-->
       <optional>true</optional>
     </dependency>
 

@@ -9,6 +9,16 @@
   <description>An example of how to use Enunciate for contract-first development.</description>
   <packaging>war</packaging>
 
+  <pluginRepositories>
+    <pluginRepository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
   <build>
     <plugins>
       <plugin>
@@ -35,9 +45,28 @@
           <wsdlDirectory>src/main/contract</wsdlDirectory>
           <!--turn off wsimport compilation-->
           <destDir></destDir>
-          <verbose>true</verbose>
-          <sourceDestDir>src/main/api</sourceDestDir>
+          <sourceDestDir>${project.build.directory}/generated-sources</sourceDestDir>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>2.1-1</version>
+            <exclusions>
+              <exclusion>
+                <!--we're going to explicitly depend on jsr-181 annotations elsewhere.-->
+                <groupId>javax.jws</groupId>
+                <artifactId>jsr181</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <dependency>
+            <!--this dependency doesn't have anything to do with xfire.  It's just xfire's build of the jsr181 annotations.-->
+            <groupId>xfire</groupId>
+            <artifactId>xfire-jsr181-api</artifactId>
+            <version>1.0-M1</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <!--now we need to add the generated sources we're testing to the test classpath-->
@@ -52,7 +81,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${basedir}/src/main/api</source>
+                <source>${project.build.directory}/generated-sources</source>
               </sources>
             </configuration>
           </execution>

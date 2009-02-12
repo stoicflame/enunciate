@@ -215,7 +215,7 @@
           [/#if]
         [/#list]
         [#if typeDef.anyElement?exists]
-          [#if typeDef.anyElement.elementRefs.empty]
+          [#if typeDef.anyElement.elementRefs?size = 0]
         <xs:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"[#if typeDef.anyElement.collectionType] minOccurs="0" maxOccurs="unbounded"[/#if]/>
           [#else]
         <xs:choice minOccurs="0" maxOccurs="unbounded">

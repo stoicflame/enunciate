@@ -5,11 +5,6 @@
   javax.xml.bind.annotation.XmlAccessOrder.${typeDef.accessorOrder}
 )
 [/#if]
-[#if typeDef.accessType?string != "PUBLIC_MEMBER"]
-@javax.xml.bind.annotation.XmlAccessorType (
-  javax.xml.bind.annotation.XmlAccessType.${typeDef.accessorType}
-)
-[/#if]
 @javax.xml.bind.annotation.XmlType (
   name = "${typeDef.name}",
   namespace = "${typeDef.namespace?default("")}"[#if typeDef.propertyOrder?exists],

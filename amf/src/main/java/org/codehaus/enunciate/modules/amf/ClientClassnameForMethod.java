@@ -60,6 +60,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(XMLGregorianCalendar.class.getName(), "Date");
     classConversions.put(Calendar.class.getName(), "Date");
     classConversions.put(Object.class.getName(), "Object");
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
   }
 
   @Override

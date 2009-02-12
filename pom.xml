@@ -41,6 +41,7 @@
     <module>integration-tests/xfire-rest</module>
     <module>integration-tests/cxf-rest</module>
     <module>integration-tests/jaxws-ri-rest</module>
+    <module>integration-tests/epcis</module>
     <module>integration-tests/jersey-storage</module>
   </modules>
 

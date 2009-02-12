@@ -77,7 +77,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(webFault, parts.iterator().next());
     assertFalse(webFault.isInput());
-    assertTrue(webFault.isOutput());
+    assertFalse(webFault.isOutput());
     assertFalse(webFault.isHeader());
     assertTrue(webFault.isFault());
   }
@@ -130,7 +130,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(webFault, parts.iterator().next());
     assertFalse(webFault.isInput());
-    assertTrue(webFault.isOutput());
+    assertFalse(webFault.isOutput());
     assertFalse(webFault.isHeader());
     assertTrue(webFault.isFault());
   }
@@ -155,7 +155,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals(1, parts.size());
     assertSame(webFault, parts.iterator().next());
     assertFalse(webFault.isInput());
-    assertTrue(webFault.isOutput());
+    assertFalse(webFault.isOutput());
     assertFalse(webFault.isHeader());
     assertTrue(webFault.isFault());
   }

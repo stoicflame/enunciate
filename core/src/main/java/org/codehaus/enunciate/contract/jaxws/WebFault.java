@@ -96,14 +96,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       }
 
       if (messageConstructorFound && messageAndThrowableConstructorFound) {
-        ClassDeclaration explicitFaultClass = faultInfoType.getDeclaration();
-        if (explicitFaultClass.getAnnotation(XmlRootElement.class) != null) {
-          explicitFaultBean = new RootElementDeclaration(explicitFaultClass, null);
-        }
-        else {
-          throw new ValidationException(getPosition(), "The faultInfo bean for a web fault must be a root element.  " + explicitFaultClass.getQualifiedName()
-            + " must be annotated with @XmlRootElement.");
-        }
+        explicitFaultBean = new RootElementDeclaration(faultInfoType.getDeclaration(), null);
       }
     }
 
@@ -364,7 +357,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return true
    */
   public boolean isOutput() {
-    return true;
+    return false;
   }
 
   /**
