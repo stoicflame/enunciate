@@ -458,8 +458,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       //standard spring configuration:
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("springImports", getSpringImportURIs());
-      model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
-      model.put("displayName", model.getEnunciateConfig().getLabel());
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {
         docsDir = "";
@@ -766,6 +764,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     model.setFileOutputDirectory(configDir);
     try {
       //delayed to the "build" phase to enable modules to supply their web app fragments.
+      model.put("displayName", model.getEnunciateConfig().getLabel());
+      model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
       model.put("webAppFragments", enunciate.getWebAppFragments());
       List<WebAppResource> envEntries = Collections.<WebAppResource>emptyList();
       List<WebAppResource> resourceEnvRefs = Collections.<WebAppResource>emptyList();

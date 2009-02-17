@@ -49,7 +49,7 @@ public class MapTypeUtil {
     DeclaredType declaredType = (DeclaredType) typeMirror;
     TypeDeclaration declaration = declaredType.getDeclaration();
     if (declaration == null) {
-      throw new RuntimeException("Type not found: " + declaredType);
+      throw new RuntimeException("Type not found: " + declaredType + ". Is it on your classpath?");
     }
     else if ("java.util.Map".equals(declaration.getQualifiedName())) {
       TypeMirror keyType = null;
