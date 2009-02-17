@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Enunciate spring component provider. All we're doing is adding the enunciate global interceptors to a root resource,
+ * whether it's lifecycle is managed by Spring or Jersey.
+ * 
  * @author Ryan Heaton
  */
 public class EnunciateSpringComponentProvider extends com.sun.jersey.spi.spring.container.servlet.SpringComponentProvider {

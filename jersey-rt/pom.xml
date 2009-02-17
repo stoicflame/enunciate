@@ -33,10 +33,13 @@
       <optional>true</optional>
     </dependency>
 
+    <!--
+    we don't need jersey's json implementation by default.
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
     </dependency>
+    -->
 
     <dependency>
       <groupId>com.sun.jersey</groupId>

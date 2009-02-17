@@ -6,6 +6,7 @@ import flex.messaging.io.amf.Amf3Output;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -26,6 +27,7 @@ import java.lang.reflect.Type;
  */
 @Provider
 @Produces ("application/x-amf")
+@Consumes ("application/x-amf")
 public class JAXRSProvider implements MessageBodyReader, MessageBodyWriter {
 
   public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {

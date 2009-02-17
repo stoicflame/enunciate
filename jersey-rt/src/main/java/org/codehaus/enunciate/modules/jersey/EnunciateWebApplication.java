@@ -16,21 +16,21 @@
 
 package org.codehaus.enunciate.modules.jersey;
 
-import com.sun.jersey.spi.container.WebApplication;
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerResponseWriter;
-import com.sun.jersey.spi.container.ContainerResponse;
-import com.sun.jersey.spi.service.ComponentProvider;
-import com.sun.jersey.spi.MessageBodyWorkers;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.container.ContainerException;
+import com.sun.jersey.api.core.HttpContext;
+import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.spi.MessageBodyWorkers;
+import com.sun.jersey.spi.container.ContainerRequest;
+import com.sun.jersey.spi.container.ContainerResponse;
+import com.sun.jersey.spi.container.ContainerResponseWriter;
+import com.sun.jersey.spi.container.WebApplication;
+import com.sun.jersey.spi.service.ComponentProvider;
 
 import java.io.IOException;
 
-import org.codehaus.enunciate.modules.jersey.StatusMessageResponseWriter;
-
 /**
+ * An enunciate-specific web application. Basically just a wrapper to support the {@link org.codehaus.enunciate.modules.jersey.StatusMessageResponseWriter}.
+ * 
  * @author Ryan Heaton
  */
 public class EnunciateWebApplication implements WebApplication {
