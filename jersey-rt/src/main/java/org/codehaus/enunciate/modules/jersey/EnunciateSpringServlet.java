@@ -95,7 +95,7 @@ public class EnunciateSpringServlet extends ServletContainer {
 
   @Override
   protected void initiate(ResourceConfig rc, WebApplication wa) {
-    wa.initiate(rc, new EnunciateSpringComponentProvider(WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext())));
+    wa.initiate(rc, new EnunciateSpringComponentProviderFactory(rc, WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext())));
     this.resourceConfig = rc;
   }
 

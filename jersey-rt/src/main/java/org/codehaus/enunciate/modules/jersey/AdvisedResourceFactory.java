@@ -3,8 +3,8 @@ package org.codehaus.enunciate.modules.jersey;
 import com.sun.jersey.api.model.AbstractResource;
 import com.sun.jersey.api.model.AbstractResourceMethod;
 import com.sun.jersey.api.model.AbstractSubResourceLocator;
-import com.sun.jersey.impl.modelapi.annotation.AnnotatedMethod;
-import com.sun.jersey.impl.modelapi.annotation.IntrospectionModeller;
+import com.sun.jersey.server.impl.modelapi.annotation.IntrospectionModeller;
+import com.sun.jersey.core.reflection.AnnotatedMethod;
 import org.springframework.aop.framework.ProxyFactory;
 
 import java.util.HashSet;

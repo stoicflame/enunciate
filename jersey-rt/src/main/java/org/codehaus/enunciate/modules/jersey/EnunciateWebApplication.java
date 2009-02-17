@@ -19,18 +19,19 @@ package org.codehaus.enunciate.modules.jersey;
 import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import com.sun.jersey.spi.MessageBodyWorkers;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
-import com.sun.jersey.spi.service.ComponentProvider;
 
 import java.io.IOException;
 
 /**
- * An enunciate-specific web application. Basically just a wrapper to support the {@link org.codehaus.enunciate.modules.jersey.StatusMessageResponseWriter}.
- * 
+ * An enunciate-supported web application.  For now, it just handles the request with a
+ * {@link org.codehaus.enunciate.modules.jersey.StatusMessageResponseWriter}.
+ *
  * @author Ryan Heaton
  */
 public class EnunciateWebApplication implements WebApplication {
@@ -45,8 +46,16 @@ public class EnunciateWebApplication implements WebApplication {
     delegate.initiate(resourceConfig);
   }
 
-  public void initiate(ResourceConfig resourceConfig, ComponentProvider provider) throws IllegalArgumentException, ContainerException {
+  public boolean isInitiated() {
+    return delegate.isInitiated();
+  }
+
+  public void initiate(ResourceConfig resourceConfig, IoCComponentProviderFactory provider) throws IllegalArgumentException, ContainerException {
     delegate.initiate(resourceConfig, provider);
+  }
+
+  public void destroy() {
+    delegate.destroy();
   }
 
   public WebApplication clone() {
@@ -55,14 +64,6 @@ public class EnunciateWebApplication implements WebApplication {
 
   public MessageBodyWorkers getMessageBodyWorkers() {
     return delegate.getMessageBodyWorkers();
-  }
-
-  public ComponentProvider getComponentProvider() {
-    return delegate.getComponentProvider();
-  }
-
-  public ComponentProvider getResourceComponentProvider() {
-    return delegate.getResourceComponentProvider();
   }
 
   public HttpContext getThreadLocalHttpContext() {
