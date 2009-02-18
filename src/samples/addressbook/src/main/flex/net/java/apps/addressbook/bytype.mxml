@@ -1,45 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" creationComplete="initApp()">
   <mx:Script><![CDATA[
-     import mx.controls.Alert;
-     import mx.rpc.events.FaultEvent;
-     import mx.rpc.events.ResultEvent;
-     import mx.rpc.remoting.RemoteObject;
-     import net.java.ws.addressbook.services.AddressBook;
-     import net.java.ws.addressbook.services.events.AddressBook.FindContactsByTypeResultEvent;
-     import net.java.ws.addressbook.domain.ContactType;
-     import net.java.ws.addressbook.domain.ContactList;
-     import net.java.ws.addressbook.domain.Contact;
+    import mx.controls.Alert;
+    import mx.rpc.events.FaultEvent;
+    import mx.rpc.events.ResultEvent;
+    import mx.rpc.remoting.RemoteObject;
 
-     //instantiate our address book service.
-     var book:AddressBook = new AddressBook();
+    import net.java.ws.addressbook.services.AddressBook;
+    import net.java.ws.addressbook.services.events.AddressBook.FindContactsByTypeResultEvent;
+    import net.java.ws.addressbook.domain.ContactType;
+    import net.java.ws.addressbook.domain.ContactList;
+    import net.java.ws.addressbook.domain.Contact;
 
-     //array of contact types; used to popluate the combo box.
-     [Bindable]
-     public var contactTypes: Array = [ ContactType.friend, ContactType.family, ContactType.professional ];
+    import flash.net.URLRequest;
+    import flash.net.URLStream;
+    import flash.net.URLRequestMethod;
+    import flash.utils.ByteArray;
+    import flash.events.*;
+    import flash.errors.*;
 
-     private function initApp():void {
-       //initialize our address book with our event listeners.
-        book.addEventListener("fault", myFaultHandler);
-        book.addEventListener("findContactsByType", myEventHandler);
-     }
+    //instantiate our address book service.
+    var book:AddressBook = new AddressBook();
+    var contactStream:URLStream;
 
-     private function myFaultHandler(event:FaultEvent):void {
-       //if a fault occurs, display a fault message.
-       Alert.show(event.toString());
-     }
+    //array of contact types; used to popluate the combo box.
+    [Bindable]
+    public var contactTypes: Array = [ ContactType.friend, ContactType.family, ContactType.professional ];
 
-     private function myEventHandler(event:FindContactsByTypeResultEvent):void {
-       //the event listener is a strongly-typed listener for the findContactsByType method.
-       dg.dataProvider = event.result.contacts;
-     }
+    private function initApp():void {
+      //initialize our address book with our event listeners.
+      book.addEventListener("fault", myFaultHandler);
+      book.addEventListener("findContactsByType", myEventHandler);
+    }
 
-  ]]></mx:Script>
+    private function myFaultHandler(event:Event):void {
+      //if a fault occurs, display a fault message.
+      Alert.show(event.toString());
+    }
+
+    private function myEventHandler(event:FindContactsByTypeResultEvent):void {
+      //the event listener is a strongly-typed listener for the findContactsByType method.
+      dg.dataProvider = event.result.contacts;
+    }
+
+    private function getContact(id:String):void {
+      var request:URLRequest = new URLRequest("amf/contact/" + id);
+      request.method = URLRequestMethod.GET;
+      contactStream = new URLStream();
+      contactStream.addEventListener("complete", contactRetrieved)
+      contactStream.addEventListener("ioError", myFaultHandler)
+      try {
+        contactStream.load(request);
+      }
+      catch (error:Error) {
+        Alert.show(error.toString());
+      }
+    }
+
+    private function postContact():void {
+      var request:URLRequest = new URLRequest("amf/contact");
+      request.method = URLRequestMethod.POST;
+      var ba:ByteArray = new ByteArray();
+      var c:Contact = new Contact();
+      c.id = int(idText.text);
+      c.name = nameText.text;
+      c.phone = phoneText.text;
+      c.address1 = address1Text.text;
+      c.address2 = address2Text.text;
+      c.city = cityText.text;
+      c.contactType = contactTypeInput.selectedLabel;
+      ba.writeObject(c);
+      request.data = ba;
+      request.contentType = "application/x-amf";
+      contactStream = new URLStream();
+      contactStream.addEventListener("complete", contactPosted)
+      contactStream.addEventListener("ioError", myFaultHandler)
+      try {
+        contactStream.load(request);
+      }
+      catch (error:Error) {
+        Alert.show(error.toString());
+      }
+
+    }
+
+    private function contactPosted(event:Event):void {
+      var selectedContact:Contact = (contactStream.readObject() as Contact);
+      Alert.show(selectedContact.name + " was successfully posted.");
+
+      //clear the form.
+      idText.text = "";
+      nameText.text = "";
+      phoneText.text = "";
+      address1Text.text = "";
+      address2Text.text = "";
+      cityText.text = "";
+      contactTypeInput.selectedIndex = 0;
+      book.findContactsByType(ct.selectedItem as String); //reload the contacts
+    }
+
+    private function contactRetrieved(event:Event):void {
+      var selectedContact:Contact = (contactStream.readObject() as Contact);
+      idText.text = String(selectedContact.id);
+      nameText.text = selectedContact.name;
+      phoneText.text = selectedContact.phone;
+      address1Text.text = selectedContact.address1;
+      address2Text.text = selectedContact.address2;
+      cityText.text = selectedContact.city;
+      if (selectedContact.contactType == ContactType.friend) {
+        contactTypeInput.selectedIndex = 0;
+      }
+      else if (selectedContact.contactType == ContactType.family) {
+        contactTypeInput.selectedIndex = 1;
+      }
+      else if (selectedContact.contactType == ContactType.professional) {
+        contactTypeInput.selectedIndex = 2;
+      }
+    }
+
+    ]]></mx:Script>
 
   <mx:DataGrid id="dg" width="100%" height="100%"/>
 
   <mx:ComboBox id="ct" dataProvider="{contactTypes}"/>
 
   <mx:Button label="Find By Type" click="book.findContactsByType(ct.selectedItem as String)"/>
+
+  <mx:Button label="Load Selected Contact" click="getContact(dg.selectedItem.id)"/>
+
+  <mx:Form width="100%" height="100%">
+    <mx:FormItem label="Id">
+      <mx:TextInput id="idText"/>
+    </mx:FormItem>
+    <mx:FormItem label="Name">
+      <mx:TextInput id="nameText"/>
+    </mx:FormItem>
+    <mx:FormItem label="Phone">
+      <mx:TextInput id="phoneText"/>
+    </mx:FormItem>
+    <mx:FormItem label="Address 1">
+      <mx:TextInput id="address1Text"/>
+    </mx:FormItem>
+    <mx:FormItem label="Address 2">
+      <mx:TextInput id="address2Text"/>
+    </mx:FormItem>
+    <mx:FormItem label="City">
+      <mx:TextInput id="cityText"/>
+    </mx:FormItem>
+    <mx:FormItem label="Type">
+      <mx:ComboBox id="contactTypeInput" dataProvider="{contactTypes}"/>
+    </mx:FormItem>
+  </mx:Form>
+  
+  <mx:Button label="Submit Changes" click="postContact()"/>
 
 </mx:Application>

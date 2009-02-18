@@ -5,8 +5,7 @@ import net.java.ws.addressbook.domain.Contact;
 import net.java.ws.addressbook.domain.ContactType;
 
 import javax.jws.WebService;
-
-import org.codehaus.enunciate.rest.annotations.*;
+import javax.ws.rs.*;
 
 /**
  * An address book that provides access to a set of contacts.
@@ -14,7 +13,6 @@ import org.codehaus.enunciate.rest.annotations.*;
  * @author Ryan Heaton
  */
 @WebService
-@RESTEndpoint
 public interface AddressBook {
 
   /**
@@ -24,13 +22,22 @@ public interface AddressBook {
    * @return The contact.
    * @throws AddressBookException If the contact wasn't found.
    */
-  @Noun (
-    "contact"
-  )
-  @Verb (
-    VerbType.read
-  )
-  Contact getContact(@ProperNoun Integer id) throws AddressBookException;
+  @GET
+  @Path("/{id}")
+  @Produces ( { "application/xml", "application/x-amf" } )
+  Contact getContact(@PathParam("id") Integer id) throws AddressBookException;
+
+  /**
+   * Post a new contact, or edit an existing one.
+   *
+   * @param contact the contact.
+   * @return the contact that was posted.
+   * @throws AddressBookException The address book exception.
+   */
+  @POST
+  @Consumes ( { "application/xml", "application/x-amf" } )
+  @Produces ( { "application/xml", "application/x-amf" } )
+  Contact postContact(Contact contact) throws AddressBookException;
 
   /**
    * Find contacts by name.

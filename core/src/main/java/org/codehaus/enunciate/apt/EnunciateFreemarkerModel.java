@@ -105,6 +105,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     HashMap<String, String> contentTypes = new HashMap<String, String>();
     contentTypes.put("application/xml", "xml");
     contentTypes.put("application/json", "json");
+    contentTypes.put("application/x-amf", "amf");
     return contentTypes;
   }
 

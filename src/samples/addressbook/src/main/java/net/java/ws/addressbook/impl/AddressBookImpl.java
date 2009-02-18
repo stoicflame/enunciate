@@ -11,6 +11,7 @@ import java.util.*;
 import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
+import javax.ws.rs.Path;
 
 /**
  * @author Ryan Heaton
@@ -18,7 +19,7 @@ import javax.jws.WebService;
 @WebService (
   endpointInterface = "net.java.ws.addressbook.services.AddressBook"
 )
-@RESTEndpoint
+@Path ("/contact")
 public class AddressBookImpl implements AddressBook {
 
   private static final Map<Integer, Contact> STORE = loadContacts();
@@ -28,6 +29,11 @@ public class AddressBookImpl implements AddressBook {
     if (contact == null) {
       throw new AddressBookException("contact not found: " + id);
     }
+    return contact;
+  }
+
+  public Contact postContact(Contact contact) throws AddressBookException {
+    STORE.put(contact.getId(), contact);
     return contact;
   }
 
@@ -78,6 +84,6 @@ public class AddressBookImpl implements AddressBook {
       contacts.put(i, contact);
     }
 
-    return Collections.unmodifiableMap(contacts);
+    return contacts;
   }
 }
