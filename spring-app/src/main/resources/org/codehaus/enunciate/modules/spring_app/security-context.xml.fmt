@@ -93,7 +93,7 @@
   [/#if]
   [#if securityConfig.enableDigestHTTPAuth]
 
-  <beans:bean class="org.springframework.security.ui.digestauth.DigestProcessingFilter">
+  <beans:bean class="org.codehaus.enunciate.modules.spring_app.EnunciateDigestProcessingFilter">
     <custom-filter position="BASIC_PROCESSING_FILTER"/>
   </beans:bean>
   [/#if]

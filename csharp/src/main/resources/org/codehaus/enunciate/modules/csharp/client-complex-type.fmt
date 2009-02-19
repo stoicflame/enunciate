@@ -8,7 +8,7 @@ namespace ${namespaceFor(type)} {
   ///  <![CDATA[${type.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
   /// </remarks>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
-  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]class ${simpleNameFor(type)} [#if !type.contentType.implied]: ${classnameFor(type.superclass)} [/#if]{
+  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]class ${simpleNameFor(type)} [#if !type.contentType.implied]: ${classnameFor(type.superclass, true)} [/#if]{
 
   [#list type.attributes as attribute]
     [#if !accessorOverridesAnother(attribute)]

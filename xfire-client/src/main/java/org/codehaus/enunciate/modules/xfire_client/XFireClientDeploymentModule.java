@@ -93,6 +93,7 @@ import java.util.*;
  * <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
  * <li>The "disable14Client" attributes disables the generation of the JDK 1.4 client.</li>
+ * <li>The "disable15Client" attributes disables the generation of the JDK 5 client.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -135,6 +136,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   private ExplicitWebAnnotations generatedAnnotations = null;
   private List<String> generatedTypeList = null;
   private boolean disable14Client = false;
+  private boolean disable15Client = true; //we've got the JAX-WS client module now.  we'll disable this by default.
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
@@ -329,40 +331,45 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
         info("Java 1.4 client generation has been disabled.  Skipping generation of 1.4 client classes.");
       }
 
-      //Now enable jdk-15 compatability and generate those client-side stubs.
-      info("Generating the XFire client classes for jdk 1.5.");
-      model.setFileOutputDirectory(jdk15GenerateDir);
-      classnameFor.setJdk15(true);
-      componentTypeFor.setJdk15(true);
-      collectionTypeFor.setJdk15(true);
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          model.put("endpointInterface", ei);
+      if (!isDisable15Client()) {
+        //Now enable jdk-15 compatability and generate those client-side stubs.
+        info("Generating the XFire client classes for jdk 1.5.");
+        model.setFileOutputDirectory(jdk15GenerateDir);
+        classnameFor.setJdk15(true);
+        componentTypeFor.setJdk15(true);
+        collectionTypeFor.setJdk15(true);
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            model.put("endpointInterface", ei);
 
-          processTemplate(eiTemplate, model);
-          processTemplate(soapImplTemplate, model);
+            processTemplate(eiTemplate, model);
+            processTemplate(soapImplTemplate, model);
+          }
+        }
+
+        for (WebFault webFault : allFaults.values()) {
+          ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
+          if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
+            model.put("superFault", allFaults.get(superFault.getQualifiedName()));
+          }
+          else {
+            model.remove("superFault");
+          }
+
+          model.put("fault", webFault);
+          processTemplate(faultTemplate, model);
+        }
+
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            model.put("type", typeDefinition);
+            URL template = typeDefinition.isEnum() ? jdk15EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+            processTemplate(template, model);
+          }
         }
       }
-
-      for (WebFault webFault : allFaults.values()) {
-        ClassDeclaration superFault = webFault.getSuperclass().getDeclaration();
-        if (superFault != null && allFaults.containsKey(superFault.getQualifiedName()) && allFaults.get(superFault.getQualifiedName()).isImplicitSchemaElement()) {
-          model.put("superFault", allFaults.get(superFault.getQualifiedName()));
-        }
-        else {
-          model.remove("superFault");
-        }
-
-        model.put("fault", webFault);
-        processTemplate(faultTemplate, model);
-      }
-
-      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          model.put("type", typeDefinition);
-          URL template = typeDefinition.isEnum() ? jdk15EnumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
-          processTemplate(template, model);
-        }
+      else {
+        info("Java 5 client generation has been disabled.  Skipping generation of Java 5 client classes.");
       }
 
       writeTypesFile(new File(getCommonJdkGenerateDir(), uuid + ".types"));
@@ -384,7 +391,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   protected boolean isUpToDate(File commonJdkGenerateDir, File jdk14GenerateDir, File jdk15GenerateDir) {
     return enunciate.isUpToDateWithSources(commonJdkGenerateDir) &&
       (isDisable14Client() || enunciate.isUpToDateWithSources(jdk14GenerateDir)) &&
-      enunciate.isUpToDateWithSources(jdk15GenerateDir);
+      (isDisable15Client() || enunciate.isUpToDateWithSources(jdk15GenerateDir));
   }
 
   protected void addExplicitAnnotations(EndpointInterface ei, ClientClassnameForMethod conversion) throws TemplateModelException {
@@ -550,17 +557,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       info("1.4 client code generation has been disabled.  Skipping compilation of 1.4 sources.");
     }
 
-    //Compile the jdk15 files.
-    File jdk15CompileDir = getJdk15CompileDir();
-    if (!enunciate.isUpToDateWithSources(jdk15CompileDir)) {
-      Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
-      jdk15Files.addAll(typeFiles);
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", jdk15CompileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
-      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk15CompileDir, uuid + ".types"));
-      enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk15CompileDir, uuid + ".annotations"));
+    if (!isDisable15Client()) {
+      //Compile the jdk15 files.
+      File jdk15CompileDir = getJdk15CompileDir();
+      if (!enunciate.isUpToDateWithSources(jdk15CompileDir)) {
+        Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
+        jdk15Files.addAll(typeFiles);
+        enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", jdk15CompileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
+        enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk15CompileDir, uuid + ".types"));
+        enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk15CompileDir, uuid + ".annotations"));
+      }
+      else {
+        info("Skipping compilation of JDK 1.5 client classes as everything appears up-to-date...");
+      }
     }
     else {
-      info("Skipping compilation of JDK 1.5 client classes as everything appears up-to-date...");
+      info("Java 5 client code generation has been disabled.  Skipping compilation of Java 5 sources.");
     }
   }
 
@@ -746,42 +758,47 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       info("No artifact generated for the Java 1.4 client because it was disabled.");
     }
 
-    File jdk15Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5.jar"));
-    if (!enunciate.isUpToDate(getJdk15CompileDir(), jdk15Jar)) {
-      enunciate.zip(jdk15Jar, getJdk15CompileDir());
-      enunciate.setProperty("client.jdk15.jar", jdk15Jar);
+    if (!isDisable15Client()) {
+      File jdk15Jar = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5.jar"));
+      if (!enunciate.isUpToDate(getJdk15CompileDir(), jdk15Jar)) {
+        enunciate.zip(jdk15Jar, getJdk15CompileDir());
+        enunciate.setProperty("client.jdk15.jar", jdk15Jar);
+      }
+      else {
+        info("Skipping creation of JDK 1.5 client jar as everything appears up-to-date...");
+      }
+
+      File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-src.jar"));
+      if (!enunciate.isUpToDate(getJdk15GenerateDir(), jdk15Sources)) {
+        enunciate.zip(jdk15Sources, getJdk15GenerateDir());
+        enunciate.setProperty("client.jdk15.sources", jdk15Sources);
+      }
+      else {
+        info("Skipping creation of the JDK 1.5 client source jar as everything appears up-to-date...");
+      }
+
+      //todo: generate the javadocs?
+
+      ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "XFire Client Library (Java 5+)");
+      jdk15ArtifactBundle.setPlatform("Java (Version 5+)");
+      //read in the description from file:
+      jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
+      NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
+      jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
+      jdk15BinariesJar.setPublic(false);
+      jdk15ArtifactBundle.addArtifact(jdk15BinariesJar);
+      NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
+      jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
+      jdk15SourcesJar.setPublic(false);
+      jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
+      jdk15ArtifactBundle.setDependencies(clientDeps);
+      enunciate.addArtifact(jdk15BinariesJar);
+      enunciate.addArtifact(jdk15SourcesJar);
+      enunciate.addArtifact(jdk15ArtifactBundle);
     }
     else {
-      info("Skipping creation of JDK 1.5 client jar as everything appears up-to-date...");
+      info("No artifact generated for the Java 5 client because it was disabled.");
     }
-
-    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-src.jar"));
-    if (!enunciate.isUpToDate(getJdk15GenerateDir(), jdk15Sources)) {
-      enunciate.zip(jdk15Sources, getJdk15GenerateDir());
-      enunciate.setProperty("client.jdk15.sources", jdk15Sources);
-    }
-    else {
-      info("Skipping creation of the JDK 1.5 client source jar as everything appears up-to-date...");
-    }
-
-    //todo: generate the javadocs?
-
-    ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "XFire Client Library (Java 5+)");
-    jdk15ArtifactBundle.setPlatform("Java (Version 5+)");
-    //read in the description from file:
-    jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
-    NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
-    jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
-    jdk15BinariesJar.setPublic(false);
-    jdk15ArtifactBundle.addArtifact(jdk15BinariesJar);
-    NamedFileArtifact jdk15SourcesJar = new NamedFileArtifact(getName(), "client.jdk15.library.sources", jdk15Sources);
-    jdk15SourcesJar.setDescription("The sources for the JDK 1.5 client library.");
-    jdk15SourcesJar.setPublic(false);
-    jdk15ArtifactBundle.addArtifact(jdk15SourcesJar);
-    jdk15ArtifactBundle.setDependencies(clientDeps);
-    enunciate.addArtifact(jdk15BinariesJar);
-    enunciate.addArtifact(jdk15SourcesJar);
-    enunciate.addArtifact(jdk15ArtifactBundle);
   }
 
   /**
@@ -902,6 +919,24 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * Whether to disable the Java 5 client.
+   *
+   * @return Whether to disable the Java 5 client.
+   */
+  public boolean isDisable15Client() {
+    return disable15Client;
+  }
+
+  /**
+   * Whether to disable the Java 5 client.
+   *
+   * @param disable15Client Whether to disable the Java 5 client.
+   */
+  public void setDisable15Client(boolean disable15Client) {
+    this.disable15Client = disable15Client;
+  }
+
+  /**
    * A unique id to associate with this build of the xfire client.
    *
    * @return A unique id to associate with this build of the xfire client.
@@ -1008,6 +1043,10 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
       debug("XFire client module is disabled because there are no endpoint interfaces.");
+      return true;
+    }
+    else if (isDisable14Client() && isDisable15Client()) {
+      debug("XFire client module is disabled because both Java 5 and Java 1.4 is disabled.");
       return true;
     }
 

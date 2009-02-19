@@ -7,7 +7,7 @@ package ${packageFor(fault)};
 /**
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(superFault)}[#else]Exception[/#if] {
+public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(superFault, true)}[#else]Exception[/#if] {
   [#if !fault.implicitSchemaElement]
     [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
 

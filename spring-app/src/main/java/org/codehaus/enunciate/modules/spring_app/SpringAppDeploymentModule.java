@@ -281,7 +281,7 @@ import java.util.jar.Manifest;
  *
  * <p>One use of specifying spring a import file is to wrap your endpoints with spring interceptors and/or XFire in/out/fault handlers.  This can be done
  * by simply declaring a bean that is an instance of your endpoint class.  This bean can be advised as needed, and if it implements
- * org.codehaus.xfire.handler.HandlerSupport (perhaps <a href="http://static.springframework.org/spring/docs/1.2.x/reference/aop.html#d0e4128">through the use
+ * org.codehaus.xfire.handler.HandlerSupport (perhaps <a href="http://static.springframework.org/spring/docs/2.5.x/reference/aop.html#d0e4128">through the use
  * of a mixin</a>?), the in/out/fault handlers will be used for the XFire invocation of that endpoint.</p>
  *
  * <p>It's important to note that the type on which the bean context will be searched is the type of the endpoint <i>interface</i>, and then only if it exists.
@@ -304,7 +304,7 @@ import java.util.jar.Manifest;
  * org.codehaus.enunciate.modules.spring_app.EnunciateServiceAdvisor.</p>
  *
  * <p>For more information on spring bean configuration and interceptor advice, see
- * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
+ * <a href="http://static.springframework.org/spring/docs/2.5.x/reference/index.html">the spring reference documentation</a>.</p>
  *
  * <h3><a name="config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></h3>
  *
@@ -327,7 +327,7 @@ import java.util.jar.Manifest;
  * </ul>
  *
  * <p>For more information on spring bean configuration and interceptor advice, see
- * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
+ * <a href="http://static.springframework.org/spring/docs/2.5.x/reference/index.html">the spring reference documentation</a>.</p>
  *
  * <h3><a name="config_handlerMapping">The "handlerMapping" element</a></h3>
  *
@@ -339,7 +339,7 @@ import java.util.jar.Manifest;
  * </ul>
  *
  * <p>For more information on spring handler mappings, see
- * <a href="http://static.springframework.org/spring/docs/1.2.x/reference/index.html">the spring reference documentation</a>.</p>
+ * <a href="http://static.springframework.org/spring/docs/2.5.x/reference/index.html">the spring reference documentation</a>.</p>
  *
  * <h3><a name="config_copyResources">The "copyResources" element</a></h3>
  *
@@ -349,7 +349,7 @@ import java.util.jar.Manifest;
  * <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
  * <li>The "<b>pattern</b>" attribute specifies an <a href="http://ant.apache.org/">Ant</a>-style
  * pattern used to find the resources to copy.  For more information, see the documentation for the
- * <a href="http://static.springframework.org/spring/docs/1.2.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
+ * <a href="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
  * JavaDocs.</li>
  * </ul>
  *

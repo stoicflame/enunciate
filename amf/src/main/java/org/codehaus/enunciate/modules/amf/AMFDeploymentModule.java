@@ -1043,8 +1043,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     if (super.isDisabled()) {
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
-      debug("AMF module is disabled because there are no endpoint interfaces.");
+    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty() && getModelInternal().getNamespacesToSchemas().isEmpty()) {
+      debug("AMF module is disabled because there are no endpoint interfaces nor any schema objects.");
       return true;
     }
 

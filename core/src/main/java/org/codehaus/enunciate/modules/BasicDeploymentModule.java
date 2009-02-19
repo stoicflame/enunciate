@@ -232,7 +232,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    */
   public void info(String message, Object... formatArgs) {
     if (this.enunciate != null) {
-      this.enunciate.info(message, formatArgs);
+      this.enunciate.info('[' + getName() + "] " + message, formatArgs);
     }
   }
 
@@ -244,7 +244,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    */
   public void debug(String message, Object... formatArgs) {
     if (this.enunciate != null) {
-      this.enunciate.debug(message, formatArgs);
+      this.enunciate.debug('[' + getName() + "] " + message, formatArgs);
     }
   }
 
@@ -256,7 +256,7 @@ public class BasicDeploymentModule implements DeploymentModule {
    */
   public void warn(String message, Object... formatArgs) {
     if (this.enunciate != null) {
-      this.enunciate.warn(message, formatArgs);
+      this.enunciate.warn('[' + getName() + "] " + message, formatArgs);
     }
   }
 

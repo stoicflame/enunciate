@@ -37,9 +37,10 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.soap.annotations.WebFaultPropertyOrder;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.*;
 
 /**
@@ -307,13 +308,45 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       }
     });
 
-    for (PropertyDeclaration property : getAllProperties(this)) {
+    for (PropertyDeclaration property : getAllFaultProperties(this)) {
       String propertyName = property.getPropertyName();
       if (("cause".equals(propertyName)) || ("localizedMessage".equals(propertyName)) || ("stackTrace".equals(propertyName))) {
         continue;
       }
 
-      childElements.add(new FaultBeanChildElement(property));
+      childElements.add(new FaultBeanChildElement(property, this));
+    }
+
+    final WebFaultPropertyOrder propOrder = getAnnotation(WebFaultPropertyOrder.class);
+    if (propOrder != null) {
+      Set<ImplicitChildElement> resorted = new TreeSet<ImplicitChildElement>(new Comparator<ImplicitChildElement>() {
+        public int compare(ImplicitChildElement o1, ImplicitChildElement o2) {
+          int index1 = -1;
+          int index2 = -1;
+          for (int i = 0; i < propOrder.value().length; i++) {
+            String prop = propOrder.value()[i];
+            if (o1.getElementName().equals(prop)) {
+              index1 = i;
+            }
+            if (o2.getElementName().equals(prop)) {
+              index2 = i;
+            }
+          }
+
+
+          if (index1 < 0) {
+            throw new ValidationException(WebFault.this.getPosition(), "@WebFaultPropertyOrder doesn't specify a property '" + o1.getElementName() + "'.");
+          }
+          else if (index2 < 0) {
+            throw new ValidationException(WebFault.this.getPosition(), "@WebFaultPropertyOrder doesn't specify a property '" + o2.getElementName() + "'.");
+          }
+          else {
+            return index1 - index2;
+          }
+        }
+      });
+      resorted.addAll(childElements);
+      childElements = resorted;
     }
 
     return childElements;
@@ -325,11 +358,18 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @param declaration The declaration from which to get all properties.
    * @return All properties.
    */
-  protected Collection<PropertyDeclaration> getAllProperties(DecoratedClassDeclaration declaration) {
+  protected Collection<PropertyDeclaration> getAllFaultProperties(DecoratedClassDeclaration declaration) {
     ArrayList<PropertyDeclaration> properties = new ArrayList<PropertyDeclaration>();
 
     while ((declaration != null) && (!Object.class.getName().equals(declaration.getQualifiedName()))) {
-      properties.addAll(declaration.getProperties());
+      for (PropertyDeclaration property : declaration.getProperties()) {
+        if (property.getGetter() != null &&
+          property.getAnnotation(XmlTransient.class) == null &&
+          property.getAnnotation(org.codehaus.enunciate.XmlTransient.class) == null) {
+          //only the readable properties that are not marked with @XmlTransient
+          properties.add(property);
+        }
+      }
 
       declaration = (DecoratedClassDeclaration) declaration.getSuperclass().getDeclaration();
     }
@@ -380,8 +420,9 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     private final int minOccurs;
     private final String maxOccurs;
     private final AdapterType adaperType;
+    private final WebFault webFault;
 
-    private FaultBeanChildElement(PropertyDeclaration property) {
+    private FaultBeanChildElement(PropertyDeclaration property, WebFault webFault) {
       DecoratedTypeMirror propertyType = (DecoratedTypeMirror) property.getPropertyType();
       this.adaperType = AdapterUtil.findAdapterType(property.getGetter());
       int minOccurs = propertyType.isPrimitive() ? 1 : 0;
@@ -398,6 +439,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       this.property = property;
       this.minOccurs = minOccurs;
       this.maxOccurs = maxOccurs;
+      this.webFault = webFault;
     }
 
     public PropertyDeclaration getProperty() {
@@ -425,7 +467,8 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
         return xmlType;
       }
       catch (XmlTypeException e) {
-        throw new ValidationException(property.getPosition(), e.getMessage());
+        throw new ValidationException(property.getPosition(), "Error with property '" + property.getPropertyName() + "' of fault '" +
+          webFault.getQualifiedName() + "'. " + e.getMessage());
       }
     }
 

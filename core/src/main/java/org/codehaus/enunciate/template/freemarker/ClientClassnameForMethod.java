@@ -23,6 +23,8 @@ import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateModel;
+import freemarker.ext.beans.BeansWrapper;
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
@@ -31,6 +33,7 @@ import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Converts a fully-qualified class name to its alternate client fully-qualified class name.
@@ -39,10 +42,23 @@ import java.util.Map;
  */
 public class ClientClassnameForMethod extends ClientPackageForMethod {
 
+  private static final ThreadLocal<Boolean> FORCE_NOT_15 = new ThreadLocal<Boolean>();
+
   private boolean jdk15 = false;
 
   public ClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
+  }
+
+  @Override
+  public Object exec(List list) throws TemplateModelException {
+    FORCE_NOT_15.set(list.size() > 1 && Boolean.TRUE.equals(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(0))));
+    try {
+      return super.exec(list);
+    }
+    finally {
+      FORCE_NOT_15.remove();
+    }
   }
 
   @Override
@@ -159,7 +175,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    * @return Whether this converter is enabled to output jdk 15 compatible classes.
    */
   public boolean isJdk15() {
-    return jdk15;
+    return jdk15 && !FORCE_NOT_15.get();
   }
 
   /**
