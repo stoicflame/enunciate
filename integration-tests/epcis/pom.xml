@@ -13,9 +13,6 @@
     <pluginRepository>
       <id>java.net</id>
       <url>http://download.java.net/maven/2</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
     </pluginRepository>
   </pluginRepositories>
 
