@@ -175,7 +175,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
    * @return Whether this converter is enabled to output jdk 15 compatible classes.
    */
   public boolean isJdk15() {
-    return jdk15 && !FORCE_NOT_15.get();
+    return jdk15 && (FORCE_NOT_15.get() == null || !FORCE_NOT_15.get());
   }
 
   /**

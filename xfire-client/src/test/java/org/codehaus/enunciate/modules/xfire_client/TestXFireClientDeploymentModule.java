@@ -94,6 +94,11 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
         //fall through...
       }
 
+      @Override
+      public boolean isDisable15Client() {
+        return false;
+      }
+
       // Inherited.
       @Override
       public boolean isDisabled() {

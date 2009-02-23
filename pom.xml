@@ -60,6 +60,7 @@
         <configuration>
           <downloadSources>true</downloadSources>
           <downloadJavadocs>true</downloadJavadocs>
+          <exclude>cargo-installs</exclude>
         </configuration>
       </plugin>
       <plugin>

@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Ryan Heaton
@@ -189,7 +190,8 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     assertEquals(faultWrapper.getTargetNamespace(), rootElementInfo.namespace());
     assertEquals(faultWrapper.getElementName(), rootElementInfo.name());
 
-    assertNull(generatedClass.getAnnotation(XmlType.class));
+    Annotation typeAnnotation = generatedClass.getAnnotation(XmlType.class);
+    assertNotNull(typeAnnotation);
 
     Map<String, Object> properties = new HashMap<String, Object>();
     properties.put("hi", "me");

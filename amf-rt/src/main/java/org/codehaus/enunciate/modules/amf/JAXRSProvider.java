@@ -31,7 +31,13 @@ import java.lang.reflect.Type;
 public class JAXRSProvider implements MessageBodyReader, MessageBodyWriter {
 
   public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return true;
+    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
+    if (mapper instanceof CustomAMFMapper) {
+      return type.isAssignableFrom(((CustomAMFMapper) mapper).getJaxbClass());
+    }
+    else {
+      return ((mapper instanceof CollectionAMFMapper) || (mapper instanceof MapAMFMapper));
+    }
   }
 
   public Object readFrom(Class type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, InputStream entityStream)
@@ -49,7 +55,13 @@ public class JAXRSProvider implements MessageBodyReader, MessageBodyWriter {
   }
 
   public boolean isWriteable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return true;
+    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
+    if (mapper instanceof CustomAMFMapper) {
+      return ((CustomAMFMapper) mapper).getJaxbClass().isAssignableFrom(type);
+    }
+    else {
+      return ((mapper instanceof CollectionAMFMapper) || (mapper instanceof MapAMFMapper));
+    }
   }
 
   public void writeTo(Object o, Class type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {

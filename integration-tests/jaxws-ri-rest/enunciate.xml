@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.9.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.10.xsd">
   <namespaces>
     <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
     <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
@@ -15,7 +15,7 @@
   <modules>
     <jaxws-ri disabled="false"/>
     <xfire disabled="true"/>
-    <xfire-client uuid="full.example">
+    <xfire-client uuid="full.example" disable15Client="false">
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>
       </package-conversions>

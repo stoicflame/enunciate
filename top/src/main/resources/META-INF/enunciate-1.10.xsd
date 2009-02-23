@@ -290,6 +290,7 @@
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
         <xs:attribute name="disable14Client" type="xs:boolean" default="false"/>
+        <xs:attribute name="disable15Client" type="xs:boolean" default="true"/>
         <xs:attribute name="uuid" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -326,7 +327,7 @@
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
-          <xs:element name="package-conversions">
+          <xs:element name="package-conversions" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
                 <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">

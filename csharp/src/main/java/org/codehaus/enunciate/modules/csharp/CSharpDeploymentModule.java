@@ -53,8 +53,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  * attempt is to be successful, then you must have a C# compiler available on your system path, or specify a "compileExecutable" attribute in the Enunciate
  * configuration file. If the compile attempt fails, only the C# source code will be made available as a client artifact.</p>
  *
- * <p>The order of the JAXWS deployment module is 0, as it doesn't depend on any artifacts exported
- * by any other module.</p>
+ * <p>The order of the C# deployment module is 0, as it doesn't depend on any artifacts exported by any other module.</p>
  *
  * <ul>
  * <li><a href="#config">configuration</a></li>

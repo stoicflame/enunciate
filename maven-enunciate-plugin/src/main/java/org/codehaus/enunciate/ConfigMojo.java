@@ -470,7 +470,10 @@ public class ConfigMojo extends AbstractMojo {
 
       for (DeploymentModule module : modules) {
         if (!module.isDisabled()) {
-          if (module instanceof SpringAppDeploymentModule) {
+          if (module instanceof DocumentationDeploymentModule) {
+            onInitDocsModule((DocumentationDeploymentModule)module);
+          }
+          else if (module instanceof SpringAppDeploymentModule) {
             onInitSpringAppDeploymentModule((SpringAppDeploymentModule) module);
           }
           else if (module instanceof AMFDeploymentModule) {
@@ -566,6 +569,10 @@ public class ConfigMojo extends AbstractMojo {
         restResource.setDirectory(clientModule.getGenerateDir().getAbsolutePath());
         project.addResource(restResource);
       }
+    }
+
+    protected void onInitDocsModule(DocumentationDeploymentModule docsModule) {
+      //no-op for now.
     }
 
     protected void onInitSpringAppDeploymentModule(SpringAppDeploymentModule springAppModule) throws IOException {

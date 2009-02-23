@@ -10,7 +10,7 @@
 
   <repositories>
     <repository>
-      <id>java.net</id>
+      <id>java.net.m1</id>
       <url>https://maven-repository.dev.java.net/nonav/repository</url>
       <layout>legacy</layout>
     </repository>
