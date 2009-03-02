@@ -33,13 +33,12 @@
       <optional>true</optional>
     </dependency>
 
-    <!--
-    we don't need jersey's json implementation by default.
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+
+      <optional>true</optional>
     </dependency>
-    -->
 
     <dependency>
       <groupId>com.sun.jersey</groupId>

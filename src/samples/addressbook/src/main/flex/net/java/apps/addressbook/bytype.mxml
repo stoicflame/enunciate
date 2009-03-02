@@ -21,7 +21,6 @@
 
     //instantiate our address book service.
     var book:AddressBook = new AddressBook();
-    var contactStream:URLStream;
 
     //array of contact types; used to popluate the combo box.
     [Bindable]
@@ -46,7 +45,7 @@
     private function getContact(id:String):void {
       var request:URLRequest = new URLRequest("amf/contact/" + id);
       request.method = URLRequestMethod.GET;
-      contactStream = new URLStream();
+      var contactStream:URLStream = new URLStream();
       contactStream.addEventListener("complete", contactRetrieved)
       contactStream.addEventListener("ioError", myFaultHandler)
       try {
@@ -72,7 +71,7 @@
       ba.writeObject(c);
       request.data = ba;
       request.contentType = "application/x-amf";
-      contactStream = new URLStream();
+      var contactStream:URLStream = new URLStream();
       contactStream.addEventListener("complete", contactPosted)
       contactStream.addEventListener("ioError", myFaultHandler)
       try {
@@ -85,6 +84,7 @@
     }
 
     private function contactPosted(event:Event):void {
+      var contactStream:URLStream = URLStream( event.target );
       var selectedContact:Contact = (contactStream.readObject() as Contact);
       Alert.show(selectedContact.name + " was successfully posted.");
 
@@ -100,6 +100,7 @@
     }
 
     private function contactRetrieved(event:Event):void {
+      var contactStream:URLStream = URLStream( event.target );
       var selectedContact:Contact = (contactStream.readObject() as Contact);
       idText.text = String(selectedContact.id);
       nameText.text = selectedContact.name;

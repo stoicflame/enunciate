@@ -1,15 +1,10 @@
 package org.codehaus.enunciate.modules.amf;
 
-import flex.messaging.io.SerializationContext;
-import flex.messaging.io.amf.Amf3Input;
-import flex.messaging.io.amf.Amf3Output;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
@@ -30,50 +25,43 @@ import java.lang.reflect.Type;
 @Consumes ("application/x-amf")
 public class JAXRSProvider implements MessageBodyReader, MessageBodyWriter {
 
-  public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
-    if (mapper instanceof CustomAMFMapper) {
-      return type.isAssignableFrom(((CustomAMFMapper) mapper).getJaxbClass());
-    }
-    else {
-      return ((mapper instanceof CollectionAMFMapper) || (mapper instanceof MapAMFMapper));
-    }
+  private AMFDataReader reader = new EnunciateAMFDataReader();
+  private AMFDataWriter writer = new EnunciateAMFDataWriter();
+
+  public boolean isReadable(Class realType, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    return this.reader.isReadable(realType, genericType);
   }
 
-  public Object readFrom(Class type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, InputStream entityStream)
+  public Object readFrom(Class realType, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, InputStream stream)
     throws IOException, WebApplicationException {
-    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
-    SerializationContext context = new SerializationContext();
-    Amf3Input input = new Amf3Input(context);
-    input.setInputStream(entityStream);
-    try {
-      return mapper.toJAXB(input.readObject(), new AMFMappingContext());
-    }
-    catch (ClassNotFoundException e) {
-      throw new WebApplicationException(Response.status(400).entity("Invalid request: " + e.getMessage()).build());
-    }
+    return this.reader.readFrom(realType, genericType, stream);
   }
 
-  public boolean isWriteable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
-    if (mapper instanceof CustomAMFMapper) {
-      return ((CustomAMFMapper) mapper).getJaxbClass().isAssignableFrom(type);
-    }
-    else {
-      return ((mapper instanceof CollectionAMFMapper) || (mapper instanceof MapAMFMapper));
-    }
+  public boolean isWriteable(Class realType, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    return this.writer.isWriteable(realType, genericType);
   }
 
-  public void writeTo(Object o, Class type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-    AMFMapper mapper = AMFMapperIntrospector.getAMFMapper(type, genericType);
-    SerializationContext context = new SerializationContext();
-    Amf3Output output = new Amf3Output(context);
-    output.setOutputStream(entityStream);
-    output.writeObject(mapper.toAMF(o, new AMFMappingContext()));
+  public void writeTo(Object o, Class realType, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap httpHeaders, OutputStream stream) throws IOException, WebApplicationException {
+    this.writer.writeTo(o, realType, genericType, stream);
   }
 
   public long getSize(Object o, Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return -1;
   }
 
+  public AMFDataReader getReader() {
+    return reader;
+  }
+
+  public void setReader(AMFDataReader reader) {
+    this.reader = reader;
+  }
+
+  public AMFDataWriter getWriter() {
+    return writer;
+  }
+
+  public void setWriter(AMFDataWriter writer) {
+    this.writer = writer;
+  }
 }

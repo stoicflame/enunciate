@@ -72,6 +72,13 @@ public class EnunciateSpringServlet extends ServletContainer {
       LOG.info("org.codehaus.enunciate.modules.amf.JAXRSProvider not found.");
     }
 
+    try {
+      rc.getClasses().add(ClassUtils.forName("org.codehaus.enunciate.modules.jersey.JacksonJAXRSProvider"));
+    }
+    catch (Throwable e) {
+      LOG.info("org.codehaus.enunciate.modules.jersey.JacksonJAXRSProvider not loaded. Perhaps Jackson isn't on the classpath?");
+    }
+
     String pathBasedConneg = sc.getInitParameter(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);
     if (pathBasedConneg == null) {
       pathBasedConneg = Boolean.TRUE.toString();
