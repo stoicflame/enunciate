@@ -26,6 +26,8 @@ public class SchemaConfig {
   private String namespace;
   private String file;
   private String location;
+  private String jaxbBindingVersion;
+  private String appinfo;
 
   /**
    * The target namespace.
@@ -85,4 +87,39 @@ public class SchemaConfig {
     this.location = location;
   }
 
+  /**
+   * Data to put in the appinfo section.
+   *
+   * @return Data to put in the appinfo section.
+   */
+  public String getAppinfo() {
+    return appinfo;
+  }
+
+  /**
+   * Data to put in the appinfo section.
+   *
+   * @param appinfo Data to put in the appinfo section.
+   */
+  public void setAppinfo(String appinfo) {
+    this.appinfo = appinfo;
+  }
+
+  /**
+   * The JAXB binding version.
+   *
+   * @return The JAXB binding version.
+   */
+  public String getJaxbBindingVersion() {
+    return jaxbBindingVersion;
+  }
+
+  /**
+   * The JAXB binding version.
+   *
+   * @param jaxbBindingVersion The JAXB binding version.
+   */
+  public void setJaxbBindingVersion(String jaxbBindingVersion) {
+    this.jaxbBindingVersion = jaxbBindingVersion;
+  }
 }

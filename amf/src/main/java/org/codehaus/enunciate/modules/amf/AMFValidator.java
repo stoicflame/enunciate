@@ -96,6 +96,10 @@ public class AMFValidator extends BaseValidator {
         result.addError(complexType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
 
+      if ("Date".equals(complexType.getSimpleName())) {
+        result.addError(complexType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name.");
+      }
+
       for (Attribute attribute : complexType.getAttributes()) {
         if (!isAMFTransient(attribute)) {
           if (attribute.getDelegate() instanceof FieldDeclaration) {
@@ -145,10 +149,24 @@ public class AMFValidator extends BaseValidator {
       if (!hasDefaultConstructor(simpleType)) {
         result.addError(simpleType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
+
+      if ("Date".equals(simpleType.getSimpleName())) {
+        result.addError(simpleType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name.");
+      }
     }
     return result;
   }
 
+  @Override
+  public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
+    ValidationResult result = super.validateEnumType(enumType);
+    if (!isAMFTransient(enumType)) {
+      if ("Date".equals(enumType.getSimpleName())) {
+        result.addError(enumType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name.");
+      }
+    }
+    return result;
+  }
 
   private boolean hasDefaultConstructor(TypeDefinition typeDefinition) {
     Collection<ConstructorDeclaration> constructors = typeDefinition.getConstructors();

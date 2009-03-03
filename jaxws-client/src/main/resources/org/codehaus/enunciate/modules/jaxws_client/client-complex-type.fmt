@@ -15,7 +15,7 @@ package ${packageFor(type)};
   namespace = "${rootEl.namespace?default("")}"
 )
 [/#if]
-public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.contentType.implied]extends ${classnameFor(type.superclass, true)} [#else]implements java.io.Serializable [/#if]{
+public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass, true)} [#else]implements java.io.Serializable [/#if]{
 
   [#list type.attributes as attribute]
   private ${classnameFor(attribute)} ${attribute.simpleName};

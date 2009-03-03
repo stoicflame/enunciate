@@ -39,7 +39,7 @@ public class SchemaInfoModel extends StringModel {
 
   @Override
   public TemplateModel get(String key) throws TemplateModelException {
-    if (("filename".equals(key)) || ("location".equals(key))) {
+    if (("filename".equals(key)) || ("location".equals(key)) || "appinfo".equals(key) || "jaxbBindingVersion".equals(key)) {
       return wrap(schemaInfo.getProperty(key));
     }
 

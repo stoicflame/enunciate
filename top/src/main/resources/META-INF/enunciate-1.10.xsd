@@ -254,9 +254,13 @@
         <xs:sequence>
           <xs:element name="schema" minOccurs="0" maxOccurs="unbounded">
             <xs:complexType>
+              <xs:sequence>
+                <xs:element name="appinfo" type="xs:string" minOccurs="0" maxOccurs="1"/>
+              </xs:sequence>
               <xs:attribute name="namespace" type="xs:string" use="required"/>
               <xs:attribute name="file" type="xs:string"/>
               <xs:attribute name="location" type="xs:string"/>
+              <xs:attribute name="jaxbBindingVersion" type="xs:string"/>
             </xs:complexType>
           </xs:element>
           <xs:element name="wsdl" minOccurs="0" maxOccurs="unbounded">
@@ -1045,6 +1049,14 @@
           <xs:annotation>
             <xs:documentation>
               The "swcDownloadable" attribute specifies whether the generated SWC is to be made available as a download from the generated web application.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="asSourcesDownloadable" type="xs:boolean" use="optional" default="false">
+          <xs:annotation>
+            <xs:documentation>
+              The "asSourcesDownloadable" attribute specifies whether the generated ActionScript source code is available as a download from the generated web
+              application.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>

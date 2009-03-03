@@ -36,12 +36,14 @@ public class Schema extends DecoratedPackageDeclaration implements Comparable<Sc
   private final XmlAccessorType xmlAccessorType;
   private final XmlAccessorOrder xmlAccessorOrder;
 
-  public Schema(PackageDeclaration delegate) {
+  public Schema(PackageDeclaration delegate, Package pckg) {
     super(delegate);
 
-    xmlSchema = getAnnotation(XmlSchema.class);
-    xmlAccessorType = getAnnotation(XmlAccessorType.class);
-    xmlAccessorOrder = getAnnotation(XmlAccessorOrder.class);
+    //try to load the package info on the classpath first.  This is because APT seems to have a bug
+    //in that it doesn't pick up the package info of an already-compiled class.
+    xmlSchema = pckg == null || pckg.getAnnotation(XmlSchema.class) == null ? getAnnotation(XmlSchema.class) : pckg.getAnnotation(XmlSchema.class);
+    xmlAccessorType = pckg == null || pckg.getAnnotation(XmlAccessorType.class) == null ? getAnnotation(XmlAccessorType.class) : pckg.getAnnotation(XmlAccessorType.class);
+    xmlAccessorOrder = pckg == null || pckg.getAnnotation(XmlAccessorOrder.class) == null ? getAnnotation(XmlAccessorOrder.class) : pckg.getAnnotation(XmlAccessorOrder.class);
   }
 
   /**

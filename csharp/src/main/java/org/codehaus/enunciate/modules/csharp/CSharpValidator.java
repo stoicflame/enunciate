@@ -16,10 +16,7 @@
 
 package org.codehaus.enunciate.modules.csharp;
 
-import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.Element;
-import org.codehaus.enunciate.contract.jaxb.Attribute;
-import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
@@ -30,10 +27,13 @@ import org.codehaus.enunciate.util.MapType;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collection;
 
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.EnumDeclaration;
+import com.sun.mirror.declaration.EnumConstantDeclaration;
 
 /**
  * Validator for the C# module.
@@ -85,17 +85,48 @@ public class CSharpValidator extends BaseValidator {
       if (webMethod.getWebResult().getType() instanceof MapType) {
         result.addError(webMethod, "C# can't handle types that are maps.");
       }
+
+      if (capitalize(webMethod.getSimpleName()).equals(ei.getSimpleName())) {
+        result.addError(webMethod, "C# can't handle methods that are of the same name as their containing class.");
+      }
     }
 
     return result;
   }
 
+  /**
+   * Capitalizes a string.
+   *
+   * @param string The string to capitalize.
+   * @return The capitalized value.
+   */
+  public static String capitalize(String string) {
+    return Character.toString(string.charAt(0)).toUpperCase() + string.substring(1);
+  }
+
   @Override
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = super.validateSimpleType(simpleType);
-    if (simpleType.getValue() != null && simpleType.getValue().isXmlIDREF()) {
-      result.addWarning(simpleType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                 "This may cause confusion to C# consumers.");
+    if (simpleType.getValue() != null) {
+      if (simpleType.getValue().isXmlIDREF()) {
+        result.addWarning(simpleType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                   "This may cause confusion to C# consumers.");
+      }
+
+      if (capitalize(simpleType.getValue().getSimpleName()).equals(simpleType.getSimpleName())) {
+        result.addError(simpleType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class.");
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
+    ValidationResult result = super.validateEnumType(enumType);
+    for (EnumConstantDeclaration enumItem : ((EnumDeclaration) enumType.getDelegate()).getEnumConstants()) {
+      if (enumItem.getSimpleName().equals(enumType.getSimpleName())) {
+        result.addError(enumItem, "C# can't handle properties/fields that are of the same name as their containing class.");
+      }
     }
     return result;
   }
@@ -108,11 +139,21 @@ public class CSharpValidator extends BaseValidator {
         result.addWarning(attribute, "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
                                    "This may cause confusion to C# consumers.");
       }
+
+      if (capitalize(attribute.getSimpleName()).equals(complexType.getSimpleName())) {
+        result.addError(attribute, "C# can't handle properties/fields that are of the same name as their containing class.");
+      }
     }
 
-    if (complexType.getValue() != null && complexType.getValue().isXmlIDREF()) {
-      result.addWarning(complexType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                 "This may cause confusion to C# consumers.");
+    if (complexType.getValue() != null) {
+      if (complexType.getValue().isXmlIDREF()) {
+        result.addWarning(complexType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
+                                   "This may cause confusion to C# consumers.");
+      }
+
+      if (capitalize(complexType.getValue().getSimpleName()).equals(complexType.getSimpleName())) {
+        result.addError(complexType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class.");
+      }
     }
 
     for (Element element : complexType.getElements()) {
@@ -124,6 +165,10 @@ public class CSharpValidator extends BaseValidator {
       if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
         result.addError(element, "C# doesn't have a built-in way of serializing a Map. So you're going to have to use @XmlJavaTypeAdapter to supply " +
           "your own adapter for the Map, or disable the C# module.");
+      }
+
+      if (capitalize(element.getSimpleName()).equals(complexType.getSimpleName())) {
+        result.addError(element, "C# can't handle properties/fields that are of the same name as their containing class.");
       }
     }
 

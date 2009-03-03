@@ -652,7 +652,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
     }
-    else if (isAsSourcesDownloadable()) {
+
+    if (isAsSourcesDownloadable()) {
       String label = "enunciate";
       if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
         label = enunciate.getConfig().getLabel();
@@ -672,7 +673,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       as3Dependency.setVersion("2.0.1");
       clientDeps.add(as3Dependency);
 
-      ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Libraries");
+      ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Library");
       as3ClientArtifact.setPlatform("Adobe Flex");
       //read in the description from file:
       as3ClientArtifact.setDescription(readResource("client_library_description.html"));
@@ -681,7 +682,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       if (swcFile != null) {
         NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.swc", swcFile);
         clientArtifact.setDescription("The compiled SWC.");
-        clientArtifact.setPublic(true);
+        clientArtifact.setPublic(false);
         as3ClientArtifact.addArtifact(clientArtifact);
         enunciate.addArtifact(clientArtifact);
       }
@@ -689,7 +690,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       if (asSources != null) {
         NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.sources", asSources);
         clientArtifact.setDescription("The client-side ActionScript sources.");
-        clientArtifact.setPublic(true);
+        clientArtifact.setPublic(false);
         as3ClientArtifact.addArtifact(clientArtifact);
         enunciate.addArtifact(clientArtifact);
       }
@@ -729,7 +730,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
   protected void doCompile() throws EnunciateException, IOException {
     Enunciate enunciate = getEnunciate();
 
-    if (isSwcDownloadable() || this.flexApps.size() > 0) {
+    if (isSwcDownloadable() || this.flexApps.size() > 0 || isAsSourcesDownloadable()) {
       doFlexCompile();
       if (this.flexApps.size() > 0) {
         enunciate.addArtifact(new FileArtifact(getName(), "flex.app.dir", getSwfCompileDir()));

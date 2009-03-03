@@ -74,7 +74,10 @@ import java.util.Map;
  *   <li>The "<b>file</b>" attribute specifies name of the schema file.  The default is the prefix appended with ".xsd".</li>
  *   <li>The "<b>location</b>" attribute specifies name of the schema location (i.e. how the schema is to be located by other schemas).
  * The default is the name of the file.</li>
+ *   <li>The "<b>jaxbBindingVersion</b>" attribute specifies the JAXB binding version for this schema. (Advanced, usually not needed.)</li>
  * </ul>
+ *
+ * <p>The "schema" element also supports a nested subelement, "appinfo" whose contents will be inlined into the schema "appinfo" annotation.</p>
  *
  * <h3>The "wsdl" element(s)</h3>
  *
@@ -179,6 +182,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
         if (customConfig.getLocation() != null) {
           schemaInfo.setProperty("location", customConfig.getLocation());
+        }
+
+        if (customConfig.getJaxbBindingVersion() != null) {
+          schemaInfo.setProperty("jaxbBindingVersion", customConfig.getJaxbBindingVersion());
+        }
+
+        if (customConfig.getAppinfo() != null) {
+          schemaInfo.setProperty("appinfo", customConfig.getAppinfo());
         }
       }
     }

@@ -18,7 +18,7 @@ namespace ${namespaceFor(type)} {
     /// </summary>
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
-    ${constant.simpleName}[#if constant_has_next],[/#if]
+    [#if "event" == constant.simpleName]evnt[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
     [/#list]
   }
 }

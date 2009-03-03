@@ -20,12 +20,20 @@
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
     [/#if]
   [/#list]
+  [#if schema.jaxbBindingVersion?exists]jxb:version="${schema.jaxbBindingVersion}" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"[/#if]
   xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
-  [#if schema.doc?exists]
+  [#if schema.doc?exists || schema.appinfo?exists]
   <${xs}:annotation>
+    [#if schema.doc?exists]
     <${xs}:documentation>
      <![CDATA[${schema.doc?trim}]]>
     </${xs}:documentation>
+    [/#if]
+    [#if schema.appinfo?exists]
+    <${xs}:appinfo>
+      ${schema.appinfo}
+    </${xs}:appinfo>
+    [/#if]
   </${xs}:annotation>
   [/#if]
 [#t]

@@ -38,7 +38,15 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
 
     this.rootElement = getAnnotation(XmlRootElement.class);
     this.typeDefinition = typeDefinition;
-    this.schema = new Schema(delegate.getPackage());
+    Package pckg;
+    try {
+      //if this is an already-compiled class, APT has a problem looking up the package info on the classpath...
+      pckg = Class.forName(getQualifiedName()).getPackage();
+    }
+    catch (Throwable e) {
+      pckg = null;
+    }
+    this.schema = new Schema(delegate.getPackage(), pckg);
   }
 
   /**

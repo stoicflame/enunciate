@@ -18,7 +18,7 @@ package ${packageFor(type)} {
     /**
      * ${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
      */
-    public static var ${constant.simpleName}:String = "${enumValueMap[constant.simpleName]}";
+    public static var [#if "delete" == constant.simpleName]del[#else]${constant.simpleName}[/#if]:String = "${enumValueMap[constant.simpleName]}";
     [/#list]
 
   }

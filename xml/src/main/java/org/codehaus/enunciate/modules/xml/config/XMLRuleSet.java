@@ -31,6 +31,8 @@ public class XMLRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/xml/schema");
     digester.addSetNext("enunciate/modules/xml/schema", "addSchemaConfig");
 
+    digester.addBeanPropertySetter("enunciate/modules/xml/schema/appinfo", "appinfo");
+
     digester.addObjectCreate("enunciate/modules/xml/wsdl", WsdlConfig.class);
     digester.addSetProperties("enunciate/modules/xml/wsdl");
     digester.addSetNext("enunciate/modules/xml/wsdl", "addWsdlConfig");

@@ -17,7 +17,6 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
@@ -25,6 +24,7 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -101,7 +101,9 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
 
   @Override
   public boolean isBaseObject() {
-    return getSuperclass().getDeclaration() == null || Object.class.getName().equals(getSuperclass().getDeclaration().getQualifiedName());
+    return getSuperclass().getDeclaration() == null
+      || Object.class.getName().equals(getSuperclass().getDeclaration().getQualifiedName())
+      || isXmlTransient(getSuperclass().getDeclaration());
   }
 
   @Override

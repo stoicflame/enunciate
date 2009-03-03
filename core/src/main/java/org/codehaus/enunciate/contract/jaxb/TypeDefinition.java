@@ -24,6 +24,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -55,7 +56,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     super(delegate);
 
     this.xmlType = getAnnotation(javax.xml.bind.annotation.XmlType.class);
-    this.schema = new Schema(delegate.getPackage());
+    Package pckg;
+    try {
+      //if this is an already-compiled class, APT has a problem looking up the package info on the classpath...
+      pckg = Class.forName(getQualifiedName()).getPackage();
+    }
+    catch (Throwable e) {
+      pckg = null;
+    }
+    this.schema = new Schema(delegate.getPackage(), pckg);
 
     ElementComparator comparator = new ElementComparator(getPropertyOrder(), getAccessorOrder());
     SortedSet<Element> elementAccessors = new TreeSet<Element>(comparator);
@@ -63,71 +72,65 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     Collection<Attribute> attributeAccessors = new ArrayList<Attribute>();
     Value value = null;
 
-    ArrayList<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
-    accessors.addAll(getFields());
-    accessors.addAll(getProperties());
     Accessor xmlID = null;
     AnyElement anyElement = null;
     boolean hasAnyAttribute = false;
-    for (MemberDeclaration accessor : accessors) {
-      if (filter.accept(accessor)) {
-        Accessor added;
-        if (isAttribute(accessor)) {
-          Attribute attribute = new Attribute(accessor, this);
-          attributeAccessors.add(attribute);
-          added = attribute;
+    for (MemberDeclaration accessor : loadPotentialAccessors(filter)) {
+      Accessor added;
+      if (isAttribute(accessor)) {
+        Attribute attribute = new Attribute(accessor, this);
+        attributeAccessors.add(attribute);
+        added = attribute;
+      }
+      else if (isValue(accessor)) {
+        if (value != null) {
+          throw new ValidationException(accessor.getPosition(), "A type definition cannot have more than one xml value.");
         }
-        else if (isValue(accessor)) {
-          if (value != null) {
-            throw new ValidationException(accessor.getPosition(), "A type definition cannot have more than one xml value.");
+
+        value = new Value(accessor, this);
+        added = value;
+      }
+      else if (isElementRef(accessor)) {
+        ElementRef elementRef = new ElementRef(accessor, this);
+        if (!elementAccessors.add(elementRef)) {
+          throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
+        }
+        added = elementRef;
+      }
+      else if (isAnyAttribute(accessor)) {
+        hasAnyAttribute = true;
+        continue;
+      }
+      else if (isAnyElement(accessor)) {
+        anyElement = new AnyElement(accessor, this);
+        continue;
+      }
+      else if (isUnsupported(accessor)) {
+        throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
+      }
+      else {
+        //its an element accessor.
+
+        if (accessor instanceof PropertyDeclaration) {
+          //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
+          if (overrides(((PropertyDeclaration) accessor).getGetter()) || overrides(((PropertyDeclaration) accessor).getSetter())) {
+            continue;
           }
-
-          value = new Value(accessor, this);
-          added = value;
-        }
-        else if (isElementRef(accessor)) {
-          ElementRef elementRef = new ElementRef(accessor, this);
-          if (!elementAccessors.add(elementRef)) {
-            throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
-          }
-          added = elementRef;
-        }
-        else if (isAnyAttribute(accessor)) {
-          hasAnyAttribute = true;
-          continue;
-        }
-        else if (isAnyElement(accessor)) {
-          anyElement = new AnyElement(accessor, this);
-          continue;
-        }
-        else if (isUnsupported(accessor)) {
-          throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
-        }
-        else {
-          //its an element accessor.
-
-          if (accessor instanceof PropertyDeclaration) {
-            //if the accessor is a property and either the getter or setter overrides ANY method of ANY superclass, exclude it.
-            if (overrides(((PropertyDeclaration)accessor).getGetter()) || overrides(((PropertyDeclaration)accessor).getSetter())) {
-              continue;
-            }
-          }
-
-          Element element = new Element(accessor, this);
-          if (!elementAccessors.add(element)) {
-            throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
-          }
-          added = element;
         }
 
-        if (added.getAnnotation(XmlID.class) != null) {
-          if (xmlID != null) {
-            throw new ValidationException(added.getPosition(), "More than one XML id specified.");
-          }
+        Element element = new Element(accessor, this);
+        if (!elementAccessors.add(element)) {
+          throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
+        }
+        added = element;
+      }
 
-          xmlID = added;
+      if (added.getAnnotation(XmlID.class) != null) {
+        if (xmlID != null) {
+          throw new ValidationException(added.getPosition(), "More than one XML id specified.");
         }
 
+        xmlID = added;
       }
     }
 
@@ -137,6 +140,58 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.xmlID = xmlID;
     this.hasAnyAttribute = hasAnyAttribute;
     this.anyElement = anyElement;
+  }
+
+  /**
+   * Load the potential accessors for this type definition.
+   *
+   * @param filter The filter.
+   * @return the potential accessors for this type definition.
+   */
+  protected List<MemberDeclaration> loadPotentialAccessors(AccessorFilter filter) {
+    List<FieldDeclaration> potentialFields = new ArrayList<FieldDeclaration>();
+    List<PropertyDeclaration> potentialProperties = new ArrayList<PropertyDeclaration>();
+    aggregatePotentialAccessors(potentialFields, potentialProperties, this, filter);
+
+    List<MemberDeclaration> accessors = new ArrayList<MemberDeclaration>();
+    accessors.addAll(potentialFields);
+    accessors.addAll(potentialProperties);
+    return accessors;
+  }
+
+  /**
+   * Aggregate the potential accessor into their separate buckets for the given class declaration, recursively including transient superclasses.
+   *
+   * @param fields     The fields.
+   * @param properties The properties.
+   * @param clazz      The class.
+   * @param filter     The filter.
+   */
+  protected void aggregatePotentialAccessors(List<FieldDeclaration> fields, List<PropertyDeclaration> properties, DecoratedClassDeclaration clazz, AccessorFilter filter) {
+    DecoratedClassDeclaration superDeclaration = (clazz.getSuperclass() != null && clazz.getSuperclass().getDeclaration() != null) ?
+      (DecoratedClassDeclaration) DeclarationDecorator.decorate(clazz.getSuperclass().getDeclaration()) :
+      null;
+    if (superDeclaration != null && isXmlTransient(superDeclaration)) {
+      aggregatePotentialAccessors(fields, properties, superDeclaration, filter);
+    }
+
+    for (FieldDeclaration fieldDeclaration : clazz.getFields()) {
+      if (!filter.accept(fieldDeclaration)) {
+        remove(fieldDeclaration, fields);
+      }
+      else {
+        addOrReplace(fieldDeclaration, fields);
+      }
+    }
+
+    for (PropertyDeclaration propertyDeclaration : clazz.getProperties()) {
+      if (!filter.accept(propertyDeclaration)) {
+        remove(propertyDeclaration, properties);
+      }
+      else {
+        addOrReplace(propertyDeclaration, properties);
+      }
+    }
   }
 
   /**
@@ -175,6 +230,33 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
 
     return false;
+  }
+
+  /**
+   * Add the specified member declaration, or if it is already in the list (by name), replace it.
+   *
+   * @param memberDeclaration  The member to add/replace.
+   * @param memberDeclarations The other members.
+   */
+  protected <M extends MemberDeclaration> void addOrReplace(M memberDeclaration, List<M> memberDeclarations) {
+    remove(memberDeclaration, memberDeclarations);
+    memberDeclarations.add(memberDeclaration);
+  }
+
+  /**
+   * Remove specified member declaration from the specified list, if it exists..
+   *
+   * @param memberDeclaration  The member to remove.
+   * @param memberDeclarations The other members.
+   */
+  protected <M extends MemberDeclaration> void remove(M memberDeclaration, List<M> memberDeclarations) {
+    Iterator<M> it = memberDeclarations.iterator();
+    while (it.hasNext()) {
+      MemberDeclaration candidate = it.next();
+      if (candidate.getSimpleName().equals(memberDeclaration.getSimpleName())) {
+        it.remove();
+      }
+    }
   }
 
   /**

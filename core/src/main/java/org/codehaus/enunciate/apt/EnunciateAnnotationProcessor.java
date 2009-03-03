@@ -196,6 +196,30 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       }
     }
 
+    //override any namespace prefix mappings as specified in the config.
+    for (String ns : config.getNamespacesToPrefixes().keySet()) {
+      String prefix = config.getNamespacesToPrefixes().get(ns);
+      model.getNamespacesToPrefixes().put(ns, prefix);
+      debug("Assigning namespace prefix %s to namespace %s as specified in the config.", prefix, ns);
+    }
+
+    //override any content type ids as specified in the config.
+    for (String ct : config.getContentTypesToIds().keySet()) {
+      String id = config.getContentTypesToIds().get(ct);
+      model.getContentTypesToIds().put(ct, id);
+      debug("Assigning id '%s' to content type '%s' as specified in the config.", id, ct);
+    }
+
+    String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
+    if (config.getDeploymentContext() != null) {
+      baseURL += config.getDeploymentContext();
+    }
+    else if ((config.getLabel() != null) && (!"".equals(config.getLabel()))) {
+      //we don't have a default context set, so we'll just guess that it's the project label.
+      baseURL += ("/" + config.getLabel());
+    }
+    model.setBaseDeploymentAddress(baseURL);
+
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -248,30 +272,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         debug("%s is neither an endpoint interface, rest endpoint, or JAXB schema type, so it'll be ignored.", declaration.getQualifiedName());
       }
     }
-
-    //override any namespace prefix mappings as specified in the config.
-    for (String ns : config.getNamespacesToPrefixes().keySet()) {
-      String prefix = config.getNamespacesToPrefixes().get(ns);
-      String old = model.getNamespacesToPrefixes().put(ns, prefix);
-      debug("Replaced namespace prefix %s with %s for namespace %s as specified in the config.", old, prefix, ns);
-    }
-
-    //override any content type ids as specified in the config.
-    for (String ct : config.getContentTypesToIds().keySet()) {
-      String id = config.getContentTypesToIds().get(ct);
-      String old = model.getContentTypesToIds().put(ct, id);
-      debug("Replaced content type '%s' with '%s' for content type '%s' as specified in the config.", old, id, ct);
-    }
-
-    String baseURL = config.getDeploymentProtocol() + "://" + config.getDeploymentHost();
-    if (config.getDeploymentContext() != null) {
-      baseURL += config.getDeploymentContext();
-    }
-    else if ((config.getLabel() != null) && (!"".equals(config.getLabel()))) {
-      //we don't have a default context set, so we'll just guess that it's the project label.
-      baseURL += ("/" + config.getLabel());
-    }
-    model.setBaseDeploymentAddress(baseURL);
 
     validate(model);
 

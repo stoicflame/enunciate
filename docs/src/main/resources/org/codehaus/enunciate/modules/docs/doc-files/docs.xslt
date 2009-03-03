@@ -67,24 +67,26 @@
     </xsl:if>
 
     <xsl:if test="/api-docs/data/schema/types/type">
-      <h1>Data Types</h1>
-      <ul>
-        <xsl:for-each select="/api-docs/data/schema/types/type">
-          <xsl:sort select="@name"/>
-          <li>
-            <xsl:choose>
-              <xsl:when test="tag[@name='deprecated']">
-                <font style="text-decoration:line-through;">
+      <xsl:for-each select="/api-docs/data/schema">
+        <h1>Data Types: <xsl:value-of select="@namespaceId"/></h1>
+        <ul>
+          <xsl:for-each select="types/type">
+            <xsl:sort select="@name"/>
+            <li>
+              <xsl:choose>
+                <xsl:when test="tag[@name='deprecated']">
+                  <font style="text-decoration:line-through;">
+                    <a href="data_{../../@namespaceId}.html#{@name}">Type <xsl:value-of select="@name"/></a>
+                  </font>
+                </xsl:when>
+                <xsl:otherwise>
                   <a href="data_{../../@namespaceId}.html#{@name}">Type <xsl:value-of select="@name"/></a>
-                </font>
-              </xsl:when>
-              <xsl:otherwise>
-                <a href="data_{../../@namespaceId}.html#{@name}">Type <xsl:value-of select="@name"/></a>
-              </xsl:otherwise>
-            </xsl:choose>
-          </li>
-        </xsl:for-each>
-      </ul>
+                </xsl:otherwise>
+              </xsl:choose>
+            </li>
+          </xsl:for-each>
+        </ul>
+      </xsl:for-each>
     </xsl:if>
   </xsl:variable>
 

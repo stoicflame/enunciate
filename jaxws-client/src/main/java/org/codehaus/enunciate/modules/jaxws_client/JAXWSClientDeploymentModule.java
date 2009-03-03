@@ -408,7 +408,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
 
     //todo: generate the javadocs?
 
-    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "jaxws.client.library", "JAX-WS Client Library");
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "jaxws.client.library", "JAX-WS Client Library (Java 5+)");
     artifactBundle.setPlatform("Java (Version 5+)");
     //read in the description from file:
     artifactBundle.setDescription(readResource("library_description.html"));
