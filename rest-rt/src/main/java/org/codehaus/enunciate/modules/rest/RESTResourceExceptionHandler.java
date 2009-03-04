@@ -34,13 +34,14 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class RESTResourceExceptionHandler implements HandlerExceptionResolver, View {
-
-  public final static String MODEL_EXCEPTION = "org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler#EXCEPTION";
+public class RESTResourceExceptionHandler implements RESTExceptionHandler {
 
   private final Map<Class, Method> errorBodies = new HashMap<Class, Method>();
 
-  public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
+  /* (non-Javadoc)
+ * @see org.codehaus.enunciate.modules.rest.RESTExceptionHandler#resolveException(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, java.lang.Exception)
+ */
+public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
     RESTRequestContentTypeHandler contentHandler = (RESTRequestContentTypeHandler) request.getAttribute(RESTRequestContentTypeHandler.class.getName());
     if (contentHandler != null) {
       return new ModelAndView(this, MODEL_EXCEPTION, exception);
@@ -49,11 +50,17 @@ public class RESTResourceExceptionHandler implements HandlerExceptionResolver, V
     return null;
   }
 
-  public String getContentType() {
+  /* (non-Javadoc)
+ * @see org.codehaus.enunciate.modules.rest.RESTExceptionHandler#getContentType()
+ */
+public String getContentType() {
     return null;
   }
 
-  public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+  /* (non-Javadoc)
+ * @see org.codehaus.enunciate.modules.rest.RESTExceptionHandler#render(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+ */
+public void render(Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
     Exception exception = (Exception) model.get(MODEL_EXCEPTION);
     RESTRequestContentTypeHandler contentHandler = (RESTRequestContentTypeHandler) request.getAttribute(RESTRequestContentTypeHandler.class.getName());
 

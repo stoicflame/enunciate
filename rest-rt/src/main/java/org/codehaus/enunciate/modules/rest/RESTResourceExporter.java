@@ -10,13 +10,23 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 package org.codehaus.enunciate.modules.rest;
 
-import org.apache.commons.beanutils.ConvertUtils;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.activation.DataHandler;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.enunciate.rest.annotations.VerbType;
@@ -32,14 +42,6 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
-import javax.activation.DataHandler;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * A exporter for a REST resource.
  *
@@ -52,6 +54,7 @@ public class RESTResourceExporter extends AbstractController {
   private final RESTResource resource;
   private final Map<VerbType, Object> endpoints;
 
+  private ConverterSupport converter;
   private MultipartRequestHandler multipartRequestHandler;
   private ContentTypeSupport contentTypeSupport;
   private Pattern contentTypeIdPattern = Pattern.compile("^/?([^/]+)");
@@ -204,11 +207,10 @@ public class RESTResourceExporter extends AbstractController {
         if (nounType != null) {
           //todo: provide a hook to some other conversion mechanism?
           try {
-            properNounValue = convert(parameterValue, nounType);
+            properNounValue = converter.convert(parameterValue, nounType);
           }
           catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
-            return null;
+        	throw new ParameterConversionException(parameterValue);
           }
         }
       }
@@ -217,11 +219,10 @@ public class RESTResourceExporter extends AbstractController {
         if (contextParameterType != null) {
           //todo: provide a hook to some other conversion mechanism?
           try {
-            contextParameterValues.put(parameterName, convert(parameterValue, contextParameterType));
+            contextParameterValues.put(parameterName, converter.convert(parameterValue, contextParameterType));
           }
           catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter value '" + parameterValue + "' on URL.");
-            return null;
+        	  throw new ParameterConversionException(parameterValue);
           }
         }
       }
@@ -245,11 +246,10 @@ public class RESTResourceExporter extends AbstractController {
           Object adjectiveValues = Array.newInstance(componentType, parameterValues.length);
           for (int i = 0; i < parameterValues.length; i++) {
             try {
-              Array.set(adjectiveValues, i, convert(parameterValues[i], componentType));
+              Array.set(adjectiveValues, i, converter.convert(parameterValues[i], componentType));
             }
             catch (Exception e) {
-              response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid value '" + parameterValues[i] + "' for parameter '" + adjective + "'.");
-              return null;
+            	throw new KeyParameterConversionException(adjective, parameterValues[i]);
             }
           }
 
@@ -282,10 +282,9 @@ public class RESTResourceExporter extends AbstractController {
           ObjectError firstError = (ObjectError) errors.getAllErrors().get(0);
           String message = "Invalid parameter.";
           if (firstError instanceof FieldError) {
-            message = String.format("Invalid parameter value: %s", ((FieldError) firstError).getRejectedValue());
+            throw new ParameterConversionException(((FieldError)firstError).getRejectedValue().toString());
           }
           response.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
-          return null;
         }
       }
 
@@ -338,29 +337,10 @@ public class RESTResourceExporter extends AbstractController {
       ((DataHandler) result).writeTo(response.getOutputStream());
     }
     else {
-      response.setContentType(String.format("%s;charset=%s", operation.getContentType(), operation.getCharset()));
+      response.setContentType(String.format("%s; charset=%s", operation.getContentType(), operation.getCharset()));
       handler.write(result, request, response);
     }
     return null;
-  }
-
-  /**
-   * Convert a string to a specified type.
-   *
-   * @param value The value.
-   * @param type  The type.
-   * @return The conversion.
-   */
-  protected Object convert(String value, Class type) {
-    if (ConvertUtils.lookup(type) != null) {
-      return ConvertUtils.convert(value, type);
-    }
-    else if (Enum.class.isAssignableFrom(type)) {
-      return Enum.valueOf(type, value);
-    }
-    else {
-      throw new UnsupportedOperationException();
-    }
   }
 
   /**
@@ -447,4 +427,25 @@ public class RESTResourceExporter extends AbstractController {
   public void setContentTypeIdPattern(Pattern contentTypeIdPattern) {
     this.contentTypeIdPattern = contentTypeIdPattern;
   }
+
+  /**
+   * The converter to use when converting from strings to types
+   * 
+   * @return The converter to use when converting from strings to types
+   */
+  public ConverterSupport getConverter() {
+	return converter;
+  }
+	
+  /**
+   * The converter to use when converting from strings to types
+   * 
+   * @return The converter to use when converting from strings to types
+   */
+  @Autowired
+  public void setConverter(ConverterSupport converter) {
+	this.converter = converter;
+  }
+  
+  
 }

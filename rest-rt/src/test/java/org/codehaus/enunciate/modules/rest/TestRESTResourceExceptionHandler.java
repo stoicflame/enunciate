@@ -47,7 +47,7 @@ public class TestRESTResourceExceptionHandler extends TestCase {
     replay(request, response);
     ModelAndView modelAndView = handler.resolveException(request, response, null, null);
     assertSame(handler, modelAndView.getView());
-    assertTrue(modelAndView.getModel().containsKey(RESTResourceExceptionHandler.MODEL_EXCEPTION));
+    assertTrue(modelAndView.getModel().containsKey(RESTExceptionHandler.MODEL_EXCEPTION));
     verify(request, response);
     reset(request, response);
   }
@@ -76,7 +76,7 @@ public class TestRESTResourceExceptionHandler extends TestCase {
     reset(request, response);
 
     RESTRequestContentTypeHandler contentHandler = createMock(RESTRequestContentTypeHandler.class);
-    model.put(RESTResourceExceptionHandler.MODEL_EXCEPTION, new Exception("hello!"));
+    model.put(RESTExceptionHandler.MODEL_EXCEPTION, new Exception("hello!"));
     expect(request.getAttribute(RESTRequestContentTypeHandler.class.getName())).andReturn(contentHandler);
     response.setStatus(500, "hello!");
     expect(request.getAttribute(RESTOperation.class.getName())).andReturn(null);
@@ -87,7 +87,7 @@ public class TestRESTResourceExceptionHandler extends TestCase {
     reset(request, response, contentHandler);
 
     RootElementExample ree = new RootElementExample();
-    model.put(RESTResourceExceptionHandler.MODEL_EXCEPTION, new ExceptionExample(ree, "wow"));
+    model.put(RESTExceptionHandler.MODEL_EXCEPTION, new ExceptionExample(ree, "wow"));
     expect(request.getAttribute(RESTRequestContentTypeHandler.class.getName())).andReturn(contentHandler);
     response.setStatus(333, "wow");
     final RESTOperation operation = new RESTOperation(null, "content/type", VerbType.read, RESTOperationExamples.class.getMethod("properNoun", String.class), null);

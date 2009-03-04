@@ -693,6 +693,12 @@
         <xs:attribute name="requireJAXBCompatibility" type="xs:boolean" default="true">
           <xs:annotation><xs:documentation>used to disable the requirement that return types and noun values be JAXB-compatible. Since Enunciate uses JAXB by default for marshalling and umarshalling, this requirement should only be disabled if you have provided your own content type handlers.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="handlerExceptionResolver" type="xs:string" default="org.codehaus.enunciate.modules.rest.RESTResourceExceptionHandler">
+          <xs:annotation><xs:documentation>Used to set the exception handler responsible for handling exceptions that arise within the course of running the resource</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="conversionSupport" type="xs:string" default="org.codehaus.enunciate.modules.rest.DefaultConverter">
+          <xs:annotation><xs:documentation>The converter to use when populating method parameters from request parameters</xs:documentation></xs:annotation>
+        </xs:attribute>                
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

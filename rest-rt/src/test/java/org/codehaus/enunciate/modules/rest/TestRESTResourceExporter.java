@@ -203,6 +203,7 @@ public class TestRESTResourceExporter extends TestCase {
     HashMap<VerbType, Object> endpoints = new HashMap<VerbType, Object>();
     endpoints.put(VerbType.update, new MockRESTEndpoint());
     RESTResourceExporter controller = new RESTResourceExporter(resource, endpoints);
+    controller.setConverter(new DefaultConverter());
     controller.setContentTypeSupport(new ContentTypeSupport(null, null));
     controller.setApplicationContext(new GenericApplicationContext());
     controller.setMultipartRequestHandler(null); //not testing multipart request handling yet...
@@ -234,7 +235,7 @@ public class TestRESTResourceExporter extends TestCase {
         request.setAttribute("result", data.getClass().getName());
       }
     };
-    response.setContentType("text/xml;charset=utf-8");
+    response.setContentType("text/xml; charset=utf-8");
     request.setAttribute("result", RootElementExample.class.getName());
     replay(request, response);
     assertNull(controller.handleRESTOperation(operation, handler, request, response));

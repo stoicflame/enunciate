@@ -11,6 +11,9 @@
 
   <!-- The REST error handler -->
   <bean id="handlerExceptionResolver" class="${handlerExceptionResolver}"/>
+  
+  <!-- The REST Conversion Support -->
+  <bean id="conversionSupport" class="${conversionSupport}"/>
 
   <!-- the namespace-to-prefix support. -->
   <bean id="namespacePrefixLookup" class="org.codehaus.enunciate.modules.rest.NamespacePrefixLookup">

@@ -317,6 +317,7 @@ import java.util.*;
  *       uses JAXB by default for marshalling and umarshalling, this requirement should only be disabled if you have provided your own content type
  *       handlers.</li>
  *   <li>The "handlerExceptionResolver" attribute is used to specify the handler exception resolver to use to map REST exceptions to the error body.</li>
+ *   <li>The "conversionSupport" attribute is used to specify the converter to use to convert request strings to the appropriate java types.</li>
  * </ul>
  *
  * <h3>The "json" element</h3>
@@ -352,6 +353,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   private String defaultJsonSerialization = JsonSerializationMethod.xmlMapped.toString();
   private boolean requireJAXBCompatibility = true;
   private String handlerExceptionResolver = RESTResourceExceptionHandler.class.getName();
+  private String conversionSupport = DefaultConverter.class.getName();
  
   /**
    * @return "rest"
@@ -430,6 +432,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     model.put("restSubcontext", getRestSubcontext());
     model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
     model.put("handlerExceptionResolver", getHandlerExceptionResolver());
+    model.put("conversionSupport", getConversionSupport());
  
     //populate the content-type-to-handler map.
     File paramNameFile = new File(getGenerateDir(), "enunciate-rest-parameter-names.properties");
@@ -608,8 +611,26 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
 	public void setHandlerExceptionResolver(String handlerExceptionResolver) {
 		this.handlerExceptionResolver = handlerExceptionResolver;
 	}
+	
+  /**
+   * The converter to use for converting from Strings to types
+   * 
+   * @return The converter to use for converting from Strings to types
+   */
+  public String getConversionSupport() {
+		return conversionSupport;
+	}
 
-  @Override
+  /**
+   * The converter to use for converting from Strings to types
+   * 
+   * @return The converter to use for converting from Strings to types
+   */
+  public void setConversionSupport(String conversionSupport) {
+		this.conversionSupport = conversionSupport;
+	}
+
+@Override
   public RuleSet getConfigurationRules() {
     return new RESTRuleSet();
   }
