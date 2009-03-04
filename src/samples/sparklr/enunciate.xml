@@ -18,6 +18,8 @@
         <formBasedLogin url="/login.do" loginPageFile="src/main/webapp/login.jsp"/>
         <formBasedLogout url="/logout.do"/>
 
+        <!--we need our index.jsp and login.jsp secure, too-->
+        <url pattern="/*"/>
       </security>
       
     </spring-app>

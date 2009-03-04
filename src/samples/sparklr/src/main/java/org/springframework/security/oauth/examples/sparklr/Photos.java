@@ -10,16 +10,16 @@ import java.util.Collection;
 @XmlRootElement
 public class Photos {
 
-  private Collection<PhotoInfo> photos;
+  private Collection<PhotoInfo> photoItems;
 
   @XmlElement (
     name = "photo"
   )
-  public Collection<PhotoInfo> getPhotos() {
-    return photos;
+  public Collection<PhotoInfo> getPhotoItems() {
+    return photoItems;
   }
 
-  public void setPhotos(Collection<PhotoInfo> photos) {
-    this.photos = photos;
+  public void setPhotoItems(Collection<PhotoInfo> photoItems) {
+    this.photoItems = photoItems;
   }
 }

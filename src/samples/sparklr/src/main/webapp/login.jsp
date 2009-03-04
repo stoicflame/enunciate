@@ -1,3 +1,5 @@
+<%@ page import="org.springframework.security.AuthenticationException" %>
+<%@ page import="org.springframework.security.ui.AbstractProcessingFilter" %>
 <%@ taglib prefix="authz" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <authz:authorize ifAllGranted="ROLE_USER">

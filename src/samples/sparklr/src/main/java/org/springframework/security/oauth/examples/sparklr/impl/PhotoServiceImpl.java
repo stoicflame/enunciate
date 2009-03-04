@@ -40,7 +40,7 @@ public class PhotoServiceImpl implements PhotoService {
         }
       }
       Photos photos = new Photos();
-      photos.setPhotos(infos);
+      photos.setPhotoItems(infos);
       return photos;
     }
     else {
