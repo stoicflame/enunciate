@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jersey-storage</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.10-RC1</version>
   <name>Enunciate - Jersey Integration Tests</name>
   <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>
@@ -135,6 +135,14 @@
       <artifactId>joda-time</artifactId>
       <version>1.4</version>
     </dependency>
+
+    <!-- uncomment to get a JSON provider.  Left commented out to make sure we run if it's not on the classpath.
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+      <version>0.9.9</version>
+    </dependency>
+    -->
 
     <dependency>
       <groupId>com.sun.jersey</groupId>

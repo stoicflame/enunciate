@@ -73,10 +73,10 @@ public class EnunciateSpringServlet extends ServletContainer {
     }
 
     try {
-      rc.getClasses().add(ClassUtils.forName("org.codehaus.enunciate.modules.jersey.JacksonJAXRSProvider"));
+      rc.getClasses().add(ClassUtils.forName("org.codehaus.jackson.jaxrs.JacksonJsonProvider"));
     }
     catch (Throwable e) {
-      LOG.info("org.codehaus.enunciate.modules.jersey.JacksonJAXRSProvider not loaded. Perhaps Jackson isn't on the classpath?");
+      LOG.info("org.codehaus.jackson.jaxrs.JacksonJsonProvider not loaded. Perhaps Jackson isn't on the classpath?");
     }
 
     String pathBasedConneg = sc.getInitParameter(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);

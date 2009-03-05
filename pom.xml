@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.10-RC1</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -823,8 +823,8 @@
 
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>0.9.8</version>
+        <artifactId>jackson-jaxrs</artifactId>
+        <version>0.9.9</version>
       </dependency>
 
       <dependency>
