@@ -35,10 +35,10 @@
           <bean parent="soap-endpoint">
             <property name="serviceClass" value="${impl.qualifiedName}"/>
             <property name="serviceBean" ref="${endpointBeanId(endpointInterface)}"/>
-          [#if wsdl.properties.filename?exists && docsDir?exists]
+          [#if wsdl.properties.filename?exists]
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">
-                <property name="url" value="/${docsDir}/${wsdl.properties.filename}"/>
+                <property name="url" value="[#if docsDir?exists]/${docsDir}[/#if]/${wsdl.properties.filename}"/>
                 <property name="contextRelative" value="true"/>
               </bean>
             </property>
