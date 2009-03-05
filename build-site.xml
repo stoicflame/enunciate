@@ -78,7 +78,7 @@
       <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.1"/>
       <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.5"/>
       <dependency groupId="javax.annotation" artifactId="jsr250-api" version="1.0"/>
-      <dependency groupId="org.codehaus.jackson" artifactId="jackson-asl-mapper" version="0.9.8"/>
+      <dependency groupId="org.codehaus.jackson" artifactId="jackson-jaxrs" version="0.9.9"/>
     </artifact:dependencies>
     <patternset id="optional.jars.dependencies.patternset">
       <exclude name="**/commons-fileupload*1.2.1*"/>
