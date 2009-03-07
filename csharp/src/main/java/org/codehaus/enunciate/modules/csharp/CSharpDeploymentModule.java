@@ -236,6 +236,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToNamespaceConversions);
       model.put("classnameFor", classnameFor);
+      model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(this.packageToNamespaceConversions));
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("csFileName", getSourceFileName());
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());

@@ -5,8 +5,11 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  <![CDATA[${type.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
+  /// <summary>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass, true)} [/#if]{
 
@@ -30,7 +33,7 @@ namespace ${namespaceFor(type)} {
     [#if !accessorOverridesAnother(attribute)]
 
     /// <summary>
-    ///  <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=attribute /]
     public ${classnameFor(attribute)} ${attribute.simpleName?cap_first} {
@@ -47,7 +50,7 @@ namespace ${namespaceFor(type)} {
     [#if !accessorOverridesAnother(type.value)]
 
     /// <summary>
-    ///  <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
     public ${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
@@ -64,7 +67,7 @@ namespace ${namespaceFor(type)} {
       [#if !accessorOverridesAnother(element)]
 
     /// <summary>
-    ///  <![CDATA[${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=element /]
     public ${classnameFor(element)} ${element.simpleName?cap_first} {

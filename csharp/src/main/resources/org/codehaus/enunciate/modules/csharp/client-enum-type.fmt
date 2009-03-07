@@ -4,8 +4,11 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  <![CDATA[${type.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
+  /// <summary>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </summary>
   [#if findRootElement(type)?exists]
   [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
   [/#if]
@@ -14,7 +17,7 @@ namespace ${namespaceFor(type)} {
     [#list type.delegate.enumConstants as constant]
 
     /// <summary>
-    ///  <![CDATA[${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]

@@ -16,8 +16,11 @@ namespace ${namespaceFor(endpointInterface)} {
   [/@forEachWebMethod]
 
   /// <remarks>
-  ///  <![CDATA[${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}]]>
+  ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
+  /// <summary>
+  ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </summary>
   [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace?default("")}")]
   public class ${endpointInterface.simpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
 
@@ -58,17 +61,17 @@ namespace ${namespaceFor(endpointInterface)} {
   [@forEachWebMethod endpointInterface=endpointInterface]
 
     /// <summary>
-    ///  <![CDATA[${webMethod.docValue?default("(no summary provided)")?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${webMethod.docValue?default("(no summary provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [#list webMethod.webParameters as param]
       [#if !param.header]
-    /// <param name="${param.simpleName}"><![CDATA[${param.docValue?default("(no parameter documentation provided)")?chop_linebreak?replace("\n", "\n    ///  ")}]]></param>
+    /// <param name="${param.simpleName}">${param.docValue?default("(no parameter documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</param>
       [/#if]
     [/#list]
-    /// <returns><![CDATA[${webMethod.returnType.docComment?default("(no returns documentation provided)")?chop_linebreak?replace("\n", "\n    ///  ")}]]></returns>
+    /// <returns>${webMethod.returnType.docComment?default("(no returns documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</returns>
     [#if webMethod.javaDoc.throws?exists]
       [#list webMethod.javaDoc.throws as exdoc]
-    /// <exception><![CDATA[${exdoc?replace("\n", "\n    ///  ")}]]></exception>
+    /// <exception>${exdoc?html?replace("\n", "\n    ///  ")}</exception>
       [/#list]
     [/#if]
     [#assign isrpc=(webMethod.soapBindingStyle?string?lower_case = "rpc") /]
@@ -89,11 +92,11 @@ namespace ${namespaceFor(endpointInterface)} {
       [/#if]
     [/#list]
     [#assign usecomma=false/]
-    public [#if webMethod.webResult.header]void[#else]${classnameFor(webMethod.webResult)}[/#if] ${webMethod.simpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="[#if param.implicitSchemaElement]${endpointInterface.targetNamespace?default("")}[/#if]")] [/#if]${classnameFor(param)} ${param.simpleName}[/#if][/#list]) {
+    public [#if webMethod.webResult.header]void[#else]${listsAsArraysClassnameFor(webMethod.webResult)}[/#if] ${webMethod.simpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="[#if param.implicitSchemaElement]${endpointInterface.targetNamespace?default("")}[/#if]")] [/#if]${classnameFor(param)} ${param.simpleName}[/#if][/#list]) {
     [#assign usecomma=false/]
       object[] results = this.Invoke("${webMethod.simpleName?cap_first}", new object[] { [#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/]${param.simpleName}[/#if][/#list] });
     [#if !webMethod.webResult.void && !webMethod.webResult.header]
-      return ((${classnameFor(webMethod.webResult)})(results[0]));
+      return ((${listsAsArraysClassnameFor(webMethod.webResult)})(results[0]));
     [/#if]
     }
   [/@forEachWebMethod]

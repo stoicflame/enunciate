@@ -4,10 +4,15 @@
 [#macro writeSoapHeaderType param endpointInterface]
 
   /// <remarks>
-  ///  <![CDATA[${param.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n  ///  ")}
+  ///  ${param.elementDocs?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   ///
-  ///  This class is intended to be used as a SOAP header for the ${endpointInterface.simpleName} class.]]>
+  ///  This class is intended to be used as a SOAP header for the ${endpointInterface.simpleName} class.
   /// </remarks>
+  /// <summary>
+  ///  ${param.elementDocs?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///
+  ///  This class is intended to be used as a SOAP header for the ${endpointInterface.simpleName} class.
+  /// </summary>
   [System.SerializableAttribute()]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",TypeName="${param.elementName}")]
   [System.Xml.Serialization.SoapTypeAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",TypeName="${param.elementName}")]
@@ -36,7 +41,7 @@
       [#if !accessorOverridesAnother(attribute)]
 
     /// <summary>
-    ///  <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=attribute /]
     public [#if accessorOverridesAnother(attribute)]override [/#if]${classnameFor(attribute)} ${attribute.simpleName?cap_first} {
@@ -53,7 +58,7 @@
       [#if !accessorOverridesAnother(type.value)]
 
     /// <summary>
-    ///  <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
     public [#if accessorOverridesAnother(type.value)]override [/#if]${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
@@ -70,7 +75,7 @@
         [#if !accessorOverridesAnother(element)]
 
     /// <summary>
-    ///  <![CDATA[${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n    ///  ")}]]>
+    ///  ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=element /]
     public ${classnameFor(element)} ${element.simpleName?cap_first} {

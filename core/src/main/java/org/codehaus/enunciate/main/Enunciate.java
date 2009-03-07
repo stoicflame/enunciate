@@ -167,7 +167,6 @@ public class Enunciate {
   /**
    * Logic for handling the closing of the Enunciate mechanism.  Closes the modules and exports
    * the artifacts.
-   *
    */
   protected void doClose() throws EnunciateException, IOException {
     info("\n\nClosing Enunciate mechanism.");
@@ -196,7 +195,6 @@ public class Enunciate {
 
   /**
    * Do the package logic.
-   *
    */
   protected void doPackage() throws IOException, EnunciateException {
     File packageDir = getPackageDir();
@@ -224,7 +222,6 @@ public class Enunciate {
 
   /**
    * Do the build logic.
-   *
    */
   protected void doBuild() throws IOException, EnunciateException {
     File buildDir = getBuildDir();
@@ -252,7 +249,6 @@ public class Enunciate {
 
   /**
    * Do the compile logic.
-   *
    */
   protected void doCompile() throws IOException, EnunciateException {
     File destdir = getCompileDir();
@@ -280,7 +276,6 @@ public class Enunciate {
 
   /**
    * Do the generate logic.
-   *
    */
   protected void doGenerate() throws IOException, EnunciateException {
     File genDir = getGenerateDir();
@@ -433,7 +428,8 @@ public class Enunciate {
    * @return A temporary directory.
    */
   public File createTempDir() throws IOException {
-    File tempDir = File.createTempFile("enunciate", "");
+    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    final File tempDir = File.createTempFile("enunciate" + random.intValue(), "");
     tempDir.delete();
     tempDir.mkdirs();
 
@@ -541,7 +537,7 @@ public class Enunciate {
   /**
    * Invokes APT on the specified source files.
    *
-   * @param sourceFiles The source files.
+   * @param sourceFiles          The source files.
    * @param additionalApiClasses The FQNs of additional classes (should be found on the Enunciate classpath) that comprise the API.
    */
   protected void invokeApt(String[] sourceFiles, String... additionalApiClasses) throws IOException, EnunciateException {
@@ -865,7 +861,7 @@ public class Enunciate {
    * is a directory, its timestamp is the timestamp of the earliest file.
    *
    * @param sourceFile The source file.
-   * @param destFile The destination file.
+   * @param destFile   The destination file.
    * @return Whether the destination file is up-to-date.
    */
   public boolean isUpToDate(File sourceFile, File destFile) {
@@ -905,7 +901,7 @@ public class Enunciate {
    * file is a directory its timestamp is the timestamp of the earliest-modified file.
    *
    * @param sourceFiles The specified source files.
-   * @param destFile The destination file.
+   * @param destFile    The destination file.
    * @return Whether the destination file is up-to-date.
    */
   protected boolean isUpToDate(List<File> sourceFiles, File destFile) {

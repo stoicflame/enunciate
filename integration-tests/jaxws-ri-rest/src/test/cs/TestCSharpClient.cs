@@ -7,6 +7,7 @@ namespace Jaxws.Ri.Rest {
   using Org.Codehaus.Enunciate.Samples.Genealogy.Data;
   using System.Web.Services.Protocols;
   using System.Collections;
+  using System.Collections.Generic;
 
   [TestFixture]
   public class FullAPITest {
@@ -53,17 +54,17 @@ namespace Jaxws.Ri.Rest {
 
       PersonService personService = new PersonService();
       personService.Url = "http://localhost:8080/full/soap-services/PersonServiceService";
-      ArrayList pids = new ArrayList();
+      List<string> pids = new List<string>();
       pids.Add("id1");
       pids.Add("id2");
       pids.Add("id3");
       pids.Add("id4");
-      Person[] persons = personService.ReadPersons((string[])pids.ToArray(typeof(string)));
+      Person[] persons = personService.ReadPersons(pids);
       Assert.AreEqual(4, persons.Length);
       foreach (Person pers in persons) {
         Assert.IsTrue(pids.Contains(pers.Id));
         Assert.IsNotNull(pers.Events);
-        Assert.IsTrue(pers.Events.Length > 0);
+        Assert.IsTrue(pers.Events.Count > 0);
         Assert.IsNotNull(pers.Events[0].Date);
         Assert.AreEqual(1970, pers.Events[0].Date.Year);
       }

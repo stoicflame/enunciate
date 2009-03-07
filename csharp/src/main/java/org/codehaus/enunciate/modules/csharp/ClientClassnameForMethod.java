@@ -133,14 +133,20 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     }
     else if (decorated.isCollection()) {
       //collections will be converted to arrays.
-      DeclaredType declaredType = (DeclaredType) typeMirror;
-      Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
-      if (actualTypeArguments.size() == 1) {
-        return convert(actualTypeArguments.iterator().next()) + "[]";
-      }
+      return getCollectionTypeConversion((DeclaredType) typeMirror);
     }
 
     return super.convert(typeMirror);
+  }
+
+  protected String getCollectionTypeConversion(DeclaredType declaredType) throws TemplateModelException {
+    Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
+    if (actualTypeArguments.size() == 1) {
+      return "System.Collections.Generic.List<" + convert(actualTypeArguments.iterator().next()) + ">";
+    }
+    else {
+      return "System.Collections.ArrayList";
+    }
   }
 
 }
