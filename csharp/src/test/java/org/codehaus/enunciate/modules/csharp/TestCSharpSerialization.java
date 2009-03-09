@@ -152,6 +152,7 @@ public class TestCSharpSerialization extends TestCase {
     window3.setLineStyle(LineStyle.solid);
     bus.setWindows(Arrays.asList(window1, window2, window3));
     bus = processThroughXml(bus);
+    assertEquals("bus id", bus.getId());
     door = bus.getDoor();
     assertSame(Color.BLUE, door.getColor());
     assertEquals(2, door.getWidth());

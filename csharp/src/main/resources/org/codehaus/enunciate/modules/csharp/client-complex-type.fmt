@@ -11,7 +11,7 @@ namespace ${namespaceFor(type)} {
   ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
-  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass, true)} [/#if]{
+  public [#if type.abstract]abstract [/#if][#if type.final]sealed [/#if]partial class ${simpleNameFor(type)} [#if !type.baseObject]: ${classnameFor(type.superclass, true)} [/#if]{
 
   [#list type.attributes as attribute]
     [#if !accessorOverridesAnother(attribute)]

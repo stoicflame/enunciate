@@ -17,6 +17,9 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.ArrayType;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -105,13 +108,7 @@ public class Attribute extends Accessor {
    * @return Whether the attribute is required.
    */
   public boolean isRequired() {
-    boolean required = false;
-
-    if (xmlAttribute != null) {
-      required = xmlAttribute.required();
-    }
-
-    return required;
+    return xmlAttribute != null && xmlAttribute.required() || (getAccessorType() instanceof PrimitiveType);
   }
 
   /**

@@ -447,6 +447,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
         warn("As of Enunciate 1.8, the \"docsDir\" attribute is no longer supported on the spring-app war config.  (It was moved to the docs module war config.)");
       }
+
+      if (isEnableSecurity()) {
+        if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
+          throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
+        }
+      }
     }
   }
 

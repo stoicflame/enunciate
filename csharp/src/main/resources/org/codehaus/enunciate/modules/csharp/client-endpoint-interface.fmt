@@ -22,7 +22,7 @@ namespace ${namespaceFor(endpointInterface)} {
   ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace?default("")}")]
-  public class ${endpointInterface.simpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
+  public partial class ${endpointInterface.simpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
 
   [@forEachWebMethod endpointInterface=endpointInterface]
     [#list webMethod.webParameters as param]
