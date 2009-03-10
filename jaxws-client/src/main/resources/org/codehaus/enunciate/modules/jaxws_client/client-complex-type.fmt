@@ -27,6 +27,12 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   private ${classnameFor(element)} ${element.simpleName};
     [/#list]
   [/#if]
+  [#if type.anyElement?exists]
+  private java.util.List<Object> ${type.anyElement.simpleName};
+  [/#if]
+  [#if type.hasAnyAttribute]
+  private java.util.Map<javax.xml.namespace.QName, String> otherAttributes;
+  [/#if]
   [#list type.attributes as attribute]
 
   /**
@@ -78,6 +84,44 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     this.${element.simpleName} = ${element.simpleName};
   }
     [/#list]
+  [/#if]
+  [#if type.anyElement?exists]
+
+  /**
+   * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  @javax.xml.bind.annotation.XmlAnyElement[#if type.anyElement.lax?exists && type.anyElement.lax]( lax = true )[/#if]
+  public java.util.List<Object> get${type.anyElement.simpleName?cap_first}() {
+    return this.${type.anyElement.simpleName};
+  }
+
+  /**
+   * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public void set${type.anyElement.simpleName?cap_first}(java.util.List<Object> ${type.anyElement.simpleName}) {
+    this.${type.anyElement.simpleName} = ${type.anyElement.simpleName};
+  }
+  [/#if]
+  [#if type.hasAnyAttribute]
+
+  /**
+   * The other attributes.
+   *
+   * @return The other attributes.
+   */
+  @javax.xml.bind.annotation.XmlAnyAttribute
+  public java.util.Map<javax.xml.namespace.QName, String> getOtherAttributes() {
+    return this.otherAttributes;
+  }
+
+  /**
+   * The other attributes.
+   *
+   * @param otherAttributes The other attributes.
+   */
+  public void setOtherAttributes(java.util.Map<javax.xml.namespace.QName, String> otherAttributes) {
+    this.otherAttributes = otherAttributes;
+  }
   [/#if]
 
 }

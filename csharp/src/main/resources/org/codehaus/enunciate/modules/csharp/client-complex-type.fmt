@@ -29,6 +29,12 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#list]
   [/#if]
+  [#if type.anyElement?exists]
+    private System.Xml.XmlElement[] _${type.anyElement.simpleName};
+  [/#if]
+  [#if type.hasAnyAttribute]
+    private System.Xml.XmlAttribute[] _otherAttributes;
+  [/#if]
   [#list type.attributes as attribute]
     [#if !accessorOverridesAnother(attribute)]
 
@@ -81,7 +87,36 @@ namespace ${namespaceFor(type)} {
       [/#if]
     [/#list]
   [/#if]
+  [#if type.anyElement?exists]
 
+    /// <summary>
+    ///  ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [System.Xml.Serialization.XmlAnyElementAttribute()]
+    public System.Xml.XmlElement[] ${type.anyElement.simpleName?cap_first} {
+      get {
+        return this._${type.anyElement.simpleName};
+      }
+      set {
+        this._${type.anyElement.simpleName} = value;
+      }
+    }
+  [/#if]
+  [#if type.hasAnyAttribute]
+
+    /// <summary>
+    ///  The other attributes
+    /// </summary>
+    [System.Xml.Serialization.XmlAnyAttributeAttribute()]
+    public System.Xml.XmlAttribute[] OtherAttributes {
+      get {
+        return this._otherAttributes;
+      }
+      set {
+        this._otherAttributes = value;
+      }
+    }
+  [/#if]
   }
 }  
 [/#macro]
