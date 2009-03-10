@@ -17,9 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.MemberDeclaration;
-import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.ArrayType;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
