@@ -114,6 +114,7 @@ namespace ${namespaceFor(type)} {
     ///  Property for the XML serializer indicating whether the "${accessor.simpleName?cap_first}" property should be included in the output.
     /// </summary>
     [System.Xml.Serialization.XmlIgnoreAttribute]
+    [System.Xml.Serialization.SoapIgnoreAttribute]
     public bool ${accessor.simpleName?cap_first}Specified {
       get {
         return this._${accessor.simpleName}Specified;
