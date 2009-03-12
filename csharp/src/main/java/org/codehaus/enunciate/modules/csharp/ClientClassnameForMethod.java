@@ -45,28 +45,28 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     super(conversions);
     setJdk15(false); //we'll control the generics.
 
-    classConversions.put(Boolean.class.getName(), "Boolean");
+    classConversions.put(Boolean.class.getName(), "bool?");
     classConversions.put(String.class.getName(), "string");
-    classConversions.put(Integer.class.getName(), "Int32");
-    classConversions.put(Short.class.getName(), "Int16");
-    classConversions.put(Byte.class.getName(), "Byte");
-    classConversions.put(Double.class.getName(), "Double");
-    classConversions.put(Long.class.getName(), "Int64");
-    classConversions.put(java.math.BigInteger.class.getName(), "Int64");
-    classConversions.put(java.math.BigDecimal.class.getName(), "Decimal");
-    classConversions.put(Float.class.getName(), "float");
-    classConversions.put(Character.class.getName(), "Char");
-    classConversions.put(Date.class.getName(), "System.DateTime");
+    classConversions.put(Integer.class.getName(), "int?");
+    classConversions.put(Short.class.getName(), "short?");
+    classConversions.put(Byte.class.getName(), "sbyte?");
+    classConversions.put(Double.class.getName(), "double?");
+    classConversions.put(Long.class.getName(), "long?");
+    classConversions.put(java.math.BigInteger.class.getName(), "long?");
+    classConversions.put(java.math.BigDecimal.class.getName(), "decimal?");
+    classConversions.put(Float.class.getName(), "float?");
+    classConversions.put(Character.class.getName(), "char?");
+    classConversions.put(Date.class.getName(), "DateTime?");
     classConversions.put(DataHandler.class.getName(), "byte[]");
     classConversions.put(java.awt.Image.class.getName(), "byte[]");
     classConversions.put(javax.xml.transform.Source.class.getName(), "byte[]");
     classConversions.put(QName.class.getName(), "System.Xml.XmlQualifiedName");
     classConversions.put(URI.class.getName(), "string");
     classConversions.put(UUID.class.getName(), "string");
-    classConversions.put(XMLGregorianCalendar.class.getName(), "System.DateTime");
-    classConversions.put(GregorianCalendar.class.getName(), "System.DateTime");
-    classConversions.put(Calendar.class.getName(), "System.DateTime");
-    classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan");
+    classConversions.put(XMLGregorianCalendar.class.getName(), "DateTime?");
+    classConversions.put(GregorianCalendar.class.getName(), "DateTime?");
+    classConversions.put(Calendar.class.getName(), "DateTime?");
+    classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan?");
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "object");
     classConversions.put(Object.class.getName(), "object");
   }
@@ -130,6 +130,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         default:
           return kind.toString().toLowerCase();
       }
+    }
+    else if (decorated.isEnum()) {
+      return super.convert(typeMirror) + "?";
     }
     else if (decorated.isCollection()) {
       //collections will be converted to arrays.

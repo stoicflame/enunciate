@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.10-RC3</version>
+    <version>1.10</version>
   </parent>
 
   <artifactId>enunciate-spring-app-rt</artifactId>

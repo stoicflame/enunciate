@@ -13,20 +13,56 @@ namespace ${namespaceFor(type)} {
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public sealed class ${type.simpleName} {
 
-    private ${classnameFor(type.value)} _${type.value.simpleName};
+  [#assign accessor=type.value/]
+    private ${classnameFor(accessor)} _${accessor.simpleName};
+  [#if classnameFor(accessor)?ends_with("?")]
+    private bool _${accessor.simpleName}Specified;
+  [/#if]
 
+  [#assign cs_classname=classnameFor(accessor)/]
+  [#if cs_classname?ends_with("?")]
     /// <summary>
-    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
-    [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
-    public ${classnameFor(type.value)} ${type.value.simpleName?cap_first} {
+    [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
+    public ${cs_classname?substring(0, cs_classname?length  - 1)} ${accessor.simpleName?cap_first} {
       get {
-        return this._${type.value.simpleName};
+        return this._${accessor.simpleName}.GetValueOrDefault();
       }
       set {
-        this._${type.value.simpleName} = value;
+        this._${accessor.simpleName} = value;
+        this._${accessor.simpleName}Specified = true;
       }
     }
+
+    /// <summary>
+    ///  Property for the XML serializer indicating whether the "${accessor.simpleName?cap_first}" property should be included in the output.
+    /// </summary>
+    [System.Xml.Serialization.XmlIgnoreAttribute]
+    public bool ${accessor.simpleName?cap_first}Specified {
+      get {
+        return this._${accessor.simpleName}Specified;
+      }
+      set {
+        this._${accessor.simpleName}Specified = value;
+      }
+    }
+
+  [#else]
+    /// <summary>
+    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
+    public ${cs_classname} ${accessor.simpleName?cap_first} {
+      get {
+        return this._${accessor.simpleName};
+      }
+      set {
+        this._${accessor.simpleName} = value;
+      }
+    }
+
+  [/#if]
   }
 }
 [/#macro]
