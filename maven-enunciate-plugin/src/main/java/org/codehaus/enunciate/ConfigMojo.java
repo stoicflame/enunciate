@@ -179,6 +179,16 @@ public class ConfigMojo extends AbstractMojo {
   private Map<String, String> exports = new HashMap<String, String>();
 
   /**
+   * The include patterns.
+   */
+  private String[] includes;
+
+  /**
+   * The exclude patterns.
+   */
+  private String[] excludes;
+
+  /**
    * The id of the Enunciate artifact that is to be the primary artifact for the maven project.
    *
    * @parameter default-value="spring.war.file"
@@ -272,6 +282,18 @@ public class ConfigMojo extends AbstractMojo {
           throw new MojoExecutionException("Problem with enunciate config file " + defaultConfig, e);
         }
         enunciate.setConfigFile(defaultConfig);
+      }
+    }
+
+    if (this.includes != null) {
+      for (String include : this.includes) {
+        config.addApiIncludePattern(include);
+      }
+    }
+
+    if (this.excludes != null) {
+      for (String exclude : this.excludes) {
+        config.addApiExcludePattern(exclude);
       }
     }
 
