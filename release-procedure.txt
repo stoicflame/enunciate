@@ -21,7 +21,7 @@
 11. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
 12. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
     12a. Make sure the links you have on the downloads page are correct.
-13. Copy the web content to the web repo (e.g. "rsync -av --delete target/docs/ /home/heatonra/mnt/enunciate/web")
+13. Copy the web content to the web repo (e.g. "rsync -rcv --delete target/docs/ /home/heatonra/mnt/enunciate/web")
 14. Make your announcements.
     14a. Codehaus news
     14b. Java.net
