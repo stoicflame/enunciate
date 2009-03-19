@@ -74,6 +74,8 @@
     <property name="hibernateProperties">
       <props>
         <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+        <!--automatically create the table if it's not there.-->
+        <prop key="hibernate.hbm2ddl.auto">create</prop>
       </props>
     </property>
   </bean>
