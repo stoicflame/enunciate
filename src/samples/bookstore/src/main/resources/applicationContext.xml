@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xmlns:jndi="http://www.springframework.org/schema/jndi"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-2.0.xsd 
+    http://www.springframework.org/schema/tx  
+    http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+    http://www.springframework.org/schema/jndi 
+    http://www.springframework.org/schema/jndi/spring-jndi.xsd 
+    http://www.springframework.org/schema/util 
+    http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="location" value="classpath:application.properties"/>
+    <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+  </bean>
+
+  <!--
+    Datasource configuration
+   -->
+  <bean id="dataSource"
+    class="com.mchange.v2.c3p0.ComboPooledDataSource">
+    <property name="driverClass">
+      <value>${jdbc.driver}</value>
+    </property>
+    <property name="jdbcUrl">
+      <value>${jdbc.url}</value>
+    </property>
+    <property name="user">
+      <value>${jdbc.username}</value>
+    </property>
+    <property name="password">
+      <value>${jdbc.password}</value>
+    </property>
+    <property name="minPoolSize">
+      <value>${c3p0.minPoolSize}</value>
+    </property>
+    <property name="maxPoolSize">
+      <value>${c3p0.maxPoolSize}</value>
+    </property>
+    <property name="checkoutTimeout">
+      <!-- Give up waiting for a connection after this many milliseconds -->
+      <value>20000</value>
+    </property>
+    <property name="maxIdleTime">
+      <value>${c3p0.maxIdleTime}</value>
+    </property>
+    <property name="idleConnectionTestPeriod">
+      <value>${c3p0.idleConnectionTestPeriod}</value>
+    </property>
+    <property name="automaticTestTable">
+      <value>${c3p0.automaticTestTable}</value>
+    </property>
+  </bean>
+
+  <!-- 
+    An AnnotationSessionFactoryBean for loading Hibernate mappings from
+    annotated domain classes.
+   -->      
+  <bean id="sessionFactory"
+    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="packagesToScan">
+      <list>
+        <value>net/java/ws/bookstore/domain</value>
+      </list>
+    </property>
+    <property name="hibernateProperties">
+      <props>
+        <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+      </props>
+    </property>
+  </bean>
+
+  <!-- 
+    Declares our Data Access Objects.
+   --> 
+  <bean id="BookDao"
+    class="net.java.ws.bookstore.dao.hibernate.BookDaoImpl">
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+
+  <!-- 
+    Setup a Hibernate based transaction manager.  
+  -->
+  <bean id="transactionManager"
+    class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
+  <!-- Tells Spring to put transactional advice on any class or method that has an @Transactional annotation on it  -->
+  <tx:annotation-driven proxy-target-class="true"/>
+
+  <!--
+    Declares our BookStoreService.
+  -->
+  <bean id="BookStoreService"
+    class="net.java.ws.bookstore.service.BookStoreServiceImpl">
+    <property name="bookDao" ref="BookDao" />
+  </bean>
+
+</beans>

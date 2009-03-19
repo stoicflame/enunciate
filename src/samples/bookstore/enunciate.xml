@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.8.xsd">
+   
+  <api-classes> 
+    <!-- Enunciate the BookStore Domain layer -->
+    <include pattern="net.java.ws.bookstore.domain.Book"/>
+    
+    <!-- Enunciate the BookStore Service layer -->
+    <include pattern="net.java.ws.bookstore.service.BookStoreService"/>
+    <include pattern="net.java.ws.bookstore.service.BookStoreServiceImpl"/>
+  </api-classes>
+
+  <modules>
+    <docs docsDir="api" title="BookStore API"/>
+    <spring-app>
+      <springImport uri="classpath:applicationContext.xml"/>
+    </spring-app>
+  </modules>
+
+</enunciate>
