@@ -26,7 +26,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * "Exports" the JAXB/JAX-WS classes in the current project. For use with the "jar" packaging.
  *
  * @goal export
- * @phase generate-sources
+ * @phase process-sources
  * @requiresDependencyResolution compile
 
  * @author Ryan Heaton

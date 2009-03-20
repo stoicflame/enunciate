@@ -16,9 +16,9 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import freemarker.ext.beans.StringModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class ServletPatternToAntPattern implements TemplateMethodModelEx {
       throw new TemplateModelException("The servletPatternToAntPattern method must have a pattern as a parameter.");
     }
 
-    StringModel model = (StringModel) list.get(0);
+    TemplateScalarModel model = (TemplateScalarModel) list.get(0);
     String pattern = model.getAsString();
     if (pattern.endsWith("/*")) {
       pattern = pattern + "*";
