@@ -21,6 +21,8 @@ import org.codehaus.xfire.service.ServiceFactory;
 import org.codehaus.xfire.spring.remoting.XFireExporter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.Advised;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,9 +38,9 @@ public class EnunciatedXFireExporter extends XFireExporter {
   private View wsdlView = null;
 
   public void afterPropertiesSet() throws Exception {
-    if (getServiceBean() instanceof HandlerSupport) {
+    HandlerSupport handlerSupport = findHandlerSupport();
+    if (handlerSupport != null) {
       //set the XFire in/out handlers that may possibly be configured.
-      HandlerSupport handlerSupport = (HandlerSupport) getServiceBean();
       setInHandlers(handlerSupport.getInHandlers());
       setOutHandlers(handlerSupport.getOutHandlers());
       setFaultHandlers(handlerSupport.getFaultHandlers());
@@ -47,6 +49,27 @@ public class EnunciatedXFireExporter extends XFireExporter {
     super.afterPropertiesSet();
 
     delegate = new EnunciatedXFireServletController(getXfire(), getXFireService().getName(), this.wsdlView);
+  }
+
+  protected HandlerSupport findHandlerSupport() {
+    Object bean = getServiceBean();
+    if (bean instanceof HandlerSupport) {
+      return (HandlerSupport) bean;
+    }
+
+    while (AopUtils.isAopProxy(bean)) {
+      try {
+        bean = ((Advised) bean).getTargetSource().getTarget();
+        if (bean instanceof HandlerSupport) {
+          return (HandlerSupport) bean;
+        }
+      }
+      catch (Exception e) {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   //inherited.
