@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.contract.validation;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
 import net.sf.jelly.apt.Context;
@@ -725,8 +726,29 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     XmlElements xmlElements = element.getAnnotation(XmlElements.class);
     if ((element.isCollectionType()) && (element.getBaseType() != KnownXmlType.ANY_TYPE) &&
       (xmlElements != null) && (xmlElements.value() != null) && (xmlElements.value().length > 1)) {
-      result.addError(element,
-                      "A parameterized collection accessor cannot be annotated with XmlElements that has a value with a length greater than one.");
+      //make sure all @XmlElement classes are an instance of the parameterized type.
+      TypeMirror itemType = element.getCollectionItemType();
+      if (itemType instanceof DeclaredType && ((DeclaredType) itemType).getDeclaration() != null) {
+        String fqn = ((DeclaredType) itemType).getDeclaration().getQualifiedName();
+        for (XmlElement xmlElement : xmlElements.value()) {
+          DecoratedTypeMirror elementCandidate;
+          try {
+            Class clazz = xmlElement.type();
+            AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+            DeclaredType declaredType = env.getTypeUtils().getDeclaredType(env.getTypeDeclaration(clazz.getName()));
+            elementCandidate = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(declaredType);
+          }
+          catch (MirroredTypeException e) {
+            elementCandidate = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+          }
+          if (!elementCandidate.isInstanceOf(fqn)) {
+            result.addError(element, elementCandidate + " is not an instance of " + fqn);
+          }
+        }
+      }
+      else {
+        result.addWarning(element, "Unknown or invisible collection item type.");
+      }
     }
 
     QName ref = element.getRef();
