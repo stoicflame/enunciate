@@ -67,7 +67,7 @@
     </artifact:dependencies>
 
     <artifact:dependencies filesetId="amf.libs.fileset">
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-gwt" version="${top.pom.version}"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-amf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
     <artifact:dependencies sourcesFilesetId="dist.sources.fileset" pathId="dist.libs.path" pomRefId="top.pom"/>
