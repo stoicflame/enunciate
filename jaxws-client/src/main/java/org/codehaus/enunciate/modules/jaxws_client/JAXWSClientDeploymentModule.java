@@ -27,6 +27,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.Registry;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
@@ -191,6 +192,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
       URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
       URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
       URL enumTypeTemplate = getTemplateURL("client-enum-type.fmt");
+      URL registryTemplate = getTemplateURL("client-registry.fmt");
 
       //set up the model, first allowing for jdk 14 compatability.
       EnunciateFreemarkerModel model = getModel();
@@ -291,6 +293,10 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
             URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
             processTemplate(template, model);
           }
+        }
+        for (Registry registry : schemaInfo.getRegistries()) {
+          model.put("registry", registry);
+          processTemplate(registryTemplate, model);
         }
       }
     }

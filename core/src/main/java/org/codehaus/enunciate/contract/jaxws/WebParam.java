@@ -106,6 +106,21 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
   }
 
   /**
+   * The target namespace of this web param.
+   *
+   * @return The target namespace of this web param.
+   */
+  public String getTargetNamespace() {
+    String namespace = isImplicitSchemaElement() ? method.getDeclaringEndpointInterface().getTargetNamespace() : "";
+
+    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
+      namespace = annotation.targetNamespace();
+    }
+
+    return namespace;
+  }
+
+  /**
    * The doc comment associated with this web param.
    *
    * @return The doc comment associated with this web param.
@@ -194,7 +209,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
       return getTypeQName();
     }
     else {
-      return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+      return new QName(getTargetNamespace(), getElementName());
     }
   }
 

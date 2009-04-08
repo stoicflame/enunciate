@@ -497,6 +497,27 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * Add an XML registry.
+   *
+   * @param registry The registry to add.
+   */
+  public void add(Registry registry) {
+    add(registry.getSchema());
+
+    String namespace = registry.getSchema().getNamespace();
+    String prefix = addNamespace(namespace);
+
+    SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+    if (schemaInfo == null) {
+      schemaInfo = new SchemaInfo();
+      schemaInfo.setId(prefix);
+      schemaInfo.setNamespace(namespace);
+      namespacesToSchemas.put(namespace, schemaInfo);
+    }
+    schemaInfo.getRegistries().add(registry);
+  }
+
+  /**
    * Adds a schema declaration to the model.
    *
    * @param schema The schema declaration to add to the model.

@@ -3,6 +3,12 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.10.xsd">
   <modules>
+    <jaxws-client>
+      <package-conversions>
+        <convert from="epcglobal" to="epcglobal.client"/>
+        <convert from="org.unece" to="org.unece.client"/>
+      </package-conversions>
+    </jaxws-client>
     <jaxws-ri disabled="false"/>
     <xfire disabled="true"/>
   </modules>

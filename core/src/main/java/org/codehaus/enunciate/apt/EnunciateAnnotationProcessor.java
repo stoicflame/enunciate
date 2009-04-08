@@ -47,6 +47,7 @@ import org.codehaus.enunciate.template.freemarker.*;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlRegistry;
 import javax.ws.rs.Path;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.ext.Provider;
@@ -230,39 +231,44 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler || isJAXRSRootResource || isJAXRSSupport) {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions);
-          info("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
+          debug("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
           for (EndpointImplementation implementation : endpointInterface.getEndpointImplementations()) {
-            info("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());
+            debug("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());
           }
           model.add(endpointInterface);
         }
 
         if (isRESTEndpoint) {
           RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
-          info("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
+          debug("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
           model.add(restEndpoint);
         }
 
         if (isContentTypeHandler) {
-          info("%s to be considered a content type handler.", declaration.getQualifiedName());
+          debug("%s to be considered a content type handler.", declaration.getQualifiedName());
           model.addContentTypeHandler((ClassDeclaration) declaration);
         }
 
         if (isJAXRSRootResource) {
           RootResource rootResource = new RootResource((ClassDeclaration) declaration);
-          info("%s to be considered as a JAX-RS root resource.", declaration.getQualifiedName());
+          debug("%s to be considered as a JAX-RS root resource.", declaration.getQualifiedName());
           model.add(rootResource);
         }
 
         if (isJAXRSSupport) {
           if (declaration.getAnnotation(Provider.class) != null) {
-            info("%s to be considered as a JAX-RS provider.", declaration.getQualifiedName());
+            debug("%s to be considered as a JAX-RS provider.", declaration.getQualifiedName());
             model.addJAXRSProvider(declaration);
           }
           else {
-            info("%s to be considered a JAX-RS support class.", declaration.getQualifiedName());
+            debug("%s to be considered a JAX-RS support class.", declaration.getQualifiedName());
           }
         }
+      }
+      else if (isRegistry(declaration)) {
+        debug("%s to be considered as an XML registry.", declaration.getQualifiedName());
+        Registry registry = new Registry((ClassDeclaration) declaration);
+        model.add(registry);
       }
       else if (isPotentialSchemaType(declaration)) {
         TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
@@ -308,7 +314,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
     if (typeDef != null) {
-      info("%s to be considered as a %s (qname:{%s}%s).",
+      debug("%s to be considered as a %s (qname:{%s}%s).",
            typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
            typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
            typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
@@ -317,7 +323,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
       RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) typeDef.getDelegate(), typeDef);
       if (rootElement != null) {
-        info("%s to be considered as a root element", typeDef.getQualifiedName());
+        debug("%s to be considered as a root element", typeDef.getQualifiedName());
         model.add(rootElement);
       }
     }
@@ -395,6 +401,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   @Override
   protected FreemarkerModel newRootModel() {
     return new EnunciateFreemarkerModel();
+  }
+
+  /**
+   * Whether the specified declaration is a registry.
+   *
+   * @param declaration The declaration.
+   * @return Whether the specified declaration is a registry.
+   */
+  protected boolean isRegistry(TypeDeclaration declaration) {
+    return declaration.getAnnotation(XmlRegistry.class) != null;
   }
 
   /**

@@ -85,6 +85,11 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
     return name;
   }
 
+  // Inherited.
+  public String getTargetNamespace() {
+    return getElementNamespace();
+  }
+
   /**
    * The local namespace of the output.
    *

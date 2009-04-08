@@ -45,6 +45,10 @@ public class ImplicitWrappedElementRef implements ImplicitRootElement {
     return this.element.getWrapperName();
   }
 
+  public String getTargetNamespace() {
+    return this.element.getWrapperNamespace();
+  }
+
   public String getElementDocs() {
     return element.getJavaDoc() != null ? element.getJavaDoc().toString() : null;
   }

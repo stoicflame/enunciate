@@ -33,6 +33,13 @@ public interface ImplicitSchemaElement {
   String getElementName();
 
   /**
+   * The target namespace;
+   *
+   * @return The target namespace;
+   */
+  String getTargetNamespace();
+
+  /**
    * Documentation for the element, if it exists.
    *
    * @return Documentation for the element, or null if none.

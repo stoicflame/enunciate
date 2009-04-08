@@ -73,6 +73,11 @@ public class RPCOutputResponseBeanAdapter implements ImplicitRootElement {
     return this.rpcMessage.getOperationName();
   }
 
+  // Inherited.
+  public String getTargetNamespace() {
+    return getElementNamespace();
+  }
+
   /**
    * The element namespace for the implicit rpc element.
    *

@@ -15,7 +15,12 @@ import javax.jws.WebParam;
 public class EPCISServiceImpl implements EPCISServicePortType {
 
   public ArrayOfString getQueryNames(EmptyParms parms) throws ImplementationExceptionResponse, SecurityExceptionResponse, ValidationExceptionResponse {
-    return null;
+    ArrayOfString queryNames = new ArrayOfString();
+    queryNames.getString().add("hello");
+    queryNames.getString().add("how");
+    queryNames.getString().add("are");
+    queryNames.getString().add("you?");
+    return queryNames;
   }
 
   public VoidHolder subscribe( Subscribe parms) throws DuplicateSubscriptionExceptionResponse, ImplementationExceptionResponse, InvalidURIExceptionResponse, NoSuchNameExceptionResponse, QueryParameterExceptionResponse, QueryTooComplexExceptionResponse, SecurityExceptionResponse, SubscribeNotPermittedExceptionResponse, SubscriptionControlsExceptionResponse, ValidationExceptionResponse {

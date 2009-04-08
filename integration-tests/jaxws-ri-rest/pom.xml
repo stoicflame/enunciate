@@ -177,6 +177,13 @@
           </configuration>
         </configuration>
       </plugin>
+      <plugin>
+        <!--skip deploy (this is just a test module)-->
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

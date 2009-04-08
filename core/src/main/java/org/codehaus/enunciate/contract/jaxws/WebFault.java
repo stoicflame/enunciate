@@ -450,6 +450,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       return property.getPropertyName();
     }
 
+    public String getTargetNamespace() {
+      return webFault.getTargetNamespace();
+    }
+
     public String getElementDocs() {
       String docs = property.getJavaDoc().toString();
       if (docs.trim().length() == 0) {

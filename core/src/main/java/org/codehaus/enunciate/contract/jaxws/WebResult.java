@@ -16,9 +16,9 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
-import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -32,7 +32,6 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.jws.soap.SOAPBinding;
-import javax.jws.*;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Arrays;

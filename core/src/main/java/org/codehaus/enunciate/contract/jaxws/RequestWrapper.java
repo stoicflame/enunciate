@@ -83,6 +83,11 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
     return name;
   }
 
+  // Inherited.
+  public String getTargetNamespace() {
+    return getElementNamespace();
+  }
+
   public String getElementNamespace() {
     String targetNamespace = webMethod.getDeclaringEndpointInterface().getTargetNamespace();
 

@@ -503,6 +503,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       wpAnnotation.setHeader(webParam.isHeader());
       wpAnnotation.setMode(webParam.getMode() == javax.jws.WebParam.Mode.INOUT ? WebParamAnnotation.MODE_INOUT : webParam.getMode() == javax.jws.WebParam.Mode.OUT ? WebParamAnnotation.MODE_OUT : WebParamAnnotation.MODE_IN);
       wpAnnotation.setName(webParam.getElementName());
+      wpAnnotation.setTargetNamespace(webParam.getTargetNamespace());
       wpAnnotation.setPartName(webParam.getPartName());
       this.generatedAnnotations.method2WebParam.put(String.format("%s.%s", methodKey, i), wpAnnotation);
       i++;

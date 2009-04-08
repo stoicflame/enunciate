@@ -76,6 +76,11 @@ public class RPCPartChildElementAdapter implements Adaptable, ImplicitChildEleme
     return this.rpcPart.getPartName();
   }
 
+  // Inherited.
+  public String getTargetNamespace() {
+    return this.rpcPart.getParticleQName().getNamespaceURI();
+  }
+
   /**
    * The element docs are the part docs.
    *

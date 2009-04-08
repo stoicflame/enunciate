@@ -42,6 +42,7 @@ public class SchemaInfo {
   private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
+  private final Collection<Registry> registries = new ArrayList<Registry>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
@@ -124,6 +125,15 @@ public class SchemaInfo {
    */
   public Collection<RootElementDeclaration> getGlobalElements() {
     return globalElements;
+  }
+
+  /**
+   * The XML registries.
+   *
+   * @return The XML registries.
+   */
+  public Collection<Registry> getRegistries() {
+    return registries;
   }
 
   /**

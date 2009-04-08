@@ -38,6 +38,10 @@ public class ImplicitElementRef implements ImplicitSchemaElement {
     return element.getName();
   }
 
+  public String getTargetNamespace() {
+    return element.getNamespace();
+  }
+
   public String getElementDocs() {
     return element.getJavaDoc() != null ? element.getJavaDoc().toString() : null;
   }
