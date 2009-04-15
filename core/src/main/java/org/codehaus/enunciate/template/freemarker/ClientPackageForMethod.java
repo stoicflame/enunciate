@@ -30,6 +30,8 @@ import freemarker.template.TemplateModelException;
 
 import java.util.*;
 
+import org.codehaus.enunciate.ClientName;
+
 /**
  * Gets the qualified package name for a package or type.
  *
@@ -38,6 +40,7 @@ import java.util.*;
 public class ClientPackageForMethod implements TemplateMethodModelEx {
 
   private final TreeMap<String, String> conversions;
+  private boolean useClientNameConversions = false;
 
   /**
    * @param conversions The conversions.
@@ -138,7 +141,12 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
    * @return The package declaration.
    */
   public String convert(PackageDeclaration packageDeclaration) {
-    return convert(packageDeclaration.getQualifiedName());
+    if (packageDeclaration == null) {
+      return "";
+    }
+
+    ClientName specifiedName = isUseClientNameConversions() ? packageDeclaration.getAnnotation(ClientName.class) : null;
+    return specifiedName == null ? convert(packageDeclaration.getQualifiedName()) : specifiedName.value();
   }
 
   /**
@@ -163,4 +171,21 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
     return fqn;
   }
 
+  /**
+   * Whether to use the client name conversions.
+   *
+   * @return Whether to use the client name conversions.
+   */
+  public boolean isUseClientNameConversions() {
+    return useClientNameConversions;
+  }
+
+  /**
+   * Whether to use the client name conversions.
+   *
+   * @param useClientNameConversions Whether to use the client name conversions.
+   */
+  public void setUseClientNameConversions(boolean useClientNameConversions) {
+    this.useClientNameConversions = useClientNameConversions;
+  }
 }

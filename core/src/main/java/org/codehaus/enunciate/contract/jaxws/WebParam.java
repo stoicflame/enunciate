@@ -35,6 +35,7 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.ClientName;
 
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
@@ -118,6 +119,20 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
     }
 
     return namespace;
+  }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
   }
 
   /**

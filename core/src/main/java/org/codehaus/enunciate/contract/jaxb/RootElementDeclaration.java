@@ -22,6 +22,8 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.beans.Introspector;
 
+import org.codehaus.enunciate.ClientName;
+
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
  *
@@ -86,6 +88,20 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
     }
 
     return namespace;
+  }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
   }
 
   /**

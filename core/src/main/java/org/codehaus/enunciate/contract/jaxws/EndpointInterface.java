@@ -22,6 +22,7 @@ import com.sun.mirror.type.ClassType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
+import org.codehaus.enunciate.ClientName;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 
@@ -181,6 +182,19 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
     return targetNamespace;
   }
 
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
+  }
 
   /**
    * Calculates a namespace URI for a given package.  Default implementation uses the algorithm defined in

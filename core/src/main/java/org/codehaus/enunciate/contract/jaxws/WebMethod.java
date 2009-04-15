@@ -28,6 +28,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.ClientName;
 
 import javax.jws.Oneway;
 import javax.jws.soap.SOAPBinding;
@@ -139,6 +140,20 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     this.messages = messages;
     this.requestWrapper = requestWrapper;
     this.responseWrapper = responseWrapper;
+  }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
   }
 
 

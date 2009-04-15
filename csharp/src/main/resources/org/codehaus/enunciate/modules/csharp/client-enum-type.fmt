@@ -12,16 +12,16 @@ namespace ${namespaceFor(type)} {
   [#if findRootElement(type)?exists]
   [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
   [/#if]
-  public enum ${type.simpleName} {
+  public enum ${type.clientSimpleName} {
     [#assign enumValueMap=type.enumValues/]
-    [#list type.delegate.enumConstants as constant]
+    [#list type.enumConstants as constant]
 
     /// <summary>
     ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
-    [#if "event" == constant.simpleName]evnt[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
+    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].allElementValues["value"]}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
     [/#list]
   }
 }

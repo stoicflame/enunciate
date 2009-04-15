@@ -30,6 +30,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.ClientName;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -353,6 +354,20 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
 
     return namespace;
+  }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
   }
 
   /**

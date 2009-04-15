@@ -46,10 +46,10 @@ public class AS3ImportStrategy extends EnunciateTemplateLoopStrategy<String> {
 
   private String var = "as3Import";
   private DecoratedMemberDeclaration declaration;
-  private final ClientClassnameForMethod classnameFor;
+  private final AS3ClientClassnameForMethod classnameFor;
   private boolean includeComponentTypes = true;
 
-  public AS3ImportStrategy(ClientClassnameForMethod classnameFor) {
+  public AS3ImportStrategy(AS3ClientClassnameForMethod classnameFor) {
     this.classnameFor = classnameFor;
   }
 

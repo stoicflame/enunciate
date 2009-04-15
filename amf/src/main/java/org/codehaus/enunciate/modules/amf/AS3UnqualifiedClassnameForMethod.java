@@ -23,9 +23,9 @@ import java.util.Map;
 /**
  * @author Ryan Heaton
  */
-public class UnqualifiedClassnameForMethod extends ClientClassnameForMethod {
+public class AS3UnqualifiedClassnameForMethod extends AS3ClientClassnameForMethod {
   
-  public UnqualifiedClassnameForMethod(Map<String, String> conversions) {
+  public AS3UnqualifiedClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
   }
 

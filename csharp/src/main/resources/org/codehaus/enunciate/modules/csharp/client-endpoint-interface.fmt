@@ -22,29 +22,29 @@ namespace ${namespaceFor(endpointInterface)} {
   ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace?default("")}")]
-  public partial class ${endpointInterface.simpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
+  public partial class ${endpointInterface.clientSimpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {
 
   [@forEachWebMethod endpointInterface=endpointInterface]
     [#list webMethod.webParameters as param]
       [#if param.header]
-    public ${param.elementName?cap_first}AsSoapHeaderFor${endpointInterface.simpleName?cap_first} ${param.elementName?cap_first};
+    public ${param.elementName?cap_first}AsSoapHeaderFor${endpointInterface.clientSimpleName?cap_first} ${param.elementName?cap_first};
       [/#if]
     [/#list]
   [/@forEachWebMethod]
 
     /// <summary>
-    ///  Construct a ${endpointInterface.simpleName} that points to the default endpoint ("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}").
+    ///  Construct a ${endpointInterface.clientSimpleName} that points to the default endpoint ("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}").
     /// </summary>
-    public ${endpointInterface.simpleName}() {
+    public ${endpointInterface.clientSimpleName}() {
       this.Url = "${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}";
     }
 
     /// <summary>
-    ///  Construct a ${endpointInterface.simpleName} that points to the endpoint at a specified host and port.
+    ///  Construct a ${endpointInterface.clientSimpleName} that points to the endpoint at a specified host and port.
     /// </summary>
     /// <param name="host">The host of the endpoint.</param>
     /// <param name="port">The port of the endpoint.</param>
-    public ${endpointInterface.simpleName}(string host, int port) {
+    public ${endpointInterface.clientSimpleName}(string host, int port) {
       UriBuilder builder = new UriBuilder("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
       builder.Host = host;
       builder.Port = port;
@@ -52,10 +52,10 @@ namespace ${namespaceFor(endpointInterface)} {
     }
 
     /// <summary>
-    ///  Construct a ${endpointInterface.simpleName} that points to the specified endpoint.
+    ///  Construct a ${endpointInterface.clientSimpleName} that points to the specified endpoint.
     /// </summary>
     /// <param name="url">The URL of the endpoint.</param>
-    public ${endpointInterface.simpleName}(string url) {
+    public ${endpointInterface.clientSimpleName}(string url) {
       this.Url = url;
     }
   [@forEachWebMethod endpointInterface=endpointInterface]
@@ -65,7 +65,7 @@ namespace ${namespaceFor(endpointInterface)} {
     /// </summary>
     [#list webMethod.webParameters as param]
       [#if !param.header]
-    /// <param name="${param.simpleName}">${param.docValue?default("(no parameter documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</param>
+    /// <param name="${param.clientSimpleName}">${param.docValue?default("(no parameter documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</param>
       [/#if]
     [/#list]
     /// <returns>${webMethod.returnType.docComment?default("(no returns documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}</returns>
@@ -92,9 +92,9 @@ namespace ${namespaceFor(endpointInterface)} {
       [/#if]
     [/#list]
     [#assign usecomma=false/]
-    public [#if webMethod.webResult.header]void[#else]${listsAsArraysClassnameFor(webMethod.webResult)}[/#if] ${webMethod.simpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="[#if param.implicitSchemaElement]${endpointInterface.targetNamespace?default("")}[/#if]")] [/#if]${classnameFor(param)} ${param.simpleName}[/#if][/#list]) {
+    public [#if webMethod.webResult.header]void[#else]${listsAsArraysClassnameFor(webMethod.webResult)}[/#if] ${webMethod.clientSimpleName?cap_first}([#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/][#if isrpc][System.Xml.Serialization.SoapElementAttribute(ElementName="${param.elementName}")] [#else][System.Xml.Serialization.XmlElementAttribute(ElementName="${param.elementName}",Namespace="[#if param.implicitSchemaElement]${endpointInterface.targetNamespace?default("")}[/#if]")] [/#if]${classnameFor(param)} ${param.clientSimpleName}[/#if][/#list]) {
     [#assign usecomma=false/]
-      object[] results = this.Invoke("${webMethod.simpleName?cap_first}", new object[] { [#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/]${param.simpleName}[/#if][/#list] });
+      object[] results = this.Invoke("${webMethod.clientSimpleName?cap_first}", new object[] { [#list webMethod.webParameters as param][#if !param.header][#if usecomma], [/#if][#assign usecomma=true/]${param.clientSimpleName}[/#if][/#list] });
     [#if !webMethod.webResult.void && !webMethod.webResult.header]
       return ((${listsAsArraysClassnameFor(webMethod.webResult)})(results[0]));
     [/#if]

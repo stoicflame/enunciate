@@ -16,6 +16,10 @@
 
 package org.codehaus.enunciate.modules.csharp;
 
+import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.EnumConstantDeclaration;
+import com.sun.mirror.declaration.EnumDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
@@ -23,17 +27,10 @@ import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.ClientName;
 
-import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collection;
-
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.EnumDeclaration;
-import com.sun.mirror.declaration.EnumConstantDeclaration;
 
 /**
  * Validator for the C# module.
@@ -86,8 +83,8 @@ public class CSharpValidator extends BaseValidator {
         result.addError(webMethod, "C# can't handle types that are maps.");
       }
 
-      if (capitalize(webMethod.getSimpleName()).equals(ei.getSimpleName())) {
-        result.addError(webMethod, "C# can't handle methods that are of the same name as their containing class.");
+      if (capitalize(webMethod.getClientSimpleName()).equals(ei.getClientSimpleName())) {
+        result.addError(webMethod, "C# can't handle methods that are of the same name as their containing class. Either rename the method, or use the @org.codehaus.enunciate.ClientName annotation to rename the method (or type) on the client-side.");
       }
     }
 
@@ -113,8 +110,8 @@ public class CSharpValidator extends BaseValidator {
                                    "This may cause confusion to C# consumers.");
       }
 
-      if (capitalize(simpleType.getValue().getSimpleName()).equals(simpleType.getSimpleName())) {
-        result.addError(simpleType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class.");
+      if (capitalize(simpleType.getValue().getClientSimpleName()).equals(simpleType.getClientSimpleName())) {
+        result.addError(simpleType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
     }
     return result;
@@ -124,8 +121,17 @@ public class CSharpValidator extends BaseValidator {
   public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
     ValidationResult result = super.validateEnumType(enumType);
     for (EnumConstantDeclaration enumItem : ((EnumDeclaration) enumType.getDelegate()).getEnumConstants()) {
-      if (enumItem.getSimpleName().equals(enumType.getSimpleName())) {
-        result.addError(enumItem, "C# can't handle properties/fields that are of the same name as their containing class.");
+      String simpleName = enumItem.getSimpleName();
+      ClientName clientNameInfo = enumItem.getAnnotation(ClientName.class);
+      if (clientNameInfo != null) {
+        simpleName = clientNameInfo.value();
+      }
+
+      if ("event".equals(simpleName)) {
+        result.addError(enumItem, "C# can't handle an enum constant named 'Event'. Either rename the enum constant, or use the @org.codehaus.enunciate.ClientName annotation to rename it on the client-side.");
+      }
+      else if (simpleName.equals(enumType.getClientSimpleName())) {
+        result.addError(enumItem, "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
     }
     return result;
@@ -140,7 +146,7 @@ public class CSharpValidator extends BaseValidator {
                                    "This may cause confusion to C# consumers.");
       }
 
-      if (capitalize(attribute.getSimpleName()).equals(complexType.getSimpleName())) {
+      if (capitalize(attribute.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
         result.addError(attribute, "C# can't handle properties/fields that are of the same name as their containing class.");
       }
     }
@@ -151,8 +157,8 @@ public class CSharpValidator extends BaseValidator {
                                    "This may cause confusion to C# consumers.");
       }
 
-      if (capitalize(complexType.getValue().getSimpleName()).equals(complexType.getSimpleName())) {
-        result.addError(complexType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class.");
+      if (capitalize(complexType.getValue().getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+        result.addError(complexType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
     }
 
@@ -167,8 +173,8 @@ public class CSharpValidator extends BaseValidator {
           "your own adapter for the Map, or disable the C# module.");
       }
 
-      if (capitalize(element.getSimpleName()).equals(complexType.getSimpleName())) {
-        result.addError(element, "C# can't handle properties/fields that are of the same name as their containing class.");
+      if (capitalize(element.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
+        result.addError(element, "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
     }
 

@@ -40,6 +40,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.ClientName;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -79,6 +80,20 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    * @return The namespace of the accessor.
    */
   public abstract String getNamespace();
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
+  }
 
   /**
    * The type of the accessor.

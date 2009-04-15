@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Collection;
 
+import org.codehaus.enunciate.ClientName;
+
 /**
  * Used to wrap @XmlAnyElement.
  *
@@ -97,4 +99,19 @@ public class AnyElement extends DecoratedMemberDeclaration {
   public List<ElementRef> getElementRefs() {
     return refs;
   }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
+  }
+
 }

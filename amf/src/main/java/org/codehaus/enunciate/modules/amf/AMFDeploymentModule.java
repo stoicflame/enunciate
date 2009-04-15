@@ -274,7 +274,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
       model.setFileOutputDirectory(serverGenerateDir);
 
-      TreeSet<String> packages = new TreeSet<String>(new Comparator<String>() {
+      TreeMap<String, String> packages = new TreeMap<String, String>(new Comparator<String>() {
         public int compare(String package1, String package2) {
           int comparison = package1.length() - package2.length();
           if (comparison == 0) {
@@ -284,23 +284,17 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
         }
       });
 
-      HashMap<String, String> as3Aliases = new HashMap<String, String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isAMFTransient(typeDefinition)) {
-            as3Aliases.put(typeDefinition.getQualifiedName(), typeDefinition.getSimpleName());
-            packages.add(typeDefinition.getPackage().getQualifiedName());
+            String packageName = typeDefinition.getPackage().getQualifiedName();
+            packages.put(packageName, packageName + ".amf");
           }
         }
       }
 
-      LinkedHashMap<String, String> amfTypePackageConversions = new LinkedHashMap<String, String>();
-      for (String pckg : packages) {
-        amfTypePackageConversions.put(pckg, pckg + ".amf");
-      }
-
       info("Generating the AMF externalizable types and their associated mappers...");
-      AMFClassnameForMethod amfClassnameForMethod = new AMFClassnameForMethod(amfTypePackageConversions);
+      AMFClassnameForMethod amfClassnameForMethod = new AMFClassnameForMethod(packages);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(amfClassnameForMethod));
       model.put("classnameFor", amfClassnameForMethod);
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
@@ -327,16 +321,32 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       URL typeTemplate = getTemplateURL("as3-type.fmt");
       URL enumTypeTemplate = getTemplateURL("as3-enum-type.fmt");
 
+      //build up the list of as3Aliases...
+      HashMap<String, String> as3Aliases = new HashMap<String, String>();
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          if (!isAMFTransient(typeDefinition)) {
+            as3Aliases.put(amfClassnameForMethod.convert(typeDefinition), typeDefinition.getSimpleName());
+          }
+        }
+      }
+
       model.setFileOutputDirectory(clientGenerateDir);
       HashMap<String, String> conversions = new HashMap<String, String>();
       //todo: accept client-side package mappings?
-      model.put("packageFor", new ClientPackageForMethod(conversions));
-      UnqualifiedClassnameForMethod classnameFor = new UnqualifiedClassnameForMethod(conversions);
-      model.put("classnameFor", classnameFor);
-      model.put("componentTypeFor", new ComponentTypeForMethod(conversions));
+      ClientPackageForMethod as3PackageFor = new ClientPackageForMethod(conversions);
+      as3PackageFor.setUseClientNameConversions(true);
+      model.put("packageFor", as3PackageFor);
+      AS3UnqualifiedClassnameForMethod as3ClassnameFor = new AS3UnqualifiedClassnameForMethod(conversions);
+      as3ClassnameFor.setUseClientNameConversions(true);
+      model.put("classnameFor", as3ClassnameFor);
+      model.put("simpleNameFor", new SimpleNameWithParamsMethod(as3ClassnameFor));
+      ComponentTypeForMethod as3ComponentTypeFor = new ComponentTypeForMethod(conversions);
+      as3ComponentTypeFor.setUseClientNameConversions(true);
+      model.put("componentTypeFor", as3ComponentTypeFor);
       model.put("amfClassnameFor", amfClassnameForMethod);
-      model.put("amfComponentTypeFor", new ComponentTypeForMethod(amfTypePackageConversions));
-      model.put("forEachAS3Import", new ForEachAS3ImportTransform(null, classnameFor));
+      model.put("amfComponentTypeFor", new ComponentTypeForMethod(packages));
+      model.put("forEachAS3Import", new ForEachAS3ImportTransform(null, as3ClassnameFor));
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
       model.put("as3Aliases", as3Aliases);
 

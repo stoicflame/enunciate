@@ -23,9 +23,9 @@ import net.sf.jelly.apt.freemarker.FreemarkerTransform;
  */
 public class ForEachAS3ImportTransform extends FreemarkerTransform<AS3ImportStrategy> {
 
-  private final ClientClassnameForMethod classnameFor;
+  private final AS3ClientClassnameForMethod classnameFor;
 
-  public ForEachAS3ImportTransform(String namespace, ClientClassnameForMethod classnameFor) {
+  public ForEachAS3ImportTransform(String namespace, AS3ClientClassnameForMethod classnameFor) {
     super(namespace);
 
     this.classnameFor = classnameFor;

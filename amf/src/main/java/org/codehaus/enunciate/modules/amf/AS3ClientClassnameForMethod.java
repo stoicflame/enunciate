@@ -36,11 +36,11 @@ import java.net.URI;
  * @link http://livedocs.adobe.com/flex/2/docs/wwhelp/wwhimpl/common/html/wwhelp.htm?context=LiveDocs_Parts&file=00001104.html#270405
  * @author Ryan Heaton
  */
-public class ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
+public class AS3ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
 
   private final Map<String, String> classConversions = new HashMap<String, String>();
 
-  public ClientClassnameForMethod(Map<String, String> conversions) {
+  public AS3ClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
     setJdk15(false);
     classConversions.put(Boolean.class.getName(), "Boolean");

@@ -15,31 +15,31 @@ namespace ${namespaceFor(type)} {
 
   [#list type.attributes as attribute]
     [#if !accessorOverridesAnother(attribute)]
-    private ${classnameFor(attribute)} _${attribute.simpleName};
+    private ${classnameFor(attribute)} _${attribute.clientSimpleName};
       [#if classnameFor(attribute)?ends_with("?")]
-    private bool _${attribute.simpleName}Specified;
+    private bool _${attribute.clientSimpleName}Specified;
       [/#if]
     [/#if]
   [/#list]
   [#if type.value?exists]
     [#if !accessorOverridesAnother(type.value)]
-    private ${classnameFor(type.value)} _${type.value.simpleName};
+    private ${classnameFor(type.value)} _${type.value.clientSimpleName};
       [#if classnameFor(type.value)?ends_with("?")]
-    private bool _${type.value.simpleName}Specified;
+    private bool _${type.value.clientSimpleName}Specified;
       [/#if]
     [/#if]
   [#else]
     [#list type.elements as element]
       [#if !accessorOverridesAnother(element)]
-    private ${classnameFor(element)} _${element.simpleName};
+    private ${classnameFor(element)} _${element.clientSimpleName};
         [#if classnameFor(element)?ends_with("?")]
-    private bool _${element.simpleName}Specified;
+    private bool _${element.clientSimpleName}Specified;
         [/#if]
       [/#if]
     [/#list]
   [/#if]
   [#if type.anyElement?exists]
-    private System.Xml.XmlElement[] _${type.anyElement.simpleName};
+    private System.Xml.XmlElement[] _${type.anyElement.clientSimpleName};
   [/#if]
   [#if type.hasAnyAttribute]
     private System.Xml.XmlAttribute[] _otherAttributes;
@@ -66,12 +66,12 @@ namespace ${namespaceFor(type)} {
     ///  ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [System.Xml.Serialization.XmlAnyElementAttribute()]
-    public System.Xml.XmlElement[] ${type.anyElement.simpleName?cap_first} {
+    public System.Xml.XmlElement[] ${type.anyElement.clientSimpleName?cap_first} {
       get {
-        return this._${type.anyElement.simpleName};
+        return this._${type.anyElement.clientSimpleName};
       }
       set {
-        this._${type.anyElement.simpleName} = value;
+        this._${type.anyElement.clientSimpleName} = value;
       }
     }
   [/#if]
@@ -100,27 +100,27 @@ namespace ${namespaceFor(type)} {
     ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
-    public ${cs_classname?substring(0, cs_classname?length  - 1)} ${accessor.simpleName?cap_first} {
+    public ${cs_classname?substring(0, cs_classname?length  - 1)} ${accessor.clientSimpleName?cap_first} {
       get {
-        return this._${accessor.simpleName}.GetValueOrDefault();
+        return this._${accessor.clientSimpleName}.GetValueOrDefault();
       }
       set {
-        this._${accessor.simpleName} = value;
-        this._${accessor.simpleName}Specified = true;
+        this._${accessor.clientSimpleName} = value;
+        this._${accessor.clientSimpleName}Specified = true;
       }
     }
 
     /// <summary>
-    ///  Property for the XML serializer indicating whether the "${accessor.simpleName?cap_first}" property should be included in the output.
+    ///  Property for the XML serializer indicating whether the "${accessor.clientSimpleName?cap_first}" property should be included in the output.
     /// </summary>
     [System.Xml.Serialization.XmlIgnoreAttribute]
     [System.Xml.Serialization.SoapIgnoreAttribute]
-    public bool ${accessor.simpleName?cap_first}Specified {
+    public bool ${accessor.clientSimpleName?cap_first}Specified {
       get {
-        return this._${accessor.simpleName}Specified;
+        return this._${accessor.clientSimpleName}Specified;
       }
       set {
-        this._${accessor.simpleName}Specified = value;
+        this._${accessor.clientSimpleName}Specified = value;
       }
     }
 
@@ -129,12 +129,12 @@ namespace ${namespaceFor(type)} {
     ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
-    public ${cs_classname} ${accessor.simpleName?cap_first} {
+    public ${cs_classname} ${accessor.clientSimpleName?cap_first} {
       get {
-        return this._${accessor.simpleName};
+        return this._${accessor.clientSimpleName};
       }
       set {
-        this._${accessor.simpleName} = value;
+        this._${accessor.clientSimpleName} = value;
       }
     }
 

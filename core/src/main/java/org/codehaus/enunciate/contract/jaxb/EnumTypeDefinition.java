@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 
 /**
  * An enum type definition.
@@ -72,6 +73,10 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       this.enumValues.put(enumConstant.getSimpleName(), value);
     }
 
+  }
+
+  public Collection<EnumConstantDeclaration> getEnumConstants() {
+    return DeclarationDecorator.decorate(((EnumDeclaration)delegate).getEnumConstants());
   }
 
   // Inherited.

@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import org.codehaus.enunciate.ClientName;
 
 /**
  * A class specified as a web service endpoint implementation.  Remember an endpoint implementation could
@@ -33,6 +34,20 @@ public class EndpointImplementation extends DecoratedClassDeclaration {
     super(delegate);
 
     this.endpointInterface = endpointInterface;
+  }
+
+  /**
+   * The simple name for client-side code generation.
+   *
+   * @return The simple name for client-side code generation.
+   */
+  public String getClientSimpleName() {
+    String clientSimpleName = getSimpleName();
+    ClientName clientName = getAnnotation(ClientName.class);
+    if (clientName != null) {
+      clientSimpleName = clientName.value();
+    }
+    return clientSimpleName;
   }
 
   /**

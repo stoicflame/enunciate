@@ -29,6 +29,7 @@ import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
+import org.codehaus.enunciate.ClientName;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -152,16 +153,10 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
-    String convertedPackage;
-    PackageDeclaration pckg = declaration.getPackage();
-    if (pckg == null) {
-      convertedPackage = "";
-    }
-    else {
-      convertedPackage = super.convert(pckg.getQualifiedName());
-    }
-
-    return convertedPackage + "." + declaration.getSimpleName();
+    String convertedPackage = super.convert(declaration.getPackage());
+    ClientName specifiedName = isUseClientNameConversions() ? declaration.getAnnotation(ClientName.class) : null;
+    String simpleName = specifiedName == null ? declaration.getSimpleName() : specifiedName.value();
+    return convertedPackage + "." + simpleName;
   }
 
   @Override
