@@ -26,6 +26,8 @@ import freemarker.template.TemplateModelException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.codehaus.enunciate.ClientName;
+
 /**
  * Gets the client-side component type for the specified classname.
  *
@@ -57,7 +59,7 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
     }
 
     TypeDeclaration declaration = (TypeDeclaration) unwrapped;
-    String simpleNameWithParams = declaration.getSimpleName();
+    String simpleNameWithParams = this.typeConversion.isUseClientNameConversions() && declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName();
     if (this.typeConversion.isJdk15() && declaration.getFormalTypeParameters() != null && !declaration.getFormalTypeParameters().isEmpty()) {
       simpleNameWithParams += "<";
       Iterator<TypeParameterDeclaration> paramIt = declaration.getFormalTypeParameters().iterator();

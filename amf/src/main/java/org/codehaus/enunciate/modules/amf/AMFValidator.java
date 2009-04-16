@@ -96,10 +96,10 @@ public class AMFValidator extends BaseValidator {
         result.addError(complexType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
 
-      if ("Date".equals(complexType.getSimpleName())) {
+      if ("Date".equals(complexType.getClientSimpleName())) {
         result.addError(complexType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
       }
-      else if ("Event".equals(complexType.getSimpleName())) {
+      else if ("Event".equals(complexType.getClientSimpleName())) {
         result.addError(complexType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
       }
 
