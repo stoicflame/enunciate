@@ -157,6 +157,9 @@ import java.util.*;
  *       "oauth" child element (see below).</li>
  *   <li>The "initJ2EESecurityContext" attribute is used to enable Spring Security to initialize the J2EE security context with the attributes of the current identity.
  *       Default: "true".</li>
+ *   <li>The "applySecurityToSOAPUrls" attribute is used to apply security to the SOAP URLs. This means that SOAP URLs will be secured to the roles specified by
+ *       the @RolesAllowed annotation on the web service class. This is different from the security that is applied to the SOAP endpoints, which is always applied.
+ *       Default: "false".</li>
  *   <li>The "key" attribute is used to specify the default security key that is to be used as necessary for security hashes. etc. If not supplied, a random
  *       default will be provided.</li>
  *   <li>The "realmName" attribute is used to specify the default realm name to be used for the authentication mechanisms that require it (e.g. HTTP Basic Auth,
@@ -328,6 +331,7 @@ public class SecurityConfig {
   private boolean enableBasicHTTPAuth = true;
   private boolean enableDigestHTTPAuth = false;
   private boolean initJ2EESecurityContext = true;
+  private boolean applySecurityToSOAPUrls = false;
   private boolean enableOAuth = false;
 
   private boolean disableDefaultProvider = false;
@@ -368,9 +372,6 @@ public class SecurityConfig {
    */
   public void setEnableFormBasedLogin(boolean enableFormBasedLogin) {
     this.enableFormBasedLogin = enableFormBasedLogin;
-    
-    if (enableFormBasedLogin) {
-    }
   }
 
   /**
@@ -497,6 +498,24 @@ public class SecurityConfig {
    */
   public void setInitJ2EESecurityContext(boolean initJ2EESecurityContext) {
     this.initJ2EESecurityContext = initJ2EESecurityContext;
+  }
+
+  /**
+   * Whether to apply security to the soap urls.
+   *
+   * @return Whether to apply security to the soap urls.
+   */
+  public boolean isApplySecurityToSOAPUrls() {
+    return applySecurityToSOAPUrls;
+  }
+
+  /**
+   * Whether to apply security to the soap urls.
+   *
+   * @param applySecurityToSOAPUrls Whether to apply security to the soap urls.
+   */
+  public void setApplySecurityToSOAPUrls(boolean applySecurityToSOAPUrls) {
+    this.applySecurityToSOAPUrls = applySecurityToSOAPUrls;
   }
 
   /**

@@ -94,6 +94,9 @@ import java.util.*;
  * <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
  * </ul>
  *
+ * <p>The Jersey module also supports an arbitrary number of "init-param" child elements that can be used to specify the init parameters (e.g.
+ * container request filters, etc.) of the Jersey servlet. The "init-param" element supports a "name" attribute and a "value" attribute.</p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The Jersey deployment module exports no artifacts.</p>
@@ -106,6 +109,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
   private boolean useSubcontext = true;
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
+  private final Map<String, String> servletInitParams = new HashMap<String, String>();
 
   /**
    * @return "jersey"
@@ -246,6 +250,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
     servletComponent.setName("jersey");
     servletComponent.setClassname(EnunciateSpringServlet.class.getName());
     TreeMap<String, String> initParams = new TreeMap<String, String>();
+    initParams.putAll(getServletInitParams());
     if (!isUsePathBasedConneg()) {
       initParams.put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, Boolean.FALSE.toString());
     }
@@ -354,6 +359,25 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDisableWildcardServletError(boolean disableWildcardServletError) {
     this.disableWildcardServletError = disableWildcardServletError;
+  }
+
+  /**
+   * Get the servlet init params.
+   *
+   * @return The servlet init params.
+   */
+  public Map<String, String> getServletInitParams() {
+    return servletInitParams;
+  }
+
+  /**
+   * Add a servlet init param.
+   *
+   * @param name The name of the init param.
+   * @param value The value of the init param.
+   */
+  public void addServletInitParam(String name, String value) {
+    this.servletInitParams.put(name, value);
   }
 
   // Inherited.

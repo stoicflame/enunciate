@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.spring_app.config;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 import org.codehaus.enunciate.modules.spring_app.config.security.*;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 
 /**
  * Rules for the configuration of the XFire client module.
@@ -77,6 +78,14 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/spring-app/globalServiceInterceptor", GlobalServiceInterceptor.class);
     digester.addSetProperties("enunciate/modules/spring-app/globalServiceInterceptor");
     digester.addSetNext("enunciate/modules/spring-app/globalServiceInterceptor", "addGlobalServiceInterceptor");
+
+    digester.addObjectCreate("enunciate/modules/spring-app/globalServletFilter", WebAppComponent.class);
+    digester.addSetProperties("enunciate/modules/spring-app/globalServletFilter");
+    digester.addSetNext("enunciate/modules/spring-app/globalServletFilter", "addGlobalServletFilter");
+
+    digester.addCallMethod("enunciate/modules/spring-app/globalServletFilter/init-param", "addInitParam", 2);
+    digester.addCallParam("enunciate/modules/spring-app/globalServletFilter/init-param", 0, "name");
+    digester.addCallParam("enunciate/modules/spring-app/globalServletFiltery/init-param", 1, "value");
 
     digester.addObjectCreate("enunciate/modules/spring-app/handlerInterceptor", HandlerInterceptor.class);
     digester.addSetProperties("enunciate/modules/spring-app/handlerInterceptor");

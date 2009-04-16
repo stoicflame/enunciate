@@ -8,6 +8,8 @@
     </rest>
   </services>
   <modules>
+    <csharp disabled="true"/>
+    <jaxws-client disabled="true"/>
     <gwt disabled="false"
          rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">
       <app srcDir="src/main/gwt-apps" javascriptStyle="PRETTY">

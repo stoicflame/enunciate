@@ -26,5 +26,9 @@ public class JerseyRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
     digester.addSetProperties("enunciate/modules/jersey");
+
+    digester.addCallMethod("enunciate/modules/jersey/init-param", "addServletInitParam", 2);
+    digester.addCallParam("enunciate/modules/jersey/init-param", 0, "name");
+    digester.addCallParam("enunciate/modules/jersey/init-param", 1, "value");
   }
 }

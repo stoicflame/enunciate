@@ -18,6 +18,8 @@ package org.codehaus.enunciate.main.webapp;
 
 import java.util.Set;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.HashMap;
 
 /**
  * Component for web application, e.g. filter, servlet, listener.
@@ -86,6 +88,19 @@ public class WebAppComponent {
   }
 
   /**
+   * Add a url mapping.
+   *
+   * @param urlMapping The url mapping to add.
+   */
+  public void addUrlMapping(String urlMapping) {
+    if (this.urlMappings == null) {
+      this.urlMappings = new TreeSet<String>();
+    }
+
+    this.urlMappings.add(urlMapping);
+  }
+
+  /**
    * The init params of the component.
    *
    * @return The init params of the component.
@@ -101,5 +116,19 @@ public class WebAppComponent {
    */
   public void setInitParams(Map<String, String> initParams) {
     this.initParams = initParams;
+  }
+
+  /**
+   * Add an init param to this component.
+   *
+   * @param name The name of the init param.
+   * @param value The value of the init param.
+   */
+  public void addInitParam(String name, String value) {
+    if (this.initParams == null) {
+      this.initParams = new HashMap<String, String>();
+    }
+
+    this.initParams.put(name, value);
   }
 }

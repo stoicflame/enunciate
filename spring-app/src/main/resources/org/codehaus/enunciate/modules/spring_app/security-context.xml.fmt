@@ -60,6 +60,15 @@
     <intercept-url pattern="${servletPatternToAntPattern(pattern)}" access="${securityConfig.secureUrls[pattern]}"/>
     [/#if]
   [/#list]
+  [#if securityConfig.applySecurityToSOAPUrls]
+    [@forEachWsdl]
+      [@forEachEndpointInterface wsdl=wsdl]
+        [#if endpointInterface.annotations["javax.annotation.security.RolesAllowed"]?exists]
+    <intercept-url pattern="${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}" access="[#list endpointInterface.annotations["javax.annotation.security.RolesAllowed"].allElementValues["value"] as role]${role}[#if role_has_next],[/#if][/#list]"/>
+        [/#if]
+      [/@forEachEndpointInterface]
+    [/@forEachWsdl]
+  [/#if]
     <intercept-url pattern="/**"/>
 
   [#if securityConfig.enableFormBasedLogout]

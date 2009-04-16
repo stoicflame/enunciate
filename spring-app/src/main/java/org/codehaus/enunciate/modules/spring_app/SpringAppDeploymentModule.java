@@ -27,6 +27,8 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
@@ -119,6 +121,7 @@ import java.util.jar.Manifest;
  * <li><a href="#config_war_element">The "war" element</a></li>
  * <li><a href="#config_springImport">The "springImport" element</a></li>
  * <li><a href="#config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></li>
+ * <li><a href="#config_globalServletFilter">The "globalServletFilter" element</a></li>
  * <li><a href="#config_handlerInterceptor">The "handlerInterceptor" element</a></li>
  * <li><a href="#config_handlerMapping">The "handlerMapping" element</a></li>
  * <li><a href="#config_copyResources">The "copyResources" element</a></li>
@@ -185,6 +188,13 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServiceInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServiceInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+ *
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
@@ -316,6 +326,16 @@ import java.util.jar.Manifest;
  * <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
  * </ul>
  *
+ * <h3><a name="config_globalServletFilter">The "globalServletFilter" element</a></h3>
+ *
+ * <p>The "globalServletFilter" element is used to specify a servlet filter that will be applied to all web service requests. It requires a "name" attribute
+ * and a "classname" attribute and supports an arbitrary number of "init-param" child elements, each supporting a "name" attribute and a "value" attribute.</p>
+ *
+ * <ul>
+ * <li>The "interceptorClass" attribute specified the class of the interceptor.</p>
+ * <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
+ * </ul>
+ *
  * <h3><a name="config_handlerInterceptor">The "handlerInterceptor" element</a></h3>
  *
  * <p>The "handlerInterceptor" element is used to specify a Spring interceptor (instance of org.springframework.web.servlet.HandlerInterceptor)
@@ -372,6 +392,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
+  private final List<WebAppComponent> globalServletFilters = new ArrayList<WebAppComponent>();
   private String defaultAutowire = null;
   private String defaultDependencyCheck = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
@@ -451,6 +472,17 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       if (isEnableSecurity()) {
         if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
           throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
+        }
+      }
+
+      if (!this.globalServletFilters.isEmpty()) {
+        for (WebAppComponent globalServletFilter : this.globalServletFilters) {
+          if (globalServletFilter.getName() == null) {
+            throw new EnunciateException("A global servlet filter (as specified in the enunciate config) requires a name.");
+          }
+          if (globalServletFilter.getClassname() == null) {
+            throw new EnunciateException("A global servlet filter (as specified in the enunciate config) requires a classname.");
+          }
         }
       }
     }
@@ -574,6 +606,23 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       copyPreBase();
 
       info("Building the expanded WAR in %s", buildDir);
+
+      if (!this.globalServletFilters.isEmpty()) {
+        Set<String> allServletUrls = new TreeSet<String>();
+        for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
+          if (fragment.getServlets() != null) {
+            for (WebAppComponent servletComponent : fragment.getServlets()) {
+              allServletUrls.addAll(servletComponent.getUrlMappings());
+            }
+          }
+        }
+        for (WebAppComponent filter : this.globalServletFilters) {
+          filter.setUrlMappings(allServletUrls);
+        }
+        BaseWebAppFragment fragment = new BaseWebAppFragment("global-servlet-filters");
+        fragment.setFilters(this.globalServletFilters);
+        enunciate.addWebAppFragment(fragment);
+      }
 
       for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
         if (fragment.getBaseDir() != null) {
@@ -1156,6 +1205,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void addGlobalServiceInterceptor(GlobalServiceInterceptor interceptorConfig) {
     this.globalServiceInterceptors.add(interceptorConfig);
+  }
+
+  /**
+   * Add a global servlet filter to be applied to all web service requests.
+   *
+   * @param filterConfig The filter configuration.
+   */
+  public void addGlobalServletFilter(WebAppComponent filterConfig) {
+    this.globalServletFilters.add(filterConfig);
   }
 
   /**
