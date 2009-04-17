@@ -29,6 +29,7 @@ import org.codehaus.xfire.jaxb2.AttachmentUnmarshaller;
 import org.codehaus.xfire.service.OperationInfo;
 import org.codehaus.xfire.service.MessageInfo;
 import org.codehaus.xfire.util.ClassLoaderUtils;
+import org.xml.sax.SAXException;
 
 import javax.jws.soap.SOAPBinding;
 import javax.jws.WebParam;
@@ -36,8 +37,15 @@ import javax.xml.bind.*;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -47,6 +55,7 @@ import java.lang.reflect.Method;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
 
 /**
  * The binding for a JAXWS operation.
@@ -101,6 +110,8 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
       paramStyle = annotation.parameterStyle();
     }
 
+    boolean schemaValidate = method.isAnnotationPresent(SchemaValidate.class) || ei.isAnnotationPresent(SchemaValidate.class) || pckg.isAnnotationPresent(SchemaValidate.class);
+
     if (paramStyle == SOAPBinding.ParameterStyle.BARE) {
       //return a bare operation info.
       //it's not necessarily the first parameter type! there could be a header or OUT parameter...
@@ -130,7 +141,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
         paramIndex = 0;
       }
 
-      return new OperationBeanInfo(method.getParameterTypes()[paramIndex], null, op.getInputMessage());
+      return new OperationBeanInfo(method.getParameterTypes()[paramIndex], null, op.getInputMessage(), schemaValidate);
     }
     else {
       String requestWrapperClassName;
@@ -160,7 +171,7 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
         return null;
       }
       
-      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass), op.getInputMessage());
+      return new OperationBeanInfo(wrapperClass, loadOrderedProperties(wrapperClass), op.getInputMessage(), schemaValidate);
     }
 
   }
@@ -274,9 +285,22 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     Object bean;
     try {
       Unmarshaller unmarshaller = this.jaxbContext.createUnmarshaller();
+      XMLStreamReader streamReader = message.getXMLStreamReader();
+      if (this.requestInfo.isSchemaValidate()) {
+        try {
+          TransformerFactory xformFactory = TransformerFactory.newInstance();
+          DOMResult domResult = new DOMResult();
+          xformFactory.newTransformer().transform(new StAXSource(streamReader, true), domResult);
+          unmarshaller.getSchema().newValidator().validate(new DOMSource(domResult.getNode()));
+          streamReader = XMLInputFactory.newInstance().createXMLStreamReader(new DOMSource(domResult.getNode()));
+        }
+        catch (Exception e) {
+          throw new XFireRuntimeException("Unable to validate the request against the schema.");
+        }
+      }
       unmarshaller.setEventHandler(getValidationEventHandler());
       unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshaller(context));
-      bean = unmarshaller.unmarshal(message.getXMLStreamReader(), this.requestInfo.getBeanClass()).getValue();
+      bean = unmarshaller.unmarshal(streamReader, this.requestInfo.getBeanClass()).getValue();
     }
     catch (JAXBException e) {
       throw new XFireRuntimeException("Unable to unmarshal type.", e);
@@ -393,11 +417,17 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     private Class beanClass;
     private PropertyDescriptor[] propertyOrder;
     private MessageInfo messageInfo;
+    private final boolean schemaValidate;
 
     public OperationBeanInfo(Class wrapperClass, PropertyDescriptor[] properties, MessageInfo message) {
+      this(wrapperClass, properties, message, false);
+    }
+
+    public OperationBeanInfo(Class wrapperClass, PropertyDescriptor[] properties, MessageInfo message, boolean schemaValidate) {
       this.beanClass = wrapperClass;
       this.propertyOrder = properties;
       this.messageInfo = message;
+      this.schemaValidate = schemaValidate;
     }
 
     /**
@@ -435,6 +465,16 @@ public class EnunciatedJAXWSOperationBinding implements MessageSerializer {
     public MessageInfo getMessageInfo() {
       return messageInfo;
     }
+
+    /**
+     * Whether to schema-valiate this operation.
+     *
+     * @return Whether to schema-valiate this operation.
+     */
+    public boolean isSchemaValidate() {
+      return schemaValidate;
+    }
+
   }
 
 }

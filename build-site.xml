@@ -75,18 +75,19 @@
       <dependency groupId="commons-fileupload" artifactId="commons-fileupload" version="1.2.1"/>
       <dependency groupId="commons-io" artifactId="commons-io" version="1.3.2"/>
       <dependency groupId="org.springframework" artifactId="spring-tx" version="2.5.4"/>
-      <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.1"/>
-      <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.5"/>
+      <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.3"/>
+      <dependency groupId="org.springframework.security" artifactId="spring-security-openid" version="2.0.3"/>
+      <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.6"/>
       <dependency groupId="javax.annotation" artifactId="jsr250-api" version="1.0"/>
       <dependency groupId="org.codehaus.jackson" artifactId="jackson-jaxrs" version="0.9.9"/>
     </artifact:dependencies>
     <patternset id="optional.jars.dependencies.patternset">
-      <exclude name="**/commons-fileupload*1.2.1*"/>
-      <exclude name="**/commons-io*1.3.2*"/>
-      <exclude name="**/spring-tx*2.5.4*"/>
-      <exclude name="**/spring-security-core-tiger*2.0.1*"/>
-      <exclude name="**/spring-security-oauth*2.5*"/>
-      <exclude name="**/jackson-asl-mapper*0.9.8*"/>
+      <exclude name="**/commons-fileupload*"/>
+      <exclude name="**/commons-io*"/>
+      <exclude name="**/spring-tx*"/>
+      <exclude name="**/spring-security-*"/>
+      <exclude name="**/jsr250*"/>
+      <exclude name="**/jackson*"/>
     </patternset>
 
     <!--filters for docs-->

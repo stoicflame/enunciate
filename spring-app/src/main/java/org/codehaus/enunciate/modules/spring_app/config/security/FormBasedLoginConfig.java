@@ -29,6 +29,7 @@ public class FormBasedLoginConfig {
   private String loginPageURL = "/login.jsp";
   private String loginPageFile;
   private BeanReference loginPageController;
+  private boolean enableOpenId = false;
 
   /**
    * The URL of the form-based login endpoint.
@@ -136,5 +137,23 @@ public class FormBasedLoginConfig {
    */
   public void setLoginPageController(BeanReference loginPageController) {
     this.loginPageController = loginPageController;
+  }
+
+  /**
+   * Whether to enable OpenId in a form-based login.
+   *
+   * @return Whether to enable OpenId in a form-based login.
+   */
+  public boolean isEnableOpenId() {
+    return enableOpenId;
+  }
+
+  /**
+   * Whether to enable OpenId in a form-based login.
+   *
+   * @param enableOpenId Whether to enable OpenId in a form-based login.
+   */
+  public void setEnableOpenId(boolean enableOpenId) {
+    this.enableOpenId = enableOpenId;
   }
 }

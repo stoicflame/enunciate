@@ -13,6 +13,15 @@
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
   <context:annotation-config/>
+  [#if securityConfig.userDetailsService?exists]
+    [#if securityConfig.userDetailsService.beanName?exists]
+      [#assign _enunciate_user_details_ref=securityConfig.userDetailsService.beanName/]
+    [#elseif securityConfig.userDetailsService.className?exists]
+      [#assign _enunciate_user_details_ref="enunciate-user-details"/]
+
+  <beans:bean id="${_enunciate_user_details_ref}" class="${securityConfig.userDetailsService.className}"/>
+    [/#if]
+  [/#if]
   [#if securityConfig.onAuthenticationFailed?exists && securityConfig.onAuthenticationFailed.redirectTo?exists]
     [#assign entryPointDefined=true/]
 
@@ -78,7 +87,11 @@
     <http-basic/>
   [/#if]
   [#if securityConfig.enableFormBasedLogin]
+    [#if securityConfig.formBasedLoginConfig.enableOpenId]
+    <openid-login authentication-failure-url="${securityConfig.formBasedLoginConfig.redirectOnFailureUrl}" default-target-url="${securityConfig.formBasedLoginConfig.redirectOnSuccessUrl}" login-page="${securityConfig.formBasedLoginConfig.loginPageURL}" login-processing-url="${securityConfig.formBasedLoginConfig.url}" user-service-ref="${_enunciate_user_details_ref}"/>
+    [#else]
     <form-login authentication-failure-url="${securityConfig.formBasedLoginConfig.redirectOnFailureUrl}" default-target-url="${securityConfig.formBasedLoginConfig.redirectOnSuccessUrl}" login-page="${securityConfig.formBasedLoginConfig.loginPageURL}" login-processing-url="${securityConfig.formBasedLoginConfig.url}"/>
+    [/#if]
   [/#if]
   [#if securityConfig.enableRememberMeToken]
     <remember-me key="${securityConfig.rememberMeConfig.key?default(securityConfig.key)}"/>
@@ -131,13 +144,8 @@
   </beans:bean>
   [/#if]
   [#if !securityConfig.disableDefaultProvider]
-    [#if securityConfig.userDetailsService?exists && securityConfig.userDetailsService.beanName?exists]
-
-  <authentication-provider user-service-ref="${securityConfig.userDetailsService.beanName}"/>
-    [#elseif securityConfig.userDetailsService?exists && securityConfig.userDetailsService.className?exists]
-
-  <beans:bean id="enunciate-user-details" class="${securityConfig.userDetailsService.className}"/>
-  <authentication-provider user-service-ref="enunciate-user-details"/>
+    [#if securityConfig.userDetailsService?exists]
+  <authentication-provider user-service-ref="${_enunciate_user_details_ref}"/>
     [#else]
 
   <beans:bean id="enunciate-auth-provider" class="org.codehaus.enunciate.modules.spring_app.DefaultEnunciateAuthenticationProvider">

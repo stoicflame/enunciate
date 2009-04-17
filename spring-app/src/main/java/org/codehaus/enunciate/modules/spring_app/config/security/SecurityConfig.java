@@ -270,6 +270,8 @@ import java.util.*;
  * login will be redirected. The default value is "/".  The "redirectOnFailureUrl" specifies the URL to which an unsuccessful login will be redirected.
  * The default value is "/".</p>
  *
+ * <p><a href="http://openid.net/">OpenID</a> is enabled using "enableOpenId" attribute of the "formBasedLogin" element.</p>
+ *
  * <p>For more information about the form-based login endpoint, see <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/webapp/AuthenticationProcessingFilter.html">org.springframework.security.ui.webapp.AuthenticationProcessingFilter</a>.</p>
  *
  * <h3>formBasedLogout</h3>

@@ -473,6 +473,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
         if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
           throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
         }
+
+        if (getSecurityConfig().getFormBasedLoginConfig() != null && getSecurityConfig().getFormBasedLoginConfig().isEnableOpenId()) {
+          if (getSecurityConfig().getUserDetailsService() == null || (getSecurityConfig().getUserDetailsService().getBeanName() == null && getSecurityConfig().getUserDetailsService().getClassName() == null)) {
+            throw new EnunciateException("Enabling OpenID requires you to specify a 'userDetailsService' bean.");
+          }
+        }
       }
 
       if (!this.globalServletFilters.isEmpty()) {
