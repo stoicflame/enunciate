@@ -208,6 +208,9 @@ public class TestFullXFireAPI extends TestCase {
 
     assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
 
+    long now = System.currentTimeMillis();
+    assertTrue(now < personService.ping());
+
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //    Map map = personService.readFamily("myChildId");
 //    for (Object key : map.keySet()) {

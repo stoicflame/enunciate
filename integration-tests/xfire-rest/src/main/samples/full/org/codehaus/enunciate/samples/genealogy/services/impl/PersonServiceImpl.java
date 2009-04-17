@@ -120,4 +120,8 @@ public class PersonServiceImpl implements PersonService {
       }
     }
   }
+
+  public long ping() {
+    return System.currentTimeMillis();
+  }
 }

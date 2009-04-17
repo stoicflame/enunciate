@@ -92,6 +92,14 @@ public interface PersonService {
     value = "file"
   )
   void uploadFiles(@NounValue DataHandler[] files, String length) throws ServiceException;
+
+  /**
+   * Ping for the current time.
+   *
+   * @return the current time.
+   */
+  long ping();
+
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.
