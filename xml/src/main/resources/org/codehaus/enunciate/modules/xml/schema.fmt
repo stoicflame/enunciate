@@ -68,10 +68,12 @@
   [/#list]
   [#list schema.registries as registry]
     [#list registry.localElementDeclarations as localElement]
-      [#if registry.substitutionGroupQName?exists]
+      [#if !isDefinedGlobally(localElement)]
+        [#if registry.substitutionGroupQName?exists]
   <${xs}:element name="${localElement.name}" substitutionGroup="${registry.substitutionGroupQName}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
-      [#else]
+        [#else]
   <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
+        [/#if]
       [/#if]
     [/#list]
   [/#list]
@@ -168,7 +170,7 @@
               <${xs}:choice minOccurs="0" maxOccurs="unbounded">
             [#list element.choices as elementChoice]
               [#if elementChoice.ref?exists]
-                <${xs}:element name="${elementChoice.name}" ref="${elementChoice.ref}"/>
+                <${xs}:element ref="${elementChoice.ref}"/>
               [#elseif elementChoice.baseType.anonymous]
                 <${xs}:element name="${elementChoice.name}">
                   [@processAnonymousType type=elementChoice.baseType/]

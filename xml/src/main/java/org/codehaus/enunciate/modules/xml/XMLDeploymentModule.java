@@ -215,6 +215,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
     model.put("prefix", new PrefixMethod());
+    model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);
