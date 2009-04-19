@@ -515,6 +515,23 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getRegistries().add(registry);
+    for (LocalElementDeclaration led : registry.getLocalElementDeclarations()) {
+      add(led);
+    }
+  }
+
+  public void add(LocalElementDeclaration led) {
+    String namespace = led.getNamespace();
+    String prefix = addNamespace(namespace);
+
+    SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+    if (schemaInfo == null) {
+      schemaInfo = new SchemaInfo();
+      schemaInfo.setId(prefix);
+      schemaInfo.setNamespace(namespace);
+      namespacesToSchemas.put(namespace, schemaInfo);
+    }
+    schemaInfo.getLocalElementDeclarations().add(led);
   }
 
   /**

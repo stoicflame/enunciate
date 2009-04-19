@@ -66,16 +66,14 @@
   <${xs}:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
     [/#if]
   [/#list]
-  [#list schema.registries as registry]
-    [#list registry.localElementDeclarations as localElement]
-      [#if !isDefinedGlobally(localElement)]
-        [#if registry.substitutionGroupQName?exists]
-  <${xs}:element name="${localElement.name}" substitutionGroup="${registry.substitutionGroupQName}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
-        [#else]
+  [#list schema.localElementDeclarations as localElement]
+    [#if !isDefinedGlobally(localElement)]
+      [#if localElement.substitutionGroupQName?exists]
+  <${xs}:element name="${localElement.name}" substitutionGroup="${localElement.substitutionGroupQName}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
+      [#else]
   <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
-        [/#if]
       [/#if]
-    [/#list]
+    [/#if]
   [/#list]
 [#t]
   [#list schema.typeDefinitions as typeDefinition]

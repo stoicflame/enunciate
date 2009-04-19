@@ -27,7 +27,6 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 public class LocalElementDeclaration extends DecoratedMethodDeclaration {
 
   private final TypeDeclaration elementTypeDeclaration;
-  private final XmlType elementXmlType;
   private final XmlElementDecl elementDecl;
   private final Registry registry;
 
@@ -48,12 +47,6 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration {
       throw new IllegalArgumentException(getPosition() + ": parameter type must be a declared type.");
     }
     elementTypeDeclaration = ((DeclaredType) param.getType()).getDeclaration();
-    try {
-      this.elementXmlType = XmlTypeFactory.getXmlType(param.getType());
-    }
-    catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
-    }
   }
 
   /**
@@ -75,7 +68,7 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration {
     if ("##default".equals(namespace)) {
       namespace = this.registry.getSchema().getNamespace();
     }
-    return namespace;
+    return "".equals(namespace) ? null : namespace;
   }
 
   /**
@@ -169,7 +162,12 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration {
    * @return The element xml type.
    */
   public XmlType getElementXmlType() {
-    return elementXmlType;
+    try {
+      return XmlTypeFactory.getXmlType(getParameters().iterator().next().getType());
+    }
+    catch (XmlTypeException e) {
+      throw new ValidationException(getPosition(), e.getMessage());
+    }
   }
 
   /**

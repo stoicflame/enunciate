@@ -43,6 +43,7 @@ public class SchemaInfo {
   private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
   private final Collection<Registry> registries = new ArrayList<Registry>();
+  private final Collection<LocalElementDeclaration> localElementDeclarations = new ArrayList<LocalElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
@@ -134,6 +135,15 @@ public class SchemaInfo {
    */
   public Collection<Registry> getRegistries() {
     return registries;
+  }
+
+  /**
+   * Local element declarations.
+   *
+   * @return Local element declarations.
+   */
+  public Collection<LocalElementDeclaration> getLocalElementDeclarations() {
+    return localElementDeclarations;
   }
 
   /**
@@ -236,6 +246,13 @@ public class SchemaInfo {
 
     for (ImplicitSchemaAttribute schemaAttribute : implicitSchemaAttributes) {
       QName typeQName = schemaAttribute.getTypeQName();
+      if (typeQName != null) {
+        referencedNamespaces.add(typeQName.getNamespaceURI());
+      }
+    }
+
+    for (LocalElementDeclaration localElementDeclaration : localElementDeclarations) {
+      QName typeQName = localElementDeclaration.getElementXmlType().getQname();
       if (typeQName != null) {
         referencedNamespaces.add(typeQName.getNamespaceURI());
       }
