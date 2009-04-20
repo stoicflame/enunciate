@@ -43,11 +43,10 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class ServiceEndpointFactoryBean extends ApplicationObjectSupport implements FactoryBean, BeanNameAware {
+public class ServiceEndpointFactoryBean extends ApplicationObjectSupport implements FactoryBean {
 
   private static final Log LOG = LogFactory.getLog(ServiceEndpointFactoryBean.class);
 
-  private String beanName;
   private boolean initialized = false;
   private final List<Object> interceptors = new ArrayList<Object>();
   private final Class serviceInterface;
@@ -62,10 +61,6 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
     }
 
     this.serviceInterface = serviceInterface;
-  }
-
-  public void setBeanName(String name) {
-    this.beanName = name;
   }
 
   @Override
@@ -95,11 +90,13 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
     if (serviceImplementationBean == null) {
       Map serviceInterfaceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, serviceInterface);
-      if (this.beanName == null) {
-        //remove myself in case the bean factory found it...
-        serviceInterfaceBeans.remove(this.beanName);
+
+      //now remove all beans that were created by a ServiceEndpointFactoryBean...
+      Map endpointFactoryBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ServiceEndpointFactoryBean.class, false, false);
+      for (Object beanName : endpointFactoryBeans.keySet()) {
+        serviceInterfaceBeans.remove(beanName);
       }
-      
+
       if (serviceInterfaceBeans.size() > 1) {
         //panic: can't determine the service bean to use.
         StringBuilder builder = new StringBuilder("There are more than one beans of type ");
