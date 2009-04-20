@@ -26,6 +26,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
@@ -42,10 +43,11 @@ import java.util.Map;
  *
  * @author Ryan Heaton
  */
-public class ServiceEndpointFactoryBean extends ApplicationObjectSupport implements FactoryBean {
+public class ServiceEndpointFactoryBean extends ApplicationObjectSupport implements FactoryBean, BeanNameAware {
 
   private static final Log LOG = LogFactory.getLog(ServiceEndpointFactoryBean.class);
 
+  private String beanName;
   private boolean initialized = false;
   private final List<Object> interceptors = new ArrayList<Object>();
   private final Class serviceInterface;
@@ -60,6 +62,10 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
     }
 
     this.serviceInterface = serviceInterface;
+  }
+
+  public void setBeanName(String name) {
+    this.beanName = name;
   }
 
   @Override
@@ -89,6 +95,11 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
     if (serviceImplementationBean == null) {
       Map serviceInterfaceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, serviceInterface);
+      if (this.beanName == null) {
+        //remove myself in case the bean factory found it...
+        serviceInterfaceBeans.remove(this.beanName);
+      }
+      
       if (serviceInterfaceBeans.size() > 1) {
         //panic: can't determine the service bean to use.
         StringBuilder builder = new StringBuilder("There are more than one beans of type ");
