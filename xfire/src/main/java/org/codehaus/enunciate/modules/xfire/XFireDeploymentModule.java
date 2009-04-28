@@ -63,7 +63,8 @@ import java.util.TreeSet;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>There are no additional configuration elements for the XFire module.</p>
+ * <p>The XFire modules supports one attribute, "xfireBeansImport", which defines the location of the XFire spring beans declaration file. The default value is
+ * "classpath:org/codehaus/xfire/spring/xfire.xml".</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -77,6 +78,8 @@ import java.util.TreeSet;
  * @docFileName module_xfire.html
  */
 public class XFireDeploymentModule extends FreemarkerDeploymentModule {
+
+  private String xfireBeansImport = "classpath:org/codehaus/xfire/spring/xfire.xml";
 
   /**
    * @return "xfire"
@@ -166,6 +169,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
+      model.put("xfireBeansImport", getXfireBeansImport());
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getXfireServletTemplateURL(), model);
@@ -220,7 +224,14 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     return new XFireValidator();
   }
 
-  // Inherited.
+  public String getXfireBeansImport() {
+    return xfireBeansImport;
+  }
+
+  public void setXfireBeansImport(String xfireBeansImport) {
+    this.xfireBeansImport = xfireBeansImport;
+  }
+
   @Override
   public boolean isDisabled() {
     if (super.isDisabled()) {

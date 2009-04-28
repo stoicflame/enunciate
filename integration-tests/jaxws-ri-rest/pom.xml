@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jaxws-ri-rest</artifactId>
-  <version>1.11-SNAPSHOT</version>
+  <version>1.11-RC2</version>
   <name>Enunciate - JAXWS-RI/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the JAXWS-RI + REST combo.</description>
   <packaging>war</packaging>
@@ -83,9 +83,8 @@
               <skip>${skipTests}</skip>
               <arguments>
                 <argument>${project.build.testSourceDirectory}/../cs/TestCSharpClient.cs</argument>
-                <argument>/out:${project.build.directory}/cstests/fulltests.dll</argument>
-                <argument>/target:library</argument>
-                <argument>/r:nunit.framework</argument>
+                <argument>/out:${project.build.directory}/cstests/fulltests.exe</argument>
+                <argument>/target:exe</argument>
                 <argument>/r:System.Web.Services</argument>
                 <argument>/r:${project.build.directory}/cstests/full.dll</argument>
               </arguments>
@@ -100,10 +99,10 @@
             </goals>
             <configuration>
               <!--compile the nunit tests-->
-              <executable>nunit-console</executable>
+              <executable>mono</executable>
               <skip>${skipTests}</skip>
               <arguments>
-                <argument>${project.build.directory}/cstests/fulltests.dll</argument>
+                <argument>${project.build.directory}/cstests/fulltests.exe</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>

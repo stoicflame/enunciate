@@ -22,7 +22,9 @@
   <xsl:variable name="restful" select="boolean(/api-docs/rest/resources/resource)"/>
 
   <!--The characters to translate from a REST name.-->
-  <xsl:variable name="rest_translate_chars">/{}</xsl:variable>
+  <!--The '/' is replaced with a '.', the ':' is replaced with a '-', and the '{' and '}' are removed-->
+  <xsl:variable name="rest_translate_chars">/:{}</xsl:variable>
+  <xsl:variable name="rest_translate_replacements">.-</xsl:variable>
 
   <!--The global side navigation (the navigation that is always there).-->
   <xsl:variable name="global-sidnav">
@@ -61,7 +63,7 @@
       <h1>REST</h1>
       <ul>
         <xsl:for-each select="/api-docs/rest/resources/resource">
-          <li><a href="rest{translate(@name,$rest_translate_chars,'.')}.html"><xsl:value-of select="@name"/></a></li>
+          <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
         </xsl:for-each>
       </ul>
     </xsl:if>
@@ -210,7 +212,7 @@
 
                   <ul>
                     <xsl:for-each select="/api-docs/rest/resources/resource">
-                      <li><a href="rest{translate(@name,$rest_translate_chars,'.')}.html"><xsl:value-of select="@name"/></a></li>
+                      <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
                       <xsl:call-template name="rest-resource"/>
                     </xsl:for-each>
                   </ul>
@@ -654,7 +656,7 @@
 
   <!--The page for a REST resource.-->
   <xsl:template name="rest-resource">
-    <redirect:write file="{$output-dir}/rest{translate(@name,$rest_translate_chars,'.')}.html">
+    <redirect:write file="{$output-dir}/rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html">
       <html>
 
         <head>

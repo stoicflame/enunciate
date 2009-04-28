@@ -9,7 +9,7 @@
 
   <context:annotation-config/>
 
-  <import resource="classpath:org/codehaus/xfire/spring/xfire.xml"/>
+  <import resource="${xfireBeansImport}"/>
 
   <!-- the soap service factory -->
   <bean id="soapServiceFactory" class="org.codehaus.enunciate.modules.xfire.EnunciatedJAXWSServiceFactory"/>

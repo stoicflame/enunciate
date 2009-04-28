@@ -359,6 +359,7 @@
   <xs:complexType name="module-xfire">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:attribute name="xfireBeansImport" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

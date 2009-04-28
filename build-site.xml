@@ -87,7 +87,6 @@
       <exclude name="**/spring-tx*"/>
       <exclude name="**/spring-security-*"/>
       <exclude name="**/jsr250*"/>
-      <exclude name="**/jackson*"/>
     </patternset>
 
     <!--filters for docs-->

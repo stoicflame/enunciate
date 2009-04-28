@@ -64,7 +64,7 @@ public class IntrospectingTypeRegistry extends DefaultTypeMappingRegistry {
       Type type = typeCreator.createType(typeClass);
 
       if (type == null) {
-        throw new IllegalStateException("Unable to find type for " + typeClass.getName() + ".");
+        throw new IllegalStateException("Unable to find type for " + typeClass.getName() + ".  Are you missing the generated XFire client types (e.g. " + typeClass.getName() + "XFireType) on your classpath?");
       }
 
       knownTypes.add(type);

@@ -43,6 +43,7 @@ public class IntrospectingTypeCreator implements TypeCreator {
   private static final Log LOG = LogFactory.getLog(IntrospectingTypeCreator.class);
   private static final Map INTROSPECTED_TYPES = Collections.synchronizedMap(new WeakHashMap());
 
+  private TypeMapping typeMapping;
   private final TypeCreator defaultDelegate;
 
   /**
@@ -123,7 +124,11 @@ public class IntrospectingTypeCreator implements TypeCreator {
       type = introspectForType(clazz);
     }
 
-    return type != null ? type : this.defaultDelegate.createType(clazz);
+    if (type == null && this.typeMapping != null) { //if the type mapping hasn't been set yet, we can't use the default delegate.
+      type = this.defaultDelegate.createType(clazz);
+    }
+
+    return type;
   }
 
   /**
@@ -131,6 +136,7 @@ public class IntrospectingTypeCreator implements TypeCreator {
    */
   public void setTypeMapping(TypeMapping typeMapping) {
     this.defaultDelegate.setTypeMapping(typeMapping);
+    this.typeMapping = typeMapping;
   }
 
   /**

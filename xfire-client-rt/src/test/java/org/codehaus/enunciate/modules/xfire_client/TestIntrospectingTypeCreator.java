@@ -33,8 +33,8 @@ public class TestIntrospectingTypeCreator extends TestCase {
   public void testCreateType() throws Exception {
     DefaultTypeMappingRegistry registry = new DefaultTypeMappingRegistry(true);
     TypeCreator typeCreator = registry.getTypeCreator();
-    typeCreator.setTypeMapping(registry.getDefaultTypeMapping());
     IntrospectingTypeCreator introspectingCreator = new IntrospectingTypeCreator(typeCreator);
+    introspectingCreator.setTypeMapping(registry.getDefaultTypeMapping());
     assertTrue(introspectingCreator.createType(GeneratedWrapperBeanExample.class) instanceof GeneratedWrapperBeanType);
     assertTrue(introspectingCreator.createType(DummyMethod.class) instanceof DummyMethodXFireType);
     assertNotNull(introspectingCreator.createType(String.class));

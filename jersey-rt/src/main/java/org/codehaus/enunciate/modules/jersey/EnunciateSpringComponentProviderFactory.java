@@ -35,7 +35,11 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
 
   public EnunciateSpringComponentProviderFactory(ResourceConfig rc, WebApplicationContext applicationContext) {
     super(rc, (ConfigurableApplicationContext) applicationContext);
-    applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+    //I'd rather be doing this:
+    //applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+    //But I have to do this because of a bug in spring using the @Qualifier annotation.
+    Object interceptors = applicationContext.getBean("service-bean-interceptors");
+    this.interceptors = (List<Object>) interceptors;
     this.springApplicationContext = applicationContext;
   }
 
@@ -106,7 +110,7 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
    * @param interceptors The interceptors.
    */
   @Autowired ( required = false )
-  public void setInterceptors(@Qualifier ("enunciate-service-bean-interceptors") List<Object> interceptors) {
+  public void setEnunciateInterceptors(@Qualifier ("enunciate-service-bean-interceptors") List<Object> interceptors) {
     this.interceptors = interceptors;
   }
 
