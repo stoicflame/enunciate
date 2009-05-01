@@ -26,9 +26,7 @@ import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Chains a set of validators.
@@ -37,7 +35,7 @@ import java.util.Map;
  */
 public class ValidatorChain implements Validator {
 
-  private final ArrayList<Validator> validators = new ArrayList<Validator>();
+  private final Map<String, Validator> validators = new LinkedHashMap<String, Validator>();
 
   public ValidatorChain() {
   }
@@ -46,26 +44,47 @@ public class ValidatorChain implements Validator {
    * The list of validators in the chain.
    *
    * @return The list of validators in the chain.
+   * @deprecated Use the getValidatorsByLabel() method.
    */
   public List<Validator> getValidators() {
-    return validators;
+    return Collections.list(Collections.enumeration(validators.values()));
+  }
+
+  /**
+   * Get a map of labels-to-validators.
+   *
+   * @return The map of validators-to-labels.
+   */
+  public Map<String, Validator> getValidatorsByLabel() {
+    return Collections.unmodifiableMap(validators);
   }
 
   /**
    * Adds a validator to the chain.
    *
    * @param validator The validator to add.
+   * @deprecated Use the one that takes a label for the validator.
    */
   public void addValidator(Validator validator) {
-    this.validators.add(validator);
+    this.validators.put(null, validator);
+  }
+
+  /**
+   * Adds a validator.
+   *
+   * @param label The label of the validator.
+   * @param validator The validator.
+   */
+  public void addValidator(String label, Validator validator) {
+    this.validators.put(label, validator);
   }
 
   // Inherited.
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateEndpointInterface(ei));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateEndpointInterface(ei));
     }
 
     return result;
@@ -75,8 +94,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateRESTAPI(restAPI));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRESTAPI(restAPI));
     }
 
     return result;
@@ -86,8 +105,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateRootResources(rootResources));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRootResources(rootResources));
     }
 
     return result;
@@ -96,8 +115,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateContentTypeHandlers(contentTypeHandlers));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateContentTypeHandlers(contentTypeHandlers));
     }
 
     return result;
@@ -107,8 +126,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateRootElement(RootElementDeclaration rootElementDeclaration) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateRootElement(rootElementDeclaration));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRootElement(rootElementDeclaration));
     }
 
     return result;
@@ -118,8 +137,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateComplexType(complexType));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateComplexType(complexType));
     }
 
     return result;
@@ -129,8 +148,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateSimpleType(simpleType));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateSimpleType(simpleType));
     }
 
     return result;
@@ -140,8 +159,8 @@ public class ValidatorChain implements Validator {
   public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
     ValidationResult result = new ValidationResult();
 
-    for (Validator validator : validators) {
-      result.aggregate(validator.validateEnumType(enumType));
+    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateEnumType(enumType));
     }
 
     return result;

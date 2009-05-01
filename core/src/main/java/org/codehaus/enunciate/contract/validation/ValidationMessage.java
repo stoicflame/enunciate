@@ -25,6 +25,7 @@ public class ValidationMessage {
 
   private SourcePosition position;
   private String text;
+  private String label;
 
   public ValidationMessage(SourcePosition position, String text) {
     this.position = position;
@@ -49,9 +50,27 @@ public class ValidationMessage {
     return text;
   }
 
+  /**
+   * The label applied to this validation message.
+   *
+   * @return The label applied to this validation message.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label applied to this validation message.
+   *
+   * @param label The label applied to this validation message.
+   */
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
   @Override
   public String toString() {
-    return getPosition() + ": " + getText();
+    return (getLabel() != null ? getLabel() : "") + getPosition() + ": " + getText();
   }
 
 

@@ -26,8 +26,7 @@ import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
 
 import javax.xml.bind.annotation.XmlElement;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import freemarker.template.TemplateModelException;
 
@@ -50,11 +49,28 @@ public class JAXWSClientValidator extends BaseValidator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = new ValidationResult();
 
+    String[] propOrder = complexType.getPropertyOrder();
+    List<String> assertedProperties = propOrder != null ? new ArrayList<String>(Arrays.asList(propOrder)) : Collections.<String>emptyList();
     for (Element element : complexType.getElements()) {
       if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
-        result.addError(element, "Because of a bug in JAXB, an Map property can't have and @XmlElement annotation, which is required for the JAXWS client. " +
-          "So you're going to have to use @XmlJavaTypeAdapter to supply your own adapter for the Map.");
+        result.addError(element, "Because of a bug in JAXB, an Map property can't have an @XmlElement annotation, which is required for the JAXWS client. " +
+          "So you're going to have to use @XmlJavaTypeAdapter to supply your own adapter for the Map. Or disable the jaxws-client module.");
       }
+
+      assertedProperties.remove(element.getSimpleName());
+    }
+    if (complexType.getAnyElement() != null) {
+      assertedProperties.remove(complexType.getAnyElement().getSimpleName());
+    }
+    if (complexType.getValue() != null) {
+      //it seems broken to state an @xmlValue property in the property order, but wsgen does it, so we'll account for the case here.
+      assertedProperties.remove(complexType.getValue().getSimpleName());
+    }
+
+    if (!assertedProperties.isEmpty()) {
+      result.addError(complexType, "Properties are declared in the @XmlType.propOrder element, but are not in the element accessor list: [" +
+        assertedProperties + "]. Perhaps you're missing a setter method for these properties? If so, this is an Enunciate limitation and not a JAXB " +
+        "limitation. Either add some no-op setter methods for these properties, or disable the jaxws-client module.");
     }
 
     if (!serverSideTypesToUse.isEmpty()) {

@@ -32,8 +32,27 @@ import java.util.List;
  */
 public class ValidationResult {
 
+  private String label;
   private final List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
   private final List<ValidationMessage> warnings = new ArrayList<ValidationMessage>();
+
+  /**
+   * The label that has been applied.
+   *
+   * @return The label that has been applied.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * Apply a specific label.
+   *
+   * @param label The label to apply.
+   */
+  public void setLabel(String label) {
+    this.label = label;
+  }
 
   /**
    * Whether there are any errors in the result.
@@ -137,6 +156,24 @@ public class ValidationResult {
   public void aggregate(ValidationResult result) {
     this.errors.addAll(result.errors);
     this.warnings.addAll(result.warnings);
+  }
+
+  /**
+   * Aggregate the specified result to these results.
+   *
+   * @param label The label to be applied to the aggregated messages.
+   * @param result The result to aggregate.
+   */
+  public void aggregate(String label, ValidationResult result) {
+    for (ValidationMessage error : result.errors) {
+      error.setLabel(label);
+      this.errors.add(error);
+    }
+
+    for (ValidationMessage warning : result.warnings) {
+      warning.setLabel(label);
+      this.warnings.add(warning);
+    }
   }
 
   private String toString(Declaration declaration) {

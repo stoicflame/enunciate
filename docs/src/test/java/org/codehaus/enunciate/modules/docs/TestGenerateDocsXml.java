@@ -97,6 +97,18 @@ public class TestGenerateDocsXml extends TestCase {
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
     builder.setEntityResolver(new EntityResolver() {
       public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        if (String.valueOf(systemId).endsWith("xhtml1-transitional.dtd")) {
+          return new InputSource(TestGenerateDocsXml.this.getClass().getResourceAsStream("xhtml1-transitional.dtd"));
+        }
+        else if (String.valueOf(systemId).endsWith("xhtml-special.ent")) {
+          return new InputSource(TestGenerateDocsXml.this.getClass().getResourceAsStream("xhtml-special.ent"));
+        }
+        else if (String.valueOf(systemId).endsWith("xhtml-lat1.ent")) {
+          return new InputSource(TestGenerateDocsXml.this.getClass().getResourceAsStream("xhtml-lat1.ent"));
+        }
+        else if (String.valueOf(systemId).endsWith("xhtml-symbol.ent")) {
+          return new InputSource(TestGenerateDocsXml.this.getClass().getResourceAsStream("xhtml-symbol.ent"));
+        }
         return null;
       }
     });

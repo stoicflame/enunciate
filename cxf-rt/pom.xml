@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.11-RC2</version>
+    <version>1.11</version>
   </parent>
 
   <artifactId>enunciate-cxf-rt</artifactId>

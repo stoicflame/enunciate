@@ -345,18 +345,18 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (coreValidator instanceof ConfigurableRules) {
       ((ConfigurableRules)coreValidator).disableRules(config.getDisabledRules());
     }
-    validator.addValidator(coreValidator);
+    validator.addValidator("core", coreValidator);
     debug("Default validator added to the chain.");
     for (DeploymentModule module : config.getEnabledModules()) {
       Validator moduleValidator = module.getValidator();
       if (moduleValidator != null) {
-        validator.addValidator(moduleValidator);
+        validator.addValidator(module.getName(), moduleValidator);
         debug("Validator for module %s added to the chain.", module.getName());
       }
     }
 
     if (!config.isAllowEmptyNamespace()) {
-      validator.addValidator(new EmptyNamespaceValidator());
+      validator.addValidator("emptyns", new EmptyNamespaceValidator());
     }
 
     ValidationResult validationResult = validate(model, validator);
@@ -364,11 +364,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (validationResult.hasWarnings()) {
       warn("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
+        StringBuilder text = new StringBuilder();
+        if (warning.getLabel() != null) {
+          text.append('[').append(warning.getLabel()).append("] ");
+        }
+        text.append(warning.getText());
+
         if (warning.getPosition() != null) {
-          messager.printWarning(warning.getPosition(), warning.getText());
+          messager.printWarning(warning.getPosition(), text.toString());
         }
         else {
-          messager.printWarning(warning.getText());
+          messager.printWarning(text.toString());
         }
       }
     }
@@ -376,11 +382,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (validationResult.hasErrors()) {
       warn("Validation result has errors.");
       for (ValidationMessage error : validationResult.getErrors()) {
+        StringBuilder text = new StringBuilder();
+        if (error.getLabel() != null) {
+          text.append('[').append(error.getLabel()).append("] ");
+        }
+        text.append(error.getText());
+
         if (error.getPosition() != null) {
-          messager.printError(error.getPosition(), error.getText());
+          messager.printError(error.getPosition(), text.toString());
         }
         else {
-          messager.printError(error.getText());
+          messager.printError(text.toString());
         }
       }
 
