@@ -26,6 +26,7 @@ import java.util.*;
  */
 public class TestCSharpSerialization extends TestCase {
 
+  private boolean skipCSharpTests;
   private File tempDir;
   private File exe;
 
@@ -33,23 +34,33 @@ public class TestCSharpSerialization extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    String exe = System.getProperty("processxml.exe");
-    if (exe == null) {
-      throw new IllegalStateException("The path to the processxml exectuable must be supplied via property 'processxml.exe'.");
-    }
-    this.exe = new File(exe);
+    String skipCSharpTests = System.getProperty("skip.csharp.tests");
+    this.skipCSharpTests = "true".equalsIgnoreCase(skipCSharpTests);
 
-    String tempDir = System.getProperty("xml.tempdir");
-    if (tempDir == null) {
-      throw new IllegalStateException("The temp directory to put the XML files must be supplied via the 'xml.tempdir' property.");
+    if (!this.skipCSharpTests) {
+      String exe = System.getProperty("processxml.exe");
+      if (exe == null) {
+        throw new IllegalStateException("The path to the processxml exectuable must be supplied via property 'processxml.exe'.");
+      }
+      this.exe = new File(exe);
+
+      String tempDir = System.getProperty("xml.tempdir");
+      if (tempDir == null) {
+        throw new IllegalStateException("The temp directory to put the XML files must be supplied via the 'xml.tempdir' property.");
+      }
+      this.tempDir = new File(tempDir);
     }
-    this.tempDir = new File(tempDir);
   }
 
   /**
    * tests serialization.
    */
   public void testSerializeDeserialize() throws Exception {
+    if (this.skipCSharpTests) {
+      System.out.println("CSharp tests have been disabled.");
+      return;
+    }
+
     Circle circle = new Circle();
     circle.setColor(Color.BLUE);
     circle.setId("someid");
@@ -104,6 +115,11 @@ public class TestCSharpSerialization extends TestCase {
    * tests a bus
    */
   public void testBus() throws Exception {
+    if (this.skipCSharpTests) {
+      System.out.println("CSharp tests have been disabled.");
+      return;
+    }
+
     Bus bus = new Bus();
     bus.setId("some bus");
     Label cityBus = new Label();
@@ -190,6 +206,11 @@ public class TestCSharpSerialization extends TestCase {
    * tests house.  This one has things like nillable and required properties.
    */
   public void testHouse() throws Exception {
+    if (this.skipCSharpTests) {
+      System.out.println("CSharp tests have been disabled.");
+      return;
+    }
+
     House house = new House();
     Rectangle base = new Rectangle();
     base.setColor(Color.BLUE);
@@ -280,6 +301,11 @@ public class TestCSharpSerialization extends TestCase {
    * todo: worry about xmlids
    */
   public void x_testCat() throws Exception {
+    if (this.skipCSharpTests) {
+      System.out.println("CSharp tests have been disabled.");
+      return;
+    }
+
     Cat cat = new Cat();
     Circle face = new Circle();
     face.setRadius(20);
@@ -337,6 +363,11 @@ public class TestCSharpSerialization extends TestCase {
    * tests the canvas.  This one as XmlElementRefs, XmlElements, and an attachment...
    */
   public void testCanvas() throws Exception {
+    if (this.skipCSharpTests) {
+      System.out.println("CSharp tests have been disabled.");
+      return;
+    }
+
     Canvas canvas = new Canvas();
     Bus bus = new Bus();
     bus.setId("busId");

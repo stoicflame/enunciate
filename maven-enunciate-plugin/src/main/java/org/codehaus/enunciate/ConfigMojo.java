@@ -54,6 +54,7 @@ import java.util.*;
  */
 public class ConfigMojo extends AbstractMojo {
 
+  public static final String ENUNCIATE_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#enunciate";
   public static final String ENUNCIATE_STEPPER_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#stepper";
 
   /**
@@ -378,6 +379,7 @@ public class ConfigMojo extends AbstractMojo {
       enunciate.loadMavenConfiguration();
       Enunciate.Stepper stepper = enunciate.getStepper();
       getPluginContext().put(ENUNCIATE_STEPPER_PROPERTY, stepper);
+      getPluginContext().put(ENUNCIATE_PROPERTY, enunciate);
     }
     catch (Exception e) {
       throw new MojoExecutionException("Error initializing Enunciate mechanism.", e);

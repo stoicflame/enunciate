@@ -97,6 +97,16 @@
               <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
             </configuration>
           </execution>
+          <execution>
+            <id>validate-csharp-enabled</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>failIfModuleDisabled</goal>
+            </goals>
+            <configuration>
+              <moduleName>csharp</moduleName>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <!-- skip unit test run, tests to be executed during integration-test -->

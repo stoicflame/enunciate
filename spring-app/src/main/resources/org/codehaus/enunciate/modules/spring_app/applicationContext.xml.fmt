@@ -14,21 +14,21 @@
   <import resource="security-context.xml"/>
   [/#if]
   [#if springImports?exists]
-    [#list springImports as springImport]
+  [#list springImports as springImport]
   <import resource="${springImport}"/>
-    [/#list]
+  [/#list]
   [/#if]
   [#if handlerInterceptors?exists]
 
   <!-- global handler mapping interceptors -->
   <!-- specifically named 'interceptors' so they can be autowired by name to basic spring handler mappings -->
-  <util:list id="interceptors">
+  <util:list id="interceptors" xmlns:util="http://www.springframework.org/schema/util">
     [#list handlerInterceptors as interceptor]
-      [#if interceptor.interceptorClass?exists]
+    [#if interceptor.interceptorClass?exists]
     <bean class="${interceptor.interceptorClass}"/>
-      [#else]
+    [#else]
     <ref bean="${interceptor.beanName}"/>
-      [/#if]
+    [/#if]
     [/#list]
   </util:list>
   [/#if]
@@ -37,18 +37,18 @@
     <qualifier value="enunciate-service-bean-interceptors"/>
     <constructor-arg>
       <list>
-    [#if globalServiceInterceptors?exists]
-      [#list globalServiceInterceptors as interceptor]
+        [#if globalServiceInterceptors?exists]
+        [#list globalServiceInterceptors as interceptor]
         [#if interceptor.interceptorClass?exists]
         <bean class="${interceptor.interceptorClass}"/>
         [#else]
         <ref bean="${interceptor.beanName}"/>
         [/#if]
-      [/#list]
-    [/#if]
-    [#if securityEnabled]
+        [/#list]
+        [/#if]
+        [#if securityEnabled]
         <ref bean="enunciate-security-interceptor"/>
-    [/#if]
+        [/#if]
       </list>
     </constructor-arg>
   </bean>
@@ -56,9 +56,9 @@
 
   <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
     [#if endpoint.endpointQualifiers?exists]
-      [#list endpoint.endpointQualifiers as qualifier]
+    [#list endpoint.endpointQualifiers as qualifier]
     <qualifier value="${qualifier}"/>
-      [/#list]
+    [/#list]
     [/#if]
     <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
     <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>

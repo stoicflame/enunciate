@@ -14,6 +14,30 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require.gmcs.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gmcs.executable</property>
+                  <message>In order to build the C# module, you must have Mono installed.
+First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
+Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
+If you just want to skip the C# tests, set the value of the property 'gmcs.executable' to be 'true'. (And don't ask any questions about why that works. It just does.)</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <!--
         we need to generate some C# client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
@@ -65,9 +89,9 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <!--compile the nunit tests-->
-              <executable>gmcs</executable>
-              <skip>${skipTests}</skip>
+              <!--compile the C# tests using the csc executable. -->
+              <executable>${gmcs.executable}</executable>
+              <skip>${gmcs.executable}</skip>
               <arguments>
                 <argument>/out:${project.build.directory}/enunciate/compile/csharp/processxml.exe</argument>
                 <argument>/r:System.Web.Services</argument>
@@ -84,6 +108,10 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemProperties>
+            <property>
+              <name>skip.csharp.tests</name>
+              <value>${gmcs.executable}</value>
+            </property>
             <property>
               <name>processxml.exe</name>
               <value>${project.build.directory}/enunciate/compile/csharp/processxml.exe</value>
@@ -161,5 +189,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
 
 </project>

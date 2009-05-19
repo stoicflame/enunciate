@@ -14,6 +14,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -38,7 +39,14 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
     //I'd rather be doing this:
     //applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
     //But I have to do this because of a bug in spring using the @Qualifier annotation.
-    Object interceptors = applicationContext.getBean("service-bean-interceptors");
+    Object interceptors = null;
+    try {
+      //try to load the opitional service bean interceptors.
+      interceptors = applicationContext.getBean("service-bean-interceptors");
+    }
+    catch (BeansException e) {
+      //fall through...
+    }
     this.interceptors = (List<Object>) interceptors;
     this.springApplicationContext = applicationContext;
   }

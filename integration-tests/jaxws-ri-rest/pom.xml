@@ -49,8 +49,33 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require.gmcs.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gmcs.executable</property>
+                  <message>In order to run the jaxws-ri integration tests, you must have Mono installed.
+First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
+Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
+If you just want to run the Java tests without running the C# tests, set the value of the property 'gmcs.executable' to be 'true'.</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
+        <version>${project.version}</version>
         <executions>
           <execution>
             <goals>
@@ -79,8 +104,8 @@
             </goals>
             <configuration>
               <!--compile the nunit tests-->
-              <executable>gmcs</executable>
-              <skip>${skipTests}</skip>
+              <executable>${gmcs.executable}</executable>
+              <skip>${gmcs.executable}</skip>
               <arguments>
                 <argument>${project.build.testSourceDirectory}/../cs/TestCSharpClient.cs</argument>
                 <argument>/out:${project.build.directory}/cstests/fulltests.exe</argument>
@@ -100,7 +125,7 @@
             <configuration>
               <!--compile the nunit tests-->
               <executable>mono</executable>
-              <skip>${skipTests}</skip>
+              <skip>${gmcs.executable}</skip>
               <arguments>
                 <argument>${project.build.directory}/cstests/fulltests.exe</argument>
               </arguments>

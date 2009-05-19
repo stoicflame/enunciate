@@ -107,6 +107,23 @@
               </rules>
             </configuration>
           </execution>
+          <execution>
+            <id>require.mono.for.deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gmcs.executable</property>
+                  <message>In order to deploy Enunciate, you must have Mono installed.
+First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
+Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -824,7 +841,7 @@
       <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
-        <version>0.9.9</version>
+        <version>1.0.0</version>
       </dependency>
 
       <dependency>
