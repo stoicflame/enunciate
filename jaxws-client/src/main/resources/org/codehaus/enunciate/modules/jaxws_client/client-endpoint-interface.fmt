@@ -27,7 +27,7 @@ public interface ${endpointInterface.simpleName} {
     action = "${webMethod.action}"
   )
   @javax.jws.WebResult (
-    name = "${webMethod.webResult.name}",
+    name = "${webMethod.webResult.elementName}",
     targetNamespace = "${webMethod.webResult.targetNamespace}",
     header = ${webMethod.webResult.header?string},
     partName = "${webMethod.webResult.partName}"

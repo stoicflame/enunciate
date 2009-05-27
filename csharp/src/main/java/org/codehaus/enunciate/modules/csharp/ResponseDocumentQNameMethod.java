@@ -66,7 +66,7 @@ public class ResponseDocumentQNameMethod implements TemplateMethodModelEx {
     else if (webMethod.getSoapParameterStyle() == SOAPBinding.ParameterStyle.BARE) {
       WebResult wr = webMethod.getWebResult();
       if (!wr.isHeader()) {
-        return new QName(webMethod.getDeclaringEndpointInterface().getTargetNamespace(), wr.getElementName());
+        return new QName(wr.getTargetNamespace(), wr.getElementName());
       }
     }
 

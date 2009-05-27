@@ -40,6 +40,14 @@
     </dependency>
 
     <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm</artifactId>
+
+      <!--some bytecode manipulation was added, but it's not being used yet.-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
 
@@ -66,6 +74,14 @@
         <dependency>
           <groupId>stax</groupId>
           <artifactId>stax-api</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+
+          <!--we just need jaxb-impl for tests in this module.-->
+          <scope>test</scope>
         </dependency>
       </dependencies>
     </profile>

@@ -53,9 +53,10 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
       this.${childElement.elementName} = new ${componentTypeFor(childElement.type)}[1];
     }
     else {
-      Object[] oldArray = this.${childElement.elementName};
-      this.${childElement.elementName} = new ${componentTypeFor(childElement.type)}[this.${childElement.elementName}.length + 1];
-      System.arraycopy(oldArray, 0, this.${childElement.elementName}, 0, oldArray.length);
+      Object oldArray = this.${childElement.elementName};
+      int oldArrayLength = this.${childElement.elementName}.length;
+      this.${childElement.elementName} = new ${componentTypeFor(childElement.type)}[oldArrayLength + 1];
+      System.arraycopy(oldArray, 0, this.${childElement.elementName}, 0, oldArrayLength);
     }
 
     this.${childElement.elementName}[this.${childElement.elementName}.length - 1] = item;

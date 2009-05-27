@@ -62,9 +62,10 @@ public class ${simpleBeanName} implements org.codehaus.enunciate.modules.xfire_c
       this.${varname} = new ${componentTypeFor(childElement.type)}[1];
     }
     else {
-      Object[] oldArray = this.${varname};
-      this.${varname} = new ${componentTypeFor(childElement.type)}[this.${varname}.length + 1];
-      System.arraycopy(oldArray, 0, this.${varname}, 0, oldArray.length);
+      Object oldArray = this.${varname};
+      int oldArrayLength = this.${varname}.length;
+      this.${varname} = new ${componentTypeFor(childElement.type)}[oldArrayLength + 1];
+      System.arraycopy(oldArray, 0, this.${varname}, 0, oldArrayLength);
     }
 
     this.${varname}[this.${varname}.length - 1] = item;

@@ -18,6 +18,9 @@ package org.codehaus.enunciate.modules.jaxws_ri;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -34,9 +37,7 @@ import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * <h1>JAX-WS RI Module</h1>
@@ -96,10 +97,17 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * @return The URL to "cxf-servlet.xml.fmt"
+   * @return The URL to "jaxws-servlet.xml.fmt"
    */
   protected URL getJAXWSServletTemplateURL() {
     return JAXWSRIDeploymentModule.class.getResource("jaxws-servlet.xml.fmt");
+  }
+
+  /**
+   * @return The URL to "jaxws-ri-endpoint.fmt"
+   */
+  protected URL getInstrumentedEndpointTemplateURL() {
+    return JAXWSRIDeploymentModule.class.getResource("jaxws-ri-endpoint.fmt");
   }
 
   @Override
@@ -127,7 +135,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
-      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+//      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
     }
 
   }
@@ -157,12 +165,28 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
+      Map<String, String> conversions = Collections.<String, String>emptyMap();
+      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+      classnameFor.setJdk15(true);
+      model.put("packageFor", new ClientPackageForMethod(conversions));
+      model.put("classnameFor", classnameFor);
+      model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getJAXWSServletTemplateURL(), model);
+
+      URL eiTemplate = getInstrumentedEndpointTemplateURL();
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          model.put("endpointInterface", ei);
+          processTemplate(eiTemplate, model);
+        }
+      }
+
+      getEnunciate().addAdditionalSourceRoot(getGenerateDir());
     }
     else {
-      info("Skipping generation of CXF config as everything appears up-to-date....");
+      info("Skipping generation of JAX-WS RI support as everything appears up-to-date....");
     }
 
   }
@@ -183,9 +207,6 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("jaxws");
     servletComponent.setClassname(WSSpringServlet.class.getName());
-//    WebAppComponent filterComponent = new WebAppComponent();
-//    filterComponent.setName("cxf-filter");
-//    filterComponent.setClassname(WSServlet.class.getName());
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
@@ -193,9 +214,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     servletComponent.setUrlMappings(urlMappings);
-//    filterComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
-//    webappFragment.setFilters(Arrays.asList(filterComponent));
     enunciate.addWebAppFragment(webappFragment);
   }
 

@@ -304,7 +304,7 @@
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:sequence>
-          <xs:element name="package-conversions">
+          <xs:element name="package-conversions" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:sequence>
                 <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
