@@ -150,11 +150,13 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

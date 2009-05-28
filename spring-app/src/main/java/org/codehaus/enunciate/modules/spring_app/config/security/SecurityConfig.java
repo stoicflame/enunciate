@@ -85,7 +85,7 @@ import java.util.*;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app ...&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app enableSecurity="true" ...&gt;
  * 
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *

@@ -50,7 +50,7 @@ namespace Jaxws.Ri.Rest {
       }
 
       PersonService personService = new PersonService();
-      personService.Url = "http://localhost:8088/full/soap-services/PersonServiceService";
+      personService.Url = "http://localhost:8080/full/soap-services/PersonServiceService";
       List<string> pids = new List<string>();
       pids.Add("id1");
       pids.Add("id2");
@@ -98,7 +98,7 @@ namespace Jaxws.Ri.Rest {
       Assert.AreEqual("this is a bunch of bytes that I would like to make sure are serialized correctly so that I can prove out that attachments are working properly", encoding.GetString(returnedPix));
 
       RelationshipService relationshipService = new RelationshipService();
-      relationshipService.Url = "http://localhost:8088/full/soap-services/RelationshipServiceService";
+      relationshipService.Url = "http://localhost:8080/full/soap-services/RelationshipServiceService";
       Relationship[] list = relationshipService.GetRelationships("someid");
       for (int i = 0; i < list.Length; i++) {
         Relationship relationship = list[i];

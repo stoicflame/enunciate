@@ -15,22 +15,26 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-rest-rt</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <!-- the REST module depends on the spring app in order to reference the endpoint beans. -->
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-spring-app</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

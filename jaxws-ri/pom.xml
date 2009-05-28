@@ -15,21 +15,26 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-jaxws-ri-rt</artifactId>
+      <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <!--the JAX-WS module depends on the spring app-->
-      <groupId>org.codehaus.enunciate</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-spring-app</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

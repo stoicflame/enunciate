@@ -326,7 +326,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isAMFTransient(typeDefinition)) {
-            as3Aliases.put(amfClassnameForMethod.convert(typeDefinition), typeDefinition.getSimpleName());
+            as3Aliases.put(amfClassnameForMethod.convert(typeDefinition), typeDefinition.getClientSimpleName());
           }
         }
       }

@@ -16,6 +16,7 @@
     <csharp disabled="true"/>
     <jaxws-client disabled="true"/>
     <xfire disabled="false"/>
+    <jaxws-ri disabled="true"/>
     <xfire-client uuid="full.example" disable15Client="false">
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>

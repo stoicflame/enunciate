@@ -172,54 +172,63 @@ Then, define a profile in your settings.xml file that defines the path to your '
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <!--depending modules: core (optional)-->
         <groupId>ant</groupId>
         <artifactId>ant</artifactId>
         <version>1.6.2</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt (optional)-->
         <groupId>asm</groupId>
         <artifactId>asm</artifactId>
         <version>3.1</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: amf-->
         <groupId>backport-util-concurrent</groupId>
         <artifactId>backport-util-concurrent</artifactId>
         <version>3.1</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: jersey-rt-->
         <groupId>cglib</groupId>
         <artifactId>cglib-nodep</artifactId>
         <version>2.1_3</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: amf-->
         <groupId>com.adobe.blazeds</groupId>
         <artifactId>blazeds-common</artifactId>
         <version>3.0.0.544</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: amf-->
         <groupId>com.adobe.blazeds</groupId>
         <artifactId>blazeds-core</artifactId>
         <version>3.0.0.544</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: amf-->
         <groupId>com.adobe.blazeds</groupId>
         <artifactId>blazeds-remoting</artifactId>
         <version>3.0.0.544</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: gwt-rt-->
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-servlet</artifactId>
         <version>1.4.60</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-->
         <groupId>com.sun</groupId>
         <artifactId>tools</artifactId>
         <version>1.5.0</version>
@@ -229,6 +238,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: jaxws-ri-rt-->
         <groupId>org.jvnet.jax-ws-commons.spring</groupId>
         <artifactId>jaxws-spring</artifactId>
         <version>1.8</version>
@@ -301,6 +311,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: jaxws-ri-rt-->
         <groupId>org.jvnet.staxex</groupId>
         <artifactId>stax-ex</artifactId>
         <version>1.2</version>
@@ -315,18 +326,14 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>${jersey.version}</version>
-      </dependency>
-
-      <dependency>
+        <!--depending modules: jersey-rt-->
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>${jersey.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: jersey-rt-->
         <groupId>com.sun.jersey.contribs</groupId>
         <artifactId>jersey-spring</artifactId>
         <version>${jersey.version}</version>
@@ -355,6 +362,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
         <version>2.1.8</version>
@@ -367,36 +375,42 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: jaxws-ri-rt-->
         <groupId>com.sun.xml.stream.buffer</groupId>
         <artifactId>streambuffer</artifactId>
         <version>0.8</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xml (test-only)-->
         <groupId>com.sun.xsom</groupId>
         <artifactId>xsom</artifactId>
         <version>20070407</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: rest-rt-->
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
         <version>1.3</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-->
         <groupId>commons-beanutils</groupId>
         <artifactId>commons-beanutils</artifactId>
         <version>1.7.0</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xfire-client-rt-->
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>1.3</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-->
         <groupId>commons-digester</groupId>
         <artifactId>commons-digester</artifactId>
         <version>1.7</version>
@@ -406,6 +420,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
             <artifactId>commons-collections</artifactId>
           </exclusion>
           <exclusion>
+            <!--xml-apis ships with the jdk now-->
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
           </exclusion>
@@ -413,54 +428,42 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: rest-rt-->
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>1.2.1</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xfire-client-rt-->
         <groupId>commons-httpclient</groupId>
         <artifactId>commons-httpclient</artifactId>
         <version>3.1</version>
       </dependency>
 
       <dependency>
-        <groupId>commons-jxpath</groupId>
-        <artifactId>commons-jxpath</artifactId>
-        <version>1.2</version>
-        <exclusions>
-          <exclusion>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
+        <!--depending modules: core-->
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
         <version>1.0.4</version>
       </dependency>
 
       <dependency>
-        <groupId>httpunit</groupId>
-        <artifactId>httpunit</artifactId>
-        <version>1.6.2</version>
-      </dependency>
-
-      <dependency>
+        <!--depending modules: core-rt-->
         <groupId>javax.activation</groupId>
         <artifactId>activation</artifactId>
         <version>1.1</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>javax.annotation</groupId>
         <artifactId>jsr250-api</artifactId>
         <version>1.0</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: jersey-rt-->
         <groupId>javax.mail</groupId>
         <artifactId>mail</artifactId>
         <version>1.4</version>
@@ -474,18 +477,21 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>javax.ws.rs</groupId>
         <artifactId>jsr311-api</artifactId>
         <version>1.0</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.3</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
         <version>2.1</version>
@@ -502,6 +508,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>javax.xml.ws</groupId>
         <artifactId>jaxws-api</artifactId>
         <version>2.1-1</version>
@@ -513,19 +520,19 @@ Then, define a profile in your settings.xml file that defines the path to your '
           </exclusion>
 
           <exclusion>
-            <!--we're going to explicitly depend on saaj elsewhere.-->
+            <!--We'll depend on SAAJ as needed (this really should be optional).-->
             <groupId>javax.xml.soap</groupId>
             <artifactId>saaj-api</artifactId>
           </exclusion>
 
           <exclusion>
-            <!--we're going to explicitly depend on jsr-250 annotations elsewhere.-->
+            <!--We'll depend on standard annotations as needed (should be optional).-->
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>
           </exclusion>
 
           <exclusion>
-            <!--we're going to explicitly depend on jsr-181 annotations elsewhere.-->
+            <!--Excluding here because this artifact doesn't exist in the central repo-->
             <groupId>javax.jws</groupId>
             <artifactId>jsr181</artifactId>
           </exclusion>
@@ -533,18 +540,21 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: xfire-rt, amf, etc. -->
         <groupId>jdom</groupId>
         <artifactId>jdom</artifactId>
         <version>1.0</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xml (test-only)-->
         <groupId>joda-time</groupId>
         <artifactId>joda-time</artifactId>
         <version>1.4</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: amf-->
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.15</version>
@@ -570,12 +580,14 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: core-->
         <groupId>net.sf.apt-jelly</groupId>
         <artifactId>apt-jelly-freemarker</artifactId>
         <version>2.6</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: cxf-rt-->
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-rt-core</artifactId>
         <version>${cxf.version}</version>
@@ -619,6 +631,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: cxf-rt-->
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-rt-frontend-jaxws</artifactId>
         <version>${cxf.version}</version>
@@ -662,195 +675,21 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: cxf-rt-->
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-rt-transports-http</artifactId>
         <version>${cxf.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-amf</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-amf-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-core-annotations</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-core-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-core</artifactId>
-        <version>${project.version}</version>
-
-        <classifier>tests</classifier>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-cxf-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-cxf</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-docs</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-gwt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-gwt-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jaxws</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jaxws-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-csharp</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jaxws-ri</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jaxws-ri-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jersey</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-jersey-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-rest</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-rest-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-spring-app</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-spring-app-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-top</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-xfire-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-xfire-client-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-xfire</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-xfire-rt</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>enunciate-xml</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
+        <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
         <version>1.0.0</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.jettison</groupId>
         <artifactId>jettison</artifactId>
         <version>1.0.1</version>
@@ -864,6 +703,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.spring-security-oauth</groupId>
         <artifactId>spring-security-oauth</artifactId>
         <version>2.6</version>
@@ -877,6 +717,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: xfire-rt-->
         <groupId>org.codehaus.xfire</groupId>
         <artifactId>xfire-all</artifactId>
         <version>1.2.2</version>
@@ -962,36 +803,28 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>20070829</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.7</version>
-      </dependency>
-
-      <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-aop</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-beans</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-context</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-core</artifactId>
         <version>${spring.version}</version>
@@ -1005,24 +838,28 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-tx</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-webmvc</artifactId>
         <version>${spring.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-core-tiger</artifactId>
         <version>${spring.security.version}</version>
@@ -1056,37 +893,44 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: spring-app-rt-->
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-openid</artifactId>
         <version>${spring.security.version}</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xml (test-only)-->
         <groupId>relaxngDatatype</groupId>
         <artifactId>relaxngDatatype</artifactId>
         <version>20020414</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>stax</groupId>
         <artifactId>stax-api</artifactId>
         <version>1.0.1</version>
       </dependency>
 
       <dependency>
-        <!--this dependency doesn't have anything to do with xfire.  It's just xfire's build of the jsr181 annotations.-->
+        <!--depending modules: core-rt-->
+        <!--this dependency doesn't have anything to do with xfire.
+            It's just xfire's build of the jsr181 annotations.-->
         <groupId>xfire</groupId>
         <artifactId>xfire-jsr181-api</artifactId>
         <version>1.0-M1</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: core-rt-->
         <groupId>org.codehaus.woodstox</groupId>
         <artifactId>wstx-asl</artifactId>
         <version>3.2.7</version>
       </dependency>
 
       <dependency>
+        <!--depending modules: xml (test-only)-->
         <groupId>wsdl4j</groupId>
         <artifactId>wsdl4j</artifactId>
         <version>1.6.2</version>

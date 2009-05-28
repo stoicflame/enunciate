@@ -15,7 +15,7 @@
   <modules>
     <csharp disabled="true"/>
     <cxf disabled="false"/>
-    <jaxws disabled="true"/>
+    <jaxws-ri disabled="true"/>
     <xfire disabled="true"/>
     <jaxws-client disabled="true"/>
     <xfire-client uuid="full.example" disable15Client="false">

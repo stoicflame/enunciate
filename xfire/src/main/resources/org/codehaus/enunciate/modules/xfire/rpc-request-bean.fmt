@@ -17,7 +17,7 @@ package ${beanPackage};
 @javax.xml.bind.annotation.XmlType (
   name = "${message.operationName}",
   namespace = "${message.targetNamespace}",
-  propOrder = { [#list message.parts as part]"${part.partName}"[#if part_has_next], [/#if][/#list] }
+  propOrder = { [#list message.parts as part]"${part.partName?uncap_first}"[#if part_has_next], [/#if][/#list] }
 )
 public class ${simpleBeanName} {
 

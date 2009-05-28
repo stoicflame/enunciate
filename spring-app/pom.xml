@@ -16,16 +16,19 @@
       <!--for some spring-based path matching for the include/exclude jar mechanism-->
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-spring-app-rt</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
 
       <classifier>tests</classifier>
       <scope>test</scope>

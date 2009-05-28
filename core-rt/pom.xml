@@ -22,21 +22,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-annotations</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>xfire</groupId>
-      <artifactId>xfire-jsr181-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.xml.ws</groupId>
-      <artifactId>jaxws-api</artifactId>
     </dependency>
 
     <dependency>
@@ -58,7 +49,9 @@
 
   <profiles>
     <profile>
-      <!--Starting with JDK 1.6, JAXB (along with activation) is shipped with the JDK.-->
+      <!-- Starting with JDK 1.6, JAXB, activation, stax,
+           and JAX-WS - along with their default implementations -
+          are packaged in the JDK (for better for for worse).-->
       <activation>
         <jdk>1.5</jdk>
       </activation>
@@ -75,13 +68,23 @@
           <groupId>stax</groupId>
           <artifactId>stax-api</artifactId>
         </dependency>
+        <dependency>
+          <groupId>javax.xml.ws</groupId>
+          <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>xfire</groupId>
+          <artifactId>xfire-jsr181-api</artifactId>
+        </dependency>
 
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>
-
-          <!--we just need jaxb-impl for tests in this module.-->
-          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <!--if we need a stax implementation, we'll use woodstox-->
+          <groupId>org.codehaus.woodstox</groupId>
+          <artifactId>wstx-asl</artifactId>
         </dependency>
       </dependencies>
     </profile>

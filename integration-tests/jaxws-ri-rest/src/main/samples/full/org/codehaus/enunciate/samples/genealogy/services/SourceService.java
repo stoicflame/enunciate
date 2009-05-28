@@ -71,6 +71,7 @@ public interface SourceService {
    * @return The id of the infoset that was added.
    * @throws ServiceException If the infoset couldn't be added to the source.
    */
+  @WebResult(name="myweirdresultname")
   String addInfoSet(String sourceId, InfoSet infoSet) throws ServiceException;
 
   /**

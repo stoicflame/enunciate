@@ -113,8 +113,8 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
         throw new EnunciateException("The CXF module requires you to disable the XFire module.");
       }
 
-      if (enunciate.isModuleEnabled("jaxws")) {
-        throw new EnunciateException("The CXF module requires you to disable the JAX-WS module.");
+      if (enunciate.isModuleEnabled("jaxws-ri")) {
+        throw new EnunciateException("The CXF module requires you to disable the JAX-WS RI module.");
       }
 
       if (!enunciate.isModuleEnabled("spring-app")) {

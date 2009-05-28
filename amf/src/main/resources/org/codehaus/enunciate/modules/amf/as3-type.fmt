@@ -84,7 +84,7 @@ package ${packageFor(type)} {
     [/#list]
   [/#if]
 
-    public function ${type.simpleName}() {
+    public function ${type.clientSimpleName}() {
     }
   [#list type.attributes as attribute]
 [@propertyAccessors property=attribute/]

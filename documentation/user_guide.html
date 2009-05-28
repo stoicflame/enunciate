@@ -131,15 +131,15 @@
           <p>Generates the support for deploying your endpoints according to the JAX-RS specification using Jersey.</p>
         </li>
         <li>
-          <h3><a href="module_xfire.html">xfire</a></h3>
-          <p>Generates support classes for deploying SOAP endpoints using <a href="http://xfire.codehaus.org/">XFire</a>.</p>
-        </li>
-        <li>
           <h3><a href="module_jaxws_ri.html">JAX-WS RI</a></h3>
           <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
-          <h3><a href="module_cxf.html">CXF</a></h3>
+          <h3><a href="module_xfire.html">xfire</a>*</h3>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="http://xfire.codehaus.org/">XFire</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_cxf.html">CXF</a>*</h3>
           <p>Generates support classes for deploying SOAP endpoints using <a href="http://cxf.apache.org/">CXF</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
@@ -176,6 +176,8 @@
         </li>
       </ul>
 
+      <p>*As of Enunciate 1.12, the XFire and CXF modules have been disabled by default. The default SOAP engine is now JAX-WS RI. <a href="http://docs.codehaus.org/display/ENUNCIATE/Using+CXF+or+XFire">See these instructions</a> if you'd like to use XFire or CXF.</p>
+      
       <p>For more information about modules (including how to write your own), see the <a href="http://docs.codehaus.org/display/ENUNCIATE/Architecture+Guide">architecture guide</a>.</p>
 
 
