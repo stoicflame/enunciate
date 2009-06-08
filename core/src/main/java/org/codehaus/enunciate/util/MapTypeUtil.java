@@ -45,6 +45,9 @@ public class MapTypeUtil {
     if (!(typeMirror instanceof DeclaredType)) {
       return null;
     }
+    else if (typeMirror instanceof MapType) {
+      return (MapType) typeMirror;
+    }
 
     DeclaredType declaredType = (DeclaredType) typeMirror;
     TypeDeclaration declaration = declaredType.getDeclaration();

@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import javax.xml.namespace.QName;
@@ -40,8 +41,8 @@ public class SchemaInfo {
   private String namespace;
   private final Collection<ImplicitSchemaElement> implicitSchemaElements = new TreeSet<ImplicitSchemaElement>(new ImplicitSchemaElementComparator());
   private final Collection<ImplicitSchemaAttribute> implicitSchemaAttributes = new TreeSet<ImplicitSchemaAttribute>(new ImplicitSchemaAttributeComparator());
-  private final Collection<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
-  private final Collection<RootElementDeclaration> globalElements = new ArrayList<RootElementDeclaration>();
+  private final Collection<TypeDefinition> typeDefinitions = new TreeSet<TypeDefinition>(new TypeDeclarationComparator());
+  private final Collection<RootElementDeclaration> globalElements = new TreeSet<RootElementDeclaration>(new TypeDeclarationComparator());
   private final Collection<Registry> registries = new ArrayList<Registry>();
   private final Collection<LocalElementDeclaration> localElementDeclarations = new ArrayList<LocalElementDeclaration>();
   private final TreeSet<Schema> packages = new TreeSet<Schema>();

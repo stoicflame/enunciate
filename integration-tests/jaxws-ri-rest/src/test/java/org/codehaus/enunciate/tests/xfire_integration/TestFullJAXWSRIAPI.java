@@ -22,7 +22,6 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
-import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Event;

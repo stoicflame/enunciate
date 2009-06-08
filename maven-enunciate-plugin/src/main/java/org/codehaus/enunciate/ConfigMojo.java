@@ -116,6 +116,13 @@ public class ConfigMojo extends AbstractMojo {
   private File packageDir = null;
 
   /**
+   * The directory where Enunciate puts scratch files.
+   *
+   * @parameter expression="${project.build.directory}/enunciate-scratch"
+   */
+  private File scratchDir = null;
+
+  /**
    * The directory for the generated WAR.
    *
    * @parameter expression="${project.build.directory}"
@@ -359,6 +366,10 @@ public class ConfigMojo extends AbstractMojo {
 
     if (this.packageDir != null) {
       enunciate.setPackageDir(this.packageDir);
+    }
+
+    if (this.scratchDir != null) {
+      enunciate.setScratchDir(this.scratchDir);
     }
 
     if (this.exports != null) {

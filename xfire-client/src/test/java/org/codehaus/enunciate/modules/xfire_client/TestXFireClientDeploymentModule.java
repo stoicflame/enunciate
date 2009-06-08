@@ -136,13 +136,13 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
     URL responseBeanTemplate = module.getTemplateURL("client-response-bean.fmt");
     assertEquals(1, templateLedger.get(xfireEnumTemplate).intValue());
     assertEquals(1, templateLedger.get(xfireSimpleTemplate).intValue());
-    assertEquals(1, templateLedger.get(xfireComplexTemplate).intValue());
+    assertEquals(2, templateLedger.get(xfireComplexTemplate).intValue());
     assertEquals(4, templateLedger.get(eiTemplate).intValue());
     assertEquals(4, templateLedger.get(soapImplTemplate).intValue());
     assertEquals(1, templateLedger.get(enumTypeTemplate).intValue());
     assertEquals(1, templateLedger.get(enum15TypeTemplate).intValue());
     assertEquals(2, templateLedger.get(simpleTypeTemplate).intValue());
-    assertEquals(2, templateLedger.get(complexTypeTemplate).intValue());
+    assertEquals(4, templateLedger.get(complexTypeTemplate).intValue());
     assertEquals(4, templateLedger.get(faultTemplate).intValue());
     assertEquals(2, templateLedger.get(faultBeanTemplate).intValue());
     assertEquals(4, templateLedger.get(requestBeanTemplate).intValue());
@@ -150,7 +150,7 @@ public class TestXFireClientDeploymentModule extends InAPTTestCase {
 
     //check that all types were accounted for.
     ArrayList<String> typeList = new ArrayList<String>(module.getGeneratedTypeList());
-    assertEquals(3 + 4 + 4 + 2, typeList.size()); //3 jaxb types, 4 request wrappers, 4 response wrappers, 2 fault beans.
+    assertEquals(4 + 4 + 4 + 2, typeList.size()); //4 jaxb types, 4 request wrappers, 4 response wrappers, 2 fault beans.
     assertTrue(typeList.remove("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithADate"));
     assertTrue(typeList.remove("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithADateResponse"));
     assertTrue(typeList.remove("org.codehaus.enunciate.samples.xfire_client.jaxws.DoSomethingWithAString"));

@@ -59,7 +59,6 @@ public class RESTEndpoint extends DecoratedClassDeclaration {
       }
     }
 
-
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Declarations utils = env.getDeclarationUtils();
 

@@ -57,6 +57,8 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Set<String> apiExcludePatterns = new TreeSet<String>();
   private boolean forceJAXWSSpecCompliance = false;
   private boolean allowEmptyNamespace = true;
+  private boolean includeReferencedClasses = true;
+  private boolean excludeUnreferencedClasses = true;
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -266,6 +268,42 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setAllowEmptyNamespace(boolean allowEmptyNamespace) {
     this.allowEmptyNamespace = allowEmptyNamespace;
+  }
+
+  /**
+   * Whether to include statically-referenced type definitions (default: true).
+   *
+   * @return Whether to include statically-referenced type definitions.
+   */
+  public boolean isIncludeReferencedClasses() {
+    return includeReferencedClasses;
+  }
+
+  /**
+   * Whether to include statically-referenced type definitions (default: true).
+   *
+   * @param includeReferencedClasses Whether to include statically-referenced type definitions.
+   */
+  public void setIncludeReferencedClasses(boolean includeReferencedClasses) {
+    this.includeReferencedClasses = includeReferencedClasses;
+  }
+
+  /**
+   * Whether to exclude classes that are not statically referenced (default: true).
+   *
+   * @return Whether to exclude classes that are not statically referenced.
+   */
+  public boolean isExcludeUnreferencedClasses() {
+    return excludeUnreferencedClasses;
+  }
+
+  /**
+   * Whether to exclude classes that are not statically referenced.
+   *
+   * @param excludeUnreferencedClasses Whether to exclude classes that are not statically referenced.
+   */
+  public void setExcludeUnreferencedClasses(boolean excludeUnreferencedClasses) {
+    this.excludeUnreferencedClasses = excludeUnreferencedClasses;
   }
 
   /**
@@ -534,6 +572,7 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addSetNext("enunciate/validator", "setValidator");
 
     //set up the include/excludes
+    digester.addSetProperties("enunciate/api-classes");
     digester.addCallMethod("enunciate/api-classes/include", "addApiIncludePattern", 1);
     digester.addCallParam("enunciate/api-classes/include", 0, "pattern");
     digester.addCallMethod("enunciate/api-classes/exclude", "addApiExcludePattern", 1);
@@ -546,8 +585,8 @@ public class EnunciateConfiguration implements ErrorHandler {
     //allow for classes and packages to be imported for JAXB.
     digester.addObjectCreate("enunciate/api-import", APIImport.class);
     digester.addSetProperties("enunciate/api-import",
-                              new String[] {"classname", "class", "seekSource"},
-                              new String[] {"classname", "classname", "seekSource"});
+                              new String[] {"classname", "class", "pattern", "seekSource"},
+                              new String[] {"pattern", "pattern", "pattern", "seekSource"});
     digester.addSetNext("enunciate/api-import", "addAPIImport");
 
     //allow for classes and packages to be imported for JAXB.

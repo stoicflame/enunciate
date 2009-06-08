@@ -53,6 +53,7 @@ public class EnunciateTask extends MatchingTask {
   private File compileDir;
   private File buildDir;
   private File packageDir;
+  private File scratchDir;
   private File gwtHome;
   private File flexHome;
   private Enunciate.Target target;
@@ -133,6 +134,10 @@ public class EnunciateTask extends MatchingTask {
         proxy.setPackageDir(this.packageDir);
       }
 
+      if (this.scratchDir != null) {
+        proxy.setScratchDir(this.scratchDir);
+      }
+
       if (this.target != null) {
         proxy.setTarget(this.target);
       }
@@ -208,6 +213,15 @@ public class EnunciateTask extends MatchingTask {
    */
   public void setPackageDir(File packageDir) {
     this.packageDir = packageDir;
+  }
+
+  /**
+   * Enunciate scratch directory.
+   *
+   * @param scratchDir The scratch directory
+   */
+  public void setScratchDir(File scratchDir) {
+    this.scratchDir = scratchDir;
   }
 
   /**

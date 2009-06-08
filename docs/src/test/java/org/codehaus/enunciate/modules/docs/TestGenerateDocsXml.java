@@ -52,6 +52,8 @@ public class TestGenerateDocsXml extends TestCase {
     module.setTitle("mytitle");
     module.setSplashPackage("org.codehaus.enunciate.samples.docs.pckg1");
     EnunciateConfiguration config = new EnunciateConfiguration(Arrays.asList((DeploymentModule) module));
+    config.setExcludeUnreferencedClasses(false);
+    config.setIncludeReferencedClasses(false);
     Enunciate enunciate = new Enunciate(getAllJavaFiles(getSamplesDir()));
     enunciate.setConfig(config);
     enunciate.setTarget(Enunciate.Target.BUILD);

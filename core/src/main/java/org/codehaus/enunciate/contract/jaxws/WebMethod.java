@@ -60,12 +60,7 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     this.annotation = getAnnotation(javax.jws.WebMethod.class);
     this.oneWay = getAnnotation(Oneway.class) != null;
     this.endpointInterface = endpointInterface;
-    TypeMirror returnType = getReturnType();
-    MapType mapType = MapTypeUtil.findMapType(returnType);
-    if (mapType != null) {
-      returnType = mapType;
-    }
-    this.webResult = new WebResult(returnType, this);
+    this.webResult = new WebResult(getReturnType(), this);
 
     Collection<ParameterDeclaration> parameters = getParameters();
     Collection<WebParam> webParameters = new ArrayList<WebParam>(parameters.size());

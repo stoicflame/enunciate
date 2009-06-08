@@ -16,33 +16,40 @@
 
 package org.codehaus.enunciate.apt;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.*;
+import com.sun.mirror.util.TypeVisitor;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedClassType;
+import net.sf.jelly.apt.decorations.type.DecoratedInterfaceType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.jaxws.WebMessage;
-import org.codehaus.enunciate.contract.jaxws.WebMessagePart;
-import org.codehaus.enunciate.contract.jaxws.WebMethod;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
-import org.codehaus.enunciate.contract.rest.RESTNoun;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.rest.MimeType;
+import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
+import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import javax.ws.rs.Produces;
 import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.util.*;
@@ -300,6 +307,19 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     wsdlInfo.getEndpointInterfaces().add(ei);
     this.endpointInterfaces.add(ei);
+
+    if (includeReferencedClasses()) {
+      addReferencedTypeDefinitions(ei);
+    }
+  }
+
+  /**
+   * Whether to include referenced type definitions.
+   *
+   * @return Whether to include referenced type definitions.
+   */
+  protected boolean includeReferencedClasses() {
+    return this.enunciateConfig == null || this.enunciateConfig.isIncludeReferencedClasses();
   }
 
   /**
@@ -308,56 +328,118 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param typeDef The type definition to add to the model.
    */
   public void add(TypeDefinition typeDef) {
-    add(typeDef.getSchema());
-
-    String namespace = typeDef.getNamespace();
-    String prefix = addNamespace(namespace);
-
-    SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
-    if (schemaInfo == null) {
-      schemaInfo = new SchemaInfo();
-      schemaInfo.setId(prefix);
-      schemaInfo.setNamespace(namespace);
-      namespacesToSchemas.put(namespace, schemaInfo);
-    }
-
-    for (Element element : typeDef.getElements()) {
-      ImplicitSchemaElement implicitElement = getImplicitElement(element);
-      if (implicitElement != null) {
-        String implicitElementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
-        SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitElementNamespace);
-        if (referencedSchemaInfo == null) {
-          referencedSchemaInfo = new SchemaInfo();
-          referencedSchemaInfo.setId(addNamespace(implicitElementNamespace));
-          referencedSchemaInfo.setNamespace(implicitElementNamespace);
-          namespacesToSchemas.put(implicitElementNamespace, referencedSchemaInfo);
-        }
-        referencedSchemaInfo.getImplicitSchemaElements().add(implicitElement);
-      }
-    }
-
-    for (Attribute attribute : typeDef.getAttributes()) {
-      ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
-      if (implicitAttribute != null) {
-        String implicitAttributeNamespace = attribute.getNamespace();
-        SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitAttributeNamespace);
-        if (referencedSchemaInfo == null) {
-          referencedSchemaInfo = new SchemaInfo();
-          referencedSchemaInfo.setId(addNamespace(implicitAttributeNamespace));
-          referencedSchemaInfo.setNamespace(implicitAttributeNamespace);
-          namespacesToSchemas.put(implicitAttributeNamespace, referencedSchemaInfo);
-        }
-        referencedSchemaInfo.getImplicitSchemaAttributes().add(implicitAttribute);
-      }
-    }
-
-    schemaInfo.getTypeDefinitions().add(typeDef);
-
     int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
-    if (position < 0) {
+    if (position < 0 && !isKnownType(typeDef)) {
       this.typeDefinitions.add(-position - 1, typeDef);
+      add(typeDef.getSchema());
+
+      String namespace = typeDef.getNamespace();
+      String prefix = addNamespace(namespace);
+
+      SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+      if (schemaInfo == null) {
+        schemaInfo = new SchemaInfo();
+        schemaInfo.setId(prefix);
+        schemaInfo.setNamespace(namespace);
+        namespacesToSchemas.put(namespace, schemaInfo);
+      }
+      schemaInfo.getTypeDefinitions().add(typeDef);
+
+      for (Element element : typeDef.getElements()) {
+        if (includeReferencedClasses()) {
+          addReferencedTypeDefinitions(element);
+        }
+
+        ImplicitSchemaElement implicitElement = getImplicitElement(element);
+        if (implicitElement != null) {
+          String implicitElementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+          SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitElementNamespace);
+          if (referencedSchemaInfo == null) {
+            referencedSchemaInfo = new SchemaInfo();
+            referencedSchemaInfo.setId(addNamespace(implicitElementNamespace));
+            referencedSchemaInfo.setNamespace(implicitElementNamespace);
+            namespacesToSchemas.put(implicitElementNamespace, referencedSchemaInfo);
+          }
+          referencedSchemaInfo.getImplicitSchemaElements().add(implicitElement);
+        }
+      }
+
+      for (Attribute attribute : typeDef.getAttributes()) {
+        if (includeReferencedClasses()) {
+          addReferencedTypeDefinitions(attribute);
+        }
+        ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
+        if (implicitAttribute != null) {
+          String implicitAttributeNamespace = attribute.getNamespace();
+          SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitAttributeNamespace);
+          if (referencedSchemaInfo == null) {
+            referencedSchemaInfo = new SchemaInfo();
+            referencedSchemaInfo.setId(addNamespace(implicitAttributeNamespace));
+            referencedSchemaInfo.setNamespace(implicitAttributeNamespace);
+            namespacesToSchemas.put(implicitAttributeNamespace, referencedSchemaInfo);
+          }
+          referencedSchemaInfo.getImplicitSchemaAttributes().add(implicitAttribute);
+        }
+      }
+
+      if ((includeReferencedClasses())) {
+        Value value = typeDef.getValue();
+        if (value != null) {
+          addReferencedTypeDefinitions(value);
+        }
+
+        ClassType superClass = typeDef.getSuperclass();
+        if (!typeDef.isEnum() && superClass != null) {
+          addReferencedTypeDefinitions(superClass);
+        }
+      }
     }
   }
+
+  /**
+   * Whether the specified type is a known type.
+   *
+   * @param typeDef The type def.
+   * @return Whether the specified type is a known type.
+   */
+  protected boolean isKnownType(TypeDefinition typeDef) {
+    return knownTypes.containsKey(typeDef.getQualifiedName())
+      || JAXBElement.class.getName().equals(typeDef.getQualifiedName())
+      || ((DecoratedTypeMirror)typeDef.getSuperclass()).isInstanceOf(JAXBElement.class.getName());
+  }
+
+  /**
+   * Add the type definition(s) referenced by the given attribute.
+   *
+   * @param attribute The attribute.
+   */
+  protected void addReferencedTypeDefinitions(Attribute attribute) {
+    addSeeAlsoTypeDefinitions(attribute);
+    addReferencedTypeDefinitions(attribute.isAdapted() ? attribute.getAdapterType() : attribute.getAccessorType());
+  }
+
+  /**
+   * Add the type definition(s) referenced by the given value.
+   *
+   * @param value The value.
+   */
+  protected void addReferencedTypeDefinitions(Value value) {
+    addSeeAlsoTypeDefinitions(value);
+    addReferencedTypeDefinitions(value.isAdapted() ? value.getAdapterType() : value.getAccessorType());
+  }
+
+  /**
+   * Add the referenced type definitions for the specified element.
+   *
+   * @param element The element.
+   */
+  protected void addReferencedTypeDefinitions(Element element) {
+    addSeeAlsoTypeDefinitions(element);
+    for (Element chioce : element.getChoices()) {
+      addReferencedTypeDefinitions(chioce.isAdapted() ? chioce.getAdapterType() : chioce.getAccessorType());
+    }
+  }
+
 
   /**
    * Gets the implicit element for the specified element, or null if there is no implicit element.
@@ -426,9 +508,45 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         contentTypes.add(contentType);
         addContentType(contentType);
       }
+
+      if (includeReferencedClasses()) {
+        addSeeAlsoTypeDefinitions(endpoint);
+        addReferencedTypeDefinitions(restMethod);
+      }
     }
 
     this.restEndpoints.add(endpoint);
+  }
+
+  /**
+   * Add all the type definitions referenced by the specified REST method.
+   *
+   * @param restMethod The REST method.
+   */
+  protected void addReferencedTypeDefinitions(RESTMethod restMethod) {
+    addSeeAlsoTypeDefinitions(restMethod);
+    RESTParameter nounValue = restMethod.getNounValue();
+    if (nounValue != null) {
+      TypeMirror nounValueType = nounValue.getType();
+      if (nounValueType instanceof ClassType) {
+        ClassDeclaration classDeclaration = ((ClassType) nounValueType).getDeclaration();
+        if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
+          //only add referenced type definitions for root elements.
+          add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+        }
+      }
+    }
+
+    TypeMirror returnType = restMethod.getReturnType();
+    if (returnType instanceof ClassType) {
+      ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
+      if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
+        //only add referenced type definitions for root elements.
+        add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+      }
+    }
+
+    //todo: include referenced type definitions from the errors?
   }
 
   /**
@@ -438,6 +556,43 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(RootResource rootResource) {
     this.rootResources.add(rootResource);
+    if (includeReferencedClasses()) {
+      addSeeAlsoTypeDefinitions(rootResource);
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        addReferencedTypeDefinitions(resourceMethod);
+      }
+    }
+  }
+
+  /**
+   * Add the referenced type definitions for the specified resource method.
+   *
+   * @param resourceMethod The resource method.
+   */
+  protected void addReferencedTypeDefinitions(ResourceMethod resourceMethod) {
+    addSeeAlsoTypeDefinitions(resourceMethod);
+    ParameterDeclaration ep = resourceMethod.getEntityParameter();
+    if (ep != null) {
+      TypeMirror type = ep.getType();
+      if (type instanceof ClassType) {
+        ClassDeclaration classDeclaration = ((ClassType) type).getDeclaration();
+        if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
+          //only add referenced type definitions for root elements.
+          add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+        }
+      }
+    }
+
+    TypeMirror returnType = resourceMethod.getReturnType();
+    if (returnType instanceof ClassType) {
+      ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
+      if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
+        //only add referenced type definitions for root elements.
+        add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+      }
+    }
+
+    //todo: include referenced type definitions from the errors?
   }
 
   /**
@@ -476,24 +631,211 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param rootElement The root element to add.
    */
   public void add(RootElementDeclaration rootElement) {
-    add(rootElement.getSchema());
-
-    String namespace = rootElement.getNamespace();
-    String prefix = addNamespace(namespace);
-
-    SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
-    if (schemaInfo == null) {
-      schemaInfo = new SchemaInfo();
-      schemaInfo.setId(prefix);
-      schemaInfo.setNamespace(namespace);
-      namespacesToSchemas.put(namespace, schemaInfo);
-    }
-    schemaInfo.getGlobalElements().add(rootElement);
-
     int position = Collections.binarySearch(this.rootElements, rootElement, CLASS_COMPARATOR);
     if (position < 0) {
       this.rootElements.add(-position - 1, rootElement);
+      add(rootElement.getSchema());
+
+      String namespace = rootElement.getNamespace();
+      String prefix = addNamespace(namespace);
+
+      SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+      if (schemaInfo == null) {
+        schemaInfo = new SchemaInfo();
+        schemaInfo.setId(prefix);
+        schemaInfo.setNamespace(namespace);
+        namespacesToSchemas.put(namespace, schemaInfo);
+      }
+      schemaInfo.getGlobalElements().add(rootElement);
+
+      if (includeReferencedClasses()) {
+        addReferencedTypeDefinitions(rootElement);
+      }
     }
+  }
+
+  /**
+   * Add any statically-referenced type definitions to the model.
+   *
+   * @param rootEl The root element.
+   */
+  protected void addReferencedTypeDefinitions(RootElementDeclaration rootEl) {
+    TypeDefinition typeDefinition = rootEl.getTypeDefinition();
+    if (typeDefinition != null) {
+      add(typeDefinition);
+    }
+    else {
+      //some root elements don't have a reference to their type definitions.
+      add(createTypeDefinition((ClassDeclaration) rootEl.getDelegate()));
+    }
+  }
+
+  /**
+   * Adds any type definitions referenced by an endpoint interface.
+   *
+   * @param ei The endpoint interface.
+   */
+  protected void addReferencedTypeDefinitions(EndpointInterface ei) {
+    addSeeAlsoTypeDefinitions(ei);
+    for (WebMethod webMethod : ei.getWebMethods()) {
+      addReferencedTypeDefinitions(webMethod);
+    }
+  }
+
+  /**
+   * Adds any type definitions referenced by a web method.
+   *
+   * @param webMethod The web method.
+   */
+  protected void addReferencedTypeDefinitions(WebMethod webMethod) {
+    addSeeAlsoTypeDefinitions(webMethod);
+    WebResult result = webMethod.getWebResult();
+    addReferencedTypeDefinitions(result.isAdapted() ? result.getAdapterType() : result.getType());
+    for (WebParam webParam : webMethod.getWebParameters()) {
+      addReferencedTypeDefinitions(webParam.isAdapted() ? webParam.getAdapterType() : webParam.getType());
+    }
+    for (WebFault webFault : webMethod.getWebFaults()) {
+      addReferencedTypeDefinitions(webFault);
+    }
+  }
+
+  /**
+   * Adds any type definitions referenced by a web fault.
+   *
+   * @param webFault The web fault.
+   */
+  protected void addReferencedTypeDefinitions(WebFault webFault) {
+    if (webFault.isImplicitSchemaElement()) {
+      for (ImplicitChildElement childElement : webFault.getChildElements()) {
+        WebFault.FaultBeanChildElement fbce = (WebFault.FaultBeanChildElement) childElement;
+        addReferencedTypeDefinitions(fbce.isAdapted() ? fbce.getAdapterType() : fbce.getType());
+      }
+    }
+    else {
+      addReferencedTypeDefinitions(webFault.getExplicitFaultBean());
+    }
+  }
+
+  /**
+   * Adds any referenced type definitions for the specified type mirror.
+   *
+   * @param type The type mirror.
+   */
+  protected void addReferencedTypeDefinitions(TypeMirror type) {
+    type.accept(new ReferencedTypeDefinitionVisitor());
+  }
+
+
+  /**
+   * Add any type definitions that are referenced using {@link XmlSeeAlso}.
+   *
+   * @param declaration The declaration.
+   */
+  protected void addSeeAlsoTypeDefinitions(Declaration declaration) {
+    XmlSeeAlso seeAlso = declaration.getAnnotation(XmlSeeAlso.class);
+    if (seeAlso != null) {
+      try {
+        Class[] classes = seeAlso.value();
+        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        for (Class clazz : classes) {
+          ClassType type = (ClassType) ape.getTypeUtils().getDeclaredType(ape.getTypeDeclaration(clazz.getName()));
+          ClassDeclaration typeDeclaration = type.getDeclaration();
+          if (typeDeclaration != null) {
+            add(createTypeDefinition(typeDeclaration));
+          }
+        }
+      }
+      catch (MirroredTypesException e) {
+        Collection<TypeMirror> mirrors = e.getTypeMirrors();
+        for (TypeMirror mirror : mirrors) {
+          if (mirror instanceof ClassType) {
+            ClassDeclaration typeDeclaration = ((ClassType) mirror).getDeclaration();
+            if (typeDeclaration != null) {
+              add(createTypeDefinition(typeDeclaration));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Find the type definition for a class given the class's declaration.
+   *
+   * @param declaration The declaration.
+   * @return The type definition.
+   */
+  protected TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
+    if (isEnumType(declaration)) {
+      return new EnumTypeDefinition((EnumDeclaration) declaration);
+    }
+    else if (isSimpleType(declaration)) {
+      return new SimpleTypeDefinition(declaration);
+    }
+    else {
+      //assume its a complex type.
+      return new ComplexTypeDefinition(declaration);
+    }
+  }
+
+  /**
+   * A quick check to see if a declaration defines a complex schema type.
+   *
+   * @param declaration The declaration to check.
+   * @return the value of the check.
+   */
+  protected boolean isComplexType(TypeDeclaration declaration) {
+    return !(declaration instanceof InterfaceDeclaration) && !isEnumType(declaration) && !isSimpleType(declaration);
+  }
+
+  /**
+   * A quick check to see if a declaration defines a enum schema type.
+   *
+   * @param declaration The declaration to check.
+   * @return the value of the check.
+   */
+  protected boolean isEnumType(TypeDeclaration declaration) {
+    return (declaration instanceof EnumDeclaration);
+  }
+
+  /**
+   * A quick check to see if a declaration defines a simple schema type.
+   *
+   * @param declaration The declaration to check.
+   * @return the value of the check.
+   */
+  protected boolean isSimpleType(TypeDeclaration declaration) {
+    if (declaration instanceof InterfaceDeclaration) {
+      if (declaration.getAnnotation(javax.xml.bind.annotation.XmlType.class) != null) {
+        throw new ValidationException(declaration.getPosition(), "An interface must not be annotated with @XmlType.");
+      }
+
+      return false;
+    }
+
+    if (isEnumType(declaration)) {
+      return false;
+    }
+
+
+    ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
+    GenericTypeDefinition typeDef = new GenericTypeDefinition(classDeclaration);
+    return ((typeDef.getValue() != null) && (hasNeitherAttributesNorElements(typeDef)));
+  }
+
+  /**
+   * Whether the specified type definition has neither attributes nor elements.
+   *
+   * @param typeDef The type def.
+   * @return Whether the specified type definition has neither attributes nor elements.
+   */
+  protected boolean hasNeitherAttributesNorElements(GenericTypeDefinition typeDef) {
+    boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
+    ClassDeclaration superDeclaration = ((ClassDeclaration) typeDef.getDelegate()).getSuperclass().getDeclaration();
+    if (!Object.class.getName().equals(superDeclaration.getQualifiedName())) {
+      none &= hasNeitherAttributesNorElements(new GenericTypeDefinition(superDeclaration));
+    }
+    return none;
   }
 
   /**
@@ -515,8 +857,21 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getRegistries().add(registry);
+    addReferencedTypeDefinitions(registry);
     for (LocalElementDeclaration led : registry.getLocalElementDeclarations()) {
       add(led);
+    }
+  }
+
+  /**
+   * Add the referenced type definitions for a registry..
+   *
+   * @param registry The registry.
+   */
+  protected void addReferencedTypeDefinitions(Registry registry) {
+    addSeeAlsoTypeDefinitions(registry);
+    for (MethodDeclaration methodDeclaration : registry.getInstanceFactoryMethods()) {
+      addReferencedTypeDefinitions(methodDeclaration.getReturnType());
     }
   }
 
@@ -532,6 +887,24 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getLocalElementDeclarations().add(led);
+    addReferencedTypeDefinitions(led);
+  }
+
+  /**
+   * Adds the referenced type definitions for the specified local element declaration.
+   *
+   * @param led The local element declaration.
+   */
+  protected void addReferencedTypeDefinitions(LocalElementDeclaration led) {
+    addSeeAlsoTypeDefinitions(led);
+    TypeDeclaration scope = led.getElementScope();
+    if (scope instanceof ClassDeclaration) {
+      add(createTypeDefinition((ClassDeclaration) scope));
+    }
+    TypeDeclaration typeDeclaration = led.getElementTypeDeclaration();
+    if (typeDeclaration instanceof ClassDeclaration) {
+      add(createTypeDefinition((ClassDeclaration) typeDeclaration));
+    }
   }
 
   /**
@@ -773,5 +1146,95 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void setEnunciateConfig(EnunciateConfiguration enunciateConfig) {
     this.enunciateConfig = enunciateConfig;
+  }
+
+  private class ReferencedTypeDefinitionVisitor implements TypeVisitor {
+
+    public void visitTypeMirror(TypeMirror typeMirror) {
+      //no-op
+    }
+
+    public void visitPrimitiveType(PrimitiveType primitiveType) {
+      //no-op
+    }
+
+    public void visitVoidType(VoidType voidType) {
+      //no-op
+    }
+
+    public void visitReferenceType(ReferenceType referenceType) {
+      //no-op
+    }
+
+    public void visitDeclaredType(DeclaredType declaredType) {
+      //no-op
+    }
+
+    public void visitClassType(ClassType classType) {
+      if (classType instanceof AdapterType) {
+        ((AdapterType)classType).getAdaptingType().accept(this);
+      }
+      else {
+        DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
+        if (!decorated.isCollection() && !decorated.isInstanceOf(JAXBElement.class.getName())) {
+          ClassDeclaration declaration = classType.getDeclaration();
+          if (declaration != null) {
+            add(createTypeDefinition(declaration));
+          }
+        }
+
+        Collection<TypeMirror> typeArgs = classType.getActualTypeArguments();
+        if (typeArgs != null) {
+          for (TypeMirror typeArg : typeArgs) {
+            typeArg.accept(this);
+          }
+        }
+      }
+    }
+
+    public void visitEnumType(EnumType enumType) {
+      EnumDeclaration enumDeclaration = enumType.getDeclaration();
+      if (enumDeclaration != null) {
+        add(createTypeDefinition(enumDeclaration));
+      }
+    }
+
+    public void visitInterfaceType(InterfaceType interfaceType) {
+      MapType mapType = MapTypeUtil.findMapType(interfaceType);
+      if (mapType != null) {
+        mapType.getKeyType().accept(this);
+        mapType.getValueType().accept(this);
+      }
+      else if (((DecoratedInterfaceType)TypeMirrorDecorator.decorate(interfaceType)).isCollection()) {
+        Collection<TypeMirror> typeArgs = interfaceType.getActualTypeArguments();
+        if (typeArgs != null) {
+          for (TypeMirror typeArg : typeArgs) {
+            typeArg.accept(this);
+          }
+        }
+      }
+    }
+
+    public void visitAnnotationType(AnnotationType annotationType) {
+      //no-op
+    }
+
+    public void visitArrayType(ArrayType arrayType) {
+      arrayType.getComponentType().accept(this);
+    }
+
+    public void visitTypeVariable(TypeVariable typeVariable) {
+      Iterator<ReferenceType> bounds = typeVariable.getDeclaration().getBounds().iterator();
+      if (bounds.hasNext()) {
+        bounds.next().accept(this);
+      }
+    }
+
+    public void visitWildcardType(WildcardType wildcardType) {
+      Iterator<ReferenceType> upperBounds = wildcardType.getUpperBounds().iterator();
+      if (upperBounds.hasNext()) {
+        upperBounds.next().accept(this);
+      }
+    }
   }
 }

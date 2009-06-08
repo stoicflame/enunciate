@@ -23,35 +23,8 @@ package org.codehaus.enunciate.config;
  */
 public class APIImport {
 
-  private String clazz;
   private boolean seekSource = true;
-
-  /**
-   * A specific class to import.
-   *
-   * @return A specific class to import.
-   */
-  public String getClassname() {
-    return clazz;
-  }
-
-  /**
-   * A specific class to import.
-   *
-   * @param clazz A specific class to import.
-   */
-  public void setClassname(String clazz) {
-    this.clazz = clazz;
-  }
-
-  /**
-   * A specific package to import.  Not supported yet.
-   *
-   * @param pckg A specific package to import.  Not supported yet.
-   */
-  public void setPackage(String pckg) {
-    throw new UnsupportedOperationException("Adding additional classes by package isn't supported yet.");
-  }
+  private String pattern;
 
   /**
    * Whether to seek the source for these additional classes.
@@ -69,5 +42,23 @@ public class APIImport {
    */
   public void setSeekSource(boolean seekSource) {
     this.seekSource = seekSource;
+  }
+
+  /**
+   * The pattern (dot-delimited, ant-style) of classes to import.
+   *
+   * @return The pattern (dot-delimited, ant-style) of classes to import.
+   */
+  public String getPattern() {
+    return pattern;
+  }
+
+  /**
+   * The pattern (dot-delimited, ant-style) of classes to import.
+   *
+   * @param pattern The pattern (dot-delimited, ant-style) of classes to import.
+   */
+  public void setPattern(String pattern) {
+    this.pattern = pattern;
   }
 }

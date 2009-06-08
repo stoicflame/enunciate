@@ -291,7 +291,12 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    * Tests adding a root element declaration to the model.
    */
   public void testAddRootElementDeclaration() throws Exception {
-    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel() {
+      @Override
+      protected boolean includeReferencedClasses() {
+        return false;
+      }
+    };
     FreemarkerModel.set(model);
     int nsCount = model.getNamespacesToPrefixes().size();
     ClassDeclaration declaration = (ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree");

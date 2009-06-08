@@ -19,8 +19,8 @@ package org.codehaus.enunciate.apt;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.apt.Messager;
 import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.AnnotationType;
+import com.sun.mirror.type.ClassType;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.Context;
@@ -31,26 +31,27 @@ import net.sf.jelly.apt.freemarker.FreemarkerProcessor;
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.XmlTransient;
-import org.codehaus.enunciate.util.AntPatternMatcher;
-import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.contract.jaxb.*;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.jaxb.Registry;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.template.freemarker.*;
+import org.codehaus.enunciate.util.AntPatternMatcher;
 
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlRegistry;
-import javax.ws.rs.Path;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
+import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -137,65 +138,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) super.getRootModel();
     model.setEnunciateConfig(config);
 
+    //build up the list of all classes to which we are going to apply enunciate.
     TypeDeclaration[] additionalApiDefinitions = loadAdditionalApiDefinitions();
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Collection<TypeDeclaration> typeDeclarations = new ArrayList<TypeDeclaration>(env.getTypeDeclarations());
     typeDeclarations.addAll(Arrays.asList(additionalApiDefinitions));
-    AntPatternMatcher matcher = new AntPatternMatcher();
-    matcher.setPathSeparator(".");
-    if (!config.getApiIncludePatterns().isEmpty()) {
-      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
-      while (typeDeclarationIt.hasNext()) {
-        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
-        boolean include = false;
-        if (config.getApiIncludePatterns().contains(typeDeclaration.getQualifiedName())) {
-          include = true;
-          debug("%s was explicitly included.", typeDeclaration.getQualifiedName());
-        }
-        else {
-          for (String includePattern : config.getApiIncludePatterns()) {
-            if (matcher.match(includePattern, typeDeclaration.getQualifiedName())) {
-              include = true;
-              debug("%s matches include pattern %s.", typeDeclaration.getQualifiedName(), includePattern);
-              break;
-            }
-          }
-        }
 
-        if (!include) {
-          debug("%s NOT to be included as an API class because it didn't match any include pattern.", typeDeclaration);
-          typeDeclarationIt.remove();
-        }
-      }
-    }
+    //trim the classes that are not "include"d.
+    trimNotIncludedClasses(typeDeclarations);
 
-    if (!config.getApiExcludePatterns().isEmpty()) {
-      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
-      while (typeDeclarationIt.hasNext()) {
-        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
-        boolean exclude = false;
-        if (config.getApiExcludePatterns().contains(typeDeclaration.getQualifiedName())) {
-          exclude = true;
-          debug("%s was explicitly excluded.", typeDeclaration.getQualifiedName());
-        }
-        else {
-          for (String excludePattern : config.getApiExcludePatterns()) {
-            if (matcher.match(excludePattern, typeDeclaration.getQualifiedName())) {
-              exclude = true;
-              debug("%s matches exclude pattern %s.", typeDeclaration.getQualifiedName(), excludePattern);
-              break;
-            }
-          }
-        }
-
-        if (exclude) {
-          typeDeclarationIt.remove();
-        }
-        else {
-          debug("%s NOT to be excluded as an API class because it didn't match any exclude pattern.", typeDeclaration);
-        }
-      }
-    }
+    //remove any explicitly-excluded classes
+    removeExcludedClasses(typeDeclarations);
 
     //override any namespace prefix mappings as specified in the config.
     for (String ns : config.getNamespacesToPrefixes().keySet()) {
@@ -271,7 +224,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         model.add(registry);
       }
       else if (isPotentialSchemaType(declaration)) {
-        TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration);
+        TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration, model);
         loadTypeDef(typeDef, model);
       }
       else {
@@ -282,6 +235,80 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     validate(model);
 
     return model;
+  }
+
+  /**
+   * Remove any classes that are explicitly exluded from this (presumably modifiable) collection.
+   *
+   * @param typeDeclarations the declarations.
+   */
+  protected void removeExcludedClasses(Collection<TypeDeclaration> typeDeclarations) {
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    AntPatternMatcher matcher = new AntPatternMatcher();
+    matcher.setPathSeparator(".");
+    if (!config.getApiExcludePatterns().isEmpty()) {
+      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
+      while (typeDeclarationIt.hasNext()) {
+        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
+        boolean exclude = false;
+        if (config.getApiExcludePatterns().contains(typeDeclaration.getQualifiedName())) {
+          exclude = true;
+          debug("%s was explicitly excluded.", typeDeclaration.getQualifiedName());
+        }
+        else {
+          for (String excludePattern : config.getApiExcludePatterns()) {
+            if (matcher.match(excludePattern, typeDeclaration.getQualifiedName())) {
+              exclude = true;
+              debug("%s matches exclude pattern %s.", typeDeclaration.getQualifiedName(), excludePattern);
+              break;
+            }
+          }
+        }
+
+        if (exclude) {
+          typeDeclarationIt.remove();
+        }
+        else {
+          debug("%s NOT to be excluded as an API class because it didn't match any exclude pattern.", typeDeclaration);
+        }
+      }
+    }
+  }
+
+  /**
+   * Trim any classes that are not explicitly included from this (presumably modifiable) collection.
+   *
+   * @param typeDeclarations The declarations.
+   */
+  protected void trimNotIncludedClasses(Collection<TypeDeclaration> typeDeclarations) {
+    EnunciateConfiguration config = this.enunciate.getConfig();
+    AntPatternMatcher matcher = new AntPatternMatcher();
+    matcher.setPathSeparator(".");
+    if (!config.getApiIncludePatterns().isEmpty()) {
+      Iterator<TypeDeclaration> typeDeclarationIt = typeDeclarations.iterator();
+      while (typeDeclarationIt.hasNext()) {
+        TypeDeclaration typeDeclaration = typeDeclarationIt.next();
+        boolean include = false;
+        if (config.getApiIncludePatterns().contains(typeDeclaration.getQualifiedName())) {
+          include = true;
+          debug("%s was explicitly included.", typeDeclaration.getQualifiedName());
+        }
+        else {
+          for (String includePattern : config.getApiIncludePatterns()) {
+            if (matcher.match(includePattern, typeDeclaration.getQualifiedName())) {
+              include = true;
+              debug("%s matches include pattern %s.", typeDeclaration.getQualifiedName(), includePattern);
+              break;
+            }
+          }
+        }
+
+        if (!include) {
+          debug("%s NOT to be included as an API class because it didn't match any include pattern.", typeDeclaration);
+          typeDeclarationIt.remove();
+        }
+      }
+    }
   }
 
   /**
@@ -299,7 +326,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           additionalApiDefinitions.add(declaration);
         }
         else {
-          this.enunciate.warn("Unable to load type definition for additional API class '%s'.", additionalApiClass);
+          this.enunciate.warn("Unable to load type definition for imported API class '%s'.", additionalApiClass);
         }
       }
     }
@@ -314,12 +341,17 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
     if (typeDef != null) {
-      debug("%s to be considered as a %s (qname:{%s}%s).",
-           typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
-           typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
-           typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
+      if (!this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
+        debug("%s to be considered as a %s (qname:{%s}%s).",
+             typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
+             typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
+             typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
 
-      model.add(typeDef);
+        model.add(typeDef);
+      }
+      else {
+        debug("%s is a potential schema type definition, but we're not going to add it directly to the model. (It could still be indirectly added, though.)", typeDef.getQualifiedName());
+      }
 
       RootElementDeclaration rootElement = createRootElementDeclaration((ClassDeclaration) typeDef.getDelegate(), typeDef);
       if (rootElement != null) {
@@ -560,19 +592,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * Find the type definition for a class given the class's declaration, or null if the class is xml transient.
    *
    * @param declaration The declaration.
+   * @param model The model to use to create the type declaration.
    * @return The type definition.
    */
-  public TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
-    if (isEnumType(declaration)) {
-      return new EnumTypeDefinition((EnumDeclaration) declaration);
-    }
-    else if (isSimpleType(declaration)) {
-      return new SimpleTypeDefinition(declaration);
-    }
-    else {
-      //assume its a complex type.
-      return new ComplexTypeDefinition(declaration);
-    }
+  public TypeDefinition createTypeDefinition(ClassDeclaration declaration, EnunciateFreemarkerModel model) {
+    return model.createTypeDefinition(declaration);
   }
 
   /**
@@ -589,57 +613,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     else {
       return new RootElementDeclaration(declaration, typeDefinition);
     }
-  }
-
-  /**
-   * A quick check to see if a declaration defines a complex schema type.
-   */
-  protected boolean isComplexType(TypeDeclaration declaration) {
-    return !(declaration instanceof InterfaceDeclaration) && !isEnumType(declaration) && !isSimpleType(declaration);
-  }
-
-  /**
-   * A quick check to see if a declaration defines a enum schema type.
-   */
-  protected boolean isEnumType(TypeDeclaration declaration) {
-    return (declaration instanceof EnumDeclaration);
-  }
-
-  /**
-   * A quick check to see if a declaration defines a simple schema type.
-   */
-  protected boolean isSimpleType(TypeDeclaration declaration) {
-    if (declaration instanceof InterfaceDeclaration) {
-      if (declaration.getAnnotation(XmlType.class) != null) {
-        throw new ValidationException(declaration.getPosition(), "An interface must not be annotated with @XmlType.");
-      }
-
-      return false;
-    }
-
-    if (isEnumType(declaration)) {
-      return false;
-    }
-
-
-    ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
-    GenericTypeDefinition typeDef = new GenericTypeDefinition(classDeclaration);
-    return ((typeDef.getValue() != null) && (hasNeitherAttributesNorElements(typeDef)));
-  }
-
-  /**
-   * Whether the specified type definition has neither attributes nor elements.
-   *
-   * @param typeDef The type def.
-   * @return Whether the specified type definition has neither attributes nor elements.
-   */
-  protected boolean hasNeitherAttributesNorElements(GenericTypeDefinition typeDef) {
-    boolean none = (typeDef.getAttributes().isEmpty()) && (typeDef.getElements().isEmpty());
-    ClassDeclaration superDeclaration = ((ClassDeclaration) typeDef.getDelegate()).getSuperclass().getDeclaration();
-    if (!Object.class.getName().equals(superDeclaration.getQualifiedName())) {
-      none &= hasNeitherAttributesNorElements(new GenericTypeDefinition(superDeclaration));
-    }
-    return none;
   }
 
   /**

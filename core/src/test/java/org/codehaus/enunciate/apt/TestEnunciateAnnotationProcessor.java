@@ -82,6 +82,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     EnunciateConfiguration config = new EnunciateConfiguration();
     config.putNamespace("urn:test", "test");
     config.putNamespace("http://enunciate.codehaus.org/samples/contract", "tContract");
+    config.setExcludeUnreferencedClasses(false);
 
     final boolean[] validated = new boolean[]{false};
     Enunciate enunciate = new Enunciate(new String[0]);
@@ -106,7 +107,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       }
 
       @Override
-      public TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
+      public TypeDefinition createTypeDefinition(ClassDeclaration declaration, EnunciateFreemarkerModel model) {
         if ("org.codehaus.enunciate.samples.schema.BeanOne".equals(declaration.getQualifiedName())) {
           return new ComplexTypeDefinition(declaration);
         }
@@ -136,6 +137,76 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     assertEquals("One and only one root elements should have been found.", 1, model.rootElements.size());
     assertNotNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne")));
     assertNotNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo")));
+    assertNotNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
+    assertNotNull(model.findRootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
+    assertTrue(validated[0]);
+    assertEquals("tContract", model.getNamespacesToPrefixes().get("http://enunciate.codehaus.org/samples/contract"));
+    assertEquals("test", model.getNamespacesToPrefixes().get("urn:test"));
+
+    //todo: test that the REST endpoints are corrected added to the model.
+  }
+
+  /**
+   * Tests getting the root model.
+   */
+  public void testGetRootModelExcludingUnreferenced() throws Exception {
+    EnunciateConfiguration config = new EnunciateConfiguration();
+    config.putNamespace("urn:test", "test");
+    config.putNamespace("http://enunciate.codehaus.org/samples/contract", "tContract");
+
+    final boolean[] validated = new boolean[]{false};
+    Enunciate enunciate = new Enunciate(new String[0]);
+    enunciate.setConfig(config);
+    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor(enunciate) {
+      @Override
+      protected void validate(EnunciateFreemarkerModel model) {
+        validated[0] = true;
+      }
+
+      @Override
+      public boolean isEndpointInterface(TypeDeclaration declaration) {
+        return "org.codehaus.enunciate.samples.services.NamespacedWebService".equals(declaration.getQualifiedName());
+      }
+
+      @Override
+      protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
+        boolean potentialSchemaType = "org.codehaus.enunciate.samples.schema".equals(declaration.getPackage().getQualifiedName());
+        String simpleName = declaration.getSimpleName();
+        potentialSchemaType &= (simpleName.equals("BeanOne") || simpleName.equals("BeanTwo") || simpleName.equals("BeanThree"));
+        return potentialSchemaType;
+      }
+
+      @Override
+      public TypeDefinition createTypeDefinition(ClassDeclaration declaration, EnunciateFreemarkerModel model) {
+        if ("org.codehaus.enunciate.samples.schema.BeanOne".equals(declaration.getQualifiedName())) {
+          return new ComplexTypeDefinition(declaration);
+        }
+        else if ("org.codehaus.enunciate.samples.schema.BeanTwo".equals(declaration.getQualifiedName())) {
+          return new ComplexTypeDefinition(declaration);
+        }
+        else if ("org.codehaus.enunciate.samples.schema.BeanThree".equals(declaration.getQualifiedName())) {
+          return new ComplexTypeDefinition(declaration);
+        }
+
+        throw new AssertionFailedError(declaration.getQualifiedName() + " shouldn't have been considered as a potential schema type.");
+      }
+
+      @Override
+      public RootElementDeclaration createRootElementDeclaration(ClassDeclaration declaration, TypeDefinition typeDefinition) {
+        if ("org.codehaus.enunciate.samples.schema.BeanThree".equals(declaration.getQualifiedName())) {
+          return new RootElementDeclaration(declaration, typeDefinition);
+        }
+
+        return null;
+      }
+    };
+
+    EnunciateFreemarkerModel model = processor.getRootModel();
+    assertEquals("One and only one endpoint interface should have been found.", 1, model.endpointInterfaces.size());
+    assertEquals("One and only one type definitions should have been found (unreferenced types are excluded).", 1, model.typeDefinitions.size());
+    assertEquals("One and only one root elements should have been found.", 1, model.rootElements.size());
+    assertNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne")));
+    assertNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo")));
     assertNotNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
     assertNotNull(model.findRootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
     assertTrue(validated[0]);
@@ -250,12 +321,12 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
    * Whether a type is a simple type.
    */
   public void testIsSimpleType() throws Exception {
-    EnunciateAnnotationProcessor processor = new EnunciateAnnotationProcessor();
-    assertFalse(processor.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne")));
-    assertFalse(processor.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo")));
-    assertFalse(processor.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
-    assertFalse(processor.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeComplexContentBean")));
-    assertTrue(processor.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeSimpleContentBean")));
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel ();
+    assertFalse(model.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanOne")));
+    assertFalse(model.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo")));
+    assertFalse(model.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
+    assertFalse(model.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeComplexContentBean")));
+    assertTrue(model.isSimpleType(getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeSimpleContentBean")));
   }
 
   private static class MockValidator extends BaseValidator {
