@@ -249,7 +249,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private String gwtHome = System.getProperty("gwt.home") == null ? System.getenv("GWT_HOME") : System.getProperty("gwt.home");
   private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
   private final List<String> gwtCompilerArgs = new ArrayList<String>();
-  private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
+  private String gwtCompilerClass;
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
   private Boolean enableGWT15;
@@ -337,6 +337,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
       if (getEnableGWT16() == null) {
         setEnableGWT16(aboutSays16);
+      }
+
+      if (getGwtCompilerClass() == null) {
+        setGwtCompilerClass(getEnableGWT16() ? "com.google.gwt.dev.Compiler" : "com.google.gwt.dev.GWTCompiler");
       }
     }
   }
