@@ -17,8 +17,6 @@
 package org.codehaus.enunciate.modules.spring_app;
 
 import org.aopalliance.aop.Advice;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -26,17 +24,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Factory bean for creating service bean instances.
@@ -44,8 +39,6 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 public class ServiceEndpointFactoryBean extends ApplicationObjectSupport implements FactoryBean {
-
-  private static final Log LOG = LogFactory.getLog(ServiceEndpointFactoryBean.class);
 
   private boolean initialized = false;
   private final List<Object> interceptors = new ArrayList<Object>();
@@ -89,20 +82,22 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
     }
 
     if (serviceImplementationBean == null) {
-      Map serviceInterfaceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, serviceInterface);
-
+      List<String> beanNames = new ArrayList<String>(Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, this.serviceInterface, false, false)));
       //now remove all beans that were created by a ServiceEndpointFactoryBean...
-      Map endpointFactoryBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ServiceEndpointFactoryBean.class, false, false);
-      for (Object beanName : endpointFactoryBeans.keySet()) {
-        serviceInterfaceBeans.remove(beanName);
+      Iterator<String> beanNamesIt = beanNames.iterator();
+      while (beanNamesIt.hasNext()) {
+        String factoryName = BeanFactory.FACTORY_BEAN_PREFIX + beanNamesIt.next();
+        if ((context.containsBean(factoryName)) && (ServiceEndpointFactoryBean.class.isAssignableFrom(context.getType(factoryName)))) {
+          beanNamesIt.remove();
+        }
       }
 
-      if (serviceInterfaceBeans.size() > 1) {
+      if (beanNames.size() > 1) {
         //panic: can't determine the service bean to use.
         StringBuilder builder = new StringBuilder("There are more than one beans of type ");
         builder.append(serviceInterface.getName());
         builder.append(" in the application context (");
-        Iterator beanNameIt = serviceInterfaceBeans.keySet().iterator();
+        Iterator beanNameIt = beanNames.iterator();
         while (beanNameIt.hasNext()) {
           Object beanName = beanNameIt.next();
           builder.append(beanName);
@@ -121,9 +116,9 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
         }
         throw new ApplicationContextException(builder.toString());
       }
-      else if (serviceInterfaceBeans.size() == 1) {
+      else if (beanNames.size() == 1) {
         //if there is only one defined, use that instead.
-        serviceImplementationBean = serviceInterfaceBeans.values().iterator().next();
+        serviceImplementationBean = context.getBean(beanNames.get(0));
       }
     }
 

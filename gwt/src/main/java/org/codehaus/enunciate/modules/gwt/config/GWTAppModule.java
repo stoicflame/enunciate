@@ -80,4 +80,13 @@ public class GWTAppModule {
   public void setShellPage(String shellPage) {
     this.shellPage = shellPage;
   }
+
+  /**
+   * The HTML page for the GWT shell.
+   *
+   * @param shellPage The HTML page for the GWT shell.
+   */
+  public void setHostPage(String shellPage) {
+    this.shellPage = shellPage;
+  }
 }

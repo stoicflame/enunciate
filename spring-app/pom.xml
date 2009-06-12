@@ -34,11 +34,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>jsr250-api</artifactId>
-    </dependency>
-
   </dependencies>
 
 </project>

@@ -76,6 +76,13 @@
     </dependency>
 
     <dependency>
+      <!-- declaring this dep to override spring-security-openid's dep -->
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-openid</artifactId>
       <optional>true</optional>
@@ -87,12 +94,6 @@
       <optional>true</optional>
     </dependency>
 
-    <dependency>
-      <!--depdency contains @RolesAllowed, @RolesDenied, etc.-->
-      <groupId>javax.annotation</groupId>
-      <artifactId>jsr250-api</artifactId>
-      <optional>true</optional>
-    </dependency>
   </dependencies>
 
 </project>

@@ -8,4 +8,11 @@ ${typeDef.qualifiedName}
 ${element.qualifiedName}
     [/#list]
   [/#list]
+  [@forEachWsdl]
+  [@forEachWebFault]
+    [#if webFault.implicitSchemaElement][#--sometimes we could leverage the fault beans for error responses.--]
+${webFault.implicitFaultBeanQualifiedName}
+    [/#if]
+  [/@forEachWebFault]
+  [/@forEachWsdl]
 [/@file]

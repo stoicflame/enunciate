@@ -53,8 +53,8 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
     return ${endpointInterface.qualifiedName}.class;
   }
 
-  @org.springframework.beans.factory.annotation.Autowired ( required = false )
-  public void setServiceBean(@org.springframework.beans.factory.annotation.Qualifier( "service-oriented-endpoint" ) ${endpointInterface.qualifiedName} serviceBean) {
+  @javax.annotation.Resource ( name = "${endpointInterface.serviceEndpointId}" )
+  public void setServiceBean(${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
 }

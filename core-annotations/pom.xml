@@ -11,4 +11,11 @@
   <name>Enunciate - Core Annotations</name>
   <description>Enunciate core annotations.</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>jsr250-api</artifactId>
+    </dependency>
+  </dependencies>
+
 </project>

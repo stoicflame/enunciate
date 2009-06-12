@@ -212,8 +212,8 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
   }
 
   // Inherited.
-  public String getServiceEndpointName() {
-    return getRESTEndpoint().getName();
+  public String getServiceEndpointId() {
+    return "enunciate:resource:" + getDeclaringType().getSimpleName();
   }
 
   // Inherited.
@@ -224,10 +224,6 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
   // Inherited.
   public TypeDeclaration getServiceEndpointDefaultImplementation() {
     return getRESTEndpoint();
-  }
-
-  public List<String> getEndpointQualifiers() {
-    return Arrays.asList("resource-oriented-endpoint");
   }
 
   /**

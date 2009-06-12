@@ -18,14 +18,20 @@ package org.codehaus.enunciate.contract;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 
-import java.util.List;
-
 /**
- * Common interface for service endpoints.
+ * Common interface for service endpoints, whether they be service-oriented (i.e. SOAP) or resource-oriented (e.g. REST).
  *
  * @author Ryan Heaton
  */
 public interface ServiceEndpoint {
+
+  /**
+   * A unique id for this service endpoint. Note that in the case where a specific class represents both a service-oriented endpoint
+   * and a resource-oriented endpoint, this id *should* be different depending on which endpoint it's representing.
+   *
+   * @return A unique id for this service endpoint.
+   */
+  String getServiceEndpointId();
 
   /**
    * The interface that defines this service endpoint.
@@ -41,10 +47,4 @@ public interface ServiceEndpoint {
    */
   TypeDeclaration getServiceEndpointDefaultImplementation();
 
-  /**
-   * Additional qualifiers for this endpoint (used to identify the endpoint from other endpoints of the same type).
-   *
-   * @return Additional qualifiers for this endpoint (used to identify the endpoint from other endpoints of the same type).
-   */
-  List<String> getEndpointQualifiers();
 }

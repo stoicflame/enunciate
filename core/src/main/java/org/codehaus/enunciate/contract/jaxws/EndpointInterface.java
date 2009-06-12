@@ -111,8 +111,8 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
   }
 
   // Inherited.
-  public String getServiceEndpointName() {
-    return getSimpleName();
+  public String getServiceEndpointId() {
+    return "enunciate:service:" + getSimpleName();
   }
 
   // Inherited.
@@ -327,10 +327,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
     }
 
     return style;
-  }
-
-  public List<String> getEndpointQualifiers() {
-    return Arrays.asList("service-oriented-endpoint");
   }
 
   // Inherited.

@@ -151,7 +151,9 @@ import java.util.*;
  * <li>The "name" attribute specifies the name of the module. This is usually of the form "com.mycompany.MyModule" and it always has a corresponding
  * ".gwt.xml" module file.</li>
  * <li>The "outputDir" attribute specifies where the compiled module will be placed, relative to the application directory.  By default, the
- * outputDir is the empty string (""), which means the compiled module will be placed at the root of the application directory.</li>
+ * outputDir is the empty string (""), which means the compiled module will be placed at the root of the application directory. <u>Note: as of GWT 1.6,
+ * a new "war" directory structure is supported, along with support to control the directory where the GWT compiler puts the compiled application. Because
+ * of this, the "outputDir" attribute will only be honored if not using GWT 1.6 or above.</u></li>
  * <li>The "shellPage" attribute specifies the (usually HTML) page to open when invoking the shell for this module (used to generate the shell script). By
  * default, the shell page is the [moduleId].html, where [moduleId] is the (short, unqualified) name of the module.</li>
  * </ul>
@@ -159,6 +161,11 @@ import java.util.*;
  * <h3>The "gwtCompileJVMArg" element</h3>
  *
  * <p>The "gwtCompileJVMArg" element is used to specify additional JVM parameters that will be used when invoking GWTCompile.  It supports a single
+ * "value" attribute.</p>
+ *
+ * <h3>The "gwtCompilerArg" element</h3>
+ *
+ * <p>The "gwtCompilerArg" element is used to specify additional arguments that will be psssed to the GWT compiler.  It supports a single
  * "value" attribute.</p>
  *
  * <h3>Example Configuration</h3>
@@ -170,7 +177,7 @@ import java.util.*;
  * &nbsp;&nbsp;&lt;modules&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;gwt disabled="false"
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rpcModuleName="com.mycompany.MyGWTRPCModule"
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.4.60"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.5.2"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/mainapp"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyRootModule"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputPath="two"/&gt;
@@ -223,7 +230,6 @@ import java.util.*;
  * <li>The "gwt.server.src.dir" artifact is the directory where the server-side source code is generated.</li>
  * <li>The "gwt.app.dir" artifact is the directory to which the GWT AJAX apps are compiled.</li>
  * <li>The "[appName].[moduleName].shell" artifact is the GWT shell script used to invoke the gwt shell for the module [moduleName] in app [appName].</li>
- * <li>The "[appName].[moduleName].shell.noserver" artifact is the GWT shell script used to invoke the gwt shell for the module [moduleName] in app [appName].
  * Script is different from the alternative in that it assumes a server is already running before invoking the GWTShell.</li>
  * </ul>
  *
@@ -242,10 +248,12 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   private final GWTRuleSet configurationRules = new GWTRuleSet();
   private String gwtHome = System.getProperty("gwt.home") == null ? System.getenv("GWT_HOME") : System.getProperty("gwt.home");
   private final List<String> gwtCompileJVMArgs = new ArrayList<String>();
+  private final List<String> gwtCompilerArgs = new ArrayList<String>();
   private String gwtCompilerClass = "com.google.gwt.dev.GWTCompiler";
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
   private Boolean enableGWT15;
+  private Boolean enableGWT16;
 
   public GWTDeploymentModule() {
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
@@ -265,10 +273,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
 
     if (!isDisabled()) {
       if (rpcModuleName == null) {
-        throw new EnunciateException("You must specify a \"gwtModuleName\" for the GWT module.");
+        throw new EnunciateException("You must specify a \"rpcModuleName\" for the GWT module.");
       }
       if (rpcModuleNamespace == null) {
-        throw new EnunciateException("You must specify a \"gwtModuleNamespace\" for the GWT module.");
+        throw new EnunciateException("You must specify a \"rpcModuleNamespace\" for the GWT module.");
       }
 
       if (gwtApps.size() > 0) {
@@ -293,31 +301,42 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
         }
       }
 
-      if (getEnableGWT15() == null) {
-        boolean useGWT15 = false;
-        if (this.gwtHome != null) {
-          File about = new File(gwtHome, "about.txt");
-          if (about.exists()) {
-            try {
-              BufferedReader reader = new BufferedReader(new FileReader(about));
-              String line = reader.readLine();
-              if (line != null) {
-                useGWT15 = line.contains("1.5");
-                if (useGWT15) {
-                  debug("It appears GWT 1.5 is being used, according to %s.", about);
-                }
-                else {
-                  debug("It appears GWT 1.5 is NOT being used, according to %s.", about);
-                }
-              }
-              reader.close();
+      boolean aboutSays14 = false;
+      boolean aboutSays16 = false;
+      if (this.gwtHome != null) {
+        File about = new File(gwtHome, "about.txt");
+        if (about.exists()) {
+          try {
+            BufferedReader reader = new BufferedReader(new FileReader(about));
+            String line = reader.readLine();
+            if (line != null) {
+              aboutSays14 = line.contains("1.4");
+              aboutSays16 = line.contains("1.6");
             }
-            catch (IOException e) {
-              //fall through...
-            }
+            reader.close();
+          }
+          catch (IOException e) {
+            //fall through...
           }
         }
-        setEnableGWT15(useGWT15);
+      }
+
+      if (getEnunciate().isDebug()) {
+        if (aboutSays14) {
+          debug("It appears GWT 1.4 is being used, according to %s.", (this.gwtHome + File.separatorChar + "about.txt"));
+        }
+
+        if (aboutSays16) {
+          debug("It appears GWT 1.6 is being used, according to %s.", (this.gwtHome + File.separatorChar + "about.txt"));
+        }
+      }
+
+      if (getEnableGWT15() == null) {
+        setEnableGWT15(!aboutSays14);
+      }
+
+      if (getEnableGWT16() == null) {
+        setEnableGWT16(aboutSays16);
       }
     }
   }
@@ -557,60 +576,57 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     //so here's the GWT compile command:
     //java [extra jvm args] -cp [classpath] [compilerClass] -gen [gwt-gen-dir] -style [style] -out [out] [moduleName]
     List<String> jvmargs = getGwtCompileJVMArgs();
-    String[] commandArray = new String[jvmargs.size() + 11];
+    List<String> compilerArgs = getGwtCompilerArgs();
+    List<String> gwtcCommand = new ArrayList<String>(jvmargs.size() + compilerArgs.size() + 11);
     int argIndex = 0;
-    commandArray[argIndex++] = javaCommand;
-    while (argIndex - 1 < jvmargs.size()) {
-      String arg = jvmargs.get(argIndex - 1);
-      commandArray[argIndex++] = arg;
+    gwtcCommand.add(argIndex++, javaCommand);
+    for (String arg : jvmargs) {
+      gwtcCommand.add(argIndex++, arg);
     }
-    commandArray[argIndex++] = "-cp";
+    gwtcCommand.add(argIndex++, "-cp");
     int classpathArgIndex = argIndex; //app-specific arg.
-    commandArray[argIndex++] = null;
+    gwtcCommand.add(argIndex++, null);
     int compileClassIndex = argIndex;
-    commandArray[argIndex++] = getGwtCompilerClass();
-    commandArray[argIndex++] = "-gen";
-    commandArray[argIndex++] = getGwtGenDir().getAbsolutePath();
-    commandArray[argIndex++] = "-style";
+    gwtcCommand.add(argIndex++, getGwtCompilerClass());
+    gwtcCommand.add(argIndex++, "-gen");
+    gwtcCommand.add(argIndex++, getGwtGenDir().getAbsolutePath());
+    gwtcCommand.add(argIndex++, "-style");
     int styleArgIndex = argIndex;
-    commandArray[argIndex++] = null; //app-specific arg.
-    commandArray[argIndex++] = "-out";
+    gwtcCommand.add(argIndex++, null); //app-specific arg.
+    gwtcCommand.add(argIndex++, getEnableGWT16() ? "-war" : "-out");
     int outArgIndex = argIndex;
-    commandArray[argIndex++] = null; //app-specific arg.
+    gwtcCommand.add(argIndex++, null); //app-specific arg.
+    for (String arg : compilerArgs) {
+      gwtcCommand.add(argIndex++, arg);
+    }
     int moduleNameIndex = argIndex;
-    commandArray[argIndex] = null; //module-specific arg.
+    gwtcCommand.add(argIndex, null); //module-specific arg.
 
     for (GWTApp gwtApp : gwtApps) {
       String appName = gwtApp.getName();
       File appSource = enunciate.resolvePath(gwtApp.getSrcDir());
       String style = gwtApp.getJavascriptStyle().toString();
       File appDir = getAppGenerateDir(appName);
-      String out = appDir.getAbsolutePath();
 
-      commandArray[classpathArgIndex] = classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath();
-      commandArray[styleArgIndex] = style;
-      commandArray[outArgIndex] = out;
+      gwtcCommand.set(classpathArgIndex, classpath.toString() + File.pathSeparatorChar + appSource.getAbsolutePath());
+      gwtcCommand.set(styleArgIndex, style);
+      gwtcCommand.set(outArgIndex, appDir.getAbsolutePath());
 
       boolean upToDate = enunciate.isUpToDate(getClientSideGenerateDir(), appDir) && enunciate.isUpToDate(appSource, appDir);
       if (!upToDate) {
         for (GWTAppModule appModule : gwtApp.getModules()) {
           String moduleName = appModule.getName();
-          String outputPath = appModule.getOutputPath();
-          File moduleOutputDir = appDir;
-          if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
-            moduleOutputDir = new File(appDir, outputPath);
-          }
 
-          commandArray[moduleNameIndex] = moduleName;
+          gwtcCommand.set(moduleNameIndex, moduleName);
           info("Executing GWTCompile for module '%s'...", moduleName);
           if (enunciate.isDebug()) {
             StringBuilder command = new StringBuilder();
-            for (String commandPiece : commandArray) {
+            for (String commandPiece : gwtcCommand) {
               command.append(' ').append(commandPiece);
             }
             debug("Executing GWTCompile for module %s with the command: %s", moduleName, command);
           }
-          ProcessBuilder processBuilder = new ProcessBuilder(commandArray);
+          ProcessBuilder processBuilder = new ProcessBuilder(gwtcCommand);
           processBuilder.directory(getGenerateDir());
           processBuilder.redirectErrorStream(true);
           Process process = processBuilder.start();
@@ -633,60 +649,56 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
             throw new EnunciateException("GWT compile failed for module " + moduleName);
           }
 
-          File moduleGenDir = new File(appDir, moduleName);
-          if (!moduleOutputDir.equals(moduleGenDir)) {
-            moduleOutputDir.mkdirs();
-            enunciate.copyDir(moduleGenDir, moduleOutputDir);
-            deleteDir(moduleGenDir);
+          if (!getEnableGWT16()) {
+            String outputPath = appModule.getOutputPath();
+            File moduleOutputDir = appDir;
+            if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
+              moduleOutputDir = new File(appDir, outputPath);
+            }
+
+            File moduleGenDir = new File(appDir, moduleName);
+            if (!moduleOutputDir.equals(moduleGenDir)) {
+              moduleOutputDir.mkdirs();
+              enunciate.copyDir(moduleGenDir, moduleOutputDir);
+              deleteDir(moduleGenDir);
+            }
           }
 
           StringBuilder shellCommand = new StringBuilder();
-          StringBuilder noServerShellCommand = new StringBuilder();
-          for (int i = 0; i < commandArray.length; i++) {
-            String commandArg = commandArray[i];
+          for (int i = 0; i < moduleNameIndex; i++) {
+            String commandArg = gwtcCommand.get(i);
             if (i == compileClassIndex) {
-              commandArg = "com.google.gwt.dev.GWTShell";
-            }
-            else if (i == moduleNameIndex) {
-              //when invoking the shell, it requires a URL to load.
-              //The URL is the [moduleName]/[shellPage.html]
-              noServerShellCommand.append("-noserver ");
-
-              shellCommand.append(windows ? "%*" : "$@").append(' ');
-              noServerShellCommand.append(windows ? "%*" : "$@").append(' ');
-
-              shellCommand.append(moduleName).append('/');
-              if ((appName != null) && (appName.trim().length() > 0)) {
-                //the no-server shell command assumes the app is deployed according to its place in the generated war file
-                noServerShellCommand.append(appName).append('/');
-              }
-
-              String shellPage = getModuleId(moduleName) + ".html";
-              if (appModule.getShellPage() != null) {
-                shellPage = appModule.getShellPage();
-              }
-              shellCommand.append(shellPage);
-              noServerShellCommand.append(shellPage);
-              break;
+              commandArg = getEnableGWT16() ? "com.google.gwt.dev.HostedMode" : "com.google.gwt.dev.GWTShell";
             }
             else if (commandArg.indexOf(' ') >= 0) {
               commandArg = '"' + commandArg + '"';
             }
 
             shellCommand.append(commandArg).append(' ');
-            noServerShellCommand.append(commandArg).append(' ');
+          }
+
+          //add any extra args before the module name.
+          shellCommand.append(windows ? "%*" : "$@").append(' ');
+
+          String shellPage = getModuleId(moduleName) + ".html";
+          if (appModule.getShellPage() != null) {
+            shellPage = appModule.getShellPage();
+          }
+
+          if (!getEnableGWT16()) {
+            //when invoking the shell for GWT 1.4 or 1.5, it requires a URL to load.
+            //The URL is the [moduleName]/[shellPage.html]
+            shellCommand.append(moduleName).append('/').append(shellPage);
+          }
+          else {
+            //as of 1.6, you invoke it with -startupUrl [shellPage.html] [moduleName]
+            shellCommand.append("-startupUrl ").append(shellPage).append(' ').append(moduleName);
           }
 
           File scriptFile = getShellScriptFile(appName, moduleName);
           scriptFile.getParentFile().mkdirs();
           FileWriter writer = new FileWriter(scriptFile);
           writer.write(shellCommand.toString());
-          writer.flush();
-          writer.close();
-
-          File noServerScriptFile = new File(scriptFile.getParentFile(), scriptFile.getName() + "-noserver");
-          writer = new FileWriter(noServerScriptFile);
-          writer.write(noServerShellCommand.toString());
           writer.flush();
           writer.close();
 
@@ -698,10 +710,9 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
             }
             scriptArtifactId.append(moduleName).append(".shell");
             getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.toString(), shellFile));
-            getEnunciate().addArtifact(new FileArtifact(getName(), scriptArtifactId.append(".noserver").toString(), noServerScriptFile));
           }
           else {
-            info("No GWT shell script file exists at %s.  No artifact added.", shellFile);
+            debug("No GWT shell script file exists at %s.  No artifact added.", shellFile);
           }
         }
       }
@@ -831,17 +842,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     gwtUserDependency.setDescription("Base GWT classes.");
     gwtUserDependency.setGroupId("com.google.gwt");
     gwtUserDependency.setURL("http://code.google.com/webtoolkit/");
-    gwtUserDependency.setVersion("1.4.60");
+    gwtUserDependency.setVersion("1.5.2");
     clientDeps.add(gwtUserDependency);
-
-    MavenDependency gwtWidgetsDependency = new MavenDependency();
-    gwtWidgetsDependency.setId("gwt-widgets");
-    gwtWidgetsDependency.setArtifactType("jar");
-    gwtWidgetsDependency.setDescription("GWT widget library.");
-    gwtWidgetsDependency.setGroupId("org.gwtwidgets");
-    gwtWidgetsDependency.setURL("http://gwt-widget.sourceforge.net/");
-    gwtWidgetsDependency.setVersion("1.5.0");
-    clientDeps.add(gwtWidgetsDependency);
 
     ClientLibraryArtifact gwtClientArtifact = new ClientLibraryArtifact(getName(), "gwt.client.library", "GWT Client Library");
     gwtClientArtifact.setPlatform("JavaScript/GWT (Version 1.4.59)");
@@ -1206,6 +1208,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * Additional arguments to pass to the GWT compiler.
+   *
+   * @return Additional arguments to pass to the GWT compiler.
+   */
+  public List<String> getGwtCompilerArgs() {
+    return gwtCompilerArgs;
+  }
+
+  /**
+   * Additional argument to pass to the GWT compiler.
+   *
+   * @param arg The additional arg.
+   */
+  public void addGwtCompilerArg(String arg) {
+    this.gwtCompilerArgs.add(arg);
+  }
+
+  /**
    * The GWT compiler class.
    *
    * @return The GWT compiler class.
@@ -1309,6 +1329,27 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setEnableGWT15(Boolean enableGWT15) {
     this.enableGWT15 = enableGWT15;
+  }
+
+  /**
+   * Whether we're using GWT 1.6.
+   *
+   * @return Whether we're using GWT 1.6.
+   */
+  public Boolean getEnableGWT16() {
+    return enableGWT16;
+  }
+
+  /**
+   * Whether we're using GWT 1.6.
+   *
+   * @param enableGWT16 Whether we're using GWT 1.6.
+   */
+  public void setEnableGWT16(Boolean enableGWT16) {
+    this.enableGWT16 = enableGWT16;
+    if (enableGWT16) {
+      setEnableGWT15(true); //1.6 supports all 1.5 features.
+    }
   }
 
   // Inherited.

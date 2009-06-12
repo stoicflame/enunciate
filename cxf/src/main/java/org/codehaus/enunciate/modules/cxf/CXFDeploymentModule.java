@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.cxf;
 
 import freemarker.template.TemplateException;
+import org.apache.cxf.transport.servlet.CXFServlet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -26,19 +27,17 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
+import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
-import org.apache.cxf.transport.servlet.CXFServlet;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.TreeSet;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * <h1>CXF Module</h1>
@@ -86,7 +85,7 @@ import java.util.List;
 public class CXFDeploymentModule extends FreemarkerDeploymentModule {
 
   public CXFDeploymentModule() {
-    setDisabled(true); //disabled by default; still using XFire.
+    setDisabled(true); //disabled by default; using JAXWS RI by default.
   }
 
   /**
@@ -161,7 +160,6 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
-      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getCXFServletTemplateURL(), model);
     }

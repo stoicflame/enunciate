@@ -94,7 +94,7 @@
               <map>
       [#list nouns2methods.get(noun) as method]
         [#list method.verbs as verb]
-                <entry key="${verb}" value-ref="${endpointBeanId(method)}"/>
+                <entry key="${verb}" value-ref="${method.serviceEndpointId}"/>
         [/#list]
       [/#list]
               </map>

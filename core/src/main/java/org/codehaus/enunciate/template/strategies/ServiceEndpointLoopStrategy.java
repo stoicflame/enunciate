@@ -38,7 +38,7 @@ public class ServiceEndpointLoopStrategy extends EnunciateTemplateLoopStrategy<S
   protected Iterator<ServiceEndpoint> getLoop(TemplateModel model) throws TemplateException {
     Set<ServiceEndpoint> interfaces = new TreeSet<ServiceEndpoint>(new Comparator<ServiceEndpoint>() {
       public int compare(ServiceEndpoint e1, ServiceEndpoint e2) {
-        return e1.getServiceEndpointInterface().getQualifiedName().compareTo(e2.getServiceEndpointInterface().getQualifiedName());
+        return e1.getServiceEndpointId().compareTo(e2.getServiceEndpointId());
       }
     });
 

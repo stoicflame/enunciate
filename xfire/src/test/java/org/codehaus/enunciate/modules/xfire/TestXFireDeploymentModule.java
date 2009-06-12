@@ -64,6 +64,7 @@ public class TestXFireDeploymentModule extends InAPTTestCase {
         return model;
       }
     };
+    module.setDisabled(false);
     model.setEnunciateConfig(new EnunciateConfiguration(Arrays.asList((DeploymentModule) module)));
 
     Enunciate enunciate = new Enunciate(new String[0]);

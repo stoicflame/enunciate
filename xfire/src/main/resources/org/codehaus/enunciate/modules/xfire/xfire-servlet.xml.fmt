@@ -34,7 +34,7 @@
         <entry key="${endpointInterface.metaData.soapPath}">
           <bean parent="soap-endpoint">
             <property name="serviceClass" value="${impl.qualifiedName}"/>
-            <property name="serviceBean" ref="${endpointBeanId(endpointInterface)}"/>
+            <property name="serviceBean" ref="${endpointInterface.serviceEndpointId}"/>
           [#if wsdl.properties.filename?exists]
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">

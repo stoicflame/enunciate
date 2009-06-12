@@ -500,7 +500,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
 
       //standard spring configuration:
-      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("springImports", getSpringImportURIs());
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {

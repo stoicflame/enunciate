@@ -4,20 +4,18 @@ import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.core.spi.component.ioc.IoCComponentProvider;
-import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
 import com.sun.jersey.core.spi.component.ioc.IoCInstantiatedComponentProvider;
+import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
 import com.sun.jersey.core.spi.component.ioc.IoCProxiedComponentProvider;
 import com.sun.jersey.spi.spring.container.SpringComponentProviderFactory;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,23 +30,10 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
 
   private final Map<Class, AdvisedResourceFactory> resourceFactories = new HashMap<Class, AdvisedResourceFactory>();
   private List<Object> interceptors;
-  private final WebApplicationContext springApplicationContext;
 
   public EnunciateSpringComponentProviderFactory(ResourceConfig rc, WebApplicationContext applicationContext) {
     super(rc, (ConfigurableApplicationContext) applicationContext);
-    //I'd rather be doing this:
-    //applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
-    //But I have to do this because of a bug in spring using the @Qualifier annotation.
-    Object interceptors = null;
-    try {
-      //try to load the opitional service bean interceptors.
-      interceptors = applicationContext.getBean("service-bean-interceptors");
-    }
-    catch (BeansException e) {
-      //fall through...
-    }
-    this.interceptors = (List<Object>) interceptors;
-    this.springApplicationContext = applicationContext;
+    applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
   }
 
   @Override
@@ -117,8 +102,8 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
    *
    * @param interceptors The interceptors.
    */
-  @Autowired ( required = false )
-  public void setEnunciateInterceptors(@Qualifier ("enunciate-service-bean-interceptors") List<Object> interceptors) {
+  @Resource ( name = "service-bean-interceptors" )
+  public void setEnunciateInterceptors(List<Object> interceptors) {
     this.interceptors = interceptors;
   }
 

@@ -14,11 +14,11 @@
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         [#--todo: what about eis with the same name, different namespace?--]
-  <bean name="${endpointBeanId(endpointInterface)}:instrumented" class="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}">
-    <constructor-arg ref="${endpointBeanId(endpointInterface)}"/>
+  <bean name="${endpointInterface.serviceEndpointId}:instrumented" class="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}">
+    <constructor-arg ref="${endpointInterface.serviceEndpointId}"/>
   </bean>
   <wss:binding url="${endpointInterface.metaData.soapPath}" service="#jaxws-service-${endpointInterface.serviceName}" />
-  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}" bean="#${endpointBeanId(endpointInterface)}:instrumented"/>
+  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}" bean="#${endpointInterface.serviceEndpointId}:instrumented"/>
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

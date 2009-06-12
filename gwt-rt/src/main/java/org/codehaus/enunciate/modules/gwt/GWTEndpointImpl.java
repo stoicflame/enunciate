@@ -20,12 +20,12 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
 import org.codehaus.enunciate.service.SecurityExceptionChecker;
 import org.codehaus.enunciate.webapp.ComponentPostProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -132,7 +132,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
    *
    * @param securityChecker The security exception checker.
    */
-  @Autowired (required = false)
+  @Resource
   public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
     this.securityChecker = securityChecker;
   }

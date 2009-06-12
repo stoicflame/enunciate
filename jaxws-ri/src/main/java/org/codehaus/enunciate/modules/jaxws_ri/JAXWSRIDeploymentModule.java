@@ -18,9 +18,6 @@ package org.codehaus.enunciate.modules.jaxws_ri;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
-import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -31,8 +28,10 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
+import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
+import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
+import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +84,6 @@ import java.util.*;
 public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
 
   public JAXWSRIDeploymentModule() {
-    setDisabled(true); //disabled by default; still using XFire.
   }
 
   /**
@@ -116,6 +114,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
 
     if (!isDisabled()) {
       if (enunciate.isModuleEnabled("xfire")) {
+        throw new EnunciateException("The JAX-WS RI module requires you to disable the XFire module.");
+      }
+
+      if (enunciate.isModuleEnabled("cxf")) {
         throw new EnunciateException("The JAX-WS RI module requires you to disable the XFire module.");
       }
 
@@ -171,7 +173,6 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
-      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getJAXWSServletTemplateURL(), model);
 

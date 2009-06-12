@@ -21,8 +21,8 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
+import org.codehaus.enunciate.contract.rest.RESTNoun;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -32,7 +32,6 @@ import org.codehaus.enunciate.modules.rest.json.JsonContentHandler;
 import org.codehaus.enunciate.modules.rest.json.JsonSerializationMethod;
 import org.codehaus.enunciate.modules.rest.json.XStreamReferenceAction;
 import org.codehaus.enunciate.modules.rest.xml.JaxbXmlContentHandler;
-import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
@@ -430,7 +429,6 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
     model.put("defaultJsonSerialization", getDefaultJsonSerialization());
     model.put("xstreamReferenceAction", getXstreamReferenceAction());
     model.put("restSubcontext", getRestSubcontext());
-    model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
     model.put("handlerExceptionResolver", getHandlerExceptionResolver());
     model.put("conversionSupport", getConversionSupport());
  

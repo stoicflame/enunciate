@@ -24,11 +24,11 @@
   <!-- specifically named 'interceptors' so they can be autowired by name to basic spring handler mappings -->
   <util:list id="interceptors" xmlns:util="http://www.springframework.org/schema/util">
     [#list handlerInterceptors as interceptor]
-    [#if interceptor.interceptorClass?exists]
+      [#if interceptor.interceptorClass?exists]
     <bean class="${interceptor.interceptorClass}"/>
-    [#else]
+      [#else]
     <ref bean="${interceptor.beanName}"/>
-    [/#if]
+      [/#if]
     [/#list]
   </util:list>
   [/#if]
@@ -38,13 +38,13 @@
     <constructor-arg>
       <list>
         [#if globalServiceInterceptors?exists]
-        [#list globalServiceInterceptors as interceptor]
-        [#if interceptor.interceptorClass?exists]
+          [#list globalServiceInterceptors as interceptor]
+            [#if interceptor.interceptorClass?exists]
         <bean class="${interceptor.interceptorClass}"/>
-        [#else]
+            [#else]
         <ref bean="${interceptor.beanName}"/>
-        [/#if]
-        [/#list]
+            [/#if]
+          [/#list]
         [/#if]
         [#if securityEnabled]
         <ref bean="enunciate-security-interceptor"/>
@@ -54,12 +54,7 @@
   </bean>
   [@forEachServiceEndpoint]
 
-  <bean name="${endpointBeanId(endpoint)}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
-    [#if endpoint.endpointQualifiers?exists]
-    [#list endpoint.endpointQualifiers as qualifier]
-    <qualifier value="${qualifier}"/>
-    [/#list]
-    [/#if]
+  <bean name="${endpoint.serviceEndpointId}" class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
     <constructor-arg value="${endpoint.serviceEndpointInterface.qualifiedName}"/>
     <property name="defaultImplementationBeanName" value="${endpoint.serviceEndpointInterface.simpleName}EndpointBean"/>
     [#if endpoint.serviceEndpointDefaultImplementation?exists]
@@ -71,5 +66,10 @@
     [/#if]
   </bean>
   [/@forEachServiceEndpoint]
+  [#if !securityEnabled]
+
+  <!-- default, no-op, security checker --> 
+  <bean class="org.codehaus.enunciate.service.DefaultSecurityExceptionChecker"/>
+  [/#if]
 </beans>
 [/@file]

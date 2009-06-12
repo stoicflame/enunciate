@@ -16,15 +16,15 @@
 
 package org.codehaus.enunciate.template.strategies.jaxws;
 
+import net.sf.jelly.apt.TemplateException;
+import net.sf.jelly.apt.TemplateModel;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import net.sf.jelly.apt.TemplateException;
-import net.sf.jelly.apt.TemplateModel;
-import net.sf.jelly.apt.strategies.MissingParameterException;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,17 +40,22 @@ public class WebFaultLoopStrategy extends EnunciateTemplateLoopStrategy<WebFault
   private WsdlInfo wsdl;
 
   protected Iterator<WebFault> getLoop(TemplateModel model) throws TemplateException {
-    WsdlInfo wsdl = this.wsdl;
-    if (wsdl == null) {
-      throw new MissingParameterException("wsdl");
+    Collection<WsdlInfo> wsdls;
+    if (this.wsdl != null) {
+      wsdls = Arrays.asList(wsdl);
+    }
+    else {
+      wsdls = getNamespacesToWSDLs().values();
     }
 
     HashMap<String, WebFault> declaredFaults = new HashMap<String, WebFault>();
-    for (EndpointInterface ei : wsdl.getEndpointInterfaces()) {
-      Collection<WebMethod> webMethods = ei.getWebMethods();
-      for (WebMethod webMethod : webMethods) {
-        for (WebFault webFault : webMethod.getWebFaults()) {
-          declaredFaults.put(webFault.getQualifiedName(), webFault);
+    for (WsdlInfo wsdl : wsdls) {
+      for (EndpointInterface ei : wsdl.getEndpointInterfaces()) {
+        Collection<WebMethod> webMethods = ei.getWebMethods();
+        for (WebMethod webMethod : webMethods) {
+          for (WebFault webFault : webMethod.getWebFaults()) {
+            declaredFaults.put(webFault.getQualifiedName(), webFault);
+          }
         }
       }
     }

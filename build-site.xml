@@ -40,6 +40,7 @@
 
     <artifact:dependencies filesetId="core.libs.fileset">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-core" version="${top.pom.version}"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-csharp" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-docs" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-client" version="${top.pom.version}"/>
@@ -78,7 +79,6 @@
       <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.3"/>
       <dependency groupId="org.springframework.security" artifactId="spring-security-openid" version="2.0.3"/>
       <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.6"/>
-      <dependency groupId="javax.annotation" artifactId="jsr250-api" version="1.0"/>
       <dependency groupId="org.codehaus.jackson" artifactId="jackson-jaxrs" version="0.9.9"/>
     </artifact:dependencies>
     <patternset id="optional.jars.dependencies.patternset">
@@ -86,7 +86,7 @@
       <exclude name="**/commons-io*"/>
       <exclude name="**/spring-tx*"/>
       <exclude name="**/spring-security-*"/>
-      <exclude name="**/jsr250*"/>
+      <exclude name="**/jackson*"/>
     </patternset>
 
     <!--filters for docs-->

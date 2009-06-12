@@ -224,7 +224,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: gwt-rt-->
         <groupId>com.google.gwt</groupId>
         <artifactId>gwt-servlet</artifactId>
-        <version>1.4.60</version>
+        <version>1.5.2</version>
       </dependency>
 
       <dependency>
@@ -526,12 +526,6 @@ Then, define a profile in your settings.xml file that defines the path to your '
           </exclusion>
 
           <exclusion>
-            <!--We'll depend on standard annotations as needed (should be optional).-->
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
-          </exclusion>
-
-          <exclusion>
             <!--Excluding here because this artifact doesn't exist in the central repo-->
             <groupId>javax.jws</groupId>
             <artifactId>jsr181</artifactId>
@@ -706,7 +700,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.spring-security-oauth</groupId>
         <artifactId>spring-security-oauth</artifactId>
-        <version>2.6</version>
+        <version>2.10</version>
         <exclusions>
           <!--we'll depend on enunciate's version of these artifacts.-->
           <exclusion>

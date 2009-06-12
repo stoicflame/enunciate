@@ -76,19 +76,19 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
-      <version>1.4.60</version>
-<!--
-      change version to use GWT 1.5
       <version>1.5.2</version>
+<!--
+      change version to use GWT 1.6
+      <version>1.6.3</version>
 -->
     </dependency>
 
 <!--
-    uncomment to use GWT 1.5
+    uncomment to use GWT 1.6
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-servlet</artifactId>
-      <version>1.5.2</version>
+      <version>1.6.3</version>
     </dependency>
 -->
     <dependency>

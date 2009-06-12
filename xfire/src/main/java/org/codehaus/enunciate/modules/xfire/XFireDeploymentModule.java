@@ -28,7 +28,6 @@ import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.spring_app.ServiceEndpointBeanIdMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
@@ -81,6 +80,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   private String xfireBeansImport = "classpath:org/codehaus/xfire/spring/xfire.xml";
 
+  public XFireDeploymentModule() {
+    setDisabled(true); //disabled by default; using JAXWS RI by default.
+  }
+
   /**
    * @return "xfire"
    */
@@ -121,8 +124,18 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (!isDisabled() && !enunciate.isModuleEnabled("jaxws")) {
-      throw new EnunciateException("The XFire module requires an enabled JAXWS module.");
+    if (!isDisabled()) {
+      if (enunciate.isModuleEnabled("jaxws-ri")) {
+        throw new EnunciateException("The XFire module requires you to disable the JAX-WS RI module.");
+      }
+
+      if (enunciate.isModuleEnabled("cxf")) {
+        throw new EnunciateException("The XFire module requires you to disable the CXF module.");
+      }
+
+      if (!enunciate.isModuleEnabled("jaxws")) {
+        throw new EnunciateException("The XFire module requires an enabled JAXWS module.");
+      }
     }
   }
 
@@ -170,7 +183,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       model.put("xfireBeansImport", getXfireBeansImport());
-      model.put("endpointBeanId", new ServiceEndpointBeanIdMethod());
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getXfireServletTemplateURL(), model);
       processTemplate(getParameterNamesTemplateURL(), model);

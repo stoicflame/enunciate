@@ -841,6 +841,14 @@
               <xs:attribute name="value" type="xs:string" use="required"/>
             </xs:complexType>
           </xs:element>
+          <xs:element name="gwtCompilerArg" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>additional arguments that will be passed to the GWT compiler.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
 
         <xs:attribute name="gwtHome" type="xs:string">
