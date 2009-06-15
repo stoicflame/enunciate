@@ -389,23 +389,26 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
-    Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
+    if (!model.getNounsToRESTMethods().isEmpty()) {
+      Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
+      Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
+      contentTypes2Ids.put("application/json", "json"); //it's assumed we've got some json provider on the classpath...
 
-    for (Map.Entry<RESTNoun, List<RESTMethod>> nounMethodEntry : model.getNounsToRESTMethods().entrySet()) {
-      Map<String, Set<String>> subcontexts = new HashMap<String, Set<String>>();
-      RESTNoun restNoun = nounMethodEntry.getKey();
-      subcontexts.put(null, new TreeSet<String>(Arrays.asList(getRestSubcontext())));
-      for (String contentType : nouns2contentTypes.get(restNoun)) {
-        String contentTypeId = contentTypes2Ids.get(contentType);
-        if (contentTypeId != null) {
-          subcontexts.put(contentType, new TreeSet<String>(Arrays.asList("/" + contentTypeId)));
+      for (Map.Entry<RESTNoun, List<RESTMethod>> nounMethodEntry : model.getNounsToRESTMethods().entrySet()) {
+        Map<String, Set<String>> subcontexts = new HashMap<String, Set<String>>();
+        RESTNoun restNoun = nounMethodEntry.getKey();
+        subcontexts.put(null, new TreeSet<String>(Arrays.asList(getRestSubcontext())));
+        for (String contentType : nouns2contentTypes.get(restNoun)) {
+          String contentTypeId = contentTypes2Ids.get(contentType);
+          if (contentTypeId != null) {
+            subcontexts.put(contentType, new TreeSet<String>(Arrays.asList("/" + contentTypeId)));
+          }
         }
-      }
 
-      for (RESTMethod restMethod : nounMethodEntry.getValue()) {
-        restMethod.putMetaData("defaultSubcontext", getRestSubcontext());
-        restMethod.putMetaData("subcontexts", subcontexts);
+        for (RESTMethod restMethod : nounMethodEntry.getValue()) {
+          restMethod.putMetaData("defaultSubcontext", getRestSubcontext());
+          restMethod.putMetaData("subcontexts", subcontexts);
+        }
       }
     }
   }

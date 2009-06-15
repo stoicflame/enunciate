@@ -144,12 +144,13 @@
       <version>1.4</version>
     </dependency>
 
-    <!-- uncomment to get a JSON provider.  Left commented out to make sure we run if it's not on the classpath.
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
-      <version>0.9.9</version>
+      <version>1.0.0</version>
     </dependency>
+
+    <!-- uncomment to get a JSON provider.  Left commented out to make sure we run if it's not on the classpath.
     -->
 
     <dependency>

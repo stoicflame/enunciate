@@ -45,6 +45,7 @@ import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
@@ -111,8 +112,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected HashMap<String, String> loadKnownContentTypes() {
     HashMap<String, String> contentTypes = new HashMap<String, String>();
     contentTypes.put("application/xml", "xml");
-    contentTypes.put("application/json", "json");
-    contentTypes.put("application/x-amf", "amf");
     return contentTypes;
   }
 
@@ -606,6 +605,18 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
       for (String contentType : produces.value()) {
+        try {
+          addContentType(MimeType.parse(contentType).toString());
+        }
+        catch (Exception e) {
+          addContentType(contentType);
+        }
+      }
+    }
+    
+    Consumes consumes = declaration.getAnnotation(Consumes.class);
+    if (consumes != null) {
+      for (String contentType : consumes.value()) {
         try {
           addContentType(MimeType.parse(contentType).toString());
         }

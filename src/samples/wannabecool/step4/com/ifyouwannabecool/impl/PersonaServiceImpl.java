@@ -21,6 +21,7 @@ import com.ifyouwannabecool.api.PermissionDeniedException;
 import com.ifyouwannabecool.domain.persona.Persona;
 
 import javax.jws.WebService;
+import javax.ws.rs.Path;
 import java.util.Collection;
 import java.util.ArrayList;
 
@@ -32,7 +33,7 @@ import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 @WebService (
   endpointInterface = "com.ifyouwannabecool.api.PersonaService"
 )
-@RESTEndpoint
+@Path ( "/persona" )
 public class PersonaServiceImpl implements PersonaService {
 
 
@@ -40,12 +41,6 @@ public class PersonaServiceImpl implements PersonaService {
     Persona persona = new Persona();
     //...load the persona from the db, etc...
     return persona;
-  }
-
-  public Collection<Persona> readPersonas(String... personaIds) {
-    ArrayList<Persona> personas = new ArrayList<Persona>();
-    //... do the load, etc.
-    return personas;
   }
 
   public void storePersona(Persona persona) {

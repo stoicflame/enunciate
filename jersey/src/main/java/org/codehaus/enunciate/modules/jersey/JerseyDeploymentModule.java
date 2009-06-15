@@ -20,6 +20,7 @@ import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -27,6 +28,7 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
+import org.springframework.util.ClassUtils;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -104,8 +106,9 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_jersey.html
  */
-public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
+public class JerseyDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener {
 
+  private boolean jacksonAvailable = false;
   private boolean useSubcontext = true;
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
@@ -159,41 +162,63 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule {
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    Map<String, String> contentTypes2Ids = getModel().getContentTypesToIds();
-    for (RootResource resource : model.getRootResources()) {
-      for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
-        Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
-        String subcontext = isUseSubcontext() ? getRestSubcontext() : "";
-        debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
-              resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
-        subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
-        resourceMethod.putMetaData("defaultSubcontext", subcontext);
+    if (!model.getRootResources().isEmpty()) {
+      Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
 
-        if (isUsePathBasedConneg()) {
-          for (String producesMime : resourceMethod.getProducesMime()) {
-            MediaType producesType = MediaType.valueOf(producesMime);
+      if (getEnunciate().isModuleEnabled("amf")) { //if the amf module is enabled, we'll add amf rest endpoints.
+        contentTypes2Ids.put("application/x-amf", "amf");
+      }
+      else {
+        debug("AMF module has been disabled, so it's assumed the REST endpoints won't be available in AMF format.");
+      }
 
-            for (Map.Entry<String, String> contentTypeToId : contentTypes2Ids.entrySet()) {
-              MediaType type = MediaType.valueOf(contentTypeToId.getKey());
-              if (producesType.isCompatible(type)) {
-                String id = '/' + contentTypeToId.getValue();
-                debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
-                      resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
-                String contentTypeValue = String.format("%s/%s", producesType.getType(), producesType.getSubtype());
-                Set<String> subcontextList = subcontextsByContentType.get(contentTypeValue);
-                if (subcontextList == null) {
-                  subcontextList = new TreeSet<String>();
-                  subcontextsByContentType.put(contentTypeValue, subcontextList);
+      if (jacksonAvailable) {
+        contentTypes2Ids.put("application/json", "json"); //if we can load jackson, we've got json.
+      }
+      else {
+        debug("Couldn't find Jackson on the classpath, so it's assumed the REST endpoints aren't available in JSON format.");
+      }
+
+      for (RootResource resource : model.getRootResources()) {
+        for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+          Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
+          String subcontext = isUseSubcontext() ? getRestSubcontext() : "";
+          debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
+                resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
+          subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
+          resourceMethod.putMetaData("defaultSubcontext", subcontext);
+
+          if (isUsePathBasedConneg()) {
+            for (String producesMime : resourceMethod.getProducesMime()) {
+              MediaType producesType = MediaType.valueOf(producesMime);
+
+              for (Map.Entry<String, String> contentTypeToId : contentTypes2Ids.entrySet()) {
+                MediaType type = MediaType.valueOf(contentTypeToId.getKey());
+                if (producesType.isCompatible(type)) {
+                  String id = '/' + contentTypeToId.getValue();
+                  debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
+                        resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
+                  String contentTypeValue = String.format("%s/%s", type.getType(), type.getSubtype());
+                  Set<String> subcontextList = subcontextsByContentType.get(contentTypeValue);
+                  if (subcontextList == null) {
+                    subcontextList = new TreeSet<String>();
+                    subcontextsByContentType.put(contentTypeValue, subcontextList);
+                  }
+                  subcontextList.add(id);
                 }
-                subcontextList.add(id);
               }
             }
           }
-        }
 
-        resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
+          resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
+        }
       }
     }
+  }
+
+  // Inherited.
+  public void onClassesFound(Set<String> classes) {
+    jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJsonProvider");
   }
 
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {

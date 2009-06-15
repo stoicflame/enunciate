@@ -41,20 +41,43 @@
       consisting of an id, a group leader, the group members, and whether the group is exclusive.</p>
 
       <p>Next, we'll define the services available for our domain data.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService</a>
-      will define the operations available on a persona.  This includes operations for reading a persona, reading multiple personas, storing a persona, and
-      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService</a>
+      will define the operations available on a persona.  This includes operations for reading a persona, storing a persona, and
+      deleting a persona.  The <a href="wannabecool/java_step1/com/ifyouwannabecool/api/SocialGroupService.java.html">SocialGroupService</a>
       will carry the operations that deal with linking and grouping personas.  These operations include creating a link between two personas, creating a social group,
-      adding someone to a social group, and reading the social groups of a given persona.  Note that our two service interfaces are annotated with the
-      @javax.jws.WebService annotation to define them as web serivces, and the two exceptions are annotated with @javax.xml.ws.WebFault to mark them as
-      web faults.</p>
+      adding someone to a social group, and reading the social groups of a given persona.</p>
 
       <p>We also define the possible exceptions that can get thrown, including a <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException</a>
       when trying to create a link between two people, and an <a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException</a>
       when trying to add a persona to an exclusive group.</p>
 
       <p>After having defined our service interfaces, we create our implementation classes, <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl</a>
-      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl</a>.
-      Notice that the implementation classes reference their Web service interfaces with the @javax.jws.WebService annotation.</p>
+      and <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java.html">SocialGroupServiceImpl</a>.</p>
+
+      <h1>Apply the Metadata</h1>
+
+      <p>In order for our code to be identified as a Web service API, we need to apply some metadata in the form of Java annotations. We'll start by defining
+      an XML REST API using <a href="https://jsr311.dev.java.net/">JAX-RS</a> annotations. Our objects will be converted to XML using
+      <a href="https://jaxb.dev.java.net/">JAXB</a>.</p>
+
+      <p>A JAX-RS endpoint is identified by mapping it's <i>implementation</i> to an URI path using the <tt>@javax.ws.rs.Path</tt> annotation. We'll apply the
+      <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl</a> endpoint implementation to the "/persona"
+      path and the <a href="wannabecool/java_step1/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java.html">SocialGroupServiceImpl</a> to the "/group" path.</p>
+
+      <p>Then, using JAX-RS, we map each method to an HTTP operation and, optionally, to a subpath. We decide to apply method metadata on the interface that
+      defines the method. (Note that using interfaces isn't strictly necessary, but it may be convenient to do so if and/or when we apply some AOP or
+      dependency injection.)</p>
+
+      <p>So for the <a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService</a>, we will use an HTTP GET to access
+        the "readPersona" method and will pass in the persona id as a parameter on the path. We will use an HTTP POST operation to store a new persona, and an
+        HTTP DELETE method to delete a person.</p>
+
+      <p>Then, for the <a href="wannabecool/java_step1/com/ifyouwannabecool/api/SocialGroupService.java.html">SocialGroupService</a>, we will use an HTTP GET to
+        access the "readGroup" method and will pass in the group id as a parameter on the path. To store a new group, we will use the HTTP POST method and pass
+        in the parameters as HTTP query parameters. To add a persona to a group, we'll use a POST to the group path and pass in the persona id as a query 
+        parameter.</p>
+
+      <p>Because we're returning objects from a few of our REST API calls, we need to also apply the @XmlRootElement annotation so that JAXB will know
+      how to write out the root of our XML tree.</p>
 
       <p>So, we've got our domain defined along with some services that operate on the domain.  The source code structure looks like this:</p>
 
@@ -68,7 +91,7 @@ src
           |----api
           |    |
           |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
-          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/SocialGroupService.java.html">SocialGroupService.java</a>
           |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
           |    |----<a href="wannabecool/java_step1/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService.java</a>
           |
@@ -86,7 +109,7 @@ src
           |
           |----impl
                |
-               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java.html">SocialGroupServiceImpl.java</a>
                |----<a href="wannabecool/java_step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
       </code>
 

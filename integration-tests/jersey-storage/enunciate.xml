@@ -3,6 +3,7 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.11.xsd">
   <modules>
+    <amf disabled="false"/>
     <spring-app>
       <springImport file="custom-spring.xml"/>
     </spring-app>

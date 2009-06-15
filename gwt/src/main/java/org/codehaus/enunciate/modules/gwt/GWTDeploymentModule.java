@@ -420,6 +420,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("componentTypeFor", componentTypeFor);
       model.put("collectionTypeFor", collectionTypeFor);
+      model.put("gwtSubcontext", getGwtSubcontext());
 
       model.setFileOutputDirectory(clientSideGenerateDir);
 
@@ -654,8 +655,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
           }
 
           if (!getEnableGWT16()) {
-            String outputPath = appModule.getOutputPath();
             File moduleOutputDir = appDir;
+            String outputPath = appModule.getOutputPath();
             if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
               moduleOutputDir = new File(appDir, outputPath);
             }

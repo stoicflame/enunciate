@@ -784,7 +784,7 @@
                         <p>Produceable MIME types:</p>
                         <ul>
                           <xsl:for-each select="contentType[@produceable='true']">
-                            <li><xsl:value-of select="@type"/><xsl:if test="@subcontext"> (mounted at <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
+                            <li><xsl:value-of select="@type"/><xsl:if test="@subcontext"> (alternative mount point: <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
                           </xsl:for-each>
                         </ul>
                       </xsl:if>

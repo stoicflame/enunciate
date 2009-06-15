@@ -476,7 +476,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
         model.setVariable("title", this.title);
       }
 
-      model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
+      model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

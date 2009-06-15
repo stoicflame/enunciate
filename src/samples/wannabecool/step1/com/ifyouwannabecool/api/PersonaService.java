@@ -2,21 +2,23 @@ package com.ifyouwannabecool.api;
 
 import com.ifyouwannabecool.domain.persona.Persona;
 
-import javax.jws.WebService;
+import javax.ws.rs.*;
 import java.util.Collection;
 
 /**
  * @author Ryan Heaton
  */
-@WebService
 public interface PersonaService {
 
-  Persona readPersona(String personaId);
+  @Path("/{id}")
+  @GET
+  Persona readPersona(@PathParam ("id") String personaId);
 
-  Collection<Persona> readPersonas(String... personaIds);
-
+  @POST
   void storePersona(Persona persona);
 
-  boolean deletePersona(String personaId) throws PermissionDeniedException;
+  @Path("/{id}")
+  @DELETE
+  boolean deletePersona(@PathParam("id") String personaId) throws PermissionDeniedException;
 
 }

@@ -34,18 +34,18 @@
 
       <h1>Step 2: Enunciate the API</h1>
 
-      <p>To invoke Enunciate in our example, we're going to use the command-line scripts (as opposed to Ant or Maven).  We make sure we
-        have our <a href="executables.html">environment set up</a>, and invoke Enunciate on the source code (multi-line, single command, use the "-v" option
-        to see more output of what Enunciate is doing):</p>
+      <p>For this example, we're going to invoke Enunciate using the command-line scripts. We do this because it's easy to demonstrate, but you'll probably want
+        to use <a href="executables.html">Ant or Maven</a>. We make sure we have our <a href="executables.html">environment set up</a>, and invoke Enunciate
+        on the source code (multi-line, single command, use the "-v" option to see more output of what Enunciate is doing):</p>
 
       <code class="console">
 user@localhost&gt;enunciate -Espring.war.file ifyouwannabecool.war\
  src/com/ifyouwannabecool/api/ExclusiveGroupException.java\
  src/com/ifyouwannabecool/api/PermissionDeniedException.java\
- src/com/ifyouwannabecool/api/LinkageService.java\
+ src/com/ifyouwannabecool/api/SocialGroupService.java\
  src/com/ifyouwannabecool/api/PersonaService.java\
  src/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
- src/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java\
  src/com/ifyouwannabecool/domain/persona/Name.java\
  src/com/ifyouwannabecool/domain/persona/Persona.java\
  src/com/ifyouwannabecool/domain/link/Link.java\
@@ -53,7 +53,7 @@ user@localhost&gt;enunciate -Espring.war.file ifyouwannabecool.war\
       </code>
 
       <!--something like this is used from the svn sandbox:-->
-      <!--target/enunciate-dist/bin/enunciate -v -Espring.war.file target/wannabecool.war src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/LinkageService.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/LinkageServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java-->
+      <!--target/enunciate-dist/bin/enunciate -v -Espring.war.file target/wannabecool.war src/samples/wannabecool/step1/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/SocialGroupService.java src/samples/wannabecool/step1/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step1/com/ifyouwannabecool/domain/link/SocialGroup.java-->
 
       <p>You have successfully enunciated your web API.</p>
 

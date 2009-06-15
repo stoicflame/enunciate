@@ -49,7 +49,7 @@ src
           |----api
           |    |
           |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/ExclusiveGroupException.java.html">ExclusiveGroupException.java</a>
-          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/LinkageService.java.html">LinkageService.java</a>
+          |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/SocialGroupService.java.html">SocialGroupService.java</a>
           |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info.java</a>
           |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PermissionDeniedException.java.html">PermissionDeniedException.java</a>
           |    |----<a href="wannabecool/java_step4/com/ifyouwannabecool/api/PersonaService.java.html">PersonaService.java</a>
@@ -70,41 +70,34 @@ src
           |
           |----impl
                |
-               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java.html">LinkageServiceImpl.java</a>
+               |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java.html">SocialGroupServiceImpl.java</a>
                |----<a href="wannabecool/java_step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java.html">PersonaServiceImpl.java</a>
       </code>
 
       <ul>
         <li>
-          <h3>Add a REST API</h3>
-          <p>By adding a few annotations, and making sure our methods conform to <a href="module_rest.html#constraints">certain constraints</a>, our services are published as REST endpoints.
-            The "readPersona" method on the <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">PersonaService</a>,
-            for example, fits nicely into a RESTful HTTP GET.  We annotate the service and its implementation with the @RESTEndpoint annotation,
-            we assign the "read" verb (@Verb annotation) and the "perona" noun (@Noun annotation) to the readPersona method,
-            and declare the method's only parameter to be a proper noun with the @ProperNoun annotation.  Finally, we make sure the
-            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/Persona.java.html">Persona</a>
-            data type is declared as a root element with the @XmlRootElement annotation, and when enunciated and deployed, the method can be
-            invoked as a REST endpoint.</p>
-          <p>The REST endpoints are mounted under the "rest" subcontext, invoked by reference to their nouns.  For example, assuming the war artifact is
-            mounted at the "api" context, the readPersona REST method described above can be invoked on persona id "12345" with an HTTP GET at
-            http://www.ifyouwannabecool.com/api/rest/persona/12345.</p>
-          <p>For more information about the REST endpoint publication mechanism, see the <a href="module_rest.html">REST module</a> in the <a href="user_guide.html">user
-            guide</a></p>
+          <h3>Add a SOAP API</h3>
+          <p>Adding a SOAP API is as simple as applying the JAX-WS @WebService annotation to our service interfaces and to our service implementations. (Note
+          that per the JAX-WS specification, the implementation must reference the interface using the "endpointInterface" method on the annotation.) We
+          also apply the @WebFault annotation to our exceptions so they'll be translated to the client correctly.</p>
+          <p>There is, and always will be, debate around a SOAP API vs. a REST API. Whatever your opinion, there are advantages to defining a SOAP API, including
+          the ability to define your API with a WSDL and provide a well-defined set of operations to your client. And when it's this easy to define a SOAP API,
+          you may want to consider whether the advantages are worth it.</p>
         </li>
         <li>
           <h3>Removed the use of the default namespace</h3>
           <p>It is considered a "best practice" to namespace-qualify your domain API.  We did this with the use of the package-info.java files for the
            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/link/package-info.java.html">link API</a> and the
            <a href="wannabecool/java_step4/com/ifyouwannabecool/domain/persona/package-info.java.html">persona API</a>.  Namespace-qualifying your domain API
-            ensures maximum compatability as the use of the default namespace is confusing to implementation vendors.</p>
+            ensures maximum compatability as the use of the default namespace is confusing to implementation vendors. It also provides a mechanism for
+            versioning your API.</p>
         </li>
         <li>
           <h3>Add a splash package</h3>
           <p>You'll notice we added a <a href="wannabecool/java_step4/com/ifyouwannabecool/api/package-info.java.html">package-info
             file</a> to the "com.ifyouwannabecool.api" package.  This is where we added the introductory (i.e. "splash") documentation for our API.
             We want this documentation to show up on our index page for our documentation, so we specify this package as the splash packge in our
-            <a href="wannabecool/java_step4/enunciate.xml">configuration
-              file</a>. For more information, check out the <a href="user_guide.html">user guide</a>.</p>
+            <a href="wannabecool/java_step4/enunciate.xml">configuration file</a>. For more information, check out the <a href="user_guide.html">user guide</a>.</p>
         </li>
         <li>
           <h3>Documentation</h3>
@@ -114,8 +107,7 @@ src
         </li>
         <li>
           <h3>Specify a title and copyright</h3>
-          <p>We can specify a title and copyright to the generated documentation in the
-            <a href="wannabecool/java_step4/enunciate.xml">configuration
+          <p>We can specify a title and copyright to the generated documentation in the <a href="wannabecool/java_step4/enunciate.xml">configuration
               file</a>.</p>
         </li>
         <li>
@@ -162,10 +154,10 @@ user@localhost&gt;enunciate -f enunciate.xml -Espring.war.file ifyouwannabecool.
  src/com/ifyouwannabecool/api/package-info.java\
  src/com/ifyouwannabecool/api/ExclusiveGroupException.java\
  src/com/ifyouwannabecool/api/PermissionDeniedException.java\
- src/com/ifyouwannabecool/api/LinkageService.java\
+ src/com/ifyouwannabecool/api/SocialGroupService.java\
  src/com/ifyouwannabecool/api/PersonaService.java\
  src/com/ifyouwannabecool/impl/PersonaServiceImpl.java\
- src/com/ifyouwannabecool/impl/LinkageServiceImpl.java\
+ src/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java\
  src/com/ifyouwannabecool/domain/persona/Name.java\
  src/com/ifyouwannabecool/domain/persona/Persona.java\
  src/com/ifyouwannabecool/domain/link/Link.java\
@@ -173,7 +165,7 @@ user@localhost&gt;enunciate -f enunciate.xml -Espring.war.file ifyouwannabecool.
       </code>
 
       <!--something like this is used from the svn sandbox:-->
-      <!--target/enunciate-dist/bin/enunciate -f enunciate.xml -v -Espring.war.file target/wannabecool.war src/samples/wannabecool/step4/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/package-info.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/LinkageService.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/LinkageServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/SocialGroup.java-->
+      <!--target/enunciate-dist/bin/enunciate -f enunciate.xml -v -Espring.war.file target/wannabecool.war src/samples/wannabecool/step4/com/ifyouwannabecool/api/ExclusiveGroupException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/package-info.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PermissionDeniedException.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/SocialGroupService.java src/samples/wannabecool/step4/com/ifyouwannabecool/api/PersonaService.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/PersonaServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/impl/SocialGroupServiceImpl.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Name.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/persona/Persona.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/Link.java src/samples/wannabecool/step4/com/ifyouwannabecool/domain/link/SocialGroup.java-->
 
       <div align="right"><p><a href="getting_started_step5.html">Step 5 (Optional): Behold the Glory >></a></p></div>
 

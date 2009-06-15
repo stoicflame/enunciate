@@ -22,8 +22,12 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.rest.MimeType;
 
 import java.util.*;
+
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
  * Rest resource path of the given REST noun.
@@ -31,6 +35,12 @@ import java.util.*;
  * @author Ryan Heaton
  */
 public class UniqueContentTypesMethod implements TemplateMethodModelEx {
+
+  private final Set<String> allKnownContentTypes;
+
+  public UniqueContentTypesMethod(Set<String> allKnownContentTypes) {
+    this.allKnownContentTypes = allKnownContentTypes;
+  }
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -49,29 +59,62 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The uniqueContentTypes method take a list of REST resources.  Not " + object.getClass().getName());
     }
 
-    TreeMap<String, SupportedContentTypeAtSubcontext> supported = new TreeMap<String, SupportedContentTypeAtSubcontext>();
+    LinkedHashMap<String, SupportedContentTypeAtSubcontext> supported = new LinkedHashMap<String, SupportedContentTypeAtSubcontext>();
     for (RESTResource resource : resourceList) {
       for (SupportedContentType contentType : resource.getSupportedContentTypes()) {
-        SupportedContentTypeAtSubcontext type = supported.get(contentType.getType());
-        if (type == null) {
-          type = new SupportedContentTypeAtSubcontext();
-          type.setType(contentType.getType());
-          supported.put(contentType.getType(), type);
-        }
+        List<String> supportedTypeSet = findAllSupportedTypes(contentType);
+        for (String supportedType : supportedTypeSet) {
+          SupportedContentTypeAtSubcontext type = supported.get(supportedType);
+          if (type == null) {
+            type = new SupportedContentTypeAtSubcontext();
+            type.setType(supportedType);
+            supported.put(supportedType, type);
+          }
 
-        type.setProduceable(type.isProduceable() || contentType.isProduceable());
-        type.setConsumable(type.isConsumable() || contentType.isConsumable());
+          type.setProduceable(type.isProduceable() || contentType.isProduceable());
+          type.setConsumable(type.isConsumable() || contentType.isConsumable());
 
-        if (contentType.isProduceable()) {
-          Map<String, Set<String>> subcontextMap = (Map<String, Set<String>>) resource.getMetaData().get("subcontexts");
-          if (subcontextMap != null) {
-            type.setSubcontexts(subcontextMap.get(contentType.getType()));
+          if (contentType.isProduceable()) {
+            Map<String, Set<String>> subcontextMap = (Map<String, Set<String>>) resource.getMetaData().get("subcontexts");
+            if (subcontextMap != null) {
+              type.setSubcontexts(subcontextMap.get(supportedType));
+            }
           }
         }
       }
     }
 
     return supported.values();
+  }
+
+  /**
+   * Finds all the supported types for the specified content type.
+   *
+   * @param contentType The content type.
+   * @return The supported types.
+   */
+  protected List<String> findAllSupportedTypes(SupportedContentType contentType) {
+    String typeValue = contentType.getType();
+    List<String> typeSet = new ArrayList<String>();
+    typeSet.add(typeValue);
+    try {
+      MimeType mimeType = MimeType.parse(typeValue);
+      for (String knownType : this.allKnownContentTypes) {
+        try {
+          MimeType knownMimeType = MimeType.parse(knownType);
+          if (mimeType.isAcceptable(knownMimeType)) {
+            typeSet.add(knownType);
+          }
+        }
+        catch (Exception e) {
+          //fall through...
+        }
+      }
+    }
+    catch (Exception e) {
+      //fall through...
+    }
+    return typeSet;
   }
 
 }

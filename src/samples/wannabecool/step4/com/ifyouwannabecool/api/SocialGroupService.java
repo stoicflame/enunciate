@@ -16,10 +16,10 @@
 
 package com.ifyouwannabecool.api;
 
-import com.ifyouwannabecool.domain.link.Link;
 import com.ifyouwannabecool.domain.link.SocialGroup;
 
 import javax.jws.WebService;
+import javax.ws.rs.*;
 import java.util.Collection;
 
 /**
@@ -29,17 +29,17 @@ import java.util.Collection;
  * @author Ryan Heaton
  */
 @WebService
-public interface LinkageService {
+public interface SocialGroupService {
 
   /**
-   * Creates a link between two personas.
+   * Read the specified social group.
    *
-   * @param persona1Id The id of the first persona.
-   * @param persona2Id The id of the second persona.
-   * @return The link that was created.
-   * @throws PermissionDeniedException If you don't have permission to create the link.
+   * @param groupId The id of the group.
+   * @return The social group.
    */
-  Link createLink(String persona1Id, String persona2Id) throws PermissionDeniedException;
+  @Path ("/{groupId}")
+  @GET
+  SocialGroup readGroup(@PathParam ("groupId") String groupId);
 
   /**
    * Create a social group.
@@ -49,7 +49,10 @@ public interface LinkageService {
    * @param exclusive Whether the group is exclusive.
    * @return The group that was created.
    */
-  SocialGroup createSocialGroup(String groupLeader, Collection<String> memberIds, boolean exclusive);
+  @POST
+  SocialGroup createSocialGroup(@QueryParam("leader") String groupLeader,
+                                @QueryParam("member") Collection<String> memberIds,
+                                @QueryParam ("exclusive") boolean exclusive);
 
   /**
    * Adds a persona to a social group.
@@ -59,13 +62,9 @@ public interface LinkageService {
    * @return Whether the persona was successfully added.
    * @throws ExclusiveGroupException If the group is exclusive.
    */
-  boolean addToSocialGroup(String groupId, String personaId) throws ExclusiveGroupException;
+  @Path("/{groupId}")
+  @POST
+  boolean addToSocialGroup(@PathParam ("groupId") String groupId,
+                           @QueryParam ("member") String personaId) throws ExclusiveGroupException;
 
-  /**
-   * Reads the social groups to which a specified persona belongs.
-   *
-   * @param personaId The id of the persona.
-   * @return The social groups that were read.
-   */
-  SocialGroup[] readGroups(String personaId);
 }

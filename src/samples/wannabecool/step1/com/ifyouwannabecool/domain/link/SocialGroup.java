@@ -1,8 +1,11 @@
 package com.ifyouwannabecool.domain.link;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class SocialGroup {
 
   private String id;

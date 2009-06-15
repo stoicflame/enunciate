@@ -18,6 +18,7 @@ package org.codehaus.enunciate.main;
 
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.APIImport;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
@@ -327,10 +328,10 @@ public class Enunciate {
     List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateClasspath().split(File.pathSeparator)));
     for (String pathItem : classpath) {
       final File pathFile = new File(pathItem);
+      final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
       if (pathFile.exists()) {
         //scan the file on the classpath to find any classes that are to be imported.
         if (pathFile.isDirectory()) {
-          final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
           visitFiles(pathFile, null, new FileVisitor() {
             public void visit(File file) {
               String path = pathFile.toURI().relativize(file.toURI()).getPath();
@@ -360,12 +361,9 @@ public class Enunciate {
               }
             }
           });
-
-          copyImportedClasses(foundClasses2Sources, classes2sources);
         }
         else {
           //assume it's a jar file.
-          final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
           JarFile jarFile;
           try {
             jarFile = new JarFile(pathFile);
@@ -432,12 +430,17 @@ public class Enunciate {
               }
             }
           }
-
-          copyImportedClasses(foundClasses2Sources, classes2sources);
         }
       }
       else {
         debug("Classpath entry %s cannot be scanned because it doesn't exist on the filesystem.", pathItem);
+      }
+
+      copyImportedClasses(foundClasses2Sources, classes2sources);
+      for (DeploymentModule module : this.config.getAllModules()) {
+        if (module instanceof EnunciateClasspathListener) {
+          ((EnunciateClasspathListener)module).onClassesFound(foundClasses2Sources.keySet());
+        }
       }
     }
 

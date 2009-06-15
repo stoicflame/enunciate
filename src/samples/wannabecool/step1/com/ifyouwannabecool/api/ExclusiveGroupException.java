@@ -2,12 +2,9 @@ package com.ifyouwannabecool.api;
 
 import com.ifyouwannabecool.domain.persona.Persona;
 
-import javax.xml.ws.WebFault;
-
 /**
  * @author Ryan Heaton
  */
-@WebFault
 public class ExclusiveGroupException extends Exception {
 
   private String groupId;

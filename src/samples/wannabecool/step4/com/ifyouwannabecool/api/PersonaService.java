@@ -19,9 +19,7 @@ package com.ifyouwannabecool.api;
 import com.ifyouwannabecool.domain.persona.Persona;
 
 import javax.jws.WebService;
-import java.util.Collection;
-
-import org.codehaus.enunciate.rest.annotations.*;
+import javax.ws.rs.*;
 
 /**
  * The persona services is used to perform actions on the data associated with a persona.
@@ -29,7 +27,6 @@ import org.codehaus.enunciate.rest.annotations.*;
  * @author Ryan Heaton
  */
 @WebService
-@RESTEndpoint
 public interface PersonaService {
 
   /**
@@ -38,23 +35,16 @@ public interface PersonaService {
    * @param personaId The id of the persona to read.
    * @return The persona.
    */
-  @Verb ( VerbType.read )
-  @Noun ( "persona" )
-  Persona readPersona(@ProperNoun String personaId);
-
-  /**
-   * Reads a set of personas.
-   *
-   * @param personaIds The ids of the personas.
-   * @return The personas.
-   */
-  Collection<Persona> readPersonas(String... personaIds);
+  @Path ("/{id}")
+  @GET
+  Persona readPersona(@PathParam ("id") String personaId);
 
   /**
    * Store a persona.
    *
    * @param persona The persona to store.
    */
+  @POST
   void storePersona(Persona persona);
 
   /**
@@ -64,6 +54,8 @@ public interface PersonaService {
    * @return Whether the persona was successfully deleted.
    * @throws PermissionDeniedException If you don't have permission to delete the persona.
    */
-  boolean deletePersona(String personaId) throws PermissionDeniedException;
+  @Path("/{id}")
+  @DELETE
+  boolean deletePersona(@PathParam("id") String personaId) throws PermissionDeniedException;
 
 }

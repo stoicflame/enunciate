@@ -67,8 +67,7 @@ public class ${endpointInterface.simpleName} {
   private final GWT${endpointInterface.simpleName}Async asyncInstance;
 
   public ${endpointInterface.simpleName}() {
-    this.asyncInstance = (GWT${endpointInterface.simpleName}Async) com.google.gwt.core.client.GWT.create(GWT${endpointInterface.simpleName}.class);
-    ((com.google.gwt.user.client.rpc.ServiceDefTarget) asyncInstance).setServiceEntryPoint(com.google.gwt.core.client.GWT.getModuleBaseURL() + "gwt/${endpointInterface.serviceName}"); 
+    this("${baseDeploymentAddress}${gwtSubcontext}/${endpointInterface.serviceName}");
   }
 
   public ${endpointInterface.simpleName}(String url) {
