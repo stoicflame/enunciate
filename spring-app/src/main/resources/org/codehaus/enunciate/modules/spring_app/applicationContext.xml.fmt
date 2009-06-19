@@ -18,11 +18,10 @@
   <import resource="${springImport}"/>
   [/#list]
   [/#if]
-  [#if handlerInterceptors?exists]
 
   <!-- global handler mapping interceptors -->
-  <!-- specifically named 'interceptors' so they can be autowired by name to basic spring handler mappings -->
-  <util:list id="interceptors" xmlns:util="http://www.springframework.org/schema/util">
+  <util:list id="enunciate-handler-interceptors" xmlns:util="http://www.springframework.org/schema/util">
+  [#if handlerInterceptors?exists]
     [#list handlerInterceptors as interceptor]
       [#if interceptor.interceptorClass?exists]
     <bean class="${interceptor.interceptorClass}"/>
@@ -30,8 +29,8 @@
     <ref bean="${interceptor.beanName}"/>
       [/#if]
     [/#list]
-  </util:list>
   [/#if]
+  </util:list>
 
   <bean name="service-bean-interceptors" class="java.util.ArrayList">
     <qualifier value="enunciate-service-bean-interceptors"/>

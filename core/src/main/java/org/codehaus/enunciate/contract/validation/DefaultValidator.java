@@ -710,11 +710,13 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(attribute, "An attribute must have a simple base type. " + new QName(baseType.getNamespace(), baseType.getName())
         + " is a complex type.");
     }
-    else if (baseType.isAnonymous()) {
-      result.addError(attribute, "An attribute must not have an anonymous type.");
-    }
     else if (attribute.isBinaryData()) {
       result.addError(attribute, "Attributes can't have binary data.");
+    }
+
+    QName ref = attribute.getRef();
+    if ((ref != null) && (attribute.getBaseType().isAnonymous())) {
+      result.addError(attribute, "Attribute whose namespace differs from that of its type definition must not have an anonymous base type.");
     }
 
     return result;

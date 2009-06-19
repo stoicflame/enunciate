@@ -10,8 +10,9 @@
   <context:annotation-config/>
 
   <!-- the handler mapping for the spring servlet. -->
-  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping" autowire="byName">
+  <bean id="handlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
     <property name="alwaysUseFullPath" value="true"/>
+    <property name="interceptors" ref="enunciate-handler-interceptors"/>
     <property name="urlMap">
       <map>
   [#if securityConfig.enableFormBasedLogin]

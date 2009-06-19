@@ -264,6 +264,17 @@
         </${xs}:annotation>
         [/#if]
       </${xs}:attribute>
+      [#elseif attribute.baseType.anonymous]
+      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if]>
+        [#if attribute.docValue?exists]
+        <${xs}:annotation>
+          <${xs}:documentation>
+            <![CDATA[${attribute.docValue}]]>
+          </${xs}:documentation>
+        </${xs}:annotation>
+        [/#if]
+        [@processAnonymousType type=attribute.baseType/]
+      </${xs}:attribute>
       [#else]
       <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}">
         [#if attribute.docValue?exists]

@@ -434,7 +434,6 @@
     </xs:annotation>
 
     <xs:sequence>
-      <xs:element name="contentType" type="contentType" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
 

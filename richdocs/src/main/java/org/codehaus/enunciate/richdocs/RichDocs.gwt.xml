@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to="richdocs">
+
+  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <inherits name='com.google.gwt.user.User'/>
+
+  <!--Stylesheet inheritance-->
+  <!--<inherits name='com.google.gwt.user.theme.standard.Standard'/>-->
+   <inherits name='com.google.gwt.user.theme.chrome.Chrome'/>
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <!-- Specify the app entry point class.                         -->
+  <entry-point class='org.codehaus.enunciate.richdocs.client.RichDocs'/>
+
+</module>

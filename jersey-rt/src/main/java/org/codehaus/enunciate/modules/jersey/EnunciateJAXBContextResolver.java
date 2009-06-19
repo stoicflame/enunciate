@@ -26,6 +26,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +45,7 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
   private static final Log LOG = LogFactory.getLog(EnunciateJAXBContextResolver.class);
 
   private final JAXBContext context;
+  private final Object prefixMapper;
 
   private final Set<Class> types;
 
@@ -75,9 +77,10 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
 
   public EnunciateJAXBContextResolver() throws Exception {
     this.types = loadTypes();
+    this.prefixMapper = loadPrefixMapper();
+
     JAXBContext context = JAXBContext.newInstance(this.types.toArray(new Class[types.size()]));
-    final Object prefixMapper = loadPrefixMapper();
-    if (prefixMapper != null) {
+    if (this.prefixMapper != null) {
       context = new DelegatingJAXBContext(context) {
         @Override
         public Marshaller createMarshaller() throws JAXBException {
@@ -113,7 +116,36 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
   }
 
   public JAXBContext getContext(Class<?> objectType) {
-    return (types.contains(objectType)) ? context : null;
+    if (types.contains(objectType)) {
+      return context;
+    }
+    else if (objectType.isAnnotationPresent(XmlRootElement.class)) {
+      //if this is a root element, we'll do our best to apply our namespace prefix mapper.
+      try {
+        JAXBContext context = JAXBContext.newInstance(objectType);
+        if (this.prefixMapper != null) {
+          context = new DelegatingJAXBContext(context) {
+            @Override
+            public Marshaller createMarshaller() throws JAXBException {
+              Marshaller marshaller = super.createMarshaller();
+              try {
+                marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper);
+              }
+              catch (PropertyException e) {
+                //fall through...
+              }
+              return marshaller;
+            }
+          };
+        }
+        return context;
+      }
+      catch (Exception e) {
+        //fall through...
+      }
+    }
+
+    return null;
   }
 
 }

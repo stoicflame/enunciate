@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api-docs copyright="My Really Cool Genealogy Site" title="Enunciate - XFire/REST Integration Tests">
+  <documentation>
+    <![CDATA[This API is a sample API that is intended to exercise Enunciate.  It has <i>a lot</i>
+of relatively obscure cases that probably won't be used very much, including:
+
+<ul>
+<li>one-way methods</li>
+<li>collections as operation parameters</li>
+<li>REST nouns and verbs</li>
+<li>RPC/lit methods</li>
+<li>SOAP headers</li>
+</ul>
+
+This text should be showing up in the index page under the "introduction" section.]]>
+  </documentation>
+  <data>
+    <schema namespace="http://enunciate.codehaus.org/samples/genealogy/cite" namespaceId="cite" file="cite.xsd">
+      <types>
+        <type name="contributor" id="org.codehaus.enunciate.samples.genealogy.cite.Contributor" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <documentation>
+            <![CDATA[A contributor of information from a source.<br>
+With some invalid XML in the documentation...]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The id of the contributor.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The contact name for the contributor.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The contact name for the contributor.]]></tag>
+              <choice name="contactName" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The email addresses associated with this contributor.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The email addresses associated with this contributor.]]></tag>
+              <choice name="emails" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeName="EMail"/>
+            </element>
+          </elements>
+        </type>
+        <type name="EMail" id="org.codehaus.enunciate.samples.genealogy.cite.EMail" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <documentation>
+            <![CDATA[An email address.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <value typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string">
+            <![CDATA[The value of the e-mail.]]>
+          </value>
+        </type>
+        <type name="infoSet" id="org.codehaus.enunciate.samples.genealogy.cite.InfoSet" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <documentation>
+            <![CDATA[A set of information.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The id of the infoset.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The inferences that make up this infoset.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The inferences that make up this infoset.]]></tag>
+              <choice name="inferences" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="IDREF"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The submitter of the information.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The submitter of the information.]]></tag>
+              <choice name="contributor" namespace="http://enunciate.codehaus.org/samples/genealogy/cite"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The source of the information.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The source of the information.]]></tag>
+              <choice name="source" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="IDREF"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A reference within the source of this information.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A reference within the source of this information.]]></tag>
+              <choice name="sourceReference" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="note" id="org.codehaus.enunciate.samples.genealogy.cite.Note" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <choice name="text" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="repository" id="org.codehaus.enunciate.samples.genealogy.cite.Repository" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <documentation>
+            <![CDATA[A repository for sources.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The id of the repository.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The location for this repository.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The location for this repository.]]></tag>
+              <choice name="location" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[An e-mail address for this repository.]]>
+              </documentation>
+              <tag name="return"><![CDATA[An e-mail address for this repository.]]></tag>
+              <choice name="email" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeName="EMail"/>
+            </element>
+          </elements>
+        </type>
+        <type name="source" id="org.codehaus.enunciate.samples.genealogy.cite.Source" package="org.codehaus.enunciate.samples.genealogy.cite">
+          <documentation>
+            <![CDATA[A source of genealogical information.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The id of the source.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The title of the source.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The title of the source.]]></tag>
+              <choice name="title" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A link to this source.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A link to this source.]]></tag>
+              <choice name="link" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The infosets associated with this source.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The infosets associated with this source.]]></tag>
+              <choice name="infoSets" namespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/cite" typeName="infoSet"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The repository for this source.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The repository for this source.]]></tag>
+              <choice name="repository" namespace="http://enunciate.codehaus.org/samples/genealogy/cite"/>
+            </element>
+          </elements>
+        </type>
+      </types>
+      <elements>
+        <element name="contributor" type="org.codehaus.enunciate.samples.genealogy.cite.Contributor">
+          <documentation>
+            <![CDATA[A contributor of information from a source.<br>
+With some invalid XML in the documentation...]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+        </element>
+        <element name="repository" type="org.codehaus.enunciate.samples.genealogy.cite.Repository">
+          <documentation>
+            <![CDATA[A repository for sources.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+        </element>
+        <element name="source" type="org.codehaus.enunciate.samples.genealogy.cite.Source">
+          <documentation>
+            <![CDATA[A source of genealogical information.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+        </element>
+      </elements>
+    </schema>
+    <schema namespace="http://enunciate.codehaus.org/samples/genealogy/data" namespaceId="data" file="data.xsd">
+      <types>
+        <type name="assertion" id="org.codehaus.enunciate.samples.genealogy.data.Assertion" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[An assertion of a piece of information, usually associated with a source.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The id of the assertion.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A note associated with this assertion.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A note associated with this assertion.]]></tag>
+              <choice name="note" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The infoset from which this assertion was made.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The infoset from which this assertion was made.]]></tag>
+              <choice name="infoSet" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="IDREF"/>
+            </element>
+          </elements>
+        </type>
+        <type name="event" id="org.codehaus.enunciate.samples.genealogy.data.Event" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.OccurringAssertion">
+          <documentation>
+            <![CDATA[An event assertion.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="type" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="eventType">
+              <![CDATA[The type of this event.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A description of this event.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A description of this event.]]></tag>
+              <choice name="description" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="eventType" id="org.codehaus.enunciate.samples.genealogy.data.EventType" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[Enumeration for event types.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <values>
+            <item value="birth">
+              <documentation>
+                 <![CDATA[Specifies a birth event.]]>
+              </documentation>
+            </item>
+            <item value="christening">
+              <documentation>
+                 <![CDATA[Specifies a christening event.]]>
+              </documentation>
+            </item>
+            <item value="marriage">
+              <documentation>
+                 <![CDATA[Specifies a marriage event.]]>
+              </documentation>
+            </item>
+            <item value="death">
+              <documentation>
+                 <![CDATA[Specifies a death event.]]>
+              </documentation>
+            </item>
+            <item value="burial">
+              <documentation>
+                 <![CDATA[Specifies a burial event.]]>
+              </documentation>
+            </item>
+          </values>
+        </type>
+        <type name="fact" id="org.codehaus.enunciate.samples.genealogy.data.Fact" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.OccurringAssertion">
+          <documentation>
+            <![CDATA[A generic fact assertion.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="type" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="factType">
+              <![CDATA[The fact type.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The value of the fact.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The value of the fact.]]></tag>
+              <choice name="value" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A description of the fact.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A description of the fact.]]></tag>
+              <choice name="description" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="factType" id="org.codehaus.enunciate.samples.genealogy.data.FactType" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[The set of fact types.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <values>
+            <item value="occupation">
+              <documentation>
+                 <![CDATA[somebody's occupation.]]>
+              </documentation>
+            </item>
+            <item value="possessions">
+              <documentation>
+                 <![CDATA[somebody's possessions.]]>
+              </documentation>
+            </item>
+            <item value="race">
+              <documentation>
+                 <![CDATA[somebody's race.]]>
+              </documentation>
+            </item>
+            <item value="nation_of_origin">
+              <documentation>
+                 <![CDATA[somebody's nation of origin.]]>
+              </documentation>
+            </item>
+            <item value="physical_description">
+              <documentation>
+                 <![CDATA[somebody's physical description.]]>
+              </documentation>
+            </item>
+          </values>
+        </type>
+        <type name="gender" id="org.codehaus.enunciate.samples.genealogy.data.Gender" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.Assertion">
+          <documentation>
+            <![CDATA[A gender assertion.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="type" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="genderType">
+              <![CDATA[The type of gender.]]>
+            </attribute>
+          </attributes>
+        </type>
+        <type name="genderType" id="org.codehaus.enunciate.samples.genealogy.data.GenderType" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[The types of gender.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <values>
+            <item value="m">
+              <documentation>
+                 <![CDATA[Male gender.]]>
+              </documentation>
+            </item>
+            <item value="f">
+              <documentation>
+                 <![CDATA[Female gender.]]>
+              </documentation>
+            </item>
+          </values>
+        </type>
+        <type name="name" id="org.codehaus.enunciate.samples.genealogy.data.Name" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.Assertion">
+          <documentation>
+            <![CDATA[A name assertion.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The text value of the name.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The text value of the name.]]></tag>
+              <choice name="value" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="occurringAssertion" id="org.codehaus.enunciate.samples.genealogy.data.OccurringAssertion" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.Assertion">
+          <documentation>
+            <![CDATA[An assertion that occurs at some point in time.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The date of the occurrence.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The date of the occurrence.]]></tag>
+              <choice name="date" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="dateTime"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The place of the occurrence.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The place of the occurrence.]]></tag>
+              <choice name="place" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+          </elements>
+        </type>
+        <type name="person" id="org.codehaus.enunciate.samples.genealogy.data.Person" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[A person.  The central data in genealogical information.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <attributes>
+            <attribute name="id" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="ID">
+              <![CDATA[The person id.]]>
+            </attribute>
+          </attributes>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The gender of a person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The gender of a person.]]></tag>
+              <choice name="gender" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="gender"/>
+            </element>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The names of the person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The names of the person.]]></tag>
+              <choice name="names" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="name"/>
+            </element>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The events associated with a person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The events associated with a person.]]></tag>
+              <choice name="events" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="event"/>
+            </element>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The facts about a person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The facts about a person.]]></tag>
+              <choice name="facts" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="fact"/>
+            </element>
+            <element minOccurs="0" maxOccurs="unbounded">
+              <documentation>
+                <![CDATA[The relationships of a person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The relationships of a person.]]></tag>
+              <choice name="relationships" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="relationship"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A picture of a person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A picture of a person.]]></tag>
+              <choice name="picture" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="base64Binary"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[A map of contributor ids to notes.]]>
+              </documentation>
+              <tag name="return"><![CDATA[A map of contributor ids to notes.]]></tag>
+              <choice name="notes" namespace="http://enunciate.codehaus.org/samples/genealogy/data"/>
+            </element>
+          </elements>
+        </type>
+        <type name="relationship" id="org.codehaus.enunciate.samples.genealogy.data.Relationship" package="org.codehaus.enunciate.samples.genealogy.data" extendsType="org.codehaus.enunciate.samples.genealogy.data.Assertion">
+          <documentation>
+            <![CDATA[A relationship between two people.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The id of the relationship.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The id of the relationship.]]></tag>
+              <choice name="id" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The relationship type.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The relationship type.]]></tag>
+              <choice name="type" namespace="http://enunciate.codehaus.org/samples/genealogy/data"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The name of the source person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The name of the source person.]]></tag>
+              <choice name="sourcePersonName" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="name"/>
+            </element>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The name of the target person.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The name of the target person.]]></tag>
+              <choice name="targetPersonName" namespace="http://enunciate.codehaus.org/samples/genealogy/data" typeNamespace="http://enunciate.codehaus.org/samples/genealogy/data" typeName="name"/>
+            </element>
+          </elements>
+        </type>
+        <type name="(anonymous)" id="org.codehaus.enunciate.samples.genealogy.data.RelationshipType" package="org.codehaus.enunciate.samples.genealogy.data">
+          <documentation>
+            <![CDATA[A type of relationship.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <values>
+            <item value="spouse">
+              <documentation>
+                 <![CDATA[indicates a spouse relationship.]]>
+              </documentation>
+            </item>
+            <item value="parent">
+              <documentation>
+                 <![CDATA[indicates a parent relationship.]]>
+              </documentation>
+            </item>
+            <item value="child">
+              <documentation>
+                 <![CDATA[indicates a child relationship.]]>
+              </documentation>
+            </item>
+          </values>
+        </type>
+      </types>
+      <elements>
+        <element name="person" type="org.codehaus.enunciate.samples.genealogy.data.Person">
+          <documentation>
+            <![CDATA[A person.  The central data in genealogical information.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+        </element>
+      </elements>
+    </schema>
+    <schema namespace="" namespaceId="ns0" file="ns0.xsd">
+      <types>
+        <type name="unknownSourceBean" id="org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean" package="org.codehaus.enunciate.samples.genealogy.services">
+          <documentation>
+            <![CDATA[Information about an unknown source.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <elements>
+            <element minOccurs="0" maxOccurs="1">
+              <documentation>
+                <![CDATA[The id of the source.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The id of the source.]]></tag>
+              <choice name="sourceId" namespace="" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="string"/>
+            </element>
+            <element minOccurs="1" maxOccurs="1">
+              <documentation>
+                <![CDATA[The error code.]]>
+              </documentation>
+              <tag name="return"><![CDATA[The error code.]]></tag>
+              <choice name="errorCode" namespace="" typeNamespace="http://www.w3.org/2001/XMLSchema" typeName="int"/>
+            </element>
+          </elements>
+        </type>
+      </types>
+      <elements>
+      </elements>
+    </schema>
+    <schema namespace="http://enunciate.codehaus.org/samples/full" namespaceId="full" file="full.xsd">
+      <types>
+      </types>
+      <elements>
+        <element name="unknownSourceBean" type="org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean">
+          <documentation>
+            <![CDATA[Information about an unknown source.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+        </element>
+      </elements>
+    </schema>
+  </data>
+  <soap>
+    <wsdls>
+      <wsdl namespace="http://enunciate.codehaus.org/samples/full" namespaceId="full" file="full.wsdl">
+        <endpointInterface name="PersonServiceService" id="org.codehaus.enunciate.samples.genealogy.services.PersonService" package="org.codehaus.enunciate.samples.genealogy.services" path="/soap-services/PersonServiceService">
+          <documentation>
+            <![CDATA[The person service is used to access persons in the database.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <method name="storePerson" oneWay="false">
+            <documentation>
+              <![CDATA[Stores a person in the database.]]>
+            </documentation>
+            <parameter name="person" input="true" output="false">
+              <![CDATA[The person to store in the database.]]>
+            </parameter>
+            <result>
+              <![CDATA[The person that was stored (presumably modified for storage).]]>
+            </result>
+          </method>
+          <method name="readPersons" oneWay="false">
+            <documentation>
+              <![CDATA[Reads a set of persons from the database.  Intended as an example of
+collections as SOAP parameters.]]>
+            </documentation>
+            <parameter name="personIds" input="true" output="false">
+              <![CDATA[The ids of the persons to read.]]>
+            </parameter>
+            <result>
+              <![CDATA[The persons that were read.]]>
+            </result>
+            <fault name="ServiceException">
+              <![CDATA[If the read of one or more of the people failed.]]>
+            </fault>
+          </method>
+          <method name="deletePerson" oneWay="false">
+            <documentation>
+              <![CDATA[Deletes a person from the database.  Not a one-way method, but still void.]]>
+            </documentation>
+            <parameter name="personId" input="true" output="false">
+              <![CDATA[The id of the person.]]>
+            </parameter>
+            <fault name="ServiceException">
+              <![CDATA[If some problem occurred when deleting the person.]]>
+            </fault>
+          </method>
+          <method name="ping" oneWay="false">
+            <documentation>
+              <![CDATA[Ping for the current time.]]>
+            </documentation>
+            <result>
+              <![CDATA[the current time.]]>
+            </result>
+          </method>
+        </endpointInterface>
+        <endpointInterface name="source-service" id="org.codehaus.enunciate.samples.genealogy.services.SourceService" package="org.codehaus.enunciate.samples.genealogy.services" path="/soap-services/sources/source">
+          <documentation>
+            <![CDATA[The source service is used to access and store source information about genealogical information.
+Compared to the person service, this one is much more customized.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <method name="addSource" oneWay="true">
+            <documentation>
+              <![CDATA[Adds a source to the database.  Example of a one-way method.]]>
+            </documentation>
+            <parameter name="source" input="true" output="false">
+              <![CDATA[The source to add to the database.]]>
+            </parameter>
+          </method>
+          <method name="getSource" oneWay="false">
+            <documentation>
+              <![CDATA[Reads a source from the database.]]>
+            </documentation>
+            <parameter name="id" input="true" output="false">
+              <![CDATA[The id of the source to read from the database.]]>
+            </parameter>
+            <result>
+              <![CDATA[The source.]]>
+            </result>
+            <fault name="ServiceException">
+              <![CDATA[If a source couldn't be read from the database.]]>
+            </fault>
+            <fault name="UnknownSourceException">
+              <![CDATA[If no source by that id was found in the database.]]>
+            </fault>
+          </method>
+          <method name="addInfoSet" oneWay="false">
+            <documentation>
+              <![CDATA[Adds an infoset to a specified source.]]>
+            </documentation>
+            <parameter name="sourceId" input="true" output="false">
+              <![CDATA[The id of the source to which to add the infoset.]]>
+            </parameter>
+            <parameter name="infoSet" input="true" output="false">
+              <![CDATA[The infoset to add to the source.]]>
+            </parameter>
+            <result>
+              <![CDATA[The id of the infoset that was added.]]>
+            </result>
+            <fault name="ServiceException">
+              <![CDATA[If the infoset couldn't be added to the source.]]>
+            </fault>
+          </method>
+          <method name="addEvents" oneWay="false">
+            <documentation>
+              <![CDATA[Adds a bunch of events to an infoset.]]>
+            </documentation>
+            <parameter name="infoSetId" input="true" output="false">
+              <![CDATA[The id of the infoset to which to add the events.]]>
+            </parameter>
+            <parameter name="assertions" input="true" output="false">
+              <![CDATA[The events that are to be added to the infoset.]]>
+            </parameter>
+            <parameter name="contributorId" input="true" output="false">
+              <![CDATA[The if of the contributor adding the events to the infoset.]]>
+            </parameter>
+            <result>
+              <![CDATA[Some message.]]>
+            </result>
+            <fault name="ServiceException">
+              <![CDATA[If the events couldn't be added to the infoset.]]>
+            </fault>
+          </method>
+        </endpointInterface>
+      </wsdl>
+      <wsdl namespace="http://services.genealogy.samples.enunciate.codehaus.org/" namespaceId="ns1" file="ns1.wsdl">
+        <endpointInterface name="RelationshipServiceService" id="org.codehaus.enunciate.samples.genealogy.services.RelationshipService" package="org.codehaus.enunciate.samples.genealogy.services" path="/soap-services/RelationshipServiceService">
+          <documentation>
+            <![CDATA[Test of a basic class-based service with no interface.]]>
+          </documentation>
+          <tag name="author"><![CDATA[Ryan Heaton]]></tag>
+          <method name="getRelationships" oneWay="false">
+            <parameter name="personId" input="true" output="false">
+              <![CDATA[(no documentation provided)]]>
+            </parameter>
+            <result>
+              <![CDATA[(no documentation provided)]]>
+            </result>
+            <fault name="RelationshipException">
+              <![CDATA[(no documentation provided)]]>
+            </fault>
+            <fault name="OutsideException">
+              <![CDATA[(no documentation provided)]]>
+            </fault>
+          </method>
+          <method name="touch" oneWay="false">
+          </method>
+        </endpointInterface>
+      </wsdl>
+    </wsdls>
+  </soap>
+  <rest baseAddress="http://localhost:8080/full">
+    <resources>
+      <resource name="/source" subcontext="/rest">
+        <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/source"/>
+        <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/source"/>
+        <operation name="PUT" type="create">
+          <documentation>
+            <![CDATA[Adds a source to the database.  Example of a one-way method.]]>
+          </documentation>
+          <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/source"/>
+          <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/source"/>
+          <inValue custom="true">
+            <![CDATA[The source to add to the database.]]>
+          </inValue>
+        </operation>
+      </resource>
+      <resource name="/pedigree/file" subcontext="/rest">
+        <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/pedigree/file"/>
+        <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/pedigree/file"/>
+        <operation name="POST" type="update">
+          <documentation>
+            <![CDATA[Uploads some files.]]>
+          </documentation>
+          <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/pedigree/file"/>
+          <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/pedigree/file"/>
+          <parameter name="length" type="query">
+            <![CDATA[The length(s) of the files.]]>
+          </parameter>
+          <inValue custom="true">
+            <![CDATA[The files]]>
+          </inValue>
+          <error code="500">
+            <![CDATA[Generic fault for the genealogy API.]]>
+          </error>
+        </operation>
+      </resource>
+      <resource name="/pedigree/person" subcontext="/rest">
+        <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/pedigree/person"/>
+        <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/pedigree/person"/>
+        <operation name="PUT" type="create">
+          <documentation>
+            <![CDATA[Stores a person in the database.]]>
+          </documentation>
+          <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/pedigree/person"/>
+          <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/pedigree/person"/>
+          <inValue custom="true">
+            <![CDATA[The person to store in the database.]]>
+          </inValue>
+          <outValue custom="true">
+            <![CDATA[The person that was stored (presumably modified for storage).]]>
+          </outValue>
+        </operation>
+      </resource>
+      <resource name="/source/{id}" subcontext="/rest">
+        <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/source/{id}"/>
+        <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/source/{id}"/>
+        <operation name="GET" type="read">
+          <documentation>
+            <![CDATA[Reads a source from the database.]]>
+          </documentation>
+          <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/source/{id}"/>
+          <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/source/{id}"/>
+          <parameter name="id" type="path">
+            <![CDATA[The id of the source to read from the database.]]>
+          </parameter>
+          <outValue custom="true">
+            <![CDATA[The source.]]>
+          </outValue>
+          <error code="500">
+            <![CDATA[Generic fault for the genealogy API.]]>
+          </error>
+          <error code="500">
+            <![CDATA[Thrown if an attempt was made to access an unknown source.]]>
+          </error>
+        </operation>
+      </resource>
+      <resource name="/remover/pedigree/person/{personId}" subcontext="/rest">
+        <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/remover/pedigree/person/{personId}"/>
+        <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/remover/pedigree/person/{personId}"/>
+        <operation name="DELETE" type="delete">
+          <documentation>
+            <![CDATA[Deletes a person from the database.  Not a one-way method, but still void.]]>
+          </documentation>
+          <contentType type="application/json" consumable="true" produceable="true" subcontext="/json" path="/json/remover/pedigree/person/{personId}"/>
+          <contentType type="application/xml" consumable="true" produceable="true" subcontext="/xml" path="/xml/remover/pedigree/person/{personId}"/>
+          <parameter name="personId" type="path">
+            <![CDATA[The id of the person.]]>
+          </parameter>
+          <error code="500">
+            <![CDATA[Generic fault for the genealogy API.]]>
+          </error>
+        </operation>
+      </resource>
+    </resources>
+  </rest>
+  <packages>
+    <package id="org.codehaus.enunciate.samples.genealogy.cite">
+      <documentation>
+        <![CDATA[The "cite" package holds information about citation information.]]>
+      </documentation>
+    </package>
+    <package id="org.codehaus.enunciate.samples.genealogy.exceptions">
+    </package>
+    <package id="org.codehaus.enunciate.samples.genealogy.services">
+    </package>
+    <package id="org.codehaus.enunciate.test.integration">
+    </package>
+    <package id="org.codehaus.enunciate.samples.genealogy.data">
+      <documentation>
+        <![CDATA[The "data" package contains genealogical data.]]>
+      </documentation>
+    </package>
+    <package id="org.codehaus.enunciate.samples.genealogy.services.impl">
+    </package>
+  </packages>
+</api-docs>
