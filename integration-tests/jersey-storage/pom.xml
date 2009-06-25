@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jersey-storage</artifactId>
-  <version>1.12.1</version>
+  <version>1.13-SNAPSHOT</version>
   <name>Enunciate - Jersey Integration Tests</name>
   <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
   <packaging>war</packaging>

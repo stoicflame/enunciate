@@ -84,6 +84,8 @@ import java.util.TreeSet;
  */
 public class CXFDeploymentModule extends FreemarkerDeploymentModule {
 
+  private boolean validate = false;
+
   public CXFDeploymentModule() {
     setDisabled(true); //disabled by default; using JAXWS RI by default.
   }
@@ -209,9 +211,18 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     return enunciate.isUpToDateWithSources(getGenerateDir());
   }
 
+  /**
+   * Whether or not to apply the CXF validation rules.
+   *
+   * @param validate Whether or not to apply the CXF validation rules.
+   */
+  public void setValidate(boolean validate) {
+    this.validate = validate;
+  }
+
   @Override
   public Validator getValidator() {
-    return new CXFValidator();
+    return this.validate ? new CXFValidator() : null;
   }
 
   // Inherited.

@@ -186,6 +186,16 @@ h1,h2,h3 {
 .content h1 a {
   color: #367EA6;
 }
+.subcontent {
+  background: url(img/bgcode.gif);
+  border: 1px solid #F0F0F0;
+  border-left: 6px solid #39F;
+  color: #555;
+  display: block;
+  font: normal 1.1em "Lucida Sans Unicode",serif;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+}
 
 /* footer */
 .footer {
