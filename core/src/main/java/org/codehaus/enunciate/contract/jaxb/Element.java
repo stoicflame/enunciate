@@ -70,10 +70,10 @@ public class Element extends Accessor {
         try {
           Class clazz = element.type();
           if ((clazz == null) || (clazz == XmlElement.DEFAULT.class)) {
-            throw new ValidationException(getPosition(), "An element choice must have its type specified.");
+            throw new ValidationException(getPosition(), "Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must have its type specified.");
           }
           else if ((clazz.isArray()) || (Collection.class.isAssignableFrom(clazz))) {
-            throw new ValidationException(getPosition(), "An element choice must not be a collection or an array.");
+            throw new ValidationException(getPosition(), "Member " + getName() + " of " + typedef.getQualifiedName() + ": an element choice must not be a collection or an array.");
           }
         }
         catch (MirroredTypeException e) {
@@ -307,7 +307,7 @@ public class Element extends Accessor {
         }
       }
       catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
+        throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + e.getMessage());
       }
     }
 

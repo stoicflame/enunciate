@@ -1,3 +1,6 @@
+[#ftl]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
   <h1>
     Introduction
   </h1>
@@ -25,9 +28,9 @@
     <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.user.client.rpc.ServiceDefTarget.html">ServiceDefTarget</a>.
   </p>
 
+[#if sample_service_method??]
   <p>
-    As an example, suppose there existed a service interface and method for reading a purchase order.
-    A typical use of the library would like like this:
+    Consider the following example:
   </p>
 
   <h1>
@@ -36,14 +39,14 @@
 
   <code>
 //instantiate a new service...
-PurchaseOrderService service =
-  new PurchaseOrderService();
+${sample_service_method.declaringEndpointInterface.simpleName} service =
+  new ${sample_service_method.declaringEndpointInterface.simpleName}();
 
-//make the asynchronous remote call to read the purchase order...
-service.readPurchaseOrder("123456",
-  new PurchaseOrderService.ReadPurchaseOrderResponseCallback() {
-    onResponse(PurchaseOrder po) {
-      //handle the purchase order as needed...
+//make the asynchronous remote call to read the result...
+service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.simpleName}, [/#list]
+  new ${sample_service_method.declaringEndpointInterface.simpleName}.${sample_service_method.simpleName?cap_first}ResponseCallback() {
+    onResponse(...) {
+      //handle the result as needed...
     }
 
     onError(Throwable error) {
@@ -51,5 +54,4 @@ service.readPurchaseOrder("123456",
     }
 });
   </code>
-
-  <p>You would then compile this code using the GWT.</p>
+[/#if]

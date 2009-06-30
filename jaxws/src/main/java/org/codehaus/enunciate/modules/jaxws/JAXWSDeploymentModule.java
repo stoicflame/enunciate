@@ -118,13 +118,13 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
         for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
           for (ReferenceType referenceType : resourceMethod.getThrownTypes()) {
             if (!(referenceType instanceof DeclaredType)) {
-              throw new ValidationException(resourceMethod.getPosition(), "Thrown type must be a declared type.");
+              throw new ValidationException(resourceMethod.getPosition(), "Method " + resourceMethod + " of " + resourceMethod.getParent().getQualifiedName() + ": thrown type must be a declared type.");
             }
 
             TypeDeclaration declaration = ((DeclaredType) referenceType).getDeclaration();
 
             if (declaration == null) {
-              throw new ValidationException(resourceMethod.getPosition(), "Unknown declaration for " + referenceType);
+              throw new ValidationException(resourceMethod.getPosition(), "Method " + resourceMethod + " of " + resourceMethod.getParent().getQualifiedName() + ": unknown declaration for " + referenceType);
             }
             else if (declaration.getAnnotation(javax.xml.ws.WebFault.class) != null) {
               WebFault fault = new WebFault((ClassDeclaration) declaration);

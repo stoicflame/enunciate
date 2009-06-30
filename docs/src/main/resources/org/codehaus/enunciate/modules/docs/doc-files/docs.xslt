@@ -21,6 +21,9 @@
   <!--Whether this API contains REST endpoints.-->
   <xsl:variable name="restful" select="boolean(/api-docs/rest/resources/resource)"/>
 
+  <!--Whether there's more than one schema-->
+  <xsl:variable name="multiple_schemas" select="count(/api-docs/data/schema) &gt; 1"/>
+
   <!--The characters to translate from a REST name.-->
   <!--The '/' is replaced with a '.', the ':' is replaced with a '-', and the '{' and '}' are removed-->
   <xsl:variable name="rest_translate_chars">/:{}</xsl:variable>
@@ -30,7 +33,7 @@
   <xsl:variable name="global-sidnav">
     <h1>Home</h1>
     <ul>
-        <li><a href="index.html">Introduction</a></li>
+      <li><a href="index.html">Introduction</a></li>
       <xsl:if test="$downloads-exists">
         <li>
           <a href="downloads.html">downloads</a>
@@ -38,8 +41,17 @@
       </xsl:if>
     </ul>
 
+    <xsl:if test="$restful">
+      <h1>REST Endpoints</h1>
+      <ul>
+        <xsl:for-each select="/api-docs/rest/resources/resource">
+          <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
+
     <xsl:if test="$soapAvailable">
-      <h1>SOAP</h1>
+      <h1>SOAP Services</h1>
       <ul>
         <xsl:for-each select="/api-docs/soap/wsdls/wsdl/endpointInterface">
           <xsl:sort select="@name"/>
@@ -59,56 +71,50 @@
       </ul>
     </xsl:if>
 
-    <xsl:if test="$restful">
-      <h1>REST</h1>
-      <ul>
-        <xsl:for-each select="/api-docs/rest/resources/resource">
-          <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
-        </xsl:for-each>
-      </ul>
-    </xsl:if>
-
-    <xsl:if test="/api-docs/data/schema/elements/element">
-      <h1>Data Elements</h1>
-      <ul>
-        <xsl:for-each select="/api-docs/data/schema/elements/element">
-          <xsl:sort select="@name"/>
-          <li>
-            <xsl:choose>
-              <xsl:when test="tag[@name='deprecated']">
-                <font style="text-decoration:line-through;">
+    <xsl:for-each select="/api-docs/data/schema">
+      <xsl:sort select="@namespace"/>
+      <xsl:if test="elements/element">
+        <h1>Data Elements<xsl:if test="$multiple_schemas and (string-length(@namespace) &gt; 0)"> (<xsl:value-of select="@namespaceId"/>)</xsl:if></h1>
+        <ul>
+          <xsl:for-each select="elements/element">
+            <xsl:sort select="@name"/>
+            <li>
+              <xsl:choose>
+                <xsl:when test="tag[@name='deprecated']">
+                  <font style="text-decoration:line-through;">
+                    <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
+                  </font>
+                </xsl:when>
+                <xsl:otherwise>
                   <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-                </font>
-              </xsl:when>
-              <xsl:otherwise>
-                <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-              </xsl:otherwise>
-            </xsl:choose>
-          </li>
-        </xsl:for-each>
-      </ul>
-    </xsl:if>
+                </xsl:otherwise>
+              </xsl:choose>
+            </li>
+          </xsl:for-each>
+        </ul>
+      </xsl:if>
 
-    <xsl:if test="/api-docs/data/schema/types/type">
-      <h1>Data Types</h1>
-      <ul>
-        <xsl:for-each select="/api-docs/data/schema/types/type">
-          <xsl:sort select="@name"/>
-          <li>
-            <xsl:choose>
-              <xsl:when test="tag[@name='deprecated']">
-                <font style="text-decoration:line-through;">
+      <xsl:if test="types/type">
+        <h1>Data Types<xsl:if test="$multiple_schemas and (string-length(@namespace) &gt; 0)"> (<xsl:value-of select="@namespaceId"/>)</xsl:if></h1>
+        <ul>
+          <xsl:for-each select="types/type">
+            <xsl:sort select="@name"/>
+            <li>
+              <xsl:choose>
+                <xsl:when test="tag[@name='deprecated']">
+                  <font style="text-decoration:line-through;">
+                    <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
+                  </font>
+                </xsl:when>
+                <xsl:otherwise>
                   <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                </font>
-              </xsl:when>
-              <xsl:otherwise>
-                <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-              </xsl:otherwise>
-            </xsl:choose>
-          </li>
-        </xsl:for-each>
-      </ul>
-    </xsl:if>
+                </xsl:otherwise>
+              </xsl:choose>
+            </li>
+          </xsl:for-each>
+        </ul>
+      </xsl:if>
+    </xsl:for-each>
   </xsl:variable>
 
 
@@ -161,63 +167,6 @@
                 </div>
               </xsl:if>
 
-              <xsl:if test="$soapAvailable">
-                <div class="item">
-
-                  <h1>SOAP</h1>
-
-                  <p>
-                    This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
-                    -compliant SOAP v1.1 endpoints. The API supports <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Pacakging (XOP)</a>
-                    and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
-                    for transmission of binary data. The SOAP API is fully described by the following endpoints:
-                  </p>
-
-                  <xsl:for-each select="/api-docs/soap/wsdls/wsdl">
-                    <xsl:sort select="@namespace"/>
-                    <xsl:variable name="ns" select="@namespace"/>
-                    <xsl:variable name="nsid" select="@namespaceId"/>
-
-                    <xsl:choose>
-                      <xsl:when test="string-length($ns) = 0">
-                        <h3>Default Namespace</h3>
-                        <xsl:if test="@file"><p>(<a href="{@file}">wsdl here</a>)</p></xsl:if>
-                      </xsl:when>
-                      <xsl:otherwise>
-                        <h3>Namespace <u><xsl:value-of select="@namespace"/></u>:</h3>
-                        <xsl:if test="@file"><p>(<a href="{@file}">wsdl here</a>)</p></xsl:if>
-                      </xsl:otherwise>
-                    </xsl:choose>
-
-                    <ul>
-                      <xsl:for-each select="endpointInterface">
-                        <xsl:sort select="@name"/>
-                        <li>
-                          <xsl:choose>
-                            <xsl:when test="tag[@name='deprecated']">
-                              <font style="text-decoration:line-through;">
-                                <a href="soap_{$nsid}_{@name}.html"><xsl:value-of select="@name"/></a>
-                              </font>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <a href="soap_{$nsid}_{@name}.html"><xsl:value-of select="@name"/></a>
-                            </xsl:otherwise>
-                          </xsl:choose>
-                        </li>
-                        <xsl:call-template name="soap-endpoint"/>
-                      </xsl:for-each>
-                    </ul>
-                  </xsl:for-each>
-
-                  <xsl:if test="$downloads-exists">
-                    <p>
-                      The SOAP API is also accessible by client-side libraries that can be downloaded from the <a href="downloads.html">download page</a>.
-                    </p>
-                  </xsl:if>
-
-                </div>
-              </xsl:if>
-
               <xsl:if test="$restful">
                 <div class="item">
 
@@ -238,6 +187,50 @@
                 </div>
               </xsl:if>
 
+              <xsl:if test="$soapAvailable">
+                <div class="item">
+
+                  <h1>SOAP</h1>
+
+                  <p>
+                    This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
+                    -compliant SOAP v1.1 endpoints. The API supports <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Pacakging (XOP)</a>
+                    and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
+                    for transmission of binary data. The SOAP API is fully described by the following endpoints:
+                  </p>
+
+                  <ul>
+                    <xsl:for-each select="/api-docs/soap/wsdls/wsdl">
+                      <xsl:sort select="@namespace"/>
+                      <xsl:variable name="nsid" select="@namespaceId"/>
+                      <xsl:for-each select="endpointInterface">
+                        <xsl:sort select="@name"/>
+                        <li>
+                          <xsl:choose>
+                            <xsl:when test="tag[@name='deprecated']">
+                              <font style="text-decoration:line-through;">
+                                <a href="soap_{$nsid}_{@name}.html"><xsl:value-of select="@name"/></a>
+                              </font> <xsl:if test="@file">(<a href="{@file}">wsdl</a>)</xsl:if>
+                            </xsl:when>
+                            <xsl:otherwise>
+                              <a href="soap_{$nsid}_{@name}.html"><xsl:value-of select="@name"/></a> <xsl:if test="@file">(<a href="{@file}">wsdl</a>)</xsl:if>
+                            </xsl:otherwise>
+                          </xsl:choose>
+                        </li>
+                        <xsl:call-template name="soap-endpoint"/>
+                      </xsl:for-each>
+                    </xsl:for-each>
+                  </ul>
+
+                  <xsl:if test="$downloads-exists">
+                    <p>
+                      The SOAP API is also accessible by client-side libraries that can be downloaded from the <a href="downloads.html">download page</a>.
+                    </p>
+                  </xsl:if>
+
+                </div>
+              </xsl:if>
+
               <xsl:if test="/api-docs/data/schema/types/type">
                 <div class="item">
 
@@ -254,78 +247,99 @@
                     This document will describe the data using terms based on <a href="http://www.w3.org/XML/Schema">XML Schema</a>.
                     Data can be grouped by namespace, with a schema document describing the <i>elements</i> and <i>types</i> of the namespace.
                     Generally speaking, <i>types</i> define the structure of the data and <i>elements</i> are <i>instances</i> of a type. For example,
-                    <i>elements</i>, are usually produced by (or consumed by) a REST endpoint, and the structure of each element is described by
+                    <i>elements</i> are usually produced by (or consumed by) a REST endpoint, and the structure of each element is described by
                     its <i>type</i>.
                   </p>
+
+                  <h2>Data Schemas</h2>
+                  <table>
+                    <tr>
+                      <th>id</th>
+                      <th>namespace</th>
+                      <th>schema file</th>
+                    </tr>
+                    <xsl:for-each select="/api-docs/data/schema">
+                      <xsl:sort select="@namespace"/>
+                      <xsl:variable name="nsid" select="@namespaceId"/>
+                      <xsl:variable name="ns" select="@namespace"/>
+                      <tr>
+                        <td><xsl:value-of select="$nsid"/></td>
+                        <td>
+                          <xsl:choose>
+                            <xsl:when test="string-length($ns) = 0">Default Namespace</xsl:when>
+                            <xsl:otherwise><xsl:value-of select="@namespace"/></xsl:otherwise>
+                          </xsl:choose>
+                        </td>
+                        <td>
+                          <xsl:choose>
+                            <xsl:when test="@file"><a href="{@file}"><xsl:value-of select="@file"/></a></xsl:when>
+                            <xsl:otherwise>(none)</xsl:otherwise>
+                          </xsl:choose>
+                        </td>
+                      </tr>
+                      <xsl:call-template name="data-schema"/>
+                    </xsl:for-each>
+                  </table>
 
                   <xsl:if test="/api-docs/data/schema/elements/element">
                     <h2>Data Elements</h2>
                     <ul>
-                      <xsl:for-each select="/api-docs/data/schema/elements/element">
-                        <xsl:sort select="@name"/>
-                        <li>
-                          <xsl:choose>
-                            <xsl:when test="tag[@name='deprecated']">
-                              <font style="text-decoration:line-through;">
-                                <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-                              </font>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-                            </xsl:otherwise>
-                          </xsl:choose>
-                        </li>
+                      <xsl:for-each select="/api-docs/data/schema">
+                        <xsl:sort select="@namespace"/>
+                        <xsl:variable name="nsid" select="@namespaceId"/>
+                        <xsl:if test="elements/element">
+                          <li>
+                            <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
+                            <ul>
+                              <xsl:for-each select="elements/element">
+                                <xsl:sort select="@name"/>
+                                <li>
+                                  <xsl:choose>
+                                    <xsl:when test="tag[@name='deprecated']">
+                                      <font style="text-decoration:line-through;">
+                                        <a href="data_{$nsid}.html#element_{@name}"><xsl:value-of select="@name"/></a>
+                                      </font>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                      <a href="data_{$nsid}.html#element_{@name}"><xsl:value-of select="@name"/></a>
+                                    </xsl:otherwise>
+                                  </xsl:choose>
+                                </li>
+                              </xsl:for-each>
+                            </ul>
+                          </li>
+                        </xsl:if>
                       </xsl:for-each>
                     </ul>
                   </xsl:if>
 
                   <h2>Data Types</h2>
                   <ul>
-                    <xsl:for-each select="/api-docs/data/schema/types/type">
-                      <xsl:sort select="@name"/>
-                      <li>
-                        <xsl:choose>
-                          <xsl:when test="tag[@name='deprecated']">
-                            <font style="text-decoration:line-through;">
-                              <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                            </font>
-                          </xsl:when>
-                          <xsl:otherwise>
-                            <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                          </xsl:otherwise>
-                        </xsl:choose>
-                      </li>
-                    </xsl:for-each>
-                  </ul>
-
-                  <h2>Schema Files</h2>
-                  <ul>
                     <xsl:for-each select="/api-docs/data/schema">
                       <xsl:sort select="@namespace"/>
-                      <xsl:variable name="ns" select="@namespace"/>
-                      <xsl:choose>
-                        <xsl:when test="@file">
-                          <xsl:choose>
-                            <xsl:when test="string-length($ns) = 0">
-                              <li><a href="{@file}">Default Namespace</a></li>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <li><a href="{@file}">Namespace <u><xsl:value-of select="@namespace"/></u></a></li>
-                            </xsl:otherwise>
-                          </xsl:choose>
-                        </xsl:when>
-                        <xsl:otherwise>
-                          <xsl:choose>
-                            <xsl:when test="string-length($ns) = 0">
-                              <li>Default Namespace</li>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <li>Namespace <u><xsl:value-of select="@namespace"/></u></li>
-                            </xsl:otherwise>
-                          </xsl:choose>
-                        </xsl:otherwise>
-                      </xsl:choose>
-                      <xsl:call-template name="data-schema"/>
+                      <xsl:variable name="nsid" select="@namespaceId"/>
+                      <xsl:if test="types/type">
+                        <li>
+                          <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
+                          <ul>
+                            <xsl:for-each select="types/type">
+                              <xsl:sort select="@name"/>
+                              <li>
+                                <xsl:choose>
+                                  <xsl:when test="tag[@name='deprecated']">
+                                    <font style="text-decoration:line-through;">
+                                      <a href="data_{$nsid}.html#{@name}"><xsl:value-of select="@name"/></a>
+                                    </font>
+                                  </xsl:when>
+                                  <xsl:otherwise>
+                                    <a href="data_{$nsid}.html#{@name}"><xsl:value-of select="@name"/></a>
+                                  </xsl:otherwise>
+                                </xsl:choose>
+                              </li>
+                            </xsl:for-each>
+                          </ul>
+                        </li>
+                      </xsl:if>
                     </xsl:for-each>
                   </ul>
                 </div>
@@ -401,18 +415,20 @@
 
                   <h2>Endpoint Metadata</h2>
                   <div class="subcontent">
-                    <xsl:choose>
-                      <xsl:when test="string-length(../@namespace) = 0">
-                        <li>Default Namespace</li>
-                      </xsl:when>
-                      <xsl:otherwise>
-                        <li>Namespace: <u><xsl:value-of select="../@namespace"/></u></li>
-                      </xsl:otherwise>
-                    </xsl:choose>
-                    <li>WSDL: <a href="{../@file}"><xsl:value-of select="../@file"/></a></li>
-                    <xsl:if test="@path">
-                      <li>Mount Point: <a href="{concat($api-relative-path,@path)}"><xsl:value-of select="@path"/></a></li>
-                    </xsl:if>
+                    <ul>
+                      <xsl:choose>
+                        <xsl:when test="string-length(../@namespace) = 0">
+                          <li>Default Namespace</li>
+                        </xsl:when>
+                        <xsl:otherwise>
+                          <li>Namespace: <u><xsl:value-of select="../@namespace"/></u></li>
+                        </xsl:otherwise>
+                      </xsl:choose>
+                      <li>WSDL: <a href="{../@file}"><xsl:value-of select="../@file"/></a></li>
+                      <xsl:if test="@path">
+                        <li>Mount Point: <a href="{concat($api-relative-path,@path)}"><xsl:value-of select="@path"/></a></li>
+                      </xsl:if>
+                    </ul>
                   </div>
 
                   <xsl:if test="method">
@@ -736,7 +752,9 @@
 
                   <h1><xsl:value-of select="@name"/></h1>
                   <xsl:if test="@subcontext">
-                    <p class="descr">Mount Point: <a href="{concat($api-relative-path,@subcontext,@name)}"><xsl:value-of select="concat(@subcontext,@name)"/></a></p>
+                    <ul>
+                      <li>Mount Point: <a href="{concat($api-relative-path,@subcontext,@name)}"><xsl:value-of select="concat(@subcontext,@name)"/></a></li>
+                    </ul>
                   </xsl:if>
 
                   <xsl:if test="operation">
@@ -777,7 +795,9 @@
                     <h1><a name="{@name}"><xsl:value-of select="@name"/></a></h1>
 
                     <xsl:if test="alias">
-                      <p>Aliases: <xsl:for-each select="alias"><xsl:value-of select="."/> </xsl:for-each></p>
+                      <ul>
+                        <li>Aliases: <xsl:for-each select="alias"><xsl:value-of select="."/> </xsl:for-each></li>
+                      </ul>
                     </xsl:if>
 
                     <xsl:if test="tag[@name='deprecated']">
@@ -797,7 +817,6 @@
                       <table>
                         <tr>
                           <th>name</th>
-                          <!--todo: put the type of the parameter.-->
                           <th>description</th>
                           <th>type</th>
                         </tr>
@@ -811,39 +830,80 @@
                       </table>
                     </xsl:if>
 
-                    <xsl:if test="outValue">
-                      <h2>Output Payload</h2>
-                      <div class="subcontent">
-                        <p>
-                          <xsl:value-of select="outValue" disable-output-escaping="yes"/>
-                        </p>
-                        <xsl:if test="contentType[@produceable='true']">
-                          <p>Supported MIME types:</p>
-                          <ul>
-                            <xsl:for-each select="contentType[@produceable='true']">
-                              <li><xsl:value-of select="@type"/><xsl:if test="@subcontext"> (alternative mount point: <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
-                            </xsl:for-each>
-                          </ul>
-                        </xsl:if>
-                      </div>
-                    </xsl:if>
-
                     <xsl:if test="inValue">
                       <h2>Input Payload</h2>
-                      <div class="subcontent">
-                        <p>
-                          <xsl:value-of select="inValue" disable-output-escaping="yes"/>
-                        </p>
-
-                        <xsl:if test="contentType[@consumable='true']">
-                          <p>Supported MIME types:</p>
-                          <ul>
-                            <xsl:for-each select="contentType[@consumable='true']">
-                              <li><xsl:value-of select="@type"/></li>
-                            </xsl:for-each>
-                          </ul>
+                      <table>
+                        <tr>
+                          <th>element</th>
+                          <th>consumeable content type(s)</th>
+                        </tr>
+                        <tr>
+                          <td>
+                            <xsl:choose>
+                              <xsl:when test="inValue/@elementName">
+                                <xsl:choose>
+                                  <xsl:when test="inValue/@elementSchemaId"><a href="data_{inValue/@elementSchemaId}.html#element_{inValue/@elementName}"><xsl:value-of select="inValue/@elementName"/></a></xsl:when>
+                                  <xsl:otherwise><xsl:value-of select="inValue/@elementName"/></xsl:otherwise>
+                                </xsl:choose>
+                              </xsl:when>
+                              <xsl:otherwise>(custom)</xsl:otherwise>
+                            </xsl:choose>
+                          </td>
+                          <td>
+                            <ul>
+                              <xsl:for-each select="contentType[@consumable='true']">
+                                <li><xsl:value-of select="@type"/></li>
+                              </xsl:for-each>
+                            </ul>
+                          </td>
+                        </tr>
+                        <xsl:if test="string-length(normalize-space(inValue)) &gt; 1">
+                          <tr>
+                            <th colspan="2">description</th>
+                          </tr>
+                          <tr>
+                            <td colspan="2"><xsl:value-of select="inValue" disable-output-escaping="yes"/></td>
+                          </tr>
                         </xsl:if>
-                      </div>
+                      </table>
+                    </xsl:if>
+
+                    <xsl:if test="outValue">
+                      <h2>Output Payload</h2>
+                      <table>
+                        <tr>
+                          <th>element</th>
+                          <th>produceable content type(s)</th>
+                        </tr>
+                        <tr>
+                          <td>
+                            <xsl:choose>
+                              <xsl:when test="outValue/@elementName">
+                                <xsl:choose>
+                                  <xsl:when test="outValue/@elementSchemaId"><a href="data_{outValue/@elementSchemaId}.html#element_{outValue/@elementName}"><xsl:value-of select="outValue/@elementName"/></a></xsl:when>
+                                  <xsl:otherwise><xsl:value-of select="outValue/@elementName"/></xsl:otherwise>
+                                </xsl:choose>
+                              </xsl:when>
+                              <xsl:otherwise>(custom)</xsl:otherwise>
+                            </xsl:choose>
+                          </td>
+                          <td>
+                            <ul>
+                              <xsl:for-each select="contentType[@produceable='true']">
+                                <li><xsl:value-of select="@type"/><xsl:if test="@subcontext"> (alternative mount point: <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
+                              </xsl:for-each>
+                            </ul>
+                          </td>
+                        </tr>
+                        <xsl:if test="string-length(normalize-space(outValue)) &gt; 1">
+                          <tr>
+                            <th colspan="2">description</th>
+                          </tr>
+                          <tr>
+                            <td colspan="2"><xsl:value-of select="outValue" disable-output-escaping="yes"/></td>
+                          </tr>
+                        </xsl:if>
+                      </table>
                     </xsl:if>
 
                     <xsl:if test="error">
@@ -934,38 +994,25 @@
               <div class="content">
                 <div class="item">
 
-                  <xsl:choose>
-                    <xsl:when test="string-length(@namespace) = 0">
-                      <h1>Default Namespace</h1>
-                    </xsl:when>
-                    <xsl:otherwise>
-                      <h1>Namespace <u><xsl:value-of select="@namespace"/></u></h1>
-                    </xsl:otherwise>
-                  </xsl:choose>
+                  <h1>Data<xsl:if test="$multiple_schemas and (string-length(@namespace) &gt; 0)">: <xsl:value-of select="@namespaceId"/></xsl:if></h1>
 
-                  <xsl:if test="types/type">
-                    <p>
-                      The following types are members of this namespace:
-                    </p>
+                  <ul>
+                    <xsl:choose>
+                      <xsl:when test="string-length(@namespace) = 0">
+                        <li>Default Namespace</li>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <li>Namespace: <u><xsl:value-of select="@namespace"/></u></li>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:if test="@file">
+                      <li>XML Schema File: <a href="{@file}"><xsl:value-of select="@file"/></a></li>
+                    </xsl:if>
+                  </ul>
 
-                    <ul>
-                      <xsl:for-each select="types/type">
-                        <xsl:sort select="@name"/>
-                        <li>
-                          <xsl:choose>
-                            <xsl:when test="tag[@name='deprecated']">
-                              <font style="text-decoration:line-through;">
-                                <a href="#{@name}"><xsl:value-of select="@name"/></a>
-                              </font>
-                            </xsl:when>
-                            <xsl:otherwise>
-                              <a href="#{@name}"><xsl:value-of select="@name"/></a>
-                            </xsl:otherwise>
-                          </xsl:choose>
-                        </li>
-                      </xsl:for-each>
-                    </ul>
-                  </xsl:if>
+                  <p>The data in this namespace is divided into elements and types. Types define the structure
+                    of the data. Elements define specific instances of the types, and are therefore more relevant to
+                    REST endpoints, which generally consume and/or produce elements.</p>
 
                   <xsl:if test="elements/element">
                     <p>
@@ -991,18 +1038,70 @@
                     </ul>
                   </xsl:if>
 
+                  <xsl:if test="types/type">
+                    <p>
+                      The following types are members of this namespace:
+                    </p>
+
+                    <ul>
+                      <xsl:for-each select="types/type">
+                        <xsl:sort select="@name"/>
+                        <li>
+                          <xsl:choose>
+                            <xsl:when test="tag[@name='deprecated']">
+                              <font style="text-decoration:line-through;">
+                                <a href="#{@name}"><xsl:value-of select="@name"/></a>
+                              </font>
+                            </xsl:when>
+                            <xsl:otherwise>
+                              <a href="#{@name}"><xsl:value-of select="@name"/></a>
+                            </xsl:otherwise>
+                          </xsl:choose>
+                        </li>
+                      </xsl:for-each>
+                    </ul>
+                  </xsl:if>
+
                 </div>
+
+                <xsl:for-each select="elements/element">
+                  <xsl:sort select="@name"/>
+                  <div class="item">
+
+                    <h1><a name="element_{@name}">Element <xsl:value-of select="@name"/></a></h1>
+
+                    <xsl:if test="@typeSchemaId and @typeName">
+                      <ul>
+                        <li>Type: <a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></li>
+                      </ul>
+                    </xsl:if>
+
+                    <xsl:if test="tag[@name='deprecated']">
+                      <p class="deprecated">
+                        This element has been deprecated.  <xsl:value-of select="tag[@name='deprecated']" disable-output-escaping="yes"/>.
+                      </p>
+                    </xsl:if>
+
+                    <xsl:if test="documentation">
+                      <p>
+                        <xsl:value-of select="documentation" disable-output-escaping="yes"/>
+                      </p>
+                    </xsl:if>
+                  </div>
+                </xsl:for-each>
 
                 <xsl:for-each select="types/type">
                   <xsl:sort select="@name"/>
 
                   <div class="item">
 
-                    <h1><a name="{@name}"><xsl:value-of select="@name"/></a></h1>
+                    <h1><a name="{@name}">Type <xsl:value-of select="@name"/></a></h1>
                     <xsl:if test="@extendsType">
                       <xsl:variable name="typeId" select="@extendsType"/>
                       <xsl:variable name="extendedType" select="//type[@id=$typeId]"/>
-                      <p class="descr">extends <a href="data_{$extendedType/../../@namespaceId}.html#{$extendedType/@name}"><xsl:value-of select="$extendedType/@name"/></a></p>
+                      <ul>
+                        <li>Extends: <a href="data_{$extendedType/../../@namespaceId}.html#{$extendedType/@name}"><xsl:value-of select="$extendedType/@name"/></a></li>
+                      </ul>
                     </xsl:if>
 
                     <xsl:if test="tag[@name='deprecated']">
@@ -1022,12 +1121,18 @@
                       <table>
                         <tr>
                           <th>name</th>
-                          <!--todo: do the type-->
+                          <th>type</th>
                           <th>description</th>
                         </tr>
                         <xsl:for-each select="attributes/attribute">
                           <tr>
                             <td><xsl:value-of select="@name"/></td>
+                            <td>
+                              <xsl:choose>
+                                <xsl:when test="@typeSchemaId"><a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></xsl:when>
+                                <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>
+                              </xsl:choose>
+                            </td>
                             <td><xsl:value-of select="." disable-output-escaping="yes"/></td>
                           </tr>
                         </xsl:for-each>
@@ -1038,9 +1143,8 @@
                       <h2>Child Elements</h2>
                       <table>
                         <tr>
-                          <th>name</th>
+                          <th>name (type)</th>
                           <th>min/max <br/>occurs</th>
-                          <!--todo: do the type or element ref-->
                           <th>description</th>
                         </tr>
                         <xsl:for-each select="elements/element">
@@ -1048,7 +1152,14 @@
                             <td>
                               <xsl:for-each select="choice">
                                 <xsl:if test="position() &gt; 1"><br/>or </xsl:if>
-                                <xsl:value-of select="@name"/>
+                                <xsl:choose>
+                                  <xsl:when test="@schemaId"><a href="data_{@schemaId}.html#element_{@name}"><xsl:value-of select="@name"/></a></xsl:when>
+                                  <xsl:otherwise><xsl:value-of select="@name"/></xsl:otherwise>
+                                </xsl:choose>
+                                <xsl:choose>
+                                  <xsl:when test="@typeSchemaId"> (<a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a>)</xsl:when>
+                                  <xsl:otherwise> (<xsl:value-of select="@typeName"/>)</xsl:otherwise>
+                                </xsl:choose>
                               </xsl:for-each>
                             </td>
                             <td><xsl:value-of select="@minOccurs"/>/<xsl:value-of select="@maxOccurs"/></td>
@@ -1067,7 +1178,15 @@
 
                     <xsl:if test="value">
                       <h2>Value</h2>
-                      <!--todo: do the type of the value.-->
+                      <ul>
+                        <li>
+                          Type:
+                          <xsl:choose>
+                            <xsl:when test="@typeSchemaId"><a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></xsl:when>
+                            <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>
+                          </xsl:choose>
+                        </li>
+                      </ul>
 
                       <p><xsl:value-of select="value" disable-output-escaping="yes"/></p>
                     </xsl:if>
@@ -1093,30 +1212,6 @@
                           </tr>
                         </xsl:for-each>
                       </table>
-                    </xsl:if>
-
-                  </div>
-                </xsl:for-each>
-
-                <xsl:for-each select="elements/element">
-                  <xsl:sort select="@name"/>
-                  <div class="item">
-
-                    <h1><a name="element_{@name}"><xsl:value-of select="@name"/></a></h1>
-                    <xsl:variable name="typeId" select="@type"/>
-                    <xsl:variable name="elType" select="//type[@id=$typeId]"/>
-                    <p class="descr">type: <a href="data_{$elType/../../@namespaceId}.html#{$elType/@name}"><xsl:value-of select="$elType/@name"/></a></p>
-
-                    <xsl:if test="tag[@name='deprecated']">
-                      <p class="deprecated">
-                        This element has been deprecated.  <xsl:value-of select="tag[@name='deprecated']" disable-output-escaping="yes"/>.
-                      </p>
-                    </xsl:if>
-
-                    <xsl:if test="documentation">
-                      <p>
-                        <xsl:value-of select="documentation" disable-output-escaping="yes"/>
-                      </p>
                     </xsl:if>
 
                   </div>

@@ -205,7 +205,7 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
   protected String calculateNamespaceURI() {
     PackageDeclaration pkg = getPackage();
     if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
-      throw new ValidationException(getPosition(), "A web service in no package must specify a target namespace.");
+      throw new ValidationException(getPosition(), getQualifiedName() + ": a web service in no package must specify a target namespace.");
     }
 
     String[] tokens = pkg.getQualifiedName().split("\\.");

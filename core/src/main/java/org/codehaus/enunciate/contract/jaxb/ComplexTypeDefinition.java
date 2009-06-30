@@ -47,7 +47,7 @@ public class ComplexTypeDefinition extends SimpleTypeDefinition {
         baseType = XmlTypeFactory.getXmlType(getSuperclass());
       }
       catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
+        throw new ValidationException(getPosition(), getQualifiedName() + ": " + e.getMessage());
       }
     }
 

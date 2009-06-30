@@ -818,7 +818,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     getEnunciate().addWebAppFragment(webAppFragment);
   }
 
-  protected void buildClientJar() throws IOException {
+  protected void buildClientJar() throws IOException, EnunciateException {
     Enunciate enunciate = getEnunciate();
     String clientJarName = getClientJarName();
 
@@ -853,7 +853,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     ClientLibraryArtifact gwtClientArtifact = new ClientLibraryArtifact(getName(), "gwt.client.library", "GWT Client Library");
     gwtClientArtifact.setPlatform("JavaScript/GWT (Version 1.4.59)");
     //read in the description from file:
-    gwtClientArtifact.setDescription(readResource("client_library_description.html"));
+    gwtClientArtifact.setDescription(readResource("client_library_description.fmt"));
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
     clientArtifact.setDescription("The binaries and sources for the GWT client library.");
     clientArtifact.setPublic(clientJarDownloadable);
@@ -871,23 +871,22 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
    * @param resource The resource to read.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException {
-    InputStream resourceIn = GWTDeploymentModule.class.getResourceAsStream(resource);
-    if (resourceIn != null) {
-      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
-      StringWriter writer = new StringWriter();
-      PrintWriter out = new PrintWriter(writer);
-      String line;
-      while ((line = in.readLine()) != null) {
-        out.println(line);
-      }
+  protected String readResource(String resource) throws IOException, EnunciateException {
+    HashMap<String, Object> model = new HashMap<String, Object>();
+    model.put("sample_service_method", getModelInternal().findExampleWebMethod());
+    model.put("sample_resource", getModelInternal().findExampleResource());
+
+    URL res = GWTDeploymentModule.class.getResource(resource);
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes);
+    try {
+      processTemplate(res, model, out);
       out.flush();
-      out.close();
-      writer.close();
-      return writer.toString();
+      bytes.flush();
+      return bytes.toString("utf-8");
     }
-    else {
-      return null;
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
     }
   }
 

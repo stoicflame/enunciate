@@ -85,7 +85,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       }
       else if (isValue(accessor)) {
         if (value != null) {
-          throw new ValidationException(accessor.getPosition(), "A type definition cannot have more than one xml value.");
+          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": a type definition cannot have more than one xml value.");
         }
 
         value = new Value(accessor, this);
@@ -94,7 +94,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       else if (isElementRef(accessor)) {
         ElementRef elementRef = new ElementRef(accessor, this);
         if (!elementAccessors.add(elementRef)) {
-          throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
+          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": duplicate XML element.");
         }
         added = elementRef;
       }
@@ -107,7 +107,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
         continue;
       }
       else if (isUnsupported(accessor)) {
-        throw new ValidationException(accessor.getPosition(), "Sorry, we currently don't support mixed or wildard elements. Maybe someday...");
+        throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": sorry, we currently don't support mixed or wildard elements. Maybe someday...");
       }
       else {
         //its an element accessor.
@@ -121,14 +121,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
 
         Element element = new Element(accessor, this);
         if (!elementAccessors.add(element)) {
-          throw new ValidationException(accessor.getPosition(), "Duplicate XML element.");
+          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": duplicate XML element.");
         }
         added = element;
       }
 
       if (added.getAnnotation(XmlID.class) != null) {
         if (xmlID != null) {
-          throw new ValidationException(added.getPosition(), "More than one XML id specified.");
+          throw new ValidationException(added.getPosition(), "Accessor " + added.getSimpleName() + " of " + getQualifiedName() + ": more than one XML id specified.");
         }
 
         xmlID = added;

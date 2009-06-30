@@ -51,7 +51,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final Set<String> producesMime;
   private final Resource parent;
   private final List<ResourceParameter> resourceParameters;
-  private final ParameterDeclaration entityParameter;
+  private final ResourceEntityParameter entityParameter;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends RESTResourceError> errors;
 
@@ -113,7 +113,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       }
     }
 
-    this.entityParameter = entityParameter;
+    this.entityParameter = entityParameter == null ? null : new ResourceEntityParameter(entityParameter);
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
@@ -264,7 +264,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    *
    * @return The entity parameter, or null if none.
    */
-  public ParameterDeclaration getEntityParameter() {
+  public ResourceEntityParameter getEntityParameter() {
     return entityParameter;
   }
 
@@ -321,7 +321,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
 
   // Inherited.
   public RESTResourcePayload getInputPayload() {
-    return getEntityParameter() != null ? new ResourcePayloadDeclarationAdapter((DecoratedDeclaration) DeclarationDecorator.decorate(getEntityParameter())) : null;
+    return getEntityParameter();
   }
 
   // Inherited.

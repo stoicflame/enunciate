@@ -1,0 +1,101 @@
+[#ftl]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
+  <h1>
+    Introduction
+  </h1>
+
+  <p>
+    The ActionScript client bundle is an SWC containing the ActionScript classes that
+    can be used with <a href="http://www.adobe.com/products/flex/">Adobe Flex</a> to develop, for example, a
+    <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> UI that interfaces with this public API. The ActionScript
+    classes have been generated with an emphasis on usability, clarity, and type safety (inasmuch as ActionScript allows it).
+    All public data types have been generated along with the services (if any) that access them.
+  </p>
+
+  <p>
+    For any services, this means that rather than using a standard RemoteObject, you can instantiate a service, register the
+    appropriate events, and invoke the method.  The service will fire the appropriate (strongly-typed) event that contains the response.
+    Because the public client-side data types are also generated for ActionScript developers, these can be used to read and invoke any
+    REST endpoints that provide the AMF content type (e.g. "application/x-amf").
+  </p>
+[#if sample_service_method??]
+
+  <p>
+    Consider the following example for the use of the ${sample_service_method.declaringEndpointInterface.simpleName}
+  </p>
+
+  <h1>
+    Services Example
+  </h1>
+
+  <code>
+//instantiate a new service...
+${sample_service_method.declaringEndpointInterface.simpleName} service =
+  new ${sample_service_method.declaringEndpointInterface.simpleName}();
+
+service.addEventListener("${sample_service_method.simpleName}",
+    do${sample_service_method.simpleName?cap_first});
+service.addEventListener("fault", doFault);
+
+private function doFault(event:Event):void {
+  Alert.show("A fault occurred.");
+}
+
+private function do${sample_service_method.simpleName?cap_first}
+    (event:${sample_service_method.simpleName?cap_first}ResultEvent):void {
+  //handle the result that was returned and is stored in "event.result"...
+}
+
+//make the asynchronous remote call to ${sample_service_method.simpleName}
+service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.simpleName}[#if param_has_next], [/#if][/#list]);
+  </code>
+
+[/#if]
+[#if sample_resource??]
+
+  <p>
+    For AMF REST, consider the REST resource "${sample_resource.path}" produced as
+    content type "application/x-amf", mounted at the relative URL "${sample_resource.path}":
+  </p>
+
+  <h1>
+    REST Example
+  </h1>
+
+  <code>
+var request:URLRequest = new URLRequest("${sample_resource.path}");
+request.method = URLRequestMethod.${sample_resource.supportedOperations?first?capitalize};
+URLStream resourceStream = new URLStream();
+[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+var ba:ByteArray = new ByteArray();
+var body:${sample_resource.inputPayload.xmlElement.simpleName} = new ${sample_resource.inputPayload.xmlElement.simpleName}();
+//set up the ${sample_resource.inputPayload.xmlElement.simpleName}...
+ba.writeObject(body);
+request.data = ba;
+request.contentType = "application/x-amf";
+[/#if]
+resourceStream.addEventListener("complete", resourceRetrieved)
+resourceStream.addEventListener("ioError", handleError)
+try {
+  resourceStream.load(request);
+}
+catch (error:Error) {
+  Alert.show(error.toString());
+}
+
+private function resourceRetrieved(event:Event):void {
+  var stream:URLStream = URLStream( event.target );
+[#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+  var resource:${sample_resource.outputPayload.xmlElement.simpleName} = ( stream.readObject() as ${sample_resource.outputPayload.xmlElement.simpleName} );
+  //...handle the ${sample_resource.outputPayload.xmlElement.simpleName}
+[#else]
+  //...handle the stream (e.g. stream.readObject())
+[/#if]
+}
+
+private function handleError(event:Event):void {
+  Alert.show("error.");
+}
+  </code>
+[/#if]

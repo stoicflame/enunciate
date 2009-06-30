@@ -1,3 +1,6 @@
+[#ftl]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
   <h1>
     Introduction
   </h1>
@@ -18,9 +21,9 @@
     for example.)
   </p>
 
+[#if sample_service_method??]
   <p>
-    As an example, suppose there existed a service interface and method for reading a purchase order.
-    Assuming the package "com.company", a typical use of the library would like like this:
+    Consider the following example:
   </p>
 
   <h1>
@@ -30,12 +33,12 @@
   <code>
 //instantiate a new service with an impl
 // (or through dependency injection, or whatever)...
-com.company.PurchaseOrderService service =
-  new com.company.impl.PurchaseOrderServiceImpl();
+${sample_service_method.declaringEndpointInterface.simpleName} service =
+  [#if sample_service_method.declaringEndpointInterface.endpointImplementations?size > 0]new ${sample_service_method.declaringEndpointInterface.endpointImplementations?first.simpleName}()[#else]...[/#if];
 
-//make the remote call to read the purchase order...
-com.company.PurchaseOrder order =
-  service.readPurchaseOrder("123456");
+//make the remote call to read the result...
+result = service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
 
-//handle the purchase order as needed...
+//handle the result as needed...
   </code>
+[/#if]

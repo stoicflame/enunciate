@@ -340,7 +340,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       //read in the description from file:
-      String description = String.format(readResource("library_description.html"), builder.toString());
+      String description = String.format(readResource("library_description.fmt", builder.toString()));
       artifactBundle.setDescription(description);
       NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "dotnet.client.bundle", bundle);
       binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));
@@ -354,26 +354,28 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
    * Reads a resource into string form.
    *
    * @param resource The resource to read.
+   * @param contains The description of what the bundle contains.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException {
-    InputStream resourceIn = CSharpDeploymentModule.class.getResourceAsStream(resource);
-    if (resourceIn != null) {
-      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
-      StringWriter writer = new StringWriter();
-      PrintWriter out = new PrintWriter(writer);
-      String line;
-      while ((line = in.readLine()) != null) {
-        out.println(line);
-      }
+  protected String readResource(String resource, String contains) throws IOException, EnunciateException {
+    HashMap<String, Object> model = new HashMap<String, Object>();
+    model.put("sample_service_method", getModelInternal().findExampleWebMethod());
+    model.put("sample_resource", getModelInternal().findExampleResource());
+    model.put("bundle_contains", contains);
+
+    URL res = CSharpDeploymentModule.class.getResource(resource);
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes);
+    try {
+      processTemplate(res, model, out);
       out.flush();
-      out.close();
-      writer.close();
-      return writer.toString();
+      bytes.flush();
+      return bytes.toString("utf-8");
     }
-    else {
-      return null;
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
     }
+
   }
 
   protected String getBundleFileName() {

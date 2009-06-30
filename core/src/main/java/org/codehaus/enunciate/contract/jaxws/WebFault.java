@@ -72,7 +72,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     if ((faultInfoProperty != null) && (faultInfoProperty.getPropertyType() instanceof ClassType)) {
       ClassType faultInfoType = (ClassType) faultInfoProperty.getPropertyType();
       if (faultInfoType.getDeclaration() == null) {
-        throw new ValidationException(getPosition(), "Class not found: " + faultInfoType + ".");
+        throw new ValidationException(getPosition(), getQualifiedName() + ": class not found: " + faultInfoType + ".");
       }
 
       boolean messageConstructorFound = false;
@@ -273,7 +273,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
   protected String calculateNamespaceURI() {
     PackageDeclaration pkg = getPackage();
     if ((pkg == null) || ("".equals(pkg.getQualifiedName()))) {
-      throw new ValidationException(getPosition(), "A web service in no package must specify a target namespace.");
+      throw new ValidationException(getPosition(), getQualifiedName() + ": a web fault in no package must specify a target namespace.");
     }
 
     String[] tokens = pkg.getQualifiedName().split("\\.");
@@ -350,10 +350,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
 
           if (index1 < 0) {
-            throw new ValidationException(WebFault.this.getPosition(), "@WebFaultPropertyOrder doesn't specify a property '" + o1.getElementName() + "'.");
+            throw new ValidationException(WebFault.this.getPosition(), WebFault.this.getQualifiedName() + ": @WebFaultPropertyOrder doesn't specify a property '" + o1.getElementName() + "'.");
           }
           else if (index2 < 0) {
-            throw new ValidationException(WebFault.this.getPosition(), "@WebFaultPropertyOrder doesn't specify a property '" + o2.getElementName() + "'.");
+            throw new ValidationException(WebFault.this.getPosition(), WebFault.this.getQualifiedName() + ": @WebFaultPropertyOrder doesn't specify a property '" + o2.getElementName() + "'.");
           }
           else {
             return index1 - index2;

@@ -477,6 +477,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
+      model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

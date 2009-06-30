@@ -105,7 +105,7 @@
   <xs:complexType name="type">
     <xs:annotation>
       <xs:documentation>
-        A schema type can be tagged documentation with additinoal elements for the
+        A schema type can be tagged documentation with additional elements for the
         attributes, elements, and value of a type.
       </xs:documentation>
     </xs:annotation>
@@ -153,6 +153,7 @@
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="typeSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
 
@@ -203,8 +204,10 @@
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="namespace" type="xs:string"/>
+        <xs:attribute name="schemaId" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="typeSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
 
@@ -250,6 +253,7 @@
       <xs:extension base="xs:string">
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="typeSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
 
@@ -279,6 +283,9 @@
       <xs:extension base="taggedDocumentation">
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="typeNamespace" type="xs:string"/>
+        <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="typeSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -538,8 +545,9 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="custom" type="xs:boolean"/>
-        <xs:attribute name="typeNamespace" type="xs:string"/>
-        <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="elementName" type="xs:string"/>
+        <xs:attribute name="elementNamespace" type="xs:string"/>
+        <xs:attribute name="elementSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -554,8 +562,9 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="custom" type="xs:boolean"/>
-        <xs:attribute name="typeNamespace" type="xs:string"/>
-        <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="elementName" type="xs:string"/>
+        <xs:attribute name="elementNamespace" type="xs:string"/>
+        <xs:attribute name="elementSchemaId" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>

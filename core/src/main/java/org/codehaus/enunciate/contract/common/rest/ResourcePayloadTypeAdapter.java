@@ -16,8 +16,13 @@
 
 package org.codehaus.enunciate.contract.common.rest;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.ClassType;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 
 /**
  * @author Ryan Heaton
@@ -105,5 +110,16 @@ public class ResourcePayloadTypeAdapter extends DecoratedTypeMirror implements R
 
   public String getDocValue() {
     return delegate.getDocValue();
+  }
+
+  // Inherited.
+  public RootElementDeclaration getXmlElement() {
+    if (delegate instanceof ClassType) {
+      ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
+      if (declaration != null) {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findRootElementDeclaration(declaration);
+      }
+    }
+    return null;
   }
 }

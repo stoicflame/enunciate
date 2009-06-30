@@ -73,13 +73,13 @@ public class WebMethod extends DecoratedMethodDeclaration implements Comparable<
     Collection<WebFault> webFaults = new ArrayList<WebFault>();
     for (ReferenceType referenceType : getThrownTypes()) {
       if (!(referenceType instanceof DeclaredType)) {
-        throw new ValidationException(getPosition(), "Thrown type must be a declared type.");
+        throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": Thrown type must be a declared type.");
       }
 
       TypeDeclaration declaration = ((DeclaredType) referenceType).getDeclaration();
 
       if (declaration == null) {
-        throw new ValidationException(getPosition(), "Unknown declaration for " + referenceType);
+        throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpointInterface.getQualifiedName() + ": unknown declaration for " + referenceType);
       }
 
       webFaults.add(new WebFault((ClassDeclaration) declaration));

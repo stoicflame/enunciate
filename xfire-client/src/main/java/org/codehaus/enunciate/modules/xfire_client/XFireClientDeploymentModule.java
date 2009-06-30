@@ -741,7 +741,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       ClientLibraryArtifact jdk14ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk14.library", "XFire Client Library (Java 1.4 Compatible)");
       jdk14ArtifactBundle.setPlatform("Java (Version 1.4+)");
       //read in the description from file:
-      jdk14ArtifactBundle.setDescription(readResource("library_description_14.html"));
+      jdk14ArtifactBundle.setDescription(readResource("library_description_14.fmt"));
       NamedFileArtifact jdk14BinariesJar = new NamedFileArtifact(getName(), "client.jdk14.library.binaries", jdk14Jar);
       jdk14BinariesJar.setDescription("The binaries for the JDK 1.4 client library.");
       jdk14BinariesJar.setPublic(false);
@@ -783,7 +783,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
       ClientLibraryArtifact jdk15ArtifactBundle = new ClientLibraryArtifact(getName(), "client.jdk15.library", "XFire Client Library (Java 5+)");
       jdk15ArtifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
-      jdk15ArtifactBundle.setDescription(readResource("library_description_15.html"));
+      jdk15ArtifactBundle.setDescription(readResource("library_description_15.fmt"));
       NamedFileArtifact jdk15BinariesJar = new NamedFileArtifact(getName(), "client.jdk15.library.binaries", jdk15Jar);
       jdk15BinariesJar.setDescription("The binaries for the JDK 1.5 client library.");
       jdk15BinariesJar.setPublic(false);
@@ -808,23 +808,22 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
    * @param resource The resource to read.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException {
-    InputStream resourceIn = XFireClientDeploymentModule.class.getResourceAsStream(resource);
-    if (resourceIn != null) {
-      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
-      StringWriter writer = new StringWriter();
-      PrintWriter out = new PrintWriter(writer);
-      String line;
-      while ((line = in.readLine()) != null) {
-        out.println(line);
-      }
+  protected String readResource(String resource) throws IOException, EnunciateException {
+    HashMap<String, Object> model = new HashMap<String, Object>();
+    model.put("sample_service_method", getModelInternal().findExampleWebMethod());
+    model.put("sample_resource", getModelInternal().findExampleResource());
+
+    URL res = XFireClientDeploymentModule.class.getResource(resource);
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes);
+    try {
+      processTemplate(res, model, out);
       out.flush();
-      out.close();
-      writer.close();
-      return writer.toString();
+      bytes.flush();
+      return bytes.toString("utf-8");
     }
-    else {
-      return null;
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
     }
   }
 

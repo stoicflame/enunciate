@@ -16,10 +16,27 @@
 
 package org.codehaus.enunciate.contract.common.rest;
 
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+
 /**
  * Payload for a REST resource.
  * 
  * @author Ryan Heaton
  */
 public interface RESTResourcePayload {
+
+  /**
+   * The documentation value for the payload.
+   *
+   * @return The documentation value for the payload.
+   */
+  String getDocValue();
+
+  /**
+   * The XML element associated with the payload, or null if none (or unknown).
+   *
+   * @return The XML element associated with the payload, or null if none (or unknown).
+   */
+  RootElementDeclaration getXmlElement();
+
 }

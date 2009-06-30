@@ -38,11 +38,13 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.rest.MimeType;
 import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
+import org.codehaus.enunciate.doc.DocumentationExample;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
@@ -818,7 +820,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected boolean isSimpleType(TypeDeclaration declaration) {
     if (declaration instanceof InterfaceDeclaration) {
       if (declaration.getAnnotation(javax.xml.bind.annotation.XmlType.class) != null) {
-        throw new ValidationException(declaration.getPosition(), "An interface must not be annotated with @XmlType.");
+        throw new ValidationException(declaration.getPosition(), declaration.getQualifiedName() + ": an interface must not be annotated with @XmlType.");
       }
 
       return false;
@@ -938,7 +940,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (schema.getElementFormDefault() != XmlNsForm.UNSET) {
       for (Schema pckg : schemaInfo.getPackages()) {
         if ((pckg.getElementFormDefault() != null) && (schema.getElementFormDefault() != pckg.getElementFormDefault())) {
-          throw new ValidationException(schema.getPosition(), "Inconsistent elementFormDefault declarations: " + pckg.getPosition());
+          throw new ValidationException(schema.getPosition(), schema.getQualifiedName() + ": inconsistent elementFormDefault declarations: " + pckg.getQualifiedName());
         }
       }
     }
@@ -946,7 +948,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (schema.getAttributeFormDefault() != XmlNsForm.UNSET) {
       for (Schema pckg : schemaInfo.getPackages()) {
         if ((pckg.getAttributeFormDefault() != null) && (schema.getAttributeFormDefault() != pckg.getAttributeFormDefault())) {
-          throw new ValidationException(schema.getPosition(), "Inconsistent attributeFormDefault declarations: " + pckg.getPosition());
+          throw new ValidationException(schema.getPosition(), schema.getQualifiedName() + ": inconsistent attributeFormDefault declarations: " + pckg.getQualifiedName());
         }
       }
     }
@@ -1093,6 +1095,93 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       return this.rootElements.get(index);
     }
     return null;
+  }
+
+  /**
+   * Finds an example resource method, according to the following preference order:
+   *
+   * <ol>
+   *   <li>The first method annotated with {@link DocumentationExample}.
+   *   <li>The first method with BOTH an output payload with a known XML element and an input payload with a known XML element.
+   *   <li>The first method with an output payload with a known XML element.
+   * </ol>
+   *
+   * @return An example resource method, or if no good examples were found.
+   */
+  public RESTResource findExampleResource() {
+    
+    RESTResource example = null;
+    List<RootResource> resources = getRootResources();
+    for (RootResource root : resources) {
+      List<ResourceMethod> methods = root.getResourceMethods(true);
+      for (ResourceMethod method : methods) {
+        if (method.getAnnotation(DocumentationExample.class) != null) {
+          return method;
+        }
+        else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
+          if (method.getInputPayload() != null && method.getInputPayload().getXmlElement() != null) {
+            //we'll prefer one with both an output AND an input.
+            return method;
+          }
+          else {
+            //we'll prefer the first one we find with an output.
+            example = example == null ? method : example;
+          }
+        }
+      }
+    }
+
+    List<RESTEndpoint> endpoints = getRESTEndpoints();
+    for (RESTEndpoint endpoint : endpoints) {
+      for (RESTMethod method : endpoint.getRESTMethods()) {
+        if (method.getAnnotation(DocumentationExample.class) != null) {
+          return method;
+        }
+        else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
+          if (method.getInputPayload() != null && method.getInputPayload().getXmlElement() != null && (example == null || example.getInputPayload() == null)) {
+            //we'll prefer one with both an output AND an input.
+            example = method;
+          }
+          else {
+            //we'll prefer the first one we find with an output.
+            example = example == null ? method : example;
+          }
+        }
+      }
+    }
+    
+    return example;
+  }
+
+  /**
+   * Finds an example resource method, according to the following preference order:
+   *
+   * <ol>
+   *   <li>The first method annotated with {@link DocumentationExample}.
+   *   <li>The first web method that returns a declared type.
+   *   <li>The first web method.
+   * </ol>
+   *
+   * @return An example resource method, or if no good examples were found.
+   */
+  public WebMethod findExampleWebMethod() {
+    WebMethod example = null;
+    for (EndpointInterface ei : this.endpointInterfaces) {
+      for (WebMethod method : ei.getWebMethods()) {
+        if (method.getAnnotation(DocumentationExample.class) != null) {
+          return method;
+        }
+        else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType
+          && (example == null || example.getWebResult() == null || (!(example.getWebResult().getType() instanceof DeclaredType)))) {
+          example = method;
+        }
+        else {
+          //we'll prefer the first one we find with an output.
+          example = example == null ? method : example;
+        }
+      }
+    }
+    return example;
   }
 
   /**

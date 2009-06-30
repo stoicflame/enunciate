@@ -18,19 +18,20 @@ package org.codehaus.enunciate.contract.rest;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedParameterDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
 import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import com.sun.mirror.declaration.ParameterDeclaration;
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.*;
 
 import java.util.Collection;
 
@@ -172,7 +173,7 @@ public class RESTParameter extends DecoratedParameterDeclaration implements REST
       return XmlTypeFactory.getXmlType(getType());
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
+      throw new ValidationException(getPosition(), "Paramater " + getSimpleName() + ": " + e.getMessage());
     }
   }
 
@@ -212,5 +213,17 @@ public class RESTParameter extends DecoratedParameterDeclaration implements REST
   // Inherited.
   public RESTResourceParameterType getResourceParameterType() {
     return isProperNoun() || isContextParam() ? RESTResourceParameterType.PATH : RESTResourceParameterType.QUERY;
+  }
+
+  // Inherited.
+  public RootElementDeclaration getXmlElement() {
+    TypeMirror type = getType();
+    if (type instanceof ClassType) {
+      ClassDeclaration declaration = ((ClassType) type).getDeclaration();
+      if (declaration != null) {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findRootElementDeclaration(declaration);
+      }
+    }
+    return null;
   }
 }

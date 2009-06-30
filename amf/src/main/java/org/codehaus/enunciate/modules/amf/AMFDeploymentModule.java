@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.amf;
 
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import flex.messaging.MessageBrokerServlet;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
@@ -37,16 +38,14 @@ import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
 import org.codehaus.enunciate.modules.amf.config.License;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
-import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-
-import flex.messaging.MessageBrokerServlet;
 
 /**
  * <h1>AMF Module</h1>
@@ -686,7 +685,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
       ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Library");
       as3ClientArtifact.setPlatform("Adobe Flex");
       //read in the description from file:
-      as3ClientArtifact.setDescription(readResource("client_library_description.html"));
+      as3ClientArtifact.setDescription(readResource("client_library_description.fmt"));
       as3ClientArtifact.setDependencies(clientDeps);
 
       if (swcFile != null) {
@@ -804,23 +803,22 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
    * @param resource The resource to read.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException {
-    InputStream resourceIn = AMFDeploymentModule.class.getResourceAsStream(resource);
-    if (resourceIn != null) {
-      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
-      StringWriter writer = new StringWriter();
-      PrintWriter out = new PrintWriter(writer);
-      String line;
-      while ((line = in.readLine()) != null) {
-        out.println(line);
-      }
+  protected String readResource(String resource) throws IOException, EnunciateException {
+    HashMap<String, Object> model = new HashMap<String, Object>();
+    model.put("sample_service_method", getModelInternal().findExampleWebMethod());
+    model.put("sample_resource", getModelInternal().findExampleResource());
+
+    URL res = AMFDeploymentModule.class.getResource(resource);
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes);
+    try {
+      processTemplate(res, model, out);
       out.flush();
-      out.close();
-      writer.close();
-      return writer.toString();
+      bytes.flush();
+      return bytes.toString("utf-8");
     }
-    else {
-      return null;
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
     }
   }
 

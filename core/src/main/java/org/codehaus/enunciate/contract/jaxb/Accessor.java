@@ -157,7 +157,7 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
       return (xmlType != null) ? xmlType : XmlTypeFactory.getXmlType(getAccessorType());
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
+      throw new ValidationException(getPosition(), "Accessor " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": " + e.getMessage());
     }
   }
 

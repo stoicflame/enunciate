@@ -417,7 +417,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "jaxws.client.library", "JAX-WS Client Library (Java 5+)");
     artifactBundle.setPlatform("Java (Version 5+)");
     //read in the description from file:
-    artifactBundle.setDescription(readResource("library_description.html"));
+    artifactBundle.setDescription(readResource("library_description.fmt"));
     NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "jaxws.client.library.binaries", jdk15Jar);
     binariesJar.setDescription("The binaries for the JAX-WS client library.");
     binariesJar.setPublic(false);
@@ -437,23 +437,22 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
    * @param resource The resource to read.
    * @return The string form of the resource.
    */
-  protected String readResource(String resource) throws IOException {
-    InputStream resourceIn = JAXWSClientDeploymentModule.class.getResourceAsStream(resource);
-    if (resourceIn != null) {
-      BufferedReader in = new BufferedReader(new InputStreamReader(resourceIn));
-      StringWriter writer = new StringWriter();
-      PrintWriter out = new PrintWriter(writer);
-      String line;
-      while ((line = in.readLine()) != null) {
-        out.println(line);
-      }
+  protected String readResource(String resource) throws IOException, EnunciateException {
+    HashMap<String, Object> model = new HashMap<String, Object>();
+    model.put("sample_service_method", getModelInternal().findExampleWebMethod());
+    model.put("sample_resource", getModelInternal().findExampleResource());
+
+    URL res = JAXWSClientDeploymentModule.class.getResource(resource);
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(bytes);
+    try {
+      processTemplate(res, model, out);
       out.flush();
-      out.close();
-      writer.close();
-      return writer.toString();
+      bytes.flush();
+      return bytes.toString("utf-8");
     }
-    else {
-      return null;
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
     }
   }
 

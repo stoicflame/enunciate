@@ -32,7 +32,7 @@
       [#if type.attributes?size > 0]
           <attributes>
         [#list type.attributes as attribute]
-            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace?default("")}" typeName="${attribute.baseType.qname.localPart}">
+            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace?default("")}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)?exists] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
               <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))}]]>
             </attribute>
         [/#list]
@@ -53,14 +53,14 @@
             [/#list]
           [/#list]
           [#list element.choices as choice]
-              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if]/>
+              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?exists && schemaForNamespace(choice)?exists] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)?exists] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
           [/#list]
             </element>
         [/#list]
           </elements>
       [/#if]
       [#if type.value?exists]
-          <value typeNamespace="${type.value.baseType.namespace?default("")}" typeName="${type.value.baseType.qname.localPart}">
+          <value typeNamespace="${type.value.baseType.namespace?default("")}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)?exists] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
             <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))}]]>
           </value>
       [/#if]
@@ -87,7 +87,7 @@
       </types>
       <elements>
     [#list schema.globalElements as element]
-        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}">
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition?exists] typeName="${element.typeDefinition.name}" typeNamespace="${element.typeDefinition.namespace?default("")}"[/#if][#if schemaForNamespace(element)?exists] typeSchemaId="${schemaForNamespace(element).id}"[/#if]>
       [#if element.docValue?exists]
           <documentation>
             <![CDATA[${element.docValue}]]>
@@ -197,12 +197,12 @@
           </parameter>
       [/#list]
       [#if resource.inputPayload?exists]
-          <inValue custom="true">
+          <inValue[#if resource.inputPayload.xmlElement?exists && schemaForNamespace(resource.inputPayload)?exists] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace?default("")}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
             <![CDATA[${resource.inputPayload.docValue?default("(no documentation provided)")}]]>
           </inValue>
       [/#if]
       [#if resource.outputPayload?exists]
-          <outValue custom="true">
+          <outValue[#if resource.outputPayload.xmlElement?exists && schemaForNamespace(resource.outputPayload)?exists] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace?default("")}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
             <![CDATA[${resource.outputPayload.docValue?default("(no documentation provided)")}]]>
           </outValue>
       [/#if]

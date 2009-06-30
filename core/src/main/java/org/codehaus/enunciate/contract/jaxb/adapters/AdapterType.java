@@ -60,7 +60,7 @@ public class AdapterType extends DecoratedClassType {
     this.adaptingType = formalTypeIt.next();
     TypeMirror boundTypeMirror = formalTypeIt.next();
     if (!(boundTypeMirror instanceof DeclaredType)) {
-      throw new ValidationException(adapterDeclaration.getPosition(), "Illegal XML adapter: not adapting a declared type (" + boundTypeMirror + ").");
+      throw new ValidationException(adapterDeclaration.getPosition(), adapterDeclaration.getQualifiedName() + ": illegal XML adapter: not adapting a declared type (" + boundTypeMirror + ").");
     }
 
     this.adaptedType = (DeclaredType) boundTypeMirror;

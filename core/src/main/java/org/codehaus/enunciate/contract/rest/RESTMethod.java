@@ -68,20 +68,20 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
       RESTParameter restParameter = new RESTParameter(parameterDeclaration);
       if (restParameter.isProperNoun()) {
         if (properNoun != null) {
-          throw new ValidationException(properNoun.getPosition(), "REST method has more than one proper noun.  The other found at " + restParameter.getPosition());
+          throw new ValidationException(properNoun.getPosition(), "Paramater " + restParameter.getSimpleName() + " of " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": REST method has more than one proper noun.  The other one " + restParameter.getSimpleName());
         }
         else if (restParameter.isContextParam()) {
-          throw new ValidationException(restParameter.getPosition(), "A REST context parameter cannot also be a proper noun.");
+          throw new ValidationException(restParameter.getPosition(), "Paramater " + restParameter.getSimpleName() + " of " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": a REST context parameter cannot also be a proper noun.");
         }
         
         properNoun = restParameter;
       }
       else if (restParameter.isNounValue()) {
         if (nounValue != null) {
-          throw new ValidationException(nounValue.getPosition(), "REST method has more than one noun value.  The other found at " + restParameter.getPosition());
+          throw new ValidationException(nounValue.getPosition(), "Paramater " + nounValue.getSimpleName() + " of " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": REST method has more than one noun value.  The other found at " + restParameter.getSimpleName());
         }
         else if (restParameter.isContextParam()) {
-          throw new ValidationException(restParameter.getPosition(), "A REST context parameter cannot also be the noun value.");
+          throw new ValidationException(restParameter.getPosition(), "Paramater " + restParameter.getSimpleName() + " of " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": a REST context parameter cannot also be the noun value.");
         }
 
         nounValue = restParameter;
@@ -148,7 +148,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.add(MimeType.parse(supported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
       for (String unsupported : contentTypeInfo.unsupported()) {
@@ -156,7 +156,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.remove(MimeType.parse(unsupported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
     }
@@ -168,7 +168,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.add(MimeType.parse(supported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
       for (String unsupported : contentTypeInfo.unsupported()) {
@@ -176,7 +176,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.remove(MimeType.parse(unsupported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
     }
@@ -188,7 +188,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.add(MimeType.parse(supported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
       for (String unsupported : contentTypeInfo.unsupported()) {
@@ -196,7 +196,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
           this.contentTypes.remove(MimeType.parse(unsupported).toString());
         }
         catch (Exception e) {
-          throw new ValidationException(getPosition(), e.getMessage());
+          throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
         }
       }
     }
@@ -331,7 +331,7 @@ public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEnd
       return XmlTypeFactory.getXmlType(getReturnType());
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
+      throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + endpoint.getQualifiedName() + ": " + e.getMessage());
     }
   }
 

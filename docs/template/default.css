@@ -33,6 +33,10 @@ p,cite,code,ul {
 	font-size: 1.2em;
 	padding-bottom: 1.2em;
 }
+ul ul {
+  font-size: 1em;
+  padding-bottom: 0;
+}
 h1 {
 	font-size: 1.4em;
 	margin-bottom: 4px;
@@ -151,7 +155,7 @@ h1,h2,h3 {
 	padding: 6px 12px;
 	border: 1px solid #EEE;
 	background: #FFF;
-	margin-bottom: 8px;
+	margin-bottom: 25px;
 }
 .content .descr {
 	color: #333;
@@ -181,10 +185,11 @@ h1,h2,h3 {
   padding: 3px 3px 3px 3px;
 }
 .content h1 {
+  color: #666;
   text-decoration:underline;
 }
 .content h1 a {
-  color: #367EA6;
+  color: #666;
 }
 .subcontent {
   background: url(img/bgcode.gif);

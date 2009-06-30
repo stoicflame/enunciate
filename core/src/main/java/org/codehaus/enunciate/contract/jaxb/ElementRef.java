@@ -98,7 +98,7 @@ public class ElementRef extends Element {
       }
 
       if (this.choices.isEmpty()) {
-        throw new ValidationException(getPosition(), String.format("No known root element subtypes of %s", typeMirror));
+        throw new ValidationException(getPosition(), String.format("Member %s of %s: no known root element subtypes of %s", getSimpleName(), typedef.getQualifiedName(), typeMirror));
       }
 
       this.ref = null;
@@ -191,7 +191,7 @@ public class ElementRef extends Element {
         String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
         String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
         if (localName == null) {
-          throw new ValidationException(getPosition(), "@XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
+          throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
         }
         refQName = new QName(namespace, localName);
       }
@@ -203,7 +203,7 @@ public class ElementRef extends Element {
     }
 
     if (refQName == null) {
-      throw new ValidationException(getPosition(), elementDeclaration + " is neither JAXBElement nor a root element declaration.");
+      throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
     }
 
     return refQName;

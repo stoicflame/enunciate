@@ -271,7 +271,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
         if (isHolder()) {
           Collection<TypeMirror> typeArgs = ((DeclaredType) type).getActualTypeArguments();
           if ((typeArgs == null) || (typeArgs.size() == 0)) {
-            throw new ValidationException(getPosition(), "Unable to get the type of the holder.");
+            throw new ValidationException(getPosition(), "Parameter " + getSimpleName() + ": unable to get the type of the holder.");
           }
 
           type = typeArgs.iterator().next();
@@ -281,7 +281,7 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
       return xmlType;
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
+      throw new ValidationException(getPosition(), "Parameter " + getSimpleName() + ": " + e.getMessage());
     }
   }
 

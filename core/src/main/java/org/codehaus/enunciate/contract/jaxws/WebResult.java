@@ -279,7 +279,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
       return xmlType;
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(method.getPosition(), e.getMessage());
+      throw new ValidationException(method.getPosition(), "Result of method " + getWebMethod().getSimpleName() + " of " + getWebMethod().getDeclaringEndpointInterface().getQualifiedName() + ": " + e.getMessage());
     }
   }
 

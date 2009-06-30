@@ -166,7 +166,7 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration {
       return XmlTypeFactory.getXmlType(getParameters().iterator().next().getType());
     }
     catch (XmlTypeException e) {
-      throw new ValidationException(getPosition(), e.getMessage());
+      throw new ValidationException(getPosition(), "Method " + getSimpleName() + " of " + registry.getQualifiedName() + ": " + e.getMessage());
     }
   }
 

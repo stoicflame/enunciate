@@ -101,14 +101,14 @@ public class XmlTypeFactory {
             try {
               Class specifiedClass = specifiedType.type();
               if (specifiedClass == XmlSchemaType.DEFAULT.class) {
-                throw new ValidationException(pckg.getPosition(), "A type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
+                throw new ValidationException(pckg.getPosition(), pckg.getQualifiedName() + ": a type must be specified in " + XmlSchemaType.class.getName() + " at the package-level.");
               }
               typeFqn = specifiedClass.getName();
             }
             catch (MirroredTypeException e) {
               TypeMirror explicitTypeMirror = e.getTypeMirror();
               if (!(explicitTypeMirror instanceof DeclaredType)) {
-                throw new ValidationException(pckg.getPosition(), "Only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
+                throw new ValidationException(pckg.getPosition(), pckg.getQualifiedName() + ": only a declared type can be adapted.  Offending type: " + explicitTypeMirror);
               }
               typeFqn = ((DeclaredType) explicitTypeMirror).getDeclaration().getQualifiedName();
             }

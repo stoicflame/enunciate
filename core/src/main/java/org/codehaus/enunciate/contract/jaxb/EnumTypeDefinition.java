@@ -67,7 +67,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
       }
 
       if (!enumValues.add(value)) {
-        throw new ValidationException(enumConstant.getPosition(), "Duplicate enum value: " + value);
+        throw new ValidationException(enumConstant.getPosition(), getQualifiedName() + ": duplicate enum value: " + value);
       }
 
       this.enumValues.put(enumConstant.getSimpleName(), value);
@@ -95,7 +95,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         }
       }
       catch (XmlTypeException e) {
-        throw new ValidationException(getPosition(), e.getMessage());
+        throw new ValidationException(getPosition(), getQualifiedName() + ": " + e.getMessage());
       }
     }
 

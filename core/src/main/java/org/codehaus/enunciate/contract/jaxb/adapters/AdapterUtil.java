@@ -122,13 +122,13 @@ public class AdapterUtil {
 
         AdapterType adapterType = new AdapterType(adapterTypeMirror);
         if (!adapterType.canAdapt((DeclaredType) adaptedType)) {
-          throw new ValidationException(referer.getPosition(), "Adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
+          throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
         }
         return adapterType;
       }
     }
     else if (typeAdapterInfo != null) {
-      throw new ValidationException(referer.getPosition(), "An XML adapter can only adapt a declared type (" + adaptedType + " cannot be adapted).");
+      throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": an XML adapter can only adapt a declared type (" + adaptedType + " cannot be adapted).");
     }
 
     return null;
@@ -167,7 +167,7 @@ public class AdapterUtil {
           try {
             Class adaptedClass = adaptedTypeInfo.type();
             if (adaptedClass == XmlJavaTypeAdapter.DEFAULT.class) {
-              throw new ValidationException(pckg.getPosition(), "A type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
+              throw new ValidationException(pckg.getPosition(), "Package " + pckg.getSimpleName() + ": a type must be specified in " + XmlJavaTypeAdapter.class.getName() + " at the package-level.");
             }
             typeFqn = adaptedClass.getName();
 
@@ -175,7 +175,7 @@ public class AdapterUtil {
           catch (MirroredTypeException e) {
             TypeMirror adaptedType = e.getTypeMirror();
             if (!(adaptedType instanceof DeclaredType)) {
-              throw new ValidationException(pckg.getPosition(), "Unadaptable type: " + adaptedType);
+              throw new ValidationException(pckg.getPosition(), "Package " + pckg.getSimpleName() + ": unadaptable type: " + adaptedType);
             }
             TypeDeclaration typeDeclaration = ((DeclaredType) adaptedType).getDeclaration();
             if (typeDeclaration == null) {
