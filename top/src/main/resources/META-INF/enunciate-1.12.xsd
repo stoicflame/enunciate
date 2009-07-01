@@ -239,7 +239,7 @@
       <xs:element name="gwt" type="module-gwt" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws" type="module-jaxws" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jaxws-client" type="module-jaxws-client" minOccurs="0" maxOccurs="1"/>
-      <xs:element name="jaxws-rt" type="module-jaxws-ri" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="jaxws-ri" type="module-jaxws-ri" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jersey" type="module-jersey" minOccurs="0" maxOccurs="1"/>
       <xs:element name="rest" type="module-rest" minOccurs="0" maxOccurs="1"/>
       <xs:element name="spring-app" type="module-spring-app" minOccurs="0" maxOccurs="1"/>
