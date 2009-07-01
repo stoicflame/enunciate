@@ -25,11 +25,15 @@ import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.doc.DocumentationExample;
+import org.jdom.Comment;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -459,4 +463,43 @@ public class Element extends Accessor {
     return nillable;
   }
 
+  public void generateExampleXml(org.jdom.Element parent) {
+    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
+    if (exampleInfo == null || !exampleInfo.exclude()) {
+      if (isWrapped()) {
+        String namespace = getNamespace();
+        String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
+        org.jdom.Element element = new org.jdom.Element(getWrapperName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+        parent.addContent(element);
+        parent = element;
+      }
+
+      for (Element choice : getChoices()) {
+        QName ref = choice.getRef();
+        int iterations = "1".equals(choice.getMaxOccurs()) ? 1 : 2;
+        for (int i = 0; i < iterations; i++) {
+          if (ref == null) {
+            String namespace = choice.getNamespace();
+            String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
+            org.jdom.Element element = new org.jdom.Element(choice.getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+            String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
+            XmlType xmlType = choice.getBaseType();
+            xmlType.generateExampleXml(element, exampleValue);
+            parent.addContent(element);
+          }
+          else {
+            String namespace = ref.getNamespaceURI();
+            String name = ref.getLocalPart();
+            String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
+            org.jdom.Element element = new org.jdom.Element(name, org.jdom.Namespace.getNamespace(prefix, namespace));
+            element.addContent(new org.jdom.Text("..."));
+            parent.addContent(element);
+          }
+        }
+        if (iterations > 1) {
+          parent.addContent(new Comment("...more \"" + (ref == null ? choice.getName() : ref.getLocalPart()) + "\" elements..."));
+        }
+      }
+    }
+  }
 }

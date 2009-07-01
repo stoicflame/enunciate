@@ -95,4 +95,8 @@ public class XmlClassType implements XmlType {
     return typeDef;
   }
 
+  // Inherited.
+  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
+    this.typeDef.generateExampleXml(node);
+  }
 }

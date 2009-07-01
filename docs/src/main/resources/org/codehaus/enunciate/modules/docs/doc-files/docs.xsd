@@ -281,6 +281,9 @@
 
     <xs:complexContent>
       <xs:extension base="taggedDocumentation">
+        <xs:sequence>
+          <xs:element name="example" type="xs:string"/>
+        </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>

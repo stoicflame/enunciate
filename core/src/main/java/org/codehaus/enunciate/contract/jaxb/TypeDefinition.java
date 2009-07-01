@@ -16,21 +16,21 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.util.Declarations;
-import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
-import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.ClientName;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -597,5 +597,41 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return The base type of this type definition.
    */
   public abstract XmlType getBaseType();
+
+  /**
+   * Stack used for maintaining the list of type definitions for which we are currently generating example xml. Used to
+   * prevent infinite recursion for circular references.
+   */
+  private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>();
+
+  /**
+   * Generate some example xml, appending to the specified node.
+   *
+   * @param parent The parent node.
+   */
+  public void generateExampleXml(org.jdom.Element parent) {
+    if (TYPE_DEF_STACK.get() == null) {
+      TYPE_DEF_STACK.set(new Stack<String>());
+    }
+    
+    if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
+      parent.addContent(new org.jdom.Comment("... " + getName() + " type..."));
+    }
+    else {
+      TYPE_DEF_STACK.get().push(getQualifiedName());
+      for (Attribute attribute : getAttributes()) {
+        attribute.generateExampleXml(parent);
+      }
+      if (getValue() != null) {
+        getValue().generateExampleXml(parent);
+      }
+      else {
+        for (Element element : getElements()) {
+          element.generateExampleXml(parent);
+        }
+      }
+      TYPE_DEF_STACK.get().pop();
+    }
+  }
 
 }

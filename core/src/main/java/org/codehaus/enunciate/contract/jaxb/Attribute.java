@@ -18,6 +18,9 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.type.PrimitiveType;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.doc.DocumentationExample;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -115,5 +118,21 @@ public class Attribute extends Accessor {
   @Override
   public boolean isAttribute() {
     return true;
+  }
+
+  /**
+   * Generates example xml to the specified parent element.
+   *
+   * @param parent The parent element.
+   */
+  public void generateExampleXml(org.jdom.Element parent) {
+    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
+    if (exampleInfo == null || !exampleInfo.exclude()) {
+      String namespace = getNamespace();
+      String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
+      String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
+      org.jdom.Attribute attr = new org.jdom.Attribute(getName(), exampleValue, org.jdom.Namespace.getNamespace(prefix, namespace));
+      parent.setAttribute(attr);
+    }
   }
 }

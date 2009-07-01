@@ -129,4 +129,13 @@ public enum KnownXmlType implements XmlType {
     return !equals(KnownXmlType.ANY_TYPE);
   }
 
+  // Inherited.
+  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
+    if (isSimple()) {
+      node.addContent(new org.jdom.Text(specifiedValue == null ? "..." : specifiedValue));
+    }
+    else {
+      node.addContent(new org.jdom.Comment("custom xml"));
+    }
+  }
 }

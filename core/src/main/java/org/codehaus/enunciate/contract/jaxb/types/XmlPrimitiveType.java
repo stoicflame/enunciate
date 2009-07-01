@@ -66,4 +66,8 @@ public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlType 
   public boolean isSimple() {
     return true;
   }
+
+  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
+    node.addContent(new org.jdom.Text(specifiedValue == null ? "..." : specifiedValue));
+  }
 }

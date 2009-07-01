@@ -1115,7 +1115,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     for (RootResource root : resources) {
       List<ResourceMethod> methods = root.getResourceMethods(true);
       for (ResourceMethod method : methods) {
-        if (method.getAnnotation(DocumentationExample.class) != null) {
+        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
           return method;
         }
         else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
@@ -1134,7 +1134,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     List<RESTEndpoint> endpoints = getRESTEndpoints();
     for (RESTEndpoint endpoint : endpoints) {
       for (RESTMethod method : endpoint.getRESTMethods()) {
-        if (method.getAnnotation(DocumentationExample.class) != null) {
+        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
           return method;
         }
         else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
@@ -1168,7 +1168,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     WebMethod example = null;
     for (EndpointInterface ei : this.endpointInterfaces) {
       for (WebMethod method : ei.getWebMethods()) {
-        if (method.getAnnotation(DocumentationExample.class) != null) {
+        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
           return method;
         }
         else if (method.getWebResult() != null && method.getWebResult().getType() instanceof DeclaredType

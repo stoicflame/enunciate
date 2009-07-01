@@ -51,4 +51,8 @@ public class Value extends Accessor {
   public boolean isValue() {
     return true;
   }
+
+  public void generateExampleXml(org.jdom.Element parent) {
+    parent.setContent(new org.jdom.Text("..."));
+  }
 }

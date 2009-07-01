@@ -76,4 +76,9 @@ public class SpecifiedXmlType implements XmlType {
   public boolean isSimple() {
     return true;
   }
+
+  // Inherited.
+  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
+    node.addContent(new org.jdom.Text(specifiedValue == null ? "..." : specifiedValue));
+  }
 }

@@ -1087,6 +1087,11 @@
                         <xsl:value-of select="documentation" disable-output-escaping="yes"/>
                       </p>
                     </xsl:if>
+
+                    <xsl:if test="example and (string-length(example) &gt; 1)">
+                      <h2>Example XML</h2>
+                      <code><xsl:value-of select="example"/></code>
+                    </xsl:if>
                   </div>
                 </xsl:for-each>
 

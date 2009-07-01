@@ -80,6 +80,12 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
 
+    <!--used for generating example xml for documentation-->
+    <dependency>
+      <groupId>jdom</groupId>
+      <artifactId>jdom</artifactId>
+    </dependency>
+
   </dependencies>
 
   <profiles>

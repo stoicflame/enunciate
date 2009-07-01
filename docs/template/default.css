@@ -54,6 +54,8 @@ code {
 	margin-bottom: 12px;
 	padding: 8px 10px;
 	white-space: pre;
+  overflow: auto;
+  max-height: 300px;
 }
 cite {
 	background: url(img/quote.gif) no-repeat;
@@ -128,6 +130,7 @@ h1,h2,h3 {
 	background: url(img/bgul.gif) repeat-x;
 	margin: 0;
 	padding: 0;
+  overflow: auto;
 }
 .sidenav li {
 	border: 1px solid #FAFAFA;
@@ -201,6 +204,7 @@ h1,h2,h3 {
   margin-bottom: 12px;
   padding: 8px 10px;
 }
+.example
 
 /* footer */
 .footer {

@@ -18,11 +18,14 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.beans.Introspector;
-
-import org.codehaus.enunciate.ClientName;
+import java.io.StringWriter;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
@@ -117,5 +120,29 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
   @Override
   public Schema getPackage() {
     return getSchema();
+  }
+
+  /**
+   * Generate some example XML for this root element.
+   *
+   * @return Some example XML.
+   */
+  public String generateExampleXml() {
+    try {
+      String namespace = getNamespace();
+      String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
+      org.jdom.Element rootElement = new org.jdom.Element(getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+      getTypeDefinition().generateExampleXml(rootElement);
+      org.jdom.Document document = new org.jdom.Document(rootElement);
+
+      XMLOutputter out = new XMLOutputter(org.jdom.output.Format.getPrettyFormat());
+      StringWriter sw = new StringWriter();
+      out.output(document, sw);
+      sw.flush();
+      return sw.toString();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

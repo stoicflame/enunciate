@@ -18,10 +18,9 @@
 </h1>
 
 <code>
-//instantiate a new service with an impl
+// instantiate a new service with an impl
 // (or through dependency injection, or whatever)...
-${sample_service_method.declaringEndpointInterface.simpleName} service =
-  [#if sample_service_method.declaringEndpointInterface.endpointImplementations?size > 0]new ${sample_service_method.declaringEndpointInterface.endpointImplementations?first.simpleName}()[#else]...[/#if];
+${sample_service_method.declaringEndpointInterface.simpleName} service = [#if sample_service_method.declaringEndpointInterface.endpointImplementations?size > 0]new ${sample_service_method.declaringEndpointInterface.endpointImplementations?first.simpleName}()[#else]...[/#if];
 
 //make the remote call to read the result...
 result = service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
@@ -38,23 +37,24 @@ result = service.${sample_service_method.simpleName}([#list sample_service_metho
 
 [#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
 <h1>
-  REST Example (Standard JAXB)
+  REST Example (Raw JAXB)
 </h1>
 
 <code>
-//read a purchase order from a REST url
-java.net.URL url = ...;
-JAXBContext context = JAXBContext.newInstance(
-  ${sample_resource.outputPayload.xmlElement.simpleName}.class
-)
+java.net.URL url = new java.net.URL(baseURL + "${sample_resource.path}");
+JAXBContext context = JAXBContext.newInstance( ${sample_resource.outputPayload.xmlElement.simpleName}.class[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??], ${sample_resource.inputPayload.xmlElement.simpleName}.class[/#if] );
+java.net.URLConnection connection = url.openConnection();
+[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+connection.setDoOutput(true);
+[/#if]
+connection.connect();
 
-Unmarshaller unmarshaller =
-  context.createUnmarshaller();
-
-${sample_resource.outputPayload.xmlElement.simpleName} result =
-  (${sample_resource.outputPayload.xmlElement.simpleName})
-  unmarshaller.unmarshal( url );
-
+Unmarshaller unmarshaller = context.createUnmarshaller();
+[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+Marshaller marshaller = context.createMarshaller();
+marshaller.marshal(${sample_resource.inputPayload.xmlElement.simpleName?uncap_first}, connection.getOutputStream());
+[/#if]
+${sample_resource.outputPayload.xmlElement.simpleName} result = (${sample_resource.outputPayload.xmlElement.simpleName}) unmarshaller.unmarshal( connection.getInputStream() );
 //handle the result as needed...
 </code>
 
@@ -63,14 +63,10 @@ ${sample_resource.outputPayload.xmlElement.simpleName} result =
 </h1>
 
 <code>
-com.sun.jersey.api.client.Client client =
-  com.sun.jersey.api.client.Client.create();
+com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
-${sample_resource.outputPayload.xmlElement.simpleName} result =
-  client.resource(baseUrl + "${sample_resource.path}")
-  [#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
-  .entity(${sample_resource.inputPayload.xmlElement.simpleName?uncap_first})
-  [/#if]
+${sample_resource.outputPayload.xmlElement.simpleName} result = client.resource(baseUrl + "${sample_resource.path}")
+  [#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??].entity(${sample_resource.inputPayload.xmlElement.simpleName?uncap_first})[/#if]
   .${sample_resource.supportedOperations?first?lower_case}(${sample_resource.outputPayload.xmlElement.simpleName}.class);
 
 //handle the result as needed...

@@ -63,7 +63,7 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
     REST Example
   </h1>
 
-  <code>
+<code>
 var request:URLRequest = new URLRequest("${sample_resource.path}");
 request.method = URLRequestMethod.${sample_resource.supportedOperations?first?capitalize};
 URLStream resourceStream = new URLStream();
@@ -97,5 +97,5 @@ private function resourceRetrieved(event:Event):void {
 private function handleError(event:Event):void {
   Alert.show("error.");
 }
-  </code>
+</code>
 [/#if]

@@ -98,6 +98,7 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
         [/#list]
       [/#list]
+          <example><![CDATA[${element.generateExampleXml()?trim}]]></example>
         </element>
     [/#list]
       </elements>

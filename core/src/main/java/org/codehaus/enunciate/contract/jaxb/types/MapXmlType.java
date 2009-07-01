@@ -92,4 +92,19 @@ public class MapXmlType implements XmlType {
   public XmlType getValueType() {
     return valueType;
   }
+
+  // Inherited.
+  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
+    for (int i = 0; i < 2; i++) {
+      org.jdom.Element entry = new org.jdom.Element("entry", node.getNamespacePrefix(), node.getNamespaceURI());
+      org.jdom.Element key = new org.jdom.Element("key", node.getNamespacePrefix(), node.getNamespaceURI());
+      org.jdom.Element value = new org.jdom.Element("value", node.getNamespacePrefix(), node.getNamespaceURI());
+      this.keyType.generateExampleXml(key, null);
+      entry.addContent(key);
+      this.valueType.generateExampleXml(value, null);
+      entry.addContent(value);
+      node.addContent(entry);
+    }
+    node.addContent(new org.jdom.Comment("...more entries..."));
+  }
 }

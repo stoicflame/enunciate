@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.contract.jaxb.types;
 
+import org.w3c.dom.Node;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -60,4 +62,11 @@ public interface XmlType {
    */
   boolean isSimple();
 
+  /**
+   * Generate some example xml to the given node.
+   *
+   * @param node The node.
+   * @param specifiedValue A
+   */
+  void generateExampleXml(org.jdom.Element node, String specifiedValue);
 }

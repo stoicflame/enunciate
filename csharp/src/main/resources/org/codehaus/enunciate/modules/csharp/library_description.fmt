@@ -18,8 +18,7 @@
 
 <code>
 //instantiate a new service...
-${sample_service_method.declaringEndpointInterface.clientSimpleName} service =
-  new ${sample_service_method.declaringEndpointInterface.clientSimpleName}();
+${sample_service_method.declaringEndpointInterface.clientSimpleName} service = new ${sample_service_method.declaringEndpointInterface.clientSimpleName}();
 
 //make the remote call...
 [#if sample_service_method.webResult?? && !sample_service_method.webResult.void]result = [/#if]service.${sample_service_method.clientSimpleName?cap_first}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
@@ -53,9 +52,7 @@ WebResponse resp = req.GetResponse();
 Stream stream = resp.GetResponseStream();
 TextReader r = new StreamReader( stream );
 
-${sample_resource.outputPayload.xmlElement.clientSimpleName} order =
-  (${sample_resource.outputPayload.xmlElement.clientSimpleName})
-  s.Deserialize( r );
+${sample_resource.outputPayload.xmlElement.clientSimpleName} order = (${sample_resource.outputPayload.xmlElement.clientSimpleName}) s.Deserialize( r );
 
 //handle the result as needed...
 </code>
