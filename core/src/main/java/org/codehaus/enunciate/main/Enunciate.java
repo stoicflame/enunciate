@@ -25,6 +25,7 @@ import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.util.AntPatternMatcher;
+import org.codehaus.enunciate.util.PackageInfoWriter;
 import org.xml.sax.SAXException;
 
 import java.io.*;
@@ -32,10 +33,10 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
-import java.util.jar.Manifest;
 import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -389,8 +390,20 @@ public class Enunciate {
               String path = entry.getName();
               if (path.endsWith(".class")) {
                 String classname = path.substring(0, path.length() - 6).replace('/', '.').replace('$', '.');
-                debug("Noticed class %s in jar file %s.", classname, pathFile);
-                foundClasses2Sources.put(classname, foundClasses2Sources.get(classname));
+                if (classname.endsWith(".package-info")) {
+                  //APT has a bug where it won't find the package-info file unless it's on the source path. So we have to generate
+                  //the source from bytecode.
+                  if (foundClasses2Sources.get(classname) == null) {
+                    File packageSourceFile = new File(tempSourcesDir, path.substring(0, path.length() - 6) + ".java");
+                    debug("Generating package source file %s...", packageSourceFile);
+                    writePackageSourceFile(jarFile.getInputStream(entry), packageSourceFile);
+                    foundClasses2Sources.put(classname, packageSourceFile);
+                  }
+                }
+                else {
+                  debug("Noticed class %s in jar file %s.", classname, pathFile);
+                  foundClasses2Sources.put(classname, foundClasses2Sources.get(classname));
+                }
               }
               else if (path.endsWith(".java")) {
                 String classname = path.substring(0, path.length() - 5).replace('/', '.');
@@ -439,7 +452,7 @@ public class Enunciate {
       copyImportedClasses(foundClasses2Sources, classes2sources);
       for (DeploymentModule module : this.config.getAllModules()) {
         if (module instanceof EnunciateClasspathListener) {
-          ((EnunciateClasspathListener)module).onClassesFound(foundClasses2Sources.keySet());
+          ((EnunciateClasspathListener) module).onClassesFound(foundClasses2Sources.keySet());
         }
       }
     }
@@ -459,20 +472,39 @@ public class Enunciate {
   }
 
   /**
+   * Write the package-info.java source to the specified file.
+   *
+   * @param bytecode The bytecode for the package-info.class
+   * @param packageSourceFile The source file.
+   */
+  protected void writePackageSourceFile(InputStream bytecode, File packageSourceFile) throws IOException {
+    packageSourceFile.getParentFile().mkdirs();
+    PackageInfoWriter writer = new PackageInfoWriter(new FileWriter(packageSourceFile));
+    writer.write(bytecode);
+    writer.close();
+  }
+
+  /**
    * Copy the relevant found classes that are imported to the specified map.
    *
    * @param foundClasses2Sources the found classes.
-   * @param classes2sources the target map.
+   * @param classes2sources      the target map.
    */
   protected void copyImportedClasses(Map<String, File> foundClasses2Sources, Map<String, File> classes2sources) {
-    if (this.config != null && this.config.getAPIImports() != null
-      && !this.config.getAPIImports().isEmpty() && !foundClasses2Sources.isEmpty()) {
-      AntPatternMatcher matcher = new AntPatternMatcher();
-      matcher.setPathSeparator(".");
-      for (APIImport apiImport : this.config.getAPIImports()) {
-        String pattern = apiImport.getPattern();
-        if (pattern != null) {
-          for (Map.Entry<String, File> foundEntry : foundClasses2Sources.entrySet()) {
+    for (Map.Entry<String, File> foundEntry : foundClasses2Sources.entrySet()) {
+      if (foundEntry.getKey().endsWith(".package-info")) {
+        File sourceFile = foundEntry.getValue();
+        if (sourceFile != null) {
+          //APT has a bug where it won't find the package-info file unless it's on the source path.
+          classes2sources.put(foundEntry.getKey(), sourceFile);
+        }
+      }
+      else if (this.config != null && this.config.getAPIImports() != null && !this.config.getAPIImports().isEmpty()) {
+        AntPatternMatcher matcher = new AntPatternMatcher();
+        matcher.setPathSeparator(".");
+        for (APIImport apiImport : this.config.getAPIImports()) {
+          String pattern = apiImport.getPattern();
+          if (pattern != null) {
             if (!classes2sources.containsKey(foundEntry.getKey())) {
               if (pattern.equals(foundEntry.getKey())) {
                 debug("Class %s will be imported because it was explicitly listed.", foundEntry.getKey());
@@ -670,9 +702,9 @@ public class Enunciate {
   /**
    * Finds all files in the specified directory (recursively) using the specified filter.
    *
-   * @param dir       The directory.
-   * @param filter    The filter.
-   * @param visitor   The visitor.
+   * @param dir     The directory.
+   * @param filter  The filter.
+   * @param visitor The visitor.
    */
   private void visitFiles(File dir, FileFilter filter, FileVisitor visitor) {
     File[] files = dir.listFiles(filter);

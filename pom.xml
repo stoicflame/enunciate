@@ -186,6 +186,13 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
+        <!--depending modules: core-->
+        <groupId>asm</groupId>
+        <artifactId>asm-tree</artifactId>
+        <version>3.1</version>
+      </dependency>
+
+      <dependency>
         <!--depending modules: amf-->
         <groupId>backport-util-concurrent</groupId>
         <artifactId>backport-util-concurrent</artifactId>

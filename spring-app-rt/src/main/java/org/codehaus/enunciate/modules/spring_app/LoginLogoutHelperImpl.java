@@ -72,12 +72,14 @@ public class LoginLogoutHelperImpl implements LoginLogoutHelper {
         rememberMeServices.loginSuccess(httpRequest, httpResponse, authResult);
       }
     }
-    finally {
+    catch (RuntimeException e) {
       SecurityContextHolder.getContext().setAuthentication(null);
 
       if ((httpContext != null) && (rememberMeServices != null)) {
         rememberMeServices.loginFail(httpRequest, httpResponse);
       }
+
+      throw e;
     }
   }
 
