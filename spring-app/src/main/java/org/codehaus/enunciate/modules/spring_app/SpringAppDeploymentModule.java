@@ -26,11 +26,12 @@ import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
-import org.codehaus.enunciate.main.webapp.WebAppFragment;
-import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectAssemblyModule;
 import org.codehaus.enunciate.modules.spring_app.config.*;
 import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
@@ -385,7 +386,7 @@ import java.util.jar.Manifest;
  * @author Ryan Heaton
  * @docFileName module_spring_app.html
  */
-public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
+public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implements ProjectAssemblyModule {
 
   private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
@@ -1354,6 +1355,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDoPackage(boolean doPackage) {
     this.doPackage = doPackage;
+  }
+
+  // Inherited.
+  public void setOutputDirectory(File outputDir) {
+    setCompileDir(outputDir);
   }
 
   /**

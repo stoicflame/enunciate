@@ -59,8 +59,8 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="jaxws-ri.libs.fileset">
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-ri" version="${top.pom.version}"/>
+    <artifact:dependencies filesetId="rest.libs.fileset">
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-rest" version="${top.pom.version}"/>
     </artifact:dependencies>
 
     <artifact:dependencies filesetId="gwt.libs.fileset">
@@ -309,13 +309,13 @@
     </delete>
 
     <!--copy the jaxws-ri module plus deps-->
-    <mkdir dir="target/lib/modules/jaxws-ri"/>
-    <copy todir="target/lib/modules/jaxws-ri">
-      <fileset refid="jaxws-ri.libs.fileset"/>
+    <mkdir dir="target/lib/modules/rest"/>
+    <copy todir="target/lib/modules/rest">
+      <fileset refid="rest.libs.fileset"/>
       <mapper type="flatten"/>
     </copy>
     <delete>
-      <fileset dir="target/lib/modules/jaxws-ri">
+      <fileset dir="target/lib/modules/rest">
         <present targetdir="target/lib"/>
       </fileset>
     </delete>

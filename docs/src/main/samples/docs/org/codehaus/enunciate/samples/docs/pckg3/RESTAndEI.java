@@ -16,10 +16,6 @@
 
 package org.codehaus.enunciate.samples.docs.pckg3;
 
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
-import org.codehaus.enunciate.rest.annotations.Verb;
-import org.codehaus.enunciate.rest.annotations.VerbType;
-import org.codehaus.enunciate.rest.annotations.ProperNoun;
 import org.codehaus.enunciate.samples.docs.pckg1.BeanOne;
 
 import javax.jws.WebService;
@@ -30,7 +26,7 @@ import javax.jws.WebService;
  * @author Ryan Heaton
  */
 @WebService
-@RESTEndpoint
+@javax.ws.rs.Path("{id}")
 public class RESTAndEI {
 
   /**
@@ -42,10 +38,8 @@ public class RESTAndEI {
    * value one multiple lines
    * @sometag sometag value
    */
-  @Verb (
-    VerbType.read
-  )
-  public BeanOne getBeanOne(@ProperNoun String id) {
+  @javax.ws.rs.GET
+  public BeanOne getBeanOne(@javax.ws.rs.PathParam("id") String id) {
     return null;
   }
 }

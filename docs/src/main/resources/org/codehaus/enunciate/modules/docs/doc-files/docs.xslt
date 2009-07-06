@@ -71,50 +71,49 @@
       </ul>
     </xsl:if>
 
-    <xsl:for-each select="/api-docs/data/schema">
-      <xsl:sort select="@namespace"/>
-      <xsl:if test="elements/element">
-        <h1>Data Elements<xsl:if test="$multiple_schemas and (string-length(@namespace) &gt; 0)"> (<xsl:value-of select="@namespaceId"/>)</xsl:if></h1>
-        <ul>
-          <xsl:for-each select="elements/element">
-            <xsl:sort select="@name"/>
-            <li>
-              <xsl:choose>
-                <xsl:when test="tag[@name='deprecated']">
-                  <font style="text-decoration:line-through;">
-                    <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-                  </font>
-                </xsl:when>
-                <xsl:otherwise>
-                  <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/></a>
-                </xsl:otherwise>
-              </xsl:choose>
-            </li>
-          </xsl:for-each>
-        </ul>
-      </xsl:if>
+    <xsl:if test="/api-docs/data/schema/elements/element">
+      <h1>Data Elements</h1>
+      <ul>
+        <xsl:for-each select="/api-docs/data/schema/elements/element">
+          <xsl:sort select="@name"/>
+          <xsl:sort select="../../@namespace"/>
+          <li>
+            <xsl:choose>
+              <xsl:when test="tag[@name='deprecated']">
+                <font style="text-decoration:line-through;">
+                  <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../../@namespaceId"/>)</xsl:if></a>
+                </font>
+              </xsl:when>
+              <xsl:otherwise>
+                <a href="data_{../../@namespaceId}.html#element_{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../../@namespaceId"/>)</xsl:if></a>
+              </xsl:otherwise>
+            </xsl:choose>
+          </li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
 
-      <xsl:if test="types/type">
-        <h1>Data Types<xsl:if test="$multiple_schemas and (string-length(@namespace) &gt; 0)"> (<xsl:value-of select="@namespaceId"/>)</xsl:if></h1>
-        <ul>
-          <xsl:for-each select="types/type">
-            <xsl:sort select="@name"/>
-            <li>
-              <xsl:choose>
-                <xsl:when test="tag[@name='deprecated']">
-                  <font style="text-decoration:line-through;">
-                    <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                  </font>
-                </xsl:when>
-                <xsl:otherwise>
-                  <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                </xsl:otherwise>
-              </xsl:choose>
-            </li>
-          </xsl:for-each>
-        </ul>
-      </xsl:if>
-    </xsl:for-each>
+    <xsl:if test="/api-docs/data/schema/types/type">
+      <h1>Data Types</h1>
+      <ul>
+        <xsl:for-each select="/api-docs/data/schema/types/type">
+          <xsl:sort select="@name"/>
+          <xsl:sort select="../../@namespace"/>
+          <li>
+            <xsl:choose>
+              <xsl:when test="tag[@name='deprecated']">
+                <font style="text-decoration:line-through;">
+                  <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../../@namespaceId"/>)</xsl:if></a>
+                </font>
+              </xsl:when>
+              <xsl:otherwise>
+                <a href="data_{../../@namespaceId}.html#{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../../@namespaceId"/>)</xsl:if></a>
+              </xsl:otherwise>
+            </xsl:choose>
+          </li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
   </xsl:variable>
 
 
@@ -289,7 +288,7 @@
                         <xsl:variable name="nsid" select="@namespaceId"/>
                         <xsl:if test="elements/element">
                           <li>
-                            <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
+                            namespace <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
                             <ul>
                               <xsl:for-each select="elements/element">
                                 <xsl:sort select="@name"/>
@@ -320,7 +319,7 @@
                       <xsl:variable name="nsid" select="@namespaceId"/>
                       <xsl:if test="types/type">
                         <li>
-                          <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
+                          namespace <a href="data_{$nsid}.html"><xsl:value-of select="$nsid"/></a>
                           <ul>
                             <xsl:for-each select="types/type">
                               <xsl:sort select="@name"/>

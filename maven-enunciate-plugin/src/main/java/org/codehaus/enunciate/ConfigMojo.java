@@ -26,19 +26,7 @@ import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.docs.DocumentationDeploymentModule;
-import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
-import org.codehaus.enunciate.modules.jaxws_client.JAXWSClientDeploymentModule;
-import org.codehaus.enunciate.modules.amf.AMFDeploymentModule;
-import org.codehaus.enunciate.modules.amf.config.FlexApp;
-import org.codehaus.enunciate.modules.gwt.GWTDeploymentModule;
-import org.codehaus.enunciate.modules.gwt.config.GWTApp;
-import org.codehaus.enunciate.modules.rest.RESTDeploymentModule;
-import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
-import org.codehaus.enunciate.modules.spring_app.config.IncludeExcludeLibs;
-import org.codehaus.enunciate.modules.spring_app.config.WarConfig;
-import org.codehaus.enunciate.modules.xfire_client.XFireClientDeploymentModule;
+import org.codehaus.enunciate.modules.*;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -157,6 +145,13 @@ public class ConfigMojo extends AbstractMojo {
    * @parameter
    */
   private boolean addJAXWSClientSourcesToTestClasspath = false;
+
+  /**
+   * List of modules that are to be excluded as extensions to this project.
+   *
+   * @parameter
+   */
+  private String[] excludeProjectExtensions;
 
   /**
    * The GWT home.
@@ -306,20 +301,6 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     enunciate.setConfig(config);
-    WarConfig warConfig = null;
-    for (DeploymentModule module : config.getAllModules()) {
-      if (!module.isDisabled()) {
-        if (module instanceof SpringAppDeploymentModule) {
-          warConfig = ((SpringAppDeploymentModule) module).getWarConfig();
-        }
-        if (module instanceof DocumentationDeploymentModule) {
-          if (project.getName() != null && !"".equals(project.getName().trim())) {
-            ((DocumentationDeploymentModule) module).setTitle(this.project.getName());
-          }
-        }
-      }
-    }
-
     Set<org.apache.maven.artifact.Artifact> classpathEntries = new HashSet<org.apache.maven.artifact.Artifact>();
     classpathEntries.addAll(this.projectDependencies);
     // todo: figure out whether we need these artifacts included in the classpath.
@@ -333,12 +314,6 @@ public class ConfigMojo extends AbstractMojo {
       if (org.apache.maven.artifact.Artifact.SCOPE_TEST.equals(artifactScope)) {
         //remove just the test-scope artifacts from the classpath.
         it.remove();
-      }
-      else
-      if ((warConfig != null) && ((org.apache.maven.artifact.Artifact.SCOPE_PROVIDED.equals(artifactScope)) || (org.apache.maven.artifact.Artifact.SCOPE_SYSTEM.equals(artifactScope)))) {
-        IncludeExcludeLibs excludeLibs = new IncludeExcludeLibs();
-        excludeLibs.setFile(artifact.getFile());
-        warConfig.addExcludeLibs(excludeLibs);
       }
     }
 
@@ -459,6 +434,31 @@ public class ConfigMojo extends AbstractMojo {
     return new MavenSpecificEnunciate(sourceDirs);
   }
 
+  protected Set<String> getExcludedProjectExtensions() {
+    TreeSet<String> excluded = new TreeSet<String>();
+    if (excludeProjectExtensions != null) {
+      excluded.addAll(Arrays.asList(excludeProjectExtensions));
+    }
+
+    if (!addActionscriptSources) {
+      excluded.add("amf");
+    }
+
+    if (!addGWTSources) {
+      excluded.add("gwt");
+    }
+
+    if (!addJAXWSClientSourcesToTestClasspath) {
+      excluded.add("jaxws-client");
+    }
+
+    if (!addXFireClientSourcesToTestClasspath) {
+      excluded.add("xfire-client");
+    }
+
+    return excluded;
+  }
+
   /**
    * Enunciate mechanism that logs via the Maven logging mechanism.
    */
@@ -477,25 +477,13 @@ public class ConfigMojo extends AbstractMojo {
     public void loadMavenConfiguration() throws IOException {
       for (DeploymentModule module : getConfig().getAllModules()) {
         if (!module.isDisabled()) {
-          if (module instanceof GWTDeploymentModule) {
-            configureGWTDeploymentModule((GWTDeploymentModule) module);
+          if (gwtHome != null && (module instanceof GWTHomeAwareModule)) {
+            ((GWTHomeAwareModule) module).setGwtHome(gwtHome);
           }
-          else if (module instanceof AMFDeploymentModule) {
-            configureAMFModule((AMFDeploymentModule) module);
+          else if (flexHome != null && (module instanceof FlexHomeAwareModule)) {
+            ((FlexHomeAwareModule) module).setFlexHome(flexHome);
           }
         }
-      }
-    }
-
-    protected void configureGWTDeploymentModule(GWTDeploymentModule gwtModule) {
-      if (gwtHome != null) {
-        gwtModule.setGwtHome(gwtHome);
-      }
-    }
-
-    protected void configureAMFModule(AMFDeploymentModule amfModule) {
-      if (flexHome != null) {
-        amfModule.setFlexHome(flexHome);
       }
     }
 
@@ -503,16 +491,21 @@ public class ConfigMojo extends AbstractMojo {
     protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
       super.initModules(modules);
 
+      if (compileDir == null) {
+        //set an explicit compile dir if one doesn't exist because we're going to need to reference it to set the output directory for Maven.
+        setCompileDir(createTempDir());
+      }
+
       for (DeploymentModule module : modules) {
         if (!module.isDisabled()) {
-          if (module instanceof DocumentationDeploymentModule) {
-            onInitDocsModule((DocumentationDeploymentModule)module);
+          if (module instanceof OutputDirectoryAware) {
+            String outputDir = project.getBuild().getOutputDirectory();
+            info("Setting the output directory for module %s to %s...", module.getName(), outputDir);
+            ((OutputDirectoryAware) module).setOutputDirectory(new File(outputDir));
           }
-          else if (module instanceof SpringAppDeploymentModule) {
-            onInitSpringAppDeploymentModule((SpringAppDeploymentModule) module);
-          }
-          else if (module instanceof AMFDeploymentModule) {
-            onInitAMFDeploymentModule((AMFDeploymentModule) module);
+
+          if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
+            ((ProjectTitleAware)module).setTitle(project.getName());
           }
         }
       }
@@ -523,102 +516,29 @@ public class ConfigMojo extends AbstractMojo {
       super.doGenerate();
 
       for (DeploymentModule module : getConfig().getAllModules()) {
-        if (!module.isDisabled()) {
-          if (module instanceof GWTDeploymentModule) {
-            afterGWTGenerate((GWTDeploymentModule) module);
+        if (!module.isDisabled() && (module instanceof ProjectExtensionModule) && !getExcludedProjectExtensions().contains(module.getName())) {
+          ProjectExtensionModule extensions = (ProjectExtensionModule) module;
+          for (File projectSource : extensions.getProjectSources()) {
+            addSourceDirToProject(projectSource);
           }
-          else if (module instanceof AMFDeploymentModule) {
-            afterAMFGenerate((AMFDeploymentModule) module);
+
+          for (File testSource : extensions.getProjectTestSources()) {
+            project.addTestCompileSourceRoot(testSource.getAbsolutePath());
           }
-          else if (module instanceof XFireClientDeploymentModule) {
-            afterXFireClientGenerate((XFireClientDeploymentModule) module);
+
+          for (File resourceDir : extensions.getProjectResourceDirectories()) {
+            Resource restResource = new Resource();
+            restResource.setDirectory(resourceDir.getAbsolutePath());
+            project.addResource(restResource);
           }
-          else if (module instanceof JAXWSClientDeploymentModule) {
-            afterJAXWSClientGenerate((JAXWSClientDeploymentModule) module);
-          }
-          else if (module instanceof RESTDeploymentModule) {
-            afterRESTGenerate((RESTDeploymentModule) module);
-          }
-        }
-      }
-    }
 
-    protected void onInitAMFDeploymentModule(AMFDeploymentModule amfModule) {
-      if (amfModule.getCompilerConfig().getContextRoot() == null) {
-        amfModule.getCompilerConfig().setContextRoot("/" + project.getArtifactId());
-      }
-    }
-
-    protected void afterAMFGenerate(AMFDeploymentModule amfModule) {
-      if (addActionscriptSources) {
-        addSourceDirToProject(amfModule.getClientSideGenerateDir());
-        addSourceDirToProject(amfModule.getServerSideGenerateDir());
-        for (FlexApp flexApp : amfModule.getFlexApps()) {
-          File srcDir = resolvePath(flexApp.getSrcDir());
-          addSourceDirToProject(srcDir);
-        }
-      }
-    }
-
-    protected void afterGWTGenerate(GWTDeploymentModule gwtModule) {
-      if (addGWTSources) {
-        addSourceDirToProject(gwtModule.getClientSideGenerateDir());
-        addSourceDirToProject(gwtModule.getServerSideGenerateDir());
-        for (GWTApp gwtApp : gwtModule.getGwtApps()) {
-          File srcDir = resolvePath(gwtApp.getSrcDir());
-          addSourceDirToProject(srcDir);
-        }
-      }
-    }
-
-    protected void afterXFireClientGenerate(XFireClientDeploymentModule clientModule) {
-      if (addXFireClientSourcesToTestClasspath) {
-        project.addTestCompileSourceRoot(clientModule.getCommonJdkGenerateDir().getAbsolutePath());
-        project.addTestCompileSourceRoot(clientModule.getJdk15GenerateDir().getAbsolutePath());
-        Resource xfireClientResources = new Resource();
-        //include any properties, types, annotations files
-        xfireClientResources.setDirectory(clientModule.getCommonJdkGenerateDir().getAbsolutePath());
-        project.addTestResource(xfireClientResources);
-      }
-    }
-
-    protected void afterJAXWSClientGenerate(JAXWSClientDeploymentModule clientModule) {
-      if (addJAXWSClientSourcesToTestClasspath) {
-        project.addTestCompileSourceRoot(clientModule.getGenerateDir().getAbsolutePath());
-
-        for (DeploymentModule module : getConfig().getEnabledModules()) {
-          if (module instanceof XMLDeploymentModule) {
-            Resource jaxwsClientResources = new Resource();
-            //include any properties, types, annotations files
-            jaxwsClientResources.setDirectory(((XMLDeploymentModule)module).getGenerateDir().getAbsolutePath());
-            project.addTestResource(jaxwsClientResources);
+          for (File resourceDir : extensions.getProjectTestResourceDirectories()) {
+            Resource resource = new Resource();
+            resource.setDirectory(resourceDir.getAbsolutePath());
+            project.addTestResource(resource);
           }
         }
       }
-    }
-
-    protected void afterRESTGenerate(RESTDeploymentModule clientModule) {
-      if (getProperty("rest.parameter.names") != null) {
-        Resource restResource = new Resource();
-        //include any properties, types, annotations files
-        restResource.setDirectory(clientModule.getGenerateDir().getAbsolutePath());
-        project.addResource(restResource);
-      }
-    }
-
-    protected void onInitDocsModule(DocumentationDeploymentModule docsModule) {
-      //no-op for now.
-    }
-
-    protected void onInitSpringAppDeploymentModule(SpringAppDeploymentModule springAppModule) throws IOException {
-      if (compileDir == null) {
-        //set an explicit compile dir if one doesn't exist because we're going to need to reference it to set the output directory for Maven.
-        setCompileDir(createTempDir());
-      }
-
-      String outputDir = project.getBuild().getOutputDirectory();
-      getLog().info("Setting the compile directory for the spring module to " + outputDir);
-      springAppModule.setCompileDir(new File(outputDir));
     }
 
     @Override
@@ -640,7 +560,6 @@ public class ConfigMojo extends AbstractMojo {
     public boolean isDebug() {
       return getLog().isDebugEnabled();
     }
-
 
     @Override
     public boolean isVerbose() {

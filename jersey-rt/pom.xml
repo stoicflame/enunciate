@@ -37,8 +37,11 @@
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
+    </dependency>
 
-      <optional>true</optional>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
     </dependency>
 
     <dependency>

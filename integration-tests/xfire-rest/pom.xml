@@ -66,8 +66,8 @@
           <!--As of Enunciate 1.12, XFire module is optional (JAXWS-RI is default)
               so the dependency needs to be added explicitly. -->
           <!--There's a weird bug in Maven that I haven't been able to track down
-          in that if I don't add the CXF module here, then the next project
-          will fail because it won't find the CXF module.-->
+          in that if I don't add the CXF and REST modules here, then the next project
+          will fail because it won't find them.-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-xfire</artifactId>
@@ -76,6 +76,11 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-cxf</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>

@@ -21,7 +21,6 @@ import org.codehaus.enunciate.samples.genealogy.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
 import org.codehaus.enunciate.samples.genealogy.services.SourceService;
 import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceException;
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
 import java.net.URI;
@@ -38,7 +37,7 @@ import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.SourceService"
 )
-@RESTEndpoint
+@javax.ws.rs.Path("source")
 public class SourceServiceImpl implements SourceService {
 
   public void addSource(Source source) {

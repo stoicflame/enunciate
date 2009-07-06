@@ -19,18 +19,17 @@ package org.codehaus.enunciate.samples.genealogy.services.impl;
 import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
+import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.codehaus.enunciate.samples.genealogy.services.SourceService;
+import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
 import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceException;
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
-import java.net.URI;
-import java.io.InputStreamReader;
+import javax.ws.rs.Path;
 import java.io.BufferedReader;
 import java.io.IOException;
-
-import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
-import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
+import java.io.InputStreamReader;
+import java.net.URI;
 
 /**
  * @author Ryan Heaton
@@ -38,8 +37,8 @@ import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.SourceService"
 )
-@RESTEndpoint
-public class SourceServiceImpl implements SourceService {
+@Path ("source")
+public class  SourceServiceImpl implements SourceService {
 
   public void addSource(Source source) {
     try {

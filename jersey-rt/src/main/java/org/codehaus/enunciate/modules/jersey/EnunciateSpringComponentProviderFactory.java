@@ -16,6 +16,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.annotation.Resource;
+import javax.ws.rs.ext.Provider;
+import javax.ws.rs.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,47 +41,54 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
   @Override
   public IoCComponentProvider getComponentProvider(ComponentContext cc, final Class c) {
     final IoCComponentProvider componentProvider = super.getComponentProvider(cc, c);
-    if (componentProvider instanceof IoCManagedComponentProvider) {
-      //return a managed provider...
-      return new IoCManagedComponentProvider() {
-        public ComponentScope getScope() {
-          return ((IoCManagedComponentProvider) componentProvider).getScope();
-        }
+    if (c.isAnnotationPresent(Path.class)) {
+      // we're only here to manage the lifecycle of service endpoints, but the component
+      // provider factory also manages the lifecyle of other JAX-RS providers.
+      // So we only inject our global service interceptors if the class is a service
+      // endpoint (i.e. the Path annotation is present).
+      if (componentProvider instanceof IoCManagedComponentProvider) {
+        //return a managed provider...
+        return new IoCManagedComponentProvider() {
+          public ComponentScope getScope() {
+            return ((IoCManagedComponentProvider) componentProvider).getScope();
+          }
 
-        public Object getInjectableInstance(Object o) {
-          return EnunciateSpringComponentProviderFactory.this.getInjectableInstance(o);
-        }
+          public Object getInjectableInstance(Object o) {
+            return EnunciateSpringComponentProviderFactory.this.getInjectableInstance(o);
+          }
 
-        public Object getInstance() {
-          return getResourceFactory(c).createAdvisedResource(componentProvider.getInstance());
-        }
-      };
+          public Object getInstance() {
+            return getResourceFactory(c).createAdvisedResource(componentProvider.getInstance());
+          }
+        };
+      }
+      else if (componentProvider instanceof IoCInstantiatedComponentProvider) {
+        //return an instantiated provider...
+        return new IoCInstantiatedComponentProvider() {
+          public Object getInjectableInstance(Object o) {
+            return EnunciateSpringComponentProviderFactory.this.getInjectableInstance(o);
+          }
+
+          public Object getInstance() {
+            return getResourceFactory(c).createAdvisedResource(componentProvider.getInstance());
+          }
+        };
+      }
+      else {
+        //just a proxied provider.
+        return new IoCProxiedComponentProvider() {
+          public Object proxy(Object o) {
+            return getResourceFactory(c).createAdvisedResource(o);
+          }
+
+          public Object getInstance() {
+            //jersey-managed instantiation.
+            return null;
+          }
+        };
+      }
     }
-    else if (componentProvider instanceof IoCInstantiatedComponentProvider) {
-      //return an instantiated provider...
-      return new IoCInstantiatedComponentProvider() {
-        public Object getInjectableInstance(Object o) {
-          return EnunciateSpringComponentProviderFactory.this.getInjectableInstance(o);
-        }
-
-        public Object getInstance() {
-          return getResourceFactory(c).createAdvisedResource(componentProvider.getInstance());
-        }
-      };
-    }
-    else {
-      //just a proxied provider.
-      return new IoCProxiedComponentProvider() {
-        public Object proxy(Object o) {
-          return getResourceFactory(c).createAdvisedResource(o);
-        }
-
-        public Object getInstance() {
-          //jersey-managed instantiation.
-          return null;
-        }
-      };
-    }
+    return componentProvider;
   }
 
   // Inherited.

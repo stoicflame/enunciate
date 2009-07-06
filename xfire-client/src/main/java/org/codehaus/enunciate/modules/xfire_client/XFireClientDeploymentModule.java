@@ -32,6 +32,7 @@ import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.xfire_client.annotations.*;
 import org.codehaus.enunciate.modules.xfire_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.xfire_client.config.XFireClientRuleSet;
@@ -127,7 +128,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_xfire_client.html
  */
-public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
+public class XFireClientDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule {
 
   private String jarName = null;
   private final Map<String, String> clientPackageConversions;
@@ -1051,5 +1052,21 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
+  }
+
+  public List<File> getProjectSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestSources() {
+    return isDisable15Client() ? (isDisable14Client() ? Collections.<File>emptyList() : Arrays.asList(getCommonJdkGenerateDir(), getJdk14GenerateDir())) : Arrays.asList(getCommonJdkGenerateDir(), getJdk15GenerateDir());
+  }
+
+  public List<File> getProjectResourceDirectories() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestResourceDirectories() {
+    return (isDisable15Client() && isDisable14Client()) ? Collections.<File>emptyList() : Arrays.asList(getCommonJdkGenerateDir());
   }
 }

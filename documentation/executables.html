@@ -56,23 +56,17 @@
       <h1>Maven</h1>
 
       <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
-      the artifact is "maven-enunciate-plugin". There are actually two ways to use the Maven Enunciate plugin.  The first is by attaching a standard goal
-      named "assemble" to a phase in the build lifecycle. The second is by simply leveraging the "enunciate-app" packaging. Both methods provide the same result.
-      The former is for use with the Maven "war" packaging and leverages the Maven War plugin to package up the war. The latter uses Enunciate's internal
-      mechanisms to build and package the war.</p>
+      the artifact is "maven-enunciate-plugin". A goal named "assemble" is attached to the build lifecycle of a Maven "war" project.</p>
 
       <h2>Classpath Setup</h2>
 
       <p>Maven users should already be aware that there are (at least) two different classpaths that are in play when invoking a Maven plugin: the plugin classpath
-      and the project dependency classpath. The Maven Enunciate plugin already establishes its own plugin classpath, and this should rarely, if ever, have to be
-      manipulated. However, the project dependency classpath defines the libraries that are to be used to compile and run the application.</p>
+      and the project dependency classpath. The Maven Enunciate plugin already establishes a default plugin classpath which shouldn't have to be manipulated unless
+      to enable modules that are not included by default. The project dependency classpath defines the libraries that are to be used to compile and run the application.</p>
 
       <p>Enunciate provides a top-level runtime ("rt") POM that can be conveniently included in the project dependencies of an Enunciate project. The groupId
       is "org.codehaus.enunciate" and the artifactId is "enunciate-rt". This is used to include the core libraries needed at runtime to drive the Enunciate
-      application, including the Jersey runtime, the XFire runtime, the Spring application runtime, etc.  As of version 1.9, there are alternatives to
-      the XFire runtime: <a href="module_jaxws_ri.html">JAX-WS RI</a> and <a href="module_cxf.html">CXF</a>.  If either of these modules are enabled, you will
-      want to exclude the XFire runtime ("org.codehaus.enunciate:xfire-rt") and include the runtimes of these modules ("org.codehaus.enunciate:jaxws-ri-rt"
-      and "org.codehaus.enunciate:cxf-rt" respectively).</p>
+      application, including the Jersey runtime, the XFire runtime, the Spring application runtime, etc.</p>
 
       <h2>Configuration</h2>
 

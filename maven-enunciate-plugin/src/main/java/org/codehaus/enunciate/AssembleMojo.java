@@ -2,7 +2,8 @@ package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.ProjectAssemblyModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.Set;
  * @goal assemble
  * @phase process-sources
  * @requiresDependencyResolution compile
+ * @executionStrategy once-per-session
 
  * @author Ryan Heaton
  */
@@ -95,13 +97,18 @@ public class AssembleMojo extends ConfigMojo {
     }
 
     @Override
-    protected void onInitSpringAppDeploymentModule(SpringAppDeploymentModule springAppModule) throws IOException {
-      super.onInitSpringAppDeploymentModule(springAppModule);
+    protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
+      super.initModules(modules);
 
-      springAppModule.setDoCompile(false);
-      springAppModule.setDoLibCopy(false);
-      springAppModule.setDoPackage(false);
-      springAppModule.setBuildDir(new File(project.getBasedir(), webappDirectory));
+      for (DeploymentModule module : modules) {
+        if (module instanceof ProjectAssemblyModule) {
+          ProjectAssemblyModule assemblyModule = (ProjectAssemblyModule) module;
+          assemblyModule.setDoCompile(false);
+          assemblyModule.setDoLibCopy(false);
+          assemblyModule.setDoPackage(false);
+          assemblyModule.setBuildDir(new File(project.getBasedir(), webappDirectory));
+        }
+      }
     }
   }
 }

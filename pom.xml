@@ -686,7 +686,14 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
+      </dependency>
+
+      <dependency>
+        <!--depending modules: jersey-rt-->
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-xc</artifactId>
+        <version>1.1.0</version>
       </dependency>
 
       <dependency>
@@ -707,7 +714,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.spring-security-oauth</groupId>
         <artifactId>spring-security-oauth</artifactId>
-        <version>2.10</version>
+        <version>3.1</version>
         <exclusions>
           <!--we'll depend on enunciate's version of these artifacts.-->
           <exclusion>

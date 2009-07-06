@@ -35,6 +35,8 @@ import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectExtensionModule;
+import org.codehaus.enunciate.modules.GWTHomeAwareModule;
 import org.codehaus.enunciate.modules.gwt.config.GWTApp;
 import org.codehaus.enunciate.modules.gwt.config.GWTAppModule;
 import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
@@ -236,7 +238,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_gwt.html
  */
-public class GWTDeploymentModule extends FreemarkerDeploymentModule {
+public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule {
 
   private boolean enforceNamespaceConformance = true;
   private boolean enforceNoFieldAccessors = true;
@@ -1368,5 +1370,28 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
+  }
+
+  public List<File> getProjectSources() {
+    List<File> projectSources = new ArrayList<File>();
+    projectSources.add(getClientSideGenerateDir());
+    projectSources.add(getServerSideGenerateDir());
+    for (GWTApp gwtApp : getGwtApps()) {
+      File srcDir = getEnunciate().resolvePath(gwtApp.getSrcDir());
+      projectSources.add(srcDir);
+    }
+    return projectSources;
+  }
+
+  public List<File> getProjectTestSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectResourceDirectories() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestResourceDirectories() {
+    return Collections.emptyList();
   }
 }

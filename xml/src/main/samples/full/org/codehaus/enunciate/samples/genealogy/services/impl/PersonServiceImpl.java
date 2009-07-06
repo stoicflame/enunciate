@@ -22,7 +22,6 @@ import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.codehaus.enunciate.samples.genealogy.cite.Note;
-import org.codehaus.enunciate.rest.annotations.*;
 import org.joda.time.DateTime;
 
 import javax.jws.WebService;
@@ -39,7 +38,7 @@ import java.io.IOException;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"
 )
-@RESTEndpoint
+@javax.ws.rs.Path("")
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {

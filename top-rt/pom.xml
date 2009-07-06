@@ -22,6 +22,9 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-rest-rt</artifactId>
       <version>${project.version}</version>
+
+      <!--optional because jax-rs is now the default-->
+      <optional>true</optional>
     </dependency>
 
     <dependency>

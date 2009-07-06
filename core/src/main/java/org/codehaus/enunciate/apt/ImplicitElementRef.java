@@ -18,6 +18,9 @@ package org.codehaus.enunciate.apt;
 
 import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxb.Element;
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 import javax.xml.namespace.QName;
 
@@ -47,6 +50,21 @@ public class ImplicitElementRef implements ImplicitSchemaElement {
   }
 
   public QName getTypeQName() {
-    return element.getBaseType().getQname();
+    XmlType baseType = element.getBaseType();
+    if (baseType.isAnonymous()) {
+      return null;
+    }
+    else {
+      return baseType.getQname();
+    }
+  }
+
+  public TypeDefinition getAnonymousTypeDefinition() {
+    XmlType baseType = element.getBaseType();
+    if ((baseType.isAnonymous()) && (baseType instanceof XmlClassType)) {
+      return ((XmlClassType) baseType).getTypeDefinition();
+    }
+
+    return null;
   }
 }

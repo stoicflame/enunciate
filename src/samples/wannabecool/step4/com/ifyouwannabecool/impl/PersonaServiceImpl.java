@@ -25,8 +25,6 @@ import javax.ws.rs.Path;
 import java.util.Collection;
 import java.util.ArrayList;
 
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
-
 /**
  * @author Ryan Heaton
  */

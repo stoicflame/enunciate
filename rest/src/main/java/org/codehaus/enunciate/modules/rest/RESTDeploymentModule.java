@@ -27,6 +27,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.rest.config.RESTRuleSet;
 import org.codehaus.enunciate.modules.rest.json.JsonContentHandler;
 import org.codehaus.enunciate.modules.rest.json.JsonSerializationMethod;
@@ -344,7 +345,7 @@ import java.util.*;
  * @author Jason Holmes
  * @docFileName module_rest.html
  */
-public class RESTDeploymentModule extends FreemarkerDeploymentModule {
+public class RESTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule {
 
   private String defaultContentTypeHandler = JaxbXmlContentHandler.class.getName();
   private String xstreamReferenceAction = XStreamReferenceAction.relative_references.toString();
@@ -649,5 +650,21 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule {
 
     return false;
 
+  }
+
+  public List<File> getProjectSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectResourceDirectories() {
+    return Arrays.asList(getGenerateDir());
+  }
+
+  public List<File> getProjectTestResourceDirectories() {
+    return Collections.emptyList();
   }
 }

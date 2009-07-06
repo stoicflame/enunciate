@@ -349,7 +349,17 @@
   </${xs}:annotation>
     [/#if]
 </${xs}:element>
-
+  [#elseif implicitElement.anonymousTypeDefinition?exists]
+<${xs}:element name="${implicitElement.elementName}">
+    [#if implicitElement.elementDocs?exists]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitElement.elementDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+  [@processTypeDef typeDef=implicitElement.anonymousTypeDefinition/]
+</${xs}:element>
   [#else]
     [#assign childElements=implicitElement.childElements]
 <${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"/>
@@ -381,6 +391,18 @@
   [/#if]
 [/#macro]
 [#macro processImplicitAttribute implicitAttribute]
+ [#if implicitAttribute.anonymousTypeDefinition?exists]
+<${xs}:attribute name="${implicitAttribute.attributeName}">
+    [#if implicitAttribute.attributeDocs?exists]
+  <${xs}:annotation>
+    <${xs}:documentation>
+      <![CDATA[${implicitAttribute.attributeDocs?trim}]]>
+    </${xs}:documentation>
+  </${xs}:annotation>
+    [/#if]
+  [@processTypeDef typeDef=implicitAttribute.anonymousTypeDefinition/]
+</${xs}:attribute>
+ [#else]
 <${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}">
     [#if implicitAttribute.attributeDocs?exists]
   <${xs}:annotation>
@@ -390,4 +412,5 @@
   </${xs}:annotation>
     [/#if]
 </${xs}:attribute>
+ [/#if]
 [/#macro]

@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.samples.docs.pckg3;
 
-import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.samples.docs.pckg2.BeanTwo;
 
 /**
@@ -24,7 +23,7 @@ import org.codehaus.enunciate.samples.docs.pckg2.BeanTwo;
  * 
  * @author Ryan Heaton
  */
-@RESTEndpoint
+@javax.ws.rs.Path("{id}")
 public class RESTEI {
 
   /**
@@ -37,8 +36,8 @@ public class RESTEI {
    * @return docs for return
    * @throws FaultTwo if something bad happens
    */
-  @Verb ( VerbType.create )
-  public BeanTwo method1(@NounValue BeanTwo two, @ProperNoun String id, String param1, @Adjective( name="param2") String param2) throws FaultTwo {
+  @javax.ws.rs.POST
+  public BeanTwo method1(BeanTwo two, @javax.ws.rs.PathParam( "id" ) String id, @javax.ws.rs.QueryParam("param1") String param1, @javax.ws.rs.QueryParam("param2") String param2) throws FaultTwo {
     return null;
   }
 

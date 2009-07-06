@@ -46,8 +46,15 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-top</artifactId>
       <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 

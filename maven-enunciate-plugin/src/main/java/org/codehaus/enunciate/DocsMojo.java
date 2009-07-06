@@ -2,8 +2,8 @@ package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
-import org.codehaus.enunciate.modules.docs.DocumentationDeploymentModule;
+import org.codehaus.enunciate.modules.BasicDeploymentModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,16 +76,17 @@ public class DocsMojo extends ConfigMojo {
     }
 
     @Override
-    protected void onInitSpringAppDeploymentModule(SpringAppDeploymentModule springAppModule) throws IOException {
-      super.onInitSpringAppDeploymentModule(springAppModule);
-      springAppModule.setDisabled(true); //disable the spring-app module.
-    }
+    protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
+      super.initModules(modules);
 
-    @Override
-    protected void onInitDocsModule(DocumentationDeploymentModule docsModule) {
-      super.onInitDocsModule(docsModule);
-      docsModule.setDocsDir(null);
-      docsModule.setBuildDir(new File(docsDir));
+      for (DeploymentModule module : modules) {
+        if ("spring-app".equals(module.getName())) {
+          ((BasicDeploymentModule)module).setDisabled(true);
+        }
+        else if ("docs".equals(module.getName())) {
+          ((BasicDeploymentModule)module).setBuildDir(new File(docsDir));
+        }
+      }
     }
   }
 

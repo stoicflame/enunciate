@@ -34,6 +34,8 @@ import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectExtensionModule;
+import org.codehaus.enunciate.modules.FlexHomeAwareModule;
 import org.codehaus.enunciate.modules.amf.config.AMFRuleSet;
 import org.codehaus.enunciate.modules.amf.config.FlexApp;
 import org.codehaus.enunciate.modules.amf.config.FlexCompilerConfig;
@@ -202,7 +204,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_amf.html
  */
-public class AMFDeploymentModule extends FreemarkerDeploymentModule {
+public class AMFDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, FlexHomeAwareModule {
 
   private String amfSubcontext = "/amf/";
   private String flexAppDir = null;
@@ -1103,5 +1105,25 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
+  }
+
+  public List<File> getProjectSources() {
+    List<File> sources = new ArrayList<File>(Arrays.asList(getClientSideGenerateDir(), getServerSideGenerateDir()));
+    for (FlexApp flexApp : getFlexApps()) {
+      sources.add(getEnunciate().resolvePath(flexApp.getSrcDir()));
+    }
+    return sources;
+  }
+
+  public List<File> getProjectTestSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectResourceDirectories() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestResourceDirectories() {
+    return Collections.emptyList();
   }
 }

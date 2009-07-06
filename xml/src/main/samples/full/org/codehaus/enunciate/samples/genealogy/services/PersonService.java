@@ -18,11 +18,14 @@ package org.codehaus.enunciate.samples.genealogy.services;
 
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
-import org.codehaus.enunciate.rest.annotations.*;
 
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.soap.SOAPBinding;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.activation.DataHandler;
 import java.util.Collection;
 import java.util.Map;
@@ -35,8 +38,6 @@ import java.util.Map;
 @WebService (
   targetNamespace = "http://enunciate.codehaus.org/samples/full"
 )
-@RESTEndpoint
-@NounContext ( "pedigree" )
 public interface PersonService {
 
   /**
@@ -48,13 +49,9 @@ public interface PersonService {
   @SOAPBinding (
     parameterStyle = SOAPBinding.ParameterStyle.BARE
   )
-  @Verb (
-    VerbType.create
-  )
-  @Noun (
-    "person"
-  )
-  Person storePerson(@NounValue Person person);
+  @PUT
+  @Path ("/pedigree/person")
+  Person storePerson(Person person);
 
   /**
    * Reads a set of persons from the database.  Intended as an example of
@@ -71,14 +68,9 @@ public interface PersonService {
    * @param personId The id of the person.
    * @throws ServiceException If some problem occurred when deleting the person.
    */
-  @Verb(
-    VerbType.delete
-  )
-  @Noun (
-    value = "person",
-    context = "remover/pedigree"
-  )
-  void deletePerson(@ProperNoun String personId) throws ServiceException;
+  @DELETE
+  @Path("/remover/pedigree/person/{id}")
+  void deletePerson(@PathParam("id") String personId) throws ServiceException;
 
   /**
    * Uploads some files.
@@ -87,11 +79,7 @@ public interface PersonService {
    * @param length The length(s) of the files.
    */
   @WebMethod ( exclude = true )
-  @Verb ( VerbType.post )
-  @Noun (
-    value = "file"
-  )
-  void uploadFiles(@NounValue DataHandler[] files, String length) throws ServiceException;
+  void uploadFiles(DataHandler[] files, String length) throws ServiceException;
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.

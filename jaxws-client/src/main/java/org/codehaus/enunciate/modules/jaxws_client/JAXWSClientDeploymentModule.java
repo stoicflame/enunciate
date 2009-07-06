@@ -35,6 +35,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.xml.XMLDeploymentModule;
 import org.codehaus.enunciate.modules.jaxws_client.config.ClientPackageConversion;
 import org.codehaus.enunciate.modules.jaxws_client.config.JAXWSClientRuleSet;
@@ -138,7 +139,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_jaxws_client.html
  */
-public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
+public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule {
 
   private String jarName = null;
   private final Map<String, String> clientPackageConversions;
@@ -577,5 +578,30 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     return false;
+  }
+
+  public List<File> getProjectSources() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestSources() {
+    return Arrays.asList(getGenerateDir());
+  }
+
+  public List<File> getProjectResourceDirectories() {
+    return Collections.emptyList();
+  }
+
+  public List<File> getProjectTestResourceDirectories() {
+    ArrayList<File> testResources = new ArrayList<File>();
+
+    //the jaxws-client requires the wsdl and schemas on the classpath.
+    for (DeploymentModule enabledModule : getEnunciate().getConfig().getEnabledModules()) {
+      if (enabledModule instanceof XMLDeploymentModule) {
+        testResources.add(((XMLDeploymentModule) enabledModule).getGenerateDir());
+      }
+    }
+
+    return testResources;
   }
 }

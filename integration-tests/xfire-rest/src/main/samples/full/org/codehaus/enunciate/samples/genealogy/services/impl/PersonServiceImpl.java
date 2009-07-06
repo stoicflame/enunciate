@@ -16,22 +16,20 @@
 
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
-import org.codehaus.enunciate.samples.genealogy.data.Person;
+import org.codehaus.enunciate.samples.genealogy.cite.Note;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
+import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
-import org.codehaus.enunciate.samples.genealogy.cite.Note;
-import org.codehaus.enunciate.rest.annotations.*;
 import org.joda.time.DateTime;
 
-import javax.jws.WebService;
-import javax.jws.WebMethod;
 import javax.activation.DataHandler;
-import java.util.*;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import javax.jws.WebService;
+import javax.ws.rs.Path;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * @author Ryan Heaton
@@ -39,7 +37,7 @@ import java.io.IOException;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"
 )
-@RESTEndpoint
+@Path("")
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {

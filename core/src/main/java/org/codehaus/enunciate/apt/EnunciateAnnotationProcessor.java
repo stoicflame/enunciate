@@ -174,6 +174,14 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
     model.setBaseDeploymentAddress(baseURL);
 
+    boolean enunciateRestEnabled = false;
+    for (DeploymentModule module : config.getAllModules()) {
+      if ("rest".equals(module.getName())) {
+        enunciateRestEnabled = true;
+        break;
+      }
+    }
+
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -373,9 +381,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     Messager messager = getMessager();
     ValidatorChain validator = new ValidatorChain();
     EnunciateConfiguration config = this.enunciate.getConfig();
+    Set<String> disabledRules = new TreeSet<String>(config.getDisabledRules());
+    if (this.enunciate.isModuleEnabled("rest")) {
+      //if the REST module is enabled, disable the validation rule that
+      //fails if the module is not enabled.
+      disabledRules.add("disabled.rest.module");
+    }
+    
     Validator coreValidator = config.getValidator();
     if (coreValidator instanceof ConfigurableRules) {
-      ((ConfigurableRules)coreValidator).disableRules(config.getDisabledRules());
+      ((ConfigurableRules)coreValidator).disableRules(disabledRules);
     }
     validator.addValidator("core", coreValidator);
     debug("Default validator added to the chain.");

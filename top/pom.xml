@@ -50,6 +50,10 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-rest</artifactId>
       <version>${project.version}</version>
+
+      <!--optional to reduce dependency bloat, jaxrs (jersey) module is default-->
+      <!--if enunciate-rest is desired, this dependency will need to be explicitly added-->
+      <optional>true</optional>
     </dependency>
 
     <dependency>

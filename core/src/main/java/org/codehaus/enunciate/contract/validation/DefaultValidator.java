@@ -172,7 +172,17 @@ public class DefaultValidator implements Validator, ConfigurableRules {
    * @return The result of the validation.
    */
   public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
-    return new ValidationResult();
+    ValidationResult result = new ValidationResult();
+    if (restAPI != null && !restAPI.isEmpty()) {
+      if (!disabledRules.contains("disabled.rest.module")) {
+        for (List<RESTMethod> restMethods : restAPI.values()) {
+          for (RESTMethod restMethod : restMethods) {
+            result.addError(restMethod, "The Enunciate REST module is missing or disabled. Please ensure that this module is on the classpath and is enabled. For more information, see http://docs.codehaus.org/display/ENUNCIATE/Enabling+Enunciate+REST+Model .");
+          }
+        }
+      }
+    }
+    return result;
   }
 
   /**
@@ -714,11 +724,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(attribute, "Attributes can't have binary data.");
     }
 
-    QName ref = attribute.getRef();
-    if ((ref != null) && (attribute.getBaseType().isAnonymous())) {
-      result.addError(attribute, "Attribute whose namespace differs from that of its type definition must not have an anonymous base type.");
-    }
-
     return result;
   }
 
@@ -751,11 +756,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       else {
         result.addWarning(element, "Unknown or invisible collection item type.");
       }
-    }
-
-    QName ref = element.getRef();
-    if ((ref != null) && (element.getBaseType().isAnonymous())) {
-      result.addError(element, "Element whose namespace differs from that of its type definition must not have an anonymous base type.");
     }
 
     return result;

@@ -25,6 +25,10 @@ import javax.jws.Oneway;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
+import javax.ws.rs.POST;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 /**
  * The source service is used to access and store source information about genealogical information.
@@ -38,7 +42,6 @@ import javax.jws.WebService;
   serviceName = "source-service",
   portName = "source-service-port"
 )
-@RESTEndpoint
 public interface SourceService {
 
   /**
@@ -47,9 +50,8 @@ public interface SourceService {
    * @param source The source to add to the database.
    */
   @Oneway
-  @Noun ("source")
-  @Verb ( VerbType.create )
-  void addSource(@NounValue Source source);
+  @POST
+  void addSource(Source source);
 
   /**
    * Reads a source from the database.
@@ -59,9 +61,9 @@ public interface SourceService {
    * @throws ServiceException If a source couldn't be read from the database.
    * @throws UnknownSourceException If no source by that id was found in the database.
    */
-  @Noun ("source")
-  @Verb ( VerbType.read )
-  Source getSource(@ProperNoun String id) throws ServiceException, UnknownSourceException;
+  @GET
+  @Path ("{id}")
+  Source getSource(@PathParam ("id") String id) throws ServiceException, UnknownSourceException;
 
   /**
    * Adds an infoset to a specified source.

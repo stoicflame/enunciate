@@ -79,6 +79,11 @@
             <artifactId>enunciate-cxf</artifactId>
             <version>${project.version}</version>
           </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
+            <version>${project.version}</version>
+          </dependency>
         </dependencies>
       </plugin>
 
@@ -169,6 +174,12 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-cxf-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-rest-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
