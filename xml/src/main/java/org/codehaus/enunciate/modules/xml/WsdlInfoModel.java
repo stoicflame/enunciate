@@ -43,6 +43,9 @@ public class WsdlInfoModel extends StringModel {
     if (("filename".equals(key)) || ("location".equals(key)) || ("inlineSchema".equals(key))) {
       return wrap(wsdlInfo.getProperty(key));
     }
+    else if ("alreadyExists".equals(key)) {
+      return wrap(wsdlInfo.getProperty("file") != null);
+    }
     else if ("importedNamespaces".equals(key)) {
       Set<String> importedNamespaces = wsdlInfo.getImportedNamespaces();
       SchemaInfo associatedSchema = wsdlInfo.getAssociatedSchema();

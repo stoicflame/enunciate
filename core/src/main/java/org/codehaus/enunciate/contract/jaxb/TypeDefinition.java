@@ -27,10 +27,14 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -599,7 +603,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   public abstract XmlType getBaseType();
 
   /**
-   * Stack used for maintaining the list of type definitions for which we are currently generating example xml. Used to
+   * Stack used for maintaining the list of type definitions for which we are currently generating example xml/json. Used to
    * prevent infinite recursion for circular references.
    */
   private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>();
@@ -613,9 +617,9 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     if (TYPE_DEF_STACK.get() == null) {
       TYPE_DEF_STACK.set(new Stack<String>());
     }
-    
+
     if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
-      parent.addContent(new org.jdom.Comment("... " + getName() + " type..."));
+      parent.addContent(new org.jdom.Comment("(content not shown)"));
     }
     else {
       TYPE_DEF_STACK.get().push(getQualifiedName());
@@ -634,4 +638,31 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
   }
 
+  public ObjectNode generateExampleJson() {
+    if (TYPE_DEF_STACK.get() == null) {
+      TYPE_DEF_STACK.set(new Stack<String>());
+    }
+
+    ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
+    if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
+      jsonNode.put("...", WhateverNode.instance);
+    }
+    else {
+      TYPE_DEF_STACK.get().push(getQualifiedName());
+      for (Attribute attribute : getAttributes()) {
+        attribute.generateExampleJson(jsonNode);
+      }
+      if (getValue() != null) {
+        getValue().generateExampleJson(jsonNode);
+      }
+      else {
+        for (Element element : getElements()) {
+          element.generateExampleJson(jsonNode);
+        }
+      }
+      TYPE_DEF_STACK.get().pop();
+    }
+
+    return jsonNode;
+  }
 }

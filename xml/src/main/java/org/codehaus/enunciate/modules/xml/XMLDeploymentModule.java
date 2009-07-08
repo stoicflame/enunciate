@@ -27,6 +27,9 @@ import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
 import org.codehaus.enunciate.modules.xml.config.WsdlConfig;
 import org.codehaus.enunciate.modules.xml.config.XMLRuleSet;
 import org.codehaus.enunciate.main.FileArtifact;
+import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
 import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
@@ -71,6 +74,7 @@ import java.util.Map;
  *
  * <ul>
  *   <li>The "<b>namespace</b>" attribute specifies the namespace of the schema that is to be configured.</li>
+ *   <li>The "<b>useFile</b>" attribute specifies the (already existing) file to use for this schema.
  *   <li>The "<b>file</b>" attribute specifies name of the schema file.  The default is the prefix appended with ".xsd".</li>
  *   <li>The "<b>location</b>" attribute specifies name of the schema location (i.e. how the schema is to be located by other schemas).
  * The default is the name of the file.</li>
@@ -86,6 +90,7 @@ import java.util.Map;
  *
  * <ul>
  *   <li>The "<b>namespace</b>" attribute specifies the namespace of the wsdl that is to be configured.</li>
+ *   <li>The "<b>useFile</b>" attribute specifies the (already existing) file to use for this schema.
  *   <li>The "<b>file</b>" attribute specifies name of the wsdl file.  The default is the prefix appended with ".wsdl".</li>
  * </ul>
  *
@@ -142,6 +147,28 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     this.wsdlConfigs.add(config);
   }
 
+  @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    for (SchemaConfig schemaConfig : this.schemaConfigs) {
+      if (schemaConfig.getUseFile() != null) {
+        File useFile = enunciate.resolvePath(schemaConfig.getUseFile());
+        if (!useFile.exists()) {
+          throw new EnunciateException("File " + useFile + " does not exist.");
+        }
+      }
+    }
+    for (WsdlConfig wsdlConfig : this.wsdlConfigs) {
+      if (wsdlConfig.getUseFile() != null) {
+        File useFile = enunciate.resolvePath(wsdlConfig.getUseFile());
+        if (!useFile.exists()) {
+          throw new EnunciateException("File " + useFile + " does not exist.");
+        }
+      }
+    }
+  }
+  
   // Inherited.
   @Override
   public void initModel(EnunciateFreemarkerModel model) {
@@ -175,6 +202,16 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       SchemaInfo schemaInfo = ns2schema.get(customConfig.getNamespace());
 
       if (schemaInfo != null) {
+        if (customConfig.getUseFile() != null) {
+          File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
+          if (!useFile.exists()) {
+            throw new IllegalStateException("File " + useFile + " does not exist.");
+          }
+          schemaInfo.setProperty("filename", useFile.getName());
+          schemaInfo.setProperty("location", useFile.getName());
+          schemaInfo.setProperty("file", useFile);
+        }
+
         if (customConfig.getFile() != null) {
           schemaInfo.setProperty("filename", customConfig.getFile());
           schemaInfo.setProperty("location", customConfig.getFile());
@@ -198,6 +235,15 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       WsdlInfo wsdlInfo = ns2wsdl.get(customConfig.getNamespace());
 
       if (wsdlInfo != null) {
+        if (customConfig.getUseFile() != null) {
+          File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
+          if (!useFile.exists()) {
+            throw new IllegalStateException("File " + useFile + " does not exist.");
+          }
+          wsdlInfo.setProperty("filename", useFile.getName());
+          wsdlInfo.setProperty("file", useFile);
+        }
+
         if (customConfig.getFile() != null) {
           wsdlInfo.setProperty("filename", customConfig.getFile());
         }
@@ -227,9 +273,12 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     for (WsdlInfo wsdl : ns2wsdl.values()) {
-      String file = (String) wsdl.getProperty("filename");
-      File wsdlFile = new File(artifactDir, file);
-      wsdl.setProperty("file", wsdlFile);
+      File wsdlFile = (File) wsdl.getProperty("file");
+      if (wsdlFile == null) {
+        String file = (String) wsdl.getProperty("filename");
+        wsdlFile = new File(artifactDir, file);
+        wsdl.setProperty("file", wsdlFile);
+      }
 
       if (!upToDate && prettyPrint) {
         prettyPrint(wsdlFile);
@@ -241,9 +290,12 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     for (SchemaInfo schemaInfo : ns2schema.values()) {
-      String file = (String) schemaInfo.getProperty("filename");
-      File schemaFile = new File(artifactDir, file);
-      schemaInfo.setProperty("file", schemaFile);
+      File schemaFile = (File) schemaInfo.getProperty("file");
+      if (schemaFile == null) {
+        String file = (String) schemaInfo.getProperty("filename");
+        schemaFile = new File(artifactDir, file);
+        schemaInfo.setProperty("file", schemaFile);
+      }
 
       if (!upToDate && prettyPrint) {
         prettyPrint(schemaFile);

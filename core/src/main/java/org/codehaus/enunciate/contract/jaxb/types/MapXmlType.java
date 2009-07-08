@@ -16,6 +16,13 @@
 
 package org.codehaus.enunciate.contract.jaxb.types;
 
+import org.jdom.Comment;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.enunciate.util.WhateverNode;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -99,12 +106,37 @@ public class MapXmlType implements XmlType {
       org.jdom.Element entry = new org.jdom.Element("entry", node.getNamespacePrefix(), node.getNamespaceURI());
       org.jdom.Element key = new org.jdom.Element("key", node.getNamespacePrefix(), node.getNamespaceURI());
       org.jdom.Element value = new org.jdom.Element("value", node.getNamespacePrefix(), node.getNamespaceURI());
-      this.keyType.generateExampleXml(key, null);
+      if (i == 0) {
+        key.addContent(new Comment("type '" + this.keyType.getName() + "'"));
+        this.keyType.generateExampleXml(key, null);
+      }
+      else {
+        key.addContent(new Comment("(another '" + this.keyType.getName() + "' type)"));
+      }
       entry.addContent(key);
-      this.valueType.generateExampleXml(value, null);
+      if (i == 0) {
+        value.addContent(new Comment("content of type '" + this.valueType.getName() + "'"));
+        this.valueType.generateExampleXml(value, null);
+      }
+      else {
+        value.addContent(new Comment("(another '" + this.valueType.getName() + "' type)"));
+      }
       entry.addContent(value);
       node.addContent(entry);
     }
     node.addContent(new org.jdom.Comment("...more entries..."));
+  }
+
+  public JsonNode generateExampleJson(String specifiedValue) {
+    ArrayNode jsonNode = JsonNodeFactory.instance.arrayNode();
+    for (int i = 0; i < 2; i++) {
+      ObjectNode entryNode = JsonNodeFactory.instance.objectNode();
+      if (i == 0) {
+        entryNode.put("...", this.valueType.generateExampleJson(null));
+        entryNode.put("...", WhateverNode.instance);
+      }
+      jsonNode.add(entryNode);
+    }
+    return jsonNode;
   }
 }

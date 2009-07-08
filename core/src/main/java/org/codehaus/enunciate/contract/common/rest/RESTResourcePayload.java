@@ -16,7 +16,7 @@
 
 package org.codehaus.enunciate.contract.common.rest;
 
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 
 /**
  * Payload for a REST resource.
@@ -37,6 +37,6 @@ public interface RESTResourcePayload {
    *
    * @return The XML element associated with the payload, or null if none (or unknown).
    */
-  RootElementDeclaration getXmlElement();
+  ElementDeclaration getXmlElement();
 
 }

@@ -1087,9 +1087,14 @@
                       </p>
                     </xsl:if>
 
-                    <xsl:if test="example and (string-length(example) &gt; 1)">
+                    <xsl:if test="examplexml and (string-length(examplexml) &gt; 1)">
                       <h2>Example XML</h2>
-                      <code><xsl:value-of select="example"/></code>
+                      <code><xsl:value-of select="examplexml"/></code>
+                    </xsl:if>
+
+                    <xsl:if test="examplejson and (string-length(examplejson) &gt; 1)">
+                      <h2>Example JSON</h2>
+                      <code><xsl:value-of select="examplejson"/></code>
                     </xsl:if>
                   </div>
                 </xsl:for-each>

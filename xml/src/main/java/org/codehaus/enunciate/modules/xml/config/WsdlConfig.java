@@ -24,6 +24,7 @@ package org.codehaus.enunciate.modules.xml.config;
 public class WsdlConfig {
 
   private String namespace;
+  private String useFile;
   private String file;
   private boolean inlineSchema = true;
 
@@ -43,6 +44,24 @@ public class WsdlConfig {
    */
   public void setNamespace(String namespace) {
     this.namespace = namespace;
+  }
+
+  /**
+   * The (already existing) file to use for this wsdl.
+   *
+   * @return The (already existing) file to use for this wsdl.
+   */
+  public String getUseFile() {
+    return useFile;
+  }
+
+  /**
+   * The (already existing) file to use for this wsdl.
+   *
+   * @param useFile The (already existing) file to use for this wsdl.
+   */
+  public void setUseFile(String useFile) {
+    this.useFile = useFile;
   }
 
   /**

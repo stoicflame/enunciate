@@ -16,6 +16,10 @@
 
 package org.codehaus.enunciate.contract.jaxb.types;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.enunciate.util.WhateverNode;
+import org.codehaus.enunciate.util.RawValueNode;
+
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.namespace.QName;
 
@@ -80,5 +84,9 @@ public class SpecifiedXmlType implements XmlType {
   // Inherited.
   public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
     node.addContent(new org.jdom.Text(specifiedValue == null ? "..." : specifiedValue));
+  }
+
+  public JsonNode generateExampleJson(String specifiedValue) {
+    return specifiedValue == null ? WhateverNode.instance : new RawValueNode(specifiedValue);
   }
 }

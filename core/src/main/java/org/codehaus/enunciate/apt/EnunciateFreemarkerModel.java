@@ -1098,6 +1098,43 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * Finds the local element declaration for the specified class declaration.
+   *
+   * @param declaration The declaration for which to find the local element declaration.
+   * @return The local element declaration, or null if none found.
+   */
+  public LocalElementDeclaration findLocalElementDeclaration(ClassDeclaration declaration) {
+    if (declaration.getPackage() != null) {
+      String packageName = declaration.getPackage().getQualifiedName();
+      for (SchemaInfo schemaInfo : namespacesToSchemas.values()) {
+        for (Registry registry : schemaInfo.getRegistries()) {
+          if (registry.getSchema().getQualifiedName().equals(packageName)) {
+            //find the registry for the declaration.
+            for (LocalElementDeclaration localElement : registry.getLocalElementDeclarations()) {
+              if (localElement.getElementTypeDeclaration() != null && localElement.getElementTypeDeclaration().getQualifiedName().equals(declaration.getQualifiedName())) {
+                return localElement;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find the element declaration (local or global) for the specified declaration.
+   *
+   * @param declaration The declaration.
+   * @return The element declaration, or null if none were found.
+   */
+  public ElementDeclaration findElementDeclaration(ClassDeclaration declaration) {
+    RootElementDeclaration rootDeclaration = findRootElementDeclaration(declaration);
+    return rootDeclaration == null ? findLocalElementDeclaration(declaration) : rootDeclaration;
+  }
+
+  /**
    * Finds an example resource method, according to the following preference order:
    *
    * <ol>

@@ -1,0 +1,77 @@
+[#ftl]
+[#--template for the client-side complex type.--]
+[#macro writeComplexType type]
+  [#list moduleFor(type)?split("::") as submodule]
+
+module ${submodule}
+  [/#list]
+
+  # ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  # ")}
+  class ${simpleNameFor(type)} [#if !type.baseObject]> ${classnameFor(type.superclass)} [/#if]
+
+  [#list type.attributes as attribute]
+    # ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${attribute.clientSimpleName}
+  [/#list]
+  [#if type.value?exists]
+    # ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${type.value.clientSimpleName}
+  [#else]
+    [#list type.elements as element]
+    # ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+    attr_accessor :${element.clientSimpleName}
+    [/#list]
+  [/#if]
+
+    # the json hash for this ${simpleNameFor(type)}
+    def to_json_hash
+      h = [#if type.baseObject]{}[#else]super[/#if]
+  [#list type.attributes as attribute]
+      h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}
+  [/#list]
+  [#if type.value?exists]
+      h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}
+  [#else]
+    [#list type.elements as element]
+    
+    [/#list]
+  [/#if]
+      return h
+    end
+  [#if type.baseObject]
+
+    # the json (string form) for this ${simpleNameFor(type)}
+    def to_json
+      to_json_hash.to_json
+    end
+  [/#if]
+
+    #initializes this ${simpleNameFor(type)} with a json hash
+    def init_json_hash(o)
+  [#if !type.baseObject]
+      super o
+  [/#if]
+  [#list type.attributes as attribute]
+      @${attribute.clientSimpleName} = o['${attribute.clientSimpleName}']
+  [/#list]
+  [#if type.value?exists]
+      @${type.value.clientSimpleName} = o['${type.value.clientSimpleName}']
+  [#else]
+    [#list type.elements as element]
+
+    [/#list]
+  [/#if]
+    end
+
+    # constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
+    def self.from_json(o)
+      inst = new
+      inst.from_json_hash o
+      return inst
+    end
+  end
+  [#list moduleFor(type)?split("::") as submodule]
+
+end
+  [/#list]
+[/#macro]

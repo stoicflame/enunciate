@@ -21,6 +21,11 @@ import net.sf.jelly.apt.decorations.type.DecoratedPrimitiveType;
 
 import javax.xml.namespace.QName;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.enunciate.util.WhateverNode;
+import org.codehaus.enunciate.util.RawValueNode;
+
 /**
  * @author Ryan Heaton
  */
@@ -69,5 +74,21 @@ public class XmlPrimitiveType extends DecoratedPrimitiveType implements XmlType 
 
   public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
     node.addContent(new org.jdom.Text(specifiedValue == null ? "..." : specifiedValue));
+  }
+
+  public JsonNode generateExampleJson(String specifiedValue) {
+    switch (getKind()) {
+      case BOOLEAN:
+        return JsonNodeFactory.instance.booleanNode("true".equalsIgnoreCase(specifiedValue));
+      case BYTE:
+      case DOUBLE:
+      case FLOAT:
+      case INT:
+      case LONG:
+      case SHORT:
+        return specifiedValue == null ? WhateverNode.instance : new RawValueNode(specifiedValue);
+      default:
+        return specifiedValue == null ? WhateverNode.instance : JsonNodeFactory.instance.textNode(specifiedValue);
+    }
   }
 }

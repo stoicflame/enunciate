@@ -26,7 +26,9 @@ import net.sf.jelly.apt.util.JavaDocTagHandler;
 import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.main.Artifact;
@@ -161,7 +163,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_docs.html
  */
-public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements ProjectTitleAware {
+public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements ProjectTitleAware, EnunciateClasspathListener {
 
   private String splashPackage;
   private String copyright;
@@ -174,6 +176,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String docsDir = null;
   private String javadocTagHandling;
   private boolean applyWsdlFilter = true;
+  private boolean jacksonXcAvailable = false;
 
   /**
    * @return "docs"
@@ -189,6 +192,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   @Override
   public int getOrder() {
     return 100;
+  }
+
+  public void onClassesFound(Set<String> classes) {
+    jacksonXcAvailable |= classes.contains("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
   }
 
   /**
@@ -479,6 +486,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
       model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));
+      model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
+      model.put("jacksonXcAvailble", jacksonXcAvailable);
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

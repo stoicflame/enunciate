@@ -33,12 +33,16 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.doc.DocumentationExample;
+import org.codehaus.enunciate.util.WhateverNode;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.JsonNode;
 import org.jdom.Comment;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -484,7 +488,13 @@ public class Element extends Accessor {
             org.jdom.Element element = new org.jdom.Element(choice.getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
             String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
             XmlType xmlType = choice.getBaseType();
-            xmlType.generateExampleXml(element, exampleValue);
+            if (i == 0) {
+              element.addContent(new Comment("content of type '" + xmlType.getName() + "'"));
+              xmlType.generateExampleXml(element, exampleValue);
+            }
+            else {
+              element.addContent(new Comment("(another '" + xmlType.getName() + "' type)"));
+            }
             parent.addContent(element);
           }
           else {
@@ -501,5 +511,53 @@ public class Element extends Accessor {
         }
       }
     }
+  }
+
+  public void generateExampleJson(ObjectNode jsonNode) {
+    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
+    if (exampleInfo == null || !exampleInfo.exclude()) {
+      String name = getJsonElementName();
+      if (!isCollectionType()) {
+        String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
+        if (getRef() == null) {
+          jsonNode.put(name, getBaseType().generateExampleJson(exampleValue));
+        }
+        else {
+          jsonNode.put(name, JsonNodeFactory.instance.objectNode());
+        }
+      }
+      else {
+        ArrayNode exampleChoices = JsonNodeFactory.instance.arrayNode();
+        for (Element choice : getChoices()) {
+          QName ref = choice.getRef();
+          int iterations = "1".equals(choice.getMaxOccurs()) ? 1 : 2;
+          for (int i = 0; i < iterations; i++) {
+            if (ref == null) {
+              String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? null : exampleInfo.value();
+              XmlType xmlType = choice.getBaseType();
+              if (i == 0) {
+                exampleChoices.add(xmlType.generateExampleJson(exampleValue));
+              }
+              else {
+                exampleChoices.add(WhateverNode.instance);
+              }
+            }
+            else {
+              exampleChoices.add(JsonNodeFactory.instance.objectNode());
+            }
+          }
+        }
+        jsonNode.put(name, exampleChoices);
+      }
+    }
+  }
+
+  /**
+   * Get the element name for the JSON attribute for this element.
+   *
+   * @return The element.
+   */
+  protected String getJsonElementName() {
+    return isWrapped() ? getWrapperName() : getName();
   }
 }

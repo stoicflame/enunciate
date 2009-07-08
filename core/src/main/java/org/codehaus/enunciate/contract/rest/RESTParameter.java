@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
@@ -216,12 +217,12 @@ public class RESTParameter extends DecoratedParameterDeclaration implements REST
   }
 
   // Inherited.
-  public RootElementDeclaration getXmlElement() {
+  public ElementDeclaration getXmlElement() {
     TypeMirror type = getType();
     if (type instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) type).getDeclaration();
       if (declaration != null) {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findRootElementDeclaration(declaration);
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findElementDeclaration(declaration);
       }
     }
     return null;

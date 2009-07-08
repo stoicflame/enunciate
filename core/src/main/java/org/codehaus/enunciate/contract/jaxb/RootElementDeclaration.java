@@ -21,6 +21,10 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.node.ObjectNode;
 import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -32,7 +36,7 @@ import java.io.StringWriter;
  *
  * @author Ryan Heaton
  */
-public class RootElementDeclaration extends DecoratedClassDeclaration {
+public class RootElementDeclaration extends DecoratedClassDeclaration implements ElementDeclaration {
 
   private final XmlRootElement rootElement;
   private final TypeDefinition typeDefinition;
@@ -138,6 +142,27 @@ public class RootElementDeclaration extends DecoratedClassDeclaration {
       XMLOutputter out = new XMLOutputter(org.jdom.output.Format.getPrettyFormat());
       StringWriter sw = new StringWriter();
       out.output(document, sw);
+      sw.flush();
+      return sw.toString();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Generate some example JSON for this root element.
+   *
+   * @return Some example JSON for this root element.
+   */
+  public String generateExampleJson() {
+    try {
+      ObjectNode node = getTypeDefinition().generateExampleJson();
+      StringWriter sw = new StringWriter();
+      JsonGenerator generator = new JsonFactory().createJsonGenerator(sw);
+      generator.useDefaultPrettyPrinter();
+      node.serialize(generator, null);
+      generator.flush();
       sw.flush();
       return sw.toString();
     }

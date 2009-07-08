@@ -29,6 +29,7 @@
     <module>xfire-client</module>
     <module>jaxws-client</module>
     <module>csharp</module>
+    <module>ruby</module>
     <module>docs</module>
     <module>amf-rt</module>
     <module>amf</module>
@@ -59,7 +60,6 @@
         <artifactId>maven-idea-plugin</artifactId>
         <configuration>
           <downloadSources>true</downloadSources>
-          <downloadJavadocs>true</downloadJavadocs>
           <exclude>cargo-installs</exclude>
         </configuration>
       </plugin>
@@ -680,6 +680,13 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-rt-transports-http</artifactId>
         <version>${cxf.version}</version>
+      </dependency>
+
+      <dependency>
+        <!--depending modules: core-->
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>1.1.0</version>
       </dependency>
 
       <dependency>

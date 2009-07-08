@@ -1,0 +1,67 @@
+[#ftl]
+[#--template for the client-side simple type.--]
+[#macro writeSimpleType type]
+namespace ${namespaceFor(type)} {
+
+  /// <remarks>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </remarks>
+  /// <summary>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </summary>
+  [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
+  public sealed class ${type.clientSimpleName} {
+
+  [#assign accessor=type.value/]
+    private ${classnameFor(accessor)} _${accessor.clientSimpleName};
+  [#if classnameFor(accessor)?ends_with("?")]
+    private bool _${accessor.clientSimpleName}Specified;
+  [/#if]
+
+  [#assign cs_classname=classnameFor(accessor)/]
+  [#if cs_classname?ends_with("?")]
+    /// <summary>
+    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
+    public ${cs_classname?substring(0, cs_classname?length  - 1)} ${accessor.clientSimpleName?cap_first} {
+      get {
+        return this._${accessor.clientSimpleName}.GetValueOrDefault();
+      }
+      set {
+        this._${accessor.clientSimpleName} = value;
+        this._${accessor.clientSimpleName}Specified = true;
+      }
+    }
+
+    /// <summary>
+    ///  Property for the XML serializer indicating whether the "${accessor.clientSimpleName?cap_first}" property should be included in the output.
+    /// </summary>
+    [System.Xml.Serialization.XmlIgnoreAttribute]
+    public bool ${accessor.clientSimpleName?cap_first}Specified {
+      get {
+        return this._${accessor.clientSimpleName}Specified;
+      }
+      set {
+        this._${accessor.clientSimpleName}Specified = value;
+      }
+    }
+
+  [#else]
+    /// <summary>
+    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
+    public ${cs_classname} ${accessor.clientSimpleName?cap_first} {
+      get {
+        return this._${accessor.clientSimpleName};
+      }
+      set {
+        this._${accessor.clientSimpleName} = value;
+      }
+    }
+
+  [/#if]
+  }
+}
+[/#macro]

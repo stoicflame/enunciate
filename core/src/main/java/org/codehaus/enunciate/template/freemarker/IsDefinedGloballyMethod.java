@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.xml;
+package org.codehaus.enunciate.template.freemarker;
 
-import freemarker.template.TemplateMethodModel;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateMethodModelEx;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.SchemaInfo;
+import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
-import org.codehaus.enunciate.config.SchemaInfo;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 import java.util.List;
 import java.util.Map;

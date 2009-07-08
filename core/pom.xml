@@ -85,6 +85,12 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
 
+    <!--used for generating example json for documentation-->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+    </dependency>
+
     <!--used for generating example xml for documentation-->
     <dependency>
       <groupId>jdom</groupId>

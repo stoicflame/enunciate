@@ -1,0 +1,28 @@
+[#ftl]
+[#--template for the client-side simple type.--]
+[#macro writeEnumType type]
+namespace ${namespaceFor(type)} {
+
+  /// <remarks>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </remarks>
+  /// <summary>
+  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  /// </summary>
+  [#if findRootElement(type)?exists]
+  [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
+  [/#if]
+  public enum ${type.clientSimpleName} {
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
+
+    /// <summary>
+    ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    /// </summary>
+    [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
+    [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
+    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].allElementValues["value"]}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
+    [/#list]
+  }
+}
+[/#macro]

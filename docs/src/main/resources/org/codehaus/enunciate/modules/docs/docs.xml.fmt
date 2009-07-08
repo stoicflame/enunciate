@@ -87,7 +87,7 @@
       </types>
       <elements>
     [#list schema.globalElements as element]
-        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition?exists] typeName="${element.typeDefinition.name}" typeNamespace="${element.typeDefinition.namespace?default("")}"[/#if][#if schemaForNamespace(element)?exists] typeSchemaId="${schemaForNamespace(element).id}"[/#if]>
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition?exists] typeName="${element.typeDefinition.name}" typeNamespace="${element.typeDefinition.namespace?default("")}"[#if schemaForNamespace(element.typeDefinition)?exists] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
       [#if element.docValue?exists]
           <documentation>
             <![CDATA[${element.docValue}]]>
@@ -98,8 +98,32 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
         [/#list]
       [/#list]
-          <example><![CDATA[${element.generateExampleXml()?trim}]]></example>
+          <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
+      [#if jacksonXcAvailble?default(false)]
+          <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
+      [/#if]
         </element>
+    [/#list]
+    [#list schema.localElementDeclarations as element]
+      [#if !isDefinedGlobally(element)]
+        [#assign localTypeQName=element.elementXmlType.qname/]
+        <element name="${element.name}"[#if element.elementTypeDeclaration?exists] type="${element.elementTypeDeclaration.qualifiedName}"[/#if] typeName="${localTypeQName.localPart}" typeNamespace="${localTypeQName.namespaceURI?default("")}"[#if schemaForNamespace(element)?exists] typeSchemaId="${schemaForNamespace(element).id}"[/#if]>
+          [#if element.docValue?exists]
+          <documentation>
+            <![CDATA[${element.docValue}]]>
+          </documentation>
+          [/#if]
+          [#list element.javaDoc?keys as tag]
+            [#list element.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            [/#list]
+          [/#list]
+          <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
+          [#if jacksonXcAvailble?default(false)]
+          <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
+          [/#if]
+        </element>
+      [/#if]
     [/#list]
       </elements>
     </schema>

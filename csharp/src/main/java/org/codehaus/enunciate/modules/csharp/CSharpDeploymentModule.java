@@ -340,7 +340,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       //read in the description from file:
-      String description = String.format(readResource("library_description.fmt", builder.toString()));
+      String description = readResource("library_description.fmt", builder.toString());
       artifactBundle.setDescription(description);
       NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "dotnet.client.bundle", bundle);
       binariesJar.setDescription(String.format("The %s for the .NET client library.", builder.toString()));

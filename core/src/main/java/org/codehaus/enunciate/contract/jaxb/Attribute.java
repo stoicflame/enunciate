@@ -21,6 +21,8 @@ import com.sun.mirror.type.PrimitiveType;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.doc.DocumentationExample;
+import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.JsonNode;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -133,6 +135,19 @@ public class Attribute extends Accessor {
       String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
       org.jdom.Attribute attr = new org.jdom.Attribute(getName(), exampleValue, org.jdom.Namespace.getNamespace(prefix, namespace));
       parent.setAttribute(attr);
+    }
+  }
+
+  /**
+   * Generates some example json to the specified object node (type def).
+   *
+   * @param jsonNode The parent node.
+   */
+  public void generateExampleJson(ObjectNode jsonNode) {
+    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
+    if (exampleInfo == null || !exampleInfo.exclude()) {
+      JsonNode valueNode = getBaseType().generateExampleJson(exampleInfo == null || "##default".equals(exampleInfo.value()) ? null : exampleInfo.value());
+      jsonNode.put(getName(), valueNode);
     }
   }
 }

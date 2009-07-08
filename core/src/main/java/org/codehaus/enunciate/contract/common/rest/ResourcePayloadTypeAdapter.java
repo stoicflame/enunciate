@@ -23,6 +23,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 
 /**
  * @author Ryan Heaton
@@ -113,11 +114,11 @@ public class ResourcePayloadTypeAdapter extends DecoratedTypeMirror implements R
   }
 
   // Inherited.
-  public RootElementDeclaration getXmlElement() {
+  public ElementDeclaration getXmlElement() {
     if (delegate instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
       if (declaration != null) {
-        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findRootElementDeclaration(declaration);
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findElementDeclaration(declaration);
       }
     }
     return null;

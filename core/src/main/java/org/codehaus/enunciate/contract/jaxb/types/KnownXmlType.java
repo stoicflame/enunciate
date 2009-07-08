@@ -16,6 +16,11 @@
 
 package org.codehaus.enunciate.contract.jaxb.types;
 
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.enunciate.util.RawValueNode;
+import org.codehaus.enunciate.util.WhateverNode;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -138,4 +143,33 @@ public enum KnownXmlType implements XmlType {
       node.addContent(new org.jdom.Comment("custom xml"));
     }
   }
+
+  public JsonNode generateExampleJson(String specifiedValue) {
+    switch (this) {
+      case BOOLEAN:
+        return JsonNodeFactory.instance.booleanNode("true".equalsIgnoreCase(specifiedValue));
+      case BYTE:
+      case DECIMAL:
+      case DOUBLE:
+      case FLOAT:
+      case INT:
+      case INTEGER:
+      case LONG:
+      case POSITIVE_INTEGER:
+      case SHORT:
+      case UNSIGNED_BYTE:
+      case UNSIGNED_INT:
+      case UNSIGNED_LONG:
+      case UNSIGNED_SHORT:
+        return specifiedValue == null ? WhateverNode.instance : new RawValueNode(specifiedValue);
+      case ANY_TYPE:
+        return JsonNodeFactory.instance.objectNode();
+      case ANY_SIMPLE_TYPE:
+        return WhateverNode.instance;
+      default:
+        return JsonNodeFactory.instance.textNode(specifiedValue == null ? "..." : specifiedValue);
+    }
+  }
+
+
 }

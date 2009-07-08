@@ -42,6 +42,9 @@ public class SchemaInfoModel extends StringModel {
     if (("filename".equals(key)) || ("location".equals(key)) || "appinfo".equals(key) || "jaxbBindingVersion".equals(key)) {
       return wrap(schemaInfo.getProperty(key));
     }
+    else if ("alreadyExists".equals(key)) {
+      return wrap(schemaInfo.getProperty("file") != null);
+    }
 
     return super.get(key);
   }

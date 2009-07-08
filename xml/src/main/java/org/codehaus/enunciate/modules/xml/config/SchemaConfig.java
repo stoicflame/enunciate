@@ -25,6 +25,7 @@ public class SchemaConfig {
 
   private String namespace;
   private String file;
+  private String useFile;
   private String location;
   private String jaxbBindingVersion;
   private String appinfo;
@@ -67,6 +68,24 @@ public class SchemaConfig {
    */
   public void setFile(String file) {
     this.file = file;
+  }
+
+  /**
+   * The (already existing) file to use for this schema.
+   *
+   * @return The (already existing) file to use for this schema.
+   */
+  public String getUseFile() {
+    return useFile;
+  }
+
+  /**
+   * The (already existing) file to use for this schema.
+   *
+   * @param useFile The (already existing) file to use for this schema.
+   */
+  public void setUseFile(String useFile) {
+    this.useFile = useFile;
   }
 
   /**

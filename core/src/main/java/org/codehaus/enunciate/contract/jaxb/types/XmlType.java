@@ -16,7 +16,7 @@
 
 package org.codehaus.enunciate.contract.jaxb.types;
 
-import org.w3c.dom.Node;
+import org.codehaus.jackson.JsonNode;
 
 import javax.xml.namespace.QName;
 
@@ -69,4 +69,12 @@ public interface XmlType {
    * @param specifiedValue A
    */
   void generateExampleXml(org.jdom.Element node, String specifiedValue);
+
+  /**
+   * Generate some example JSON for this type.
+   *
+   * @param specifiedValue The specified value, or null if none supplied.
+   * @return The example JSON.
+   */
+  JsonNode generateExampleJson(String specifiedValue);
 }
