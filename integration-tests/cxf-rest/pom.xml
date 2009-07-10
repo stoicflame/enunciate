@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-cxf-rest</artifactId>
-  <version>1.13-SNAPSHOT</version>
+  <version>1.13-RC1</version>
   <name>Enunciate - CXF/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
   <packaging>war</packaging>
@@ -64,7 +64,7 @@
           </execution>
         </executions>
         <dependencies>
-          <!--As of Enunciate 1.13-SNAPSHOT, CXF module is optional (JAXWS-RI is default)
+          <!--As of Enunciate 1.13-RC1, CXF module is optional (JAXWS-RI is default)
               so the dependency needs to be added explicitly. -->
           <!--There's a weird bug in Maven that I haven't been able to track down
           in that if I don't add the XFire module here, then the next project

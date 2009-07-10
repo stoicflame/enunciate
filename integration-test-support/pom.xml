@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <version>1.13-RC1</version>
   </parent>
 
   <artifactId>enunciate-integration-test-support</artifactId>

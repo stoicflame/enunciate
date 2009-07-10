@@ -25,6 +25,7 @@
 <code>
 require 'net/https'
 require 'uri'
+//...
 
 //read a resource from a REST url
 url = URI.parse("...")

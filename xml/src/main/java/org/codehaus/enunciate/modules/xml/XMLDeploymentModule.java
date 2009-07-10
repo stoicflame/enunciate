@@ -278,10 +278,10 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         String file = (String) wsdl.getProperty("filename");
         wsdlFile = new File(artifactDir, file);
         wsdl.setProperty("file", wsdlFile);
-      }
 
-      if (!upToDate && prettyPrint) {
-        prettyPrint(wsdlFile);
+        if (!upToDate && prettyPrint) {
+          prettyPrint(wsdlFile);
+        }
       }
 
       FileArtifact wsdlArtifact = new FileArtifact(getName(), wsdl.getId() + ".wsdl", wsdlFile);
@@ -295,14 +295,14 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
         String file = (String) schemaInfo.getProperty("filename");
         schemaFile = new File(artifactDir, file);
         schemaInfo.setProperty("file", schemaFile);
-      }
 
-      if (!upToDate && prettyPrint) {
-        prettyPrint(schemaFile);
-      }
+        if (!upToDate && prettyPrint) {
+          prettyPrint(schemaFile);
+        }
 
-      if (!upToDate && validateSchemas) {
-        //todo: write some logic to validate the schemas.
+        if (!upToDate && validateSchemas) {
+          //todo: write some logic to validate the schemas.
+        }
       }
 
       FileArtifact schemaArtifact = new FileArtifact(getName(), schemaInfo.getId() + ".xsd", schemaFile);

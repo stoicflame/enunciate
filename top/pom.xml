@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.13-SNAPSHOT</version>
+    <version>1.13-RC1</version>
   </parent>
 
   <artifactId>enunciate-top</artifactId>
@@ -99,6 +99,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-csharp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-ruby</artifactId>
       <version>${project.version}</version>
     </dependency>
 

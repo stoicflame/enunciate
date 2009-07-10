@@ -29,6 +29,7 @@ import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.NamedFileArtifact;
+import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ruby.config.PackageModuleConversion;
 import org.codehaus.enunciate.modules.ruby.config.RubyRuleSet;
@@ -170,11 +171,14 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
       info("Skipping Ruby code generation because everything appears up-to-date.");
     }
 
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "ruby.client.library", "Ruby Client Library");
+    artifactBundle.setPlatform("Ruby");
     NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "ruby.client", new File(getGenerateDir(), getSourceFileName()));
-    sourceScript.setPublic(true);
+    sourceScript.setPublic(false);
     String description = readResource("library_description.fmt"); //read in the description from file
-    sourceScript.setDescription(description);
-    getEnunciate().addArtifact(sourceScript);
+    artifactBundle.setDescription(description);
+    artifactBundle.addArtifact(sourceScript);
+    getEnunciate().addArtifact(artifactBundle);
   }
 
   /**

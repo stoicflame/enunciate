@@ -329,69 +329,72 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param typeDef The type definition to add to the model.
    */
   public void add(TypeDefinition typeDef) {
-    int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
-    if (position < 0 && !isKnownType(typeDef)) {
-      this.typeDefinitions.add(-position - 1, typeDef);
-      add(typeDef.getSchema());
+    if (typeDef.getAnnotation(XmlTransient.class) == null) { //make sure we don't add a transient type definition.
 
-      String namespace = typeDef.getNamespace();
-      String prefix = addNamespace(namespace);
+      int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
+      if (position < 0 && !isKnownType(typeDef)) {
+        this.typeDefinitions.add(-position - 1, typeDef);
+        add(typeDef.getSchema());
 
-      SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
-      if (schemaInfo == null) {
-        schemaInfo = new SchemaInfo();
-        schemaInfo.setId(prefix);
-        schemaInfo.setNamespace(namespace);
-        namespacesToSchemas.put(namespace, schemaInfo);
-      }
-      schemaInfo.getTypeDefinitions().add(typeDef);
+        String namespace = typeDef.getNamespace();
+        String prefix = addNamespace(namespace);
 
-      for (Element element : typeDef.getElements()) {
-        if (includeReferencedClasses()) {
-          addReferencedTypeDefinitions(element);
+        SchemaInfo schemaInfo = namespacesToSchemas.get(namespace);
+        if (schemaInfo == null) {
+          schemaInfo = new SchemaInfo();
+          schemaInfo.setId(prefix);
+          schemaInfo.setNamespace(namespace);
+          namespacesToSchemas.put(namespace, schemaInfo);
         }
+        schemaInfo.getTypeDefinitions().add(typeDef);
 
-        ImplicitSchemaElement implicitElement = getImplicitElement(element);
-        if (implicitElement != null) {
-          String implicitElementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
-          SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitElementNamespace);
-          if (referencedSchemaInfo == null) {
-            referencedSchemaInfo = new SchemaInfo();
-            referencedSchemaInfo.setId(addNamespace(implicitElementNamespace));
-            referencedSchemaInfo.setNamespace(implicitElementNamespace);
-            namespacesToSchemas.put(implicitElementNamespace, referencedSchemaInfo);
+        for (Element element : typeDef.getElements()) {
+          if (includeReferencedClasses()) {
+            addReferencedTypeDefinitions(element);
           }
-          referencedSchemaInfo.getImplicitSchemaElements().add(implicitElement);
-        }
-      }
 
-      for (Attribute attribute : typeDef.getAttributes()) {
-        if (includeReferencedClasses()) {
-          addReferencedTypeDefinitions(attribute);
-        }
-        ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
-        if (implicitAttribute != null) {
-          String implicitAttributeNamespace = attribute.getNamespace();
-          SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitAttributeNamespace);
-          if (referencedSchemaInfo == null) {
-            referencedSchemaInfo = new SchemaInfo();
-            referencedSchemaInfo.setId(addNamespace(implicitAttributeNamespace));
-            referencedSchemaInfo.setNamespace(implicitAttributeNamespace);
-            namespacesToSchemas.put(implicitAttributeNamespace, referencedSchemaInfo);
+          ImplicitSchemaElement implicitElement = getImplicitElement(element);
+          if (implicitElement != null) {
+            String implicitElementNamespace = element.isWrapped() ? element.getWrapperNamespace() : element.getNamespace();
+            SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitElementNamespace);
+            if (referencedSchemaInfo == null) {
+              referencedSchemaInfo = new SchemaInfo();
+              referencedSchemaInfo.setId(addNamespace(implicitElementNamespace));
+              referencedSchemaInfo.setNamespace(implicitElementNamespace);
+              namespacesToSchemas.put(implicitElementNamespace, referencedSchemaInfo);
+            }
+            referencedSchemaInfo.getImplicitSchemaElements().add(implicitElement);
           }
-          referencedSchemaInfo.getImplicitSchemaAttributes().add(implicitAttribute);
-        }
-      }
-
-      if ((includeReferencedClasses())) {
-        Value value = typeDef.getValue();
-        if (value != null) {
-          addReferencedTypeDefinitions(value);
         }
 
-        ClassType superClass = typeDef.getSuperclass();
-        if (!typeDef.isEnum() && superClass != null) {
-          addReferencedTypeDefinitions(superClass);
+        for (Attribute attribute : typeDef.getAttributes()) {
+          if (includeReferencedClasses()) {
+            addReferencedTypeDefinitions(attribute);
+          }
+          ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
+          if (implicitAttribute != null) {
+            String implicitAttributeNamespace = attribute.getNamespace();
+            SchemaInfo referencedSchemaInfo = namespacesToSchemas.get(implicitAttributeNamespace);
+            if (referencedSchemaInfo == null) {
+              referencedSchemaInfo = new SchemaInfo();
+              referencedSchemaInfo.setId(addNamespace(implicitAttributeNamespace));
+              referencedSchemaInfo.setNamespace(implicitAttributeNamespace);
+              namespacesToSchemas.put(implicitAttributeNamespace, referencedSchemaInfo);
+            }
+            referencedSchemaInfo.getImplicitSchemaAttributes().add(implicitAttribute);
+          }
+        }
+
+        if ((includeReferencedClasses())) {
+          Value value = typeDef.getValue();
+          if (value != null) {
+            addReferencedTypeDefinitions(value);
+          }
+
+          ClassType superClass = typeDef.getSuperclass();
+          if (!typeDef.isEnum() && superClass != null) {
+            addReferencedTypeDefinitions(superClass);
+          }
         }
       }
     }
@@ -406,7 +409,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected boolean isKnownType(TypeDefinition typeDef) {
     return knownTypes.containsKey(typeDef.getQualifiedName())
       || JAXBElement.class.getName().equals(typeDef.getQualifiedName())
-      || ((DecoratedTypeMirror)typeDef.getSuperclass()).isInstanceOf(JAXBElement.class.getName());
+      || ((DecoratedTypeMirror) typeDef.getSuperclass()).isInstanceOf(JAXBElement.class.getName());
   }
 
   /**
@@ -615,7 +618,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
       }
     }
-    
+
     Consumes consumes = declaration.getAnnotation(Consumes.class);
     if (consumes != null) {
       for (String contentType : consumes.value()) {
@@ -996,7 +999,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (id.endsWith("/")) {
       throw new IllegalArgumentException("Illegal content type: " + id);
     }
-    
+
     int semiColon = id.indexOf(';');
     if (semiColon > -1) {
       id = id.substring(0, semiColon);
@@ -1064,7 +1067,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (declaration.getAnnotation(XmlTransient.class) != null) {
       return KnownXmlType.ANY_TYPE;
     }
-    
+
     return knownTypes.get(declaration.getQualifiedName());
   }
 
@@ -1138,15 +1141,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Finds an example resource method, according to the following preference order:
    *
    * <ol>
-   *   <li>The first method annotated with {@link DocumentationExample}.
-   *   <li>The first method with BOTH an output payload with a known XML element and an input payload with a known XML element.
-   *   <li>The first method with an output payload with a known XML element.
+   * <li>The first method annotated with {@link DocumentationExample}.
+   * <li>The first method with BOTH an output payload with a known XML element and an input payload with a known XML element.
+   * <li>The first method with an output payload with a known XML element.
    * </ol>
    *
    * @return An example resource method, or if no good examples were found.
    */
   public RESTResource findExampleResource() {
-    
+
     RESTResource example = null;
     List<RootResource> resources = getRootResources();
     for (RootResource root : resources) {
@@ -1186,7 +1189,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
       }
     }
-    
+
     return example;
   }
 
@@ -1194,9 +1197,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * Finds an example resource method, according to the following preference order:
    *
    * <ol>
-   *   <li>The first method annotated with {@link DocumentationExample}.
-   *   <li>The first web method that returns a declared type.
-   *   <li>The first web method.
+   * <li>The first method annotated with {@link DocumentationExample}.
+   * <li>The first web method that returns a declared type.
+   * <li>The first web method.
    * </ol>
    *
    * @return An example resource method, or if no good examples were found.
@@ -1309,7 +1312,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     public void visitClassType(ClassType classType) {
       if (classType instanceof AdapterType) {
-        ((AdapterType)classType).getAdaptingType().accept(this);
+        ((AdapterType) classType).getAdaptingType().accept(this);
       }
       else {
         DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
@@ -1342,7 +1345,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         mapType.getKeyType().accept(this);
         mapType.getValueType().accept(this);
       }
-      else if (((DecoratedInterfaceType)TypeMirrorDecorator.decorate(interfaceType)).isCollection()) {
+      else if (((DecoratedInterfaceType) TypeMirrorDecorator.decorate(interfaceType)).isCollection()) {
         Collection<TypeMirror> typeArgs = interfaceType.getActualTypeArguments();
         if (typeArgs != null) {
           for (TypeMirror typeArg : typeArgs) {

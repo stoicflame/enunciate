@@ -876,18 +876,20 @@ public class Enunciate {
    * @param to   The destination directory.
    */
   public void copyDir(File from, File to) throws IOException {
-    File[] files = from.listFiles();
+    if (from != null && from.exists()) {
+      File[] files = from.listFiles();
 
-    if (!to.exists()) {
-      to.mkdirs();
-    }
-
-    for (File file : files) {
-      if (file.isDirectory()) {
-        copyDir(file, new File(to, file.getName()));
+      if (!to.exists()) {
+        to.mkdirs();
       }
-      else {
-        copyFile(file, new File(to, file.getName()));
+
+      for (File file : files) {
+        if (file.isDirectory()) {
+          copyDir(file, new File(to, file.getName()));
+        }
+        else {
+          copyFile(file, new File(to, file.getName()));
+        }
       }
     }
   }
