@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
-
-import javax.jws.WebService;
+package org.codehaus.enunciate.examples.ruby.schema;
 
 /**
  * @author Ryan Heaton
  */
-@WebService
-public class ShapeService {
+public enum Color {
+
+  RED,
+
+  YELLOW,
+
+  GREEN,
+
+  BLUE
+  
 }

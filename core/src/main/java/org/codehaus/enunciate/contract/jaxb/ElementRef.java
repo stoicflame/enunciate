@@ -379,7 +379,7 @@ public class ElementRef extends Element {
   }
 
   @Override
-  protected String getJsonElementName() {
+  public String getJsonElementName() {
     return isElementRefs() ? getSimpleName() : getName();
   }
 }

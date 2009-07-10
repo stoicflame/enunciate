@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema.draw;
+package org.codehaus.enunciate.examples.ruby.schema.draw;
 
-import org.codehaus.enunciate.examples.csharp.schema.structures.House;
-import org.codehaus.enunciate.examples.csharp.schema.animals.Cat;
-import org.codehaus.enunciate.examples.csharp.schema.vehicles.Bus;
-import org.codehaus.enunciate.examples.csharp.schema.*;
+import org.codehaus.enunciate.examples.ruby.schema.structures.House;
+import org.codehaus.enunciate.examples.ruby.schema.animals.Cat;
+import org.codehaus.enunciate.examples.ruby.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.ruby.schema.*;
 
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.*;

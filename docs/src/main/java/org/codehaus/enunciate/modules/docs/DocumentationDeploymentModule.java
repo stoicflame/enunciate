@@ -466,7 +466,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       if (this.splashPackage != null) {
         PackageDeclaration packageDeclaration = Context.getCurrentEnvironment().getPackage(this.splashPackage);
         if (packageDeclaration != null) {
-          info("Including documentation for package %s as the splash documentation.", this.splashPackage);
+          debug("Including documentation for package %s as the splash documentation.", this.splashPackage);
           model.setVariable("apiDoc", new DecoratedPackageDeclaration(packageDeclaration).getJavaDoc());
         }
         else {
@@ -579,11 +579,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       }
     }
     else if (this.base.isDirectory()) {
-      info("Directory %s to be used as the documentation base.", this.base);
+      debug("Directory %s to be used as the documentation base.", this.base);
       enunciate.copyDir(this.base, buildDir);
     }
     else {
-      info("Zip file %s to be extracted as the documentation base.", this.base);
+      debug("Zip file %s to be extracted as the documentation base.", this.base);
       enunciate.extractBase(new FileInputStream(this.base), buildDir);
     }
 
@@ -614,7 +614,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       else if (download.getFile() != null) {
         File downloadFile = enunciate.resolvePath(download.getFile());
 
-        info("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
+        debug("File %s to be added as an extra download.", downloadFile.getAbsolutePath());
         DownloadBundle downloadArtifact = new DownloadBundle(getName(), downloadFile.getName(), downloadFile);
 
         if (download.getName() != null) {
@@ -635,7 +635,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
           downloads.add(artifact);
         }
 
-        info("Artifact %s to be added as an extra download.", artifact.getId());
+        debug("Artifact %s to be added as an extra download.", artifact.getId());
         explicitArtifacts.remove(artifact.getId());
       }
     }
@@ -647,7 +647,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     }
 
     for (Artifact download : downloads) {
-      info("Exporting %s to directory %s.", download.getId(), buildDir);
+      debug("Exporting %s to directory %s.", download.getId(), buildDir);
       download.exportTo(buildDir, enunciate);
     }
 
@@ -659,7 +659,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    * Do the XSLT tranformation to generate the documentation.
    */
   protected void doXSLT() throws IOException, EnunciateException {
-    info("Executing documentation stylesheet transformation.");
+    debug("Executing documentation stylesheet transformation.");
     URL xsltURL = this.xsltURL;
     if (xsltURL == null) {
       xsltURL = DocumentationDeploymentModule.class.getResource("doc-files/docs.xslt");

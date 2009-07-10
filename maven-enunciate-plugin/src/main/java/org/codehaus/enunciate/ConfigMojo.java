@@ -500,7 +500,7 @@ public class ConfigMojo extends AbstractMojo {
         if (!module.isDisabled()) {
           if (module instanceof OutputDirectoryAware) {
             String outputDir = project.getBuild().getOutputDirectory();
-            info("Setting the output directory for module %s to %s...", module.getName(), outputDir);
+            debug("Setting the output directory for module %s to %s...", module.getName(), outputDir);
             ((OutputDirectoryAware) module).setOutputDirectory(new File(outputDir));
           }
 

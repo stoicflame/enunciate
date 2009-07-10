@@ -156,7 +156,11 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
     String convertedPackage = super.convert(declaration.getPackage());
     ClientName specifiedName = isUseClientNameConversions() ? declaration.getAnnotation(ClientName.class) : null;
     String simpleName = specifiedName == null ? declaration.getSimpleName() : specifiedName.value();
-    return convertedPackage + "." + simpleName;
+    return convertedPackage + getPackageSeparator() + simpleName;
+  }
+
+  protected String getPackageSeparator() {
+    return ".";
   }
 
   @Override

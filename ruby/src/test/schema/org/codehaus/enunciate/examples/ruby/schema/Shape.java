@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema;
 
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlList;
-import java.util.Collection;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class Figure {
+public abstract class Shape {
 
   private String id;
-  private Collection<Label> labels;
+  private Color color;
+  private LineStyle lineStyle;
+  private int positionX;
+  private int positionY;
 
   @XmlID
   @XmlAttribute
@@ -39,12 +40,35 @@ public abstract class Figure {
     this.id = id;
   }
 
-  @XmlList
-  public Collection<Label> getLabels() {
-    return labels;
+  public int getPositionX() {
+    return positionX;
   }
 
-  public void setLabels(Collection<Label> labels) {
-    this.labels = labels;
+  public void setPositionX(int positionX) {
+    this.positionX = positionX;
+  }
+
+  public int getPositionY() {
+    return positionY;
+  }
+
+  public void setPositionY(int positionY) {
+    this.positionY = positionY;
+  }
+
+  public Color getColor() {
+    return color;
+  }
+
+  public void setColor(Color color) {
+    this.color = color;
+  }
+
+  public LineStyle getLineStyle() {
+    return lineStyle;
+  }
+
+  public void setLineStyle(LineStyle lineStyle) {
+    this.lineStyle = lineStyle;
   }
 }

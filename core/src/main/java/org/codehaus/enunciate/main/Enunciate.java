@@ -187,7 +187,7 @@ public class Enunciate {
       String artifactId = artifact.getId();
       if (this.exports.containsKey(artifactId)) {
         File dest = this.exports.get(artifactId);
-        info("\n\nExporting artifact %s to %s.", artifactId, dest);
+        debug("\n\nExporting artifact %s to %s.", artifactId, dest);
         artifact.exportTo(dest, this);
         exportedArtifacts.add(artifactId);
       }
@@ -1478,7 +1478,7 @@ public class Enunciate {
    * @return Whether the artifact was successfully added.
    */
   public boolean addArtifact(Artifact artifact) {
-    info("Artifact %s added for module %s.", artifact.getId(), artifact.getModule());
+    debug("Artifact %s added for module %s.", artifact.getId(), artifact.getModule());
     return this.artifacts.add(artifact);
   }
 
@@ -1506,7 +1506,7 @@ public class Enunciate {
    * @param root The source root directory.
    */
   public void addAdditionalSourceRoot(File root) {
-    info("Adding " + root + " as an additional source root.");
+    debug("Adding " + root + " as an additional source root.");
     this.additionalSourceRoots.add(root);
   }
 

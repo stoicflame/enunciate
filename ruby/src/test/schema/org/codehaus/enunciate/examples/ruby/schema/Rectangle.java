@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

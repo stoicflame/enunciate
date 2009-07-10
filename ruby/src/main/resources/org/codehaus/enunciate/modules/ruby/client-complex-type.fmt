@@ -7,7 +7,7 @@ module ${submodule}
   [/#list]
 
   # ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  # ")}
-  class ${simpleNameFor(type)} [#if !type.baseObject]> ${classnameFor(type.superclass)} [/#if]
+  class ${simpleNameFor(type)} [#if !type.baseObject]< ${classnameFor(type.superclass)} [/#if]
 
   [#list type.attributes as attribute]
     # ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
@@ -24,50 +24,78 @@ module ${submodule}
   [/#if]
 
     # the json hash for this ${simpleNameFor(type)}
-    def to_json_hash
-      h = [#if type.baseObject]{}[#else]super[/#if]
+    def to_jaxb_json_hash
+      _h = [#if type.baseObject]{}[#else]super[/#if]
   [#list type.attributes as attribute]
-      h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}
+      if !${attribute.clientSimpleName}.nil?
+        _h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash
+      end
   [/#list]
   [#if type.value?exists]
-      h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}
+      if !${type.value.clientSimpleName}.nil?
+        _h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash
+      end
   [#else]
     [#list type.elements as element]
-    
+      if !${element.clientSimpleName}.nil?
+      [#if element.collectionType]
+        _ha = Array.new
+        ${element.clientSimpleName}.each { | _item | _ha.push _item.to_jaxb_json_hash }
+        _h['${element.jsonElementName}'] = _ha
+      [#else]
+        _h['${element.jsonElementName}'] = ${element.clientSimpleName}.to_jaxb_json_hash
+      [/#if]
+      end
     [/#list]
   [/#if]
-      return h
+      return _h
     end
   [#if type.baseObject]
 
     # the json (string form) for this ${simpleNameFor(type)}
     def to_json
-      to_json_hash.to_json
+      to_jaxb_json_hash.to_json
     end
   [/#if]
 
     #initializes this ${simpleNameFor(type)} with a json hash
-    def init_json_hash(o)
+    def init_jaxb_json_hash(_o)
   [#if !type.baseObject]
-      super o
+      super _o
   [/#if]
   [#list type.attributes as attribute]
-      @${attribute.clientSimpleName} = o['${attribute.clientSimpleName}']
+      if !_o['${attribute.clientSimpleName}'].nil?
+        @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.clientSimpleName}'])
+      end
   [/#list]
   [#if type.value?exists]
-      @${type.value.clientSimpleName} = o['${type.value.clientSimpleName}']
+      if !_o['${type.value.clientSimpleName}'].nil?
+        @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.clientSimpleName}'])
+      end
   [#else]
     [#list type.elements as element]
-
+      if !_o['${element.jsonElementName}'].nil?
+      [#if element.collectionType]
+        @${element.clientSimpleName} = Array.new
+        _oa = _o['${element.jsonElementName}']
+        _oa.each { | _item | @${element.clientSimpleName}.push ${classnameFor(element.collectionItemType)}.from_json(_item) }
+      [#else]
+        @${element.clientSimpleName} = ${classnameFor(element)}.from_json(_o['${element.clientSimpleName}'])
+      [/#if]
+      end
     [/#list]
   [/#if]
     end
 
     # constructs a ${simpleNameFor(type)} from a (parsed) JSON hash
     def self.from_json(o)
-      inst = new
-      inst.from_json_hash o
-      return inst
+      if o.nil?
+        return nil
+      else
+        inst = new
+        inst.init_jaxb_json_hash o
+        return inst
+      end
     end
   end
   [#list moduleFor(type)?split("::") as submodule]

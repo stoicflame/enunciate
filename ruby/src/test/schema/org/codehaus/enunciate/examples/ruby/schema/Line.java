@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author Ryan Heaton
  */
-public abstract class Shape {
+@XmlRootElement
+public class Line {
 
   private String id;
-  private Color color;
-  private LineStyle lineStyle;
-  private int positionX;
-  private int positionY;
+  private int startX;
+  private int startY;
+  private int endX;
+  private int endY;
 
   @XmlID
-  @XmlAttribute
   public String getId() {
     return id;
   }
@@ -40,35 +40,35 @@ public abstract class Shape {
     this.id = id;
   }
 
-  public int getPositionX() {
-    return positionX;
+  public int getStartX() {
+    return startX;
   }
 
-  public void setPositionX(int positionX) {
-    this.positionX = positionX;
+  public void setStartX(int startX) {
+    this.startX = startX;
   }
 
-  public int getPositionY() {
-    return positionY;
+  public int getStartY() {
+    return startY;
   }
 
-  public void setPositionY(int positionY) {
-    this.positionY = positionY;
+  public void setStartY(int startY) {
+    this.startY = startY;
   }
 
-  public Color getColor() {
-    return color;
+  public int getEndX() {
+    return endX;
   }
 
-  public void setColor(Color color) {
-    this.color = color;
+  public void setEndX(int endX) {
+    this.endX = endX;
   }
 
-  public LineStyle getLineStyle() {
-    return lineStyle;
+  public int getEndY() {
+    return endY;
   }
 
-  public void setLineStyle(LineStyle lineStyle) {
-    this.lineStyle = lineStyle;
+  public void setEndY(int endY) {
+    this.endY = endY;
   }
 }

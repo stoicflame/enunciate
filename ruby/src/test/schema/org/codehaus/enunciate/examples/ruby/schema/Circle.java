@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Ryan Heaton
  */
-@XmlEnum (
-  Integer.class
-)
-public enum LineStyle {
+@XmlRootElement
+public class Circle extends Shape {
 
-  @XmlEnumValue ("1")
-  solid,
+  private int radius;
 
-  @XmlEnumValue ("2")
-  dotted,
+  public int getRadius() {
+    return radius;
+  }
 
-  @XmlEnumValue ("3")
-  dashed
+  public void setRadius(int radius) {
+    this.radius = radius;
+  }
 }

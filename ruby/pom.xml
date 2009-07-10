@@ -36,11 +36,11 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
           </execution>
         </executions>
       </plugin>
-<!--      <plugin>
-        --><!--
+      <plugin>
+        <!--
         we need to generate some Ruby client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
-        --><!--
+        -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
@@ -60,7 +60,7 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
 
                 <mkdir dir="${project.build.directory}/enunciate/gen" />
                 <mkdir dir="${project.build.directory}/enunciate/compile" />
-                <mkdir dir="${project.build.directory}/xmltests"/>
+                <mkdir dir="${project.build.directory}/jsontests"/>
 
                 <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"
                            generateDir="${project.build.directory}/enunciate/gen"
@@ -68,6 +68,8 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
                   <include name="**/*.java" />
                   <classpath refid="enunciate.classpath" />
                 </enunciate>
+
+                <copy todir="${project.build.directory}/enunciate/gen/ruby" file="${project.build.testSourceDirectory}/../ruby/processjson.rb"/>
               </tasks>
             </configuration>
             <goals>
@@ -77,53 +79,31 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.1.1</version>
-        <executions>
-          <execution>
-            <id>compile-cs</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              --><!--compile the C# tests using the csc executable. --><!--
-              <executable>${gmcs.executable}</executable>
-              <skip>${gmcs.executable}</skip>
-              <arguments>
-                <argument>/out:${project.build.directory}/enunciate/compile/csharp/processxml.exe</argument>
-                <argument>/r:System.Web.Services</argument>
-                <argument>${project.build.directory}/enunciate/gen/csharp/enunciate.cs</argument>
-                <argument>${project.build.testSourceDirectory}/../cs/ProcessXml.cs</argument>
-              </arguments>
-              <workingDirectory>${project.build.directory}</workingDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemProperties>
             <property>
-              <name>skip.csharp.tests</name>
-              <value>${gmcs.executable}</value>
+              <name>skip.ruby.tests</name>
+              <value>${ruby.executable}</value>
             </property>
             <property>
-              <name>processxml.exe</name>
-              <value>${project.build.directory}/enunciate/compile/csharp/processxml.exe</value>
+              <name>ruby.execuable</name>
+              <value>${ruby.executable}</value>
             </property>
             <property>
-              <name>xml.tempdir</name>
-              <value>${project.build.directory}/xmltests</value>
+              <name>processjson.rb</name>
+              <value>${project.build.directory}/enunciate/gen/ruby/processjson.rb</value>
+            </property>
+            <property>
+              <name>json.tempdir</name>
+              <value>${project.build.directory}/jsontests</value>
             </property>
           </systemProperties>
         </configuration>
       </plugin>
       <plugin>
-        --><!--now we need to add the generated sources we're testing to the test classpath--><!--
+        <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>1.1</version>
@@ -141,7 +121,7 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
             </configuration>
           </execution>
         </executions>
-      </plugin>-->
+      </plugin>
     </plugins>
   </build>
 
@@ -170,25 +150,12 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
     </dependency>
 
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-
+      <!--depending modules: jersey-rt-->
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 

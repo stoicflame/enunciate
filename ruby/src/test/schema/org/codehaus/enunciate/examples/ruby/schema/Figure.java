@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlList;
+import java.util.Collection;
 
 /**
  * @author Ryan Heaton
  */
-@XmlRootElement
-public class Line {
+public abstract class Figure {
 
   private String id;
-  private int startX;
-  private int startY;
-  private int endX;
-  private int endY;
+  private Collection<Label> labels;
 
   @XmlID
+  @XmlAttribute
   public String getId() {
     return id;
   }
@@ -40,35 +39,12 @@ public class Line {
     this.id = id;
   }
 
-  public int getStartX() {
-    return startX;
+  @XmlList
+  public Collection<Label> getLabels() {
+    return labels;
   }
 
-  public void setStartX(int startX) {
-    this.startX = startX;
-  }
-
-  public int getStartY() {
-    return startY;
-  }
-
-  public void setStartY(int startY) {
-    this.startY = startY;
-  }
-
-  public int getEndX() {
-    return endX;
-  }
-
-  public void setEndX(int endX) {
-    this.endX = endX;
-  }
-
-  public int getEndY() {
-    return endY;
-  }
-
-  public void setEndY(int endY) {
-    this.endY = endY;
+  public void setLabels(Collection<Label> labels) {
+    this.labels = labels;
   }
 }

@@ -556,7 +556,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   @Override
   protected void doCompile() throws EnunciateException, IOException {
     if (!isDoCompile()) {
-      info("Compilation has been disabled.  No server-side classes will be compiled, nor will any resources be copied.");
+      debug("Compilation has been disabled.  No server-side classes will be compiled, nor will any resources be copied.");
       return;
     }
 
@@ -611,7 +611,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     if (!enunciate.isUpToDateWithSources(buildDir)) {
       copyPreBase();
 
-      info("Building the expanded WAR in %s", buildDir);
+      debug("Building the expanded WAR in %s", buildDir);
 
       if (!this.globalServletFilters.isEmpty()) {
         Set<String> allServletUrls = new TreeSet<String>();
@@ -647,7 +647,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
         doLibCopy();
       }
       else {
-        info("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
+        debug("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
       }
 
       generateWebXml();
@@ -678,11 +678,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     if ((this.warConfig != null) && (this.warConfig.getPostBase() != null)) {
       File postBase = enunciate.resolvePath(this.warConfig.getPostBase());
       if (postBase.isDirectory()) {
-        info("Copying postBase directory %s to %s...", postBase, buildDir);
+        debug("Copying postBase directory %s to %s...", postBase, buildDir);
         enunciate.copyDir(postBase, buildDir);
       }
       else {
-        info("Extracting postBase zip file %s to %s...", postBase, buildDir);
+        debug("Extracting postBase zip file %s to %s...", postBase, buildDir);
         enunciate.extractBase(new FileInputStream(postBase), buildDir);
       }
     }
@@ -697,11 +697,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     if ((this.warConfig != null) && (this.warConfig.getPreBase() != null)) {
       File preBase = enunciate.resolvePath(this.warConfig.getPreBase());
       if (preBase.isDirectory()) {
-        info("Copying preBase directory %s to %s...", preBase, buildDir);
+        debug("Copying preBase directory %s to %s...", preBase, buildDir);
         enunciate.copyDir(preBase, buildDir);
       }
       else {
-        info("Extracting preBase zip file %s to %s...", preBase, buildDir);
+        debug("Extracting preBase zip file %s to %s...", preBase, buildDir);
         enunciate.extractBase(new FileInputStream(preBase), buildDir);
       }
     }
@@ -868,7 +868,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
         throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
       }
 
-      info("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
+      debug("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
       mergedWebXml = mergeTarget;
     }
 
@@ -878,11 +878,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
         transformURL = enunciate.resolvePath(this.warConfig.getWebXMLTransform()).toURL();
       }
 
-      info("web.xml transform has been specified as %s.", transformURL);
+      debug("web.xml transform has been specified as %s.", transformURL);
       try {
         StreamSource source = new StreamSource(transformURL.openStream());
         Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-        info("Transforming %s to %s.", mergedWebXml, destWebXML);
+        debug("Transforming %s to %s.", mergedWebXml, destWebXML);
         transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
       }
       catch (TransformerException e) {
@@ -946,7 +946,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
             includePatterns.add(pattern);
           }
           else {
-            info("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
+            warn("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
           }
         }
       }
@@ -1043,11 +1043,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     //now we've got the final list, copy the libs.
     for (File includedLib : includedLibs) {
       if (includedLib.isDirectory()) {
-        info("Adding the contents of %s to WEB-INF/classes.", includedLib);
+        debug("Adding the contents of %s to WEB-INF/classes.", includedLib);
         enunciate.copyDir(includedLib, webinfClasses);
       }
       else {
-        info("Including %s in WEB-INF/lib.", includedLib);
+        debug("Including %s in WEB-INF/lib.", includedLib);
         enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
       }
     }
@@ -1086,7 +1086,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
           warFile.getParentFile().mkdirs();
         }
 
-        info("Creating %s", warFile.getAbsolutePath());
+        debug("Creating %s", warFile.getAbsolutePath());
 
         enunciate.zip(warFile, buildDir);
       }
@@ -1097,7 +1097,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       enunciate.addArtifact(new FileArtifact(getName(), "spring.war.file", warFile));
     }
     else {
-      info("Packaging has been disabled.  No packaging will be performed.");
+      debug("Packaging has been disabled.  No packaging will be performed.");
     }
   }
 

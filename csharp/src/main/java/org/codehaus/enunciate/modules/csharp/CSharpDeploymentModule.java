@@ -121,39 +121,39 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
         String osName = System.getProperty("os.name");
         if (osName != null && osName.toUpperCase().contains("WINDOWS")) {
           //try the "csc" command on Windows environments.
-          info("Attempting to execute command \"csc /help\" for the current environment (%s).", osName);
+          debug("Attempting to execute command \"csc /help\" for the current environment (%s).", osName);
           try {
             Process process = new ProcessBuilder("csc", "/help").redirectErrorStream(true).start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-              info("Command \"csc /help\" failed with exit code " + exitCode + ".");
+              debug("Command \"csc /help\" failed with exit code " + exitCode + ".");
             }
             else {
               compileExectuable = "csc";
-              info("C# compile executable to be used: csc");
+              debug("C# compile executable to be used: csc");
             }
           }
           catch (Throwable e) {
-            info("Command \"csc /help\" failed (" + e.getMessage() + ").");
+            debug("Command \"csc /help\" failed (" + e.getMessage() + ").");
           }
         }
 
         if (compileExectuable == null) {
           //try the "gmcs" command (Mono)
-          info("Attempting to execute command \"gmcs /help\" for the current environment (%s).", osName);
+          debug("Attempting to execute command \"gmcs /help\" for the current environment (%s).", osName);
           try {
             Process process = new ProcessBuilder("gmcs", "/help").redirectErrorStream(true).start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-              info("Command \"gmcs /help\" failed with exit code " + exitCode + ".");
+              debug("Command \"gmcs /help\" failed with exit code " + exitCode + ".");
             }
             else {
               compileExectuable = "gmcs";
-              info("C# compile executable to be used: %s", compileExectuable);
+              debug("C# compile executable to be used: %s", compileExectuable);
             }
           }
           catch (Throwable e) {
-            info("Command \"gmcs /help\" failed (" + e.getMessage() + ").");
+            debug("Command \"gmcs /help\" failed (" + e.getMessage() + ").");
           }
         }
 
@@ -241,7 +241,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       model.put("csFileName", getSourceFileName());
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 
-      info("Generating the C# client classes...");
+      debug("Generating the C# client classes...");
       URL apiTemplate = getTemplateURL("api.fmt");
       processTemplate(apiTemplate, model);
     }
@@ -282,7 +282,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
         BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line = procReader.readLine();
         while (line != null) {
-          info(line);
+          debug(line);
           line = procReader.readLine();
         }
         int procCode;
@@ -307,7 +307,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
     else {
-      info("Skipping C# compile because a compile executale was neither found nor provided.  The C# bundle will only include the sources.");
+      debug("Skipping C# compile because a compile executale was neither found nor provided.  The C# bundle will only include the sources.");
     }
 
   }

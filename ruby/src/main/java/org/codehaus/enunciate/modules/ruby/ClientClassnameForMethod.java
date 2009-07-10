@@ -16,25 +16,28 @@
 
 package org.codehaus.enunciate.modules.ruby;
 
-import com.sun.mirror.type.*;
-import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.EnumDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.type.InterfaceType;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.ArrayType;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import javax.activation.DataHandler;
-import javax.xml.namespace.QName;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.*;
+import javax.xml.namespace.QName;
 import java.net.URI;
+import java.util.*;
 
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 
 /**
- * Conversion from java types to C# types.
+ * Conversion from java types to Ruby types.
  *
- * @link http://livedocs.adobe.com/flex/2/docs/wwhelp/wwhimpl/common/html/wwhelp.htm?context=LiveDocs_Parts&file=00001104.html#270405
  * @author Ryan Heaton
  */
 public class ClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
@@ -45,30 +48,30 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     super(conversions);
     setJdk15(false); //we'll control the generics.
 
-    classConversions.put(Boolean.class.getName(), "bool?");
-    classConversions.put(String.class.getName(), "string");
-    classConversions.put(Integer.class.getName(), "int?");
-    classConversions.put(Short.class.getName(), "short?");
-    classConversions.put(Byte.class.getName(), "sbyte?");
-    classConversions.put(Double.class.getName(), "double?");
-    classConversions.put(Long.class.getName(), "long?");
-    classConversions.put(java.math.BigInteger.class.getName(), "long?");
-    classConversions.put(java.math.BigDecimal.class.getName(), "decimal?");
-    classConversions.put(Float.class.getName(), "float?");
-    classConversions.put(Character.class.getName(), "char?");
-    classConversions.put(Date.class.getName(), "DateTime?");
-    classConversions.put(DataHandler.class.getName(), "byte[]");
-    classConversions.put(java.awt.Image.class.getName(), "byte[]");
-    classConversions.put(javax.xml.transform.Source.class.getName(), "byte[]");
-    classConversions.put(QName.class.getName(), "System.Xml.XmlQualifiedName");
-    classConversions.put(URI.class.getName(), "string");
-    classConversions.put(UUID.class.getName(), "string");
-    classConversions.put(XMLGregorianCalendar.class.getName(), "DateTime?");
-    classConversions.put(GregorianCalendar.class.getName(), "DateTime?");
-    classConversions.put(Calendar.class.getName(), "DateTime?");
-    classConversions.put(javax.xml.datatype.Duration.class.getName(), "TimeSpan?");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "object");
-    classConversions.put(Object.class.getName(), "object");
+    classConversions.put(Boolean.class.getName(), "Boolean");
+    classConversions.put(String.class.getName(), "String");
+    classConversions.put(Integer.class.getName(), "Fixnum");
+    classConversions.put(Short.class.getName(), "Fixnum");
+    classConversions.put(Byte.class.getName(), "Fixnum");
+    classConversions.put(Double.class.getName(), "Float");
+    classConversions.put(Long.class.getName(), "Bignum");
+    classConversions.put(java.math.BigInteger.class.getName(), "Bignum");
+    classConversions.put(java.math.BigDecimal.class.getName(), "Float");
+    classConversions.put(Float.class.getName(), "Float");
+    classConversions.put(Character.class.getName(), "String");
+    classConversions.put(Date.class.getName(), "Time");
+    classConversions.put(DataHandler.class.getName(), "String");
+    classConversions.put(java.awt.Image.class.getName(), "String");
+    classConversions.put(javax.xml.transform.Source.class.getName(), "String");
+    classConversions.put(QName.class.getName(), "String");
+    classConversions.put(URI.class.getName(), "String");
+    classConversions.put(UUID.class.getName(), "String");
+    classConversions.put(XMLGregorianCalendar.class.getName(), "String");
+    classConversions.put(GregorianCalendar.class.getName(), "Time");
+    classConversions.put(Calendar.class.getName(), "Time");
+    classConversions.put(javax.xml.datatype.Duration.class.getName(), "String");
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "Object");
+    classConversions.put(Object.class.getName(), "Object");
   }
 
   @Override
@@ -77,8 +80,11 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     if (classConversions.containsKey(fqn)) {
       return classConversions.get(fqn);
     }
+    else if (declaration instanceof EnumDeclaration) {
+      return "String";
+    }
     else if (isCollection(declaration)) {
-      return "System.Collections.ArrayList";
+      return "Array";
     }
 
     return super.convert(declaration);
@@ -87,8 +93,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
     if (accessor.isXmlIDREF()) {
-      return "string";//C# doesn't support strict object reference resolution via IDREF.  The best we can do is (de)serialize the ID.
+      return "String";
     }
+    
     return super.convert(accessor);
   }
 
@@ -126,30 +133,38 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       PrimitiveType.Kind kind = ((PrimitiveType) decorated).getKind();
       switch (kind) {
         case BOOLEAN:
-          return "bool"; //boolean as 'bool'
+          return "Boolean";
+        case BYTE:
+        case INT:
+        case SHORT:
+          return "Fixnum";
+        case FLOAT:
+        case DOUBLE:
+          return "Float";
+        case LONG:
+          return "Bignum";
         default:
-          return kind.toString().toLowerCase();
+          return "String";
       }
     }
     else if (decorated.isEnum()) {
-      return super.convert(typeMirror) + "?";
+      return "String";
     }
     else if (decorated.isCollection()) {
-      //collections will be converted to arrays.
-      return getCollectionTypeConversion((DeclaredType) typeMirror);
+      return "Array";
+    }
+    else if (decorated.isArray()) {
+      TypeMirror componentType = ((ArrayType) decorated).getComponentType();
+      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
+        return "String";
+      }
     }
 
     return super.convert(typeMirror);
   }
 
-  protected String getCollectionTypeConversion(DeclaredType declaredType) throws TemplateModelException {
-    Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
-    if (actualTypeArguments.size() == 1) {
-      return "System.Collections.Generic.List<" + convert(actualTypeArguments.iterator().next()) + ">";
-    }
-    else {
-      return "System.Collections.ArrayList";
-    }
+  @Override
+  protected String getPackageSeparator() {
+    return "::";
   }
-
 }

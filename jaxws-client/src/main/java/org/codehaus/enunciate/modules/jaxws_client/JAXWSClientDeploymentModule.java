@@ -204,7 +204,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
 
-      info("Generating the JAX-WS client classes...");
+      debug("Generating the JAX-WS client classes...");
       model.setFileOutputDirectory(generateDir);
       HashMap<String, WebFault> allFaults = new HashMap<String, WebFault>();
 

@@ -14,23 +14,32 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema.draw;
+package org.codehaus.enunciate.examples.ruby.schema;
 
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Ryan Heaton
  */
-public class CanvasAttachment {
+@XmlRootElement
+public class Triangle extends Shape {
 
-  private byte[] value;
+  private int base;
+  private int height;
 
-  @XmlValue
-  public byte[] getValue() {
-    return value;
+  public int getBase() {
+    return base;
   }
 
-  public void setValue(byte[] value) {
-    this.value = value;
+  public void setBase(int base) {
+    this.base = base;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
   }
 }

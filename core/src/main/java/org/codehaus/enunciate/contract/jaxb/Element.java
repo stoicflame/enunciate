@@ -517,13 +517,14 @@ public class Element extends Accessor {
     DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
       String name = getJsonElementName();
+      JsonNode elementNode;
       if (!isCollectionType()) {
         String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
         if (getRef() == null) {
-          jsonNode.put(name, getBaseType().generateExampleJson(exampleValue));
+          elementNode = getBaseType().generateExampleJson(exampleValue);
         }
         else {
-          jsonNode.put(name, JsonNodeFactory.instance.objectNode());
+          elementNode = JsonNodeFactory.instance.objectNode();
         }
       }
       else {
@@ -547,8 +548,9 @@ public class Element extends Accessor {
             }
           }
         }
-        jsonNode.put(name, exampleChoices);
+        elementNode = exampleChoices;
       }
+      jsonNode.put(name, elementNode);
     }
   }
 
@@ -557,7 +559,7 @@ public class Element extends Accessor {
    *
    * @return The element.
    */
-  protected String getJsonElementName() {
+  public String getJsonElementName() {
     return isWrapped() ? getWrapperName() : getName();
   }
 }

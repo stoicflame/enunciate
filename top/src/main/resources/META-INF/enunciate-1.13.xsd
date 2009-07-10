@@ -124,7 +124,7 @@
       <xs:element name="service" type="services-soap-service" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
 
-    <xs:attribute name="defaultSubcontext" type="xs:string"/>
+    <xs:attribute name="defaultSoapSubcontext" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="services-rest">

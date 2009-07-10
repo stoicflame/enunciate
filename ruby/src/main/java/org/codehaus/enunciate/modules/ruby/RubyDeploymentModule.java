@@ -38,10 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
+
+import com.sun.mirror.type.ClassType;
 
 /**
  * <h1>Ruby Module</h1>
@@ -89,10 +88,6 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   private String label = null;
   private final Map<String, String> packageToModuleConversions = new HashMap<String, String>();
   private boolean jacksonXcAvailable = false;
-
-  public RubyDeploymentModule() {
-    setDisabled(true);
-  }
 
   /**
    * @return "ruby"
@@ -143,10 +138,22 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   }
 
   @Override
-  public void doFreemarkerGenerate() throws IOException, TemplateException {
+  public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File genDir = getGenerateDir();
     if (!enunciate.isUpToDateWithSources(genDir)) {
+      List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
       EnunciateFreemarkerModel model = getModel();
+      ExtensionDepthComparator comparator = new ExtensionDepthComparator();
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
+          if (position < 0) {
+            position = -position - 1;
+          }
+          schemaTypes.add(position, typeDefinition);
+        }
+      }
+      model.put("schemaTypes", schemaTypes);
       model.put("packages2modules", this.packageToModuleConversions);
       model.put("moduleFor", new ClientPackageForMethod(this.packageToModuleConversions));
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToModuleConversions);
@@ -155,20 +162,17 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
       model.put("simpleNameFor", simpleNameFor);
       model.put("rubyFileName", getSourceFileName());
 
-      info("Generating the Ruby data classes...");
+      debug("Generating the Ruby data classes...");
       URL apiTemplate = getTemplateURL("api.fmt");
       processTemplate(apiTemplate, model);
     }
     else {
       info("Skipping Ruby code generation because everything appears up-to-date.");
     }
-  }
 
-  @Override
-  protected void doBuild() throws EnunciateException, IOException {
-    String description = readResource("library_description.fmt"); //read in the description from file
     NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "ruby.client", new File(getGenerateDir(), getSourceFileName()));
     sourceScript.setPublic(true);
+    String description = readResource("library_description.fmt"); //read in the description from file
     sourceScript.setDescription(description);
     getEnunciate().addArtifact(sourceScript);
   }
@@ -325,5 +329,26 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
     }
 
     return false;
+  }
+
+  private static final class ExtensionDepthComparator implements Comparator<TypeDefinition> {
+    public int compare(TypeDefinition t1, TypeDefinition t2) {
+      int depth1 = 0;
+      int depth2 = 0;
+
+      ClassType superClass = t1.getSuperclass();
+      while (superClass != null && superClass.getDeclaration() != null && !Object.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
+        depth1++;
+        superClass = superClass.getDeclaration().getSuperclass();
+      }
+
+      superClass = t2.getSuperclass();
+      while (superClass != null && superClass.getDeclaration() != null && !Object.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
+        depth2++;
+        superClass = superClass.getDeclaration().getSuperclass();
+      }
+
+      return depth1 - depth2;
+    }
   }
 }

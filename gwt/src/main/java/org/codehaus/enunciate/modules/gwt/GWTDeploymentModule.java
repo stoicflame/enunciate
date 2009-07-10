@@ -409,7 +409,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       }
 
       if (getEnableGWT15()) {
-        info("Generating source code targeting GWT 1.5.");
+        debug("Generating source code targeting GWT 1.5.");
       }
 
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
@@ -429,7 +429,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       Properties gwt2jaxbMappings = new Properties();
 
       TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
-      info("Generating the GWT endpoints...");
+      debug("Generating the GWT endpoints...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           if (!isGWTTransient(ei)) {
@@ -445,7 +445,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the GWT faults...");
+      debug("Generating the GWT faults...");
       for (WebFault webFault : allFaults) {
         if (!isGWTTransient(webFault)) {
           model.put("fault", webFault);
@@ -453,7 +453,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the GWT types...");
+      debug("Generating the GWT types...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isGWTTransient(typeDefinition)) {
@@ -469,7 +469,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
       model.setFileOutputDirectory(serverSideGenerateDir);
 
-      info("Generating the GWT endpoint implementations...");
+      debug("Generating the GWT endpoint implementations...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           if (!isGWTTransient(ei)) {
@@ -479,7 +479,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the GWT type mappers...");
+      debug("Generating the GWT type mappers...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isGWTTransient(typeDefinition)) {
@@ -497,7 +497,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the GWT fault mappers...");
+      debug("Generating the GWT fault mappers...");
       for (WebFault webFault : allFaults) {
         if (!isGWTTransient(webFault)) {
           model.put("fault", webFault);
@@ -625,7 +625,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           String moduleName = appModule.getName();
 
           gwtcCommand.set(moduleNameIndex, moduleName);
-          info("Executing GWTCompile for module '%s'...", moduleName);
+          debug("Executing GWTCompile for module '%s'...", moduleName);
           if (enunciate.isDebug()) {
             StringBuilder command = new StringBuilder();
             for (String commandPiece : gwtcCommand) {
@@ -641,7 +641,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           String line = procReader.readLine();
           while (line != null) {
             line = URLDecoder.decode(line, "utf-8").replaceAll("%", "%%").trim(); //GWT URL-encodes spaces and other weird Windows characters.
-            info(line);
+            debug(line);
             line = procReader.readLine();
           }
           int procCode;
@@ -760,7 +760,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     }
 
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
-      info("Compiling the GWT client-side files...");
+      debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
       enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getEnableGWT15() ? "1.5" : "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
@@ -784,13 +784,13 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if ((this.gwtApps.size() > 0) && (gwtCompileDir != null) && (gwtCompileDir.exists())) {
       File gwtAppDir = webappDir;
       if ((getGwtAppDir() != null) && (!"".equals(getGwtAppDir()))) {
-        info("Gwt applications will be put into the %s subdirectory of the web application.", getGwtAppDir());
+        debug("Gwt applications will be put into the %s subdirectory of the web application.", getGwtAppDir());
         gwtAppDir = new File(webappDir, getGwtAppDir());
       }
       getEnunciate().copyDir(gwtCompileDir, gwtAppDir);
     }
     else {
-      info("No gwt apps were found.");
+      debug("No gwt apps were found.");
     }
     webAppFragment.setBaseDir(webappDir);
 

@@ -294,7 +294,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the AMF externalizable types and their associated mappers...");
+      debug("Generating the AMF externalizable types and their associated mappers...");
       AMFClassnameForMethod amfClassnameForMethod = new AMFClassnameForMethod(packages);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(amfClassnameForMethod));
       model.put("classnameFor", amfClassnameForMethod);
@@ -308,7 +308,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      info("Generating the AMF endpoint beans...");
+      debug("Generating the AMF endpoint beans...");
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
           if (!isAMFTransient(ei)) {
@@ -351,7 +351,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
       model.put("as3Aliases", as3Aliases);
 
-      info("Generating the ActionScript types...");
+      debug("Generating the ActionScript types...");
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isAMFTransient(typeDefinition)) {
@@ -374,7 +374,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
 
       model.setFileOutputDirectory(xmlGenerateDir);
-      info("Generating the configuration files.");
+      debug("Generating the configuration files.");
       processTemplate(servicesConfigTemplate, model);
     }
     else {
@@ -558,7 +558,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       if (!swcUpToDate) {
         commandLine.set(compileCommandIndex, compilerConfig.getSwcCompileCommand());
         commandLine.set(outputFileIndex, swcFile.getAbsolutePath());
-        info("Compiling %s for the client-side ActionScript classes...", swcFile.getAbsolutePath());
+        debug("Compiling %s for the client-side ActionScript classes...", swcFile.getAbsolutePath());
         if (enunciate.isDebug()) {
           StringBuilder command = new StringBuilder();
           for (String commandPiece : commandLine) {
@@ -627,7 +627,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
           commandLine.set(mainMxmlPathIndex, mainMxmlFile.getAbsolutePath());
           commandLine.set(sourcePathIndex, appSrcDir.getAbsolutePath());
 
-          info("Compiling %s ...", swfFilePath);
+          debug("Compiling %s ...", swfFilePath);
           if (enunciate.isDebug()) {
             StringBuilder command = new StringBuilder();
             for (String commandPiece : commandLine) {
@@ -643,7 +643,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
           BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
           String line = procReader.readLine();
           while (line != null) {
-            info(line);
+            debug(line);
             line = procReader.readLine();
           }
           int procCode;
@@ -721,7 +721,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
     BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String line = procReader.readLine();
     while (line != null) {
-      info(line);
+      debug(line);
       line = procReader.readLine();
     }
     int procCode;
@@ -769,13 +769,13 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
     if ((this.flexApps.size() > 0) && (swfCompileDir != null) && (swfCompileDir.exists())) {
       File flexAppDir = webappDir;
       if ((getFlexAppDir() != null) && (!"".equals(getFlexAppDir()))) {
-        info("Flex applications will be put into the %s subdirectory of the web application.", getFlexAppDir());
+        debug("Flex applications will be put into the %s subdirectory of the web application.", getFlexAppDir());
         flexAppDir = new File(webappDir, getFlexAppDir());
       }
       getEnunciate().copyDir(swfCompileDir, flexAppDir);
     }
     else {
-      info("No flex apps were found.");
+      debug("No flex apps were found.");
     }
     webAppFragment.setBaseDir(webappDir);
 

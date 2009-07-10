@@ -204,7 +204,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       // This includes all request/response beans and all xfire types.
       // Also, we're going to gather the annotation information, the type list,
       // and the list of unique web faults.
-      info("Generating the XFire client classes that are common to both jdk 1.4 and jdk 1.5.");
+      debug("Generating the XFire client classes that are common to both jdk 1.4 and jdk 1.5.");
       model.setFileOutputDirectory(commonJdkGenerateDir);
       generatedAnnotations = new ExplicitWebAnnotations();
       generatedTypeList = new ArrayList<String>();
@@ -296,7 +296,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
 
       if (!isDisable14Client()) {
         //Now, generate the jdk14-compatable client-side stubs.
-        info("Generating the XFire client classes for jdk 1.4.");
+        debug("Generating the XFire client classes for jdk 1.4.");
         model.setFileOutputDirectory(jdk14GenerateDir);
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
           for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -329,12 +329,12 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
         }
       }
       else {
-        info("Java 1.4 client generation has been disabled.  Skipping generation of 1.4 client classes.");
+        debug("Java 1.4 client generation has been disabled.  Skipping generation of 1.4 client classes.");
       }
 
       if (!isDisable15Client()) {
         //Now enable jdk-15 compatability and generate those client-side stubs.
-        info("Generating the XFire client classes for jdk 1.5.");
+        debug("Generating the XFire client classes for jdk 1.5.");
         model.setFileOutputDirectory(jdk15GenerateDir);
         classnameFor.setJdk15(true);
         componentTypeFor.setJdk15(true);
@@ -370,7 +370,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
         }
       }
       else {
-        info("Java 5 client generation has been disabled.  Skipping generation of Java 5 client classes.");
+        debug("Java 5 client generation has been disabled.  Skipping generation of Java 5 client classes.");
       }
 
       writeTypesFile(new File(getCommonJdkGenerateDir(), uuid + ".types"));
@@ -556,7 +556,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       }
     }
     else {
-      info("1.4 client code generation has been disabled.  Skipping compilation of 1.4 sources.");
+      debug("1.4 client code generation has been disabled.  Skipping compilation of 1.4 sources.");
     }
 
     if (!isDisable15Client()) {
@@ -574,7 +574,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       }
     }
     else {
-      info("Java 5 client code generation has been disabled.  Skipping compilation of Java 5 sources.");
+      debug("Java 5 client code generation has been disabled.  Skipping compilation of Java 5 sources.");
     }
   }
 
@@ -584,7 +584,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
    * @param annotationsFile The to which to write the generated annotations.
    */
   protected void writeAnnotationsFile(File annotationsFile) throws EnunciateException, IOException {
-    info("Writing annotations to %s.", annotationsFile);
+    debug("Writing annotations to %s.", annotationsFile);
     if (this.generatedAnnotations == null) {
       throw new EnunciateException("No annotations to write.");
     }
@@ -607,7 +607,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
    * @param typesFile The file to write the type list to.
    */
   protected void writeTypesFile(File typesFile) throws EnunciateException, FileNotFoundException {
-    info("Writing client type list to %s.", typesFile);
+    debug("Writing client type list to %s.", typesFile);
     if (this.generatedTypeList == null) {
       throw new EnunciateException("No type list to write.");
     }
@@ -757,7 +757,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       enunciate.addArtifact(jdk14ArtifactBundle);
     }
     else {
-      info("No artifact generated for the Java 1.4 client because it was disabled.");
+      debug("No artifact generated for the Java 1.4 client because it was disabled.");
     }
 
     if (!isDisable15Client()) {
@@ -799,7 +799,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       enunciate.addArtifact(jdk15ArtifactBundle);
     }
     else {
-      info("No artifact generated for the Java 5 client because it was disabled.");
+      debug("No artifact generated for the Java 5 client because it was disabled.");
     }
   }
 

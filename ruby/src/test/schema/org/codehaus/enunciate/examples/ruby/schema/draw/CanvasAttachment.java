@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema;
+package org.codehaus.enunciate.examples.ruby.schema.draw;
+
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Ryan Heaton
  */
-public enum Color {
+public class CanvasAttachment {
 
-  RED,
+  private byte[] value;
 
-  YELLOW,
+  @XmlValue
+  public byte[] getValue() {
+    return value;
+  }
 
-  GREEN,
-
-  BLUE
-  
+  public void setValue(byte[] value) {
+    this.value = value;
+  }
 }

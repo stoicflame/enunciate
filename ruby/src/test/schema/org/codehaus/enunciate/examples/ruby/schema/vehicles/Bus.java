@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema.vehicles;
+package org.codehaus.enunciate.examples.ruby.schema.vehicles;
 
-import org.codehaus.enunciate.examples.csharp.schema.Figure;
-import org.codehaus.enunciate.examples.csharp.schema.Rectangle;
-import org.codehaus.enunciate.examples.csharp.schema.Circle;
+import org.codehaus.enunciate.examples.ruby.schema.Figure;
+import org.codehaus.enunciate.examples.ruby.schema.Rectangle;
+import org.codehaus.enunciate.examples.ruby.schema.Circle;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;

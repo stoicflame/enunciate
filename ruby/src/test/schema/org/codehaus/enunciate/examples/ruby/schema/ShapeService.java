@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema.structures;
+package org.codehaus.enunciate.examples.ruby.schema;
 
-import org.joda.time.DateTime;
-import org.codehaus.enunciate.XmlTransient;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.util.Date;
+import javax.jws.WebService;
 
 /**
  * @author Ryan Heaton
  */
-@XmlTransient
-public class DateTimeXmlAdapter extends XmlAdapter<Date, DateTime> {
-
-  public DateTime unmarshal(Date date) throws Exception {
-    return new DateTime(date);
-  }
-
-  public Date marshal(DateTime dateTime) throws Exception {
-    return dateTime.toDate();
-  }
+@WebService
+public class ShapeService {
 }

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.examples.csharp.schema.structures;
+package org.codehaus.enunciate.examples.ruby.schema.structures;
 
-import org.codehaus.enunciate.examples.csharp.schema.Rectangle;
-import org.codehaus.enunciate.examples.csharp.schema.Triangle;
-import org.codehaus.enunciate.examples.csharp.schema.Circle;
-import org.codehaus.enunciate.examples.csharp.schema.Figure;
+import org.codehaus.enunciate.examples.ruby.schema.Rectangle;
+import org.codehaus.enunciate.examples.ruby.schema.Triangle;
+import org.codehaus.enunciate.examples.ruby.schema.Circle;
+import org.codehaus.enunciate.examples.ruby.schema.Figure;
 import org.joda.time.DateTime;
 
 import javax.xml.bind.annotation.XmlElement;

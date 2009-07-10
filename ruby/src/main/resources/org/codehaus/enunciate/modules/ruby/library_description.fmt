@@ -6,58 +6,44 @@
   Introduction
 </h1>
 
-[#if sample_service_method??]
 <p>
-  The .NET client-side library may be used to access the SOAP API for this application via
-  the .NET runtime.
+  The Ruby client-side library defines the Ruby classes that can be (de)serialized to/from JSON.
+  This is useful for accessing the REST endpoints that are published by this application, but only
+  those that produce a JSON representation of their resources (content type "application/json").
 </p>
 
+<p>
+  This library leverages the <a href="http://json.rubyforge.org/">Ruby JSON Implementation</a>, which is
+  required in order to use this library.
+</p>
+
+[#if sample_resource?? && sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
 <h1>
-    .NET Service Example
+  JSON REST Example
 </h1>
 
 <code>
-//instantiate a new service...
-${sample_service_method.declaringEndpointInterface.clientSimpleName} service = new ${sample_service_method.declaringEndpointInterface.clientSimpleName}();
+require 'net/https'
+require 'uri'
 
-//make the remote call...
-[#if sample_service_method.webResult?? && !sample_service_method.webResult.void]result = [/#if]service.${sample_service_method.clientSimpleName?cap_first}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
-
-//handle the result as needed...
-</code>
-[/#if]
-[#if sample_resource??]
-
-<p>
-  The .NET client-side library defines the classes that can be (de)serialized to/from XML.
-  This is useful for accessing the REST endpoints that are published by this application.
-</p>
-
-[#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
-<h1>
-  REST Example
-</h1>
-
-<code>
 //read a resource from a REST url
-Uri uri = new Uri(...);
+url = URI.parse("...")
+request = Net::HTTP::${sample_resource.supportedOperations?first?lower_case?cap_first}.new(url)
+[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+input = ${sample_resource.inputPayload.xmlElement.simpleName}.new
+//set up the ${sample_resource.inputPayload.xmlElement.simpleName}...
+request.body = input.to_json
+request['Content-Type'] = "application/json"
+[/#if]
 
-XmlSerializer s = new XmlSerializer(
-  typeof( ${sample_resource.outputPayload.xmlElement.clientSimpleName} )
-);
+http = Net::HTTP.new(url.host, url.port)
+//set up additional http stuff...
+res = http.start do |ht|
+  ht.request(request)
+end
 
-  //Create the request object
-WebRequest req = WebRequest.Create(uri);
-WebResponse resp = req.GetResponse();
-Stream stream = resp.GetResponseStream();
-TextReader r = new StreamReader( stream );
-
-${sample_resource.outputPayload.xmlElement.clientSimpleName} order = (${sample_resource.outputPayload.xmlElement.clientSimpleName}) s.Deserialize( r );
+result = ${sample_resource.outputPayload.xmlElement.simpleName}.from_json(JSON.parse(res.body))
 
 //handle the result as needed...
 </code>
 [/#if]
-[/#if]
-<p>
-  This bundle contains ${bundle_contains}.
-</p>
