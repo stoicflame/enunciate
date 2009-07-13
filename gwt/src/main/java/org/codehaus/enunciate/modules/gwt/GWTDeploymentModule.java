@@ -855,7 +855,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     ClientLibraryArtifact gwtClientArtifact = new ClientLibraryArtifact(getName(), "gwt.client.library", "GWT Client Library");
     gwtClientArtifact.setPlatform("JavaScript/GWT (Version 1.4.59)");
     //read in the description from file:
-    gwtClientArtifact.setDescription(readResource("client_library_description.fmt"));
+    gwtClientArtifact.setDescription(readResource("library_description.fmt"));
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
     clientArtifact.setDescription("The binaries and sources for the GWT client library.");
     clientArtifact.setPublic(clientJarDownloadable);

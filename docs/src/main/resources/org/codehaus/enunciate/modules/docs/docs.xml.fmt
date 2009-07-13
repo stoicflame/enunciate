@@ -1,8 +1,11 @@
 [#ftl]
+[#-- @ftlvariable name="resources" type="java.util.Collection<org.codehaus.enunciate.contract.common.rest.RESTResource>" --]
+[#-- @ftlvariable name="wsdl" type="org.codehaus.enunciate.config.WsdlInfo" --]
+[#-- @ftlvariable name="schema" type="org.codehaus.enunciate.config.SchemaInfo" --]
 [@file name="docs.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
-<api-docs[#if copyright?exists] copyright="${copyright}"[/#if][#if licenseFile?exists] licenseFile="${licenseFile}"[/#if][#if title?exists] title="${title}"[/#if]>
-[#if apiDoc?exists]
+<api-docs[#if copyright??] copyright="${copyright}"[/#if][#if licenseFile??] licenseFile="${licenseFile}"[/#if][#if title??] title="${title}"[/#if]>
+[#if apiDoc??]
   <documentation>
     <![CDATA[${apiDoc}]]>
   </documentation>
@@ -15,11 +18,11 @@
   <data>
 [@forEachSchema]
   [#if (schema.typeDefinitions?size > 0) || (schema.globalElements?size > 0)]
-    <schema namespace="${schema.namespace?default("")}" namespaceId="${schema.id}"[#if schema.properties.filename?exists] file="${schema.properties.filename}"[/#if]>
+    <schema namespace="${schema.namespace!""}" namespaceId="${schema.id}"[#if schema.properties.filename??] file="${schema.properties.filename}"[/#if]>
       <types>
     [#list schema.typeDefinitions as type]
-        <type name="${type.name?default("(anonymous)")}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
-      [#if type.docValue?exists]
+        <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
+      [#if type.docValue??]
           <documentation>
             <![CDATA[${type.docValue}]]>
           </documentation>
@@ -32,8 +35,8 @@
       [#if type.attributes?size > 0]
           <attributes>
         [#list type.attributes as attribute]
-            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace?default("")}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)?exists] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
-              <![CDATA[${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))}]]>
+            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
+              <![CDATA[${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"}]]>
             </attribute>
         [/#list]
           </attributes>
@@ -42,7 +45,7 @@
           <elements>
         [#list type.elements as element]
             <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-          [#if element.docValue?exists]
+          [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
               </documentation>
@@ -53,22 +56,22 @@
             [/#list]
           [/#list]
           [#list element.choices as choice]
-              <choice name="${choice.name}" namespace="${choice.namespace?default("")}"[#if !(choice.ref?exists || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace?default("")}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?exists && schemaForNamespace(choice)?exists] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)?exists] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
+              <choice name="${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
           [/#list]
             </element>
         [/#list]
           </elements>
       [/#if]
-      [#if type.value?exists]
-          <value typeNamespace="${type.value.baseType.namespace?default("")}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)?exists] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
-            <![CDATA[${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))}]]>
+      [#if type.value??]
+          <value typeNamespace="${type.value.baseType.namespace!""}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)??] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
+            <![CDATA[${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"}]]>
           </value>
       [/#if]
       [#if type.enum]
           <values>
         [#list type.delegate.enumConstants as item]
             <item value="${type.enumValues[item.simpleName]}">
-          [#if item.docValue?exists]
+          [#if item.docValue??]
               <documentation>
                  <![CDATA[${item.docValue}]]>
               </documentation>
@@ -87,8 +90,8 @@
       </types>
       <elements>
     [#list schema.globalElements as element]
-        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition?exists] typeName="${element.typeDefinition.name}" typeNamespace="${element.typeDefinition.namespace?default("")}"[#if schemaForNamespace(element.typeDefinition)?exists] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
-      [#if element.docValue?exists]
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
+      [#if element.docValue??]
           <documentation>
             <![CDATA[${element.docValue}]]>
           </documentation>
@@ -99,7 +102,7 @@
         [/#list]
       [/#list]
           <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
-      [#if jacksonXcAvailble?default(false)]
+      [#if jacksonXcAvailble!false]
           <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
       [/#if]
         </element>
@@ -107,8 +110,8 @@
     [#list schema.localElementDeclarations as element]
       [#if !isDefinedGlobally(element)]
         [#assign localTypeQName=element.elementXmlType.qname/]
-        <element name="${element.name}"[#if element.elementTypeDeclaration?exists] type="${element.elementTypeDeclaration.qualifiedName}"[/#if] typeName="${localTypeQName.localPart}" typeNamespace="${localTypeQName.namespaceURI?default("")}"[#if schemaForNamespace(element)?exists] typeSchemaId="${schemaForNamespace(element).id}"[/#if]>
-          [#if element.docValue?exists]
+        <element name="${element.name}"[#if element.elementTypeDeclaration??] type="${element.elementTypeDeclaration.qualifiedName}"[/#if] typeName="${localTypeQName.localPart}" typeNamespace="${localTypeQName.namespaceURI!""}"[#if schemaForNamespace(element)??] typeSchemaId="${schemaForNamespace(element).id}"[/#if]>
+          [#if element.docValue??]
           <documentation>
             <![CDATA[${element.docValue}]]>
           </documentation>
@@ -119,7 +122,7 @@
             [/#list]
           [/#list]
           <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
-          [#if jacksonXcAvailble?default(false)]
+          [#if jacksonXcAvailble!false]
           <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
           [/#if]
         </element>
@@ -133,10 +136,10 @@
   <soap>
     <wsdls>
 [@forEachWsdl]
-      <wsdl namespace="${wsdl.targetNamespace?default("")}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename?exists] file="${wsdl.properties.filename}"[/#if]>
+      <wsdl namespace="${wsdl.targetNamespace!""}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename??] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface wsdl=wsdl]
-        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath?exists] path="${endpointInterface.metaData.soapPath}"[/#if]>
-    [#if endpointInterface.docValue?exists]
+        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if]>
+    [#if endpointInterface.docValue??]
           <documentation>
             <![CDATA[${endpointInterface.docValue}]]>
           </documentation>
@@ -148,7 +151,7 @@
     [/#list]
     [#list endpointInterface.webMethods as method]
           <method name="${method.operationName}" oneWay="${method.oneWay?string}">
-      [#if method.docValue?exists]
+      [#if method.docValue??]
             <documentation>
               <![CDATA[${method.docValue}]]>
             </documentation>
@@ -162,17 +165,17 @@
       [/#list]
       [#list method.webParameters as parameter]
             <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
-              <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
+              <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
             </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
             <result>
-              <![CDATA[${method.returnType.docValue?default("(no documentation provided)")}]]>
+              <![CDATA[${method.returnType.docValue!"(no documentation provided)"}]]>
             </result>
       [/#if]
       [#list method.thrownTypes as fault]
             <fault name="${fault.declaration.simpleName}">
-              <![CDATA[${fault.docValue?default("(no documentation provided)")}]]>
+              <![CDATA[${fault.docValue!"(no documentation provided)"}]]>
             </fault>
       [/#list]
           </method>
@@ -186,11 +189,11 @@
   <rest baseAddress="${baseDeploymentAddress}">
     <resources>
 [@forEachRESTResourceListByPath]
-      <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext?default("/rest")}">
+      <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
-        <operation name="${resource.supportedOperations?first}"[#if resource.verbs?exists] type="${resource.verbs?first}"[/#if]>
-      [#if resource.docValue?exists]
+        <operation name="${resource.supportedOperations?first}"[#if resource.verbs??] type="${resource.verbs?first}"[/#if]>
+      [#if resource.docValue??]
           <documentation>
             <![CDATA[${resource.docValue}]]>
           </documentation>
@@ -208,7 +211,7 @@
         [/#list]
       [/#if]
       [#list uniqueContentTypes(resource) as contentType]
-        [#if contentType.produceable && contentType.subcontexts?exists]
+        [#if contentType.produceable && contentType.subcontexts??]
           [#list contentType.subcontexts as subcontext]
           <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.path}"/>
           [/#list]
@@ -218,22 +221,22 @@
       [/#list]
       [#list resource.resourceParameters as parameter]
           <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}">
-            <![CDATA[${parameter.docValue?default("(no documentation provided)")}]]>
+            <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
           </parameter>
       [/#list]
-      [#if resource.inputPayload?exists]
-          <inValue[#if resource.inputPayload.xmlElement?exists && schemaForNamespace(resource.inputPayload)?exists] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace?default("")}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
-            <![CDATA[${resource.inputPayload.docValue?default("(no documentation provided)")}]]>
+      [#if resource.inputPayload??]
+          <inValue[#if resource.inputPayload.xmlElement?? && schemaForNamespace(resource.inputPayload)??] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
+            <![CDATA[${resource.inputPayload.docValue!"(no documentation provided)"}]]>
           </inValue>
       [/#if]
-      [#if resource.outputPayload?exists]
-          <outValue[#if resource.outputPayload.xmlElement?exists && schemaForNamespace(resource.outputPayload)?exists] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace?default("")}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
-            <![CDATA[${resource.outputPayload.docValue?default("(no documentation provided)")}]]>
+      [#if resource.outputPayload??]
+          <outValue[#if resource.outputPayload.xmlElement?? && schemaForNamespace(resource.outputPayload)??] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
+            <![CDATA[${resource.outputPayload.docValue!"(no documentation provided)"}]]>
           </outValue>
       [/#if]
       [#list resource.resourceErrors as error]
           <error code="${error.errorCode}">
-            <![CDATA[${error.docValue?default("")}]]>
+            <![CDATA[${error.docValue!""}]]>
           </error>
       [/#list]
         </operation>
@@ -246,7 +249,7 @@
   <packages>
 [@forAllPackages var="package"]
     <package id="${package.qualifiedName}">
-  [#if package.docValue?exists]
+  [#if package.docValue??]
       <documentation>
         <![CDATA[${package.docValue}]]>
       </documentation>

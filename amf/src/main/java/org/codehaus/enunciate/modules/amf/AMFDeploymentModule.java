@@ -687,7 +687,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
       ClientLibraryArtifact as3ClientArtifact = new ClientLibraryArtifact(getName(), "as3.client.library", "ActionScript 3 Client Library");
       as3ClientArtifact.setPlatform("Adobe Flex");
       //read in the description from file:
-      as3ClientArtifact.setDescription(readResource("client_library_description.fmt"));
+      as3ClientArtifact.setDescription(readResource("library_description.fmt"));
       as3ClientArtifact.setDependencies(clientDeps);
 
       if (swcFile != null) {
