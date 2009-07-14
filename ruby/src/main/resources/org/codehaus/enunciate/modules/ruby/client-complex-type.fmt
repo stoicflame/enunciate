@@ -27,25 +27,21 @@ module ${submodule}
     def to_jaxb_json_hash
       _h = [#if type.baseObject]{}[#else]super[/#if]
   [#list type.attributes as attribute]
-      if !${attribute.clientSimpleName}.nil?
-        _h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash
-      end
+      _h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash unless ${attribute.clientSimpleName}.nil?
   [/#list]
   [#if type.value?exists]
-      if !${type.value.clientSimpleName}.nil?
-        _h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash
-      end
+      _h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash unless ${type.value.clientSimpleName}.nil?
   [#else]
     [#list type.elements as element]
-      if !${element.clientSimpleName}.nil?
       [#if element.collectionType]
+      if !${element.clientSimpleName}.nil?
         _ha = Array.new
         ${element.clientSimpleName}.each { | _item | _ha.push _item.to_jaxb_json_hash }
         _h['${element.jsonElementName}'] = _ha
-      [#else]
-        _h['${element.jsonElementName}'] = ${element.clientSimpleName}.to_jaxb_json_hash
-      [/#if]
       end
+      [#else]
+      _h['${element.jsonElementName}'] = ${element.clientSimpleName}.to_jaxb_json_hash unless ${element.clientSimpleName}.nil?
+      [/#if]
     [/#list]
   [/#if]
       return _h
@@ -64,25 +60,21 @@ module ${submodule}
       super _o
   [/#if]
   [#list type.attributes as attribute]
-      if !_o['${attribute.clientSimpleName}'].nil?
-        @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.clientSimpleName}'])
-      end
+      @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.clientSimpleName}']) unless _o['${attribute.clientSimpleName}'].nil?
   [/#list]
   [#if type.value?exists]
-      if !_o['${type.value.clientSimpleName}'].nil?
-        @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.clientSimpleName}'])
-      end
+      @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.clientSimpleName}']) unless _o['${type.value.clientSimpleName}'].nil?
   [#else]
     [#list type.elements as element]
-      if !_o['${element.jsonElementName}'].nil?
       [#if element.collectionType]
+      if !_o['${element.jsonElementName}'].nil?
         @${element.clientSimpleName} = Array.new
         _oa = _o['${element.jsonElementName}']
         _oa.each { | _item | @${element.clientSimpleName}.push ${classnameFor(element.collectionItemType)}.from_json(_item) }
-      [#else]
-        @${element.clientSimpleName} = ${classnameFor(element)}.from_json(_o['${element.clientSimpleName}'])
-      [/#if]
       end
+      [#else]
+      @${element.clientSimpleName} = ${classnameFor(element)}.from_json(_o['${element.clientSimpleName}']) unless _o['${element.jsonElementName}'].nil?
+      [/#if]
     [/#list]
   [/#if]
     end
