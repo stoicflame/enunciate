@@ -1,5 +1,5 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.12.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.13.xsd">
   <modules>
     <gwt disabled="false" gwtHome="/path/to/gwt/home" rpcModuleName="net.java.ws.addressbook.AddressBookGWT">
       <app srcDir="src/main/gwt">

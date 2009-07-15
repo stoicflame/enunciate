@@ -6,19 +6,19 @@
 module ${submodule}
   [/#list]
 
-  # ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  # ")}
+  # ${type.javaDoc!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  # ")}
   class ${simpleNameFor(type)} [#if !type.baseObject]< ${classnameFor(type.superclass)} [/#if]
 
   [#list type.attributes as attribute]
-    # ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+    # ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${attribute.clientSimpleName}
   [/#list]
-  [#if type.value?exists]
-    # ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+  [#if type.value??]
+    # ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${type.value.clientSimpleName}
   [#else]
     [#list type.elements as element]
-    # ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    # ")}
+    # ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${element.clientSimpleName}
     [/#list]
   [/#if]
@@ -29,7 +29,7 @@ module ${submodule}
   [#list type.attributes as attribute]
       _h['${attribute.clientSimpleName}'] = ${attribute.clientSimpleName}.to_jaxb_json_hash unless ${attribute.clientSimpleName}.nil?
   [/#list]
-  [#if type.value?exists]
+  [#if type.value??]
       _h['${type.value.clientSimpleName}'] = ${type.value.clientSimpleName}.to_jaxb_json_hash unless ${type.value.clientSimpleName}.nil?
   [#else]
     [#list type.elements as element]
@@ -62,7 +62,7 @@ module ${submodule}
   [#list type.attributes as attribute]
       @${attribute.clientSimpleName} = ${classnameFor(attribute)}.from_json(_o['${attribute.clientSimpleName}']) unless _o['${attribute.clientSimpleName}'].nil?
   [/#list]
-  [#if type.value?exists]
+  [#if type.value??]
       @${type.value.clientSimpleName} = ${classnameFor(type.value)}.from_json(_o['${type.value.clientSimpleName}']) unless _o['${type.value.clientSimpleName}'].nil?
   [#else]
     [#list type.elements as element]

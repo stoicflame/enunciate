@@ -56,6 +56,9 @@ module Org
         attr_accessor :gender
         attr_accessor :cool
 
+        def initialize
+        end
+
         def to_jaxb_json_hash
           h = {}
           h['name'] = name.to_jaxb_json_hash
@@ -92,6 +95,11 @@ module Org
         attr_accessor :birth
         attr_accessor :name
         attr_accessor :parents
+
+        def initialize
+          super
+          @parents = Array.new
+        end
 
         def to_jaxb_json_hash
           h = super
@@ -142,6 +150,7 @@ puts "another json: " + another.to_json
 puts
 
 mine = Org::FamilySearch::Ws::ExPerson.new()
+puts "ex new " + mine.inspect
 mine.name = 'my name'
 mine.gender = 'male'
 mine.cool = true
