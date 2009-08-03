@@ -1638,7 +1638,7 @@ public class Enunciate {
         throw new EnunciateExecutionException("All steps completed.");
       }
 
-      info("\n\nEntering %s step....", this.nextTarget);
+      info("\n\ninvoking enunciate:%s step...", this.nextTarget.toString().toLowerCase());
 
       switch (this.nextTarget) {
         case GENERATE:

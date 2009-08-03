@@ -17,6 +17,6 @@
 @XmlSchema (
   namespace = "http://jaxws_client.enunciate.codehaus.org/structures"
 )
-package org.codehaus.enunciate.jaxws_client.schema.structures;
+package org.codehaus.enunciate.examples.jaxws_client.schema.structures;
 
 import javax.xml.bind.annotation.XmlSchema;

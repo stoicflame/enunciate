@@ -1,34 +1,31 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.MethodDeclaration;
+import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
+import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.node.ObjectNode;
+import org.jdom.Comment;
+import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
-import java.util.Collection;
 import java.io.StringWriter;
-
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
-import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
-import org.jdom.output.XMLOutputter;
-import org.jdom.Comment;
+import java.util.Collection;
 
 /**
  * A declaration of a "local" element (defined by a registry).
@@ -80,6 +77,15 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration implemen
       namespace = this.registry.getSchema().getNamespace();
     }
     return "".equals(namespace) ? null : namespace;
+  }
+
+  /**
+   * The qname of the element.
+   *
+   * @return The qname of the element.
+   */
+  public QName getQname() {
+    return new QName(getNamespace(), getName());
   }
 
   /**

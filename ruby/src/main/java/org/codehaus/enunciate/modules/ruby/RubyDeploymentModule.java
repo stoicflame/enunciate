@@ -67,7 +67,7 @@ import com.sun.mirror.type.ClassType;
  *
  * <h3>The "package-conversions" element</h3>
  *
- * <p>The "package-conversions" subelement of the "csharp" element is used to map packages from
+ * <p>The "package-conversions" subelement of the "ruby" element is used to map packages from
  * the original API packages to Ruby modules.  This element supports an arbitrary number of
  * "convert" child elements that are used to specify the conversions.  These "convert" elements support
  * the following attributes:</p>

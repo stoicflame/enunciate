@@ -2,6 +2,8 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.Declaration;
 
+import javax.xml.namespace.QName;
+
 /**
  * Common interface for an element declaration.
  * 
@@ -24,10 +26,23 @@ public interface ElementDeclaration extends Declaration {
   String getNamespace();
 
   /**
+   * The qname for this root element.
+   *
+   * @return The qname for this root element.
+   */
+  QName getQname();
+
+  /**
    * Generate some example XML for this root element.
    *
    * @return Some example XML.
    */
   String generateExampleXml();
-  
+
+  /**
+   * Generate some example JSON for this root element.
+   *
+   * @return Some example JSON for this root element.
+   */
+  String generateExampleJson();
 }

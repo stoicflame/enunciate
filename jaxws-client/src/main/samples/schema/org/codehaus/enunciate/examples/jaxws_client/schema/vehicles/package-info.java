@@ -17,6 +17,6 @@
 @XmlSchema (
   namespace = "http://jaxws_client.enunciate.codehaus.org/vehicles"
 )
-package org.codehaus.enunciate.jaxws_client.schema.vehicles;
+package org.codehaus.enunciate.examples.jaxws_client.schema.vehicles;
 
 import javax.xml.bind.annotation.XmlSchema;

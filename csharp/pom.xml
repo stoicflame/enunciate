@@ -30,7 +30,7 @@
                   <message>In order to build the C# module, you must have Mono installed.
 First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
 Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
-If you just want to skip the C# tests, set the value of the property 'gmcs.executable' to be 'true'. (And don't ask any questions about why that works. It just does.)</message>
+If you just want to skip the C# tests, set the value of the property 'gmcs.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
             </configuration>

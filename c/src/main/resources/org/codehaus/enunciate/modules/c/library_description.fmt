@@ -1,0 +1,50 @@
+[#ftl]
+[#-- @ftlvariable name="bundle_contains" type="java.lang.String" --]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
+<h1>
+  Introduction
+</h1>
+
+<p>
+  The Ruby client-side library defines the Ruby classes that can be (de)serialized to/from JSON.
+  This is useful for accessing the REST endpoints that are published by this application, but only
+  those that produce a JSON representation of their resources (content type "application/json").
+</p>
+
+<p>
+  This library leverages the <a href="http://json.rubyforge.org/">Ruby JSON Implementation</a>, which is
+  required in order to use this library.
+</p>
+
+[#if sample_resource?? && sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+<h1>
+  JSON REST Example
+</h1>
+
+<code>
+require 'net/https'
+require 'uri'
+//...
+
+//read a resource from a REST url
+url = URI.parse("...")
+request = Net::HTTP::${sample_resource.supportedOperations?first?lower_case?cap_first}.new(url.request_uri)
+[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+input = ${sample_resource.inputPayload.xmlElement.simpleName}.new
+//set up the ${sample_resource.inputPayload.xmlElement.simpleName}...
+request.body = input.to_json
+request['Content-Type'] = "application/json"
+[/#if]
+
+http = Net::HTTP.new(url.host, url.port)
+//set up additional http stuff...
+res = http.start do |ht|
+  ht.request(request)
+end
+
+result = ${sample_resource.outputPayload.xmlElement.simpleName}.from_json(JSON.parse(res.body))
+
+//handle the result as needed...
+</code>
+[/#if]

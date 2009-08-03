@@ -17,6 +17,6 @@
 @XmlSchema (
   namespace = "http://jaxws_client.enunciate.codehaus.org/draw"
 )
-package org.codehaus.enunciate.jaxws_client.schema.draw;
+package org.codehaus.enunciate.examples.jaxws_client.schema.draw;
 
 import javax.xml.bind.annotation.XmlSchema;

@@ -1,0 +1,815 @@
+[#ftl]
+
+[#--template for the client-side complex type.--]
+[#macro writeComplexTypeHeader type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+
+/**
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ */
+struct ${typeName} {
+
+  [@forAllAccessors typeDefinition=type]
+    [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
+
+  /**
+   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  ${classnameFor(accessor)} *${accessor.clientSimpleName};
+
+  /**
+   * Size of the ${accessor.clientSimpleName} data.
+   */
+  int _sizeof_${accessor.clientSimpleName};
+    [#elseif ((accessor.collectionType) && (accessor.choices??) && (accessor.choices?size > 1))]
+      [#list accessor.choices as choice]
+
+  /**
+   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   *
+   * (Partial list.)
+   */
+  ${classnameFor(choice)} *${choice.name?replace("-", "_")}_${accessor.clientSimpleName};
+
+  /**
+   * Size of the ${accessor.clientSimpleName} array.
+   */
+  int _sizeof_${choice.name?replace("-", "_")}_${accessor.clientSimpleName};
+      [/#list]
+    [#elseif accessor.collectionType]
+
+  /**
+   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  ${classnameFor(accessor)} *${accessor.clientSimpleName};
+
+  /**
+   * Size of the ${accessor.clientSimpleName} array.
+   */
+  int _sizeof_${accessor.clientSimpleName};
+    [#else]
+
+  /**
+   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  ${classnameFor(accessor)} [#if !accessor.accessorType.primitive]*[/#if]${accessor.clientSimpleName};
+    [/#if]
+  [/@forAllAccessors]
+};
+[#if findRootElement(type)??]
+  [#assign rootElement=findRootElement(type)/]
+
+/**
+ * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
+ * it is assumed that the reader is pointing to the XML document (not the element).
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL in case of error.
+ */
+struct ${typeName} *xml_read_${typeName}(xmlTextReaderPtr reader);
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+int xml_write_${typeName}(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+
+/**
+ * Frees a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+void free_${typeName}(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+
+/**
+ * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
+ * it is assumed that the reader is already pointing to the element.
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL in case of error.
+ */
+struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(xmlTextReaderPtr reader);
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ * Does NOT write the namespace prefixes.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @param writeNamespaces Whether to write the namespace prefixes.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}ElementNS(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}, int writeNamespaces);
+
+/**
+ * Frees the children of a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} whose children are to be free.
+ */
+static void free${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+[/#if]
+
+/**
+ * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL in case of error.
+ */
+static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type.qname)?cap_first}Type(xmlTextReaderPtr reader);
+
+/**
+ * Writes a ${type.clientSimpleName} to XML.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(type.qname)?cap_first}Type(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+
+/**
+ * Frees the elements of a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+static void free${xmlFunctionIdentifier(type.qname)?cap_first}Type(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+[/#macro]
+
+
+
+[#macro writeComplexTypeImpl type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+  [#if findRootElement(type)??]
+    [#assign rootElement=findRootElement(type)/]
+
+/**
+ * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
+ * it is assumed that the reader is pointing to the XML document (not the element).
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL in case of error.
+ */
+struct ${typeName} *xml_read_${typeName}(xmlTextReaderPtr reader) {
+  int status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+  return xmlTextReaderRead${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(reader);
+}
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return 1 if successful, 0 otherwise.
+ */
+int xml_write_${typeName}(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  return xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}ElementNS(writer, _${type.clientSimpleName?uncap_first}, 1);
+}
+
+/**
+ * Frees a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+void free_${typeName}(struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+  free(_${type.clientSimpleName?uncap_first});
+}
+
+/**
+ * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
+ * it is assumed that the reader is pointing to that element.
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL in case of error.
+ */
+struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(xmlTextReaderPtr reader) {
+  struct ${typeName} *_${type.clientSimpleName?uncap_first} = NULL;
+
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+    && strcmp("${rootElement.name}", xmlTextReaderConstLocalName(reader)) == 0
+    && [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]strcmp("${rootElement.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+#if DEBUG_ENUNCIATE
+    printf("Attempting to read root element {${rootElement.namespace!""}}${rootElement.name}.\n");
+#endif
+    _${type.clientSimpleName?uncap_first} = xmlTextReaderRead${xmlFunctionIdentifier(type.qname)?cap_first}Type(reader);
+  }
+#if DEBUG_ENUNCIATE
+  if (_${type.clientSimpleName?uncap_first} == NULL) {
+    if (xmlTextReaderConstNamespaceUri(reader) == NULL) {
+      printf("attempt to read {${rootElement.namespace!""}}${rootElement.name} failed. current element: {}%s\n",  xmlTextReaderConstLocalName(reader));
+    }
+    else {
+      printf("attempt to read {${rootElement.namespace!""}}${rootElement.name} failed. current element: {%s}%s\n", xmlTextReaderConstNamespaceUri(reader), xmlTextReaderConstLocalName(reader));
+    }
+  }
+#endif
+
+  return _${type.clientSimpleName?uncap_first};
+}
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ * Does NOT write the namespace prefixes.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return 1 if successful, 0 otherwise.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}ElementNS(writer, _${type.clientSimpleName?uncap_first}, 0);
+}
+
+/**
+ * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @param writeNamespaces Whether to write the namespace prefixes.
+ * @return 1 if successful, 0 otherwise.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement.qname)?cap_first}ElementNS(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}, int writeNamespaces) {
+  int totalBytes = 0;
+  int status;
+
+  status = xmlTextWriterStartElementNS(writer, [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]"${prefix(rootElement.namespace)}"[#else]NULL[/#if], "${rootElement.name}", NULL);
+  if (status < 0) {
+#if DEBUG_ENUNCIATE
+    printf("unable to write start element {${rootElement.namespace!""}}${rootElement.name}. status: %i\n", status);
+#endif
+    return status;
+  }
+  totalBytes += status;
+  [#assign localReferencedNamespaces=referencedNamespaces(rootElement)/]
+  [#if localReferencedNamespaces?size > 0]
+
+  if (writeNamespaces) {
+#if DEBUG_ENUNCIATE
+    printf("writing namespaces for start element {${rootElement.namespace!""}}${rootElement.name}...\n");
+#endif
+    [#list localReferencedNamespaces as referencedNamespace]
+      [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
+
+    status = xmlTextWriterWriteAttribute(writer, "xmlns:${prefix(referencedNamespace)}", "${referencedNamespace}");
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("unable to write namespace attribute xmlns:${prefix(referencedNamespace)}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+      [/#if]
+    [/#list]
+  }
+  [/#if]
+
+  status = xmlTextWriterWrite${xmlFunctionIdentifier(type.qname)?cap_first}Type(writer, _${type.clientSimpleName?uncap_first});
+  if (status < 0) {
+#if DEBUG_ENUNCIATE
+    printf("unable to write type for start element {${rootElement.namespace!""}}${rootElement.name}. status: %i\n", status);
+#endif
+    return status;
+  }
+  totalBytes += status;
+
+  status = xmlTextWriterEndElement(writer);
+  if (status < 0) {
+#if DEBUG_ENUNCIATE
+    printf("unable to end element {${rootElement.namespace!""}}${rootElement.name}. status: %i\n", status);
+#endif
+    return status;
+  }
+  totalBytes += status;
+
+  return totalBytes;
+}
+
+/**
+ * Frees the children of a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} whose children are to be free.
+ */
+static void free${xmlFunctionIdentifier(rootElement.qname)?cap_first}Element(struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+}
+  [/#if]
+
+/**
+ * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
+ *
+ * @return the ${type.clientSimpleName}, or NULL in case of error.
+ */
+static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type.qname)?cap_first}Type(xmlTextReaderPtr reader) {
+  int status, depth;
+  void *_child_accessor;
+  struct ${typeName} *_${type.clientSimpleName?uncap_first} = calloc(1, sizeof(struct ${typeName}));
+
+  [#assign attributesFound=false/]
+  [@forAllAccessors typeDefinition=type attributes=true elements=false value=false var="attribute"]
+    [#if !attributesFound]
+  if (xmlTextReaderHasAttributes(reader)) {
+    while (xmlTextReaderMoveToNextAttribute(reader)) {
+    [/#if]
+      if ((strcmp("${attribute.name}", xmlTextReaderConstLocalName(reader)) == 0) && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]strcmp("${attribute.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if])) {
+    [#if attribute.binaryData]
+#if DEBUG_ENUNCIATE
+        printf("Attempting to read binary data from attribute {${attribute.namespace!""}}${attribute.name}...\n");
+#endif
+        _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
+        _${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${attribute.clientSimpleName}));
+        free(_child_accessor);
+    [#else]
+        _child_accessor = xmlTextReaderRead${xmlFunctionIdentifier(attribute.baseType.qname)?cap_first}Type(reader);
+        if (_child_accessor == NULL) {
+          //panic: unable to return the attribute value for some reason.
+#if DEBUG_ENUNCIATE
+          printf("Failed to read attribute {${attribute.namespace!""}}${attribute.name} of type {${attribute.baseType.qname.namespaceURI}}${attribute.baseType.qname.localPart}.\n");
+#endif
+          free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+          free(_${type.clientSimpleName?uncap_first});
+          return NULL;
+        }
+        _${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} = [#if attribute.accessorType.primitive]*[/#if]((${classnameFor(attribute)}*)_child_accessor);
+        [#if attribute.accessorType.primitive]
+        free${xmlFunctionIdentifier(attribute.baseType.qname)?cap_first}Type((${classnameFor(attribute)}*) _child_accessor);
+        free(_child_accessor);
+        [/#if]
+        continue;
+    [/#if]
+      }
+    [#assign attributesFound=true/]
+  [/@forAllAccessors]
+  [#if attributesFound]
+    }
+
+    status = xmlTextReaderMoveToElement(reader);
+    if (status < 1) {
+      //panic: unable to return to the element node.
+#if DEBUG_ENUNCIATE
+      printf("Unable to return to element node from attributes.\n");
+#endif
+      free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+      free(_${type.clientSimpleName?uncap_first});
+      return NULL;
+    }
+  }
+  [/#if]
+
+  [#assign valueFound=false/]
+  [@forAllAccessors typeDefinition=type attributes=false elements=false value=true var="typeValue"]
+  if (xmlTextReaderIsEmptyElement(reader) == 0) {
+    [#if typeValue.binaryData]
+#if DEBUG_ENUNCIATE
+    printf("Attempting to read binary data from element value.\n");
+#endif
+    _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
+    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${typeValue.clientSimpleName}));
+    free(_child_accessor);
+    [#else]
+    _child_accessor = xmlTextReaderRead${xmlFunctionIdentifier(typeValue.baseType.qname)?cap_first}Type(reader);
+    if (_child_accessor == NULL) {
+      //panic: unable to return the value for some reason.
+#if DEBUG_ENUNCIATE
+      printf("Failed to read value of type {${typeValue.baseType.qname.namespaceURI}}${typeValue.baseType.qname.localPart}.\n");
+#endif
+      free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+      free(_${type.clientSimpleName?uncap_first});
+      return NULL;
+    }
+    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = [#if typeValue.accessorType.primitive]*[/#if]((${classnameFor(typeValue)}*)_child_accessor);
+      [#if typeValue.accessorType.primitive]
+    free(_child_accessor);
+      [/#if]
+    [/#if]
+  }
+    [#if typeValue.accessorType.isInstanceOf("java.lang.String")]
+      [#--special case for string accessors (empty string)--]
+  else {
+    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = "";
+  }
+    [/#if]
+    [#assign valueFound=true/]
+  [/@forAllAccessors]
+
+  [#if !valueFound][#--if a value is found, we don't have to iterate through the elements.--]
+    [#assign elementsFound=false/]
+    [@forAllAccessors typeDefinition=type attributes=false elements=true value=false var="element"]
+      [#if !elementsFound]
+  if (xmlTextReaderIsEmptyElement(reader) == 0) {
+    depth = xmlTextReaderDepth(reader);//track the depth.
+    status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+
+    while (xmlTextReaderDepth(reader) > depth) {
+      if (status < 1) {
+        //panic: XML read error.
+#if DEBUG_ENUNCIATE
+        printf("Failure to advance to next child element.\n");
+#endif
+        free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+        free(_${type.clientSimpleName?uncap_first});
+        return NULL;
+      }
+      [/#if]
+      [#if element.wrapped]
+      else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+        && strcmp("${element.wrapperName}", xmlTextReaderConstLocalName(reader)) == 0
+        && [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]strcmp("${element.wrapperNamespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+
+#if DEBUG_ENUNCIATE
+        printf("Unwrapping wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}...\n");
+#endif
+        //start wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
+        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        while (xmlTextReaderDepth(reader) > (depth + 1)) {
+          if (status < 1) {
+            //panic: XML read error.
+#if DEBUG_ENUNCIATE
+            printf("Failure to advance to next child element.\n");
+#endif
+            free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+            free(_${type.clientSimpleName?uncap_first});
+            return NULL;
+          }
+      [/#if]
+      [#list element.choices as choice]
+      else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+        && strcmp("${choice.name}", xmlTextReaderConstLocalName(reader)) == 0
+        && [#if ((choice.namespace??) && (choice.namespace != ""))]strcmp("${choice.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+
+        [#if ((!choice.ref??) && (choice.binaryData))]
+#if DEBUG_ENUNCIATE
+        printf("Attempting to read binary data of choice {${choice.namespace!""}}${choice.name}.\n");
+#endif
+        _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
+        _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName}));
+        free(_child_accessor);
+        [#else]
+        _child_accessor = [#if choice.ref??]xmlTextReaderRead${xmlFunctionIdentifier(choice.ref)?cap_first}Element(reader)[#else]xmlTextReaderRead${xmlFunctionIdentifier(choice.baseType.qname)?cap_first}Type(reader)[/#if];
+        if (_child_accessor == NULL) {
+#if DEBUG_ENUNCIATE
+          printf("Failed to read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].\n");
+#endif
+          //panic: unable to read the child element for some reason.
+          free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+          free(_${type.clientSimpleName?uncap_first});
+          return NULL;
+        }
+          [#if ((element.collectionType) && (element.choices?size > 1))]
+
+        _${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} = realloc(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}, (_${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${element.clientSimpleName} + 1) * sizeof(${classnameFor(choice)}));
+        memcpy(&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[_${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${element.clientSimpleName}++]), _child_accessor, sizeof(${classnameFor(choice)}));
+            [#if choice.ref??]
+        free${xmlFunctionIdentifier(choice.ref)?cap_first}Element((${classnameFor(choice)}*) _child_accessor);
+            [#else]
+        free${xmlFunctionIdentifier(choice.baseType.qname)?cap_first}Type((${classnameFor(choice)}*) _child_accessor);
+        free(_child_accessor);
+            [/#if]
+          [#elseif element.collectionType]
+
+        _${type.clientSimpleName?uncap_first}->${element.clientSimpleName} = realloc(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}, (_${type.clientSimpleName?uncap_first}->_sizeof_${element.clientSimpleName} + 1) * sizeof(${classnameFor(choice)}));
+        memcpy(&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[_${type.clientSimpleName?uncap_first}->_sizeof_${element.clientSimpleName}++]), _child_accessor, sizeof(${classnameFor(choice)}));
+            [#if choice.ref??]
+        free${xmlFunctionIdentifier(choice.ref)?cap_first}Element((${classnameFor(choice)}*) _child_accessor);
+            [#else]
+        free${xmlFunctionIdentifier(choice.baseType.qname)?cap_first}Type((${classnameFor(choice)}*) _child_accessor);
+        free(_child_accessor);
+            [/#if]
+          [#else]
+
+        _${type.clientSimpleName?uncap_first}->${element.clientSimpleName} = [#if choice.accessorType.primitive]*[/#if]((${classnameFor(choice)}*)_child_accessor);
+          [/#if]
+        [/#if]
+        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+      }
+      [/#list]
+      [#if element.wrapped]
+
+        if (status < 1) {
+          //panic: XML read error.
+#if DEBUG_ENUNCIATE
+          printf("Failed to advance to end wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}.\n");
+#endif
+          free${xmlFunctionIdentifier(type.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first});
+          free(_${type.clientSimpleName?uncap_first});
+          return NULL;
+        }
+        else {
+          //end wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
+          status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        }
+        } // end "while in wrapper element" loop
+      } // end "if wrapper element"
+      [/#if]
+      [#assign elementsFound=true/]
+    [/@forAllAccessors]
+  [#if elementsFound]
+    }
+  }
+  [/#if]
+  [/#if]
+
+  return _${type.clientSimpleName?uncap_first};
+}
+
+/**
+ * Writes a ${type.clientSimpleName} to XML.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The total bytes written, or -1 on error;
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(type.qname)?cap_first}Type(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  int status, totalBytes = 0, i;
+  char *binaryData;
+  [@forAllAccessors typeDefinition=type attributes=true elements=false value=false var="attribute"]
+
+    [#if !attribute.accessorType.primitive]
+  if (_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} != NULL) {
+    [#else]
+  if (1) { //always write the primitive attribute
+    [/#if]
+    status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]"${prefix(attribute.namespace)}"[#else]NULL[/#if], "${attribute.name}", NULL);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write start attribute {${attribute.namespace!""}}${attribute.name}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+
+    [#if attribute.binaryData]
+    binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${attribute.clientSimpleName});
+#if DEBUG_ENUNCIATE
+    printf("Writing binary value for attribute {${attribute.namespace!""}}${attribute.name}.");
+#endif
+    status = xmlTextWriterWriteString(writer, binaryData);
+    free(binaryData);
+    [#else]
+    status = xmlTextWriterWrite${xmlFunctionIdentifier(attribute.baseType.qname)?cap_first}Type(writer, [#if attribute.accessorType.primitive]&[/#if](_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName}));
+    [/#if]
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+    [#if attribute.binaryData]
+      printf("Failed to write binary value for attribute {${attribute.namespace!""}}${attribute.name}. status: %i", status);
+    [#else]
+      printf("Failed to write type {${attribute.baseType.qname.namespaceURI}}${attribute.baseType.qname.localPart} for attribute {${attribute.namespace!""}}${attribute.name}. status: %i", status);
+    [/#if]
+#endif
+      return status;
+    }
+    totalBytes += status;
+
+    status = xmlTextWriterEndAttribute(writer);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write end attribute {${attribute.namespace!""}}${attribute.name}. status: %i", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+  [/@forAllAccessors]
+  [@forAllAccessors typeDefinition=type attributes=false elements=false value=true var="typeValue"]
+
+    [#if !typeValue.accessorType.primitive]
+  if (_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} != NULL) {
+    [#else]
+  if (1) { //always write the primitive value.
+    [/#if]
+    [#if typeValue.binaryData]
+    binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${typeValue.clientSimpleName});
+    status = xmlTextWriterWriteString(writer, binaryData);
+    free(binaryData);
+    [#else]
+    status = xmlTextWriterWrite${xmlFunctionIdentifier(typeValue.baseType.qname)?cap_first}Type(writer, [#if typeValue.accessorType.primitive]&[/#if](_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName}));
+    [/#if]
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+    [#if attribute.binaryData]
+      printf("Failed to write binary value for element value. status: %i", status);
+    [#else]
+      printf("Failed to write type {${typeValue.baseType.qname.namespaceURI}}${typeValue.baseType.qname.localPart} for element value. status: %i", status);
+    [/#if]
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+  [/@forAllAccessors]
+  [@forAllAccessors typeDefinition=type attributes=false elements=true value=false var="element"]
+    [#if element.wrapped]
+      [#if element.choices?size > 1]
+
+  if ([#list element.choices as choice](_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} != NULL)[#if choice_has_next] || [/#if][/#list]) {
+    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]"${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], "${element.wrapperName}", NULL);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write start element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+      [#else]
+
+  if (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName} != NULL) {
+    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]"${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], "${element.wrapperName}", NULL);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write start element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+      [/#if]
+    [/#if]
+    [#list element.choices as choice]
+      [#if element.choices?size > 1]
+  for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${element.clientSimpleName}; i++) {
+      [#elseif element.collectionType]
+  for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${element.clientSimpleName}; i++) {
+      [#elseif !element.accessorType.primitive]
+  if (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName} != NULL) {
+      [#else]
+  if (1) { //always write the primitive element.
+      [/#if]
+      [#if choice.ref??]
+    status = xmlTextWriterWrite${xmlFunctionIdentifier(choice.ref)?cap_first}ElementNS(writer, [#if element.choices?size > 1]&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i])[#elseif element.collectionType]&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i])[#else]_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[/#if], 0);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write element {${choice.ref.namespaceURI}}${choice.ref.localPart}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+      [#else]
+    status = xmlTextWriterStartElementNS(writer, [#if ((choice.namespace??) && (choice.namespace != ""))]"${prefix(choice.namespace)}"[#else]NULL[/#if], "${choice.name}", NULL);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write start element {${choice.namespace!""}}${choice.name}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+        [#if choice.binaryData]
+
+    binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${choice.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName});
+    status = xmlTextWriterWriteString(writer, binaryData);
+    free(binaryData);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write binary data for element {${choice.namespace!""}}${choice.name}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+        [#else]
+
+    status = xmlTextWriterWrite${xmlFunctionIdentifier(choice.baseType.qname)?cap_first}Type(writer, [#if element.choices?size > 1]&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i])[#elseif element.collectionType]&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i])[#else][#if element.accessorType.primitive]&[/#if](_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})[/#if]);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart} for element {${choice.namespace!""}}${choice.name}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+        [/#if]
+
+    status = xmlTextWriterEndElement(writer);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write end element {${choice.namespace!""}}${choice.name}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+      [/#if]
+  }
+    [/#list]
+    [#if element.wrapped]
+      [#if element.choices?size > 1]
+
+  if ([#list element.choices as choice](_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} != NULL)[#if choice_has_next] || [/#if][/#list]) {
+    status = xmlTextWriterEndElement(writer);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write end element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+      [#else]
+
+  if (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName} != NULL) {
+    status = xmlTextWriterEndElement(writer);
+    if (status < 0) {
+#if DEBUG_ENUNCIATE
+      printf("Failed to write end element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
+#endif
+      return status;
+    }
+    totalBytes += status;
+  }
+      [/#if]
+    [/#if]
+  [/@forAllAccessors]
+
+
+  return totalBytes;
+}
+
+/**
+ * Frees the elements of a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+static void free${xmlFunctionIdentifier(type.qname)?cap_first}Type(struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  int i;
+  [@forAllAccessors typeDefinition=type]
+    [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
+  if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
+#if DEBUG_ENUNCIATE
+    printf("Freeing accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+  }
+    [#elseif ((accessor.collectionType) && (accessor.choices??) && (accessor.choices?size > 1))]
+      [#list accessor.choices as choice]
+  if (_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName} != NULL) {
+    for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${choice.name?replace("-", "_")}_${accessor.clientSimpleName}; i++) {
+      [#if choice.ref??]
+#if DEBUG_ENUNCIATE
+      printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free${xmlFunctionIdentifier(choice.ref)?cap_first}Element(&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[i]));
+      [#else]
+#if DEBUG_ENUNCIATE
+      printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free${xmlFunctionIdentifier(choice.baseType.qname)?cap_first}Type(&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName}[i]));
+      [/#if]
+    }
+#if DEBUG_ENUNCIATE
+    printf("Freeing accessor ${choice.name?replace("-", "_")}_${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${accessor.clientSimpleName});
+  }
+      [/#list]
+    [#elseif accessor.collectionType]
+  if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
+    for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${accessor.clientSimpleName}; i++) {
+      [#if accessor.ref??]
+#if DEBUG_ENUNCIATE
+      printf("Freeing accessor ${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free${xmlFunctionIdentifier(accessor.ref)?cap_first}Element(&(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName}[i]));
+      [#else]
+#if DEBUG_ENUNCIATE
+      printf("Freeing accessor ${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free${xmlFunctionIdentifier(accessor.baseType.qname)?cap_first}Type(&(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName}[i]));
+      [/#if]
+    }
+#if DEBUG_ENUNCIATE
+    printf("Freeing accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+  }
+    [#elseif accessor.ref??]
+  if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
+#if DEBUG_ENUNCIATE
+    printf("Freeing element of accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free${xmlFunctionIdentifier(accessor.ref)?cap_first}Element(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+#if DEBUG_ENUNCIATE
+    printf("Freeing accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+  }
+    [#elseif !accessor.accessorType.primitive]
+  if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
+#if DEBUG_ENUNCIATE
+    printf("Freeing type of accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free${xmlFunctionIdentifier(accessor.baseType.qname)?cap_first}Type(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+#if DEBUG_ENUNCIATE
+    printf("Freeing accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
+#endif
+    free(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+  }
+    [/#if]
+  [/@forAllAccessors]
+}
+[/#macro]

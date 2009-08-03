@@ -17,6 +17,6 @@
 @XmlSchema (
   namespace = "http://jaxws_client.enunciate.codehaus.org/animals"
 )
-package org.codehaus.enunciate.jaxws_client.schema.animals;
+package org.codehaus.enunciate.examples.jaxws_client.schema.animals;
 
 import javax.xml.bind.annotation.XmlSchema;

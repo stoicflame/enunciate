@@ -52,7 +52,7 @@ public class FindRootElementMethod implements TemplateMethodModelEx {
 
     ClassDeclaration def = (ClassDeclaration) unwrapped;
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-    return model.findRootElementDeclaration(def);
+    return model.findElementDeclaration(def);
   }
 
 }

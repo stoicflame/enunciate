@@ -15,8 +15,8 @@
  */
 
 @XmlSchema (
-  namespace = "http://xfire_client.enunciate.codehaus.org/animals"
+  namespace = "http://ruby.enunciate.codehaus.org/animals"
 )
-package org.codehaus.enunciate.xfire_client.schema.animals;
+package org.codehaus.enunciate.examples.ruby.schema.animals;
 
 import javax.xml.bind.annotation.XmlSchema;

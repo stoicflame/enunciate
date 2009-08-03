@@ -29,7 +29,7 @@
                   <property>ruby.executable</property>
                   <message>In order to build the Ruby module, you must have Ruby installed.
 Then, define a profile in your settings.xml file that defines the path to your 'ruby' executable in the property 'ruby.executable'.
-If you just want to skip the Ruby tests, set the value of the property 'ruby.executable' to be 'true'. (And don't ask any questions about why that works. It just does.)</message>
+If you just want to skip the Ruby tests, set the value of the property 'ruby.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
             </configuration>

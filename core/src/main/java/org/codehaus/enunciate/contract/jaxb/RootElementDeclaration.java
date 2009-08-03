@@ -28,6 +28,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.io.StringWriter;
 
@@ -95,6 +96,15 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
     }
 
     return namespace;
+  }
+
+  /**
+   * The qname of the element.
+   *
+   * @return The qname of the element.
+   */
+  public QName getQname() {
+    return new QName(getNamespace(), getName());
   }
 
   /**
