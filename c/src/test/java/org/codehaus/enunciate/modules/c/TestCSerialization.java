@@ -1,24 +1,21 @@
 package org.codehaus.enunciate.modules.c;
 
 import junit.framework.TestCase;
-
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.*;
-
 import org.codehaus.enunciate.examples.c.schema.*;
-import org.codehaus.enunciate.examples.c.schema.vehicles.*;
-import org.codehaus.enunciate.examples.c.schema.structures.*;
-import org.codehaus.enunciate.examples.c.schema.draw.*;
-import org.codehaus.enunciate.examples.c.schema.animals.*;
-import org.joda.time.DateTimeZone;
+import org.codehaus.enunciate.examples.c.schema.animals.Cat;
+import org.codehaus.enunciate.examples.c.schema.draw.Canvas;
+import org.codehaus.enunciate.examples.c.schema.structures.House;
+import org.codehaus.enunciate.examples.c.schema.vehicles.Bus;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.activation.DataHandler;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.util.*;
 
 /**
  * Makes sure C serialization is working correctly.
@@ -291,14 +288,14 @@ public class TestCSerialization extends TestCase {
     assertEquals(10, window.getHeight());
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
-    assertNull("constructed date should be null (C# value type should not be serialized)", house.getConstructedDate());
-    assertEquals(new DateTime(date, DateTimeZone.UTC), house.getConstructedDate());
+    assertNotNull(house.getConstructedDate());
+    assertEquals(date.getTime() - (date.getTime() % 1000), house.getConstructedDate().getMillis());
 
   }
 
   /**
    * tests cat.  This one has IDREFs.
-   * todo: worry about xmlids
+   * todo: worry about referential integrity
    */
   public void x_testCat() throws Exception {
     if (this.skipCTests) {
@@ -510,7 +507,7 @@ public class TestCSerialization extends TestCase {
     File in = File.createTempFile(object.getClass().getName(), ".xml", this.tempDir);
     File out = File.createTempFile(object.getClass().getName(), ".xml", this.tempDir);
     marshaller.marshal(object, in);
-    System.out.printf("%s %s %s %s\n", this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath());
+//    System.out.printf("%s %s %s %s\n", this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath());
     Process process = new ProcessBuilder(this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath())
       .redirectErrorStream(true)
       .start();

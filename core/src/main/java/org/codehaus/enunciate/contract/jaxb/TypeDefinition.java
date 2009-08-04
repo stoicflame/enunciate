@@ -380,7 +380,11 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return The qname of this type definition.
    */
   public QName getQname() {
-    return new QName(getNamespace(), getName());
+    String localPart = getName();
+    if (localPart == null) {
+      localPart = "";
+    }
+    return new QName(getNamespace(), localPart);
   }
 
   /**

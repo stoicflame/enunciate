@@ -176,9 +176,9 @@ public class Enunciate {
    * the artifacts.
    */
   protected void doClose() throws EnunciateException, IOException {
-    info("\n\nClosing Enunciate mechanism.");
+    info("\n\nclosing enunciate.");
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
-      debug("Closing module %s.", deploymentModule.getName());
+      debug("closing enunciate module %s.", deploymentModule.getName());
       deploymentModule.close();
     }
 
@@ -562,9 +562,9 @@ public class Enunciate {
    * @param deploymentModules The deployment modules.
    */
   protected void initModules(Collection<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
-    info("\n\nInitializing Enunciate mechanism.");
+    info("\n\ninitializing enunciate.");
     for (DeploymentModule deploymentModule : deploymentModules) {
-      debug("Initializing module %s.", deploymentModule.getName());
+      debug("initializing enunciate module %s.", deploymentModule.getName());
       deploymentModule.init(this);
     }
   }

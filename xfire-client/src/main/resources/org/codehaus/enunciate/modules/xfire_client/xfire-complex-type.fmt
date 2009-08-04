@@ -191,7 +191,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
       [#list type.elements as element]
         [#assign element_codeblock_index = element_index]
         [#if element.wrapped]
-    [#if element_codeblock_index > 0]else [/#if]if ("${type.namespace?default("")}".equals(name.getNamespaceURI()) && ("${element.wrapperName}".equals(name.getLocalPart()))) {
+    [#if element_codeblock_index > 0]else [/#if]if ("${element.wrapperNamespace?default("")}".equals(name.getNamespaceURI()) && ("${element.wrapperName}".equals(name.getLocalPart()))) {
       ElementsUtil.readWrappedElements(elementReader, context, new WrappedItemCallback() {
         public void handleChildElement(QName name, MessageReader elementReader, MessageContext context) throws XFireFault {
 

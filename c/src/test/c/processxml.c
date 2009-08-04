@@ -1,4 +1,4 @@
-#define DEBUG_ENUNCIATE 1
+#define DEBUG_ENUNCIATE 0 //set to '1' or '2' for output debugging.
 #include <enunciate.c>
 #include <stdio.h>
 

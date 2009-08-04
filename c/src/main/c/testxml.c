@@ -718,18 +718,111 @@ static void freeXsQNameType(char *value) {
  */
 static struct tm *xmlTextReaderReadXsDateTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  int year = 0, month = 0, day = 0, hour = 0, minute = 0, offset_hours = 0, offset_min = 0, success;
-  float second = 0;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i-%i-%iT%i:%i:%f%i:%i", &year, &month, &day, &hour, &minute, &second, &offset_hours, &offset_min);
-  free(nodeValue);
-  time->tm_sec = second;
-  time->tm_min = minute;
-  time->tm_hour = hour;
-  time->tm_mday = day;
-  time->tm_mon = month - 1;
-  time->tm_year = year - 1900;
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
+  //go to first '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_year = atoi(token) - 1900;
+  if (token_index > 0) {
+    success++; //assume 'year' was successfully read.
+    index++;
+  }
+
+  //go to next '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mon = atoi(token) - 1;
+  if (token_index > 0) {
+    success++; //assume 'month' was successfully read.
+    index++;
+  }
+
+  //go to 'T' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != 'T') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mday = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'day' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_hour = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'hour' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'minutes' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
   time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
   return time;
 }
 
@@ -741,7 +834,7 @@ static struct tm *xmlTextReaderReadXsDateTimeType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWriteXsDateTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -763,15 +856,75 @@ static void freeXsDateTimeType(struct tm *value) {
  */
 static struct tm *xmlTextReaderReadXsTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  int hour = 0, minute = 0, offset_hours = 0, offset_min = 0, success;
-  float second = 0;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i:%i:%f%i:%i", &hour, &minute, &second, &offset_hours, &offset_min);
-  free(nodeValue);
-  time->tm_sec = second;
-  time->tm_min = minute;
-  time->tm_hour = hour;
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: hh:MM:ss+oo:oo
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_hour = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'hour' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'minutes' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
   time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
   return time;
 }
 
@@ -783,7 +936,7 @@ static struct tm *xmlTextReaderReadXsTimeType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWriteXsTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i%+02i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i.000%+03i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -804,16 +957,77 @@ static void freeXsTimeType(struct tm *value) {
  * @return pointer to the date.
  */
 static struct tm *xmlTextReaderReadXsDateType(xmlTextReaderPtr reader) {
-  struct tm * date = calloc(1, sizeof(struct tm));
-  int year = 0, month = 0, day = 0, offset_hours = 0, offset_min = 0, success;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i-%i-%i%i:%i", &year, &month, &day, &offset_hours, &offset_min);
-  free(nodeValue);
-  date->tm_mday = day;
-  date->tm_mon = month - 1;
-  date->tm_year = year - 1900;
-  date->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-  return date;
+  struct tm * time = calloc(1, sizeof(struct tm));
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: yyyy-mm-dd+oo:oo
+  //go to first '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_year = atoi(token) - 1900;
+  if (token_index > 0) {
+    success++; //assume 'year' was successfully read.
+    index++;
+  }
+
+  //go to next '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mon = atoi(token) - 1;
+  if (token_index > 0) {
+    success++; //assume 'month' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
+  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
+  return time;
 }
 
 /**
@@ -824,7 +1038,7 @@ static struct tm *xmlTextReaderReadXsDateType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWriteXsDateType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+02i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -1270,17 +1484,110 @@ void personxmlout(struct person *p) {
 }
 
 int readDateTime(char* timevalue, struct tm *time) {
-  int year = 0, month = 0, day = 0, hour = 0, minute = 0, offset_hours = 0, offset_min = 0, success;
-  float second = 0;
-  success = sscanf(timevalue, "%i-%i-%iT%i:%i:%f%i:%i", &year, &month, &day, &hour, &minute, &second, &offset_hours, &offset_min);
-  time->tm_sec = second;
-  time->tm_min = minute;
-  time->tm_hour = hour;
-  time->tm_mday = day;
-  time->tm_mon = month - 1;
-  time->tm_year = year - 1900;
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
+  //go to first '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_year = atoi(token) - 1900;
+  if (token_index > 0) {
+    success++; //assume 'year' was successfully read.
+    index++;
+  }
+
+  //go to next '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mon = atoi(token) - 1;
+  if (token_index > 0) {
+    success++; //assume 'month' was successfully read.
+    index++;
+  }
+
+  //go to 'T' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != 'T') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mday = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'day' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_hour = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'hour' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'minutes' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
   time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-  return success - 6;
+
+  return success;
 }
 
 int genderxmlout(xmlTextWriterPtr writer, enum gender g) {
@@ -1477,20 +1784,6 @@ int main() {
 //  personout(readperson);
 //  personxmlout(readperson);
 
-  printf("\n");
-  printf("\n");
-  printf("DATE EXPERIMENTS:\n");
-  time(now_t);
-  now = localtime(now_t);
-  printf("Now: %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec, (int) now->tm_gmtoff / 3600, (int) (now->tm_gmtoff / 60) % 60);
-  success = readDateTime("2007-01-01T12:12:12", &othertime);
-  printf("parsed 2007-01-01T12:12:12 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  success = readDateTime("2007-01-01", &othertime);
-  printf("parsed 2007-01-01 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  success = readDateTime("12:20:30", &othertime);
-  printf("parsed 12:20:30 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  printf("blobby: %i\n", blobbyblobby);
-
   eventptr = malloc(sizeof(struct event));
 
   someevent.description = "hello, there!";
@@ -1538,6 +1831,21 @@ int main() {
   bunchofints[1] = 1;
   bunchofints[2] = 2;
   free(bunchofints);
+
+  printf("\n");
+  printf("\n");
+  printf("DATE EXPERIMENTS:\n");
+  time(now_t);
+  now = localtime(now_t);
+  printf("Now: %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec, (int) now->tm_gmtoff / 3600, (int) (now->tm_gmtoff / 60) % 60);
+  success = readDateTime("2007-01-01T12:12:12", &othertime);
+  printf("parsed 2007-01-01T12:12:12 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
+  success = readDateTime("2007-01-01", &othertime);
+  printf("parsed 2007-01-01 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
+  success = readDateTime("12:20:30", &othertime);
+  printf("parsed 12:20:30 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
+  success = readDateTime("2009-08-04T10:11:38.428-06:00", &othertime);
+  printf("parsed 2009-08-04T10:11:38.428-06:00 to %04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) (othertime.tm_gmtoff / 3600), (int) ((othertime.tm_gmtoff / 60) % 60));
 };
 
 void testFunc() {

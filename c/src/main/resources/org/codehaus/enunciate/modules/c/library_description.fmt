@@ -1,50 +1,49 @@
 [#ftl]
-[#-- @ftlvariable name="bundle_contains" type="java.lang.String" --]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
-[#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
+[#-- @ftlvariable name="filename" type="java.lang.String" --]
+[#-- @ftlvariable name="input_element_name" type="java.lang.String" --]
+[#-- @ftlvariable name="output_element_name" type="java.lang.String" --]
 <h1>
   Introduction
 </h1>
 
 <p>
-  The Ruby client-side library defines the Ruby classes that can be (de)serialized to/from JSON.
-  This is useful for accessing the REST endpoints that are published by this application, but only
-  those that produce a JSON representation of their resources (content type "application/json").
+  The C module generates the source code for the ANSI-C-compatible data structures and (de)serialization
+  functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a> to (de)serialize
+  the REST resources as they are represented as XML data.
 </p>
 
 <p>
-  This library leverages the <a href="http://json.rubyforge.org/">Ruby JSON Implementation</a>, which is
-  required in order to use this library.
+  The generated C source code depends on the <a href="http://xmlsoft.org/html/libxml-xmlreader.html">XML Reader API</a>
+  and the <a href="http://xmlsoft.org/html/libxml-xmlwriter.html">XML Writer API</a> as well as the <tt>&lt;time.h&gt;</tt>,
+  <tt>&lt;string.h&gt;</tt>, and <tt>&lt;stdlib.h&gt;</tt> C standard libraries.
 </p>
 
-[#if sample_resource?? && sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+[#if output_element_name??]
 <h1>
-  JSON REST Example
+  REST XML Example
 </h1>
 
 <code>
-require 'net/https'
-require 'uri'
+#include <${filename}>
 //...
 
-//read a resource from a REST url
-url = URI.parse("...")
-request = Net::HTTP::${sample_resource.supportedOperations?first?lower_case?cap_first}.new(url.request_uri)
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
-input = ${sample_resource.inputPayload.xmlElement.simpleName}.new
-//set up the ${sample_resource.inputPayload.xmlElement.simpleName}...
-request.body = input.to_json
-request['Content-Type'] = "application/json"
+[#if input_element_name??]
+xmlTextWriterPtr writer = ...; //set up the writer to the url.
+${input_element_name} *request_element = ...;
 [/#if]
+xmlTextReaderPtr reader = ...; //set up the reader to the url.
+${output_element_name} *response_element = ...;
+[#if input_element_name??]
+//set up the ${input_element_name}...
+xml_write_${input_element_name}(writer, request_element);
+[/#if]
+response_element = xml_read_${output_element_name}(reader);
 
-http = Net::HTTP.new(url.host, url.port)
-//set up additional http stuff...
-res = http.start do |ht|
-  ht.request(request)
-end
+//handle the response as needed...
 
-result = ${sample_resource.outputPayload.xmlElement.simpleName}.from_json(JSON.parse(res.body))
-
-//handle the result as needed...
+[#if input_element_name??]
+free_${input_element_name}(request_element); //free the ${input_element_name}
+[/#if]
+free_${output_element_name}(response_element); //free the ${output_element_name}
 </code>
 [/#if]

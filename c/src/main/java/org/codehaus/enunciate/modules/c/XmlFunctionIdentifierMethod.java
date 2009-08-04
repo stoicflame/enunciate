@@ -22,6 +22,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -47,8 +50,27 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+
+    if (unwrapped instanceof XmlType) {
+      if (unwrapped instanceof XmlClassType && ((XmlType)unwrapped).isAnonymous()) {
+        unwrapped = ((XmlClassType) unwrapped).getTypeDefinition();
+      }
+      else {
+        unwrapped = ((XmlType) unwrapped).getQname();
+      }
+    }
+
+    if (unwrapped instanceof TypeDefinition) {
+      if (((TypeDefinition) unwrapped).isAnonymous()) {
+        unwrapped = new QName(((TypeDefinition)unwrapped).getNamespace(), "anonymous" + ((TypeDefinition)unwrapped).getSimpleName());
+      }
+      else {
+        unwrapped = ((TypeDefinition) unwrapped).getQname();
+      }
+    }
+    
     if (!(unwrapped instanceof QName)) {
-      throw new TemplateModelException("The xmlFunctionIdentifier method must have a qname as a parameter.");
+      throw new TemplateModelException("The xmlFunctionIdentifier method must have a qname, type definition, or xml type as a parameter.");
     }
 
     QName qname = (QName) unwrapped;
@@ -62,7 +84,11 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
 
-    String localName = qname.getLocalPart().replace('-', '_');
+    String localName = qname.getLocalPart();
+    if ("".equals(localName)) {
+      localName = "anonymous";
+    }
+    localName = localName.replace('-', '_');
     StringBuilder identifier = new StringBuilder();
     identifier.append(Character.toLowerCase(prefix.charAt(0)));
     identifier.append(prefix.substring(1));

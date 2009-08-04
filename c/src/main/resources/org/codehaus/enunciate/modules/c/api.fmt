@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
-#include <libxml/tree.h>
 
 #ifndef DEBUG_ENUNCIATE
 #define DEBUG_ENUNCIATE 0
@@ -729,18 +728,111 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  int year = 0, month = 0, day = 0, hour = 0, minute = 0, offset_hours = 0, offset_min = 0, success;
-  float second = 0;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i-%i-%iT%i:%i:%f%i:%i", &year, &month, &day, &hour, &minute, &second, &offset_hours, &offset_min);
-  free(nodeValue);
-  time->tm_sec = second;
-  time->tm_min = minute;
-  time->tm_hour = hour;
-  time->tm_mday = day;
-  time->tm_mon = month - 1;
-  time->tm_year = year - 1900;
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
+  //go to first '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_year = atoi(token) - 1900;
+  if (token_index > 0) {
+    success++; //assume 'year' was successfully read.
+    index++;
+  }
+
+  //go to next '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mon = atoi(token) - 1;
+  if (token_index > 0) {
+    success++; //assume 'month' was successfully read.
+    index++;
+  }
+
+  //go to 'T' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != 'T') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mday = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'day' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_hour = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'hour' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'minutes' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
   time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
   return time;
 }
 
@@ -752,7 +844,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
 }
 
 /**
@@ -774,15 +866,75 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeT
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  int hour = 0, minute = 0, offset_hours = 0, offset_min = 0, success;
-  float second = 0;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i:%i:%f%i:%i", &hour, &minute, &second, &offset_hours, &offset_min);
-  free(nodeValue);
-  time->tm_sec = second;
-  time->tm_min = minute;
-  time->tm_hour = hour;
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: hh:MM:ss+oo:oo
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_hour = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'hour' was successfully read.
+    index++;
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume 'minutes' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
   time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
   return time;
 }
 
@@ -794,7 +946,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i%+02i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i.000%+03i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
 }
 
 /**
@@ -815,16 +967,77 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(
  * @return pointer to the date.
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateType(xmlTextReaderPtr reader) {
-  struct tm * date = calloc(1, sizeof(struct tm));
-  int year = 0, month = 0, day = 0, offset_hours = 0, offset_min = 0, success;
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  success = sscanf(nodeValue, "%i-%i-%i%i:%i", &year, &month, &day, &offset_hours, &offset_min);
-  free(nodeValue);
-  date->tm_mday = day;
-  date->tm_mon = month - 1;
-  date->tm_year = year - 1900;
-  date->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-  return date;
+  struct tm * time = calloc(1, sizeof(struct tm));
+  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  char token[len];
+
+  //date time format: yyyy-mm-dd+oo:oo
+  //go to first '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_year = atoi(token) - 1900;
+  if (token_index > 0) {
+    success++; //assume 'year' was successfully read.
+    index++;
+  }
+
+  //go to next '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_mon = atoi(token) - 1;
+  if (token_index > 0) {
+    success++; //assume 'month' was successfully read.
+    index++;
+  }
+
+  //go to '+' or '-' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  time->tm_sec = atof(token);
+  if (token_index > 0) {
+    success++; //assume 'seconds' was successfully read.
+    if (timevalue[index] == '+') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_hours = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset hours was successfully read.
+    index++;
+  }
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\n';
+  offset_min = atoi(token);
+  if (token_index > 0) {
+    success++; //assume gmt offset minutes was successfully read.
+    index++;
+  }
+  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
+
+  free(timevalue);
+  return time;
 }
 
 /**
@@ -835,7 +1048,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+02i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
 }
 
 /**

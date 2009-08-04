@@ -25,6 +25,10 @@ import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
+import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
@@ -37,6 +41,8 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeMap;
+
+import com.sun.mirror.declaration.ClassDeclaration;
 
 /**
  * <h1>C Module</h1>
@@ -143,7 +149,42 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
    */
   protected String readResource(String resource) throws IOException, EnunciateException {
     HashMap<String, Object> model = new HashMap<String, Object>();
-    model.put("sample_resource", getModelInternal().findExampleResource());
+    RESTResource exampleResource = getModelInternal().findExampleResource();
+    model.put("filename", getSourceFileName());
+    String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, getModelInternal().getNamespacesToPrefixes());
+
+    if (exampleResource != null) {
+      if (exampleResource.getInputPayload() != null && exampleResource.getInputPayload().getXmlElement() != null) {
+        ElementDeclaration el = exampleResource.getInputPayload().getXmlElement();
+        TypeDefinition typeDefinition = null;
+        if (el instanceof RootElementDeclaration) {
+          typeDefinition = getModelInternal().findTypeDefinition((RootElementDeclaration) el);
+        }
+        else if (el instanceof LocalElementDeclaration && ((LocalElementDeclaration) el).getElementTypeDeclaration() instanceof ClassDeclaration) {
+          typeDefinition = getModelInternal().findTypeDefinition((ClassDeclaration) ((LocalElementDeclaration) el).getElementTypeDeclaration());
+        }
+
+        if (typeDefinition != null) {
+          model.put("input_element_name", nameForTypeDefinition.calculateName(typeDefinition));
+        }
+      }
+
+      if (exampleResource.getOutputPayload() != null && exampleResource.getOutputPayload().getXmlElement() != null) {
+        ElementDeclaration el = exampleResource.getOutputPayload().getXmlElement();
+        TypeDefinition typeDefinition = null;
+        if (el instanceof RootElementDeclaration) {
+          typeDefinition = getModelInternal().findTypeDefinition((RootElementDeclaration) el);
+        }
+        else if (el instanceof LocalElementDeclaration && ((LocalElementDeclaration) el).getElementTypeDeclaration() instanceof ClassDeclaration) {
+          typeDefinition = getModelInternal().findTypeDefinition((ClassDeclaration) ((LocalElementDeclaration) el).getElementTypeDeclaration());
+        }
+
+        if (typeDefinition != null) {
+          model.put("output_element_name", nameForTypeDefinition.calculateName(typeDefinition));
+        }
+      }
+    }
 
     URL res = CDeploymentModule.class.getResource(resource);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -167,7 +208,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   protected String getSourceFileName() {
     String label = getLabel();
     if (label == null) {
-      label = getEnunciate().getConfig().getLabel();
+      label = getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel();
     }
     return label + ".c";
   }

@@ -114,6 +114,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     if (accessor.isXmlIDREF()) {
       return "char";
     }
+    else if (accessor.isXmlList()) {
+      return "char";
+    }
     
     return super.convert(accessor);
   }
