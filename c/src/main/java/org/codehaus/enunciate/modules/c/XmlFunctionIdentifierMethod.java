@@ -21,12 +21,19 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 
 import javax.xml.namespace.QName;
+import javax.xml.bind.JAXBElement;
 import java.util.List;
 import java.util.Map;
 
@@ -45,11 +52,25 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
    */
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
-      throw new TemplateModelException("The xmlFunctionIdentifier method must have a qname as a parameter.");
+      throw new TemplateModelException("The xmlFunctionIdentifier method must have a qname, type definition, or xml type as a parameter.");
     }
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+
+    if (unwrapped instanceof Accessor) {
+      DecoratedTypeMirror accessorType = (DecoratedTypeMirror) ((Accessor) unwrapped).getBareAccessorType();
+
+      if (accessorType.isInstanceOf(JAXBElement.class.getName())) {
+        unwrapped = KnownXmlType.ANY_TYPE.getQname();
+      }
+      else if (unwrapped instanceof Element && ((Element)unwrapped).getRef() != null) {
+        unwrapped = ((Element) unwrapped).getRef();
+      }
+      else {
+        unwrapped = ((Accessor) unwrapped).getBaseType();
+      }
+    }
 
     if (unwrapped instanceof XmlType) {
       if (unwrapped instanceof XmlClassType && ((XmlType)unwrapped).isAnonymous()) {
@@ -62,11 +83,16 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
 
     if (unwrapped instanceof TypeDefinition) {
       if (((TypeDefinition) unwrapped).isAnonymous()) {
+        //if anonymous, we have to come up with a unique (albeit nonstandard) name for the xml type.
         unwrapped = new QName(((TypeDefinition)unwrapped).getNamespace(), "anonymous" + ((TypeDefinition)unwrapped).getSimpleName());
       }
       else {
         unwrapped = ((TypeDefinition) unwrapped).getQname();
       }
+    }
+
+    if (unwrapped instanceof ElementDeclaration) {
+      unwrapped = ((ElementDeclaration) unwrapped).getQname();
     }
     
     if (!(unwrapped instanceof QName)) {
@@ -86,15 +112,14 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
 
     String localName = qname.getLocalPart();
     if ("".equals(localName)) {
-      localName = "anonymous";
+      return null;
     }
-    localName = localName.replace('-', '_');
     StringBuilder identifier = new StringBuilder();
     identifier.append(Character.toLowerCase(prefix.charAt(0)));
     identifier.append(prefix.substring(1));
     identifier.append(Character.toUpperCase(localName.charAt(0)));
     identifier.append(localName.substring(1));
-    return identifier.toString();
+    return CDeploymentModule.scrubIdentifier(identifier.toString());
   }
 
   /**

@@ -98,6 +98,12 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-c</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-csharp</artifactId>
       <version>${project.version}</version>
     </dependency>

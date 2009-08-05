@@ -21,6 +21,7 @@ import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -41,6 +42,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 
@@ -64,17 +66,19 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * <ul>
  * <li>The "label" attribute is the label for the C API.  This is the name by which the file will be identified (producing [label].c).
  * By default the label is the same as the Enunciate project label.</li>
+ * <li>The "forceEnable" attribute is used to force-enable the C module. By default, the C module is enabled only if REST endpoints are found in the project.</li>
  * <li>The "enumConstantNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an enum constant name to a unique c-style constant name. The arguments passed to the format string are: (1) the project label (2) the namespace id
  * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
  * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name with the '_' character replacing the '.' character (9) the annotation-specified client name of the enum contant (10)
- * the simple name of the enum constant. The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
+ * type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
+ * be "scrubbed" by replacing any non-word character with the "_" character. The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
  * <li>The "typeDefinitionNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an type definition name to a unique c-style name. The arguments passed to the format string are: (1) the project label (2) the namespace id
  * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
  * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name with the '_' character replacing the '.' character. The default value for this pattern is "%1$s_%2$s_%3$s".</li> 
+ * type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character with the "_" character. The default value for this
+ * pattern is "%1$s_%2$s_%3$s".</li> 
  * </ul>
  *
  * @author Ryan Heaton
@@ -82,6 +86,12 @@ import com.sun.mirror.declaration.ClassDeclaration;
  */
 public class CDeploymentModule extends FreemarkerDeploymentModule {
 
+  /**
+   * The pattern to scrub is any non-word character.
+   */
+  private static final Pattern SCRUB_PATTERN = Pattern.compile("\\W");
+
+  private boolean forceEnable = false;
   private String label = null;
   private String typeDefinitionNamePattern = "%1$s_%2$s_%3$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
@@ -92,6 +102,16 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public String getName() {
     return "c";
+  }
+
+  /**
+   * Scrub a C identifier (removing any illegal characters, etc.).
+   *
+   * @param identifier The identifier.
+   * @return The identifier.
+   */
+  public static String scrubIdentifier(String identifier) {
+    return identifier == null ? null : SCRUB_PATTERN.matcher(identifier).replaceAll("_");
   }
 
   @Override
@@ -123,6 +143,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());
       model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod());
+      model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 
       debug("Generating the C data structures and (de)serialization functions...");
       URL apiTemplate = getTemplateURL("api.fmt");
@@ -291,6 +312,24 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
     this.enumConstantNamePattern = enumConstantNamePattern;
   }
 
+  /**
+   * Whether to require this module (force-enable it).
+   *
+   * @return Whether to require this module (force-enable it).
+   */
+  public boolean isForceEnable() {
+    return forceEnable;
+  }
+
+  /**
+   * Whether to require this module (force-enable it).
+   *
+   * @param forceEnable Whether to require this module (force-enable it).
+   */
+  public void setForceEnable(boolean forceEnable) {
+    this.forceEnable = forceEnable;
+  }
+
   @Override
   public RuleSet getConfigurationRules() {
     return new CRuleSet();
@@ -304,11 +343,19 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   // Inherited.
   @Override
   public boolean isDisabled() {
-    if (super.isDisabled()) {
+    if (isForceEnable()) {
+      debug("C module is force-enabled via the 'require' attribute in the configuration.");
+      return false;
+    }
+    else if (super.isDisabled()) {
       return true;
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToSchemas().isEmpty()) {
-      debug("C module is disabled because there are no resource types.");
+      debug("C module is disabled because there are no schema types.");
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
+      debug("C module is disabled because there are no JAX-RS root resources.");
       return true;
     }
 

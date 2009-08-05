@@ -61,7 +61,7 @@
         <artifactId>maven-idea-plugin</artifactId>
         <configuration>
           <downloadSources>true</downloadSources>
-          <exclude>cargo-installs</exclude>
+          <exclude>cargo-installs,target/tomcat5x,target/war</exclude>
         </configuration>
       </plugin>
       <plugin>

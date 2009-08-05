@@ -28,6 +28,8 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
@@ -63,6 +65,13 @@ import com.sun.mirror.type.ClassType;
  * <ul>
  * <li>The "label" attribute is the label for the Ruby API.  This is the name by which the file will be identified (producing [label].rb).
  * By default the label is the same as the Enunciate project label.</li>
+ * <li>The "forceEnable" attribute is used to force-enable the Ruby module. By default, the Ruby module is
+ * enabled only when both of these conditions are met:
+ *   <ol>
+ *     <li>Jackson-XC is on the claspath.</li>
+ *     <li>There exists a JAX-RS resource method that consumes or produces JSON.</li>
+ *   </ol> 
+ * </li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -85,7 +94,7 @@ import com.sun.mirror.type.ClassType;
  */
 public class RubyDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener {
 
-  private boolean require = false;
+  private boolean forceEnable = false;
   private String label = null;
   private final Map<String, String> packageToModuleConversions = new HashMap<String, String>();
   private boolean jacksonXcAvailable = false;
@@ -247,17 +256,17 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
    *
    * @return Whether to require the Ruby client code.
    */
-  public boolean isRequire() {
-    return require;
+  public boolean isForceEnable() {
+    return forceEnable;
   }
 
   /**
    * Whether to require the Ruby client code.
    *
-   * @param require Whether to require the Ruby client code.
+   * @param forceEnable Whether to require the Ruby client code.
    */
-  public void setRequire(boolean require) {
-    this.require = require;
+  public void setForceEnable(boolean forceEnable) {
+    this.forceEnable = forceEnable;
   }
 
   /**
@@ -320,7 +329,11 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   // Inherited.
   @Override
   public boolean isDisabled() {
-    if (super.isDisabled()) {
+    if (isForceEnable()) {
+      debug("Ruby module is force-enabled via the 'require' attribute in the config.");
+      return false;
+    }
+    else if (super.isDisabled()) {
       return true;
     }
     else if (!jacksonXcAvailable) {
@@ -328,10 +341,42 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
       return true;
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToSchemas().isEmpty()) {
-      debug("Ruby module is disabled because there are no resource types.");
+      debug("Ruby module is disabled because there are no schema types.");
+      return true;
+    }
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
+      debug("Ruby module is disabled because there are no JAX-RS root resources.");
+      return true;
+    }
+    else if (getModelInternal() != null && !existsAnyJsonResourceMethod(getModelInternal().getRootResources())) {
+      debug("Ruby module is disabled because there are no JAX-RS root resource methods that produce or consume json.");
       return true;
     }
 
+    return false;
+  }
+
+  /**
+   * Whether any root resources exist that produce json.
+   *
+   * @param rootResources The root resources.
+   * @return Whether any root resources exist that produce json.
+   */
+  protected boolean existsAnyJsonResourceMethod(List<RootResource> rootResources) {
+    for (RootResource rootResource : rootResources) {
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        for (String mime : resourceMethod.getProducesMime()) {
+          if (mime.toLowerCase().contains("json")) {
+            return true;
+          }
+        }
+        for (String mime : resourceMethod.getConsumesMime()) {
+          if (mime.toLowerCase().contains("json")) {
+            return true;
+          }
+        }
+      }
+    }
     return false;
   }
 

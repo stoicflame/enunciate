@@ -27,7 +27,7 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
 
   public NameForEnumConstantMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
-    this.projectLabel = projectLabel;
+    this.projectLabel = CDeploymentModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -48,17 +48,21 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
     }
     EnumConstantDeclaration constant = (EnumConstantDeclaration) unwrapped;
 
-    String name = typeDefinition.getName();
-    String simpleName = typeDefinition.getSimpleName();
-    String clientName = typeDefinition.getClientSimpleName();
-    String simpleNameDecap = Introspector.decapitalize(simpleName);
-    String clientNameDecap = Introspector.decapitalize(clientName);
+    String name = CDeploymentModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = CDeploymentModule.scrubIdentifier(typeDefinition.getSimpleName());
+    String clientName = CDeploymentModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    if (name == null) {
+      name = "anonymous_" + clientNameDecap;
+    }
     PackageDeclaration pckg = ((TypeDeclaration) typeDefinition).getPackage();
-    String packageUnderscored = pckg != null ? pckg.getQualifiedName().replace('.', '_') :"";
-    String nsid = namespaces2ids.get(typeDefinition.getNamespace());
+    String packageUnderscored = CDeploymentModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().replace('.', '_') :"");
+    String nsid = CDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
-    String constantName = constant.getSimpleName();
-    String constantClientName = constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName;
+    String constantName = CDeploymentModule.scrubIdentifier(constant.getSimpleName());
+    String constantClientName = CDeploymentModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored, constantClientName, constantName);
   }
+
 }

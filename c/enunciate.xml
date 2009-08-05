@@ -4,13 +4,5 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.13.xsd">
   <modules>
     <c forceEnable="true"/>
-    <jaxws-client>
-      <package-conversions>
-        <convert from="epcglobal" to="epcglobal.client"/>
-        <convert from="org.unece" to="org.unece.client"/>
-      </package-conversions>
-    </jaxws-client>
-    <jaxws-ri disabled="false"/>
-    <xfire disabled="true"/>
   </modules>
 </enunciate>

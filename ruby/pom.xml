@@ -64,7 +64,8 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
 
                 <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"
                            generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile">
+                           compileDir="${project.build.directory}/enunciate/compile"
+                           configFile="${project.basedir}/enunciate.xml">
                   <include name="**/*.java" />
                   <classpath refid="enunciate.classpath" />
                 </enunciate>

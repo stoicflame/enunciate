@@ -60,6 +60,14 @@ static int xmlTextReaderAdvanceToNextStartOrEndElement(xmlTextReaderPtr reader) 
   return status;
 }
 
+static int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
+  int status = xmlTextReaderNext(reader);
+  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+    status = xmlTextReaderRead(reader);
+  }
+  return status;
+}
+
 static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
   char *buffer = calloc(1, sizeof(char));
   const char *snippet;
@@ -708,6 +716,38 @@ static void freeXsQNameType(char *value) {
   freeXsStringType(value);
 }
 
+/*******************xs:anyURI************************************/
+
+/**
+ * Read a anyURI value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyURI.
+ */
+static char *xmlTextReaderReadXsAnyURIType(xmlTextReaderPtr reader) {
+  return xmlTextReaderReadXsStringType(reader);
+}
+
+/**
+ * Write a anyURI value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteXsAnyURIType(xmlTextWriterPtr writer, char *value) {
+  return xmlTextWriterWriteString(writer, value);
+}
+
+/**
+ * Frees a anyURI type from memory.
+ *
+ * @param value The value to free.
+ */
+static void freeXsAnyURIType(char *value) {
+  freeXsStringType(value);
+}
+
 /*******************xs:dateTime************************************/
 
 /**
@@ -1238,6 +1278,79 @@ static int xmlTextWriterWriteXsAnyTypeType(xmlTextWriterPtr writer, struct xmlBa
   totalBytes += status;
 
   return totalBytes;
+}
+
+/**
+ * Read a anyType element value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyType., or NULL if error.
+ */
+static struct xmlBasicNode *xmlTextReaderReadXsAnyTypeElement(xmlTextReaderPtr reader) {
+  return xmlTextReaderReadXsAnyTypeType(reader);
+}
+
+/**
+ * Write a anyType element value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteXsAnyTypeElement(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
+  return xmlTextWriterWriteXsAnyTypeType(writer, node);
+}
+
+/**
+ * Write a anyType element value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteXsAnyTypeElementNS(xmlTextWriterPtr writer, struct xmlBasicNode *node, int writeNamespaces) {
+  return xmlTextWriterWriteXsAnyTypeType(writer, node);
+}
+
+/*******************xs:anySimpleType************************************/
+
+/**
+ * Frees a anyType type from memory.
+ *
+ * @param node The node to free.
+ */
+static void freeXsAnySimpleTypeType(struct xmlBasicNode *node) {
+  freeXsAnyTypeType(node);
+}
+
+/**
+ * Read a anyType value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyType., or NULL if error.
+ */
+static struct xmlBasicNode *xmlTextReaderReadXsAnySimpleTypeType(xmlTextReaderPtr reader) {
+  struct xmlBasicNode *node = calloc(1, sizeof(struct xmlBasicNode));
+
+  node->name = xmlTextReaderLocalName(reader);
+  node->ns = xmlTextReaderNamespaceUri(reader);
+  node->prefix = xmlTextReaderPrefix(reader);
+  node->value = xmlTextReaderReadEntireNodeValue(reader);
+
+  return node;
+}
+
+/**
+ * Write a anyType value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteXsAnySimpleTypeType(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
+  if (node->value != NULL) {
+    return xmlTextWriterWriteXsStringType(writer, node->value);
+  }
 }
 
 #endif /* BASIC_XML_FUNCTIONS_XS */
@@ -1846,6 +1959,27 @@ int main() {
   printf("parsed 12:20:30 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
   success = readDateTime("2009-08-04T10:11:38.428-06:00", &othertime);
   printf("parsed 2009-08-04T10:11:38.428-06:00 to %04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) (othertime.tm_gmtoff / 3600), (int) ((othertime.tm_gmtoff / 60) % 60));
+
+  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\">\n <p:event>\n  <p:description>birth</p:description>\n  <p:place>event one city &amp; state</p:place>\n  <p:date>event one date</p:date>\n </p:event>\n <p:event>\n  <p:description>death</p:description>\n  <p:place>event two place</p:place>\n  <p:date>event two date</p:date>\n </p:event>\n</p:person>";
+  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
+  success = xmlTextReaderRead(reader); //read to document
+  success = xmlTextReaderAdvanceToNextStartOrEndElement(reader); //read to event
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+
+  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\"><p:event><p:description>birth</p:description><p:place>event one city &amp; state</p:place><p:date>event one date</p:date></p:event><p:event><p:description>death</p:description><p:place>event two place</p:place><p:date>event two date</p:date></p:event></p:person>";
+  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
+  success = xmlTextReaderRead(reader); //read to document
+  success = xmlTextReaderAdvanceToNextStartOrEndElement(reader); //read to event
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+
 };
 
 void testFunc() {

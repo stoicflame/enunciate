@@ -243,6 +243,7 @@
       <xs:element name="jaxws-ri" type="module-jaxws-ri" minOccurs="0" maxOccurs="1"/>
       <xs:element name="jersey" type="module-jersey" minOccurs="0" maxOccurs="1"/>
       <xs:element name="rest" type="module-rest" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="ruby" type="module-ruby" minOccurs="0" maxOccurs="1"/>
       <xs:element name="spring-app" type="module-spring-app" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xfire" type="module-xfire" minOccurs="0" maxOccurs="1"/>
       <xs:element name="xfire-client" type="module-xfire-client" minOccurs="0" maxOccurs="1"/>
@@ -355,12 +356,36 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="module-ruby">
+    <xs:complexContent>
+      <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="package-conversions" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="convert" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:attribute name="from" type="xs:string" use="required"/>
+                    <xs:attribute name="to" type="xs:string" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="label" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="module-c">
     <xs:complexContent>
       <xs:extension base="module-base">
         <xs:attribute name="label" type="xs:string"/>
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
+        <xs:attribute name="forceEnable" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

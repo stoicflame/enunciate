@@ -176,7 +176,7 @@ public class Enunciate {
    * the artifacts.
    */
   protected void doClose() throws EnunciateException, IOException {
-    info("\n\nclosing enunciate.");
+    info("closing enunciate.");
     for (DeploymentModule deploymentModule : this.config.getAllModules()) {
       debug("closing enunciate module %s.", deploymentModule.getName());
       deploymentModule.close();
@@ -187,7 +187,7 @@ public class Enunciate {
       String artifactId = artifact.getId();
       if (this.exports.containsKey(artifactId)) {
         File dest = this.exports.get(artifactId);
-        debug("\n\nExporting artifact %s to %s.", artifactId, dest);
+        debug("Exporting artifact %s to %s.", artifactId, dest);
         artifact.exportTo(dest, this);
         exportedArtifacts.add(artifactId);
       }
@@ -562,7 +562,7 @@ public class Enunciate {
    * @param deploymentModules The deployment modules.
    */
   protected void initModules(Collection<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
-    info("\n\ninitializing enunciate.");
+    info("initializing enunciate.");
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("initializing enunciate module %s.", deploymentModule.getName());
       deploymentModule.init(this);
@@ -1638,7 +1638,7 @@ public class Enunciate {
         throw new EnunciateExecutionException("All steps completed.");
       }
 
-      info("\n\ninvoking enunciate:%s step...", this.nextTarget.toString().toLowerCase());
+      info("invoking enunciate:%s step...", this.nextTarget.toString().toLowerCase());
 
       switch (this.nextTarget) {
         case GENERATE:

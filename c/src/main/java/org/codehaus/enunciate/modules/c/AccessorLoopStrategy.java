@@ -22,6 +22,7 @@ import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
  * @author Ryan Heaton
  */
 public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor> {
+
+  private static final AccessorOverridesAnotherMethod OVERRIDE_CHECK = new AccessorOverridesAnotherMethod();
 
   private String var = "accessor";
   private TypeDefinition typeDefinition;
@@ -52,7 +55,7 @@ public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor
     }
     if (value) {
       Value value = findValue(typeDef);
-      if (value != null) {
+      if (value != null && !OVERRIDE_CHECK.overridesAnother(value)) {
         accessors.add(value);
       }
     }
@@ -71,7 +74,9 @@ public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor
     }
 
     for (Attribute attribute : typeDef.getAttributes()) {
-      accessors.add(attribute);
+      if (!OVERRIDE_CHECK.overridesAnother(attribute)) {
+        accessors.add(attribute);
+      }
     }
   }
 
@@ -97,7 +102,9 @@ public class AccessorLoopStrategy extends EnunciateTemplateLoopStrategy<Accessor
     }
 
     for (Element element : typeDef.getElements()) {
-      accessors.add(element);
+      if (!OVERRIDE_CHECK.overridesAnother(element)) {
+        accessors.add(element);
+      }
     }
   }
 

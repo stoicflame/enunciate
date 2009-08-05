@@ -65,7 +65,8 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
 
                 <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"
                            generateDir="${project.build.directory}/enunciate/gen"
-                           compileDir="${project.build.directory}/enunciate/compile">
+                           compileDir="${project.build.directory}/enunciate/compile"
+                           configFile="${project.basedir}/enunciate.xml">
                   <include name="**/*.java" />
                   <classpath refid="enunciate.classpath" />
                 </enunciate>
@@ -95,6 +96,7 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
               <executable>${gcc.executable}</executable>
               <skip>${gcc.executable}</skip>
               <arguments>
+                <argument>-Werror</argument>
                 <argument>${gcc.libxml.cflags}</argument>
                 <argument>-I${project.build.directory}/enunciate/gen/c</argument>
                 <argument>${gcc.libxml.libs}</argument>

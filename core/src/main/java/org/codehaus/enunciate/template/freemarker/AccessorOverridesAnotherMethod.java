@@ -46,9 +46,13 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The accessorOverridesAnother method must have the accessor as a parameter.");
     }
 
-    String name = ((Accessor) unwrapped).getSimpleName();
+    return overridesAnother((Accessor) unwrapped);
+  }
+
+  public Boolean overridesAnother(Accessor a) {
+    String name = a.getSimpleName();
     EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-    TypeDeclaration declaringType = ((Accessor) unwrapped).getDeclaringType();
+    TypeDeclaration declaringType = a.getDeclaringType();
     if (declaringType instanceof ClassDeclaration) {
       declaringType = ((ClassDeclaration) declaringType).getSuperclass().getDeclaration();
       while (declaringType instanceof ClassDeclaration && !Object.class.getName().equals(declaringType.getQualifiedName())) {

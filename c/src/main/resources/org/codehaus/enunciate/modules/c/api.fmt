@@ -70,6 +70,14 @@ static int xmlTextReaderAdvanceToNextStartOrEndElement(xmlTextReaderPtr reader) 
   return status;
 }
 
+static int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
+  int status = xmlTextReaderNext(reader);
+  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+    status = xmlTextReaderRead(reader);
+  }
+  return status;
+}
+
 static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
   char *buffer = calloc(1, sizeof(char));
   const char *snippet;
@@ -718,6 +726,38 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
+/*******************xs:anyURI************************************/
+
+/**
+ * Read a anyURI value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyURI.
+ */
+static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextReaderPtr reader) {
+  return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
+}
+
+/**
+ * Write a anyURI value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextWriterPtr writer, char *value) {
+  return xmlTextWriterWriteString(writer, value);
+}
+
+/**
+ * Frees a anyURI type from memory.
+ *
+ * @param value The value to free.
+ */
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(char *value) {
+  free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
+}
+
 /*******************xs:dateTime************************************/
 
 /**
@@ -1248,6 +1288,79 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
   totalBytes += status;
 
   return totalBytes;
+}
+
+/**
+ * Read a anyType element value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyType., or NULL if error.
+ */
+static struct xmlBasicNode *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeElement(xmlTextReaderPtr reader) {
+  return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(reader);
+}
+
+/**
+ * Write a anyType element value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeElement(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
+  return xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(writer, node);
+}
+
+/**
+ * Write a anyType element value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeElementNS(xmlTextWriterPtr writer, struct xmlBasicNode *node, int writeNamespaces) {
+  return xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(writer, node);
+}
+
+/*******************xs:anySimpleType************************************/
+
+/**
+ * Frees a anyType type from memory.
+ *
+ * @param node The node to free.
+ */
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnySimpleTypeType(struct xmlBasicNode *node) {
+  free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(node);
+}
+
+/**
+ * Read a anyType value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return pointer to the anyType., or NULL if error.
+ */
+static struct xmlBasicNode *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnySimpleTypeType(xmlTextReaderPtr reader) {
+  struct xmlBasicNode *node = calloc(1, sizeof(struct xmlBasicNode));
+
+  node->name = xmlTextReaderLocalName(reader);
+  node->ns = xmlTextReaderNamespaceUri(reader);
+  node->prefix = xmlTextReaderPrefix(reader);
+  node->value = xmlTextReaderReadEntireNodeValue(reader);
+
+  return node;
+}
+
+/**
+ * Write a anyType value to the writer.
+ *
+ * @param writer The writer.
+ * @param node The node to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnySimpleTypeType(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
+  if (node->value != NULL) {
+    return xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(writer, node->value);
+  }
 }
 
 #endif /* BASIC_XML_FUNCTIONS_${prefix("http://www.w3.org/2001/XMLSchema")?capitalize} */

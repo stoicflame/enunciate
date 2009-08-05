@@ -70,6 +70,24 @@ If you just want to run the Java tests without running the C# tests, set the val
               </rules>
             </configuration>
           </execution>
+          <execution>
+            <id>require.gcc.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gcc.executable</property>
+                  <message>In order to run the jaxws-ri integration tests, you must have gcc installed.
+Then, define a profile in your settings.xml file that defines the path to your 'gcc' executable in the property 'gcc.executable'. You'll probably also need
+to supply additional properties "gcc.libxml.cflags" and "gcc.libxml.libs" so as to make sure gcc can link to libxml.
+If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -128,6 +146,29 @@ If you just want to run the Java tests without running the C# tests, set the val
               <skip>${gmcs.executable}</skip>
               <arguments>
                 <argument>${project.build.directory}/cstests/fulltests.exe</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>compile-c</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!--compile the C tests using the gcc executable. -->
+              <executable>${gcc.executable}</executable>
+              <skip>${gcc.executable}</skip>
+              <arguments>
+                <argument>-Werror</argument>
+                <argument>${gcc.libxml.cflags}</argument>
+                <argument>-I${project.build.directory}/enunciate/gen/c</argument>
+                <argument>${gcc.libxml.libs}</argument>
+                <argument>-o</argument>
+                <argument>${project.build.directory}/enunciate/generate/c/full.o</argument>
+                <argument>-c</argument>
+                <argument>${project.build.directory}/enunciate/generate/c/full.c</argument>
               </arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>

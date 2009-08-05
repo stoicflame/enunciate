@@ -93,6 +93,12 @@ public class CValidator extends BaseValidator {
       }
 
       if (element.isCollectionType()) {
+        if (element.getChoices().size() > 1) {
+          result.addWarning(element, "The C client code doesn't fully support multiple choices for a collection. It has to separate each choice into its own array. " +
+            "This makes the C API a bit awkward to use and makes it impossible to preserve the order of the collection. If order is relevant, consider breaking out " +
+            "the choices into their own collection or otherwise refactoring the API.");
+        }
+
         if (element.isBinaryData()) {
           result.addError(element, "The C client code doesn't support a collection of items that are binary data. You'll have to define separate accessors for each item or disable the C module.");
         }

@@ -13,6 +13,7 @@
     </soap>
   </services>
   <modules>
+    <c disabled="true"/>
     <csharp disabled="true"/>
     <jaxws-client disabled="true"/>
     <xfire disabled="false"/>
