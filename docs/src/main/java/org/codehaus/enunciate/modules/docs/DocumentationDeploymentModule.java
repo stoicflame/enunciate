@@ -167,7 +167,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
   private String splashPackage;
   private String copyright;
-  private String title = "Web API";
+  private String title;
   private boolean includeDefaultDownloads = true;
   private URL xsltURL;
   private File css;
@@ -250,6 +250,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  /**
+   * Set the title for this project iff it hasn't already been set.
+   *
+   * @param title The title.
+   */
+  public void setTitleConditionally(String title) {
+    if (this.title == null) {
+      this.title = title;
+    }
   }
 
   /**
@@ -479,10 +490,13 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         model.setVariable("copyright", this.copyright);
       }
 
-      if (this.title != null) {
-        debug("Documentation title: %s", this.title);
-        model.setVariable("title", this.title);
+      String title = this.title;
+      if (title == null) {
+        title = "Web API";
       }
+
+      debug("Documentation title: %s", title);
+      model.setVariable("title", title);
 
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
       model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));

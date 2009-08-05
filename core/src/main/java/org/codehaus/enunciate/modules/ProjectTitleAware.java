@@ -13,4 +13,11 @@ public interface ProjectTitleAware extends DeploymentModule {
    * @param title The title.
    */
   public void setTitle(String title);
+
+  /**
+   * Set the title for this project iff it hasn't already been set.
+   *
+   * @param title The title.
+   */
+  public void setTitleConditionally(String title);
 }

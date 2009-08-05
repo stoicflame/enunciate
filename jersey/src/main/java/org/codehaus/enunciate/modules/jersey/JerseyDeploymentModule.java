@@ -305,6 +305,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
         }
       }
     }
+    urlMappings.add("*.wadl");
 
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));

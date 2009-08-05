@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.*;
 
 import org.codehaus.enunciate.examples.ruby.schema.*;
@@ -12,8 +13,18 @@ import org.codehaus.enunciate.examples.ruby.schema.vehicles.*;
 import org.codehaus.enunciate.examples.ruby.schema.structures.*;
 import org.codehaus.enunciate.examples.ruby.schema.draw.*;
 import org.codehaus.enunciate.examples.ruby.schema.animals.*;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.*;
+import org.codehaus.jackson.map.introspect.Annotated;
+import org.codehaus.jackson.map.ser.CustomSerializerFactory;
+import org.codehaus.jackson.map.ser.BasicSerializerFactory;
+import org.codehaus.jackson.map.deser.StdDeserializerProvider;
+import org.codehaus.jackson.map.deser.CustomDeserializerFactory;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.JsonParser;
+
+import javax.activation.DataHandler;
 
 /**
  * Makes sure Ruby serialization is working correctly.
@@ -152,7 +163,7 @@ public class TestRubySerialization extends TestCase {
     back.setColor(Color.BLUE);
     back.setLineStyle(LineStyle.dotted);
     back.setRadius(7);
-    bus.setWheels(new Circle[] {front, back});
+    bus.setWheels(new Circle[]{front, back});
     Rectangle window1 = new Rectangle();
     window1.setColor(Color.BLUE);
     window1.setWidth(2);
@@ -319,7 +330,7 @@ public class TestRubySerialization extends TestCase {
     cat.setEars(Arrays.asList(ear, ear));
 
     // The eyes are the same as the ears, but so it needs to be for this test.
-    cat.setEyes(new Triangle[] {ear, ear});
+    cat.setEyes(new Triangle[]{ear, ear});
 
     Line noseLine = new Line();
     noseLine.setId("noseId");
@@ -511,7 +522,35 @@ public class TestRubySerialization extends TestCase {
 
   protected <T> T processThroughJson(T object) throws Exception {
     ObjectMapper mapper = new ObjectMapper();
-    JaxbAnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector();
+    JaxbAnnotationIntrospector jaxbIntrospector = new JaxbAnnotationIntrospector() {
+      @Override
+      public JsonSerializer<?> findSerializer(Annotated am) {
+        if (am.getType() != null && DataHandler.class.isAssignableFrom(am.getType())) {
+          return new JsonSerializer<DataHandler>() {
+            @Override
+            public void serialize(DataHandler value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+              jgen.writeString("whatever");
+            }
+          };
+        }
+
+        return super.findSerializer(am);
+      }
+
+      @Override
+      public JsonDeserializer<?> findDeserializer(Annotated am) {
+        if (am.getType() != null && DataHandler.class.isAssignableFrom(am.getType())) {
+          return new JsonDeserializer<DataHandler>() {
+            @Override
+            public DataHandler deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+              return null;
+            }
+          };
+        }
+        return super.findDeserializer(am);
+      }
+    };
+    
     mapper.getSerializationConfig().setAnnotationIntrospector(jaxbIntrospector);
     mapper.getDeserializationConfig().setAnnotationIntrospector(jaxbIntrospector);
 

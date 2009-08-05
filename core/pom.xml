@@ -88,7 +88,7 @@
     <!--used for generating example json for documentation-->
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
+      <artifactId>jackson-mapper-asl</artifactId>
     </dependency>
 
     <!--used for generating example xml for documentation-->

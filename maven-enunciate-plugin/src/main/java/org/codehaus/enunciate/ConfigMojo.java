@@ -505,7 +505,7 @@ public class ConfigMojo extends AbstractMojo {
           }
 
           if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-            ((ProjectTitleAware)module).setTitle(project.getName());
+            ((ProjectTitleAware)module).setTitleConditionally(project.getName());
           }
         }
       }
