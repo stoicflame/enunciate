@@ -24,7 +24,7 @@
 </h1>
 
 <code>
-#include <${filename}>
+#include &lt;${filename}&gt;
 //...
 
 [#if input_element_name??]
@@ -42,8 +42,10 @@ response_element = xml_read_${output_element_name}(reader);
 //handle the response as needed...
 
 [#if input_element_name??]
-free_${input_element_name}(request_element); //free the ${input_element_name}
+//free the ${input_element_name}
+free_${input_element_name}(request_element);
 [/#if]
-free_${output_element_name}(response_element); //free the ${output_element_name}
+//free the ${output_element_name}
+free_${output_element_name}(response_element);
 </code>
 [/#if]
