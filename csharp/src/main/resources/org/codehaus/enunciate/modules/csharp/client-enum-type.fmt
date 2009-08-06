@@ -21,7 +21,7 @@ namespace ${namespaceFor(type)} {
     /// </summary>
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
-    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].allElementValues["value"]}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
+    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
     [/#list]
   }
 }

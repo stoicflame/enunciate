@@ -73,7 +73,7 @@
     [@forEachWsdl]
       [@forEachEndpointInterface wsdl=wsdl]
         [#if endpointInterface.annotations["javax.annotation.security.RolesAllowed"]?exists]
-    <intercept-url pattern="${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}" access="[#list endpointInterface.annotations["javax.annotation.security.RolesAllowed"].allElementValues["value"] as role]${role}[#if role_has_next],[/#if][/#list]"/>
+    <intercept-url pattern="${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}" access="[#list endpointInterface.annotations["javax.annotation.security.RolesAllowed"].value as role]${role}[#if role_has_next],[/#if][/#list]"/>
         [/#if]
       [/@forEachEndpointInterface]
     [/@forEachWsdl]
