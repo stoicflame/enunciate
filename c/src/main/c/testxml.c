@@ -17,22 +17,22 @@ struct xmlBasicNode {
   /**
    * The (local) name of the node.
    */
-  char *name;
+  xmlChar *name;
 
   /**
    * The namespace of the node.
    */
-  char *ns;
+  xmlChar *ns;
 
   /**
    * The namespace prefix of the node.
    */
-  char *prefix;
+  xmlChar *prefix;
 
   /**
    * The (text) value of the node.
    */
-  char *value;
+  xmlChar *value;
 
   /**
    * The child elements of the node.
@@ -68,9 +68,9 @@ static int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
   return status;
 }
 
-static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
-  char *buffer = calloc(1, sizeof(char));
-  const char *snippet;
+static xmlChar *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
+  xmlChar *buffer = calloc(1, sizeof(xmlChar));
+  const xmlChar *snippet;
   int status;
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ATTRIBUTE) {
     return xmlTextReaderValue(reader);
@@ -79,8 +79,8 @@ static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
     status = xmlTextReaderRead(reader);
     while (status && (xmlTextReaderNodeType(reader) == XML_READER_TYPE_TEXT || xmlTextReaderNodeType(reader) == XML_READER_TYPE_CDATA || xmlTextReaderNodeType(reader) == XML_READER_TYPE_ENTITY_REFERENCE)) {
       snippet = xmlTextReaderConstValue(reader);
-      buffer = realloc(buffer, (strlen(buffer) + strlen(snippet) + 1) * sizeof(char));
-      strcat(buffer, snippet);
+      buffer = realloc(buffer, (xmlStrlen(buffer) + xmlStrlen(snippet) + 1) * sizeof(xmlChar));
+      xmlStrcat(buffer, snippet);
       status = xmlTextReaderRead(reader);
     }
   }
@@ -140,17 +140,17 @@ static void _decode_base64_block( unsigned char in[4], unsigned char out[3] )
  * @param insize The size of the stream to encode.
  * @return The encoded string.
  */
-char *_encode_base64(unsigned char *instream, int insize) {
+xmlChar *_encode_base64(unsigned char *instream, int insize) {
   unsigned char in[3];
-  char out[4];
-  char *encoded;
+  unsigned char out[4];
+  xmlChar *encoded;
   int i, in_index = 0, out_index = 0, blocklen;
 
   if (insize == 0) {
-    return "\0";
+    return BAD_CAST "\0";
   }
 
-  encoded = calloc(((insize / 3) * 4) + 10, sizeof(char));
+  encoded = calloc(((insize / 3) * 4) + 10, sizeof(xmlChar));
   while (in_index <= insize) {
     blocklen = 0;
     for (i = 0; i < 3; i++) {
@@ -182,8 +182,8 @@ char *_encode_base64(unsigned char *instream, int insize) {
  * @param outsize Holder for the length of the returned data.
  * @return The decoded data.
  */
-unsigned char *_decode_base64( const char *invalue, int *outsize ) {
-  char in[4];
+unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
+  xmlChar in[4];
   unsigned char out[3], v;
   int i, in_index = 0, out_index = 0, blocklen;
   unsigned char *outstream;
@@ -192,7 +192,7 @@ unsigned char *_decode_base64( const char *invalue, int *outsize ) {
     return NULL;
   }
 
-  outstream = calloc(((strlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
+  outstream = calloc(((xmlStrlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
   while (invalue[in_index] != '\0') {
     for (blocklen = 0, i = 0; i < 4 && invalue[in_index]; i++) {
       v = 0;
@@ -244,9 +244,9 @@ unsigned char *_decode_base64( const char *invalue, int *outsize ) {
  * @return pointer to 1 if "true" was read. pointer to 0 otherwise.
  */
 static int *xmlTextReaderReadXsBooleanType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
-  *value = (strcmp("true", nodeValue) == 0) ? 1 : 0;
+  *value = (xmlStrcmp(BAD_CAST "true", nodeValue) == 0) ? 1 : 0;
   free(nodeValue);
   return value;
 }
@@ -260,10 +260,10 @@ static int *xmlTextReaderReadXsBooleanType(xmlTextReaderPtr reader) {
  */
 static int xmlTextWriterWriteXsBooleanType(xmlTextWriterPtr writer, int *value) {
   if (*value) {
-    return xmlTextWriterWriteString(writer, "false");
+    return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
   else {
-    return xmlTextWriterWriteString(writer, "true");
+    return xmlTextWriterWriteString(writer, BAD_CAST "true");
   }
 }
 
@@ -285,9 +285,9 @@ static void freeXsBooleanType(int *value) {
  * @return pointer to the byte.
  */
 static unsigned char *xmlTextReaderReadXsByteType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   unsigned char *value = malloc(sizeof(unsigned char));
-  *value = (unsigned char) atoi(nodeValue);
+  *value = (unsigned char) atoi((char *) nodeValue);
   free(nodeValue);
   return value;
 }
@@ -321,9 +321,9 @@ static void freeXsByteType(unsigned char *value) {
  * @return pointer to the double.
  */
 static double *xmlTextReaderReadXsDoubleType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   double *value = malloc(sizeof(double));
-  *value = atof(nodeValue);
+  *value = atof((char *) nodeValue);
   free(nodeValue);
   return value;
 }
@@ -357,9 +357,9 @@ static void freeXsDoubleType(double *value) {
  * @return pointer to the float.
  */
 static float *xmlTextReaderReadXsFloatType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   float *value = malloc(sizeof(float));
-  *value = atof(nodeValue);
+  *value = atof((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -394,9 +394,9 @@ static void freeXsFloatType(float *value) {
  * @return pointer to the int.
  */
 static int *xmlTextReaderReadXsIntType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
-  *value = atoi(nodeValue);
+  *value = atoi((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -430,9 +430,9 @@ static void freeXsIntType(int *value) {
  * @return pointer to the long.
  */
 static long *xmlTextReaderReadXsLongType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   long *value = malloc(sizeof(long));
-  *value = atol(nodeValue);
+  *value = atol((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -466,9 +466,9 @@ static void freeXsLongType(long *value) {
  * @return pointer to the short.
  */
 static short *xmlTextReaderReadXsShortType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   short *value = malloc(sizeof(short));
-  *value = atoi(nodeValue);
+  *value = atoi((char *)nodeValue);
   return value;
 }
 
@@ -500,7 +500,7 @@ static void freeXsShortType(short *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the string.
  */
-static char *xmlTextReaderReadXsStringType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsStringType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadEntireNodeValue(reader);
 }
 
@@ -511,7 +511,7 @@ static char *xmlTextReaderReadXsStringType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsStringType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsStringType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -520,7 +520,7 @@ static int xmlTextWriterWriteXsStringType(xmlTextWriterPtr writer, char *value) 
  *
  * @param value The value to free.
  */
-static void freeXsStringType(char *value) {
+static void freeXsStringType(xmlChar *value) {
   //no-op
 }
 
@@ -532,7 +532,7 @@ static void freeXsStringType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the ID.
  */
-static char *xmlTextReaderReadXsIDType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsIDType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -543,7 +543,7 @@ static char *xmlTextReaderReadXsIDType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsIDType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsIDType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -552,7 +552,7 @@ static int xmlTextWriterWriteXsIDType(xmlTextWriterPtr writer, char *value) {
  *
  * @param value The value to free.
  */
-static void freeXsIDType(char *value) {
+static void freeXsIDType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -564,7 +564,7 @@ static void freeXsIDType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the IDREF.
  */
-static char *xmlTextReaderReadXsIDREFType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsIDREFType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -575,7 +575,7 @@ static char *xmlTextReaderReadXsIDREFType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsIDREFType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsIDREFType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -584,7 +584,7 @@ static int xmlTextWriterWriteXsIDREFType(xmlTextWriterPtr writer, char *value) {
  *
  * @param value The value to free.
  */
-static void freeXsIDREFType(char *value) {
+static void freeXsIDREFType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -596,7 +596,7 @@ static void freeXsIDREFType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the integer.
  */
-static char *xmlTextReaderReadXsIntegerType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsIntegerType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -607,7 +607,7 @@ static char *xmlTextReaderReadXsIntegerType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsIntegerType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsIntegerType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -616,7 +616,7 @@ static int xmlTextWriterWriteXsIntegerType(xmlTextWriterPtr writer, char *value)
  *
  * @param value The value to free.
  */
-static void freeXsIntegerType(char *value) {
+static void freeXsIntegerType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -628,7 +628,7 @@ static void freeXsIntegerType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the decimal.
  */
-static char *xmlTextReaderReadXsDecimalType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsDecimalType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -639,7 +639,7 @@ static char *xmlTextReaderReadXsDecimalType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsDecimalType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsDecimalType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -648,7 +648,7 @@ static int xmlTextWriterWriteXsDecimalType(xmlTextWriterPtr writer, char *value)
  *
  * @param value The value to free.
  */
-static void freeXsDecimalType(char *value) {
+static void freeXsDecimalType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -660,7 +660,7 @@ static void freeXsDecimalType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the duration.
  */
-static char *xmlTextReaderReadXsDurationType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsDurationType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -671,7 +671,7 @@ static char *xmlTextReaderReadXsDurationType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsDurationType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsDurationType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -680,7 +680,7 @@ static int xmlTextWriterWriteXsDurationType(xmlTextWriterPtr writer, char *value
  *
  * @param value The value to free.
  */
-static void freeXsDurationType(char *value) {
+static void freeXsDurationType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -692,7 +692,7 @@ static void freeXsDurationType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the QName.
  */
-static char *xmlTextReaderReadXsQNameType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsQNameType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -703,7 +703,7 @@ static char *xmlTextReaderReadXsQNameType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsQNameType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsQNameType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -712,7 +712,7 @@ static int xmlTextWriterWriteXsQNameType(xmlTextWriterPtr writer, char *value) {
  *
  * @param value The value to free.
  */
-static void freeXsQNameType(char *value) {
+static void freeXsQNameType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -724,7 +724,7 @@ static void freeXsQNameType(char *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the anyURI.
  */
-static char *xmlTextReaderReadXsAnyURIType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderReadXsAnyURIType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadXsStringType(reader);
 }
 
@@ -735,7 +735,7 @@ static char *xmlTextReaderReadXsAnyURIType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsAnyURIType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWriteXsAnyURIType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -744,7 +744,7 @@ static int xmlTextWriterWriteXsAnyURIType(xmlTextWriterPtr writer, char *value) 
  *
  * @param value The value to free.
  */
-static void freeXsAnyURIType(char *value) {
+static void freeXsAnyURIType(xmlChar *value) {
   freeXsStringType(value);
 }
 
@@ -758,8 +758,8 @@ static void freeXsAnyURIType(char *value) {
  */
 static struct tm *xmlTextReaderReadXsDateTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
@@ -896,8 +896,8 @@ static void freeXsDateTimeType(struct tm *value) {
  */
 static struct tm *xmlTextReaderReadXsTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: hh:MM:ss+oo:oo
@@ -998,8 +998,8 @@ static void freeXsTimeType(struct tm *value) {
  */
 static struct tm *xmlTextReaderReadXsDateType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: yyyy-mm-dd+oo:oo
@@ -1131,7 +1131,7 @@ static void freeXsAnyTypeType(struct xmlBasicNode *node) {
 static struct xmlBasicNode *xmlTextReaderReadXsAnyTypeType(xmlTextReaderPtr reader) {
   struct xmlBasicNode *child, *next, *node = calloc(1, sizeof(struct xmlBasicNode));
   int status, depth = xmlTextReaderDepth(reader);
-  char *text;
+  const xmlChar *text;
 
   node->name = xmlTextReaderLocalName(reader);
   node->ns = xmlTextReaderNamespaceUri(reader);
@@ -1193,17 +1193,8 @@ static struct xmlBasicNode *xmlTextReaderReadXsAnyTypeType(xmlTextReaderPtr read
           break;
         case XML_READER_TYPE_TEXT:
         case XML_READER_TYPE_CDATA:
-          if (node->value == NULL) {
-            text = xmlTextReaderValue(reader);
-          }
-          else {
-            text = calloc(strlen(node->value) + strlen(xmlTextReaderConstValue(reader)) + 1, sizeof(char));
-            strcpy(text, node->value);
-            strcat(text, xmlTextReaderConstValue(reader));
-            free(node->value);
-          }
-
-          node->value = text;
+          text = xmlTextReaderConstValue(reader);
+          node->value = xmlStrncat(node->value, text, xmlStrlen(text));
           break;
         default:
           //skip anything else.
@@ -1351,6 +1342,8 @@ static int xmlTextWriterWriteXsAnySimpleTypeType(xmlTextWriterPtr writer, struct
   if (node->value != NULL) {
     return xmlTextWriterWriteXsStringType(writer, node->value);
   }
+
+  return 0;
 }
 
 #endif /* BASIC_XML_FUNCTIONS_XS */
@@ -1381,7 +1374,7 @@ enum gender {
 };
 
 struct person {
-  char *id;
+  xmlChar *id;
   enum gender gender;
   int cool;
   struct event *events;
@@ -1389,9 +1382,9 @@ struct person {
 };
 
 struct event {
-  char* description;
-  char* place;
-  char* date;
+  xmlChar* description;
+  xmlChar* place;
+  xmlChar* date;
 };
 
 struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
@@ -1405,8 +1398,8 @@ struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
       return NULL;
     }
     else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && strcmp("description", xmlTextReaderConstLocalName(reader)) == 0
-      && strcmp("http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+      && xmlStrcmp(BAD_CAST "description", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
 
       _event->description = xmlTextReaderReadEntireNodeValue(reader);
       status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
@@ -1417,8 +1410,8 @@ struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
       return NULL;
     }
     else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && strcmp("place", xmlTextReaderConstLocalName(reader)) == 0
-      && strcmp("http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+      && xmlStrcmp(BAD_CAST "place", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
 
       _event->place = xmlTextReaderReadEntireNodeValue(reader);
       status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
@@ -1428,8 +1421,8 @@ struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
       return NULL;
     }
     else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && strcmp("date", xmlTextReaderConstLocalName(reader)) == 0
-      && strcmp("http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+      && xmlStrcmp(BAD_CAST "date", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
 
       _event->date = xmlTextReaderReadEntireNodeValue(reader);
       status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
@@ -1439,12 +1432,12 @@ struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
   return _event;
 }
 
-enum gender xmlTextReaderReadGender(const char *enumValue) {
+enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   if (enumValue != NULL) {
-    if (strcmp(enumValue, "MALE") == 0) {
+    if (xmlStrcmp(enumValue, BAD_CAST "MALE") == 0) {
       return m;
     }
-    if (strcmp(enumValue, "FEMALE") == 0) {
+    if (xmlStrcmp(enumValue, BAD_CAST "FEMALE") == 0) {
       return f;
     }
   }
@@ -1459,6 +1452,20 @@ void personout(struct person *p) {
   }
   printf("\n");
 };
+
+int genderxmlout(xmlTextWriterPtr writer, enum gender g) {
+  switch (g) {
+    case m:
+      return xmlTextWriterWriteString(writer, BAD_CAST "MALE");
+    case f:
+      return xmlTextWriterWriteString(writer, BAD_CAST "FEMALE");
+    case blobbyblobby:
+    case not_set:
+      return -1;
+  }
+
+  return -1;
+}
 
 void personxmlout(struct person *p) {
   int i;
@@ -1493,7 +1500,7 @@ void personxmlout(struct person *p) {
   }
 
   //write the start element.
-  rc = xmlTextWriterStartElementNS(writer, "p", "person", NULL);
+  rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "person", NULL);
   if (rc < 0) {
       printf("testXmlwriterMemory: Error at xmlTextWriterStartElementNS\n");
       return;
@@ -1501,7 +1508,7 @@ void personxmlout(struct person *p) {
 
   //write the attributes of start element.
   if (p->id != NULL) {
-    rc = xmlTextWriterWriteAttributeNS(writer, "w", "id", NULL, p->id);
+    rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "id", NULL, p->id);
     if (rc < 0) {
         printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
         return;
@@ -1509,7 +1516,7 @@ void personxmlout(struct person *p) {
   }
 
   if (p->gender != not_set) {
-    rc = xmlTextWriterStartAttributeNS(writer, "w", "gender", NULL);
+    rc = xmlTextWriterStartAttributeNS(writer, BAD_CAST "w", BAD_CAST "gender", NULL);
     if (rc < 0) {
         printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
         return;
@@ -1528,34 +1535,34 @@ void personxmlout(struct person *p) {
     }
   }
 
-  rc = xmlTextWriterWriteAttributeNS(writer, "w", "cool", NULL, p->cool ? "true" : "false");
+  rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "cool", NULL, p->cool ? BAD_CAST "true" : BAD_CAST "false");
   if (rc < 0) {
       printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
       return;
   }
 
   //if we're on the start element, write the xmlns prefixes
-  rc = xmlTextWriterWriteAttribute(writer, "xmlns:w", "http://whereverelse.com");
+  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:w", BAD_CAST "http://whereverelse.com");
   if (rc < 0) {
       printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
       return;
   }
 
-  rc = xmlTextWriterWriteAttribute(writer, "xmlns:p", "http://person.com");
+  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:p", BAD_CAST "http://person.com");
   if (rc < 0) {
       printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
       return;
   }
 
   for (i = 0; i < p->_sizeof_events; i++) {
-    rc = xmlTextWriterStartElementNS(writer, "p", "event", NULL);
+    rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "event", NULL);
     if (rc < 0) {
         printf("testXmlwriterMemory: Error at xmlTextWriterStartElementNS\n");
         return;
     }
 
     if (p->events[i].description != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, "p", "description", NULL, p->events[i].description);
+      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "description", NULL, p->events[i].description);
       if (rc < 0) {
           printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
           return;
@@ -1563,7 +1570,7 @@ void personxmlout(struct person *p) {
     }
 
     if (p->events[i].place != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, "p", "place", NULL, p->events[i].place);
+      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "place", NULL, p->events[i].place);
       if (rc < 0) {
           printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
           return;
@@ -1571,7 +1578,7 @@ void personxmlout(struct person *p) {
     }
 
     if (p->events[i].date != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, "p", "date", NULL, p->events[i].date);
+      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "date", NULL, p->events[i].date);
       if (rc < 0) {
           printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
           return;
@@ -1703,17 +1710,6 @@ int readDateTime(char* timevalue, struct tm *time) {
   return success;
 }
 
-int genderxmlout(xmlTextWriterPtr writer, enum gender g) {
-  switch (g) {
-    case m:
-      return xmlTextWriterWriteString(writer, "MALE");
-    case f:
-      return xmlTextWriterWriteString(writer, "FEMALE");
-  }
-
-  return -1;
-}
-
 struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
   struct person *_person = calloc(1, sizeof(struct person));
   void *_child_accessor;
@@ -1721,16 +1717,16 @@ struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
 
   if (xmlTextReaderHasAttributes(reader)) {
     while (xmlTextReaderMoveToNextAttribute(reader)) {
-      if ((strcmp("gender", xmlTextReaderConstLocalName(reader)) == 0) && (strcmp("http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+      if ((xmlStrcmp(BAD_CAST "gender", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
         _person->gender = xmlTextReaderReadGender(xmlTextReaderConstValue(reader));
         continue;
       }
-      if ((strcmp("id", xmlTextReaderConstLocalName(reader)) == 0) && (strcmp("http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+      if ((xmlStrcmp(BAD_CAST "id", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
         _person->id = xmlTextReaderReadEntireNodeValue(reader);
         continue;
       }
-      if ((strcmp("cool", xmlTextReaderConstLocalName(reader)) == 0) && (strcmp("http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        _person->cool = (strcmp("true", xmlTextReaderConstValue(reader)) == 0) ? 1 : 0;
+      if ((xmlStrcmp(BAD_CAST "cool", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+        _person->cool = (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) ? 1 : 0;
         continue;
       }
     }
@@ -1752,8 +1748,8 @@ struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
       return NULL;
     }
     else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && strcmp("event", xmlTextReaderConstLocalName(reader)) == 0
-      && strcmp("http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+      && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
 
       _person->_sizeof_events = 0;
       _person->events = NULL;
@@ -1777,8 +1773,8 @@ struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
         }
 
         status = xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-          && strcmp("event", xmlTextReaderConstLocalName(reader)) == 0
-          && strcmp("http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0;
+          && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
+          && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0;
       }
     }
   }
@@ -1795,13 +1791,13 @@ static int *methodThatReturnsIntPointer() {
 int main() {
   struct person person;
   struct person *readperson;
-  char id[11] = "1234567890";
-  char event1description[6] = "birth";
-  char event1place[16] = "event one place";
-  char event1date[15] = "event one date";
-  char event2description[6] = "death";
-  char event2place[16] = "event two place";
-  char event2date[15] = "event two date";
+  xmlChar id[11] = "1234567890";
+  xmlChar event1description[6] = "birth";
+  xmlChar event1place[16] = "event one place";
+  xmlChar event1date[15] = "event one date";
+  xmlChar event2description[6] = "death";
+  xmlChar event2place[16] = "event two place";
+  xmlChar event2date[15] = "event two date";
   struct event events[2];
   time_t *now_t = malloc(sizeof(time_t));
   struct tm othertime;
@@ -1814,8 +1810,10 @@ int main() {
   struct xmlBasicNode *personNode;
   struct event someevent, otherevent, *eventptr;
   int someint;
-  char *dummystring;
+  xmlChar *dummystring;
   int *bunchofints;
+  long somelong;
+  short someshort;
 
   person.id = id;
   person.gender = f;
@@ -1899,15 +1897,15 @@ int main() {
 
   eventptr = malloc(sizeof(struct event));
 
-  someevent.description = "hello, there!";
-  someevent.place = "hello, place!";
-  someevent.date = "hello, date!";
+  someevent.description = BAD_CAST "hello, there!";
+  someevent.place = BAD_CAST "hello, place!";
+  someevent.date = BAD_CAST "hello, date!";
 
   otherevent = someevent;
   *eventptr = someevent;
 
-  someevent.description = "changed description";
-  eventptr->description = "pointer source";
+  someevent.description = BAD_CAST "changed description";
+  eventptr->description = BAD_CAST "pointer source";
   printf("%s = %s = %s?\n", otherevent.description, someevent.description, eventptr->description);
   otherevent = *eventptr;
   printf("%s = %s = %s?\n", otherevent.description, someevent.description, eventptr->description);
@@ -1915,7 +1913,7 @@ int main() {
   someint = *methodThatReturnsIntPointer();
   printf("some int: %i\n\n\n", someint);
 
-  dummystring = "123456789\01234567890";
+  dummystring = BAD_CAST "123456789\01234567890";
   dummystring = _encode_base64(dummystring, 20);
   printf("encoded: %s\n", dummystring);
   dummystring = _decode_base64(dummystring, &someint);
@@ -1980,6 +1978,7 @@ int main() {
   success = xmlTextReaderSkipElement(reader);
   printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
 
+  return 0;
 };
 
 void testFunc() {

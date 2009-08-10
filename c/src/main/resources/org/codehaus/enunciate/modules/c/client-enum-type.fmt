@@ -50,12 +50,12 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(enum ${typeName} *_
  * @return The ${type.clientSimpleName}, or NULL if unable to be read.
  */
 static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextReaderPtr reader) {
-  char *enumValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *enumValue = xmlTextReaderReadEntireNodeValue(reader);
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   if (enumValue != NULL) {
   [#assign enumValueMap=type.enumValues/]
   [#list type.enumConstants as constant]
-    if (strcmp(enumValue, "${enumValueMap[constant.simpleName]}") == 0) {
+    if (xmlStrcmp(enumValue, BAD_CAST "${enumValueMap[constant.simpleName]}") == 0) {
       *value = ${nameForEnumConstant(type, constant)};
       free(enumValue);
       return value;
@@ -86,7 +86,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
   [#assign enumValueMap=type.enumValues/]
   [#list type.enumConstants as constant]
     case ${nameForEnumConstant(type, constant)}:
-      return xmlTextWriterWriteString(writer, "${enumValueMap[constant.simpleName]}");
+      return xmlTextWriterWriteString(writer, BAD_CAST "${enumValueMap[constant.simpleName]}");
   [/#list]
   }
 

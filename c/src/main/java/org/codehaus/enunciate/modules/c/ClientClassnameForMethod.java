@@ -44,27 +44,27 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     setJdk15(false); //we'll control the generics.
 
     classConversions.put(Boolean.class.getName(), "int");
-    classConversions.put(String.class.getName(), "char");
+    classConversions.put(String.class.getName(), "xmlChar");
     classConversions.put(Integer.class.getName(), "int");
     classConversions.put(Short.class.getName(), "short");
     classConversions.put(Byte.class.getName(), "unsigned char");
     classConversions.put(Double.class.getName(), "double");
     classConversions.put(Long.class.getName(), "long");
-    classConversions.put(java.math.BigInteger.class.getName(), "char");
-    classConversions.put(java.math.BigDecimal.class.getName(), "char");
+    classConversions.put(java.math.BigInteger.class.getName(), "xmlChar");
+    classConversions.put(java.math.BigDecimal.class.getName(), "xmlChar");
     classConversions.put(Float.class.getName(), "float");
-    classConversions.put(Character.class.getName(), "char");
+    classConversions.put(Character.class.getName(), "xmlChar");
     classConversions.put(Date.class.getName(), "struct tm");
     classConversions.put(DataHandler.class.getName(), "unsigned char");
     classConversions.put(java.awt.Image.class.getName(), "unsigned char");
     classConversions.put(javax.xml.transform.Source.class.getName(), "unsigned char");
-    classConversions.put(QName.class.getName(), "char");
-    classConversions.put(URI.class.getName(), "char");
-    classConversions.put(UUID.class.getName(), "char");
+    classConversions.put(QName.class.getName(), "xmlChar");
+    classConversions.put(URI.class.getName(), "xmlChar");
+    classConversions.put(UUID.class.getName(), "xmlChar");
     classConversions.put(XMLGregorianCalendar.class.getName(), "struct tm");
     classConversions.put(GregorianCalendar.class.getName(), "struct tm");
     classConversions.put(Calendar.class.getName(), "struct tm");
-    classConversions.put(javax.xml.datatype.Duration.class.getName(), "char");
+    classConversions.put(javax.xml.datatype.Duration.class.getName(), "xmlChar");
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
     classConversions.put(Object.class.getName(), "struct xmlBasicNode");
     classConversions.putAll(conversions);
@@ -112,10 +112,10 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
     if (accessor.isXmlIDREF()) {
-      return "char";
+      return "xmlChar";
     }
     else if (accessor.isXmlList()) {
-      return "char";
+      return "xmlChar";
     }
     
     return super.convert(accessor);
@@ -142,7 +142,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         case LONG:
           return "long";
         default:
-          return "char";
+          return "xmlChar";
       }
     }
     else if (decorated.isCollection()) {

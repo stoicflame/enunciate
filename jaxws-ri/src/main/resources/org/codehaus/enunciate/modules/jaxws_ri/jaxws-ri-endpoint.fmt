@@ -29,7 +29,7 @@ import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
 @javax.xml.ws.soap.MTOM (
   enabled = ${impl.annotations["javax.xml.ws.soap.MTOM"].enabled?string},
-  threshold = ${impl.annotations["javax.xml.ws.soap.MTOM"].threshold?string}
+  threshold = ${impl.annotations["javax.xml.ws.soap.MTOM"].threshold?c}
 )
 [/#if]
 [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.Addressing"]??))]
@@ -47,7 +47,7 @@ import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
 @com.sun.xml.ws.developer.StreamingAttachment (
   dir = "${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].dir}",
   parseEagerly = ${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].parseEagerly?string},
-  memoryThreshold = ${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].memoryThreshold?string}
+  memoryThreshold = ${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].memoryThreshold?c}L
 )
 [/#if]
 public class ${endpointInterface.simpleName}Instrumented {

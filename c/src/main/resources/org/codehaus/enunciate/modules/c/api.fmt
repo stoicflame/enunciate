@@ -27,22 +27,22 @@ struct xmlBasicNode {
   /**
    * The (local) name of the node.
    */
-  char *name;
+  xmlChar *name;
 
   /**
    * The namespace of the node.
    */
-  char *ns;
+  xmlChar *ns;
 
   /**
    * The namespace prefix of the node.
    */
-  char *prefix;
+  xmlChar *prefix;
 
   /**
    * The (text) value of the node.
    */
-  char *value;
+  xmlChar *value;
 
   /**
    * The child elements of the node.
@@ -78,9 +78,9 @@ static int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
   return status;
 }
 
-static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
-  char *buffer = calloc(1, sizeof(char));
-  const char *snippet;
+static xmlChar *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
+  xmlChar *buffer = calloc(1, sizeof(xmlChar));
+  const xmlChar *snippet;
   int status;
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ATTRIBUTE) {
     return xmlTextReaderValue(reader);
@@ -89,8 +89,8 @@ static char *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
     status = xmlTextReaderRead(reader);
     while (status && (xmlTextReaderNodeType(reader) == XML_READER_TYPE_TEXT || xmlTextReaderNodeType(reader) == XML_READER_TYPE_CDATA || xmlTextReaderNodeType(reader) == XML_READER_TYPE_ENTITY_REFERENCE)) {
       snippet = xmlTextReaderConstValue(reader);
-      buffer = realloc(buffer, (strlen(buffer) + strlen(snippet) + 1) * sizeof(char));
-      strcat(buffer, snippet);
+      buffer = realloc(buffer, (xmlStrlen(buffer) + xmlStrlen(snippet) + 1) * sizeof(xmlChar));
+      xmlStrcat(buffer, snippet);
       status = xmlTextReaderRead(reader);
     }
   }
@@ -150,17 +150,17 @@ static void _decode_base64_block( unsigned char in[4], unsigned char out[3] )
  * @param insize The size of the stream to encode.
  * @return The encoded string.
  */
-char *_encode_base64(unsigned char *instream, int insize) {
+xmlChar *_encode_base64(unsigned char *instream, int insize) {
   unsigned char in[3];
-  char out[4];
-  char *encoded;
+  unsigned char out[4];
+  xmlChar *encoded;
   int i, in_index = 0, out_index = 0, blocklen;
 
   if (insize == 0) {
-    return "\0";
+    return BAD_CAST "\0";
   }
 
-  encoded = calloc(((insize / 3) * 4) + 10, sizeof(char));
+  encoded = calloc(((insize / 3) * 4) + 10, sizeof(xmlChar));
   while (in_index <= insize) {
     blocklen = 0;
     for (i = 0; i < 3; i++) {
@@ -192,8 +192,8 @@ char *_encode_base64(unsigned char *instream, int insize) {
  * @param outsize Holder for the length of the returned data.
  * @return The decoded data.
  */
-unsigned char *_decode_base64( const char *invalue, int *outsize ) {
-  char in[4];
+unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
+  xmlChar in[4];
   unsigned char out[3], v;
   int i, in_index = 0, out_index = 0, blocklen;
   unsigned char *outstream;
@@ -202,7 +202,7 @@ unsigned char *_decode_base64( const char *invalue, int *outsize ) {
     return NULL;
   }
 
-  outstream = calloc(((strlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
+  outstream = calloc(((xmlStrlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
   while (invalue[in_index] != '\0') {
     for (blocklen = 0, i = 0; i < 4 && invalue[in_index]; i++) {
       v = 0;
@@ -254,9 +254,9 @@ unsigned char *_decode_base64( const char *invalue, int *outsize ) {
  * @return pointer to 1 if "true" was read. pointer to 0 otherwise.
  */
 static int *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}BooleanType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
-  *value = (strcmp("true", nodeValue) == 0) ? 1 : 0;
+  *value = (xmlStrcmp(BAD_CAST "true", nodeValue) == 0) ? 1 : 0;
   free(nodeValue);
   return value;
 }
@@ -270,10 +270,10 @@ static int *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}BooleanType(xmlTextWriterPtr writer, int *value) {
   if (*value) {
-    return xmlTextWriterWriteString(writer, "false");
+    return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
   else {
-    return xmlTextWriterWriteString(writer, "true");
+    return xmlTextWriterWriteString(writer, BAD_CAST "true");
   }
 }
 
@@ -295,9 +295,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}BooleanTy
  * @return pointer to the byte.
  */
 static unsigned char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}ByteType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   unsigned char *value = malloc(sizeof(unsigned char));
-  *value = (unsigned char) atoi(nodeValue);
+  *value = (unsigned char) atoi((char *) nodeValue);
   free(nodeValue);
   return value;
 }
@@ -331,9 +331,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}ByteType(
  * @return pointer to the double.
  */
 static double *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DoubleType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   double *value = malloc(sizeof(double));
-  *value = atof(nodeValue);
+  *value = atof((char *) nodeValue);
   free(nodeValue);
   return value;
 }
@@ -367,9 +367,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DoubleTyp
  * @return pointer to the float.
  */
 static float *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}FloatType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   float *value = malloc(sizeof(float));
-  *value = atof(nodeValue);
+  *value = atof((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -404,9 +404,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}FloatType
  * @return pointer to the int.
  */
 static int *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
-  *value = atoi(nodeValue);
+  *value = atoi((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -440,9 +440,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntType(i
  * @return pointer to the long.
  */
 static long *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}LongType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   long *value = malloc(sizeof(long));
-  *value = atol(nodeValue);
+  *value = atol((char *)nodeValue);
   free(nodeValue);
   return value;
 }
@@ -476,9 +476,9 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}LongType(
  * @return pointer to the short.
  */
 static short *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}ShortType(xmlTextReaderPtr reader) {
-  char *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
+  xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   short *value = malloc(sizeof(short));
-  *value = atoi(nodeValue);
+  *value = atoi((char *)nodeValue);
   return value;
 }
 
@@ -510,7 +510,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}ShortType
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the string.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadEntireNodeValue(reader);
 }
 
@@ -521,7 +521,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -530,7 +530,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(xmlChar *value) {
   //no-op
 }
 
@@ -542,7 +542,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringTyp
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the ID.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -553,7 +553,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -562,7 +562,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -574,7 +574,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDType(ch
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the IDREF.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -585,7 +585,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -594,7 +594,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -606,7 +606,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IDREFType
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the integer.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -617,7 +617,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -626,7 +626,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -638,7 +638,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}IntegerTy
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the decimal.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -649,7 +649,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -658,7 +658,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -670,7 +670,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DecimalTy
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the duration.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -681,7 +681,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -690,7 +690,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -702,7 +702,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DurationT
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the QName.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -713,7 +713,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -722,7 +722,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -734,7 +734,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}QNameType
  * @param reader The reader (pointing at a node with a value).
  * @return pointer to the anyURI.
  */
-static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextReaderPtr reader) {
+static xmlChar *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextReaderPtr reader) {
   return xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(reader);
 }
 
@@ -745,7 +745,7 @@ static char *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_f
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextWriterPtr writer, char *value) {
+static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
@@ -754,7 +754,7 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
  *
  * @param value The value to free.
  */
-static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(char *value) {
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURIType(xmlChar *value) {
   free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(value);
 }
 
@@ -768,8 +768,8 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyURITyp
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
@@ -884,7 +884,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -906,8 +906,8 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateTimeT
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: hh:MM:ss+oo:oo
@@ -986,7 +986,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i.000%+03i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i.000%+03i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -1008,8 +1008,8 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}TimeType(
  */
 static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateType(xmlTextReaderPtr reader) {
   struct tm * time = calloc(1, sizeof(struct tm));
-  char *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
   char token[len];
 
   //date time format: yyyy-mm-dd+oo:oo
@@ -1088,7 +1088,7 @@ static struct tm *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}DateType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) value->tm_gmtoff / 3600, (int) (value->tm_gmtoff / 60) % 60);
+  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
 }
 
 /**
@@ -1141,7 +1141,7 @@ static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeTy
 static struct xmlBasicNode *xmlTextReaderRead${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(xmlTextReaderPtr reader) {
   struct xmlBasicNode *child, *next, *node = calloc(1, sizeof(struct xmlBasicNode));
   int status, depth = xmlTextReaderDepth(reader);
-  char *text;
+  const xmlChar *text;
 
   node->name = xmlTextReaderLocalName(reader);
   node->ns = xmlTextReaderNamespaceUri(reader);
@@ -1203,23 +1203,14 @@ static struct xmlBasicNode *xmlTextReaderRead${prefix("http://www.w3.org/2001/XM
           break;
         case XML_READER_TYPE_TEXT:
         case XML_READER_TYPE_CDATA:
-          if (node->value == NULL) {
-            text = xmlTextReaderValue(reader);
-          }
-          else {
-            text = calloc(strlen(node->value) + strlen(xmlTextReaderConstValue(reader)) + 1, sizeof(char));
-            strcpy(text, node->value);
-            strcat(text, xmlTextReaderConstValue(reader));
-            free(node->value);
-          }
-
-          node->value = text;
+          text = xmlTextReaderConstValue(reader);
+          node->value = xmlStrncat(node->value, text, xmlStrlen(text));
           break;
         default:
           //skip anything else.
           break;
       }
-      
+
       status = xmlTextReaderRead(reader);
     }
 
@@ -1361,6 +1352,8 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
   if (node->value != NULL) {
     return xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}StringType(writer, node->value);
   }
+
+  return 0;
 }
 
 #endif /* BASIC_XML_FUNCTIONS_${prefix("http://www.w3.org/2001/XMLSchema")?capitalize} */

@@ -36,6 +36,10 @@ import java.util.*;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"
 )
+@com.sun.xml.ws.developer.StreamingAttachment (
+  parseEagerly = true,
+  memoryThreshold = 40000L
+)
 @Path ("")
 public class PersonServiceImpl implements PersonService {
 

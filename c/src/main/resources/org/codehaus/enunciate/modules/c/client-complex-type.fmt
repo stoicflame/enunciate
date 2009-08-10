@@ -211,8 +211,8 @@ struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(rootElement)?cap_fi
   struct ${typeName} *_${type.clientSimpleName?uncap_first} = NULL;
 
   if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-    && strcmp("${rootElement.name}", xmlTextReaderConstLocalName(reader)) == 0
-    && [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]strcmp("${rootElement.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+    && xmlStrcmp(BAD_CAST "${rootElement.name}", xmlTextReaderConstLocalName(reader)) == 0
+    && [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]xmlStrcmp(BAD_CAST "${rootElement.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
 #if DEBUG_ENUNCIATE > 1
     printf("Attempting to read root element {${rootElement.namespace!""}}${rootElement.name}.\n");
 #endif
@@ -241,7 +241,7 @@ struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(rootElement)?cap_fi
  * @return 1 if successful, 0 otherwise.
  */
 static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}Element(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
-  xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}ElementNS(writer, _${type.clientSimpleName?uncap_first}, 0);
+  return xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}ElementNS(writer, _${type.clientSimpleName?uncap_first}, 0);
 }
 
 /**
@@ -256,7 +256,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}Elem
   int totalBytes = 0;
   int status;
 
-  status = xmlTextWriterStartElementNS(writer, [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]"${prefix(rootElement.namespace)}"[#else]NULL[/#if], "${rootElement.name}", NULL);
+  status = xmlTextWriterStartElementNS(writer, [#if ((rootElement.namespace??) && (rootElement.namespace != ""))]BAD_CAST "${prefix(rootElement.namespace)}"[#else]NULL[/#if], BAD_CAST "${rootElement.name}", NULL);
   if (status < 0) {
 #if DEBUG_ENUNCIATE
     printf("unable to write start element {${rootElement.namespace!""}}${rootElement.name}. status: %i\n", status);
@@ -274,7 +274,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}Elem
     [#list localReferencedNamespaces as referencedNamespace]
       [#if ((referencedNamespace??) && (referencedNamespace?length > 0))]
 
-    status = xmlTextWriterWriteAttribute(writer, "xmlns:${prefix(referencedNamespace)}", "${referencedNamespace}");
+    status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${prefix(referencedNamespace)}", BAD_CAST "${referencedNamespace}");
     if (status < 0) {
 #if DEBUG_ENUNCIATE
       printf("unable to write namespace attribute xmlns:${prefix(referencedNamespace)}. status: %i\n", status);
@@ -337,13 +337,13 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
   if (xmlTextReaderHasAttributes(reader)) {
     while (xmlTextReaderMoveToNextAttribute(reader)) {
     [/#if]
-      if ((strcmp("${attribute.name}", xmlTextReaderConstLocalName(reader)) == 0) && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]strcmp("${attribute.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if])) {
+      if ((xmlStrcmp(BAD_CAST "${attribute.name}", xmlTextReaderConstLocalName(reader)) == 0) && ([#if ((attribute.namespace??) && (attribute.namespace != ""))]xmlStrcmp(BAD_CAST "${attribute.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if])) {
     [#if attribute.binaryData]
 #if DEBUG_ENUNCIATE > 1
         printf("Attempting to read binary data from attribute {${attribute.namespace!""}}${attribute.name}...\n");
 #endif
         _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
-        _${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${attribute.clientSimpleName}));
+        _${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} = _decode_base64((xmlChar *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${attribute.clientSimpleName}));
         free(_child_accessor);
     [#elseif attribute.xmlList]
         _${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName} = xmlTextReaderReadEntireNodeValue(reader);
@@ -409,7 +409,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
     printf("Attempting to read binary data from element value.\n");
 #endif
     _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
-    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${typeValue.clientSimpleName}));
+    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = _decode_base64((xmlChar *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${typeValue.clientSimpleName}));
     free(_child_accessor);
     [#elseif typeValue.xmlList]
     _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = xmlTextReaderReadEntireNodeValue(reader);
@@ -436,7 +436,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
     [#if typeValue.accessorType.isInstanceOf("java.lang.String")]
       [#--special case for string accessors (empty string)--]
   else {
-    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = "";
+    _${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} = BAD_CAST "";
   }
     [/#if]
     [#assign valueFound=true/]
@@ -463,8 +463,8 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
       [/#if]
       [#if element.wrapped]
       else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-        && strcmp("${element.wrapperName}", xmlTextReaderConstLocalName(reader)) == 0
-        && [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]strcmp("${element.wrapperNamespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+        && xmlStrcmp(BAD_CAST "${element.wrapperName}", xmlTextReaderConstLocalName(reader)) == 0
+        && [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]xmlStrcmp(BAD_CAST "${element.wrapperNamespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
 
         if (xmlTextReaderIsEmptyElement(reader) == 0) {
 #if DEBUG_ENUNCIATE > 1
@@ -485,13 +485,13 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
       [/#if]
       [#list element.choices as choice]
       else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-        && strcmp("${choice.name}", xmlTextReaderConstLocalName(reader)) == 0
-        && [#if ((choice.namespace??) && (choice.namespace != ""))]strcmp("${choice.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
+        && xmlStrcmp(BAD_CAST "${choice.name}", xmlTextReaderConstLocalName(reader)) == 0
+        && [#if ((choice.namespace??) && (choice.namespace != ""))]xmlStrcmp(BAD_CAST "${choice.namespace}", xmlTextReaderConstNamespaceUri(reader)) == 0[#else]xmlTextReaderConstNamespaceUri(reader) == NULL[/#if]) {
 
         [#if choice.nillable!false]
           status = 1;
-          if (xmlTextReaderMoveToAttributeNs(reader, "nil", "http://www.w3.org/2001/XMLSchema-instance")) {
-            if (strcmp("true", xmlTextReaderConstValue(reader)) == 0) {
+          if (xmlTextReaderMoveToAttributeNs(reader, BAD_CAST "nil", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance")) {
+            if (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) {
 #if DEBUG_ENUNCIATE > 1
               printf("Choice {${choice.namespace!""}}${choice.name} was nil according to the xsi:nil attribute.\n");
 #endif
@@ -507,7 +507,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
         printf("Attempting to read binary data of choice {${choice.namespace!""}}${choice.name}.\n");
 #endif
         _child_accessor = xmlTextReaderReadEntireNodeValue(reader);
-        _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = _decode_base64((const char *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName}));
+        _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = _decode_base64((xmlChar *) _child_accessor, &(_${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName}));
         free(_child_accessor);
         [#elseif ((!choice.ref??) && (choice.xmlList))]
         _${type.clientSimpleName?uncap_first}->${choice.clientSimpleName} = xmlTextReaderReadEntireNodeValue(reader);
@@ -627,7 +627,7 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
  */
 static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}) {
   int status, totalBytes = 0, i;
-  char *binaryData;
+  xmlChar *binaryData;
   [#if type.hasAnyAttribute || type.anyElement??]
   struct xmlBasicNode *_next;
   [/#if]
@@ -638,7 +638,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     [#else]
   if (1) { //always write the primitive attribute
     [/#if]
-    status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]"${prefix(attribute.namespace)}"[#else]NULL[/#if], "${attribute.name}", NULL);
+    status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]BAD_CAST "${prefix(attribute.namespace)}"[#else]NULL[/#if], BAD_CAST "${attribute.name}", NULL);
     if (status < 0) {
 #if DEBUG_ENUNCIATE
       printf("Failed to write start attribute {${attribute.namespace!""}}${attribute.name}. status: %i\n", status);
@@ -742,7 +742,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
       [#if element.choices?size > 1]
 
   if ([#list element.choices as choice](_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName} != NULL)[#if choice_has_next] || [/#if][/#list]) {
-    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]"${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], "${element.wrapperName}", NULL);
+    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]BAD_CAST "${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], BAD_CAST "${element.wrapperName}", NULL);
     if (status < 0) {
 #if DEBUG_ENUNCIATE
       printf("Failed to write start element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
@@ -754,7 +754,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
       [#else]
 
   if (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName} != NULL) {
-    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]"${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], "${element.wrapperName}", NULL);
+    status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]BAD_CAST "${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], BAD_CAST "${element.wrapperName}", NULL);
     if (status < 0) {
 #if DEBUG_ENUNCIATE
       printf("Failed to write start element {${element.wrapperNamespace!""}}${element.wrapperName}. status: %i\n", status);
@@ -788,7 +788,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     }
     totalBytes += status;
       [#else]
-    status = xmlTextWriterStartElementNS(writer, [#if ((choice.namespace??) && (choice.namespace != ""))]"${prefix(choice.namespace)}"[#else]NULL[/#if], "${choice.name}", NULL);
+    status = xmlTextWriterStartElementNS(writer, [#if ((choice.namespace??) && (choice.namespace != ""))]BAD_CAST "${prefix(choice.namespace)}"[#else]NULL[/#if], BAD_CAST "${choice.name}", NULL);
     if (status < 0) {
 #if DEBUG_ENUNCIATE
       printf("Failed to write start element {${choice.namespace!""}}${choice.name}. status: %i\n", status);

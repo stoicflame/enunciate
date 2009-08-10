@@ -161,6 +161,9 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
               <executable>${gcc.executable}</executable>
               <skip>${gcc.executable}</skip>
               <arguments>
+                <argument>-Wall</argument>
+                <argument>-Wno-unused-variable</argument>
+                <argument>-Wno-unused-function</argument>
                 <argument>-Werror</argument>
                 <argument>${gcc.libxml.cflags}</argument>
                 <argument>-I${project.build.directory}/enunciate/gen/c</argument>
