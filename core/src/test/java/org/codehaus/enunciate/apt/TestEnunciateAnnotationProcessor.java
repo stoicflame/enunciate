@@ -99,7 +99,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       }
 
       @Override
-      protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
+      protected boolean isPotentialXmlSchemaType(TypeDeclaration declaration) {
         boolean potentialSchemaType = "org.codehaus.enunciate.samples.schema".equals(declaration.getPackage().getQualifiedName());
         String simpleName = declaration.getSimpleName();
         potentialSchemaType &= (simpleName.equals("BeanOne") || simpleName.equals("BeanTwo") || simpleName.equals("BeanThree"));
@@ -169,7 +169,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
       }
 
       @Override
-      protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
+      protected boolean isPotentialXmlSchemaType(TypeDeclaration declaration) {
         boolean potentialSchemaType = "org.codehaus.enunciate.samples.schema".equals(declaration.getPackage().getQualifiedName());
         String simpleName = declaration.getSimpleName();
         potentialSchemaType &= (simpleName.equals("BeanOne") || simpleName.equals("BeanTwo") || simpleName.equals("BeanThree"));

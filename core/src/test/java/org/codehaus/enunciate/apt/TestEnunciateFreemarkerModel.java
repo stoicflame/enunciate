@@ -27,6 +27,10 @@ import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition;
+import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +66,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertNotNull("The model should have a 'knownNamespaces' variable set.", model.getVariable("knownNamespaces"));
     assertNotNull("The model should have a 'ns2prefix' variable set.", model.getVariable("ns2prefix"));
     assertNotNull("The model should have a 'ns2schema' variable set.", model.getVariable("ns2schema"));
+    assertNotNull("The model should have a 'id2JsonSchema' variable set.", model.getVariable("id2JsonSchema"));
     assertNotNull("The model should have a 'ns2wsdl' variable set.", model.getVariable("ns2wsdl"));
   }
 
@@ -236,6 +241,23 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
   }
 
   /**
+   * Tests adding a JSON type definition to the model.
+   */
+  public void testAddJsonTypeDefinition()
+  {
+      EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+      FreemarkerModel.set(model);
+      final JsonTypeDefinition nameTypeDefinition = JsonTypeDefinition.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
+      assertNull(model.findJsonTypeDefinition(nameTypeDefinition));
+      model.add(nameTypeDefinition);
+      assertNotNull(model.findJsonTypeDefinition(nameTypeDefinition));
+      JsonSchemaInfo jsonSchemaInfo = model.getIdsToJsonSchemas().get(JsonSchemaInfo.schemaIdForType(nameTypeDefinition));
+      assertNotNull(jsonSchemaInfo);
+      assertNotNull(jsonSchemaInfo.getTypes().get(nameTypeDefinition.getTypeName()));
+      assertNull(jsonSchemaInfo.getTopLevelTypes().get(nameTypeDefinition.getTypeName()));
+  }
+
+  /**
    * Tests adding a type definition to the model.
    */
   public void testAddTypeDefinition() throws Exception {
@@ -285,6 +307,28 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
     assertEquals("There should have been no new namespaces added.", nsCount, model.getNamespacesToPrefixes().size());
 
     assertEquals(3, model.typeDefinitions.size());
+  }
+
+  /**
+   * Tests adding a JSON root element declaration to the model.
+   */
+  public void testAddJsonRootElement()
+  {
+      EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+      FreemarkerModel.set(model);
+
+      final JsonTypeDefinition nameTypeDefinition = JsonTypeDefinition.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
+      final JsonRootElementDeclaration rootElementDeclaration = new JsonRootElementDeclaration(nameTypeDefinition);
+
+      assertNull(model.findJsonRootElementDeclaration(rootElementDeclaration));
+      model.add(rootElementDeclaration);
+      assertNotNull(model.findJsonRootElementDeclaration(rootElementDeclaration));
+      assertNotNull(model.findJsonTypeDefinition(nameTypeDefinition));
+
+      JsonSchemaInfo jsonSchemaInfo = model.getIdsToJsonSchemas().get(JsonSchemaInfo.schemaIdForType(nameTypeDefinition));
+      assertNotNull(jsonSchemaInfo);
+      assertNotNull(jsonSchemaInfo.getTypes().get(nameTypeDefinition.getTypeName()));
+      assertNotNull(jsonSchemaInfo.getTopLevelTypes().get(nameTypeDefinition.getTypeName()));
   }
 
   /**

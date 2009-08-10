@@ -38,8 +38,11 @@ import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
+import org.codehaus.enunciate.json.JsonType;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
@@ -102,7 +105,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       EnunciateConfiguration config = this.enunciate.getConfig();
       for (DeploymentModule module : config.getAllModules()) {
         if (module instanceof EnunciateModelAware) {
-          ((EnunciateModelAware)module).initModel(model);
+          ((EnunciateModelAware) module).initModel(model);
         }
       }
 
@@ -231,12 +234,22 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         Registry registry = new Registry((ClassDeclaration) declaration);
         model.add(registry);
       }
-      else if (isPotentialSchemaType(declaration)) {
-        TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration, model);
-        loadTypeDef(typeDef, model);
-      }
       else {
-        debug("%s is neither an endpoint interface, rest endpoint, or JAXB schema type, so it'll be ignored.", declaration.getQualifiedName());
+        boolean xmlType = isPotentialXmlSchemaType(declaration);
+        if (xmlType) {
+          TypeDefinition typeDef = createTypeDefinition((ClassDeclaration) declaration, model);
+          loadTypeDef(typeDef, model);
+        }
+
+        boolean jsonType = isPotentialJsonSchemaType(declaration);
+        if (jsonType) {
+          JsonTypeDefinition typeDefinition = JsonTypeDefinition.createTypeDefinition((ClassDeclaration) declaration);
+          loadJsonTypeDef(typeDefinition, model);
+        }
+
+        if (!xmlType && !jsonType) {
+          debug("%s is neither an endpoint interface, rest endpoint, or a schema type, so it'll be ignored.", declaration.getQualifiedName());
+        }
       }
     }
 
@@ -344,16 +357,37 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   /**
    * Loads the specified type definition into the specified model.
    *
+   * @param typeDefinition The type definition to load.
+   * @param model          The model into which to load the type definition.
+   */
+  protected void loadJsonTypeDef(JsonTypeDefinition typeDefinition, EnunciateFreemarkerModel model) {
+    if (typeDefinition != null) {
+      if (this.enunciate.getConfig() != null && !this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
+        debug("%s to be considered as a %s", typeDefinition.getTypeName(), typeDefinition.getClass().getSimpleName());
+        model.add(typeDefinition);
+      }
+      else {
+        debug("%s is a potential schema type definition, but we're not going to add it directly to the model. (It could still be indirectly added, though.)", typeDefinition.getTypeName());
+      }
+
+      debug("%s to be considered as a root element", typeDefinition.getTypeName());
+      model.add(new JsonRootElementDeclaration(typeDefinition));
+    }
+  }
+
+  /**
+   * Loads the specified type definition into the specified model.
+   *
    * @param typeDef The type definition to load.
-   * @param model The model into which to load the type definition.
+   * @param model   The model into which to load the type definition.
    */
   protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
     if (typeDef != null) {
       if (!this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
         debug("%s to be considered as a %s (qname:{%s}%s).",
-             typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
-             typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
-             typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
+              typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
+              typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
+              typeDef.getName() == null ? "(anonymous)" : typeDef.getName());
 
         model.add(typeDef);
       }
@@ -387,10 +421,10 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       //fails if the module is not enabled.
       disabledRules.add("disabled.rest.module");
     }
-    
+
     Validator coreValidator = config.getValidator();
     if (coreValidator instanceof ConfigurableRules) {
-      ((ConfigurableRules)coreValidator).disableRules(disabledRules);
+      ((ConfigurableRules) coreValidator).disableRules(disabledRules);
     }
     validator.addValidator("core", coreValidator);
     debug("Default validator added to the chain.");
@@ -473,12 +507,22 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   /**
+   * Whether the specified declaration is a potential schema type for JSON data.
+   *
+   * @param declaration The declaration to determine whether it's a potential schema type for JSON data.
+   * @return Whether the specified declaration is a potential schema type for JSON data.
+   */
+  protected boolean isPotentialJsonSchemaType(TypeDeclaration declaration) {
+    return declaration instanceof ClassDeclaration && declaration.getAnnotation(JsonType.class) != null;
+  }
+
+  /**
    * Whether the specified declaration is a potential schema type.
    *
    * @param declaration The declaration to determine whether it's a potential schema type.
    * @return Whether the specified declaration is a potential schema type.
    */
-  protected boolean isPotentialSchemaType(TypeDeclaration declaration) {
+  protected boolean isPotentialXmlSchemaType(TypeDeclaration declaration) {
     if (!(declaration instanceof ClassDeclaration)) {
       debug("%s isn't a potential schema type because it's not a class.", declaration.getQualifiedName());
       return false;
@@ -560,7 +604,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   public boolean isEndpointInterface(TypeDeclaration declaration) {
     WebService ws = declaration.getAnnotation(WebService.class);
     return (declaration.getAnnotation(XmlTransient.class) == null)
-      &&  (ws != null) && ((declaration instanceof InterfaceDeclaration)
+      && (ws != null) && ((declaration instanceof InterfaceDeclaration)
       //if this is a class declaration, then it has an implicit endpoint interface if it doesn't reference another.
       || (ws.endpointInterface() == null) || ("".equals(ws.endpointInterface())));
   }
@@ -607,7 +651,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * Find the type definition for a class given the class's declaration, or null if the class is xml transient.
    *
    * @param declaration The declaration.
-   * @param model The model to use to create the type declaration.
+   * @param model       The model to use to create the type declaration.
    * @return The type definition.
    */
   public TypeDefinition createTypeDefinition(ClassDeclaration declaration, EnunciateFreemarkerModel model) {
@@ -712,7 +756,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           }
         }
         builder.append(". Please use the Enunciate configuration to specify a unique id for each content type.");
-        validationResult.addError((Declaration) null,  builder.toString());
+        validationResult.addError((Declaration) null, builder.toString());
         break;
       }
     }
@@ -763,7 +807,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   /**
    * Handle an info-level message.
    *
-   * @param message The info message.
+   * @param message    The info message.
    * @param formatArgs The format args of the message.
    */
   public void info(String message, Object... formatArgs) {
@@ -773,7 +817,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   /**
    * Handle a debug-level message.
    *
-   * @param message The debug message.
+   * @param message    The debug message.
    * @param formatArgs The format args of the message.
    */
   public void debug(String message, Object... formatArgs) {
@@ -783,7 +827,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   /**
    * Handle a warn-level message.
    *
-   * @param message The warn message.
+   * @param message    The warn message.
    * @param formatArgs The format args of the message.
    */
   public void warn(String message, Object... formatArgs) {
