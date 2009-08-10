@@ -1303,6 +1303,15 @@ static int xmlTextWriterWriteXsAnyTypeElementNS(xmlTextWriterPtr writer, struct 
   return xmlTextWriterWriteXsAnyTypeType(writer, node);
 }
 
+/**
+ * Free a anyType element value.
+ *
+ * @param node The node.
+ */
+static void freeXsAnyTypeElement(struct xmlBasicNode *node) {
+  freeXsAnyTypeType(node);
+}
+
 /*******************xs:anySimpleType************************************/
 
 /**

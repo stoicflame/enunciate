@@ -1313,6 +1313,15 @@ static int xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_fi
   return xmlTextWriterWrite${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(writer, node);
 }
 
+/**
+ * Free a anyType element value.
+ *
+ * @param node The node.
+ */
+static void free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeElement(struct xmlBasicNode *node) {
+  free${prefix("http://www.w3.org/2001/XMLSchema")?cap_first}AnyTypeType(node);
+}
+
 /*******************xs:anySimpleType************************************/
 
 /**
