@@ -61,11 +61,6 @@
     </dependency>
 
     <dependency>
-      <groupId>asm</groupId>
-      <artifactId>asm-tree</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>net.sf.apt-jelly</groupId>
       <artifactId>apt-jelly-freemarker</artifactId>
     </dependency>
