@@ -999,7 +999,7 @@
             </xs:annotation>
             <xs:complexType>
               <xs:sequence>
-                <xs:element name="JVMArg">
+                <xs:element name="JVMArg" minOccurs="0" maxOccurs="unbounded">
                   <xs:annotation>
                     <xs:documentation>
                       additional JVM arguments, passed in order to the JVM used to invoke the compiler
@@ -1009,7 +1009,7 @@
                     <xs:attribute name="value" type="xs:string"/>
                   </xs:complexType>
                 </xs:element>
-                <xs:element name="arg">
+                <xs:element name="arg" minOccurs="0" maxOccurs="unbounded">
                   <xs:annotation>
                     <xs:documentation>
                       additional compiler arguments, passed in order to the compiler
@@ -1019,7 +1019,7 @@
                     <xs:attribute name="value" type="xs:string"/>
                   </xs:complexType>
                 </xs:element>
-                <xs:element name="license">
+                <xs:element name="license" minOccurs="0" maxOccurs="unbounded">
                   <xs:complexType>
                     <xs:attribute name="product" type="xs:string"/>
                     <xs:attribute name="serialNumber" type="xs:string"/>
