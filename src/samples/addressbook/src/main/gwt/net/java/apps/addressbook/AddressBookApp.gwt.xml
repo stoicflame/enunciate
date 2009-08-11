@@ -1,4 +1,4 @@
-<module>
+<module rename-to="addressbook">
 
   <!--inherit from the main GWT client-side library.-->
   <inherits name='com.google.gwt.user.User'/>

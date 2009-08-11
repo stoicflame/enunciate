@@ -3,11 +3,12 @@
   <modules>
     <gwt disabled="false" gwtHome="/path/to/gwt/home" rpcModuleName="net.java.ws.addressbook.AddressBookGWT">
       <app srcDir="src/main/gwt">
-        <module name="net.java.apps.addressbook.AddressBookApp"/>
+        <module name="net.java.apps.addressbook.AddressBookApp" outputDir="addressbook"/>
       </app>
     </gwt>
     <amf disabled="false" flexHome="/path/to/flex/home">
       <app srcDir="src/main/flex" name="bytype" mainMxmlFile="src/main/flex/net/java/apps/addressbook/bytype.mxml"/>
+      <war flexAppDir="addressbook"/>
     </amf>
   </modules>
 </enunciate>

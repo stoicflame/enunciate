@@ -40,7 +40,7 @@ Invocation via Maven
 Run "mvn -Dgwt.home=/path/to/gwt/home package" in this directory.
 
 You can also run "mvn -Dgwt.home=/path/to/gwt/home jetty:run-war" to automatically
-run the war.  Then you can hit http://localhost:8080/petclinic/petclinic.html
+run the war.  Then you can hit http://localhost:8080/petclinic/petclinic/petclinic.html
 to see the application.
 
 To enable the flex application, edit the enunciate.xml file and make sure

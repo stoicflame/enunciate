@@ -43,7 +43,7 @@
     }
 
     private function getContact(id:String):void {
-      var request:URLRequest = new URLRequest("amf/contact/" + id);
+      var request:URLRequest = new URLRequest("../amf/contact/" + id);
       request.method = URLRequestMethod.GET;
       var contactStream:URLStream = new URLStream();
       contactStream.addEventListener("complete", contactRetrieved)
@@ -57,7 +57,7 @@
     }
 
     private function postContact():void {
-      var request:URLRequest = new URLRequest("amf/contact");
+      var request:URLRequest = new URLRequest("../amf/contact");
       request.method = URLRequestMethod.POST;
       var ba:ByteArray = new ByteArray();
       var c:Contact = new Contact();

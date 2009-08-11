@@ -313,7 +313,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
             String line = reader.readLine();
             if (line != null) {
               aboutSays14 = line.contains("1.4");
-              aboutSays16 = line.contains("1.6");
+              aboutSays16 = line.contains("1.6") || line.contains("1.7");
             }
             reader.close();
           }

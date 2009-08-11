@@ -1107,6 +1107,11 @@
                   <xs:documentation>source directory for the application</xs:documentation>
                 </xs:annotation>
               </xs:attribute>
+              <xs:attribute name="outputDir" type="xs:string" use="optional">
+                <xs:annotation>
+                  <xs:documentation>output directory for the application</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
               <xs:attribute name="mainMxmlFile" type="xs:string" use="required">
                 <xs:annotation>
                   <xs:documentation>the main mxml file for the app. This attribute is required. The path to this file is resolved

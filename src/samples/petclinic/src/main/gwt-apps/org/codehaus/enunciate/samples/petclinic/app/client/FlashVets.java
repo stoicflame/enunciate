@@ -22,7 +22,7 @@ public class FlashVets extends ClinicComponent {
   private HTML html;
 
   public FlashVets() {
-    final String swfURL = com.google.gwt.core.client.GWT.getModuleBaseURL() + "vets.swf";
+    final String swfURL = "vets.swf";
     html = new HTML("<p>Looking for " + swfURL + "...");
     RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, swfURL);
 

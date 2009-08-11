@@ -161,6 +161,7 @@ import java.util.*;
  * <li>The "srcDir" attribute specifies the source directory for the application. This attribute is required.</li>
  * <li>The "mainMxmlFile" attribute specifies the main mxml file for the app.  This attribute is required. The path to this file is resolved
  * relative to the enunciate.xml file (not to the "srcDir" attribute of the app).</li>
+ * <li>The "outputDir" attribute specified the output directory for the application, relative to the "flexAppDir".</li>
  * </ul>
  *
  * <h3>Example Configuration</h3>
@@ -614,7 +615,12 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
           throw new EnunciateException("Main MXML file for the flex app '" + flexApp.getName() + "' doesn't exist.");
         }
 
-        File swfFile = new File(outputDirectory, flexApp.getName() + ".swf");
+        File swfDir = outputDirectory;
+        if (flexApp.getOutputDir() != null && !"".equals(flexApp.getOutputDir())) {
+          swfDir = new File(outputDirectory, flexApp.getOutputDir());
+          swfDir.mkdirs();
+        }
+        File swfFile = new File(swfDir, flexApp.getName() + ".swf");
         File appSrcDir = enunciate.resolvePath(flexApp.getSrcDir());
         String swfFilePath = swfFile.getAbsolutePath();
 
