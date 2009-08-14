@@ -303,10 +303,6 @@ public class ConfigMojo extends AbstractMojo {
     enunciate.setConfig(config);
     Set<org.apache.maven.artifact.Artifact> classpathEntries = new HashSet<org.apache.maven.artifact.Artifact>();
     classpathEntries.addAll(this.projectDependencies);
-    // todo: figure out whether we need these artifacts included in the classpath.
-    // If not, we wouldn't have to declare the dependency on Enunciate in our project.
-    // If so, we get maven jars included in the generated war.... 
-    //classpathEntries.addAll(this.pluginArtifacts);
     Iterator<org.apache.maven.artifact.Artifact> it = classpathEntries.iterator();
     while (it.hasNext()) {
       org.apache.maven.artifact.Artifact artifact = it.next();
@@ -325,7 +321,20 @@ public class ConfigMojo extends AbstractMojo {
         classpath.append(File.pathSeparatorChar);
       }
     }
-    enunciate.setClasspath(classpath.toString());
+    enunciate.setRuntimeClasspath(classpath.toString());
+
+    classpathEntries.clear();
+    classpathEntries.addAll(this.pluginDepdendencies);
+    classpath = new StringBuffer();
+    classpathIt = classpathEntries.iterator();
+    while (classpathIt.hasNext()) {
+      classpath.append(classpathIt.next().getFile().getAbsolutePath());
+      if (classpathIt.hasNext()) {
+        classpath.append(File.pathSeparatorChar);
+      }
+    }
+    enunciate.setBuildClasspath(classpath.toString());
+
 
     if (this.generateDir != null) {
       enunciate.setGenerateDir(this.generateDir);
@@ -384,7 +393,8 @@ public class ConfigMojo extends AbstractMojo {
       config.load(configFile);
     }
     else {
-      File filteredConfig = File.createTempFile("enunciateConfig", ".xml");
+      this.scratchDir.mkdirs();
+      File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.scratchDir);
       getLog().info("Filtering " + configFile + " to " + filteredConfig + "...");
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, null, true, "utf-8", this.session);
       config.load(filteredConfig);
@@ -613,7 +623,7 @@ public class ConfigMojo extends AbstractMojo {
           }
 
           if (artifact != null) {
-            File tempExportFile = File.createTempFile(project.getArtifactId() + "-" + projectArtifact.getClassifier(), projectArtifact.getArtifactType());
+            File tempExportFile = createTempFile(project.getArtifactId() + "-" + projectArtifact.getClassifier(), projectArtifact.getArtifactType());
             artifact.exportTo(tempExportFile, this);
             projectHelper.attachArtifact(project, projectArtifact.getArtifactType(), projectArtifact.getClassifier(), tempExportFile);
           }

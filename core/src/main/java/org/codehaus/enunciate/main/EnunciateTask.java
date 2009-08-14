@@ -89,10 +89,11 @@ public class EnunciateTask extends MatchingTask {
       EnunciateConfiguration config;
 
       if (classpath != null) {
-        proxy.setClasspath(classpath.toString());
+        proxy.setRuntimeClasspath(classpath.toString());
 
         //set up the classloader for the Enunciate invocation.
         AntClassLoader loader = new AntClassLoader(Enunciate.class.getClassLoader(), getProject(), this.classpath, true);
+        proxy.setBuildClasspath(loader.getClasspath());
         Thread.currentThread().setContextClassLoader(loader);
         ArrayList<DeploymentModule> modules = new ArrayList<DeploymentModule>();
         Iterator discoveredModules = Service.providers(DeploymentModule.class, loader);

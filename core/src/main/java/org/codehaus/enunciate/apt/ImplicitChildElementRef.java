@@ -47,4 +47,12 @@ public class ImplicitChildElementRef extends ImplicitElementRef implements Impli
   public TypeMirror getType() {
     return element.getCollectionItemType();
   }
+
+  public String getMimeType() {
+    return element.getMimeType();
+  }
+
+  public boolean isSwaRef() {
+    return element.isSwaRef();
+  }
 }

@@ -108,6 +108,30 @@ public class RPCPartChildElementAdapter implements Adaptable, ImplicitChildEleme
     }
   }
 
+  public String getMimeType() {
+    if (this.rpcPart instanceof WebParam) {
+      return ((WebParam) this.rpcPart).getMimeType();
+    }
+    else if (this.rpcPart instanceof WebResult) {
+      return ((WebResult) this.rpcPart).getMimeType();
+    }
+    else {
+      return null;
+    }
+  }
+
+  public boolean isSwaRef() {
+    if (this.rpcPart instanceof WebParam) {
+      return ((WebParam) this.rpcPart).isSwaRef();
+    }
+    else if (this.rpcPart instanceof WebResult) {
+      return ((WebResult) this.rpcPart).isSwaRef();
+    }
+    else {
+      return false;
+    }
+  }
+
   /**
    * The java type of this part.
    *
@@ -124,6 +148,8 @@ public class RPCPartChildElementAdapter implements Adaptable, ImplicitChildEleme
       return null;
     }
   }
+
+
 
   // Inherited.
   public boolean isAdapted() {

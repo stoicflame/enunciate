@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-xfire-rest</artifactId>
-  <version>1.14-RC2</version>
+  <version>1.14-RC3</version>
   <name>Enunciate - XFire/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the xfire + REST combo.</description>
   <packaging>war</packaging>
@@ -220,6 +220,15 @@
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
 
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-xfire-client-rt</artifactId>
+      <version>${project.version}</version>
+
+      <!--used to compile the tests.-->
       <scope>test</scope>
     </dependency>
   </dependencies>

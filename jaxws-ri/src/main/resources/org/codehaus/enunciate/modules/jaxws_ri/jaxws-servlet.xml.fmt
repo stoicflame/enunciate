@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
 [@file name="jaxws-servlet.xml" charset="utf-8"]
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,11 +15,40 @@
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         [#--todo: what about eis with the same name, different namespace?--]
-  <bean name="${endpointInterface.serviceEndpointId}:instrumented" class="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}">
-    <constructor-arg ref="${endpointInterface.serviceEndpointId}"/>
+  <bean name="${impl.serviceEndpointId}:instrumented" class="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}">
+    <constructor-arg ref="${impl.serviceEndpointId}"/>
   </bean>
   <wss:binding url="${endpointInterface.metaData.soapPath}" service="#jaxws-service-${endpointInterface.serviceName}" />
-  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}" bean="#${endpointInterface.serviceEndpointId}:instrumented"/>
+  [#if impl.annotations["javax.xml.ws.soap.MTOM"]??]
+  <ws:mtom id="jaxws-service-${endpointInterface.serviceName}-mtom" enabled="${impl.annotations["javax.xml.ws.soap.MTOM"].enabled?string}" threshold="${impl.annotations["javax.xml.ws.soap.MTOM"].threshold?c}"/>
+  [/#if]
+  [#if impl.annotations["javax.xml.ws.soap.Addressing"]??]
+  <ws:addressing id="jaxws-service-${endpointInterface.serviceName}-addressing" enabled="${impl.annotations["javax.xml.ws.soap.Addressing"].enabled?string}" required="${impl.annotations["javax.xml.ws.soap.Addressing"].required?string}"/>
+  [/#if]
+  <ws:service id="jaxws-service-${endpointInterface.serviceName}" impl="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}" bean="#${impl.serviceEndpointId}:instrumented">
+        [#if ((impl.annotations["javax.xml.ws.soap.MTOM"]??) || (impl.annotations["javax.xml.ws.soap.Addressing"]??) || (impl.annotations["javax.xml.ws.RespectBinding"]??) || (impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"]??))]
+    <ws:features>
+            [#if impl.annotations["javax.xml.ws.soap.MTOM"]??]
+      <ref bean="jaxws-service-${endpointInterface.serviceName}-mtom"/>
+            [/#if]
+            [#if impl.annotations["javax.xml.ws.soap.Addressing"]??]
+      <ref bean="jaxws-service-${endpointInterface.serviceName}-addressing"/>
+            [/#if]
+            [#if impl.annotations["javax.xml.ws.RespectBinding"]??]
+      <bean class="javax.xml.ws.RespectBindingFeature">
+        <constructor-arg value="${impl.annotations["javax.xml.ws.RespectBinding"].enabled?string}"/>
+      </bean>
+            [/#if]
+            [#if impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"]??]
+      <bean class="com.sun.xml.ws.developer.StreamingAttachmentFeature">
+        <constructor-arg value="${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].dir}"/>
+        <constructor-arg value="${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].parseEagerly?string}"/>
+        <constructor-arg value="${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].memoryThreshold?c}"/>
+      </bean>
+            [/#if]
+    </ws:features>
+          [/#if]
+  </ws:service>
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

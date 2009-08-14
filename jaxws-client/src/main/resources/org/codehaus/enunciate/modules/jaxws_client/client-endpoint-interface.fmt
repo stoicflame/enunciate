@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="webMethod" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
 [#--template for the client-side endpoint interface.--]
 [#if endpointInterface.endpointImplementations?size == 1]
   [#assign impl=endpointInterface.endpointImplementations[0]/]
@@ -80,7 +81,7 @@ public interface ${endpointInterface.simpleName} {
   [#if webMethod.oneWay]
   @javax.jws.Oneway
   [/#if]
-  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@javax.jws.WebParam( name = "${param.elementName}", targetNamespace="${param.targetNamespace}", mode = javax.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" ) ${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
+  ${classnameFor(webMethod.webResult)} ${webMethod.simpleName}([#list webMethod.webParameters as param]@javax.jws.WebParam( name = "${param.elementName}", targetNamespace="${param.targetNamespace}", mode = javax.jws.WebParam.Mode.${param.mode?string} , header = ${param.header?string}, partName = "${param.partName}" )[#if param.mimeType??] @javax.xml.bind.annotation.XmlMimeType("${param.mimeType}")[/#if][#if param.swaRef] @javax.xml.bind.annotation.XmlAttachmentRef[/#if] ${classnameFor(param)} ${param.simpleName}[#if param_has_next], [/#if][/#list]) [#if webMethod.webFaults?size > 0]throws [#list webMethod.webFaults as fault]${classnameFor(fault)}[#if fault_has_next], [/#if][/#list][/#if];
   [/@forEachWebMethod]
 
 }

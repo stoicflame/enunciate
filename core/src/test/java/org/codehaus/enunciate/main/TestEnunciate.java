@@ -57,7 +57,7 @@ public class TestEnunciate extends TestCase {
     createSourceFile("org.codehaus.enunciate.pckg3.SampleClassTen", dirToZipUp);
     File jarFile2 = File.createTempFile("enunciatetest", ".jar");
     enunciate.zip(jarFile2, dirToZipUp);
-    enunciate.setClasspath(dirEntry.getAbsolutePath() + File.pathSeparator + jarFile.getAbsolutePath() + File.pathSeparator + jarFile2.getAbsolutePath());
+    enunciate.setRuntimeClasspath(dirEntry.getAbsolutePath() + File.pathSeparator + jarFile.getAbsolutePath() + File.pathSeparator + jarFile2.getAbsolutePath());
     EnunciateConfiguration config = new EnunciateConfiguration(Collections.<DeploymentModule>emptyList());
     APIImport apiImport = new APIImport();
     apiImport.setPattern("org.codehaus.enunciate.pckg1.SampleClassOne");

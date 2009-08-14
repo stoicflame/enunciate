@@ -547,7 +547,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       if (!enunciate.isUpToDateWithSources(jdk14CompileDir)) {
         Collection<String> jdk14Files = enunciate.getJavaFiles(getJdk14GenerateDir());
         jdk14Files.addAll(typeFiles);
-        enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.4", jdk14CompileDir, new ArrayList<String>(), jdk14Files.toArray(new String[jdk14Files.size()]));
+        String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
+        enunciate.invokeJavac(clientClasspath, "1.4", jdk14CompileDir, new ArrayList<String>(), jdk14Files.toArray(new String[jdk14Files.size()]));
         enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk14CompileDir, uuid + ".types"));
         enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk14CompileDir, uuid + ".annotations"));
       }
@@ -565,7 +566,8 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       if (!enunciate.isUpToDateWithSources(jdk15CompileDir)) {
         Collection<String> jdk15Files = enunciate.getJavaFiles(getJdk15GenerateDir());
         jdk15Files.addAll(typeFiles);
-        enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", jdk15CompileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
+        String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
+        enunciate.invokeJavac(clientClasspath, "1.5", jdk15CompileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
         enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".types"), new File(jdk15CompileDir, uuid + ".types"));
         enunciate.copyFile(new File(getCommonJdkGenerateDir(), uuid + ".annotations"), new File(jdk15CompileDir, uuid + ".annotations"));
       }

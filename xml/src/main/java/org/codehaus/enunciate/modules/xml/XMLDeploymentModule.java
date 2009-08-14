@@ -331,7 +331,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       SAXParserFactory factory = SAXParserFactory.newInstance();
       factory.setNamespaceAware(false);
       SAXParser parser = factory.newSAXParser();
-      File prettyFile = File.createTempFile("enunciate", file.getName());
+      File prettyFile = enunciate.createTempFile("enunciate", file.getName());
       parser.parse(file, new PrettyPrinter(prettyFile));
 
       if (file.delete()) {

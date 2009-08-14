@@ -431,6 +431,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
         schemaInfo.getTypeDefinitions().add(typeDef);
 
+        addSeeAlsoTypeDefinitions(typeDef);
+        
         for (Element element : typeDef.getElements()) {
           if (includeReferencedClasses()) {
             addReferencedTypeDefinitions(element);

@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
 [@file name="xfire-servlet.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -35,8 +36,8 @@
         <entry key="${endpointInterface.metaData.soapPath}">
           <bean parent="soap-endpoint">
             <property name="serviceClass" value="${impl.qualifiedName}"/>
-            <property name="serviceBean" ref="${endpointInterface.serviceEndpointId}"/>
-          [#if wsdl.properties.filename?exists]
+            <property name="serviceBean" ref="${impl.serviceEndpointId}"/>
+          [#if wsdl.properties.filename??]
             <property name="wsdlView">
               <bean class="org.springframework.web.servlet.view.RedirectView">
                 <property name="url" value="[#if docsDir?exists]/${docsDir}[/#if]/${wsdl.properties.filename}"/>

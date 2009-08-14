@@ -28,6 +28,12 @@ public class ${simpleBeanName} {
   @javax.xml.bind.annotation.XmlElement (
     name = "${childElement.elementName}"
   )
+    [#if childElement.mimeType??]
+  @javax.xml.bind.annotation.XmlMimeType("${childElement.mimeType}")
+    [/#if]
+    [#if childElement.swaRef]
+  @javax.xml.bind.annotation.XmlAttachmentRef
+    [/#if]
     [#if "return" = childElement.elementName]
   protected ${classnameFor(childElement)} _retval;
     [#else]

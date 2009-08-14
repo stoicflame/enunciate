@@ -40,6 +40,8 @@ import org.codehaus.enunciate.ClientName;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Holder;
+import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlAttachmentRef;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -283,6 +285,15 @@ public class WebParam extends DecoratedParameterDeclaration implements Adaptable
     catch (XmlTypeException e) {
       throw new ValidationException(getPosition(), "Parameter " + getSimpleName() + ": " + e.getMessage());
     }
+  }
+
+  public String getMimeType() {
+    XmlMimeType mimeType = getAnnotation(XmlMimeType.class);
+    return mimeType == null ? null : mimeType.value();
+  }
+
+  public boolean isSwaRef() {
+    return getAnnotation(XmlAttachmentRef.class) != null;
   }
 
   /**

@@ -21,6 +21,7 @@ import net.sf.jelly.apt.TemplateModel;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.rest.RESTMethod;
 
@@ -51,7 +52,9 @@ public class ServiceEndpointLoopStrategy extends EnunciateTemplateLoopStrategy<S
     Collection<WsdlInfo> wsdls = getNamespacesToWSDLs().values();
     for (WsdlInfo wsdl : wsdls) {
       for (EndpointInterface endpointInterface : wsdl.getEndpointInterfaces()) {
-        interfaces.add(endpointInterface);
+        for (EndpointImplementation impl : endpointInterface.getEndpointImplementations()) {
+          interfaces.add(impl);
+        }
       }
     }
 

@@ -42,6 +42,8 @@ import org.codehaus.enunciate.ClientName;
 
 import javax.xml.namespace.QName;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlAttachmentRef;
 import java.util.*;
 
 /**
@@ -489,6 +491,15 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
         throw new ValidationException(property.getPosition(), "Error with property '" + property.getPropertyName() + "' of fault '" +
           webFault.getQualifiedName() + "'. " + e.getMessage());
       }
+    }
+
+    public String getMimeType() {
+      XmlMimeType mimeType = property.getAnnotation(XmlMimeType.class);
+      return mimeType == null ? null : mimeType.value();
+    }
+
+    public boolean isSwaRef() {
+      return property.getAnnotation(XmlAttachmentRef.class) != null;
     }
 
     public QName getTypeQName() {

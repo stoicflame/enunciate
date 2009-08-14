@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.14-RC2</version>
+    <version>1.14-RC3</version>
   </parent>
 
   <artifactId>enunciate-rt</artifactId>
@@ -67,6 +67,9 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-xfire-client-rt</artifactId>
       <version>${project.version}</version>
+
+      <!--optional because we don't need the client-side dependencies for server-side targets-->
+      <optional>true</optional>
     </dependency>
 
     <dependency>

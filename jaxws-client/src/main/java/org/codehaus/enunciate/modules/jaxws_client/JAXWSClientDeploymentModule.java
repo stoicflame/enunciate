@@ -367,7 +367,8 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
     if (!enunciate.isUpToDateWithSources(compileDir)) {
       Collection<String> jdk15Files = enunciate.getJavaFiles(generateDir);
       jdk15Files.addAll(typeFiles);
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), "1.5", compileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
+      String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
+      enunciate.invokeJavac(clientClasspath, "1.5", compileDir, new ArrayList<String>(), jdk15Files.toArray(new String[jdk15Files.size()]));
 
       for (DeploymentModule module : enunciate.getConfig().getEnabledModules()) {
         if (module instanceof XMLDeploymentModule) {

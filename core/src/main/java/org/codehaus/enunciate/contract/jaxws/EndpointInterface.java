@@ -36,7 +36,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class EndpointInterface extends DecoratedTypeDeclaration implements ServiceEndpoint {
+public class EndpointInterface extends DecoratedTypeDeclaration {
 
   private final javax.jws.WebService annotation;
   private final List<WebMethod> webMethods;
@@ -108,21 +108,6 @@ public class EndpointInterface extends DecoratedTypeDeclaration implements Servi
     }
 
     this.webMethods = webMethods;
-  }
-
-  // Inherited.
-  public String getServiceEndpointId() {
-    return "enunciate:service:" + getSimpleName();
-  }
-
-  // Inherited.
-  public TypeDeclaration getServiceEndpointInterface() {
-    return this;
-  }
-
-  // Inherited.
-  public TypeDeclaration getServiceEndpointDefaultImplementation() {
-    return impls.isEmpty() ? null : impls.iterator().next();
   }
 
   /**

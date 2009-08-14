@@ -33,6 +33,12 @@ public class ${simpleBeanName} {
   /**
    * ${childElement.elementDocs?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
+    [#if childElement.mimeType??]
+  @javax.xml.bind.annotation.XmlMimeType("${childElement.mimeType}")
+    [/#if]
+    [#if childElement.swaRef]
+  @javax.xml.bind.annotation.XmlAttachmentRef
+    [/#if]
   public ${childElement.type} get${childElement.elementName?cap_first}() {
     [#if "return" = childElement.elementName]
     return this._retval;

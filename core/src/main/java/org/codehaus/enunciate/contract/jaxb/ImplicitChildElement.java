@@ -58,6 +58,20 @@ public interface ImplicitChildElement extends ImplicitSchemaElement {
   XmlType getXmlType();
 
   /**
+   * The mime type for this child element (for binary data), or null if not applicable.
+   *
+   * @return The mime type or null.
+   */
+  String getMimeType();
+
+  /**
+   * Whether this child element is an attachment ref.
+   *
+   * @return Whether this child element is an attachment ref.
+   */
+  boolean isSwaRef();
+
+  /**
    * Gets the java type for this child element.
    *
    * @return The xml type.

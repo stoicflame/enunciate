@@ -57,7 +57,7 @@ public class TestGenerateDocsXml extends TestCase {
     Enunciate enunciate = new Enunciate(getAllJavaFiles(getSamplesDir()));
     enunciate.setConfig(config);
     enunciate.setTarget(Enunciate.Target.BUILD);
-    enunciate.setClasspath(getInAPTClasspath());
+    enunciate.setRuntimeClasspath(getInAPTClasspath());
     module.setBase(enunciate.createTempDir());
     ClientLibraryArtifact artifact1 = new ClientLibraryArtifact("module1", "1", "lib1") {
 

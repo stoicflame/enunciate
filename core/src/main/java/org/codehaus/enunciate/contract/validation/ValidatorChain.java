@@ -60,16 +60,6 @@ public class ValidatorChain implements Validator {
   }
 
   /**
-   * Adds a validator to the chain.
-   *
-   * @param validator The validator to add.
-   * @deprecated Use the one that takes a label for the validator.
-   */
-  public void addValidator(Validator validator) {
-    this.validators.put(null, validator);
-  }
-
-  /**
    * Adds a validator.
    *
    * @param label The label of the validator.

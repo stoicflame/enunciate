@@ -85,7 +85,8 @@ public class Enunciate {
   private File buildDir;
   private File packageDir;
   private File scratchDir;
-  private String classpath;
+  private String runtimeClasspath;
+  private String buildClasspath;
   private EnunciateConfiguration config;
   private Target target = Target.PACKAGE;
   private final HashMap<String, Object> properties = new HashMap<String, Object>();
@@ -307,7 +308,7 @@ public class Enunciate {
 
     if (sourceFiles.isEmpty()) {
       //no source files (all imports are on the classpath).  Since APT requires at least one, we'll write it out ourselves....
-      File tempSource = File.createTempFile("EnunciateMockClass", ".java");
+      File tempSource = createTempFile("EnunciateMockClass", ".java");
       FileWriter writer = new FileWriter(tempSource);
       writer.write(String.format("@org.codehaus.enunciate.XmlTransient public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
       writer.flush();
@@ -326,7 +327,7 @@ public class Enunciate {
   protected Map<String, File> scanForClassesToImport() throws IOException {
     final Map<String, File> classes2sources = new HashMap<String, File>();
     File tempSourcesDir = createTempDir();
-    List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateClasspath().split(File.pathSeparator)));
+    List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateRuntimeClasspath().split(File.pathSeparator)));
     for (String pathItem : classpath) {
       final File pathFile = new File(pathItem);
       final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
@@ -625,6 +626,23 @@ public class Enunciate {
   }
 
   /**
+   * Creates a temporary file. Same as {@link File#createTempFile(String, String)} but in the Enunciate scratch directory.
+   *
+   * @param baseName The base name of the file.
+   * @param suffix The suffix.
+   * @return The temp file.
+   */
+  public File createTempFile(String baseName, String suffix) throws IOException {
+    final Double random = Double.valueOf(Math.random() * 10000); //this random name is applied to avoid an "access denied" error on windows.
+    File scratchDir = getScratchDir();
+    if (scratchDir != null && !scratchDir.exists()) {
+      scratchDir.mkdirs();
+    }
+
+    return File.createTempFile(baseName + random.intValue(), suffix, scratchDir);
+  }
+
+  /**
    * Get the source files for this enunciate mechanism.
    *
    * @return The source files.
@@ -723,14 +741,27 @@ public class Enunciate {
   }
 
   /**
-   * The enunciate classpath to use for javac and apt.
+   * The enunciate classpath to use when running the application (after being built).
    *
-   * @return The enunciate classpath to use for javac and apt.
+   * @return The enunciate classpath to use when running the application (after being built).
    */
-  public String getEnunciateClasspath() {
-    String classpath = getClasspath();
+  public String getEnunciateRuntimeClasspath() {
+    String classpath = getRuntimeClasspath();
     if (classpath == null) {
       classpath = System.getProperty("java.class.path");
+    }
+    return classpath;
+  }
+
+  /**
+   * The enunciate classpath to use when building the application.
+   *
+   * @return The enunciate classpath to use when building the application.
+   */
+  public String getEnunciateBuildClasspath() {
+    String classpath = getBuildClasspath();
+    if (classpath == null) {
+      classpath = getEnunciateRuntimeClasspath();
     }
     return classpath;
   }
@@ -743,7 +774,7 @@ public class Enunciate {
    */
   protected void invokeApt(String[] sourceFiles, String... additionalApiClasses) throws IOException, EnunciateException {
     ArrayList<String> args = new ArrayList<String>();
-    String classpath = getEnunciateClasspath();
+    String classpath = getEnunciateRuntimeClasspath();
 
     args.add("-cp");
     args.add(classpath);
@@ -790,15 +821,14 @@ public class Enunciate {
   }
 
   /**
-   * Invokes javac on the specified source files. The classpath will be the classpath for this enunciate mechanism,
-   * if specified, otherwise the system classpath.
+   * Invokes javac on the specified source files. The classpath will be the {@link #getEnunciateRuntimeClasspath() runtime classpath}.
    *
    * @param compileDir  The compile directory.
    * @param sourceFiles The source files.
    * @throws EnunciateException if the compile fails.
    */
   public void invokeJavac(File compileDir, String[] sourceFiles) throws EnunciateException {
-    String classpath = getEnunciateClasspath();
+    String classpath = getEnunciateRuntimeClasspath();
 
     invokeJavac(classpath, compileDir, sourceFiles);
   }
@@ -874,8 +904,9 @@ public class Enunciate {
    *
    * @param from The source directory.
    * @param to   The destination directory.
+   * @param excludes The files to exclude from the copy
    */
-  public void copyDir(File from, File to) throws IOException {
+  public void copyDir(File from, File to, File... excludes) throws IOException {
     if (from != null && from.exists()) {
       File[] files = from.listFiles();
 
@@ -883,7 +914,15 @@ public class Enunciate {
         to.mkdirs();
       }
 
-      for (File file : files) {
+      COPY_LOOP : for (File file : files) {
+        if (excludes != null) {
+          for (File exclude : excludes) {
+            if (file.equals(exclude)) {
+              continue COPY_LOOP;
+            }
+          }
+        }
+
         if (file.isDirectory()) {
           copyDir(file, new File(to, file.getName()));
         }
@@ -1401,21 +1440,39 @@ public class Enunciate {
   }
 
   /**
-   * The classpath.
+   * The runtime classpath.
    *
-   * @return The classpath.
+   * @return The runtime classpath.
    */
-  public String getClasspath() {
-    return classpath;
+  public String getRuntimeClasspath() {
+    return runtimeClasspath;
   }
 
   /**
-   * The classpath.
+   * The runtime classpath.
    *
-   * @param classpath The classpath.
+   * @param runtimeClasspath The runtime classpath.
    */
-  public void setClasspath(String classpath) {
-    this.classpath = classpath;
+  public void setRuntimeClasspath(String runtimeClasspath) {
+    this.runtimeClasspath = runtimeClasspath;
+  }
+
+  /**
+   * The build classpath.
+   *
+   * @return The build classpath.
+   */
+  public String getBuildClasspath() {
+    return buildClasspath;
+  }
+
+  /**
+   * The build classpath.
+   *
+   * @param buildClasspath The build classpath.
+   */
+  public void setBuildClasspath(String buildClasspath) {
+    this.buildClasspath = buildClasspath;
   }
 
   /**

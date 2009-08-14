@@ -726,9 +726,9 @@
                         </xs:documentation>
                       </xs:annotation>
                     </xs:attribute>
-                    <xs:attribute name="outputDir" type="xs:string" default="">
+                    <xs:attribute name="outputPath" type="xs:string" default="">
                       <xs:annotation>
-                        <xs:documentation>where the compiled module will be placed, relative to the application directory. By default, the outputDir is the
+                        <xs:documentation>where the compiled module will be placed, relative to the application directory. By default, the outputPath is the
                           empty string (""), which means the compiled module will be placed at the root of the application directory.
                         </xs:documentation>
                       </xs:annotation>

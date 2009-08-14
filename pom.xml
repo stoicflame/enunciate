@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.14-RC2</version>
+  <version>1.14-RC3</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -304,7 +304,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
           </exclusion>
 
           <exclusion>
-            <!--we'll use woodstox -->
+            <!--we'll use enunciate's version of sjsxp -->
             <groupId>com.sun.xml.stream</groupId>
             <artifactId>sjsxp</artifactId>
           </exclusion>
@@ -380,6 +380,15 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <groupId>com.sun.xml.stream.buffer</groupId>
         <artifactId>streambuffer</artifactId>
         <version>0.8</version>
+      </dependency>
+
+      <dependency>
+        <!--depending modules: jaxws-ri-rt-->
+        <groupId>com.sun.xml.stream</groupId>
+        <artifactId>sjsxp</artifactId>
+
+        <!--why oh why do we have to use version "SNAPSHOT"? Why can't Sun get their act together? -->
+        <version>SNAPSHOT</version>
       </dependency>
 
       <dependency>

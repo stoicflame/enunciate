@@ -283,6 +283,14 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
     }
   }
 
+  public String getMimeType() {
+    return null;
+  }
+
+  public boolean isSwaRef() {
+    return false;
+  }
+
   /**
    * The min occurs of a web result.
    *

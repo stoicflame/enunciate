@@ -273,7 +273,7 @@ public class Main {
           return true;
 
         case classpath:
-          enunciate.setClasspath(value);
+          enunciate.setRuntimeClasspath(value);
           return true;
 
         case target:

@@ -445,17 +445,19 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (validationResult.hasWarnings()) {
       warn("Validation result has warnings.");
       for (ValidationMessage warning : validationResult.getWarnings()) {
-        StringBuilder text = new StringBuilder();
-        if (warning.getLabel() != null) {
-          text.append('[').append(warning.getLabel()).append("] ");
-        }
-        text.append(warning.getText());
+        if (!disabledRules.contains("all.warnings") && !disabledRules.contains(String.valueOf(warning.getLabel()) + ".warnings")) {
+          StringBuilder text = new StringBuilder();
+          if (warning.getLabel() != null) {
+            text.append('[').append(warning.getLabel()).append("] ");
+          }
+          text.append(warning.getText());
 
-        if (warning.getPosition() != null) {
-          messager.printWarning(warning.getPosition(), text.toString());
-        }
-        else {
-          messager.printWarning(text.toString());
+          if (warning.getPosition() != null) {
+            messager.printWarning(warning.getPosition(), text.toString());
+          }
+          else {
+            messager.printWarning(text.toString());
+          }
         }
       }
     }

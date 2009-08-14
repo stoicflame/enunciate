@@ -161,7 +161,7 @@ import java.util.*;
  * <li>The "srcDir" attribute specifies the source directory for the application. This attribute is required.</li>
  * <li>The "mainMxmlFile" attribute specifies the main mxml file for the app.  This attribute is required. The path to this file is resolved
  * relative to the enunciate.xml file (not to the "srcDir" attribute of the app).</li>
- * <li>The "outputDir" attribute specified the output directory for the application, relative to the "flexAppDir".</li>
+ * <li>The "outputPath" attribute specified the output directory for the application, relative to the "flexAppDir".</li>
  * </ul>
  *
  * <h3>Example Configuration</h3>
@@ -616,8 +616,8 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         }
 
         File swfDir = outputDirectory;
-        if (flexApp.getOutputDir() != null && !"".equals(flexApp.getOutputDir())) {
-          swfDir = new File(outputDirectory, flexApp.getOutputDir());
+        if (flexApp.getOutputPath() != null && !"".equals(flexApp.getOutputPath())) {
+          swfDir = new File(outputDirectory, flexApp.getOutputPath());
           swfDir.mkdirs();
         }
         File swfFile = new File(swfDir, flexApp.getName() + ".swf");

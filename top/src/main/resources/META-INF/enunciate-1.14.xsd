@@ -830,9 +830,9 @@
                         </xs:documentation>
                       </xs:annotation>
                     </xs:attribute>
-                    <xs:attribute name="outputDir" type="xs:string" default="">
+                    <xs:attribute name="outputPath" type="xs:string" default="">
                       <xs:annotation>
-                        <xs:documentation>where the compiled module will be placed, relative to the application directory. By default, the outputDir is the
+                        <xs:documentation>where the compiled module will be placed, relative to the application directory. By default, the outputPath is the
                           empty string (""), which means the compiled module will be placed at the root of the application directory.
                         </xs:documentation>
                       </xs:annotation>
@@ -897,6 +897,16 @@
         <xs:attribute name="rpcModuleName" type="xs:string">
           <xs:annotation>
             <xs:documentation>The name of the generated GWT rpc module.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enableGWT15" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>Whether GWT 1.5+ is enabled (default: true).</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enableGWT16" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether GWT 1.6+ is enabled (default:false)</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -1107,7 +1117,7 @@
                   <xs:documentation>source directory for the application</xs:documentation>
                 </xs:annotation>
               </xs:attribute>
-              <xs:attribute name="outputDir" type="xs:string" use="optional">
+              <xs:attribute name="outputPath" type="xs:string" use="optional">
                 <xs:annotation>
                   <xs:documentation>output directory for the application</xs:documentation>
                 </xs:annotation>

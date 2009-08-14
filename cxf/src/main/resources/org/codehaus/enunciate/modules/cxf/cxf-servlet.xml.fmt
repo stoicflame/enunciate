@@ -1,4 +1,5 @@
 [#ftl]
+[#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
 [@file name="cxf-servlet.xml" charset="utf-8"]
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -12,7 +13,7 @@
         [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         [#--todo: what about eis with the same name, different namespace?--]
-  <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${endpointInterface.serviceEndpointId}" address="${endpointInterface.metaData.soapPath}" implementorClass="${endpointInterface.qualifiedName}"/>
+  <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${impl.serviceEndpointId}" address="${endpointInterface.metaData.soapPath}" implementorClass="${endpointInterface.qualifiedName}"/>
         [/#if]
       [/#list]
     [/@forEachEndpointInterface]

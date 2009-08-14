@@ -963,7 +963,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
       debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
       //prime the list of libs to include in the war with what's on the enunciate classpath.
-      warLibs.addAll(Arrays.asList(enunciate.getEnunciateClasspath().split(File.pathSeparator)));
+      warLibs.addAll(Arrays.asList(enunciate.getEnunciateRuntimeClasspath().split(File.pathSeparator)));
     }
 
     // Apply the "in filter" (i.e. the filter that specifies the files to be included).

@@ -17,8 +17,12 @@
 package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.ServiceEndpoint;
+
+import javax.annotation.Resource;
 
 /**
  * A class specified as a web service endpoint implementation.  Remember an endpoint implementation could
@@ -26,7 +30,7 @@ import org.codehaus.enunciate.ClientName;
  *
  * @author Ryan Heaton
  */
-public class EndpointImplementation extends DecoratedClassDeclaration {
+public class EndpointImplementation extends DecoratedClassDeclaration implements ServiceEndpoint {
 
   private final EndpointInterface endpointInterface;
 
@@ -74,6 +78,26 @@ public class EndpointImplementation extends DecoratedClassDeclaration {
     }
 
     return BindingType.SOAP_1_1;
+  }
+
+  // Inherited.
+  public String getServiceEndpointId() {
+    String name = "enunciate:service:" + getSimpleName();
+    Resource resource = getAnnotation(Resource.class);
+    if (resource != null && !"".equals(resource.name())) {
+      name = resource.name();
+    }
+    return name;
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointInterface() {
+    return getEndpointInterface();
+  }
+
+  // Inherited.
+  public TypeDeclaration getServiceEndpointDefaultImplementation() {
+    return this;
   }
 
 }

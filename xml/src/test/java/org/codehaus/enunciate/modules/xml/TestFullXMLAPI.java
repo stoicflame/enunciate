@@ -96,7 +96,7 @@ public class TestFullXMLAPI extends TestCase {
     Enunciate enunciate = new Enunciate(getAllJavaFiles("full"));
     enunciate.setConfig(config);
     enunciate.setTarget(Enunciate.Target.GENERATE);
-    enunciate.setClasspath(getInAPTClasspath());
+    enunciate.setRuntimeClasspath(getInAPTClasspath());
     enunciate.execute();
 
     final File dataSchemaFile = new File(enunciate.getGenerateDir(), "xml/data.xsd");

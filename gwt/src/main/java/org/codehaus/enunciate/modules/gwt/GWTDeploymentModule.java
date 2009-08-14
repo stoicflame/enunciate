@@ -182,11 +182,11 @@ import java.util.*;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gwtHome="/home/myusername/tools/gwt-linux-1.5.2"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/mainapp"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyRootModule"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputPath="two"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.main.MyModuleTwo" outputDir="two"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;app srcDir="src/main/anotherapp" name="another"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.AnotherRootModule"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.MyModuleThree" outputPath="three"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;module name="com.mycompany.apps.another.MyModuleThree" outputDir="three"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/app&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/gwt&gt;
@@ -572,7 +572,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       javaCommand = "java";
     }
 
-    StringBuilder classpath = new StringBuilder(enunciate.getEnunciateClasspath());
+    StringBuilder classpath = new StringBuilder(enunciate.getEnunciateRuntimeClasspath());
     //append the client-side gwt directory.
     classpath.append(File.pathSeparatorChar).append(getClientSideGenerateDir().getAbsolutePath());
     //append the gwt-user jar.
@@ -762,7 +762,8 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      enunciate.invokeJavac(enunciate.getEnunciateClasspath(), getEnableGWT15() ? "1.5" : "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.       
+      enunciate.invokeJavac(clientClasspath, getEnableGWT15() ? "1.5" : "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
       info("Skipping compile of GWT client-side files because everything appears up-to-date...");
@@ -787,7 +788,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Gwt applications will be put into the %s subdirectory of the web application.", getGwtAppDir());
         gwtAppDir = new File(webappDir, getGwtAppDir());
       }
-      getEnunciate().copyDir(gwtCompileDir, gwtAppDir);
+      getEnunciate().copyDir(gwtCompileDir, gwtAppDir, new File(gwtCompileDir, ".gwt-tmp"));
     }
     else {
       debug("No gwt apps were found.");

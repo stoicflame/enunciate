@@ -25,7 +25,7 @@ public class FlexApp {
 
   private String name = "";
   private String srcDir;
-  private String outputDir;
+  private String outputPath;
   private String mainMxmlFile;
 
   /**
@@ -72,17 +72,17 @@ public class FlexApp {
    *
    * @return The output directory of the app (relative to the base webapp directory).
    */
-  public String getOutputDir() {
-    return outputDir;
+  public String getOutputPath() {
+    return outputPath;
   }
 
   /**
    * The output directory of the app (relative to the base webapp directory).
    *
-   * @param outputDir The output directory of the app (relative to the base webapp directory).
+   * @param outputPath The output directory of the app (relative to the base webapp directory).
    */
-  public void setOutputDir(String outputDir) {
-    this.outputDir = outputDir;
+  public void setOutputPath(String outputPath) {
+    this.outputPath = outputPath;
   }
 
   /**

@@ -55,7 +55,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
     return ${endpointInterface.qualifiedName}.class;
   }
 
-  @javax.annotation.Resource ( name = "${endpointInterface.serviceEndpointId}" )
+  @javax.annotation.Resource ( name = "${endpointInterface.endpointImplementations[0].serviceEndpointId}" )
   public void setServiceBean(${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
