@@ -19,12 +19,11 @@ package org.codehaus.enunciate.modules.spring_app;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
@@ -46,7 +45,6 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
   private Object serviceImplementationBean;
   private String defaultImplementationBeanName;
   private Class defaultImplementationClass;
-  private boolean requireInstanceOfImpl = false;
 
   public ServiceEndpointFactoryBean(Class serviceInterface) {
     if (serviceInterface == null) {
@@ -58,10 +56,6 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
   @Override
   protected void initApplicationContext(ApplicationContext context) throws BeansException {
-    if (isRequireInstanceOfImpl() && getDefaultImplementationClass() == null) {
-      throw new ApplicationContextException("The service bean is required to implement a class that isn't supplied.");
-    }
-
     Map adviceBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, EnunciateServiceAdvice.class);
     for (Object advice : adviceBeans.values()) {
       addInterceptor(advice);
@@ -136,9 +130,6 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
       catch (Exception e) {
         throw new ApplicationContextException("Unable to instantiate " + defaultImplementationClass.getName(), e);
       }
-    }
-    else if (isRequireInstanceOfImpl() && !defaultImplementationClass.isInstance(serviceImplementationBean)) {
-      throw new ApplicationContextException("Found service implementation bean is not an instance of " + defaultImplementationClass.getName());      
     }
 
     initialized = true;
@@ -219,24 +210,10 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
   public Object wrapEndpoint(final Class iface, Object endpointImpl) throws Exception {
     Object endpoint = endpointImpl;
 
-    final boolean isInterface = iface.isInterface();
-    final boolean requireInstanceOfImpl = isRequireInstanceOfImpl();
-
     if (interceptors.size() > 0) {
       ProxyFactory proxyFactory = new ProxyFactory();
-      if (!isInterface || requireInstanceOfImpl) {
-        proxyFactory.setProxyTargetClass(true);
-        proxyFactory.setTargetSource(new SingletonTargetSource(endpointImpl) {
-          @Override
-          public Class getTargetClass() {
-            return requireInstanceOfImpl ? getDefaultImplementationClass() : iface;
-          }
-        });
-      }
-      else {
-        proxyFactory.setTarget(endpointImpl);
-        proxyFactory.setInterfaces(new Class[]{iface});
-      }
+      proxyFactory.setTarget(endpointImpl);
+      proxyFactory.setInterfaces(new Class[]{iface});
 
       for (Object interceptor : interceptors) {
         if (interceptor instanceof Advice) {
@@ -251,10 +228,6 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
       }
 
       endpoint = proxyFactory.getProxy();
-
-      if (requireInstanceOfImpl && !getDefaultImplementationClass().isInstance(endpoint)) {
-        throw new ApplicationContextException("Created proxy is not an instance of " + getDefaultImplementationClass().getName());
-      }
     }
 
     return endpoint;
@@ -321,23 +294,5 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
    */
   public void setDefaultImplementationClass(Class defaultImplementationClass) {
     this.defaultImplementationClass = defaultImplementationClass;
-  }
-
-  /**
-   * Whether to require that the service bean instance be an instance of the default implementation class.
-   *
-   * @return Whether to require that the service bean instance be an instance of the default implementation class.
-   */
-  public boolean isRequireInstanceOfImpl() {
-    return requireInstanceOfImpl;
-  }
-
-  /**
-   * Whether to require that the service bean instance be an instance of the default implementation class.
-   *
-   * @param requireInstanceOfImpl Whether to require that the service bean instance be an instance of the default implementation class.
-   */
-  public void setRequireInstanceOfImpl(boolean requireInstanceOfImpl) {
-    this.requireInstanceOfImpl = requireInstanceOfImpl;
   }
 }

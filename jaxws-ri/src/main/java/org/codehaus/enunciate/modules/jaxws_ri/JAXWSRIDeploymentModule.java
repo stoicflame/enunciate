@@ -126,18 +126,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule {
       }
 
       if (!enunciate.isModuleEnabled("spring-app")) {
-        throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
+        throw new EnunciateException("The JAX-WS RI module requires the spring-app module to be enabled.");
       }
-      else {
-        List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
-        for (DeploymentModule enabledModule : enabledModules) {
-          if (enabledModule instanceof SpringAppDeploymentModule) {
-            ((SpringAppDeploymentModule) enabledModule).setRequireEndpointInstancesOfImplemenationClass(true);
-          }
-        }
-      }
-
-//      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
     }
 
   }

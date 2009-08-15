@@ -61,9 +61,6 @@
     <property name="defaultImplementationClass" value="${endpoint.serviceEndpointDefaultImplementation.qualifiedName}"/>
     [/#if]
     <property name="interceptors" ref="service-bean-interceptors"/>
-    [#if requireEndpointInstancesOfImplemenationClass?default(false)]
-    <property name="requireInstanceOfImpl" value="true"/>
-    [/#if]
   </bean>
   [/@forEachServiceEndpoint]
   [#if !securityEnabled]

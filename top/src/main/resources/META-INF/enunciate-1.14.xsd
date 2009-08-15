@@ -571,9 +571,6 @@
         <xs:attribute name="doPackage" type="xs:boolean" default="true">
           <xs:annotation><xs:documentation>whether this module should take on the responsibility of packaging (zipping) up the war.  This may not be desired if the module is being used only for generating the war structure and configuration files.</xs:documentation></xs:annotation>
         </xs:attribute>
-        <xs:attribute name="requireEndpointInstancesOfImplemenationClass" type="xs:boolean" default="false">
-          <xs:annotation><xs:documentation>whether to require the endpoint instances to be of the endopint implementation type (instead of just the endpoint interface type).  Advanced feature.</xs:documentation></xs:annotation>
-        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
