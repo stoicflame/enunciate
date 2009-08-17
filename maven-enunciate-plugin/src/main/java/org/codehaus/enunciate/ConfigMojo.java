@@ -389,13 +389,13 @@ public class ConfigMojo extends AbstractMojo {
    */
   protected void loadConfig(EnunciateConfiguration config, File configFile) throws IOException, SAXException, MavenFilteringException {
     if (this.configFilter == null) {
-      getLog().info("No maven file filter was provided, so no filtering of the config file will be done.");
+      getLog().debug("No maven file filter was provided, so no filtering of the config file will be done.");
       config.load(configFile);
     }
     else {
       this.scratchDir.mkdirs();
       File filteredConfig = File.createTempFile("enunciateConfig", ".xml", this.scratchDir);
-      getLog().info("Filtering " + configFile + " to " + filteredConfig + "...");
+      getLog().debug("Filtering " + configFile + " to " + filteredConfig + "...");
       this.configFilter.copyFile(configFile, filteredConfig, true, this.project, null, true, "utf-8", this.session);
       config.load(filteredConfig);
     }
@@ -420,7 +420,7 @@ public class ConfigMojo extends AbstractMojo {
     String sourceDir = dir.getAbsolutePath();
     ENUNCIATE_ADDED.add(sourceDir);
     if (!project.getCompileSourceRoots().contains(sourceDir)) {
-      getLog().info("Adding '" + sourceDir + "' to the compile source roots.");
+      getLog().debug("Adding '" + sourceDir + "' to the compile source roots.");
       project.addCompileSourceRoot(sourceDir);
     }
   }
@@ -603,7 +603,7 @@ public class ConfigMojo extends AbstractMojo {
           project.getArtifact().setFile(warArtifactFile);
         }
         else {
-          getLog().warn("War artifact '" + warArtifactId + "' not found in the project...");
+          getLog().debug("War artifact '" + warArtifactId + "' not found in the project...");
         }
       }
 

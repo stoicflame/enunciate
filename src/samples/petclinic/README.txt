@@ -37,6 +37,9 @@ this directory.
 Invocation via Maven
 ====================
 
+*Note: if you're using GWT 1.6 or later, then you'll need to update the
+dependencies in the pom according to the comments you see there.
+
 Run "mvn -Dgwt.home=/path/to/gwt/home package" in this directory.
 
 You can also run "mvn -Dgwt.home=/path/to/gwt/home jetty:run-war" to automatically

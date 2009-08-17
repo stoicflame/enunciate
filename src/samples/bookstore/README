@@ -1,1 +1,2 @@
-example with Enunciate, Hibernate, and JPA entities.
+Example with Enunciate, Hibernate, and JPA entities. We still need some web UI to demonstrate this. This example
+for now is just demonstrating how to set up a project in this way.

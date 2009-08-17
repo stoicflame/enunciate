@@ -11,7 +11,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.14-RC3</version>
+        <version>1.14</version>
         <configuration>
           <configFile>enunciate.xml</configFile>
           <gwtHome>${gwt.home}</gwtHome>
@@ -28,7 +28,7 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rest</artifactId>
-            <version>1.14-RC3</version>
+            <version>1.14</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
-      <version>1.14-RC3</version>
+      <version>1.14</version>
     </dependency>
 
     <!--this project uses the Enunciate-propriety
@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rest-rt</artifactId>
-      <version>1.14-RC3</version>
+      <version>1.14</version>
     </dependency>
 
     <dependency>

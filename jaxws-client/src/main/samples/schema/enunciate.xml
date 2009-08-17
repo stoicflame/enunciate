@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <enunciate label="shapes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.13.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.14.xsd">
   <deployment context="net.java.ws.addressbook_addressbook_war_1.0-SNAPSHOT"/>
   <modules>
     <jaxws-client disabled="false">

@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.spring_app;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -212,8 +213,12 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
 
     if (interceptors.size() > 0) {
       ProxyFactory proxyFactory = new ProxyFactory();
-      proxyFactory.setTarget(endpointImpl);
-      proxyFactory.setInterfaces(new Class[]{iface});
+      proxyFactory.setTargetSource(new SingletonTargetSource(endpointImpl) {
+        @Override
+        public Class getTargetClass() {
+          return iface;
+        }
+      });
 
       for (Object interceptor : interceptors) {
         if (interceptor instanceof Advice) {
