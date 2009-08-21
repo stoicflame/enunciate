@@ -63,7 +63,9 @@ public class ExportMojo extends ConfigMojo {
 
   @Override
   protected EnunciateConfiguration createEnunciateConfiguration() {
-    return new EnunciateConfiguration(Arrays.asList((DeploymentModule) new ExportListDeploymentModule()));
+    EnunciateConfiguration configuration = new EnunciateConfiguration(Arrays.asList((DeploymentModule) new ExportListDeploymentModule()));
+    configuration.setExcludeUnreferencedClasses(false);
+    return configuration;
   }
 
   protected class ExportListDeploymentModule extends BasicDeploymentModule {

@@ -383,7 +383,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   protected void loadTypeDef(TypeDefinition typeDef, EnunciateFreemarkerModel model) {
     if (typeDef != null) {
-      if (!this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
+      if (this.enunciate.getConfig() != null && !this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
         debug("%s to be considered as a %s (qname:{%s}%s).",
               typeDef.getQualifiedName(), typeDef.getClass().getSimpleName(),
               typeDef.getNamespace() == null ? "" : typeDef.getNamespace(),
