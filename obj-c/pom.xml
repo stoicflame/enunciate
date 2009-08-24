@@ -39,7 +39,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       </plugin>
       <plugin>
         <!--
-        we need to generate some C client-side classes for testing purposes.
+        we need to generate some objective C client-side classes for testing purposes.
         we'll use the Enunciate ant task to do it.
         -->
         <groupId>org.apache.maven.plugins</groupId>
