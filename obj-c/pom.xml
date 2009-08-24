@@ -1,0 +1,185 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.15-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-obj-c</artifactId>
+  <name>Enunciate - Objective C Module</name>
+  <description>The Enunciate Objective C module generates the Objective C client code for accessing the Enunciate services.</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require.gcc.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gcc.executable</property>
+                  <message>In order to build the Objective C module, you must have gcc installed.
+Define a profile in your settings.xml file that defines the path to your 'gcc' executable in the property 'gcc.executable'. You'll probably also need
+to supply additional properties "gcc.libxml.cflags" and "gcc.libxml.libs" so as to make sure gcc can link to libxml.
+If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!--
+        we need to generate some C client-side classes for testing purposes.
+        we'll use the Enunciate ant task to do it.
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enunciate</id>
+            <phase>generate-test-resources</phase>
+            <configuration>
+              <tasks>
+                <path id="enunciate.classpath">
+                  <path refid="maven.test.classpath" />
+                  <pathelement location="${java.home}/../lib/tools.jar" />
+                </path>
+
+                <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
+                  <classpath refid="enunciate.classpath" />
+                </taskdef>
+
+                <mkdir dir="${project.build.directory}/enunciate/gen" />
+                <mkdir dir="${project.build.directory}/enunciate/compile" />
+                <mkdir dir="${project.build.directory}/ctests"/>
+
+                <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"
+                           generateDir="${project.build.directory}/enunciate/gen"
+                           compileDir="${project.build.directory}/enunciate/compile"
+                           configFile="${project.basedir}/enunciate.xml">
+                  <include name="**/*.java" />
+                  <classpath refid="enunciate.classpath" />
+                </enunciate>
+
+                <copy todir="${project.build.directory}/enunciate/gen/obj-c" file="${project.build.testSourceDirectory}/../obj-c/processxml.m"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1.1</version>
+        <executions>
+          <execution>
+            <id>compile-c</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!--compile the C tests using the gcc executable. -->
+              <executable>${gcc.executable}</executable>
+              <skip>${gcc.executable}</skip>
+              <arguments>
+                <argument>-Wall</argument>
+                <argument>-Wno-unused-variable</argument>
+                <argument>-Wno-unused-function</argument>
+                <argument>-Werror</argument>
+                <argument>${gcc.libxml.cflags}</argument>
+                <argument>-I${project.build.directory}/enunciate/gen/obj-c</argument>
+                <argument>${gcc.libxml.libs}</argument>
+                <argument>-o</argument>
+                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml</argument>
+                <argument>${project.build.directory}/enunciate/gen/obj-c/processxml.m</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>skip.objc.tests</name>
+              <value>${gcc.executable}</value>
+            </property>
+            <property>
+              <name>processxml.exe</name>
+              <value>${project.build.directory}/enunciate/gen/c/processxml</value>
+            </property>
+            <property>
+              <name>xml.tempdir</name>
+              <value>${project.build.directory}/ctests</value>
+            </property>
+          </systemProperties>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--now we need to add the generated sources we're testing to the test classpath-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${basedir}/src/test/schema</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+
+      <!--for testing the xmladapters only-->
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+
+</project>

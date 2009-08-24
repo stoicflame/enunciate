@@ -1,0 +1,107 @@
+[#ftl]
+[#--template for the client-side enum type.--]
+[#macro writeEnumTypeHeader type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+
+/**
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ */
+enum ${typeName} {
+[#list type.enumConstants as constant]
+
+  /**
+   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
+[/#list]
+};
+
+/**
+ * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL if unable to be read.
+ */
+static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextReaderPtr reader);
+
+/**
+ * Writes a ${type.clientSimpleName} to XML.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first});
+
+/**
+ * Frees a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+static void free${xmlFunctionIdentifier(type)?cap_first}Type(enum ${typeName} *_${type.clientSimpleName?uncap_first});
+[/#macro]
+[#macro writeEnumTypeImpl type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+
+/**
+ * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
+ *
+ * @param reader The XML reader.
+ * @return The ${type.clientSimpleName}, or NULL if unable to be read.
+ */
+static enum ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextReaderPtr reader) {
+  xmlChar *enumValue = xmlTextReaderReadEntireNodeValue(reader);
+  enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
+  if (enumValue != NULL) {
+  [#assign enumValueMap=type.enumValues/]
+  [#list type.enumConstants as constant]
+    if (xmlStrcmp(enumValue, BAD_CAST "${enumValueMap[constant.simpleName]}") == 0) {
+      *value = ${nameForEnumConstant(type, constant)};
+      free(enumValue);
+      return value;
+    }
+  [/#list]
+#if DEBUG_ENUNCIATE
+    printf("Attempt to read enum value failed: %s doesn't match an enum value.\n", enumValue);
+#endif
+  }
+#if DEBUG_ENUNCIATE
+  else {
+    printf("Attempt to read enum value failed: NULL value.\n");
+  }
+#endif
+
+  return NULL;
+}
+
+/**
+ * Writes a ${type.clientSimpleName} to XML.
+ *
+ * @param writer The XML writer.
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
+ * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  switch (*_${type.clientSimpleName?uncap_first}) {
+  [#assign enumValueMap=type.enumValues/]
+  [#list type.enumConstants as constant]
+    case ${nameForEnumConstant(type, constant)}:
+      return xmlTextWriterWriteString(writer, BAD_CAST "${enumValueMap[constant.simpleName]}");
+  [/#list]
+  }
+
+#if DEBUG_ENUNCIATE
+  printf("Unable to write enum value (no valid value found).\n");
+#endif
+  return -1;
+}
+
+/**
+ * Frees a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ */
+static void free${xmlFunctionIdentifier(type)?cap_first}Type(enum ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  //no-op
+}
+[/#macro]
