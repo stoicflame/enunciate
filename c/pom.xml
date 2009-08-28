@@ -27,10 +27,12 @@
               <rules>
                 <requireProperty>
                   <property>gcc.executable</property>
-                  <message>In order to build the C module, you must have gcc installed.
-Then, define a profile in your settings.xml file that defines the path to your 'gcc' executable in the property 'gcc.executable'. You'll probably also need
-to supply additional properties "gcc.libxml.cflags" and "gcc.libxml.libs" so as to make sure gcc can link to libxml.
-If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
+                  <message>In order to build the C module, you must have gcc installed along with libxml.
+Define a profile in your settings.xml file that defines the path to your 'gcc'
+executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
+specifies the executable that exposes your libxml compiler flags and library includes.
+If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'.
+(And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -78,37 +80,22 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
               <goal>run</goal>
             </goals>
           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.1.1</version>
-        <executions>
           <execution>
             <id>compile-c</id>
             <phase>test-compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
             <configuration>
-              <!--compile the C tests using the gcc executable. -->
-              <executable>${gcc.executable}</executable>
-              <skip>${gcc.executable}</skip>
-              <arguments>
-                <argument>-Wall</argument>
-                <argument>-Wno-unused-variable</argument>
-                <argument>-Wno-unused-function</argument>
-                <argument>-Werror</argument>
-                <argument>${gcc.libxml.cflags}</argument>
-                <argument>-I${project.build.directory}/enunciate/gen/c</argument>
-                <argument>${gcc.libxml.libs}</argument>
-                <argument>-o</argument>
-                <argument>${project.build.directory}/enunciate/gen/c/processxml</argument>
-                <argument>${project.build.directory}/enunciate/gen/c/processxml.c</argument>
-              </arguments>
-              <workingDirectory>${project.build.directory}</workingDirectory>
+              <tasks>
+                <property name="gcc.executable" value="${gcc.executable}"/>
+                <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                <property name="project.build.directory" value="${project.build.directory}"/>
+                <ant antfile="${basedir}/gcc-compile.xml">
+                  <target name="gcc"/>
+                </ant>
+              </tasks>
             </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

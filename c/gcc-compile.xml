@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="gcccompile">
+
+  <target name="skip-if-necessary">
+    <condition property="skip.gcc">
+      <istrue value="${gcc.executable}"/>
+    </condition>
+  </target>
+
+  <target name="get-libxml-flags" if="libxml.config.executable" unless="skip.gcc">
+    <exec executable="${libxml.config.executable}" failonerror="true" errorproperty="libxml.config.error" outputproperty="libxml.config.flags">
+      <arg value="--cflags"/>
+    </exec>
+  </target>
+
+  <target name="get-libxml-libs" if="libxml.config.executable" unless="skip.gcc">
+    <exec executable="${libxml.config.executable}" failonerror="true" errorproperty="libxml.config.error" outputproperty="libxml.config.libs">
+      <arg value="--libs"/>
+    </exec>
+  </target>
+
+  <target name="-gcc" unless="skip.gcc">
+    <property name="libxml.config.flags" value=""/>
+    <property name="libxml.config.libs" value=""/>
+
+    <exec executable="${gcc.executable}" failonerror="true" dir="${project.build.directory}">
+      <!--report all warnings...-->
+      <arg value="-Wall"/>
+      <!--...except the unused variable warnings-->
+      <arg value="-Wno-unused-variable"/>
+      <!--...and the unused function warnings-->
+      <arg value="-Wno-unused-function"/>
+      <!--count all warnings as errors -->
+      <arg value="-Werror"/>
+      <!--include the libxml compile flags-->
+      <arg line="${libxml.config.flags}"/>
+      <!--include the libxml libraries-->
+      <arg line="${libxml.config.libs}"/>
+      <!--include the source directory-->
+      <arg value="-I${project.build.directory}/enunciate/gen/c"/>
+      <!--output to the file-->
+      <arg line="-o ${project.build.directory}/enunciate/gen/c/processxml"/>
+      <!--compile this file-->
+      <arg value="${project.build.directory}/enunciate/gen/c/processxml.c"/>
+    </exec>
+  </target>
+
+  <target name="gcc" depends="skip-if-necessary, get-libxml-flags, get-libxml-libs, -gcc"/>
+
+</project>

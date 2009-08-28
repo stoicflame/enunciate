@@ -1,3 +1,4 @@
+#define NO_GNUSTEP
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -1374,93 +1375,11 @@ static int xmlTextWriterWriteXsAnySimpleTypeType(xmlTextWriterPtr writer, struct
 
 
 
-
-
 enum gender {
   not_set,
   m,
   f,
   blobbyblobby
-};
-
-struct person {
-  xmlChar *id;
-  enum gender gender;
-  int cool;
-  struct event *events;
-  int _sizeof_events;
-};
-
-struct event {
-  xmlChar* description;
-  xmlChar* place;
-  xmlChar* date;
-};
-
-struct event *xmlTextReaderReadEvent(xmlTextReaderPtr reader) {
-  struct event *_event = calloc(1, sizeof(struct event));
-
-  if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    int status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-
-    if (!status) {
-      //XML read error
-      return NULL;
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "description", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      _event->description = xmlTextReaderReadEntireNodeValue(reader);
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
-
-    if (!status) {
-      //XML read error
-      return NULL;
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "place", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      _event->place = xmlTextReaderReadEntireNodeValue(reader);
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
-
-    if (!status) {
-      return NULL;
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "date", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      _event->date = xmlTextReaderReadEntireNodeValue(reader);
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
-  }
-
-  return _event;
-}
-
-enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
-  if (enumValue != NULL) {
-    if (xmlStrcmp(enumValue, BAD_CAST "MALE") == 0) {
-      return m;
-    }
-    if (xmlStrcmp(enumValue, BAD_CAST "FEMALE") == 0) {
-      return f;
-    }
-  }
-  return not_set;
-}
-
-void personout(struct person *p) {
-  int i;
-  printf("person, id: %s, gender: %i, cool: %i, events: ", p->id, p->gender, p->cool);
-  for (i = 0; i < p->_sizeof_events; i++) {
-    printf(" description: %s, place: %s, date: %s; ", p->events[i].description, p->events[i].place, p->events[i].date);
-  }
-  printf("\n");
 };
 
 int genderxmlout(xmlTextWriterPtr writer, enum gender g) {
@@ -1477,266 +1396,140 @@ int genderxmlout(xmlTextWriterPtr writer, enum gender g) {
   return -1;
 }
 
-void personxmlout(struct person *p) {
-  int i;
-  int rc;
-  xmlTextWriterPtr writer;
-  xmlBufferPtr buf;
-  xmlChar *tmp;
-
-  buf = xmlBufferCreate();
-  if (buf == NULL) {
-      printf("testXmlwriterMemory: Error creating the xml buffer\n");
-      return;
-  }
-
-  writer = xmlNewTextWriterMemory(buf, 0);
-  if (writer == NULL) {
-      printf("testXmlwriterMemory: Error creating the xml writer\n");
-      return;
-  }
-
-  rc = xmlTextWriterSetIndent(writer, 2);
-  if (rc < 0) {
-      printf("testXmlwriterMemory: error xmlTextWriterSetIndent\n");
-      return;
-  }
-
-  //xml prefix
-  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
-  if (rc < 0) {
-      printf("testXmlwriterMemory: Error at xmlTextWriterStartDocument\n");
-      return;
-  }
-
-  //write the start element.
-  rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "person", NULL);
-  if (rc < 0) {
-      printf("testXmlwriterMemory: Error at xmlTextWriterStartElementNS\n");
-      return;
-  }
-
-  //write the attributes of start element.
-  if (p->id != NULL) {
-    rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "id", NULL, p->id);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
-        return;
+enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
+  if (enumValue != NULL) {
+    if (xmlStrcmp(enumValue, BAD_CAST "MALE") == 0) {
+      return m;
+    }
+    if (xmlStrcmp(enumValue, BAD_CAST "FEMALE") == 0) {
+      return f;
     }
   }
-
-  if (p->gender != not_set) {
-    rc = xmlTextWriterStartAttributeNS(writer, BAD_CAST "w", BAD_CAST "gender", NULL);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
-        return;
-    }
-
-    rc = genderxmlout(writer, p->gender);
-    if (rc < 0) {
-        printf("genderxmlout: Error at genderxmlout\n");
-        return;
-    }
-
-    rc = xmlTextWriterEndAttribute(writer);
-    if (rc < 0) {
-        printf("xmlTextWriterEndAttribute: Error at xmlTextWriterEndAttribute\n");
-        return;
-    }
-  }
-
-  rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "cool", NULL, p->cool ? BAD_CAST "true" : BAD_CAST "false");
-  if (rc < 0) {
-      printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttributeNS\n");
-      return;
-  }
-
-  //if we're on the start element, write the xmlns prefixes
-  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:w", BAD_CAST "http://whereverelse.com");
-  if (rc < 0) {
-      printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
-      return;
-  }
-
-  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:p", BAD_CAST "http://person.com");
-  if (rc < 0) {
-      printf("testXmlwriterMemory: Error at xmlTextWriterWriteAttribute\n");
-      return;
-  }
-
-  for (i = 0; i < p->_sizeof_events; i++) {
-    rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "event", NULL);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterStartElementNS\n");
-        return;
-    }
-
-    if (p->events[i].description != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "description", NULL, p->events[i].description);
-      if (rc < 0) {
-          printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
-          return;
-      }
-    }
-
-    if (p->events[i].place != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "place", NULL, p->events[i].place);
-      if (rc < 0) {
-          printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
-          return;
-      }
-    }
-
-    if (p->events[i].date != NULL) {
-      rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "date", NULL, p->events[i].date);
-      if (rc < 0) {
-          printf("testXmlwriterMemory: Error at xmlTextWriterWriteElementNS\n");
-          return;
-      }
-    }
-
-    rc = xmlTextWriterEndElement(writer);
-    if (rc < 0) {
-        printf("testXmlwriterMemory: Error at xmlTextWriterEndElement\n");
-        return;
-    }
-  }
-
-  rc = xmlTextWriterEndDocument(writer);
-  if (rc < 0) {
-    printf("testXmlwriterMemory: Error at xmlTextWriterEndDocument\n");
-    return;
-  }
-
-  xmlFreeTextWriter(writer);
-  printf("%s", buf->content);
-  xmlBufferFree(buf);
+  return not_set;
 }
 
-int readDateTime(char* timevalue, struct tm *time) {
-  int success = 0, index = 0, token_index = 0, len = strlen(timevalue), offset_hours = 0, offset_min = 0;
-  char token[len];
+@protocol JAXBType
+  + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader;
+  - (void) writeXMLType: (xmlTextWriterPtr) writer;
+@end
 
-  //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
-  //go to first '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_year = atoi(token) - 1900;
-  if (token_index > 0) {
-    success++; //assume 'year' was successfully read.
-    index++;
-  }
+@protocol JAXBElement
+@end
 
-  //go to next '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_mon = atoi(token) - 1;
-  if (token_index > 0) {
-    success++; //assume 'month' was successfully read.
-    index++;
-  }
+@interface NSString (JAXBType) <JAXBType>
+@end
 
-  //go to 'T' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != 'T') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_mday = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'day' was successfully read.
-    index++;
-  }
+@implementation NSString (JAXBType)
 
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_hour = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'hour' was successfully read.
-    index++;
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'minutes' was successfully read.
-    index++;
-  }
-
-  //go to '+' or '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_sec = atof(token);
-  if (token_index > 0) {
-    success++; //assume 'seconds' was successfully read.
-    if (timevalue[index] == '+') {
-      index++;
-    }
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_hours = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset hours was successfully read.
-    index++;
-  }
-
-  //go to end.
-  token_index = 0;
-  while (index < len) {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset minutes was successfully read.
-    index++;
-  }
-  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-
-  return success;
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSString stringWithUTF8String: (const char *) xmlTextReaderReadXsStringType(reader)];
 }
 
-struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
-  struct person *_person = calloc(1, sizeof(struct person));
-  void *_child_accessor;
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlTextWriterWriteXsStringType(writer, BAD_CAST [self UTF8String]);
+}
+
+@end
+
+@interface Person : NSObject <JAXBType>
+{
+  @private
+    NSString *_id;
+    enum gender _gender;
+    BOOL _cool;
+    NSArray *_events;
+}
+
+- (NSString*) id;
+- (void) setId: (NSString*) newId;
+- (enum gender) gender;
+- (void) setGender: (enum gender) newGender;
+- (BOOL) cool;
+- (void) setCool: (BOOL) newCool;
+- (NSArray*) events;
+- (void) setEvents: (NSArray*) newEvents;
+@end
+
+@interface Event : NSObject <JAXBType>
+{
+  @private
+    NSString *_description;
+    NSString *_place;
+    NSString *_date;
+}
+
+- (NSString*) description;
+- (void) setDescription: (NSString*) newDescription;
+- (NSString*) place;
+- (void) setPlace: (NSString*) newPlace;
+- (NSString*) date;
+- (void) setDate: (NSString*) newDate;
+
+@end
+
+@implementation Person
+
+- (NSString*) id
+{
+  return _id;
+}
+
+- (void) setId: (NSString*) newId
+{
+  _id = newId;
+}
+
+- (enum gender) gender
+{
+  return _gender;
+}
+
+- (void) setGender: (enum gender) newGender
+{
+  _gender = newGender;
+}
+
+- (BOOL) cool
+{
+  return _cool;
+}
+
+- (void) setCool: (BOOL) newCool
+{
+  _cool = newCool;
+}
+
+- (NSArray*) events
+{
+  return _events;
+}
+
+- (void) setEvents: (NSArray*) newEvents
+{
+  _events = newEvents;
+}
+
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  Person *_person = [Person new];
+  id __child;
+  NSMutableArray *__children;
   int status;
 
   if (xmlTextReaderHasAttributes(reader)) {
     while (xmlTextReaderMoveToNextAttribute(reader)) {
       if ((xmlStrcmp(BAD_CAST "gender", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        _person->gender = xmlTextReaderReadGender(xmlTextReaderConstValue(reader));
+        [_person setGender: xmlTextReaderReadGender(xmlTextReaderConstValue(reader))];
         continue;
       }
       if ((xmlStrcmp(BAD_CAST "id", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        _person->id = xmlTextReaderReadEntireNodeValue(reader);
+        [_person setId: (NSString*) [NSString readXMLType: reader]];
         continue;
       }
       if ((xmlStrcmp(BAD_CAST "cool", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        _person->cool = (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) ? 1 : 0;
+        [_person setCool: (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) ? YES : NO];
         continue;
       }
     }
@@ -1744,8 +1537,9 @@ struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
     status = xmlTextReaderMoveToElement(reader);
     if (!status) {
       //panic: unable to return to the element node.
-      free(_person);
-      return NULL;
+      [_person dealloc];
+      [NSException raise: @"XMLReadError"
+                   format: @"Error moving to element of type 'person'."];
     }
   }
 
@@ -1754,245 +1548,282 @@ struct person *xmlTextReaderReadPerson(xmlTextReaderPtr reader) {
 
     if (!status) {
       //XML read error
-      free(_person);
-      return NULL;
+      [_person dealloc];
+      [NSException raise: @"XMLReadError"
+                   format: @"Error reading 'person' type."];
     }
     else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
       && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
       && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
 
-      _person->_sizeof_events = 0;
-      _person->events = NULL;
+      __children = [NSMutableArray new];
       while (status) {
 
-        _child_accessor = xmlTextReaderReadEvent(reader);
-        if (_child_accessor == NULL) {
-          //panic: parse error: couldn't read the child element
-          free(_person);
-          return NULL;
-        }
-
-        _person->events = realloc(_person->events, (_person->_sizeof_events + 1) * sizeof(struct event));
-        memcpy(&(_person->events[_person->_sizeof_events++]), _child_accessor, sizeof(struct event));
-        free(_child_accessor);
+        __child = [Event readXMLType: reader];
+        [__children addObject: __child];
         status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
         if (!status) {
           //XML read error
-          free(_person);
-          return NULL;
+          [_person dealloc];
+          [NSException raise: @"XMLReadError"
+                       format: @"Error reading 'person' type."];
         }
 
         status = xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
           && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
           && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0;
       }
+      [_person setEvents: __children];
     }
   }
 
   return _person;
 }
 
-static int *methodThatReturnsIntPointer() {
-  int *someint = malloc(sizeof(int));
-  *someint = 90;
-  return someint;
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  int rc;
+  id __item;
+  NSEnumerator *__enumerator;
+
+  //write the attributes of start element.
+  if (_id != NULL) {
+    rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "id", NULL, BAD_CAST [_id UTF8String]);
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'id' on 'person'."];
+    }
+  }
+
+  if (_gender != not_set) {
+    rc = xmlTextWriterStartAttributeNS(writer, BAD_CAST "w", BAD_CAST "gender", NULL);
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'gender' on 'person'."];
+    }
+
+    rc = genderxmlout(writer, _gender);
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'gender' on 'person'."];
+    }
+
+    rc = xmlTextWriterEndAttribute(writer);
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'gender' on 'person'."];
+        return;
+    }
+  }
+
+  rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "cool", NULL, _cool ? BAD_CAST "true" : BAD_CAST "false");
+  if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing attribute 'cool' on 'person'."];
+      return;
+  }
+
+  //if we're on the start element, write the xmlns prefixes
+  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:w", BAD_CAST "http://whereverelse.com");
+  if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing attribute 'xmlns:w' on 'person'."];
+      return;
+  }
+
+  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:p", BAD_CAST "http://person.com");
+  if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing attribute 'xmlns:p' on 'person'."];
+      return;
+  }
+
+  if (_events != NULL) {
+    __enumerator = [_events objectEnumerator];
+
+    while ( (__item = [__enumerator nextObject]) ) {
+      rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "event", NULL);
+      if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing element 'event' on 'person'."];
+          return;
+      }
+
+      [__item writeXMLType: writer];
+
+      rc = xmlTextWriterEndElement(writer);
+      if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing end element 'event' on 'person'."];
+          return;
+      }
+    }
+  }
 }
 
+@end
+
+@implementation Event
+
+- (NSString*) description
+{
+  return _description;
+}
+
+- (void) setDescription: (NSString*) newDescription
+{
+  _description = newDescription;
+}
+
+- (NSString*) place
+{
+  return _place;
+}
+
+- (void) setPlace: (NSString*) newPlace
+{
+  _place = newPlace;
+}
+
+- (NSString *) date
+{
+  return _date;
+}
+
+- (void) setDate: (NSString*) newDate
+{
+  _date = newDate;
+}
+
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  Event *_event = [Event new];
+
+  if (xmlTextReaderIsEmptyElement(reader) == 0) {
+    int status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+
+    if (!status) {
+      //XML read error
+      [NSException raise: @"XMLReadError"
+                   format: @"Error reading event type."];
+    }
+    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+      && xmlStrcmp(BAD_CAST "description", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+      [_event setDescription: (NSString*)[NSString readXMLType: reader]];
+      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+    }
+
+    if (!status) {
+      //XML read error
+      [NSException raise: @"XMLReadError"
+                   format: @"Error reading event type."];
+    }
+    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+      && xmlStrcmp(BAD_CAST "place", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+      [_event setPlace: (NSString*)[NSString readXMLType: reader]];
+      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+    }
+
+    if (!status) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Error reading event type."];
+    }
+    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+      && xmlStrcmp(BAD_CAST "date", xmlTextReaderConstLocalName(reader)) == 0
+      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+      [_event setDate: (NSString*)[NSString readXMLType: reader]];
+      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+    }
+  }
+
+  return _event;
+
+}
+
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  int rc;
+
+  if ( _description != NULL ) {
+    rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "description", NULL, BAD_CAST [_description UTF8String]);
+    if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing element 'description' on 'event'."];
+      return;
+    }
+  }
+
+  if (_place != NULL) {
+    rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "place", NULL, BAD_CAST [_place UTF8String]);
+    if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing element 'place' on 'event'."];
+      return;
+    }
+  }
+
+  if (_date != nil) {
+    rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "date", NULL, BAD_CAST [_date UTF8String]);
+    if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing element 'date' on 'event'."];
+      return;
+    }
+  }
+
+}
+@end
+
+
 int main() {
-  struct person person;
-  struct person *readperson;
-  xmlChar id[11] = "1234567890";
-  xmlChar event1description[6] = "birth";
-  xmlChar event1place[16] = "event one place";
-  xmlChar event1date[15] = "event one date";
-  xmlChar event2description[6] = "death";
-  xmlChar event2place[16] = "event two place";
-  xmlChar event2date[15] = "event two date";
-  struct event events[2];
-  time_t *now_t = malloc(sizeof(time_t));
-  struct tm othertime;
-  struct tm *now;
-  int success = blobbyblobby;
+  Person *person = [Person new];
+  Person *readperson;
+  NSString *pid = @"1234567890";
+  NSString *event1description = @"birth";
+  NSString *event1place = @"event one place";
+  NSString *event1date = @"event one date";
+  NSString *event2description = @"death";
+  NSString *event2place = @"event two place";
+  NSString *event2date = @"event two date";
+  Event *event1, *event2;
+  NSArray *events;
   char * examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\">\n <p:event>\n  <p:description>birth</p:description>\n  <p:place>event one city &amp; state</p:place>\n  <p:date>event one date</p:date>\n </p:event>\n <p:event>\n  <p:description>death</p:description>\n  <p:place>event two place</p:place>\n  <p:date>event two date</p:date>\n </p:event>\n</p:person>";
   xmlBufferPtr buf;
   xmlTextReaderPtr reader;
   xmlTextWriterPtr writer;
-  struct xmlBasicNode *personNode;
-  struct event someevent, otherevent, *eventptr;
-  int someint;
-  xmlChar *dummystring;
-  int *bunchofints;
-  long somelong;
-  short someshort;
+  int rc;
 
-  person.id = id;
-  person.gender = f;
-  person.cool = 1;
-  person.events = events;
-  events[0].description = event1description;
-  events[0].place = event1place;
-  events[0].date = event1date;
-  events[1].description = event2description;
-  events[1].place = event2place;
-  events[1].date = event2date;
-  person._sizeof_events = 2;
+  [person setId: pid];
+  [person setGender: f];
+  [person setCool: YES];
+  
+  event1 = [Event new];
+  [event1 setDescription: event1description];
+  [event1 setPlace: event1place];
+  [event1 setDate: event1date];
+  event2 = [Event new];
+  [event2 setDescription: event2description];
+  [event2 setPlace: event2place];
+  [event2 setDate: event2date];
 
-  personout(&person);
-  personxmlout(&person);
+  events = [[NSArray alloc] initWithObjects: event1, event2, nil];
+  [person setEvents: events];
 
-  printf("\n");
-  printf("\n");
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  if (reader == NULL) {
-    printf("BAD READER!");
-    return 1;
-  }
-  success = xmlTextReaderRead(reader);
-  if (success != 1) {
-    printf("BAD READ!");
-  }
-  readperson = xmlTextReaderReadPerson(reader);
-  personout(readperson);
-  personxmlout(readperson);
-
-  printf("\n");
-  printf("\n");
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\"/>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  if (reader == NULL) {
-    printf("BAD READER!");
-    return 1;
-  }
-  success = xmlTextReaderRead(reader);
-  if (success != 1) {
-    printf("BAD READ!");
-  }
-  readperson = xmlTextReaderReadPerson(reader);
-  personout(readperson);
-  personxmlout(readperson);
-
-  printf("\n");
-  printf("\n");
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\">\n <p:event>\n  <p:description></p:description>\n  <p:place/>\n  <p:date>event one date</p:date>\n </p:event>\n <p:event>\n  <p:description>death</p:description>\n  <p:place>event two place</p:place>\n  </p:event>\n</p:person>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  if (reader == NULL) {
-    printf("BAD READER!");
-    return 1;
-  }
-  success = xmlTextReaderRead(reader);
-  if (success != 1) {
-    printf("BAD READ!");
-  }
-  readperson = xmlTextReaderReadPerson(reader);
-  personout(readperson);
-  personxmlout(readperson);
-
-  printf("\n");
-  printf("\n");
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<person></person>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  if (reader == NULL) {
-    printf("BAD READER!");
-    return 1;
-  }
-  success = xmlTextReaderRead(reader);
-  if (success != 1) {
-    printf("BAD READ!");
-  }
-  xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-  printf("namspace uri: [%i]", (xmlTextReaderConstNamespaceUri(reader) == NULL));
-//  readperson = xmlTextReaderReadPerson(reader);
-//  personout(readperson);
-//  personxmlout(readperson);
-
-  eventptr = malloc(sizeof(struct event));
-
-  someevent.description = BAD_CAST "hello, there!";
-  someevent.place = BAD_CAST "hello, place!";
-  someevent.date = BAD_CAST "hello, date!";
-
-  otherevent = someevent;
-  *eventptr = someevent;
-
-  someevent.description = BAD_CAST "changed description";
-  eventptr->description = BAD_CAST "pointer source";
-  printf("%s = %s = %s?\n", otherevent.description, someevent.description, eventptr->description);
-  otherevent = *eventptr;
-  printf("%s = %s = %s?\n", otherevent.description, someevent.description, eventptr->description);
-
-  someint = *methodThatReturnsIntPointer();
-  printf("some int: %i\n\n\n", someint);
-
-  dummystring = BAD_CAST "123456789\01234567890";
-  dummystring = _encode_base64(dummystring, 20);
-  printf("encoded: %s\n", dummystring);
-  dummystring = _decode_base64(dummystring, &someint);
-  printf("decoded: %s (len: %i)\n\n\n", dummystring, someint);
-
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\">\n <p:event>\n  <p:description>birth</p:description>\n  <p:place>event one city &amp; state</p:place>\n  <p:date>event one date</p:date>\n </p:event>\n <p:event>\n  <p:description>death</p:description>\n  <p:place>event two place</p:place>\n  <p:date>event two date</p:date>\n </p:event>\n</p:person>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  success = xmlTextReaderRead(reader);
-  if (success != 1) {
-    printf("BAD READ!");
-  }
-  printf("reading any type...\n");
-  personNode = xmlTextReaderReadXsAnyTypeType(reader);
-  printf("personnode: %p\n", personNode);
   buf = xmlBufferCreate();
   writer = xmlNewTextWriterMemory(buf, 0);
-  xmlTextWriterSetIndent(writer, 2);
-  xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
-  success = xmlTextWriterWriteXsAnyTypeType(writer, personNode);
-  xmlTextWriterEndDocument(writer);
-  printf("STATUS: %i\n%s", success, buf->content);
-  freeXsAnyTypeType(personNode);
-  free(personNode);
-
-  bunchofints = calloc(10, sizeof(int));
-  bunchofints[1] = 1;
-  bunchofints[2] = 2;
-  free(bunchofints);
-
-  printf("\n");
-  printf("\n");
-  printf("DATE EXPERIMENTS:\n");
-  time(now_t);
-  now = localtime(now_t);
-  printf("Now: %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec, (int) now->tm_gmtoff / 3600, (int) (now->tm_gmtoff / 60) % 60);
-  success = readDateTime("2007-01-01T12:12:12", &othertime);
-  printf("parsed 2007-01-01T12:12:12 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  success = readDateTime("2007-01-01", &othertime);
-  printf("parsed 2007-01-01 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  success = readDateTime("12:20:30", &othertime);
-  printf("parsed 12:20:30 to %04i-%02i-%02iT%02i:%02i:%02i%+02i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) othertime.tm_gmtoff / 3600, (int) (othertime.tm_gmtoff / 60) % 60);
-  success = readDateTime("2009-08-04T10:11:38.428-06:00", &othertime);
-  printf("parsed 2009-08-04T10:11:38.428-06:00 to %04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i\n", othertime.tm_year + 1900, othertime.tm_mon + 1, othertime.tm_mday, othertime.tm_hour, othertime.tm_min, othertime.tm_sec, (int) (othertime.tm_gmtoff / 3600), (int) ((othertime.tm_gmtoff / 60) % 60));
-
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\">\n <p:event>\n  <p:description>birth</p:description>\n  <p:place>event one city &amp; state</p:place>\n  <p:date>event one date</p:date>\n </p:event>\n <p:event>\n  <p:description>death</p:description>\n  <p:place>event two place</p:place>\n  <p:date>event two date</p:date>\n </p:event>\n</p:person>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  success = xmlTextReaderRead(reader); //read to document
-  success = xmlTextReaderAdvanceToNextStartOrEndElement(reader); //read to event
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
-  success = xmlTextReaderSkipElement(reader);
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
-  success = xmlTextReaderSkipElement(reader);
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
-
-  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\"><p:event><p:description>birth</p:description><p:place>event one city &amp; state</p:place><p:date>event one date</p:date></p:event><p:event><p:description>death</p:description><p:place>event two place</p:place><p:date>event two date</p:date></p:event></p:person>";
-  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
-  success = xmlTextReaderRead(reader); //read to document
-  success = xmlTextReaderAdvanceToNextStartOrEndElement(reader); //read to event
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
-  success = xmlTextReaderSkipElement(reader);
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
-  success = xmlTextReaderSkipElement(reader);
-  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  rc = xmlTextWriterSetIndent(writer, 2);
+  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+  rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "person", NULL);
+  [person writeXMLType: writer];
+  rc = xmlTextWriterEndDocument(writer);
+  xmlFreeTextWriter(writer);
+  printf("%s", buf->content);
+  xmlBufferFree(buf);
 
   return 0;
 };
-
-void testFunc() {
-  void * something;
-  int value;
-  value = *((int*)something);
-}
