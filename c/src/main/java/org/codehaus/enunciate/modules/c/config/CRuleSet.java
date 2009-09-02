@@ -20,16 +20,12 @@ import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 
 /**
- * Rules for the configuration of the JAX-WS client module.
+ * Rules for the configuration of the C client module.
  *
  * @author Ryan Heaton
  */
 public class CRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
-    //allow client package conversions to be configured.
-    digester.addObjectCreate("enunciate/modules/ruby/package-conversions/convert", PackageModuleConversion.class);
-    digester.addSetProperties("enunciate/modules/ruby/package-conversions/convert");
-    digester.addSetNext("enunciate/modules/ruby/package-conversions/convert", "addClientPackageConversion");
   }
 }

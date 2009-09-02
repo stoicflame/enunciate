@@ -25,7 +25,7 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
 
   public NameForTypeDefinitionMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
-    this.projectLabel = CDeploymentModule.scrubIdentifier(projectLabel);
+    this.projectLabel = ObjCDeploymentModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
 
@@ -44,17 +44,17 @@ public class NameForTypeDefinitionMethod implements TemplateMethodModelEx {
   }
 
   public Object calculateName(TypeDefinition typeDefinition) {
-    String name = CDeploymentModule.scrubIdentifier(typeDefinition.getName());
-    String simpleName = CDeploymentModule.scrubIdentifier(typeDefinition.getSimpleName());
-    String clientName = CDeploymentModule.scrubIdentifier(typeDefinition.getClientSimpleName());
-    String simpleNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(simpleName));
-    String clientNameDecap = CDeploymentModule.scrubIdentifier(Introspector.decapitalize(clientName));
+    String name = ObjCDeploymentModule.scrubIdentifier(typeDefinition.getName());
+    String simpleName = ObjCDeploymentModule.scrubIdentifier(typeDefinition.getSimpleName());
+    String clientName = ObjCDeploymentModule.scrubIdentifier(typeDefinition.getClientSimpleName());
+    String simpleNameDecap = ObjCDeploymentModule.scrubIdentifier(Introspector.decapitalize(simpleName));
+    String clientNameDecap = ObjCDeploymentModule.scrubIdentifier(Introspector.decapitalize(clientName));
     if (name == null) {
       name = "anonymous_" + clientNameDecap;
     }
     PackageDeclaration pckg = ((TypeDeclaration) typeDefinition).getPackage();
-    String packageUnderscored = CDeploymentModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName() : "");
-    String nsid = CDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
+    String packageUnderscored = ObjCDeploymentModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName() : "");
+    String nsid = ObjCDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
     return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored);
   }
 }

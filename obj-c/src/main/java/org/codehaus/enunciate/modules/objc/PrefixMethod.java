@@ -47,7 +47,7 @@ public class PrefixMethod implements TemplateMethodModel {
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
-    return CDeploymentModule.scrubIdentifier(prefix);
+    return ObjCDeploymentModule.scrubIdentifier(prefix);
   }
 
   /**

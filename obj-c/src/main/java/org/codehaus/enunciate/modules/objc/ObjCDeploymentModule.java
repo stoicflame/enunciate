@@ -33,7 +33,7 @@ import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.objc.config.CRuleSet;
+import org.codehaus.enunciate.modules.objc.config.ObjCRuleSet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -82,9 +82,9 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * </ul>
  *
  * @author Ryan Heaton
- * @docFileName module_c.html
+ * @docFileName module_obj_c.html
  */
-public class CDeploymentModule extends FreemarkerDeploymentModule {
+public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
 
   /**
    * The pattern to scrub is any non-word character.
@@ -97,11 +97,11 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
 
   /**
-   * @return "c"
+   * @return "obj-c"
    */
   @Override
   public String getName() {
-    return "c";
+    return "obj-c";
   }
 
   /**
@@ -142,7 +142,6 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());
-      model.put("xmlFunctionIdentifier", new XmlFunctionIdentifierMethod());
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 
       debug("Generating the C data structures and (de)serialization functions...");
@@ -207,7 +206,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       }
     }
 
-    URL res = CDeploymentModule.class.getResource(resource);
+    URL res = ObjCDeploymentModule.class.getResource(resource);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(bytes);
     try {
@@ -255,7 +254,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
    * @return The URL to the specified template.
    */
   protected URL getTemplateURL(String template) {
-    return CDeploymentModule.class.getResource(template);
+    return ObjCDeploymentModule.class.getResource(template);
   }
 
   /**
@@ -332,12 +331,12 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public RuleSet getConfigurationRules() {
-    return new CRuleSet();
+    return new ObjCRuleSet();
   }
 
   @Override
   public Validator getValidator() {
-    return new CValidator();
+    return new ObjCValidator();
   }
 
   // Inherited.

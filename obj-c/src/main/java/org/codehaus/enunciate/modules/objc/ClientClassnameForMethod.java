@@ -43,30 +43,30 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     super(conversions);
     setJdk15(false); //we'll control the generics.
 
-    classConversions.put(Boolean.class.getName(), "int");
-    classConversions.put(String.class.getName(), "xmlChar");
+    classConversions.put(Boolean.class.getName(), "BOOL");
+    classConversions.put(String.class.getName(), "NSString");
     classConversions.put(Integer.class.getName(), "int");
     classConversions.put(Short.class.getName(), "short");
     classConversions.put(Byte.class.getName(), "unsigned char");
     classConversions.put(Double.class.getName(), "double");
     classConversions.put(Long.class.getName(), "long");
-    classConversions.put(java.math.BigInteger.class.getName(), "xmlChar");
-    classConversions.put(java.math.BigDecimal.class.getName(), "xmlChar");
+    classConversions.put(java.math.BigInteger.class.getName(), "NSNumber");
+    classConversions.put(java.math.BigDecimal.class.getName(), "NSDecimalNumber");
     classConversions.put(Float.class.getName(), "float");
     classConversions.put(Character.class.getName(), "xmlChar");
-    classConversions.put(Date.class.getName(), "struct tm");
-    classConversions.put(DataHandler.class.getName(), "unsigned char");
-    classConversions.put(java.awt.Image.class.getName(), "unsigned char");
-    classConversions.put(javax.xml.transform.Source.class.getName(), "unsigned char");
-    classConversions.put(QName.class.getName(), "xmlChar");
-    classConversions.put(URI.class.getName(), "xmlChar");
-    classConversions.put(UUID.class.getName(), "xmlChar");
-    classConversions.put(XMLGregorianCalendar.class.getName(), "struct tm");
-    classConversions.put(GregorianCalendar.class.getName(), "struct tm");
-    classConversions.put(Calendar.class.getName(), "struct tm");
-    classConversions.put(javax.xml.datatype.Duration.class.getName(), "xmlChar");
-    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "struct xmlBasicNode");
-    classConversions.put(Object.class.getName(), "struct xmlBasicNode");
+    classConversions.put(Date.class.getName(), "NSDate");
+    classConversions.put(DataHandler.class.getName(), "NSData");
+    classConversions.put(java.awt.Image.class.getName(), "NSData");
+    classConversions.put(javax.xml.transform.Source.class.getName(), "NSData");
+    classConversions.put(QName.class.getName(), "NSString");
+    classConversions.put(URI.class.getName(), "NSURL");
+    classConversions.put(UUID.class.getName(), "NSString");
+    classConversions.put(XMLGregorianCalendar.class.getName(), "NSCalendarDate");
+    classConversions.put(GregorianCalendar.class.getName(), "NSCalendarDate");
+    classConversions.put(Calendar.class.getName(), "NSCalendarDate");
+    classConversions.put(javax.xml.datatype.Duration.class.getName(), "NSString");
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "JAXBBasicXMLNode");
+    classConversions.put(Object.class.getName(), "NSObject");
     classConversions.putAll(conversions);
   }
 
@@ -77,7 +77,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       return classConversions.get(fqn);
     }
     else if (isCollection(declaration)) {
-      return "xmlNode";
+      return "NSArray";
     }
     return super.convert(declaration);
   }
@@ -111,11 +111,8 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
 
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
-    if (accessor.isXmlIDREF()) {
-      return "xmlChar";
-    }
-    else if (accessor.isXmlList()) {
-      return "xmlChar";
+    if (accessor.isXmlIDREF() || accessor.isXmlList()) {
+      return "NSString";
     }
     
     return super.convert(accessor);
@@ -142,7 +139,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
         case LONG:
           return "long";
         default:
-          return "xmlChar";
+          return "NSString";
       }
     }
     else if (decorated.isCollection()) {
@@ -152,15 +149,20 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
           return convert(typeArgs.iterator().next());
         }
       }
-      return "xmlNode";
+      return "NSArray";
     }
     else if (decorated.isArray()) {
       TypeMirror componentType = ((ArrayType) decorated).getComponentType();
-      if ((componentType instanceof PrimitiveType) && (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE)) {
-        return "unsigned char";
+      if (componentType instanceof PrimitiveType) {
+        if (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE) {
+          return "NSData";
+        }
+        else {
+          return convert(componentType);
+        }
       }
 
-      return convert(componentType);
+      return "NSArray";
     }
 
     return super.convert(typeMirror);

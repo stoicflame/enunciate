@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.objc;
+package org.codehaus.enunciate.modules.objc.config;
 
-import net.sf.jelly.apt.freemarker.FreemarkerTransform;
+import org.apache.commons.digester.Digester;
+import org.apache.commons.digester.RuleSetBase;
 
 /**
+ * Rules for the configuration of the Objective-C client module.
+ *
  * @author Ryan Heaton
  */
-public class ForAllAccessorsTransform extends FreemarkerTransform<AccessorLoopStrategy> {
+public class ObjCRuleSet extends RuleSetBase {
 
-
-  public ForAllAccessorsTransform(String namespace) {
-    super(namespace);
+  public void addRuleInstances(Digester digester) {
   }
-
-  public AccessorLoopStrategy newStrategy() {
-    return new AccessorLoopStrategy();
-  }
-
 }

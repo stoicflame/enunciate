@@ -1,4 +1,4 @@
-#include <stdio.h>
+realloc#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -6,8 +6,8 @@
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 
-#ifndef ENUNCIATE_C_UTILITIES
-#define ENUNCIATE_C_UTILITIES
+#ifndef ENUNCIATE_C_STRUCT
+#define ENUNCIATE_C_STRUCT
 
 /**
  * A basic xml node, used when (de)serializing unknown or "any" xml type.
@@ -49,6 +49,11 @@ struct xmlBasicNode {
    */
   struct xmlBasicNode *sibling;
 };
+
+#endif /* ENUNCIATE_C_STRUCT */
+
+#ifndef ENUNCIATE_C_UTILITIES
+#define ENUNCIATE_C_UTILITIES
 
 /*******************xml utilities************************************/
 
@@ -469,6 +474,7 @@ static short *xmlTextReaderReadXsShortType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   short *value = malloc(sizeof(short));
   *value = atoi((char *)nodeValue);
+  free(nodeValue);
   return value;
 }
 

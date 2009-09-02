@@ -7,163 +7,119 @@
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-struct ${typeName} {
-
-  [@forAllAccessors typeDefinition=type]
-    [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
-
-  /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
-   */
-  ${classnameFor(accessor)} *${accessor.clientSimpleName};
-
-  /**
-   * Size of the ${accessor.clientSimpleName} data.
-   */
-  int _sizeof_${accessor.clientSimpleName};
-    [#elseif ((accessor.collectionType) && (accessor.choices??) && (accessor.choices?size > 1))]
-      [#list accessor.choices as choice]
-
-  /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
-   *
-   * (Partial list.)
-   */
-  ${classnameFor(choice)} *${choice.name?replace("-", "_")}_${accessor.clientSimpleName};
-
-  /**
-   * Size of the ${accessor.clientSimpleName} array.
-   */
-  int _sizeof_${choice.name?replace("-", "_")}_${accessor.clientSimpleName};
-      [/#list]
-    [#elseif accessor.collectionType]
-
-  /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
-   */
-  ${classnameFor(accessor)} *${accessor.clientSimpleName};
-
-  /**
-   * Size of the ${accessor.clientSimpleName} array.
-   */
-  int _sizeof_${accessor.clientSimpleName};
-    [#else]
-
-  /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
-   */
-  ${classnameFor(accessor)} [#if !accessor.accessorType.primitive]*[/#if]${accessor.clientSimpleName};
+@interface ${typeName} : [#if type.baseType.typeDefinition??]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if] <JAXBType[#if findRootElement(type)??], JAXBElement[/#if]>
+{
+  @private
+  [#list type.attributes as attribute]
+    [#if !accessorOverridesAnother(attribute)]
+    ${classnameFor(attribute)} [#if !attribute.accessorType.primitive]*[/#if]_${attribute.clientSimpleName};
     [/#if]
-  [/@forAllAccessors]
-  [#if type.hasAnyAttribute]
-
-  /**
-   * Additional attributes.
-   */
-  struct xmlBasicNode *otherAttributes;
+  [/#list]
+  [#if type.value??]
+    [#if !accessorOverridesAnother(type.value)]
+    ${classnameFor(type.value)} [#if !type.value.accessorType.primitive]*[/#if]_${type.value.clientSimpleName};
+    [/#if]
+  [#else]
+    [#list type.elements as element]
+      [#if !accessorOverridesAnother(element)]
+    ${classnameFor(element)} [#if !element.accessorType.primitive]*[/#if]_${element.clientSimpleName};
+      [/#if]
+    [/#list]
   [/#if]
   [#if type.anyElement??]
-
-  /**
-   * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"additional elements"?chop_linebreak?replace("\n", "\n   * ")}
-   */
-  struct xmlBasicNode *${type.anyElement.clientSimpleName};
+    NSArray *_${type.anyElement.clientSimpleName};
   [/#if]
-};
-[#if findRootElement(type)??]
-  [#assign rootElement=findRootElement(type)/]
+  [#if type.hasAnyAttribute]
+    NSArray *_otherAttributes;
+  [/#if]
+}
+[#list type.attributes as attribute]
+  [#if !accessorOverridesAnother(attribute)]
 
 /**
- * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
- * it is assumed that the reader is pointing to the XML document (not the element).
- *
- * @param reader The XML reader.
- * @return The ${type.clientSimpleName}, or NULL in case of error.
+ * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-struct ${typeName} *xml_read_${typeName}(xmlTextReaderPtr reader);
+- (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${attribute.clientSimpleName};
 
 /**
- * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
- *
- * @param writer The XML writer.
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
- * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-int xml_write_${typeName}(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (void) set${attribute.clientSimpleName?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${attribute.clientSimpleName};
+  [/#if]
+[/#list]
+[#if type.value??]
+  [#if !accessorOverridesAnother(type.value)]
 
 /**
- * Frees a ${type.clientSimpleName}.
- *
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-void free_${typeName}(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${type.value.clientSimpleName};
 
 /**
- * Reads a ${type.clientSimpleName} element from XML. The element to be read is "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}", and
- * it is assumed that the reader is already pointing to the element.
- *
- * @param reader The XML reader.
- * @return The ${type.clientSimpleName}, or NULL in case of error.
+ * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(rootElement)?cap_first}Element(xmlTextReaderPtr reader);
+- (void) set${type.value.clientSimpleName?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${type.value.clientSimpleName};
+  [/#if]
+[#else]
+  [#list type.elements as element]
+    [#if !accessorOverridesAnother(element)]
 
 /**
- * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
- * Does NOT write the namespace prefixes.
- *
- * @param writer The XML writer.
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
- * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}Element(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${element.clientSimpleName};
 
 /**
- * Writes a ${type.clientSimpleName} to XML under element name "[#if ((rootElement.namespace??) && (rootElement.namespace != ""))]{${rootElement.namespace}}[/#if]${rootElement.name}".
- *
- * @param writer The XML writer.
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
- * @param writeNamespaces Whether to write the namespace prefixes.
- * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-static int xmlTextWriterWrite${xmlFunctionIdentifier(rootElement)?cap_first}ElementNS(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first}, int writeNamespaces);
-
-/**
- * Frees the children of a ${type.clientSimpleName}.
- *
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} whose children are to be free.
- */
-static void free${xmlFunctionIdentifier(rootElement)?cap_first}Element(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (void) set${element.clientSimpleName?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${element.clientSimpleName};
+    [/#if]
+  [/#list]
 [/#if]
+[#if type.anyElement??]
 
 /**
- * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
+ * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  *
- * @param reader The XML reader.
- * @return The ${type.clientSimpleName}, or NULL in case of error.
+ * Contains instances of JAXBBasicXMLNode.
  */
-static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextReaderPtr reader);
+- (NSArray *) ${type.anyElement.clientSimpleName};
 
 /**
- * Writes a ${type.clientSimpleName} to XML.
+ * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  *
- * @param writer The XML writer.
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to write.
- * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
+ * Contains instances of JAXBBasicXMLNode.
  */
-static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTextWriterPtr writer, struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (void) set${type.anyElement.clientSimpleName?cap_first}: (NSArray *) type.anyElement.clientSimpleName;
+[/#if]
+[#if type.hasAnyAttribute]
 
 /**
- * Frees the elements of a ${type.clientSimpleName}.
+ * Other attributes applicable to ${typeName}.
  *
- * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
+ * Contains instances of JAXBBasicXMLNode.
  */
-static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+- (NSArray *) otherAttributes;
+
+/**
+ * Other attributes applicable to ${typeName}.
+ *
+ * Contains instances of JAXBBasicXMLNode.
+ */
+- (void) setOtherAttributes: (NSArray *) otherAttributes;
+[/#if]
+@end /* interface ${typeName} */
 [/#macro]
 
 
 
 [#macro writeComplexTypeImpl type]
   [#assign typeName=nameForTypeDefinition(type)/]
+
+/**
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ */
+@implementation ${typeName}
   [#if findRootElement(type)??]
     [#assign rootElement=findRootElement(type)/]
 

@@ -1,56 +1,7 @@
-#define NO_GNUSTEP
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <libxml/xmlwriter.h>
-#include <libxml/xmlreader.h>
-#include <libxml/tree.h>
-#include <Foundation/Foundation.h>
+#include <testxml.h>
 
-#ifndef ENUNCIATE_OBJC_UTILITIES
-#define ENUNCIATE_OBJC_UTILITIES
-
-/**
- * A basic xml node, used when (de)serializing unknown or "any" xml type.
- * We can't use the libxml xmlNodePtr because we can't reliably "free" it.
- */
-struct xmlBasicNode {
-  /**
-   * The (local) name of the node.
-   */
-  xmlChar *name;
-
-  /**
-   * The namespace of the node.
-   */
-  xmlChar *ns;
-
-  /**
-   * The namespace prefix of the node.
-   */
-  xmlChar *prefix;
-
-  /**
-   * The (text) value of the node.
-   */
-  xmlChar *value;
-
-  /**
-   * The child elements of the node.
-   */
-  struct xmlBasicNode *child_elements;
-
-  /**
-   * The attributes of the node.
-   */
-  struct xmlBasicNode *attributes;
-
-  /**
-   * The next sibling (for a list of nodes).
-   */
-  struct xmlBasicNode *sibling;
-};
+#ifndef ENUNCIATE_C_UTILITIES
+#define ENUNCIATE_C_UTILITIES
 
 /*******************xml utilities************************************/
 
@@ -232,23 +183,1080 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
   return outstream;
 }
 
-#endif /* ENUNCIATE_OBJC_UTILITIES */
+#endif /* ENUNCIATE_C_UTILITIES */
 
-#ifndef BASIC_XML_OBJC_FUNCTIONS_XS
-#define BASIC_XML_OBJC_FUNCTIONS_XS
+#ifndef ENUNCIATE_OBJC_CLASSES
+#define ENUNCIATE_OBJC_CLASSES
 
-/*******************xs:boolean************************************/
+/**
+ * Protocol defining methods for events that occur
+ * when reading/parsing XML. Intended for internal
+ * use only.
+ */
+@protocol JAXBReading
+
+/**
+ * Method for reading an attribute.
+ *
+ * @param reader The reader pointing to the attribute.
+ * @return Whether the attribute was read.
+ */
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading the value of an element.
+ *
+ * @param reader The reader pointing to the element containing a value.
+ * @return Whether the value was read.
+ */
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading a child element. If (and only if) the child
+ * element was handled, the element in the reader should be
+ * "consumed" and the reader will be pointing to the end element.
+ *
+ * @param reader The reader pointing to the child element.
+ * @return Whether the child element was read.
+ */
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading an unknown attribute.
+ *
+ * @param reader The reader pointing to the unknown attribute.
+ * @return Whether the attribute was read.
+ */
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading an unknown child element. Implementations
+ * must be responsible for "consuming" the child element.
+ *
+ * @param reader The reader pointing to the unknown child element.
+ * @return The status of the reader after having consumed the unknown child element.
+ */
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader;
+
+@end /*protocol JAXBReading*/
+
+/**
+ * Protocol defining methods for events that occur
+ * when writing XML. Intended for internal
+ * use only.
+ */
+@protocol JAXBWriting
+
+/**
+ * Method for writing the attributes.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer;
+
+/**
+ * Method for writing the element value.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer;
+
+/**
+ * Method for writing the child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer;
+
+@end /*protocol JAXBWriting*/
+
+/**
+ * Declaration of the JAXB type, element, events for a base object.
+ */
+@interface NSObject (JAXB) <JAXBType, JAXBElement, JAXBReading, JAXBWriting>
+
+@end
+
+/**
+ * Implementation of the JAXB type, element, events for a base object.
+ */
+@implementation NSObject (JAXB)
+
+/**
+ * Read the XML type from the reader; an instance of NSXMLElement.
+ *
+ * @param reader The reader.
+ * @return An instance of NSXMLElement
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [JAXBBasicXMLNode readXMLType: reader];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  int status, depth;
+  if (xmlTextReaderHasAttributes(reader)) {
+    while (xmlTextReaderMoveToNextAttribute(reader)) {
+      if ([self readJAXBAttribute: reader] == NO) {
+        [self readUnknownJAXBAttribute: reader];
+      }
+    }
+
+    status = xmlTextReaderMoveToElement(reader);
+    if (!status) {
+      //panic: unable to return to the element node.
+      [NSException raise: @"XMLReadError"
+                   format: @"Error moving back to element position from attributes."];
+    }
+  }
+
+  if ([self readJAXBValue: reader] == NO) {
+    //no value handled; attempt to process child elements 
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      depth = xmlTextReaderDepth(reader);//track the depth.
+      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+      while (xmlTextReaderDepth(reader) > depth) {
+        if (status < 1) {
+          //panic: XML read error.
+          [NSException raise: @"XMLReadError"
+                       format: @"Error handling a child element."];
+        }
+        else if ([self readJAXBChildElement: reader]) {
+          status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        }
+        else {
+          status = [self readUnknownJAXBChildElement: reader];
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Write the XML type value of this object to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  [self writeJAXBAttributes: writer];
+  [self writeJAXBValue: writer];
+  [self writeJAXBChildElements: writer];
+}
+
+/**
+ * Read the XML element from the reader; an instance of NSXMLElement.
+ *
+ * @param reader The reader.
+ * @return An instance of NSXMLElement
+ */
++ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader
+{
+  return (id<JAXBElement>) [JAXBBasicXMLNode readXMLType: reader];
+}
+
+/**
+ * No op; root objects don't have an element name/namespace. Subclasses must override.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer
+{
+  //no-op
+}
+
+/**
+ * No op; root objects don't have an element name/namespace. Subclasses must override.
+ *
+ * @param writer The writer.
+ * @param writeNs Ignored.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
+{
+  //no-op
+}
+
+/**
+ * No-op; base objects do not handle any attributes.
+ *
+ * @param reader The reader pointing to the attribute.
+ * @return NO
+ */
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any values.
+ *
+ * @param reader The reader pointing to the element containing a value.
+ * @return NO
+ */
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any child elements.
+ *
+ * @param reader The reader pointing to the child element.
+ * @return NO
+ */
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any attributes.
+ *
+ * @param reader The reader pointing to the unknown attribute.
+ */
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader
+{
+}
+
+/**
+ * Just skips the unknown element; base objects do not handle any child elements.
+ *
+ * @param reader The reader pointing to the unknown child element.
+ * @return The status of the reader after skipping the unknown child element.
+ */
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return xmlTextReaderSkipElement(reader);
+}
+
+/**
+ * No-op; base objects have no attributes.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+/**
+ * No-op; base objects have no element value.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+/**
+ * No-op; base objects have no child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+@end /*NSObject (JAXB)*/
+
+/**
+ * Implementation of the JAXB type, element for an xml element.
+ */
+@implementation JAXBBasicXMLNode
+
+/**
+ * Accessor for the (local) name of the XML node.
+ *
+ * @return The (local) name of the XML node.
+ */
+- (NSString *) name
+{
+  return _name;
+}
+
+/**
+ * Accessor for the (local) name of the XML node.
+ *
+ * @param newName The (local) name of the XML node.
+ */
+- (void) setName: (NSString *) newName
+{
+  [newName retain];
+  [_name release];
+  _name = newName;
+}
+
+/**
+ * Accessor for the namespace of the XML node.
+ *
+ * @return The namespace of the XML node.
+ */
+- (NSString *) ns
+{
+  return _ns;
+}
+
+/**
+ * Accessor for the namespace of the XML node.
+ *
+ * @param newNs The namespace of the XML node.
+ */
+- (void) setNs: (NSString *) newNs
+{
+  [newNs retain];
+  [_ns release];
+  _ns = newNs;
+}
+
+/**
+ * Accessor for the namespace prefix of the XML node.
+ *
+ * @return The namespace prefix of the XML node.
+ */
+- (NSString *) prefix
+{
+  return _prefix;
+}
+
+/**
+ * Accessor for the namespace prefix of the XML node.
+ *
+ * @param newPrefix The namespace prefix of the XML node.
+ */
+- (void) setPrefix: (NSString *) newPrefix
+{
+  [newPrefix retain];
+  [_prefix release];
+  _prefix = newPrefix;
+}
+
+/**
+ * Accessor for the value of the XML node.
+ *
+ * @return The value of the XML node.
+ */
+- (NSString *) value
+{
+  return _value;
+}
+
+/**
+ * Accessor for the value of the XML node.
+ *
+ * @param newValue The value of the XML node.
+ */
+- (void) setValue: (NSString *) newValue
+{
+  [newValue retain];
+  [_value release];
+  _value = newValue;
+}
+
+/**
+ * Accessor for the child elements of the XML node.
+ *
+ * @return The child elements of the XML node.
+ */
+- (NSArray *) childElements
+{
+  return _childElements;
+}
+
+/**
+ * Accessor for the child elements of the XML node.
+ *
+ * @param newValue The child elements of the XML node.
+ */
+- (void) setChildElements: (NSArray *) newChildElements
+{
+  [newChildElements retain];
+  [_childElements release];
+  _childElements = newChildElements;
+}
+
+/**
+ * Accessor for the attributes of the XML node.
+ *
+ * @return The attributes of the XML node.
+ */
+- (NSArray *) attributes
+{
+  return _attributes;
+}
+
+/**
+ * Accessor for the attributes of the XML node.
+ *
+ * @param newAttributes The attributes of the XML node.
+ */
+- (void) setAttributes: (NSArray *) newAttributes
+{
+  [newAttributes retain];
+  [_attributes release];
+  _attributes = newAttributes;
+}
+
+/**
+ * Read the XML type from the reader; an instance of JAXBBasicXMLNode.
+ *
+ * @param reader The reader.
+ * @return An instance of JAXBBasicXMLNode
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  JAXBBasicXMLNode *node = [JAXBBasicXMLNode new];
+  NS_DURING
+  {
+    [node initWithReader: reader];
+  }
+  NS_HANDLER
+  {
+    [node dealloc];
+    node = nil;
+    [localException raise];
+  }
+  NS_ENDHANDLER
+  
+  [node autorelease];
+  return node;
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance of JAXBBasicXMLNode.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  int status, depth = xmlTextReaderDepth(reader);
+  JAXBBasicXMLNode *child;
+  xmlChar *value = NULL;
+  const xmlChar *text;
+  NSMutableArray *children;
+
+  [self setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
+  [self setNs: [NSString stringWithUTF8String: (const char *) xmlTextReaderNamespaceUri(reader)]];
+  [self setPrefix: [NSString stringWithUTF8String: (const char *)xmlTextReaderPrefix(reader)]];
+
+  if (xmlTextReaderHasAttributes(reader)) {
+    child = nil;
+    children = [NSMutableArray new];
+    while (xmlTextReaderMoveToNextAttribute(reader)) {
+      child = [JAXBBasicXMLNode new];
+      [child setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
+      [child setNs: [NSString stringWithUTF8String: (const char *)xmlTextReaderNamespaceUri(reader)]];
+      [child setPrefix: [NSString stringWithUTF8String: (const char *) xmlTextReaderPrefix(reader)]];
+      [child setValue: [NSString stringWithUTF8String: (const char *) xmlTextReaderValue(reader)]];
+      [children addObject: child];
+    }
+    [self setAttributes: children];
+
+    status = xmlTextReaderMoveToElement(reader);
+    if (status < 1) {
+      //panic: unable to return to the element node.
+      [NSException raise: @"XMLReadError"
+                   format: @"Error moving to element from attributes."];
+    }
+  }
+
+  if (xmlTextReaderIsEmptyElement(reader) == 0) {
+    children = [NSMutableArray new];
+    status = xmlTextReaderRead(reader);
+    while (status == 1 && xmlTextReaderDepth(reader) > depth) {
+      switch (xmlTextReaderNodeType(reader)) {
+        case XML_READER_TYPE_ELEMENT:
+          child = (JAXBBasicXMLNode *) [JAXBBasicXMLNode readXMLType: reader];
+          [children addObject: child];
+          break;
+        case XML_READER_TYPE_TEXT:
+        case XML_READER_TYPE_CDATA:
+          text = xmlTextReaderConstValue(reader);
+          value = xmlStrncat(value, text, xmlStrlen(text));
+          break;
+        default:
+          //skip anything else.
+          break;
+      }
+
+      status = xmlTextReaderRead(reader);
+    }
+
+    if (status < 1) {
+      //panic: xml read error
+      [NSException raise: @"XMLReadError"
+                   format: @"Error reading child elements."];
+    }
+
+    if ([children count] > 0) {
+      [self setChildElements: children];
+    }
+
+    if (value != NULL) {
+      [self setValue: [NSString stringWithUTF8String: (const char *) value]];
+    }
+
+  }
+}
+
+/**
+ * Read the XML element from the reader; an instance of NSXMLElement.
+ *
+ * @param reader The reader.
+ * @return An instance of NSXMLElement
+ */
++ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader
+{
+  return (id<JAXBElement>) [JAXBBasicXMLNode readXMLType: reader];
+}
+
+/**
+ * Write the basic node to an xml writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  int status;
+  NSEnumerator *enumerator;
+  JAXBBasicXMLNode *child;
+  xmlChar *childns, *childname, *childprefix, *childvalue;
+
+  status = xmlTextWriterStartElementNS(writer, _prefix ? BAD_CAST [_prefix UTF8String] : NULL, _name ? BAD_CAST [_name UTF8String] : NULL, _ns ? BAD_CAST [_ns UTF8String] : NULL);
+  if (status < 0) {
+    childns = BAD_CAST "";
+    if (_ns) {
+      childns = BAD_CAST [_ns UTF8String];
+    }
+
+    childname = BAD_CAST "";
+    if (_name) {
+      childname = BAD_CAST [_name UTF8String];
+    }
+
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing start element {%s}%s for JAXBBasicXMLNode.", childns, childname];
+  }
+
+  if (_attributes) {
+    enumerator = [_attributes objectEnumerator];
+    while ( (child = (JAXBBasicXMLNode *)[enumerator nextObject]) ) {
+      childns = NULL;
+      if ([child ns]) {
+        childns = BAD_CAST [[child ns] UTF8String];
+      }
+
+      childprefix = NULL;
+      if ([child prefix]) {
+        childprefix = BAD_CAST [[child prefix] UTF8String];
+      }
+      
+      childname = NULL;
+      if ([child name]) {
+        childname = BAD_CAST [[child name] UTF8String];
+      }
+
+      childvalue = NULL;
+      if ([child value]) {
+        childvalue = BAD_CAST [[child value] UTF8String];
+      }
+
+      status = xmlTextWriterWriteAttributeNS(writer, childprefix, childname, childns, childvalue);
+      if (status < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute {%s}%s for JAXBBasicXMLNode.", childns, childname];
+      }
+    }
+  }
+
+  if (_value) {
+    status = xmlTextWriterWriteString(writer, BAD_CAST [_value UTF8String]);
+    if (status < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing value of JAXBBasicXMLNode."];
+    }
+  }
+
+  if (_childElements) {
+    enumerator = [_childElements objectEnumerator];
+    while ( (child = [enumerator nextObject]) ) {
+      [child writeXMLType: writer];
+    }
+  }
+
+  status = xmlTextWriterEndElement(writer);
+  if (status < 0) {
+    childns = BAD_CAST "";
+    if (_ns) {
+      childns = BAD_CAST [_ns UTF8String];
+    }
+
+    childname = BAD_CAST "";
+    if (_name) {
+      childname = BAD_CAST [_name UTF8String];
+    }
+
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing end element {%s}%s for JAXBBasicXMLNode.", childns, childname];
+  }
+}
+
+/**
+ * Writes this node to a writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer
+{
+  [self writeXMLType: writer];
+}
+
+/**
+ * Writes this node to a writer.
+ *
+ * @param writer The writer.
+ * @param writeNs Whether to write the namespaces for this element to the xml writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
+{
+  [self writeXMLType: writer];
+}
+
+- (void) dealloc {
+  [self setName: nil];
+  [self setNs: nil];
+  [self setPrefix: nil];
+  [self setValue: nil];
+  [self setChildElements: nil];
+  [self setAttributes: nil];
+  [super dealloc];
+}
+@end /*implementation JAXBBasicXMLNode*/
+
+/**
+ * Declaration of the JAXB type for a string.
+ */
+@interface NSString (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a string.
+ */
+@implementation NSString (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSString that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing string cannot be modified."];
+}
+
+/**
+ * Write the NSString to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlTextWriterWriteString(writer, BAD_CAST [self UTF8String]);
+}
+
+@end /*NSString (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for a big number.
+ */
+@interface NSNumber (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a big number.
+ */
+@implementation NSNumber (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSNumber that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSNumber valueFromString: [NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)]];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing number cannot be modified."];
+}
+
+/**
+ * Write the NSNumber to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlTextWriterWriteString(writer, BAD_CAST [[self description] UTF8String]);
+}
+
+@end /*NSNumber (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for a big number.
+ */
+@interface NSDecimalNumber (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a big number.
+ */
+@implementation NSDecimalNumber (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSDecimalNumber that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSDecimalNumber decimalNumberWithString: [NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)]];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing decimal number cannot be modified."];
+}
+
+/**
+ * Write the NSDecimalNumber to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlTextWriterWriteString(writer, BAD_CAST [[self description] UTF8String]);
+}
+
+@end /*NSDecimalNumber (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for a url.
+ */
+@interface NSURL (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a url.
+ */
+@implementation NSURL (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSURL that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSURL URLWithString: [NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)]];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing url cannot be modified."];
+}
+
+/**
+ * Write the NSURL to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlTextWriterWriteString(writer, BAD_CAST [[self absoluteString] UTF8String]);
+}
+
+@end /*NSURL (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for binary data.
+ */
+@interface NSData (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a binary data.
+ */
+@implementation NSData (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSData that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  xmlChar *base64data = xmlTextReaderReadEntireNodeValue(reader);
+  int len;
+  unsigned char *data = _decode_base64(base64data, &len);
+  NSData *wrappedData = [NSData dataWithBytesNoCopy: data length: len];
+  free(base64data);
+  return wrappedData;
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing NSData cannot be modified."];
+}
+
+/**
+ * Write the NSData to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  xmlChar *out = _encode_base64((unsigned char *)[self bytes], [self length]);
+  xmlTextWriterWriteString(writer, out);
+  free(out);
+}
+
+@end /*NSData (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for a big number.
+ */
+@interface NSDate (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a big number.
+ */
+@implementation NSDate (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSDate that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [NSCalendarDate readXMLType: reader];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing date cannot be modified."];
+}
+
+/**
+ * Write the NSDate to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
+  xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
+  timevalue[19] = timevalue[20];
+  timevalue[20] = timevalue[21];
+  timevalue[21] = timevalue[22];
+  timevalue[22] = ':';
+  xmlTextWriterWriteString(writer, timevalue);
+  [formatter release];
+}
+@end /*NSDate (JAXBType)*/
+
+
+
+/**
+ * Declaration of the JAXB type for a big number.
+ */
+@interface NSCalendarDate (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a big number.
+ */
+@implementation NSCalendarDate (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The NSCalendarDate that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
+  int len = xmlStrlen(timevalue);
+  NSString *calendarFormat;
+  NSCalendarDate *date;
+
+  if ((len == 25) && (timevalue[22] == ':')) {
+    //assume format yyyy-mm-ddThh:MM:ss+oo:oo
+    //convert to yyyy-mm-ddThh:MM:ss +oooo
+    timevalue[22] = timevalue[21];
+    timevalue[21] = timevalue[20];
+    timevalue[20] = timevalue[19];
+    timevalue[19] = ' ';
+    calendarFormat = @"%Y-%m-%dT%H:%M:%S %z";
+  }
+  else if ((len == 19) && (timevalue[11] == 'T')) {
+    //assume format yyyy-mm-ddThh:MM:ss
+    calendarFormat = @"%Y-%m-%dT%H:%M:%S";
+  }
+  else if ((len == 16) && (timevalue[13] == ':')) {
+    //assume format yyyy-mm-dd+oo:oo
+    //convert to yyyy-mm-dd +oooo
+    timevalue[13] = timevalue[12];
+    timevalue[12] = timevalue[11];
+    timevalue[11] = timevalue[10];
+    timevalue[10] = ' ';
+    calendarFormat = @"%Y-%m-%d %z";
+  }
+  else if ((len == 14) && (timevalue[11] == ':')) {
+    //assume format hh:MM:ss+oo:oo
+    //convert to hh:MM:ss +oooo
+    timevalue[11] = timevalue[10];
+    timevalue[10] = timevalue[9];
+    timevalue[9] = timevalue[8];
+    timevalue[8] = ' ';
+    calendarFormat = @"%H:%M:%S %z";
+  }
+  else if (len == 10) {
+    //assume format yyyy-mm-dd
+    calendarFormat = @"%Y-%m-%d";
+  }
+  else if (len == 8) {
+    //assume format hh:MM:ss
+    calendarFormat = @"%H:%M:%S";
+  }
+  else {
+    free(timevalue);
+    [NSException raise: @"XMLReadError"
+                 format: @"Unable to parse date %s", timevalue];
+  }
+
+  date = [NSCalendarDate dateWithString: [NSString stringWithUTF8String: (const char *) timevalue] calendarFormat: calendarFormat];
+  free(timevalue);
+  return date;
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [NSException raise: @"XMLReadError"
+               format: @"An existing date cannot be modified."];
+}
+
+/**
+ * Write the NSDate to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  [super writeXMLType: writer];
+}
+
+@end /*NSCalendarDate (JAXBType)*/
+#endif /* ENUNCIATE_OBJC_CLASSES */
+
+#ifndef ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
+#define ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
+
+/*******************boolean************************************/
 
 /**
  * Read a boolean value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to 1 if "true" was read. pointer to 0 otherwise.
+ * @return YES if "true" was read. NO otherwise.
  */
-static int *xmlTextReaderReadXsBooleanType(xmlTextReaderPtr reader) {
+static BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
-  int *value = malloc(sizeof(int));
-  *value = (xmlStrcmp(BAD_CAST "true", nodeValue) == 0) ? 1 : 0;
+  BOOL *value = malloc(sizeof(BOOL));
+  *value = (xmlStrcmp(BAD_CAST "true", nodeValue) == 0) ? YES : NO;
   free(nodeValue);
   return value;
 }
@@ -260,7 +1268,7 @@ static int *xmlTextReaderReadXsBooleanType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsBooleanType(xmlTextWriterPtr writer, int *value) {
+static int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value) {
   if (*value) {
     return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
@@ -269,24 +1277,15 @@ static int xmlTextWriterWriteXsBooleanType(xmlTextWriterPtr writer, int *value) 
   }
 }
 
-/**
- * Frees a boolean type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsBooleanType(int *value) {
-  //no-op
-}
-
-/*******************xs:byte************************************/
+/*******************byte************************************/
 
 /**
  * Read a byte value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to the byte.
+ * @return the byte.
  */
-static unsigned char *xmlTextReaderReadXsByteType(xmlTextReaderPtr reader) {
+static unsigned char *xmlTextReaderReadByteType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   unsigned char *value = malloc(sizeof(unsigned char));
   *value = (unsigned char) atoi((char *) nodeValue);
@@ -301,28 +1300,19 @@ static unsigned char *xmlTextReaderReadXsByteType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsByteType(xmlTextWriterPtr writer, unsigned char *value) {
+static int xmlTextWriterWriteByteType(xmlTextWriterPtr writer, unsigned char *value) {
   return xmlTextWriterWriteFormatString(writer, "%i", *value);
 }
 
-/**
- * Frees a byte type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsByteType(unsigned char *value) {
-  //no-op
-}
-
-/*******************xs:double************************************/
+/*******************double************************************/
 
 /**
  * Read a double value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to the double.
+ * @return the double.
  */
-static double *xmlTextReaderReadXsDoubleType(xmlTextReaderPtr reader) {
+static double *xmlTextReaderReadDoubleType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   double *value = malloc(sizeof(double));
   *value = atof((char *) nodeValue);
@@ -337,28 +1327,19 @@ static double *xmlTextReaderReadXsDoubleType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsDoubleType(xmlTextWriterPtr writer, double *value) {
+static int xmlTextWriterWriteDoubleType(xmlTextWriterPtr writer, double *value) {
   return xmlTextWriterWriteFormatString(writer, "%f", *value);
 }
 
-/**
- * Frees a double type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsDoubleType(double *value) {
-  //no-op
-}
-
-/*******************xs:float************************************/
+/*******************float************************************/
 
 /**
  * Read a float value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to the float.
+ * @return the float.
  */
-static float *xmlTextReaderReadXsFloatType(xmlTextReaderPtr reader) {
+static float *xmlTextReaderReadFloatType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   float *value = malloc(sizeof(float));
   *value = atof((char *)nodeValue);
@@ -373,29 +1354,20 @@ static float *xmlTextReaderReadXsFloatType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsFloatType(xmlTextWriterPtr writer, float *value) {
+static int xmlTextWriterWriteFloatType(xmlTextWriterPtr writer, float *value) {
   return xmlTextWriterWriteFormatString(writer, "%f", *value);
 }
 
-/**
- * Frees a float type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsFloatType(float *value) {
-  //no-op
-}
-
-/*******************xs:int************************************/
+/*******************int************************************/
 
 /**
  * Read a int value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
  * @param value The value to be written.
- * @return pointer to the int.
+ * @return the int.
  */
-static int *xmlTextReaderReadXsIntType(xmlTextReaderPtr reader) {
+static int *xmlTextReaderReadIntType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
   *value = atoi((char *)nodeValue);
@@ -410,28 +1382,19 @@ static int *xmlTextReaderReadXsIntType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsIntType(xmlTextWriterPtr writer, int *value) {
+static int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value) {
   return xmlTextWriterWriteFormatString(writer, "%i", *value);
 }
 
-/**
- * Frees a int type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsIntType(int *value) {
-  //no-op
-}
-
-/*******************xs:long************************************/
+/*******************long************************************/
 
 /**
  * Read a long value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to the long.
+ * @return the long.
  */
-static long *xmlTextReaderReadXsLongType(xmlTextReaderPtr reader) {
+static long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   long *value = malloc(sizeof(long));
   *value = atol((char *)nodeValue);
@@ -446,31 +1409,23 @@ static long *xmlTextReaderReadXsLongType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsLongType(xmlTextWriterPtr writer, long *value) {
+static int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value) {
   return xmlTextWriterWriteFormatString(writer, "%l", *value);
 }
 
-/**
- * Frees a long type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsLongType(long *value) {
-  //no-op
-}
-
-/*******************xs:short************************************/
+/*******************short************************************/
 
 /**
  * Read a short value from the reader.
  *
  * @param reader The reader (pointing at a node with a value).
- * @return pointer to the short.
+ * @return the short.
  */
-static short *xmlTextReaderReadXsShortType(xmlTextReaderPtr reader) {
+static short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   short *value = malloc(sizeof(short));
   *value = atoi((char *)nodeValue);
+  free(nodeValue);
   return value;
 }
 
@@ -481,887 +1436,11 @@ static short *xmlTextReaderReadXsShortType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteXsShortType(xmlTextWriterPtr writer, short *value) {
+static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
   return xmlTextWriterWriteFormatString(writer, "%h", *value);
 }
 
-/**
- * Frees a short type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsShortType(short *value) {
-  //no-op
-}
-
-/*******************xs:string************************************/
-
-/**
- * Read a string value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the string.
- */
-static xmlChar *xmlTextReaderReadXsStringType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadEntireNodeValue(reader);
-}
-
-/**
- * Write a string value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsStringType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a string type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsStringType(xmlChar *value) {
-  //no-op
-}
-
-/*******************xs:ID************************************/
-
-/**
- * Read a ID value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the ID.
- */
-static xmlChar *xmlTextReaderReadXsIDType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a ID value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsIDType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a ID type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsIDType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:IDREF************************************/
-
-/**
- * Read a IDREF value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the IDREF.
- */
-static xmlChar *xmlTextReaderReadXsIDREFType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a IDREF value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsIDREFType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a IDREF type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsIDREFType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:integer************************************/
-
-/**
- * Read a (big) integer value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the integer.
- */
-static xmlChar *xmlTextReaderReadXsIntegerType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a integer value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsIntegerType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a integer type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsIntegerType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:decimal************************************/
-
-/**
- * Read a (big) decimal value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the decimal.
- */
-static xmlChar *xmlTextReaderReadXsDecimalType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a decimal value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsDecimalType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a decimal type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsDecimalType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:duration************************************/
-
-/**
- * Read a duration value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the duration.
- */
-static xmlChar *xmlTextReaderReadXsDurationType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a duration value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsDurationType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a duration type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsDurationType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:QName************************************/
-
-/**
- * Read a QName value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the QName.
- */
-static xmlChar *xmlTextReaderReadXsQNameType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a QName value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsQNameType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a QName type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsQNameType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:anyURI************************************/
-
-/**
- * Read a anyURI value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the anyURI.
- */
-static xmlChar *xmlTextReaderReadXsAnyURIType(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsStringType(reader);
-}
-
-/**
- * Write a anyURI value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsAnyURIType(xmlTextWriterPtr writer, xmlChar *value) {
-  return xmlTextWriterWriteString(writer, value);
-}
-
-/**
- * Frees a anyURI type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsAnyURIType(xmlChar *value) {
-  freeXsStringType(value);
-}
-
-/*******************xs:dateTime************************************/
-
-/**
- * Read a dateTime value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the dateTime.
- */
-static struct tm *xmlTextReaderReadXsDateTimeType(xmlTextReaderPtr reader) {
-  struct tm * time = calloc(1, sizeof(struct tm));
-  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
-  char token[len];
-
-  //date time format: yyyy-mm-ddThh:MM:ss+oo:oo
-  //go to first '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_year = atoi(token) - 1900;
-  if (token_index > 0) {
-    success++; //assume 'year' was successfully read.
-    index++;
-  }
-
-  //go to next '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_mon = atoi(token) - 1;
-  if (token_index > 0) {
-    success++; //assume 'month' was successfully read.
-    index++;
-  }
-
-  //go to 'T' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != 'T') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_mday = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'day' was successfully read.
-    index++;
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_hour = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'hour' was successfully read.
-    index++;
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'minutes' was successfully read.
-    index++;
-  }
-
-  //go to '+' or '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_sec = atof(token);
-  if (token_index > 0) {
-    success++; //assume 'seconds' was successfully read.
-    if (timevalue[index] == '+') {
-      index++;
-    }
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_hours = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset hours was successfully read.
-    index++;
-  }
-
-  //go to end.
-  token_index = 0;
-  while (index < len) {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset minutes was successfully read.
-    index++;
-  }
-  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-
-  free(timevalue);
-  return time;
-}
-
-/**
- * Write a dateTime value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsDateTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02iT%02i:%02i:%02i.000%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
-}
-
-/**
- * Frees a dateTime type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsDateTimeType(struct tm *value) {
-  //no-op
-}
-
-/*******************xs:time************************************/
-
-/**
- * Read a time value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the time.
- */
-static struct tm *xmlTextReaderReadXsTimeType(xmlTextReaderPtr reader) {
-  struct tm * time = calloc(1, sizeof(struct tm));
-  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
-  char token[len];
-
-  //date time format: hh:MM:ss+oo:oo
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_hour = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'hour' was successfully read.
-    index++;
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume 'minutes' was successfully read.
-    index++;
-  }
-
-  //go to '+' or '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_sec = atof(token);
-  if (token_index > 0) {
-    success++; //assume 'seconds' was successfully read.
-    if (timevalue[index] == '+') {
-      index++;
-    }
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_hours = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset hours was successfully read.
-    index++;
-  }
-
-  //go to end.
-  token_index = 0;
-  while (index < len) {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset minutes was successfully read.
-    index++;
-  }
-  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-
-  free(timevalue);
-  return time;
-}
-
-/**
- * Write a time value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsTimeType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%02i:%02i:%02i.000%+03i:%02i", value->tm_hour, value->tm_min, value->tm_sec, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
-}
-
-/**
- * Frees a time type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsTimeType(struct tm *value) {
-  //no-op
-}
-
-/*******************xs:date************************************/
-
-/**
- * Read a date value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the date.
- */
-static struct tm *xmlTextReaderReadXsDateType(xmlTextReaderPtr reader) {
-  struct tm * time = calloc(1, sizeof(struct tm));
-  xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int success = 0, index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hours = 0, offset_min = 0;
-  char token[len];
-
-  //date time format: yyyy-mm-dd+oo:oo
-  //go to first '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_year = atoi(token) - 1900;
-  if (token_index > 0) {
-    success++; //assume 'year' was successfully read.
-    index++;
-  }
-
-  //go to next '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_mon = atoi(token) - 1;
-  if (token_index > 0) {
-    success++; //assume 'month' was successfully read.
-    index++;
-  }
-
-  //go to '+' or '-' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != '+' && timevalue[index] != '-') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  time->tm_sec = atof(token);
-  if (token_index > 0) {
-    success++; //assume 'seconds' was successfully read.
-    if (timevalue[index] == '+') {
-      index++;
-    }
-  }
-
-  //go to ':' character.
-  token_index = 0;
-  while (index < len && timevalue[index] != ':') {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_hours = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset hours was successfully read.
-    index++;
-  }
-
-  //go to end.
-  token_index = 0;
-  while (index < len) {
-    token[token_index++] = timevalue[index++];
-  }
-  token[token_index] = '\n';
-  offset_min = atoi(token);
-  if (token_index > 0) {
-    success++; //assume gmt offset minutes was successfully read.
-    index++;
-  }
-  time->tm_gmtoff = ((offset_hours * 60) + offset_min) * 60;
-
-  free(timevalue);
-  return time;
-}
-
-/**
- * Write a date value to the writer.
- *
- * @param writer The writer.
- * @param value The value to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsDateType(xmlTextWriterPtr writer, struct tm *value) {
-  return xmlTextWriterWriteFormatString(writer, "%04i-%02i-%02i%+03i:%02i", value->tm_year + 1900, value->tm_mon + 1, value->tm_mday, (int) (value->tm_gmtoff / 3600), (int) ((value->tm_gmtoff / 60) % 60));
-}
-
-/**
- * Frees a date type from memory.
- *
- * @param value The value to free.
- */
-static void freeXsDateType(struct tm *value) {
-  //no-op
-}
-
-/*******************xs:anyType************************************/
-
-/**
- * Frees a anyType type from memory.
- *
- * @param node The node to free.
- */
-static void freeXsAnyTypeType(struct xmlBasicNode *node) {
-  if (node->attributes != NULL) {
-    freeXsAnyTypeType(node->attributes);
-  }
-  if (node->value != NULL) {
-    free(node->value);
-  }
-  if (node->child_elements != NULL) {
-    freeXsAnyTypeType(node->child_elements);
-  }
-  if (node->name != NULL) {
-    free(node->name);
-  }
-  if (node->prefix != NULL) {
-    free(node->prefix);
-  }
-  if (node->ns != NULL) {
-    free(node->ns);
-  }
-  if (node->sibling != NULL) {
-    freeXsAnyTypeType(node->sibling);
-    free(node->sibling);
-  }
-}
-
-/**
- * Read a anyType value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the anyType., or NULL if error.
- */
-static struct xmlBasicNode *xmlTextReaderReadXsAnyTypeType(xmlTextReaderPtr reader) {
-  struct xmlBasicNode *child, *next, *node = calloc(1, sizeof(struct xmlBasicNode));
-  int status, depth = xmlTextReaderDepth(reader);
-  const xmlChar *text;
-
-  node->name = xmlTextReaderLocalName(reader);
-  node->ns = xmlTextReaderNamespaceUri(reader);
-  node->prefix = xmlTextReaderPrefix(reader);
-
-  if (xmlTextReaderHasAttributes(reader)) {
-    child = NULL;
-    while (xmlTextReaderMoveToNextAttribute(reader)) {
-      next = calloc(1, sizeof(struct xmlBasicNode));
-      if (child == NULL) {
-        node->attributes = next;
-      }
-      else {
-        child->sibling = next;
-      }
-      child = next;
-      child->name = xmlTextReaderLocalName(reader);
-      child->ns = xmlTextReaderNamespaceUri(reader);
-      child->prefix = xmlTextReaderPrefix(reader);
-      child->value = xmlTextReaderValue(reader);
-    }
-
-    status = xmlTextReaderMoveToElement(reader);
-    if (status < 1) {
-      //panic: unable to return to the element node.
-      freeXsAnyTypeType(node);
-      free(node);
-      return NULL;
-    }
-  }
-
-  if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    status = xmlTextReaderRead(reader);
-    while (status == 1 && xmlTextReaderDepth(reader) > depth) {
-      switch (xmlTextReaderNodeType(reader)) {
-        case XML_READER_TYPE_ELEMENT:
-          child = xmlTextReaderReadXsAnyTypeType(reader);
-          if (child == NULL) {
-            //panic: xml read error
-            freeXsAnyTypeType(node);
-            free(node);
-            return NULL;
-          }
-
-          next = node->child_elements;
-          if (next == NULL) {
-            node->child_elements = child;
-          }
-          else {
-            while (1) {
-              if (next->sibling == NULL) {
-                next->sibling = child;
-                break;
-              }
-              next = next->sibling;
-            }
-          }
-
-          break;
-        case XML_READER_TYPE_TEXT:
-        case XML_READER_TYPE_CDATA:
-          text = xmlTextReaderConstValue(reader);
-          node->value = xmlStrncat(node->value, text, xmlStrlen(text));
-          break;
-        default:
-          //skip anything else.
-          break;
-      }
-      
-      status = xmlTextReaderRead(reader);
-    }
-
-    if (status < 1) {
-      //panic: xml read error
-      freeXsAnyTypeType(node);
-      free(node);
-      return NULL;
-    }
-  }
-
-  return node;
-}
-
-/**
- * Write a anyType value to the writer.
- *
- * @param writer The writer.
- * @param node The node to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsAnyTypeType(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
-  int status;
-  int totalBytes = 0;
-  struct xmlBasicNode *next;
-
-  status = xmlTextWriterStartElementNS(writer, node->prefix, node->name, node->ns);
-  if (status < 0) {
-    return status;
-  }
-  totalBytes += status;
-
-  next = node->attributes;
-  while (next != NULL) {
-    status = xmlTextWriterWriteAttributeNS(writer, next->prefix, next->name, next->ns, next->value);
-    if (status < 0) {
-      return status;
-    }
-    totalBytes += status;
-    next = next->sibling;
-  }
-
-  if (node->value != NULL) {
-    status = xmlTextWriterWriteString(writer, node->value);
-    if (status < 0) {
-      //panic: xml write error
-      return status;
-    }
-    totalBytes += status;
-  }
-
-  next = node->child_elements;
-  while (next != NULL) {
-    status = xmlTextWriterWriteXsAnyTypeType(writer, next);
-    if (status < 0) {
-      return status;
-    }
-    totalBytes += status;
-    next = next->sibling;
-  }
-
-  status = xmlTextWriterEndElement(writer);
-  if (status < 0) {
-    return status;
-  }
-  totalBytes += status;
-
-  return totalBytes;
-}
-
-/**
- * Read a anyType element value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the anyType., or NULL if error.
- */
-static struct xmlBasicNode *xmlTextReaderReadXsAnyTypeElement(xmlTextReaderPtr reader) {
-  return xmlTextReaderReadXsAnyTypeType(reader);
-}
-
-/**
- * Write a anyType element value to the writer.
- *
- * @param writer The writer.
- * @param node The node to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsAnyTypeElement(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
-  return xmlTextWriterWriteXsAnyTypeType(writer, node);
-}
-
-/**
- * Write a anyType element value to the writer.
- *
- * @param writer The writer.
- * @param node The node to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsAnyTypeElementNS(xmlTextWriterPtr writer, struct xmlBasicNode *node, int writeNamespaces) {
-  return xmlTextWriterWriteXsAnyTypeType(writer, node);
-}
-
-/**
- * Free a anyType element value.
- *
- * @param node The node.
- */
-static void freeXsAnyTypeElement(struct xmlBasicNode *node) {
-  freeXsAnyTypeType(node);
-}
-
-/*******************xs:anySimpleType************************************/
-
-/**
- * Frees a anyType type from memory.
- *
- * @param node The node to free.
- */
-static void freeXsAnySimpleTypeType(struct xmlBasicNode *node) {
-  freeXsAnyTypeType(node);
-}
-
-/**
- * Read a anyType value from the reader.
- *
- * @param reader The reader (pointing at a node with a value).
- * @return pointer to the anyType., or NULL if error.
- */
-static struct xmlBasicNode *xmlTextReaderReadXsAnySimpleTypeType(xmlTextReaderPtr reader) {
-  struct xmlBasicNode *node = calloc(1, sizeof(struct xmlBasicNode));
-
-  node->name = xmlTextReaderLocalName(reader);
-  node->ns = xmlTextReaderNamespaceUri(reader);
-  node->prefix = xmlTextReaderPrefix(reader);
-  node->value = xmlTextReaderReadEntireNodeValue(reader);
-
-  return node;
-}
-
-/**
- * Write a anyType value to the writer.
- *
- * @param writer The writer.
- * @param node The node to be written.
- * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
- */
-static int xmlTextWriterWriteXsAnySimpleTypeType(xmlTextWriterPtr writer, struct xmlBasicNode *node) {
-  if (node->value != NULL) {
-    return xmlTextWriterWriteXsStringType(writer, node->value);
-  }
-
-  return 0;
-}
-
-#endif /* BASIC_XML_OBJC_FUNCTIONS_XS */
-
-
-
-
+#endif /* ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS */
 
 
 
@@ -1408,31 +1487,6 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   return not_set;
 }
 
-@protocol JAXBType
-  + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader;
-  - (void) writeXMLType: (xmlTextWriterPtr) writer;
-@end
-
-@protocol JAXBElement
-@end
-
-@interface NSString (JAXBType) <JAXBType>
-@end
-
-@implementation NSString (JAXBType)
-
-+ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
-{
-  return [NSString stringWithUTF8String: (const char *) xmlTextReaderReadXsStringType(reader)];
-}
-
-- (void) writeXMLType: (xmlTextWriterPtr) writer
-{
-  xmlTextWriterWriteXsStringType(writer, BAD_CAST [self UTF8String]);
-}
-
-@end
-
 @interface Person : NSObject <JAXBType>
 {
   @private
@@ -1478,6 +1532,8 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 - (void) setId: (NSString*) newId
 {
+  [newId retain];
+  [_id release];
   _id = newId;
 }
 
@@ -1508,84 +1564,185 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 - (void) setEvents: (NSArray*) newEvents
 {
+  [newEvents retain];
+  [_events release];
   _events = newEvents;
 }
 
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
   Person *_person = [Person new];
-  id __child;
-  NSMutableArray *__children;
-  int status;
-
-  if (xmlTextReaderHasAttributes(reader)) {
-    while (xmlTextReaderMoveToNextAttribute(reader)) {
-      if ((xmlStrcmp(BAD_CAST "gender", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        [_person setGender: xmlTextReaderReadGender(xmlTextReaderConstValue(reader))];
-        continue;
-      }
-      if ((xmlStrcmp(BAD_CAST "id", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        [_person setId: (NSString*) [NSString readXMLType: reader]];
-        continue;
-      }
-      if ((xmlStrcmp(BAD_CAST "cool", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
-        [_person setCool: (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) ? YES : NO];
-        continue;
-      }
-    }
-
-    status = xmlTextReaderMoveToElement(reader);
-    if (!status) {
-      //panic: unable to return to the element node.
-      [_person dealloc];
-      [NSException raise: @"XMLReadError"
-                   format: @"Error moving to element of type 'person'."];
-    }
+  NS_DURING
+  {
+    [_person initWithReader: reader];
   }
-
-  if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-
-    if (!status) {
-      //XML read error
-      [_person dealloc];
-      [NSException raise: @"XMLReadError"
-                   format: @"Error reading 'person' type."];
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      __children = [NSMutableArray new];
-      while (status) {
-
-        __child = [Event readXMLType: reader];
-        [__children addObject: __child];
-        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-        if (!status) {
-          //XML read error
-          [_person dealloc];
-          [NSException raise: @"XMLReadError"
-                       format: @"Error reading 'person' type."];
-        }
-
-        status = xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-          && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
-          && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0;
-      }
-      [_person setEvents: __children];
-    }
+  NS_HANDLER
+  {
+    [_person dealloc];
+    _person = nil;
+    [localException raise];
   }
+  NS_ENDHANDLER
 
+  [_person autorelease];
   return _person;
 }
 
+//documentation inherited.
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [super initWithReader: reader];
+}
+
+//documentation inherited.
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
-  int rc;
-  id __item;
-  NSEnumerator *__enumerator;
+  [super writeXMLType:writer];
+}
 
+- (void) dealloc
+{
+  [self setId: nil];
+  [self setEvents: nil];
+  [super dealloc];
+}
+
++ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader {
+  return nil;
+}
+
+- (void) writeXMLElement: (xmlTextWriterPtr) writer
+{
+  [self writeXMLElement: writer writeNamespaces: YES];
+}
+
+/**
+ * Write this instance of a JAXB element to a writer.
+ *
+ * @param writer The writer.
+ * @param writeNs Whether to write the namespaces for this element to the xml writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
+{
+  int rc;
+  rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "person", NULL);
+  if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing start element 'person'."];
+      return;
+  }
+
+  if (writeNs) {
+    rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:w", BAD_CAST "http://whereverelse.com");
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'xmlns:w' on 'person'."];
+        return;
+    }
+
+    rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:p", BAD_CAST "http://person.com");
+    if (rc < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing attribute 'xmlns:p' on 'person'."];
+        return;
+    }
+  }
+
+  [self writeXMLType: writer];
+  rc = xmlTextWriterEndElement(writer);
+  if (rc < 0) {
+      [NSException raise: @"XMLWriteError"
+                   format: @"Error writing start element 'person'."];
+      return;
+  }
+}
+
+@end /*implementation Person*/
+
+/**
+ * Internal, private interface for JAXB reading and writing.
+ */
+@interface Person (JAXB) <JAXBReading, JAXBWriting>
+
+@end /*interface Person (JAXB)*/
+
+/**
+ * Internal, private implementation for JAXB reading and writing.
+ */
+@implementation Person (JAXB)
+
+//documentation inherited.
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader
+{
+
+  if ((xmlStrcmp(BAD_CAST "gender", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+    [self setGender: xmlTextReaderReadGender(xmlTextReaderConstValue(reader))];
+    return YES;
+  }
+
+  if ((xmlStrcmp(BAD_CAST "id", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+    [self setId: (NSString*) [NSString readXMLType: reader]];
+    return YES;
+  }
+  
+  if ((xmlStrcmp(BAD_CAST "cool", xmlTextReaderConstLocalName(reader)) == 0) && (xmlStrcmp(BAD_CAST "http://whereverelse.com", xmlTextReaderConstNamespaceUri(reader)) == 0)) {
+    [self setCool: (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) ? YES : NO];
+    return YES;
+  }
+
+  return NO;
+}
+
+//documentation inherited.
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader
+{
+  return [super readJAXBValue: reader];
+}
+
+//documentation inherited.
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  id __child;
+  if ([super readJAXBValue: reader]) {
+    return YES;
+  }
+  
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+    && xmlStrcmp(BAD_CAST "event", xmlTextReaderConstLocalName(reader)) == 0
+    && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+    __child = [Event readXMLType: reader];
+    if ([self events]) {
+      [self setEvents: [[self events] arrayByAddingObject: __child]];
+    }
+    else {
+      [self setEvents: [NSArray arrayWithObject: __child]];
+    }
+
+    return YES;
+  }
+
+  return NO;
+}
+
+//documentation inherited.
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader
+{
+  [super readUnknownJAXBAttribute: reader];
+}
+
+//documentation inherited.
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return [super readUnknownJAXBChildElement: reader];
+}
+
+//documentation inherited.
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer
+{
+  int rc;
+
+  [super writeJAXBAttributes: writer];
   //write the attributes of start element.
   if (_id != NULL) {
     rc = xmlTextWriterWriteAttributeNS(writer, BAD_CAST "w", BAD_CAST "id", NULL, BAD_CAST [_id UTF8String]);
@@ -1622,22 +1779,26 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
                    format: @"Error writing attribute 'cool' on 'person'."];
       return;
   }
+}
 
-  //if we're on the start element, write the xmlns prefixes
-  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:w", BAD_CAST "http://whereverelse.com");
-  if (rc < 0) {
-      [NSException raise: @"XMLWriteError"
-                   format: @"Error writing attribute 'xmlns:w' on 'person'."];
-      return;
-  }
+//documentation inherited.
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer
+{
+  [super writeJAXBValue: writer];
+}
 
-  rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:p", BAD_CAST "http://person.com");
-  if (rc < 0) {
-      [NSException raise: @"XMLWriteError"
-                   format: @"Error writing attribute 'xmlns:p' on 'person'."];
-      return;
-  }
+/**
+ * Method for writing the child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer
+{
+  int rc;
+  id __item;
+  NSEnumerator *__enumerator;
 
+  [super writeJAXBChildElements: writer];
   if (_events != NULL) {
     __enumerator = [_events objectEnumerator];
 
@@ -1660,8 +1821,8 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
     }
   }
 }
+@end /*implementation Person (JAXB)*/
 
-@end
 
 @implementation Event
 
@@ -1670,9 +1831,11 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   return _description;
 }
 
-- (void) setDescription: (NSString*) newDescription
+- (void) setDescription: (NSString*) description
 {
-  _description = newDescription;
+  [description retain];
+  [_description release];
+  _description = description;
 }
 
 - (NSString*) place
@@ -1682,6 +1845,8 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 - (void) setPlace: (NSString*) newPlace
 {
+  [newPlace retain];
+  [_place release];
   _place = newPlace;
 }
 
@@ -1692,69 +1857,172 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 - (void) setDate: (NSString*) newDate
 {
+  [newDate retain];
+  [_date release];
   _date = newDate;
 }
 
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
   Event *_event = [Event new];
-
-  if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    int status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-
-    if (!status) {
-      //XML read error
-      [NSException raise: @"XMLReadError"
-                   format: @"Error reading event type."];
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "description", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      [_event setDescription: (NSString*)[NSString readXMLType: reader]];
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
-
-    if (!status) {
-      //XML read error
-      [NSException raise: @"XMLReadError"
-                   format: @"Error reading event type."];
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "place", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      [_event setPlace: (NSString*)[NSString readXMLType: reader]];
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
-
-    if (!status) {
-      [NSException raise: @"XMLReadError"
-                   format: @"Error reading event type."];
-    }
-    else if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
-      && xmlStrcmp(BAD_CAST "date", xmlTextReaderConstLocalName(reader)) == 0
-      && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
-
-      [_event setDate: (NSString*)[NSString readXMLType: reader]];
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-    }
+  NS_DURING
+  {
+    [_event initWithReader: reader];
   }
+  NS_HANDLER
+  {
+     [_event dealloc];
+     _event = nil;
+     [localException raise];
+  }
+  NS_ENDHANDLER
 
+  [_event autorelease];
   return _event;
+}
 
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  [super initWithReader: reader];
 }
 
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
+  [super writeXMLType: writer];
+}
+
+- (void) dealloc
+{
+  [self setDescription: nil];
+  [self setPlace: nil];
+  [self setDate: nil];
+  [super dealloc];
+}
+@end /*implementation Event*/
+
+/**
+ * Internal, private interface for JAXB reading and writing.
+ */
+@interface Event (JAXB) <JAXBReading, JAXBWriting>
+
+@end /*interface Event (JAXB)*/
+
+/**
+ * Internal, private implementation for JAXB reading and writing.
+ */
+@implementation Event (JAXB)
+
+//documentation inherited.
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader
+{
+  return [super readJAXBAttribute: reader];
+}
+
+//documentation inherited.
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader
+{
+  return [super readJAXBValue: reader];
+}
+
+//documentation inherited.
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  if ([super readJAXBChildElement: reader]) {
+    return YES;
+  }
+
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+    && xmlStrcmp(BAD_CAST "description", xmlTextReaderConstLocalName(reader)) == 0
+    && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      [self setDescription: (NSString*)[NSString readXMLType: reader]];
+    }
+    else {
+      [self setDescription: @""];
+    }
+    return YES;
+  }
+
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+    && xmlStrcmp(BAD_CAST "place", xmlTextReaderConstLocalName(reader)) == 0
+    && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      [self setPlace: (NSString*)[NSString readXMLType: reader]];
+    }
+    else {
+      [self setPlace: @""];
+    }
+    return YES;
+  }
+
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ELEMENT
+    && xmlStrcmp(BAD_CAST "date", xmlTextReaderConstLocalName(reader)) == 0
+    && xmlStrcmp(BAD_CAST "http://person.com", xmlTextReaderConstNamespaceUri(reader)) == 0) {
+
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      [self setDate: (NSString*)[NSString readXMLType: reader]];
+    }
+    else {
+      [self setDate: @""];
+    }
+    return YES;
+  }
+
+  return NO;
+}
+
+//documentation inherited.
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader
+{
+  [super readUnknownJAXBAttribute: reader];
+}
+
+//documentation inherited.
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return [super readUnknownJAXBChildElement: reader];
+}
+
+//documentation inherited.
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer
+{
+  [super writeJAXBAttributes: writer];
+}
+
+/**
+ * Method for writing the element value.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer
+{
+  [super writeJAXBValue: writer];
+}
+
+/**
+ * Method for writing the child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer
+{
   int rc;
 
-  if ( _description != NULL ) {
+  [super writeJAXBChildElements: writer];
+
+  if ( _description ) {
     rc = xmlTextWriterWriteElementNS(writer, BAD_CAST "p", BAD_CAST "description", NULL, BAD_CAST [_description UTF8String]);
     if (rc < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing element 'description' on 'event'."];
-      return;
     }
   }
 
@@ -1763,7 +2031,6 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
     if (rc < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing element 'place' on 'event'."];
-      return;
     }
   }
 
@@ -1772,15 +2039,15 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
     if (rc < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing element 'date' on 'event'."];
-      return;
     }
   }
-
 }
-@end
+
+@end /*implementation Event (JAXB)*/
 
 
 int main() {
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
   Person *person = [Person new];
   Person *readperson;
   NSString *pid = @"1234567890";
@@ -1797,6 +2064,8 @@ int main() {
   xmlTextReaderPtr reader;
   xmlTextWriterPtr writer;
   int rc;
+  JAXBBasicXMLNode *node;
+  NSCalendarDate *cal;
 
   [person setId: pid];
   [person setGender: f];
@@ -1818,12 +2087,72 @@ int main() {
   writer = xmlNewTextWriterMemory(buf, 0);
   rc = xmlTextWriterSetIndent(writer, 2);
   rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
-  rc = xmlTextWriterStartElementNS(writer, BAD_CAST "p", BAD_CAST "person", NULL);
-  [person writeXMLType: writer];
+  [person writeXMLElement: writer];
   rc = xmlTextWriterEndDocument(writer);
   xmlFreeTextWriter(writer);
-  printf("%s", buf->content);
+  printf("%s\n\n", buf->content);
   xmlBufferFree(buf);
 
+  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
+  if (reader == NULL) {
+    printf("BAD READER!");
+    return 1;
+  }
+  rc = xmlTextReaderRead(reader);
+  if (rc != 1) {
+    printf("BAD READ!");
+  }
+  person = (Person*) [Person readXMLType: reader];
+  buf = xmlBufferCreate();
+  writer = xmlNewTextWriterMemory(buf, 0);
+  rc = xmlTextWriterSetIndent(writer, 2);
+  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+  [person writeXMLElement: writer];
+  rc = xmlTextWriterEndDocument(writer);
+  xmlFreeTextWriter(writer);
+  printf("%s\n\n", buf->content);
+  xmlBufferFree(buf);
+
+  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
+  if (reader == NULL) {
+    printf("BAD READER!");
+    return 1;
+  }
+  rc = xmlTextReaderRead(reader);
+  if (rc != 1) {
+    printf("BAD READ!");
+  }
+  node = (JAXBBasicXMLNode*) [JAXBBasicXMLNode readXMLType: reader];
+  buf = xmlBufferCreate();
+  writer = xmlNewTextWriterMemory(buf, 0);
+  rc = xmlTextWriterSetIndent(writer, 2);
+  [node writeXMLType: writer];
+  xmlFreeTextWriter(writer);
+  printf("%s\n\n", buf->content);
+  xmlBufferFree(buf);
+
+  cal = [NSCalendarDate dateWithString:@"2009-08-31T16:47:03 -0700" calendarFormat:@"%Y-%m-%dT%H:%M:%S %z"];
+  printf("writing reading calendar: %s...\n", [[cal description] cString]);
+  buf = xmlBufferCreate();
+  writer = xmlNewTextWriterMemory(buf, 0);
+  rc = xmlTextWriterSetIndent(writer, 2);
+  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+  rc = xmlTextWriterStartElementNS(writer, NULL, BAD_CAST "date", NULL);
+  [cal writeXMLType: writer];
+  rc = xmlTextWriterEndDocument(writer);
+  printf("%s\n\n", buf->content);
+  reader = xmlReaderForMemory(buf->content, strlen(buf->content), NULL, NULL, 0);
+  if (reader == NULL) {
+    printf("BAD READER!");
+    return 1;
+  }
+  rc = xmlTextReaderRead(reader);
+  if (rc != 1) {
+    printf("BAD READ!");
+  }
+  cal = (NSCalendarDate*) [NSCalendarDate readXMLType: reader];
+  printf("read calendar: %s...\n", [[cal description] cString]);
+
+  [pool release];
   return 0;
 };
