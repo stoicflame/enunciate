@@ -44,7 +44,9 @@
 @protocol JAXBElement
 
 /**
- * Read the XML element from an XML reader.
+ * Read the XML element from an XML reader. It is assumed
+ * that the reader is pointing at the start element (be careful
+ * that it's not still pointing to the XML document).
  *
  * @param reader The reader.
  * @return An instance of the object defining the JAXB element.

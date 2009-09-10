@@ -151,8 +151,8 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File genDir = getGenerateDir();
     if (!enunciate.isUpToDateWithSources(genDir)) {
-      List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
       EnunciateFreemarkerModel model = getModel();
+      List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
       ExtensionDepthComparator comparator = new ExtensionDepthComparator();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {

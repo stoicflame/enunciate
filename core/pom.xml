@@ -88,7 +88,7 @@
 
     <!--used for generating example xml for documentation-->
     <dependency>
-      <groupId>jdom</groupId>
+      <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
     </dependency>
 

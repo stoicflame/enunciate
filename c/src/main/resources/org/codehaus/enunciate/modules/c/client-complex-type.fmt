@@ -545,6 +545,10 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
         [/#if]
         [#if choice.nillable!false]
           } //end "if not nil" clause
+          else if (xmlTextReaderIsEmptyElement(reader) == 0) {
+            //if it's not the empty element, skip it because it's nil.
+            xmlTextReaderSkipElement(reader);
+          }
         [/#if]
         status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
       }

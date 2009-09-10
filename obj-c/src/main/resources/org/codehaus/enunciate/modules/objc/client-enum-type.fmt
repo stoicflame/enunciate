@@ -57,12 +57,12 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
     }
   [/#list]
 #if DEBUG_ENUNCIATE
-    printf("Attempt to read enum value failed: %s doesn't match an enum value.\n", enumValue);
+    NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", enumValue);
 #endif
   }
 #if DEBUG_ENUNCIATE
   else {
-    printf("Attempt to read enum value failed: NULL value.\n");
+    NSLog(@"Attempt to read enum value failed: NULL value.");
   }
 #endif
 
@@ -87,7 +87,7 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
   }
 
 #if DEBUG_ENUNCIATE
-  printf("Unable to write enum value (no valid value found).\n");
+  NSLog(@"Unable to write enum value (no valid value found).");
 #endif
   return -1;
 }

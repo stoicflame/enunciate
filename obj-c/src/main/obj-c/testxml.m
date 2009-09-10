@@ -1440,6 +1440,29 @@ static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
   return xmlTextWriterWriteFormatString(writer, "%h", *value);
 }
 
+/*******************char************************************/
+
+/**
+ * Read a character value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the character.
+ */
+static xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader) {
+  return xmlTextReaderReadEntireNodeValue(reader);
+}
+
+/**
+ * Write a character value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteCharacterType(xmlTextWriterPtr writer, xmlChar *value) {
+  return xmlTextWriterWriteString(writer, value);
+}
+
 #endif /* ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS */
 
 
@@ -1530,11 +1553,11 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   return _id;
 }
 
-- (void) setId: (NSString*) newId
+- (void) setId: (NSString*) id
 {
-  [newId retain];
+  [id retain];
   [_id release];
-  _id = newId;
+  _id = id;
 }
 
 - (enum gender) gender
@@ -1703,7 +1726,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 - (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
 {
   id __child;
-  if ([super readJAXBValue: reader]) {
+  if ([super readJAXBChildElement: reader]) {
     return YES;
   }
   

@@ -1,4 +1,4 @@
-realloc#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -1987,6 +1987,15 @@ int main() {
   reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
   success = xmlTextReaderRead(reader); //read to document
   success = xmlTextReaderAdvanceToNextStartOrEndElement(reader); //read to event
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+  success = xmlTextReaderSkipElement(reader);
+  printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
+
+  examplexml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><p:person w:id=\"1234567890\" w:gender=\"FEMALE\" w:cool=\"true\" xmlns:w=\"http://whereverelse.com\" xmlns:p=\"http://person.com\"/>";
+  reader = xmlReaderForMemory(examplexml, strlen(examplexml), NULL, NULL, 0);
+  success = xmlTextReaderRead(reader); //read to document
   printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));
   success = xmlTextReaderSkipElement(reader);
   printf("current node: %s, ns: %s, type: %i\n", xmlTextReaderConstLocalName(reader), xmlTextReaderConstNamespaceUri(reader), xmlTextReaderNodeType(reader));

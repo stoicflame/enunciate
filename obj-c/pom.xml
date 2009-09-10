@@ -88,7 +88,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               <tasks>
                 <property name="gcc.executable" value="${gcc.executable}"/>
                 <property name="libxml.config.executable" value="${libxml.config.executable}"/>
-                <property name="gnustep.config.executable" value="${libxml.config.executable}"/>
+                <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
                 <property name="project.build.directory" value="${project.build.directory}"/>
                 
                 <ant antfile="${basedir}/gcc-compile.xml">
@@ -143,7 +143,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             </property>
             <property>
               <name>processxml.exe</name>
-              <value>${project.build.directory}/enunciate/gen/c/processxml</value>
+              <value>${project.build.directory}/enunciate/gen/obj-c/processxml</value>
             </property>
             <property>
               <name>xml.tempdir</name>

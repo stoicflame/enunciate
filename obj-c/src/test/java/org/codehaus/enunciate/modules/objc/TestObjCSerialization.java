@@ -1,11 +1,11 @@
-package org.codehaus.enunciate.modules.c;
+package org.codehaus.enunciate.modules.objc;
 
 import junit.framework.TestCase;
-import org.codehaus.enunciate.examples.c.schema.*;
-import org.codehaus.enunciate.examples.c.schema.animals.Cat;
-import org.codehaus.enunciate.examples.c.schema.draw.Canvas;
-import org.codehaus.enunciate.examples.c.schema.structures.House;
-import org.codehaus.enunciate.examples.c.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.objc.schema.*;
+import org.codehaus.enunciate.examples.objc.schema.animals.Cat;
+import org.codehaus.enunciate.examples.objc.schema.draw.Canvas;
+import org.codehaus.enunciate.examples.objc.schema.structures.House;
+import org.codehaus.enunciate.examples.objc.schema.vehicles.Bus;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -18,13 +18,13 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 /**
- * Makes sure C serialization is working correctly.
+ * Makes sure Objecitve C serialization is working correctly.
  *
  * @author Ryan Heaton
  */
-public class TestCSerialization extends TestCase {
+public class TestObjCSerialization extends TestCase {
 
-  private boolean skipCTests;
+  private boolean skipObjCTests;
   private File tempDir;
   private File exe;
 
@@ -32,13 +32,13 @@ public class TestCSerialization extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
 
-    String skipCTests = System.getProperty("skip.c.tests");
-    this.skipCTests = "true".equalsIgnoreCase(skipCTests);
+    String skipCTests = System.getProperty("skip.objc.tests");
+    this.skipObjCTests = "true".equalsIgnoreCase(skipCTests);
 
-    if (!this.skipCTests) {
+    if (!this.skipObjCTests) {
       String exe = System.getProperty("processxml.exe");
       if (exe == null) {
-        throw new IllegalStateException("The path to the processjson script must be supplied via property 'processjson.rb'.");
+        throw new IllegalStateException("The path to the processjson script must be supplied via property 'processjson.exe'.");
       }
       this.exe = new File(exe);
 
@@ -54,7 +54,7 @@ public class TestCSerialization extends TestCase {
    * tests serialization.
    */
   public void testSerializeDeserialize() throws Exception {
-    if (this.skipCTests) {
+    if (this.skipObjCTests) {
       System.out.println("C tests have been disabled.");
       return;
     }
@@ -113,7 +113,7 @@ public class TestCSerialization extends TestCase {
    * tests a bus
    */
   public void testBus() throws Exception {
-    if (this.skipCTests) {
+    if (this.skipObjCTests) {
       System.out.println("C tests have been disabled.");
       return;
     }
@@ -204,7 +204,7 @@ public class TestCSerialization extends TestCase {
    * tests house.  This one has things like nillable and required properties.
    */
   public void testHouse() throws Exception {
-    if (this.skipCTests) {
+    if (this.skipObjCTests) {
       System.out.println("C tests have been disabled.");
       return;
     }
@@ -298,7 +298,7 @@ public class TestCSerialization extends TestCase {
    * todo: worry about referential integrity
    */
   public void x_testCat() throws Exception {
-    if (this.skipCTests) {
+    if (this.skipObjCTests) {
       System.out.println("C tests have been disabled.");
       return;
     }
@@ -360,7 +360,7 @@ public class TestCSerialization extends TestCase {
    * tests the canvas.  This one as XmlElementRefs, XmlElements, and an attachment...
    */
   public void testCanvas() throws Exception {
-    if (this.skipCTests) {
+    if (this.skipObjCTests) {
       System.out.println("C tests have been disabled.");
       return;
     }

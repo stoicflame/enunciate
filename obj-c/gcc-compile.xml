@@ -39,14 +39,6 @@
     <property name="libxml.config.libs" value=""/>
 
     <exec executable="${gcc.executable}" failonerror="true" dir="${project.build.directory}">
-      <!--report all warnings...-->
-      <arg value="-Wall"/>
-      <!--...except the unused variable warnings-->
-      <arg value="-Wno-unused-variable"/>
-      <!--...and the unused function warnings-->
-      <arg value="-Wno-unused-function"/>
-      <!--count all warnings as errors -->
-      <arg value="-Werror"/>
       <!--include the gnustep compile flags-->
       <arg line="${gnustep.config.flags}"/>
       <!--include the libxml compile flags-->
@@ -55,6 +47,14 @@
       <arg line="${gnustep.config.libs}"/>
       <!--include the libxml libraries-->
       <arg line="${libxml.config.libs}"/>
+      <!--report all warnings...-->
+      <arg value="-Wall"/>
+      <!--...except the unused variable warnings-->
+      <arg value="-Wno-unused-variable"/>
+      <!--...and the unused function warnings-->
+      <arg value="-Wno-unused-function"/>
+      <!--count all warnings as errors -->
+      <arg value="-Werror"/>
       <!--include the source directory-->
       <arg value="-I${project.build.directory}/enunciate/gen/obj-c"/>
       <!--output to the file-->

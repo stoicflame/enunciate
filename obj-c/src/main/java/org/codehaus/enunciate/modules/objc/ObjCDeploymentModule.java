@@ -40,19 +40,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.ClassType;
 
 /**
- * <h1>C Module</h1>
+ * <h1>Objective C Module</h1>
  *
- * <p>The C module generates C data structures and (de)serialization functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a>
+ * <p>The Objective C module generates Objective C classes and (de)serialization functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a>
  * to (de)serialize the REST resources as they are represented as XML data.</p>
  *
- * <p>The order of the C deployment module is 0, as it doesn't depend on any artifacts exported by any other module.</p>
+ * <p>The order of the Objective C deployment module is 0, as it doesn't depend on any artifacts exported by any other module.</p>
  *
  * <ul>
  * <li><a href="#config">configuration</a></li>
@@ -60,25 +60,25 @@ import com.sun.mirror.declaration.ClassDeclaration;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>The C module is configured with the "c" element under the "modules" element of the enunciate configuration file. It supports the following
+ * <p>The Objective C module is configured with the "obj-c" element under the "modules" element of the enunciate configuration file. It supports the following
  * attributes:</p>
  *
  * <ul>
- * <li>The "label" attribute is the label for the C API.  This is the name by which the file will be identified (producing [label].c).
+ * <li>The "label" attribute is the label for the Objective C API.  This is the name by which the file will be identified (producing [label].m and [label].h).
  * By default the label is the same as the Enunciate project label.</li>
- * <li>The "forceEnable" attribute is used to force-enable the C module. By default, the C module is enabled only if REST endpoints are found in the project.</li>
+ * <li>The "forceEnable" attribute is used to force-enable the Objective C module. By default, the Objective C module is enabled only if REST endpoints are found in the project.</li>
  * <li>The "enumConstantNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an enum constant name to a unique c-style constant name. The arguments passed to the format string are: (1) the project label (2) the namespace id
- * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
- * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
+ * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
+ * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
+ * (7) the decapitalized simple name of the type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
  * be "scrubbed" by replacing any non-word character with the "_" character. The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
  * <li>The "typeDefinitionNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an type definition name to a unique c-style name. The arguments passed to the format string are: (1) the project label (2) the namespace id
- * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
- * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character with the "_" character. The default value for this
- * pattern is "%1$s_%2$s_%3$s".</li> 
+ * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
+ * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
+ * (7) the decapitalized simple name of the type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character
+ * with the "_" character. The default value for this pattern is "%1$S%2$S%4$s".</li> 
  * </ul>
  *
  * @author Ryan Heaton
@@ -93,7 +93,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean forceEnable = false;
   private String label = null;
-  private String typeDefinitionNamePattern = "%1$s_%2$s_%3$s";
+  private String typeDefinitionNamePattern = "%1$S%2$S%4$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
 
   /**
@@ -117,10 +117,23 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File genDir = getGenerateDir();
+    String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
     if (!enunciate.isUpToDateWithSources(genDir)) {
       EnunciateFreemarkerModel model = getModel();
 
-      String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
+      List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
+      ExtensionDepthComparator comparator = new ExtensionDepthComparator();
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          int position = Collections.binarySearch(schemaTypes, typeDefinition, comparator);
+          if (position < 0) {
+            position = -position - 1;
+          }
+          schemaTypes.add(position, typeDefinition);
+        }
+      }
+      model.put("schemaTypes", schemaTypes);
+
       NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, model.getNamespacesToPrefixes());
       model.put("nameForTypeDefinition", nameForTypeDefinition);
       model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, model.getNamespacesToPrefixes()));
@@ -131,14 +144,14 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
             conversions.put(typeDefinition.getQualifiedName(), "enum " + nameForTypeDefinition.calculateName(typeDefinition));
           }
           else {
-            conversions.put(typeDefinition.getQualifiedName(), "struct " + nameForTypeDefinition.calculateName(typeDefinition));
+            conversions.put(typeDefinition.getQualifiedName(), (String) nameForTypeDefinition.calculateName(typeDefinition));
           }
         }
       }
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
       model.put("classnameFor", classnameFor);
-      model.put("cFileName", getSourceFileName());
-      model.put("forAllAccessors", new ForAllAccessorsTransform(null));
+      model.put("functionIdentifierFor", new FunctionIdentifierForMethod(nameForTypeDefinition));
+      model.put("objcBaseName", label);
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());
@@ -153,11 +166,14 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     }
 
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "c.client.library", "C Client Library");
-    NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), getSourceFileName()));
-    sourceScript.setPublic(false);
+    NamedFileArtifact sourceHeader = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), label + ".h"));
+    sourceHeader.setPublic(false);
+    NamedFileArtifact sourceImpl = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), label + ".m"));
+    sourceImpl.setPublic(false);
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);
-    artifactBundle.addArtifact(sourceScript);
+    artifactBundle.addArtifact(sourceHeader);
+    artifactBundle.addArtifact(sourceImpl);
     getEnunciate().addArtifact(artifactBundle);
   }
 
@@ -170,8 +186,8 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   protected String readResource(String resource) throws IOException, EnunciateException {
     HashMap<String, Object> model = new HashMap<String, Object>();
     RESTResource exampleResource = getModelInternal().findExampleResource();
-    model.put("filename", getSourceFileName());
     String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
+    model.put("label", label);
     NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, getModelInternal().getNamespacesToPrefixes());
 
     if (exampleResource != null) {
@@ -218,19 +234,6 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     catch (TemplateException e) {
       throw new EnunciateException(e);
     }
-  }
-
-  /**
-   * The name of the generated Ruby source file.
-   *
-   * @return The name of the generated Ruby source file.
-   */
-  protected String getSourceFileName() {
-    String label = getLabel();
-    if (label == null) {
-      label = getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel();
-    }
-    return label + ".c";
   }
 
   @Override
@@ -343,21 +346,42 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   @Override
   public boolean isDisabled() {
     if (isForceEnable()) {
-      debug("C module is force-enabled via the 'require' attribute in the configuration.");
+      debug("Objective C module is force-enabled via the 'require' attribute in the configuration.");
       return false;
     }
     else if (super.isDisabled()) {
       return true;
     }
     else if (getModelInternal() != null && getModelInternal().getNamespacesToSchemas().isEmpty()) {
-      debug("C module is disabled because there are no schema types.");
+      debug("Objective C module is disabled because there are no schema types.");
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
-      debug("C module is disabled because there are no JAX-RS root resources.");
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty() && getModelInternal().getRESTEndpoints().isEmpty()) {
+      debug("Objective C module is disabled because there are no REST resources.");
       return true;
     }
 
     return false;
+  }
+
+  private static final class ExtensionDepthComparator implements Comparator<TypeDefinition> {
+    public int compare(TypeDefinition t1, TypeDefinition t2) {
+      int depth1 = 0;
+      int depth2 = 0;
+
+      ClassType superClass = t1.getSuperclass();
+      while (superClass != null && superClass.getDeclaration() != null && !Object.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
+        depth1++;
+        superClass = superClass.getDeclaration().getSuperclass();
+      }
+
+      superClass = t2.getSuperclass();
+      while (superClass != null && superClass.getDeclaration() != null && !Object.class.getName().equals(superClass.getDeclaration().getQualifiedName())) {
+        depth2++;
+        superClass = superClass.getDeclaration().getSuperclass();
+      }
+
+      return depth1 - depth2;
+    }
   }
 }

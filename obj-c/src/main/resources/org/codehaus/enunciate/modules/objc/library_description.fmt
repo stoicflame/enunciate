@@ -7,15 +7,14 @@
 </h1>
 
 <p>
-  The C module generates the source code for the ANSI-C-compatible data structures and (de)serialization
+  The Objective C module generates the source code for the Objective C classes and (de)serialization
   functions that can be used in conjunction with <a href="http://xmlsoft.org/">libxml2</a> to (de)serialize
   the REST resources as they are represented as XML data.
 </p>
 
 <p>
-  The generated C source code depends on the <a href="http://xmlsoft.org/html/libxml-xmlreader.html">XML Reader API</a>
-  and the <a href="http://xmlsoft.org/html/libxml-xmlwriter.html">XML Writer API</a> as well as the <tt>&lt;time.h&gt;</tt>,
-  <tt>&lt;string.h&gt;</tt>, and <tt>&lt;stdlib.h&gt;</tt> C standard libraries.
+  The generated Objective C source code depends on the <a href="http://xmlsoft.org/html/libxml-xmlreader.html">XML Reader API</a>
+  and the <a href="http://xmlsoft.org/html/libxml-xmlwriter.html">XML Writer API</a> as well as the base OpenStep foundation classes.
 </p>
 
 [#if output_element_name??]
@@ -24,7 +23,7 @@
 </h1>
 
 <code>
-#include &lt;${filename}&gt;
+#include &lt;${label}.h&gt;
 //...
 
 [#if input_element_name??]
@@ -35,17 +34,14 @@ xmlTextReaderPtr reader = ...; //set up the reader to the url.
 ${output_element_name} *response_element = ...;
 [#if input_element_name??]
 //set up the ${input_element_name}...
-xml_write_${input_element_name}(writer, request_element);
+[request_element writeXMLElement: writer];
 [/#if]
-response_element = xml_read_${output_element_name}(reader);
+response_element = (${input_element_name} *) [${input_element_name} readXMLElement: reader];
+[response_element retain];
 
 //handle the response as needed...
 
-[#if input_element_name??]
-//free the ${input_element_name}
-free_${input_element_name}(request_element);
-[/#if]
-//free the ${output_element_name}
-free_${output_element_name}(response_element);
+//release the ${output_element_name}
+[response_element release];
 </code>
 [/#if]

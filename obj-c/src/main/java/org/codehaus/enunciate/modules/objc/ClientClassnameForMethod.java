@@ -111,7 +111,10 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
 
   @Override
   public String convert(Accessor accessor) throws TemplateModelException {
-    if (accessor.isXmlIDREF() || accessor.isXmlList()) {
+    if (accessor.isXmlList()) {
+      return "NSString";
+    }
+    else if (accessor.isXmlIDREF() && !accessor.isCollectionType()) {
       return "NSString";
     }
     
@@ -143,12 +146,6 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       }
     }
     else if (decorated.isCollection()) {
-      if (decorated instanceof DeclaredType) {
-        Collection<TypeMirror> typeArgs = ((DeclaredType) typeMirror).getActualTypeArguments();
-        if (typeArgs.size() == 1) {
-          return convert(typeArgs.iterator().next());
-        }
-      }
       return "NSArray";
     }
     else if (decorated.isArray()) {
@@ -156,9 +153,6 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       if (componentType instanceof PrimitiveType) {
         if (((PrimitiveType) componentType).getKind() == PrimitiveType.Kind.BYTE) {
           return "NSData";
-        }
-        else {
-          return convert(componentType);
         }
       }
 

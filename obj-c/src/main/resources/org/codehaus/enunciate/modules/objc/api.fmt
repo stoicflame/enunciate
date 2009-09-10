@@ -35,10 +35,9 @@
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader;
 
 /**
- * Initialize this JAXB type with an XML reader, pointing at
- * the XML that is an instance conforms to this XML type.
+ * Initialize the object with an XML reader.
  *
- * @param reader The XML reader.
+ * @param reader The XML reader from which to initialize the values of this type.
  */
 - (void) initWithReader: (xmlTextReaderPtr) reader;
 
@@ -59,7 +58,9 @@
 @protocol JAXBElement
 
 /**
- * Read the XML element from an XML reader.
+ * Read the XML element from an XML reader. It is assumed
+ * that the reader is pointing at the start element (be careful
+ * that it's not still pointing to the XML document).
  *
  * @param reader The reader.
  * @return An instance of the object defining the JAXB element.
@@ -79,7 +80,7 @@
  * @param writer The writer.
  * @param writeNs Whether to write the namespaces for this element to the xml writer.
  */
-- (void) writeXMLElementWithNs: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs;
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs;
 
 @end /*protocol JAXBElement*/
 
@@ -188,19 +189,27 @@
 
 #endif /* ENUNCIATE_OBJC_TYPES */
 
-[@forEachSchema]
-  [#list schema.typeDefinitions as typeDefinition]
-    [#if typeDefinition.enum]
-      [@libEnumType.writeEnumTypeHeader type=typeDefinition/]
-    [#else]
-      [@libComplexType.writeComplexTypeHeader type=typeDefinition/]
-    [/#if]
-  [/#list]
-[/@forEachSchema]
+[#list schemaTypes as typeDefinition]
+  [#if typeDefinition.enum]
+    [@libEnumType.writeEnumTypeHeader type=typeDefinition/]
+  [/#if]
+[/#list]
+
+[#list schemaTypes as typeDefinition]
+  [#if !typeDefinition.enum]
+@class ${nameForTypeDefinition(typeDefinition)};
+  [/#if]
+[/#list]
+
+[#list schemaTypes as typeDefinition]
+  [#if !typeDefinition.enum]
+    [@libComplexType.writeComplexTypeHeader type=typeDefinition/]
+  [/#if]
+[/#list]
 [/@file]
 
 [@file name=(objcBaseName + ".m") charset="utf-8"]
-#include <${objcBaseName}.m>
+#include <${objcBaseName}.h>
 
 /**
  * Enunciate-specific C functions.
@@ -390,12 +399,288 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 
 #endif /* ENUNCIATE_C_UTILITIES */
 
-
-/**
- * Enunciate-specific implementations and internal interfaces.
- */
 #ifndef ENUNCIATE_OBJC_CLASSES
 #define ENUNCIATE_OBJC_CLASSES
+
+/**
+ * Protocol defining methods for events that occur
+ * when reading/parsing XML. Intended for internal
+ * use only.
+ */
+@protocol JAXBReading
+
+/**
+ * Method for reading an attribute.
+ *
+ * @param reader The reader pointing to the attribute.
+ * @return Whether the attribute was read.
+ */
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading the value of an element.
+ *
+ * @param reader The reader pointing to the element containing a value.
+ * @return Whether the value was read.
+ */
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading a child element. If (and only if) the child
+ * element was handled, the element in the reader should be
+ * "consumed" and the reader will be pointing to the end element.
+ *
+ * @param reader The reader pointing to the child element.
+ * @return Whether the child element was read.
+ */
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading an unknown attribute.
+ *
+ * @param reader The reader pointing to the unknown attribute.
+ * @return Whether the attribute was read.
+ */
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader;
+
+/**
+ * Method for reading an unknown child element. Implementations
+ * must be responsible for "consuming" the child element.
+ *
+ * @param reader The reader pointing to the unknown child element.
+ * @return The status of the reader after having consumed the unknown child element.
+ */
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader;
+
+@end /*protocol JAXBReading*/
+
+/**
+ * Protocol defining methods for events that occur
+ * when writing XML. Intended for internal
+ * use only.
+ */
+@protocol JAXBWriting
+
+/**
+ * Method for writing the attributes.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer;
+
+/**
+ * Method for writing the element value.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer;
+
+/**
+ * Method for writing the child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer;
+
+@end /*protocol JAXBWriting*/
+
+/**
+ * Declaration of the JAXB type, element, events for a base object.
+ */
+@interface NSObject (JAXB) <JAXBType, JAXBElement, JAXBReading, JAXBWriting>
+
+@end
+
+/**
+ * Implementation of the JAXB type, element, events for a base object.
+ */
+@implementation NSObject (JAXB)
+
+/**
+ * Read the XML type from the reader; an instance of NSXMLElement.
+ *
+ * @param reader The reader.
+ * @return An instance of NSXMLElement
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  return [JAXBBasicXMLNode readXMLType: reader];
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (void) initWithReader: (xmlTextReaderPtr) reader
+{
+  int status, depth;
+  if (xmlTextReaderHasAttributes(reader)) {
+    while (xmlTextReaderMoveToNextAttribute(reader)) {
+      if ([self readJAXBAttribute: reader] == NO) {
+        [self readUnknownJAXBAttribute: reader];
+      }
+    }
+
+    status = xmlTextReaderMoveToElement(reader);
+    if (!status) {
+      //panic: unable to return to the element node.
+      [NSException raise: @"XMLReadError"
+                   format: @"Error moving back to element position from attributes."];
+    }
+  }
+
+  if ([self readJAXBValue: reader] == NO) {
+    //no value handled; attempt to process child elements
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      depth = xmlTextReaderDepth(reader);//track the depth.
+      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+      while (xmlTextReaderDepth(reader) > depth) {
+        if (status < 1) {
+          //panic: XML read error.
+          [NSException raise: @"XMLReadError"
+                       format: @"Error handling a child element."];
+        }
+        else if ([self readJAXBChildElement: reader]) {
+          status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        }
+        else {
+          status = [self readUnknownJAXBChildElement: reader];
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Write the XML type value of this object to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  [self writeJAXBAttributes: writer];
+  [self writeJAXBValue: writer];
+  [self writeJAXBChildElements: writer];
+}
+
+/**
+ * Read the XML element from the reader; an instance of NSXMLElement.
+ *
+ * @param reader The reader.
+ * @return An instance of NSXMLElement
+ */
++ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader
+{
+  return (id<JAXBElement>) [JAXBBasicXMLNode readXMLType: reader];
+}
+
+/**
+ * No op; root objects don't have an element name/namespace. Subclasses must override.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer
+{
+  //no-op
+}
+
+/**
+ * No op; root objects don't have an element name/namespace. Subclasses must override.
+ *
+ * @param writer The writer.
+ * @param writeNs Ignored.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
+{
+  //no-op
+}
+
+/**
+ * No-op; base objects do not handle any attributes.
+ *
+ * @param reader The reader pointing to the attribute.
+ * @return NO
+ */
+- (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any values.
+ *
+ * @param reader The reader pointing to the element containing a value.
+ * @return NO
+ */
+- (BOOL) readJAXBValue: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any child elements.
+ *
+ * @param reader The reader pointing to the child element.
+ * @return NO
+ */
+- (BOOL) readJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return NO;
+}
+
+/**
+ * No-op; base objects do not handle any attributes.
+ *
+ * @param reader The reader pointing to the unknown attribute.
+ */
+- (void) readUnknownJAXBAttribute: (xmlTextReaderPtr) reader
+{
+}
+
+/**
+ * Just skips the unknown element; base objects do not handle any child elements.
+ *
+ * @param reader The reader pointing to the unknown child element.
+ * @return The status of the reader after skipping the unknown child element.
+ */
+- (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader
+{
+  return xmlTextReaderSkipElement(reader);
+}
+
+/**
+ * No-op; base objects have no attributes.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBAttributes: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+/**
+ * No-op; base objects have no element value.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBValue: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+/**
+ * No-op; base objects have no child elements.
+ *
+ * @param writer The writer.
+ */
+- (void) writeJAXBChildElements: (xmlTextWriterPtr) writer
+{
+  //no-op.
+}
+
+@end /*NSObject (JAXB)*/
 
 /**
  * Implementation of the JAXB type, element for an xml element.
@@ -740,7 +1025,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 }
 
 /**
- * No op; no way to write an object to a writer. Subclasses must override.
+ * Writes this node to a writer.
  *
  * @param writer The writer.
  */
@@ -750,12 +1035,12 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 }
 
 /**
- * Write this instance of a JAXB element to a writer.
+ * Writes this node to a writer.
  *
  * @param writer The writer.
  * @param writeNs Whether to write the namespaces for this element to the xml writer.
  */
-- (void) writeXMLElementWithNs: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
 {
   [self writeXMLType: writer];
 }
@@ -770,87 +1055,6 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
   [super dealloc];
 }
 @end /*implementation JAXBBasicXMLNode*/
-
-
-
-/**
- * Declaration of the JAXB type, element for a base object.
- */
-@interface NSObject (JAXBType) <JAXBType, JAXBElement>
-@end
-
-/**
- * Implementation of the JAXB type, element for a base object.
- */
-@implementation NSObject (JAXBType)
-
-/**
- * Read the XML type from the reader; an instance of NSXMLElement.
- *
- * @param reader The reader.
- * @return An instance of NSXMLElement
- */
-+ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
-{
-  return [JAXBBasicXMLNode readXMLType: reader];
-}
-
-/**
- * Read an XML type from an XML reader into an existing instance.
- *
- * @param reader The reader.
- * @param existing The existing instance into which to read values.
- */
-- (void) initWithReader: (xmlTextReaderPtr) reader
-{
-  //no-op
-}
-
-/**
- * Read the XML element from the reader; an instance of NSXMLElement.
- *
- * @param reader The reader.
- * @return An instance of NSXMLElement
- */
-+ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader
-{
-  return (id<JAXBElement>) [JAXBBasicXMLNode readXMLType: reader];
-}
-
-/**
- * No op; no way to write an object to a writer. Subclasses must override.
- *
- * @param writer The writer.
- */
-- (void) writeXMLType: (xmlTextWriterPtr) writer
-{
-  //no-op
-}
-
-/**
- * No op; no way to write an object to a writer. Subclasses must override.
- *
- * @param writer The writer.
- */
-- (void) writeXMLElement: (xmlTextWriterPtr) writer
-{
-  //no-op
-}
-
-/**
- * Write this instance of a JAXB element to a writer.
- *
- * @param writer The writer.
- * @param writeNs Whether to write the namespaces for this element to the xml writer.
- */
-- (void) writeXMLElementWithNs: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs
-{
-  //no-op
-}
-
-@end /*NSObject (JAXBType)*/
-
-
 
 /**
  * Declaration of the JAXB type for a string.
@@ -1252,10 +1456,6 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 @end /*NSCalendarDate (JAXBType)*/
 #endif /* ENUNCIATE_OBJC_CLASSES */
 
-/**
- * C functions that are applicable only to the Enunciate
- * Objective-C implementation.
- */
 #ifndef ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
 #define ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
 
@@ -1454,15 +1654,36 @@ static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
   return xmlTextWriterWriteFormatString(writer, "%h", *value);
 }
 
+/*******************char************************************/
+
+/**
+ * Read a character value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the character.
+ */
+static xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader) {
+  return xmlTextReaderReadEntireNodeValue(reader);
+}
+
+/**
+ * Write a character value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+static int xmlTextWriterWriteCharacterType(xmlTextWriterPtr writer, xmlChar *value) {
+  return xmlTextWriterWriteString(writer, value);
+}
+
 #endif /* ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS */
 
-[@forEachSchema]
-  [#list schema.typeDefinitions as typeDefinition]
-    [#if typeDefinition.enum]
-      [@libEnumType.writeEnumTypeImpl type=typeDefinition/]
-    [#else]
-      [@libComplexType.writeComplexTypeImpl type=typeDefinition/]
-    [/#if]
-  [/#list]
-[/@forEachSchema]
+[#list schemaTypes as typeDefinition]
+  [#if typeDefinition.enum]
+    [@libEnumType.writeEnumTypeImpl type=typeDefinition/]
+  [#else]
+    [@libComplexType.writeComplexTypeImpl type=typeDefinition/]
+  [/#if]
+[/#list]
 [/@file]

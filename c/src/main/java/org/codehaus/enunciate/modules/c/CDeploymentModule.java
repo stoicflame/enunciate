@@ -69,15 +69,15 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * <li>The "forceEnable" attribute is used to force-enable the C module. By default, the C module is enabled only if REST endpoints are found in the project.</li>
  * <li>The "enumConstantNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an enum constant name to a unique c-style constant name. The arguments passed to the format string are: (1) the project label (2) the namespace id
- * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
- * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
+ * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
+ * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
+ * (7) the decapitalized simple name of the type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
  * be "scrubbed" by replacing any non-word character with the "_" character. The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
  * <li>The "typeDefinitionNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an type definition name to a unique c-style name. The arguments passed to the format string are: (1) the project label (2) the namespace id
- * of the type definition (3) the name of the type definition (4) the decapitalized annotation-specified client name of the type declaration (5) the NOT decapitalized
- * annotation-specified client name of the type declaration (6) the decapitalized simple name of the type declaration (7) the NOT-decapitalized simple name of the
- * type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character with the "_" character. The default value for this
+ * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
+ * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
+ * (7) the decapitalized simple name of the type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character with the "_" character. The default value for this
  * pattern is "%1$s_%2$s_%3$s".</li> 
  * </ul>
  *
@@ -354,8 +354,8 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       debug("C module is disabled because there are no schema types.");
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
-      debug("C module is disabled because there are no JAX-RS root resources.");
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty() && getModelInternal().getRESTEndpoints().isEmpty()) {
+      debug("C module is disabled because there are no REST resources.");
       return true;
     }
 

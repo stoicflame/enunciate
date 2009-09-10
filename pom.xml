@@ -569,9 +569,9 @@ Then, define a profile in your settings.xml file that defines the path to your '
 
       <dependency>
         <!--depending modules: xfire-rt, amf, etc. -->
-        <groupId>jdom</groupId>
+        <groupId>org.jdom</groupId>
         <artifactId>jdom</artifactId>
-        <version>1.0</version>
+        <version>1.1</version>
       </dependency>
 
       <dependency>
