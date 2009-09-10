@@ -67,6 +67,27 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <downloadJavadocs>true</downloadJavadocs>
+          <downloadSources>true</downloadSources>
+          <useProjectReferences>false</useProjectReferences>
+          <classpathContainers>
+            <classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5</classpathContainer>
+          </classpathContainers>
+          <additionalConfig>
+            <file>
+              <name>.settings/org.eclipse.core.resources.prefs</name>
+              <content>
+                <![CDATA[eclipse.preferences.version=1${line.separator}encoding/<project>=${project.build.sourceEncoding}${line.separator}]]>
+              </content>
+            </file>
+          </additionalConfig>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
@@ -165,6 +186,8 @@ Then, define a profile in your settings.xml file that defines the path to your '
   </dependencies>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>2.5.4</spring.version>
     <spring.security.version>2.0.3</spring.security.version>
     <jersey.version>1.0.3</jersey.version>
