@@ -1377,58 +1377,124 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
   xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  int len = xmlStrlen(timevalue);
-  NSString *calendarFormat;
-  NSCalendarDate *date;
+  NSInteger year = 0;
+  NSUInteger month = 1, day = 1, hour = 0, minute = 0, second = 0;
+  NSTimeZone *tz = nil;
+  BOOL skip_time = NO;
+  int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_seconds = 0;
+  char token[len];
 
-  if ((len == 25) && (timevalue[22] == ':')) {
-    //assume format yyyy-mm-ddThh:MM:ss+oo:oo
-    //convert to yyyy-mm-ddThh:MM:ss +oooo
-    timevalue[22] = timevalue[21];
-    timevalue[21] = timevalue[20];
-    timevalue[20] = timevalue[19];
-    timevalue[19] = ' ';
-    calendarFormat = @"%Y-%m-%dT%H:%M:%S %z";
-  }
-  else if ((len == 19) && (timevalue[11] == 'T')) {
-    //assume format yyyy-mm-ddThh:MM:ss
-    calendarFormat = @"%Y-%m-%dT%H:%M:%S";
-  }
-  else if ((len == 16) && (timevalue[13] == ':')) {
-    //assume format yyyy-mm-dd+oo:oo
-    //convert to yyyy-mm-dd +oooo
-    timevalue[13] = timevalue[12];
-    timevalue[12] = timevalue[11];
-    timevalue[11] = timevalue[10];
-    timevalue[10] = ' ';
-    calendarFormat = @"%Y-%m-%d %z";
-  }
-  else if ((len == 14) && (timevalue[11] == ':')) {
-    //assume format hh:MM:ss+oo:oo
-    //convert to hh:MM:ss +oooo
-    timevalue[11] = timevalue[10];
-    timevalue[10] = timevalue[9];
-    timevalue[9] = timevalue[8];
-    timevalue[8] = ' ';
-    calendarFormat = @"%H:%M:%S %z";
-  }
-  else if (len == 10) {
-    //assume format yyyy-mm-dd
-    calendarFormat = @"%Y-%m-%d";
-  }
-  else if (len == 8) {
-    //assume format hh:MM:ss
-    calendarFormat = @"%H:%M:%S";
-  }
-  else {
-    free(timevalue);
-    [NSException raise: @"XMLReadError"
-                 format: @"Unable to parse date %s", timevalue];
+  if (len > (index + 5) && timevalue[index + 4] == '-') {
+    //assume we're at yyyy-MM-dd
+    token_index = 0;
+    while (index < len && timevalue[index] != '-') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index != 4) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid year: %s", timevalue, token];
+    }
+    year = atoi(token);
+    index++;
+
+    //go to next '-' character.
+    token_index = 0;
+    while (index < len && timevalue[index] != '-') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index != 2) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid month: %s", timevalue, token];
+    }
+    month = atoi(token);
+    index++;
+
+    //go to 'T', 'Z', '+', or '-' character.
+    token_index = 0;
+    while (index < len && timevalue[index] != 'T' && timevalue[index] != 'Z' && timevalue[index] != '-' && timevalue[index] != '+') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index != 2) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid day of month: %s", timevalue, token];
+    }
+    day = atoi(token);
+    if (timevalue[index] != 'T') {
+      skip_time = YES;
+    }
+    if (timevalue[index] != '-') {
+      index++;
+    }
   }
 
-  date = [NSCalendarDate dateWithString: [NSString stringWithUTF8String: (const char *) timevalue] calendarFormat: calendarFormat];
+  if (skip_time == NO || (len > (index + 3) && timevalue[index + 2] == ':')) {
+    //assume we're at HH:mm:ss
+
+    //go to ':' character.
+    token_index = 0;
+    while (index < len && timevalue[index] != ':') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index != 2) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid hour: %s", timevalue, token];
+    }
+    hour = atoi(token);
+    index++;
+
+    //go to ':' character.
+    token_index = 0;
+    while (index < len && timevalue[index] != ':') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index != 2) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid minute: %s", timevalue, token];
+    }
+    minute = atoi(token);
+    index++;
+
+    //go to '+' or '-' or 'Z' character.
+    token_index = 0;
+    while (index < len && timevalue[index] != '+' && timevalue[index] != '-' && timevalue[index] != 'Z') {
+      token[token_index++] = timevalue[index++];
+    }
+    token[token_index] = '\0';
+    if (token_index == 0) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Unable to read dateTime %s; invalid seconds: %s", timevalue, token];
+    }
+    second = (NSUInteger) atof(token);
+    if (timevalue[index] != '-') {
+      index++;
+    }
+  }
+
+  //go to ':' character.
+  token_index = 0;
+  while (index < len && timevalue[index] != ':') {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\0';
+  offset_seconds += atoi(token) * 60 * 60;
+  index++;
+
+  //go to end.
+  token_index = 0;
+  while (index < len) {
+    token[token_index++] = timevalue[index++];
+  }
+  token[token_index] = '\0';
+  offset_seconds += atoi(token) * 60;
+
+  tz = [NSTimeZone timeZoneForSecondsFromGMT: offset_seconds];
   free(timevalue);
-  return date;
+  return [NSCalendarDate dateWithYear: year month: month day: day hour: hour minute: minute second: second timeZone: tz];
 }
 
 /**

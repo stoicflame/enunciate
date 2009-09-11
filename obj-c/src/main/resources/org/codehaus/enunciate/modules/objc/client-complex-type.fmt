@@ -381,6 +381,9 @@
     NSLog(@"Attempting to read root element {${rootElement.namespace!""}}${rootElement.name}.");
 #endif
     _${type.clientSimpleName?uncap_first} = (${typeName} *)[${typeName} readXMLType: reader];
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"Successfully read root element {${rootElement.namespace!""}}${rootElement.name}.");
+#endif
   }
   else {
     if (xmlTextReaderConstNamespaceUri(reader) == NULL) {
@@ -439,6 +442,9 @@
     }
        [/#if]
      [/#list]
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully wrote namespaces for start element {${rootElement.namespace!""}}${rootElement.name}...");
+#endif
   }
     [/#if]
 
@@ -446,6 +452,9 @@
   NSLog(@"writing type {${type.qname.namespaceURI}}${type.qname.localPart} for root element {${rootElement.namespace!""}}${rootElement.name}...");
 #endif
   [self writeXMLType: writer];
+#if DEBUG_ENUNCIATE > 1
+  NSLog(@"successfully wrote type {${type.qname.namespaceURI}}${type.qname.localPart} for root element {${rootElement.namespace!""}}${rootElement.name}...");
+#endif
   rc = xmlTextWriterEndElement(writer);
   if (rc < 0) {
     [NSException raise: @"XMLWriteError"
@@ -497,6 +506,9 @@
     [#else]
     [self set${attribute.clientSimpleName?cap_first}: (${classnameFor(attribute)}*) [${classnameFor(attribute)} readXMLType: reader]];
     [/#if]
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully read attribute {${attribute.namespace!""}}${attribute.name}...");
+#endif
     return YES;
   }
     [/#if]
@@ -540,6 +552,9 @@
     [self set${type.value.clientSimpleName?cap_first}: @""];
   }
     [/#if]
+#if DEBUG_ENUNCIATE > 1
+  NSLog(@"successfully read element value...");
+#endif
 
   return YES;
 }
@@ -656,6 +671,9 @@
           [#else]
     __child = [${classnameFor(choice)} readXMLType: reader];
           [/#if]
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully read choice {${choice.namespace!""}}${choice.name} of [#if choice.ref??]element {${choice.ref.namespaceURI}}${choice.ref.localPart}[#else]type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart}[/#if].");
+#endif
           [#if choice.nillable!false]
     } //end "if not nil" clause
     else if (xmlTextReaderIsEmptyElement(reader) == 0) {
@@ -684,18 +702,44 @@
 
         [#if element.wrapped]
         status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+#if DEBUG_ENUNCIATE > 1
+        NSLog(@"successfully unwrapped wrapper element {${element.wrapperNamespace!""}}${element.wrapperName}...");
+#endif
       } // end "while in wrapper element" loop
-    } //end "if empty element" clause
 
-    if (status < 1) {
-      //panic: XML read error.
-      [self dealloc];
-      [NSException raise: @"XMLReadError"
-                   format: @"Failure to advance to end wrapper element."];
-    }
+      if (status < 1) {
+        //panic: XML read error.
+        [self dealloc];
+        [NSException raise: @"XMLReadError"
+                     format: @"Failure to advance to end wrapper element."];
+      }
+      else {
+        //end wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
+        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+      }
+    } //end "if empty element" clause
     else {
-      //end wrapper element "{${element.wrapperNamespace!""}}${element.wrapperName}"
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+          [#if element.wrapperNillable]
+      //we've got an empty wrapper element; see if it's nil.
+      if (xmlTextReaderMoveToAttributeNs(reader, BAD_CAST "nil", BAD_CAST "http://www.w3.org/2001/XMLSchema-instance")) {
+        if (xmlStrcmp(BAD_CAST "true", xmlTextReaderConstValue(reader)) == 0) {
+#if DEBUG_ENUNCIATE > 1
+          NSLog(@"wrapper {${element.wrapperNamespace!""}}${element.wrapperName} was nil according to the xsi:nil attribute.");
+#endif
+          __child = nil;
+        }
+        else {
+          __child = [NSArray array];
+        }
+      }
+      else {
+        __child = [NSArray array];
+      }
+      xmlTextReaderMoveToElement(reader); //move back to the element
+          [#else]
+      __child = [NSArray array];
+          [/#if]
+      [self set${element.clientSimpleName?cap_first}: (NSArray*) __child];
     }
 
     return YES;
@@ -792,6 +836,9 @@
   [#else]
     [[self ${attribute.clientSimpleName}] writeXMLType: writer];
   [/#if]
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully wrote attribute {${attribute.namespace!""}}${attribute.name}...");
+#endif
 
     status = xmlTextWriterEndAttribute(writer);
     if (status < 0) {
@@ -821,6 +868,9 @@
 //documentation inherited.
 - (void) writeJAXBValue: (xmlTextWriterPtr) writer
 {
+#if DEBUG_ENUNCIATE > 1
+  NSLog(@"writing element value...");
+#endif
   [#if functionIdentifierFor(type.value)??]
   status = xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${type.value.clientSimpleName}[#else][self ${type.value.clientSimpleName}][/#if]);
   if (status < 0) {
@@ -830,6 +880,9 @@
   [#else]
   [[self ${type.value.clientSimpleName}] writeXMLType: writer];
   [/#if]
+#if DEBUG_ENUNCIATE > 1
+  NSLog(@"successfully wrote element value...");
+#endif
 }
 
 /**
@@ -875,7 +928,13 @@
                    format: @"Error writing start child element {${element.namespace!""}}${element.name}."];
     }
 
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"writing element {${element.namespace!""}}${element.name}...");
+#endif
     status = xmlTextWriterWrite${functionIdentifierFor(element)?cap_first}Type(writer, [#if element.accessorType.primitive]&_${element.clientSimpleName}[#else][self ${element.clientSimpleName}][/#if]);
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
+#endif
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing child element {${element.namespace!""}}${element.name}."];
@@ -911,6 +970,9 @@
                        format: @"Error writing start child element {${choice.namespace!""}}${choice.name}."];
         }
 
+#if DEBUG_ENUNCIATE > 1
+        NSLog(@"writing element choice {${choice.namespace!""}}${choice.name}...");
+#endif
               [#if functionIdentifierFor(choice)??]
         status = xmlTextWriterWrite${functionIdentifierFor(choice)?cap_first}Type(writer, ((${classnameFor(choice)}*) [((NSValue *)__item) pointerValue]));
         if (status < 0) {
@@ -920,6 +982,9 @@
               [#else]
         [__item writeXMLType: writer];
               [/#if]
+#if DEBUG_ENUNCIATE > 1
+        NSLog(@"successfully wrote element choice {${choice.namespace!""}}${choice.name}...");
+#endif
 
         status = xmlTextWriterEndElement(writer);
         if (status < 0) {
@@ -936,6 +1001,9 @@
                      format: @"Error writing start child element {${element.namespace!""}}${element.name}."];
       }
 
+#if DEBUG_ENUNCIATE > 1
+      NSLog(@"writing element {${element.namespace!""}}${element.name}...");
+#endif
             [#if functionIdentifierFor(element.collectionItemType)??]
       status = xmlTextWriterWrite${functionIdentifierFor(element)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) [((NSValue *)__item) pointerValue]));
       if (status < 0) {
@@ -945,6 +1013,9 @@
             [#else]
       [__item writeXMLType: writer];
             [/#if]
+#if DEBUG_ENUNCIATE > 1
+      NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
+#endif
 
       status = xmlTextWriterEndElement(writer);
       if (status < 0) {
@@ -962,7 +1033,13 @@
                    format: @"Error writing start child element {${element.namespace!""}}${element.name}."];
     }
 
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"writing element {${element.namespace!""}}${element.name}...");
+#endif
     [[self ${element.clientSimpleName}] writeXMLType: writer];
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
+#endif
 
     status = xmlTextWriterEndElement(writer);
     if (status < 0) {
