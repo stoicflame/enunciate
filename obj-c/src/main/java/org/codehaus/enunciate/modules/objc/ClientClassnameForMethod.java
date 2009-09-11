@@ -128,7 +128,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       PrimitiveType.Kind kind = ((PrimitiveType) decorated).getKind();
       switch (kind) {
         case BOOLEAN:
-          return "int";
+          return "BOOL";
         case BYTE:
           return "unsigned char";
         case INT:

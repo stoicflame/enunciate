@@ -165,10 +165,10 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping C code generation because everything appears up-to-date.");
     }
 
-    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "c.client.library", "C Client Library");
-    NamedFileArtifact sourceHeader = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), label + ".h"));
+    ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "objc.client.library", "Objective C Client Library");
+    NamedFileArtifact sourceHeader = new NamedFileArtifact(getName(), "objc.client.h", new File(getGenerateDir(), label + ".h"));
     sourceHeader.setPublic(false);
-    NamedFileArtifact sourceImpl = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), label + ".m"));
+    NamedFileArtifact sourceImpl = new NamedFileArtifact(getName(), "objc.client.m", new File(getGenerateDir(), label + ".m"));
     sourceImpl.setPublic(false);
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);

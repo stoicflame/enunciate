@@ -4,6 +4,7 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.14.xsd">
   <modules>
     <c forceEnable="true"/>
+    <obj-c forceEnable="true"/>
     <jaxws-client>
       <package-conversions>
         <convert from="epcglobal" to="epcglobal.client"/>

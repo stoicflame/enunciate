@@ -80,10 +80,13 @@ If you just want to run the Java tests without running the C# tests, set the val
               <rules>
                 <requireProperty>
                   <property>gcc.executable</property>
-                  <message>In order to run the jaxws-ri integration tests, you must have gcc installed.
-Then, define a profile in your settings.xml file that defines the path to your 'gcc' executable in the property 'gcc.executable'. You'll probably also need
-to supply additional properties "gcc.libxml.cflags" and "gcc.libxml.libs" so as to make sure gcc can link to libxml.
-If you just want to skip the C tests, set the value of the property 'gcc.executable' to be 'true'. (And don't ask any questions about why that works. Maven mess.)</message>
+                  <message>In order to run the jaxws-ri integration testse, you must have gcc installed along with libxml and gnustep.
+Define a profile in your settings.xml file that defines the path to your 'gcc'
+executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
+specifies the executable that exposes your libxml compiler flags and library includes.
+Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library includes.
+If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
+(And don't ask any questions about why that works. Maven mess.)</message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -150,31 +153,31 @@ If you just want to skip the C tests, set the value of the property 'gcc.executa
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
           </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
           <execution>
-            <id>compile-c</id>
+            <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
+            <id>compile-obj-c</id>
             <phase>test-compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
             <configuration>
-              <!--compile the C tests using the gcc executable. -->
-              <executable>${gcc.executable}</executable>
-              <skip>${gcc.executable}</skip>
-              <arguments>
-                <argument>-Wall</argument>
-                <argument>-Wno-unused-variable</argument>
-                <argument>-Wno-unused-function</argument>
-                <argument>-Werror</argument>
-                <argument>${gcc.libxml.cflags}</argument>
-                <argument>-I${project.build.directory}/enunciate/gen/c</argument>
-                <argument>${gcc.libxml.libs}</argument>
-                <argument>-o</argument>
-                <argument>${project.build.directory}/enunciate/generate/c/full.o</argument>
-                <argument>-c</argument>
-                <argument>${project.build.directory}/enunciate/generate/c/full.c</argument>
-              </arguments>
-              <workingDirectory>${project.build.directory}</workingDirectory>
+              <tasks>
+                <property name="gcc.executable" value="${gcc.executable}"/>
+                <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
+                <property name="project.build.directory" value="${project.build.directory}"/>
+
+                <ant antfile="${basedir}/gcc-compile.xml">
+                  <target name="gcc"/>
+                </ant>
+              </tasks>
             </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

@@ -7,7 +7,7 @@
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-@interface ${typeName} : [#if type.baseType.typeDefinition??]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if] <JAXBType[#if findRootElement(type)??], JAXBElement[/#if]>
+@interface ${typeName} : [#if ((!type.baseObject) && (type.baseType.typeDefinition??))]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if] <JAXBType[#if findRootElement(type)??], JAXBElement[/#if]>
 {
   @private
   [#list type.attributes as attribute]
@@ -664,7 +664,7 @@
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
-    __child = [NSValue value: _child_acessor withObjCType: @encode(${classnameFor(choice.collectionItemType)})];
+    __child = [NSValue value: _child_accessor withObjCType: @encode(${classnameFor(choice.collectionItemType)})];
             [#else]
     __child = [${classnameFor(choice.collectionItemType)} readXMLType: reader];
             [/#if]
@@ -786,7 +786,6 @@
   else {
     [self setOtherAttributes: [NSArray arrayWithObject: node]];
   }
-  return YES;
 }
 [#else]
 
@@ -852,11 +851,11 @@
   if ([self otherAttributes]) {
     __enumerator = [[self otherAttributes] objectEnumerator];
 
-    while ( (__node = (NSEnumerator *) [__enumerator nextObject]) ) {
+    while ( (__node = (JAXBBasicXMLNode *) [__enumerator nextObject]) ) {
       status = xmlTextWriterWriteAttributeNS(writer, BAD_CAST [[__node prefix] UTF8String], BAD_CAST [[__node name] UTF8String], BAD_CAST [[__node ns] UTF8String], BAD_CAST [[__node value] UTF8String]);
       if (status < 0) {
         [NSException raise: @"XMLWriteError"
-                     format: @"Error writing start attribute {${attribute.namespace!""}}${attribute.name}."];
+                     format: @"Error writing unknown attribute."];
       }
 
     }
@@ -872,8 +871,7 @@
   NSLog(@"writing element value...");
 #endif
   [#if functionIdentifierFor(type.value)??]
-  status = xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${type.value.clientSimpleName}[#else][self ${type.value.clientSimpleName}][/#if]);
-  if (status < 0) {
+  if (xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${type.value.clientSimpleName}[#else][self ${type.value.clientSimpleName}][/#if]) < 0) {
     [NSException raise: @"XMLWriteError"
                  format: @"Error writing element value."];
   }
@@ -1005,7 +1003,7 @@
       NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
             [#if functionIdentifierFor(element.collectionItemType)??]
-      status = xmlTextWriterWrite${functionIdentifierFor(element)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) [((NSValue *)__item) pointerValue]));
+      status = xmlTextWriterWrite${functionIdentifierFor(element.collectionItemType)?cap_first}Type(writer, ((${classnameFor(element.collectionItemType)}*) [((NSValue *)__item) pointerValue]));
       if (status < 0) {
         [NSException raise: @"XMLWriteError"
                      format: @"Error writing child element {${element.namespace!""}}${element.name}."];
