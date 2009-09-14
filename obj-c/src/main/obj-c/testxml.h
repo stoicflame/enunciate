@@ -25,7 +25,7 @@
  *
  * @param reader The XML reader from which to initialize the values of this type.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader;
+- (id) initWithReader: (xmlTextReaderPtr) reader;
 
 /**
  * Write this instance of a JAXB type to a writer.

@@ -450,7 +450,7 @@ static long *xmlTextReaderReadXsLongType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWriteXsLongType(xmlTextWriterPtr writer, long *value) {
-  return xmlTextWriterWriteFormatString(writer, "%l", *value);
+  return xmlTextWriterWriteFormatString(writer, "%ld", *value);
 }
 
 /**

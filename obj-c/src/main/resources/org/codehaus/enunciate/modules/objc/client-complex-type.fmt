@@ -268,7 +268,7 @@
  */
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  ${typeName} *_${typeName?uncap_first} = [${typeName} new];
+  ${typeName} *_${typeName?uncap_first} = [[${typeName} alloc] init];
   NS_DURING
   {
     [_${typeName?uncap_first} initWithReader: reader];
@@ -291,9 +291,9 @@
  *
  * @param reader The reader.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
-  [super initWithReader: reader];
+  return [super initWithReader: reader];
 }
 
 /**

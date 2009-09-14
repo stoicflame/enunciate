@@ -299,44 +299,47 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   int status, depth;
-  if (xmlTextReaderHasAttributes(reader)) {
-    while (xmlTextReaderMoveToNextAttribute(reader)) {
-      if ([self readJAXBAttribute: reader] == NO) {
-        [self readUnknownJAXBAttribute: reader];
+  if ((self = [self init])) {
+    if (xmlTextReaderHasAttributes(reader)) {
+      while (xmlTextReaderMoveToNextAttribute(reader)) {
+        if ([self readJAXBAttribute: reader] == NO) {
+          [self readUnknownJAXBAttribute: reader];
+        }
+      }
+
+      status = xmlTextReaderMoveToElement(reader);
+      if (!status) {
+        //panic: unable to return to the element node.
+        [NSException raise: @"XMLReadError"
+                     format: @"Error moving back to element position from attributes."];
       }
     }
 
-    status = xmlTextReaderMoveToElement(reader);
-    if (!status) {
-      //panic: unable to return to the element node.
-      [NSException raise: @"XMLReadError"
-                   format: @"Error moving back to element position from attributes."];
-    }
-  }
-
-  if ([self readJAXBValue: reader] == NO) {
-    //no value handled; attempt to process child elements 
-    if (xmlTextReaderIsEmptyElement(reader) == 0) {
-      depth = xmlTextReaderDepth(reader);//track the depth.
-      status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-      while (xmlTextReaderDepth(reader) > depth) {
-        if (status < 1) {
-          //panic: XML read error.
-          [NSException raise: @"XMLReadError"
-                       format: @"Error handling a child element."];
-        }
-        else if ([self readJAXBChildElement: reader]) {
-          status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
-        }
-        else {
-          status = [self readUnknownJAXBChildElement: reader];
+    if ([self readJAXBValue: reader] == NO) {
+      //no value handled; attempt to process child elements
+      if (xmlTextReaderIsEmptyElement(reader) == 0) {
+        depth = xmlTextReaderDepth(reader);//track the depth.
+        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        while (xmlTextReaderDepth(reader) > depth) {
+          if (status < 1) {
+            //panic: XML read error.
+            [NSException raise: @"XMLReadError"
+                         format: @"Error handling a child element."];
+          }
+          else if ([self readJAXBChildElement: reader]) {
+            status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+          }
+          else {
+            status = [self readUnknownJAXBChildElement: reader];
+          }
         }
       }
     }
   }
+  return self;
 }
 
 /**
@@ -613,7 +616,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  JAXBBasicXMLNode *node = [JAXBBasicXMLNode new];
+  JAXBBasicXMLNode *node = [[JAXBBasicXMLNode alloc] init];
   NS_DURING
   {
     [node initWithReader: reader];
@@ -636,76 +639,81 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
-  int status, depth = xmlTextReaderDepth(reader);
+  int status, depth;
   JAXBBasicXMLNode *child;
   xmlChar *value = NULL;
   const xmlChar *text;
   NSMutableArray *children;
 
-  [self setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
-  [self setNs: [NSString stringWithUTF8String: (const char *) xmlTextReaderNamespaceUri(reader)]];
-  [self setPrefix: [NSString stringWithUTF8String: (const char *)xmlTextReaderPrefix(reader)]];
+  if ((self = [self init])) {
+    depth = xmlTextReaderDepth(reader);
+    [self setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
+    [self setNs: [NSString stringWithUTF8String: (const char *) xmlTextReaderNamespaceUri(reader)]];
+    [self setPrefix: [NSString stringWithUTF8String: (const char *)xmlTextReaderPrefix(reader)]];
 
-  if (xmlTextReaderHasAttributes(reader)) {
-    child = nil;
-    children = [NSMutableArray new];
-    while (xmlTextReaderMoveToNextAttribute(reader)) {
-      child = [JAXBBasicXMLNode new];
-      [child setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
-      [child setNs: [NSString stringWithUTF8String: (const char *)xmlTextReaderNamespaceUri(reader)]];
-      [child setPrefix: [NSString stringWithUTF8String: (const char *) xmlTextReaderPrefix(reader)]];
-      [child setValue: [NSString stringWithUTF8String: (const char *) xmlTextReaderValue(reader)]];
-      [children addObject: child];
+    if (xmlTextReaderHasAttributes(reader)) {
+      child = nil;
+      children = [[NSMutableArray alloc] init];
+      while (xmlTextReaderMoveToNextAttribute(reader)) {
+        child = [[JAXBBasicXMLNode alloc] init];
+        [child setName: [NSString stringWithUTF8String: (const char *) xmlTextReaderLocalName(reader)]];
+        [child setNs: [NSString stringWithUTF8String: (const char *)xmlTextReaderNamespaceUri(reader)]];
+        [child setPrefix: [NSString stringWithUTF8String: (const char *) xmlTextReaderPrefix(reader)]];
+        [child setValue: [NSString stringWithUTF8String: (const char *) xmlTextReaderValue(reader)]];
+        [children addObject: child];
+      }
+      [self setAttributes: children];
+
+      status = xmlTextReaderMoveToElement(reader);
+      if (status < 1) {
+        //panic: unable to return to the element node.
+        [NSException raise: @"XMLReadError"
+                     format: @"Error moving to element from attributes."];
+      }
     }
-    [self setAttributes: children];
 
-    status = xmlTextReaderMoveToElement(reader);
-    if (status < 1) {
-      //panic: unable to return to the element node.
-      [NSException raise: @"XMLReadError"
-                   format: @"Error moving to element from attributes."];
-    }
-  }
+    if (xmlTextReaderIsEmptyElement(reader) == 0) {
+      children = [[NSMutableArray alloc] init];
+      status = xmlTextReaderRead(reader);
+      while (status == 1 && xmlTextReaderDepth(reader) > depth) {
+        switch (xmlTextReaderNodeType(reader)) {
+          case XML_READER_TYPE_ELEMENT:
+            child = (JAXBBasicXMLNode *) [JAXBBasicXMLNode readXMLType: reader];
+            [children addObject: child];
+            break;
+          case XML_READER_TYPE_TEXT:
+          case XML_READER_TYPE_CDATA:
+            text = xmlTextReaderConstValue(reader);
+            value = xmlStrncat(value, text, xmlStrlen(text));
+            break;
+          default:
+            //skip anything else.
+            break;
+        }
 
-  if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    children = [NSMutableArray new];
-    status = xmlTextReaderRead(reader);
-    while (status == 1 && xmlTextReaderDepth(reader) > depth) {
-      switch (xmlTextReaderNodeType(reader)) {
-        case XML_READER_TYPE_ELEMENT:
-          child = (JAXBBasicXMLNode *) [JAXBBasicXMLNode readXMLType: reader];
-          [children addObject: child];
-          break;
-        case XML_READER_TYPE_TEXT:
-        case XML_READER_TYPE_CDATA:
-          text = xmlTextReaderConstValue(reader);
-          value = xmlStrncat(value, text, xmlStrlen(text));
-          break;
-        default:
-          //skip anything else.
-          break;
+        status = xmlTextReaderRead(reader);
       }
 
-      status = xmlTextReaderRead(reader);
-    }
+      if (status < 1) {
+        //panic: xml read error
+        [NSException raise: @"XMLReadError"
+                     format: @"Error reading child elements."];
+      }
 
-    if (status < 1) {
-      //panic: xml read error
-      [NSException raise: @"XMLReadError"
-                   format: @"Error reading child elements."];
-    }
+      if ([children count] > 0) {
+        [self setChildElements: children];
+      }
 
-    if ([children count] > 0) {
-      [self setChildElements: children];
-    }
+      if (value != NULL) {
+        [self setValue: [NSString stringWithUTF8String: (const char *) value]];
+      }
 
-    if (value != NULL) {
-      [self setValue: [NSString stringWithUTF8String: (const char *) value]];
     }
-
   }
+  
+  return self;
 }
 
 /**
@@ -870,10 +878,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing string cannot be modified."];
+  return nil;
 }
 
 /**
@@ -909,7 +918,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  return [NSNumber valueFromString: [NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)]];
+  return [NSNumber numberWithLongLong: [[NSString stringWithUTF8String: (const char *) xmlTextReaderReadEntireNodeValue(reader)] longLongValue]];
 }
 
 /**
@@ -918,10 +927,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing number cannot be modified."];
+  return nil;
 }
 
 /**
@@ -966,10 +976,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing decimal number cannot be modified."];
+  return nil;
 }
 
 /**
@@ -1014,10 +1025,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing url cannot be modified."];
+  return nil;
 }
 
 /**
@@ -1067,10 +1079,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing NSData cannot be modified."];
+  return nil;
 }
 
 /**
@@ -1117,10 +1130,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing date cannot be modified."];
+  return nil;
 }
 
 /**
@@ -1289,10 +1303,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
   [NSException raise: @"XMLReadError"
                format: @"An existing date cannot be modified."];
+  return nil;
 }
 
 /**
@@ -1660,7 +1675,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  Person *_person = [Person new];
+  Person *_person = [[Person alloc] init];
   NS_DURING
   {
     [_person initWithReader: reader];
@@ -1678,9 +1693,9 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 }
 
 //documentation inherited.
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
-  [super initWithReader: reader];
+  return [super initWithReader: reader];
 }
 
 //documentation inherited.
@@ -1953,7 +1968,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  Event *_event = [Event new];
+  Event *_event = [[Event alloc] init];
   NS_DURING
   {
     [_event initWithReader: reader];
@@ -1976,9 +1991,9 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
  * @param reader The reader.
  * @param existing The existing instance into which to read values.
  */
-- (void) initWithReader: (xmlTextReaderPtr) reader
+- (id) initWithReader: (xmlTextReaderPtr) reader
 {
-  [super initWithReader: reader];
+  return [super initWithReader: reader];
 }
 
 - (void) writeXMLType: (xmlTextWriterPtr) writer
