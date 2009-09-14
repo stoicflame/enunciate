@@ -22,11 +22,13 @@ import java.util.Map;
 public class NameForEnumConstantMethod implements TemplateMethodModelEx {
 
   private final String pattern;
+  private final String packageIdentifierPattern;
   private final String projectLabel;
   private final Map<String, String> namespaces2ids;
 
-  public NameForEnumConstantMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids) {
+  public NameForEnumConstantMethod(String pattern, String packageIdentifierPattern, String projectLabel, Map<String, String> namespaces2ids) {
     this.pattern = pattern;
+    this.packageIdentifierPattern = packageIdentifierPattern;
     this.projectLabel = ObjCDeploymentModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
@@ -57,12 +59,20 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
       name = "anonymous_" + clientNameDecap;
     }
     PackageDeclaration pckg = ((TypeDeclaration) typeDefinition).getPackage();
-    String packageUnderscored = ObjCDeploymentModule.scrubIdentifier(pckg != null ? pckg.getQualifiedName().replace('.', '_') :"");
+    String packageName = pckg.getQualifiedName();
+    String packageIdentifier;
+    if (this.packageIdentifierPattern != null) {
+      String[] subpackages = packageName.split("\\.", 9);
+      packageIdentifier = ObjCDeploymentModule.scrubIdentifier(String.format(this.packageIdentifierPattern, subpackages));
+    }
+    else {
+      packageIdentifier = ObjCDeploymentModule.scrubIdentifier(pckg != null ? packageName : "");
+    }
     String nsid = ObjCDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
     String constantName = ObjCDeploymentModule.scrubIdentifier(constant.getSimpleName());
     String constantClientName = ObjCDeploymentModule.scrubIdentifier(constant.getAnnotation(ClientName.class) != null ? constant.getAnnotation(ClientName.class).value() : constantName);
-    return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageUnderscored, constantClientName, constantName);
+    return String.format(this.pattern, this.projectLabel, nsid, name, clientName, clientNameDecap, simpleName, simpleNameDecap, packageIdentifier, constantClientName, constantName);
   }
 
 }

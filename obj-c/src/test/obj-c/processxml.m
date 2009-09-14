@@ -3,9 +3,8 @@
 #include <stdio.h>
 
 int main ( int argc, char *argv[] ) {
-  xmlTextReaderPtr reader;
-  xmlTextWriterPtr writer;
-  int status;
+  NSData *in;
+  NSData *out;
   ENUNCIATENS0Circle *circle;
   ENUNCIATENS0Triangle *triangle;
   ENUNCIATENS0Rectangle *rectangle;
@@ -19,98 +18,77 @@ int main ( int argc, char *argv[] ) {
     return 1;
   }
 
-  reader = xmlReaderForFile(argv[2], NULL, 0);
-  writer = xmlNewTextWriterFilename(argv[3], 0);
+  in = [NSData dataWithContentsOfFile: [NSString stringWithCString: argv[2]]];
+  [in retain];
   if (strcmp("circle", argv[1]) == 0) {
-    circle = (ENUNCIATENS0Circle *) [ENUNCIATENS0Circle readXMLElement: reader];
-    [circle writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing circle.");
-      return 1;
-    }
+    circle = (ENUNCIATENS0Circle *) [ENUNCIATENS0Circle readFromXML: in];
+    out = [circle writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [circle dealloc];
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("triangle", argv[1]) == 0) {
-    triangle = (ENUNCIATENS0Triangle *) [ENUNCIATENS0Triangle readXMLElement: reader];
-    [triangle writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing triangle.");
-      return 1;
-    }
+    triangle = (ENUNCIATENS0Triangle *) [ENUNCIATENS0Triangle readFromXML: in];
+    out = [triangle writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [triangle dealloc]; //free the triangle.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("rectangle", argv[1]) == 0) {
-    rectangle = (ENUNCIATENS0Rectangle *) [ENUNCIATENS0Rectangle readXMLElement: reader];
-    [rectangle writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing rectangle.");
-      return 1;
-    }
+    rectangle = (ENUNCIATENS0Rectangle *) [ENUNCIATENS0Rectangle readFromXML: in];
+    out = [rectangle writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [rectangle dealloc]; //free the rectangle.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("cat", argv[1]) == 0) {
-    cat = (ENUNCIATENS2Cat *) [ENUNCIATENS2Cat readXMLElement: reader];
-    [cat writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing cat.");
-      return 1;
-    }
+    cat = (ENUNCIATENS2Cat *) [ENUNCIATENS2Cat readFromXML: in];
+    out = [cat writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [cat dealloc]; //free the cat.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("canvas", argv[1]) == 0) {
-    canvas = (ENUNCIATENS3Canvas *) [ENUNCIATENS3Canvas readXMLElement: reader];
-    [canvas writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing canvas.");
-      return 1;
-    }
+    canvas = (ENUNCIATENS3Canvas *) [ENUNCIATENS3Canvas readFromXML: in];
+    out = [canvas writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [canvas dealloc]; //free the canvas.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("house", argv[1]) == 0) {
-    house = (ENUNCIATENS4House *) [ENUNCIATENS4House readXMLElement: reader];
-    [house writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing house.");
-      return 1;
-    }
+    house = (ENUNCIATENS4House *) [ENUNCIATENS4House readFromXML: in];
+    out = [house writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [house dealloc]; //free the house.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else if (strcmp("bus", argv[1]) == 0) {
-    bus = (ENUNCIATENS5Bus *) [ENUNCIATENS5Bus readXMLElement: reader];
-    [bus writeXMLElement: writer];
-    if (status < 0) {
-      //panic
-      printf("Problem writing bus.");
-      return 1;
-    }
+    bus = (ENUNCIATENS5Bus *) [ENUNCIATENS5Bus readFromXML: in];
+    out = [bus writeToXML];
+    [out retain];
+    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
 
     [bus dealloc]; //free the bus.
-    xmlFreeTextWriter(writer); //free the writer
-    xmlFreeTextReader(reader); //free the reader
+    [in release];
+    [out release];
   }
   else {
     printf("Unrecognized xml type: %s\nUsage: %s [cat|canvas|house|bus||circle|triangle|rectangle] [infile] [outfile]", argv[1], argv[0]);

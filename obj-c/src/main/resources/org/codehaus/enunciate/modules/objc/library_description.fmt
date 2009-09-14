@@ -27,8 +27,16 @@
 //...
 
 [#if input_element_name??]
-xmlTextWriterPtr writer = ...; //set up the writer to the url.
-${input_element_name} *request_element = ...;
+${input_element_name} *request_element = [[${input_element_name} alloc] init];
+NSData *request_data; //data holding the XML for the request.
+[/#if]
+NSData *response_data; //data holding the XML from the response.
+${output_element_name} *response_element;
+NSFileHandle *conn = ...; //the connection to the server.
+[#if input_element_name??]
+
+//set up the ${input_element_name}...
+response_data = [request_element writeToXML];
 [/#if]
 xmlTextReaderPtr reader = ...; //set up the reader to the url.
 ${output_element_name} *response_element = ...;

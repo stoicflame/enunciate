@@ -71,14 +71,19 @@ import com.sun.mirror.type.ClassType;
  * converting an enum constant name to a unique c-style constant name. The arguments passed to the format string are: (1) the project label (2) the namespace id
  * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
  * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
- * (7) the decapitalized simple name of the type declaration (8) the package name (9) the annotation-specified client name of the enum contant (10) the simple name of the enum constant. All tokens will
- * be "scrubbed" by replacing any non-word character with the "_" character. The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
+ * (7) the decapitalized simple name of the type declaration (8) the package identifier (9) the annotation-specified client name of the enum contant
+ * (10) the simple name of the enum constant. All tokens will be "scrubbed" by replacing any non-word character with the "_" character.
+ * The default value for this pattern is "%1$S_%2$S_%3$S_%9$S".</li>
  * <li>The "typeDefinitionNamePattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
  * converting an type definition name to a unique c-style name. The arguments passed to the format string are: (1) the project label (2) the namespace id
  * of the type definition (3) the name of the type definition (4) the NOT decapitalized annotation-specified client name of the type declaration
  * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
- * (7) the decapitalized simple name of the type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character
- * with the "_" character. The default value for this pattern is "%1$S%2$S%4$s".</li> 
+ * (7) the decapitalized simple name of the type declaration (8) the package identifier. All tokens will be "scrubbed" by replacing any non-word character
+ * with the "_" character. The default value for this pattern is "%1$S%2$S%4$s".</li>
+ * <li>The "packageIdentifierPattern" attribute defines the <a href="http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax">format string</a> for
+ * creating a unique package identifier for a given package. The arguments passed to the format string will be each subpackage. So, for package "org.codehaus.enunciate.samples.c",
+ * The arguments are (1) org (2) codehaus (3) enunciate (4) samples (5) c. The default package identifier is the package name. The package identifier
+ * is in turn passed as an argument to the "enumConstantNamePattern" and to the "typeDefinitionNamePattern".</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -93,6 +98,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean forceEnable = false;
   private String label = null;
+  private String packageIdentifierPattern = null;
   private String typeDefinitionNamePattern = "%1$S%2$S%4$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
 
@@ -134,9 +140,9 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.put("schemaTypes", schemaTypes);
 
-      NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, model.getNamespacesToPrefixes());
+      NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), getPackageIdentifierPattern(), label, model.getNamespacesToPrefixes());
       model.put("nameForTypeDefinition", nameForTypeDefinition);
-      model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, model.getNamespacesToPrefixes()));
+      model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), getPackageIdentifierPattern(), label, model.getNamespacesToPrefixes()));
       TreeMap<String, String> conversions = new TreeMap<String, String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -188,7 +194,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     RESTResource exampleResource = getModelInternal().findExampleResource();
     String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
     model.put("label", label);
-    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, getModelInternal().getNamespacesToPrefixes());
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), packageIdentifierPattern, label, getModelInternal().getNamespacesToPrefixes());
 
     if (exampleResource != null) {
       if (exampleResource.getInputPayload() != null && exampleResource.getInputPayload().getXmlElement() != null) {
@@ -276,6 +282,24 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * The format string creating a package identifier from a package name.
+   *
+   * @return The format string creating a package identifier from a package name.
+   */
+  public String getPackageIdentifierPattern() {
+    return packageIdentifierPattern;
+  }
+
+  /**
+   * The format string creating a package identifier from a package name.
+   *
+   * @param packageIdentifierPattern The format string creating a package identifier from a package name.
+   */
+  public void setPackageIdentifierPattern(String packageIdentifierPattern) {
+    this.packageIdentifierPattern = packageIdentifierPattern;
   }
 
   /**

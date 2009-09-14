@@ -8,68 +8,25 @@
 #define ENUNCIATE_OBJC_TYPES
 
 /**
- * Protocol defining a JAXB (see https://jaxb.dev.java.net/) type.
+ * Protocol defining an Enunciate XML I/O methods.
  */
-@protocol JAXBType
+@protocol EnunciateXML
 
 /**
- * Read an XML type from an XML reader.
+ * Read an instance from XML.
  *
- * @param reader The reader.
- * @return An instance of the object defining the JAXB type.
+ * @param xml The XML to read.
  */
-+ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader;
++ (id<EnunciateXML>) readFromXML: (NSData *) xml;
 
 /**
- * Initialize the object with an XML reader.
+ * Write this instance as XML.
  *
- * @param reader The XML reader from which to initialize the values of this type.
+ * @return The XML.
  */
-- (id) initWithReader: (xmlTextReaderPtr) reader;
+- (NSData *) writeToXML;
 
-/**
- * Write this instance of a JAXB type to a writer.
- *
- * @param writer The writer.
- */
-- (void) writeXMLType: (xmlTextWriterPtr) writer;
-
-@end /*protocol JAXBType*/
-
-
-
-/**
- * Protocol defining a JAXB (see https://jaxb.dev.java.net/) element.
- */
-@protocol JAXBElement
-
-/**
- * Read the XML element from an XML reader. It is assumed
- * that the reader is pointing at the start element (be careful
- * that it's not still pointing to the XML document).
- *
- * @param reader The reader.
- * @return An instance of the object defining the JAXB element.
- */
-+ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader;
-
-/**
- * Write this instance of a JAXB element to a writer.
- *
- * @param writer The writer.
- */
-- (void) writeXMLElement: (xmlTextWriterPtr) writer;
-
-/**
- * Write this instance of a JAXB element to a writer.
- *
- * @param writer The writer.
- * @param writeNs Whether to write the namespaces for this element to the xml writer.
- */
-- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs;
-
-@end /*protocol JAXBElement*/
-
+@end /*protocol EnunciateXML*/
 
 
 /**
@@ -77,7 +34,7 @@
  * instead of NSXMLElement because it's not supported on all
  * platforms yet.
  */
-@interface JAXBBasicXMLNode : NSObject <JAXBType, JAXBElement>
+@interface JAXBBasicXMLNode : NSObject
 {
   @private
     NSString *_name;

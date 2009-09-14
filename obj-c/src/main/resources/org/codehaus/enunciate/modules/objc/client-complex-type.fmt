@@ -7,7 +7,7 @@
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-@interface ${typeName} : [#if ((!type.baseObject) && (type.baseType.typeDefinition??))]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if] <JAXBType[#if findRootElement(type)??], JAXBElement[/#if]>
+@interface ${typeName} : [#if ((!type.baseObject) && (type.baseType.typeDefinition??))]${nameForTypeDefinition(type.baseType.typeDefinition)}[#else]NSObject[/#if][#if findRootElement(type)??] <EnunciateXML>[/#if]
 {
   @private
   [#list type.attributes as attribute]
@@ -260,6 +260,142 @@
 }
 [/#if]
 
+- (void) dealloc
+{
+[#list type.attributes as attribute]
+  [#if !accessorOverridesAnother(attribute)]
+    [#if !attribute.accessorType.primitive]
+      [#if functionIdentifierFor(attribute)??]
+  [self set${attribute.clientSimpleName?cap_first}: NULL];
+      [#else]
+  [self set${attribute.clientSimpleName?cap_first}: nil];
+      [/#if]
+    [/#if]
+  [/#if]
+[/#list]
+[#if type.value??]
+  [#if !accessorOverridesAnother(type.value)]
+    [#if !type.value.accessorType.primitive]
+      [#if functionIdentifierFor(type.value)??]
+  [self set${type.value.clientSimpleName?cap_first}: NULL];
+      [#else]
+  [self set${type.value.clientSimpleName?cap_first}: nil];
+      [/#if]
+    [/#if]
+  [/#if]
+[#else]
+  [#list type.elements as element]
+    [#if !accessorOverridesAnother(element)]
+      [#if !element.accessorType.primitive]
+        [#if functionIdentifierFor(element)??]
+  [self set${element.clientSimpleName?cap_first}: NULL];
+        [#else]
+  [self set${element.clientSimpleName?cap_first}: nil];
+        [/#if]
+      [/#if]
+    [/#if]
+  [/#list]
+[/#if]
+[#if type.anyElement??]
+  [self set${type.anyElement.clientSimpleName?cap_first}: nil];
+[/#if]
+[#if type.hasAnyAttribute]
+  [self setOtherAttributes: nil];
+[/#if]
+  [super dealloc];
+}
+[#if findRootElement(type)??]
+  [#assign rootElement=findRootElement(type)/]
+
+//documentation inherited.
++ (id<EnunciateXML>) readFromXML: (NSData *) xml
+{
+  ${typeName} *_${typeName?uncap_first};
+  xmlTextReaderPtr reader = xmlReaderForMemory([xml bytes], [xml length], NULL, NULL, 0);
+  if (reader == NULL) {
+    [NSException raise: @"XMLReadError"
+                 format: @"Error instantiating an XML reader."];
+    return nil;
+  }
+
+  _${typeName?uncap_first} = (${typeName} *) [${typeName} readXMLElement: reader];
+  xmlFreeTextReader(reader); //free the reader
+  return _${typeName?uncap_first};
+}
+
+//documentation inherited.
+- (NSData *) writeToXML
+{
+  xmlBufferPtr buf;
+  xmlTextWriterPtr writer;
+  int rc;
+  NSData *data;
+
+  buf = xmlBufferCreate();
+  if (buf == NULL) {
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error creating an XML buffer."];
+    return nil;
+  }
+
+  writer = xmlNewTextWriterMemory(buf, 0);
+  if (writer == NULL) {
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error creating an XML writer."];
+    return nil;
+  }
+
+  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+  if (rc < 0) {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing XML start document."];
+    return nil;
+  }
+
+  NS_DURING
+  {
+    [self writeXMLElement: writer];
+  }
+  NS_HANDLER
+  {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [localException raise];
+  }
+  NS_ENDHANDLER
+
+  rc = xmlTextWriterEndDocument(writer);
+  if (rc < 0) {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing XML end document."];
+    return nil;
+  }
+
+  xmlFreeTextWriter(writer);
+  data = [NSData dataWithBytes: buf->content length: buf->use];
+  xmlBufferFree(buf);
+  return data;
+}
+[/#if]
+@end /* implementation ${typeName} */
+
+/**
+ * Internal, private interface for JAXB reading and writing.
+ */
+@interface ${typeName} (JAXB) <JAXBReading, JAXBWriting, JAXBType[#if findRootElement(type)??], JAXBElement[/#if]>
+
+@end /*interface ${typeName} (JAXB)*/
+
+/**
+ * Internal, private implementation for JAXB reading and writing.
+ */
+@implementation ${typeName} (JAXB)
+
 /**
  * Read an instance of ${typeName} from an XML reader.
  *
@@ -307,52 +443,6 @@
 {
   [super writeXMLType:writer];
 }
-
-- (void) dealloc
-{
-[#list type.attributes as attribute]
-  [#if !accessorOverridesAnother(attribute)]
-    [#if !attribute.accessorType.primitive]
-      [#if functionIdentifierFor(attribute)??]
-  [self set${attribute.clientSimpleName?cap_first}: NULL];
-      [#else]
-  [self set${attribute.clientSimpleName?cap_first}: nil];
-      [/#if]
-    [/#if]
-  [/#if]
-[/#list]
-[#if type.value??]
-  [#if !accessorOverridesAnother(type.value)]
-    [#if !type.value.accessorType.primitive]
-      [#if functionIdentifierFor(type.value)??]
-  [self set${type.value.clientSimpleName?cap_first}: NULL];
-      [#else]
-  [self set${type.value.clientSimpleName?cap_first}: nil];
-      [/#if]
-    [/#if]
-  [/#if]
-[#else]
-  [#list type.elements as element]
-    [#if !accessorOverridesAnother(element)]
-      [#if !element.accessorType.primitive]
-        [#if functionIdentifierFor(element)??]
-  [self set${element.clientSimpleName?cap_first}: NULL];
-        [#else]
-  [self set${element.clientSimpleName?cap_first}: nil];
-        [/#if]
-      [/#if]
-    [/#if]
-  [/#list]
-[/#if]
-[#if type.anyElement??]
-  [self set${type.anyElement.clientSimpleName?cap_first}: nil];
-[/#if]
-[#if type.hasAnyAttribute]
-  [self setOtherAttributes: nil];
-[/#if]
-  [super dealloc];
-}
-
   [#if findRootElement(type)??]
     [#assign rootElement=findRootElement(type)/]
 
@@ -462,19 +552,6 @@
   }
 }
   [/#if]
-@end /* implementation ${typeName} */
-
-/**
- * Internal, private interface for JAXB reading and writing.
- */
-@interface ${typeName} (JAXB) <JAXBReading, JAXBWriting>
-
-@end /*interface ${typeName} (JAXB)*/
-
-/**
- * Internal, private implementation for JAXB reading and writing.
- */
-@implementation ${typeName} (JAXB)
 
 //documentation inherited.
 - (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader

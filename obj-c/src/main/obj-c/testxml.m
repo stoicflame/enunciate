@@ -189,6 +189,69 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 #define ENUNCIATE_OBJC_CLASSES
 
 /**
+ * Protocol defining a JAXB (see https://jaxb.dev.java.net/) type.
+ */
+@protocol JAXBType
+
+/**
+ * Read an XML type from an XML reader.
+ *
+ * @param reader The reader.
+ * @return An instance of the object defining the JAXB type.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader;
+
+/**
+ * Initialize the object with an XML reader.
+ *
+ * @param reader The XML reader from which to initialize the values of this type.
+ */
+- (id) initWithReader: (xmlTextReaderPtr) reader;
+
+/**
+ * Write this instance of a JAXB type to a writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer;
+
+@end /*protocol JAXBType*/
+
+
+/**
+ * Protocol defining a JAXB (see https://jaxb.dev.java.net/) element.
+ */
+@protocol JAXBElement
+
+/**
+ * Read the XML element from an XML reader. It is assumed
+ * that the reader is pointing at the start element (be careful
+ * that it's not still pointing to the XML document).
+ *
+ * @param reader The reader.
+ * @return An instance of the object defining the JAXB element.
+ */
++ (id<JAXBElement>) readXMLElement: (xmlTextReaderPtr) reader;
+
+/**
+ * Write this instance of a JAXB element to a writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer;
+
+/**
+ * Write this instance of a JAXB element to a writer.
+ *
+ * @param writer The writer.
+ * @param writeNs Whether to write the namespaces for this element to the xml writer.
+ */
+- (void) writeXMLElement: (xmlTextWriterPtr) writer writeNamespaces: (BOOL) writeNs;
+
+@end /*protocol JAXBElement*/
+
+
+/**
  * Protocol defining methods for events that occur
  * when reading/parsing XML. Intended for internal
  * use only.
@@ -608,6 +671,26 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
   _attributes = newAttributes;
 }
 
+- (void) dealloc {
+  [self setName: nil];
+  [self setNs: nil];
+  [self setPrefix: nil];
+  [self setValue: nil];
+  [self setChildElements: nil];
+  [self setAttributes: nil];
+  [super dealloc];
+}
+@end /*implementation JAXBBasicXMLNode*/
+
+/**
+ * Internal, private interface for JAXB reading and writing.
+ */
+@interface JAXBBasicXMLNode (JAXB) <JAXBType, JAXBElement>
+
+@end /*interface JAXBBasicXMLNode (JAXB)*/
+
+@implementation JAXBBasicXMLNode (JAXB)
+
 /**
  * Read the XML type from the reader; an instance of JAXBBasicXMLNode.
  *
@@ -628,7 +711,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
     [localException raise];
   }
   NS_ENDHANDLER
-  
+
   [node autorelease];
   return node;
 }
@@ -712,7 +795,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 
     }
   }
-  
+
   return self;
 }
 
@@ -767,7 +850,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
       if ([child prefix]) {
         childprefix = BAD_CAST [[child prefix] UTF8String];
       }
-      
+
       childname = NULL;
       if ([child name]) {
         childname = BAD_CAST [[child name] UTF8String];
@@ -839,16 +922,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
   [self writeXMLType: writer];
 }
 
-- (void) dealloc {
-  [self setName: nil];
-  [self setNs: nil];
-  [self setPrefix: nil];
-  [self setValue: nil];
-  [self setChildElements: nil];
-  [self setAttributes: nil];
-  [super dealloc];
-}
-@end /*implementation JAXBBasicXMLNode*/
+@end /* implementation JAXBBasicXMLNode (JAXB) */
 
 /**
  * Declaration of the JAXB type for a string.
@@ -1766,7 +1840,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
 /**
  * Internal, private interface for JAXB reading and writing.
  */
-@interface Person (JAXB) <JAXBReading, JAXBWriting>
+@interface Person (JAXB) <JAXBReading, JAXBWriting, EnunciateXML>
 
 @end /*interface Person (JAXB)*/
 
@@ -1774,6 +1848,81 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
  * Internal, private implementation for JAXB reading and writing.
  */
 @implementation Person (JAXB)
+
+//documentation inherited.
++ (id<EnunciateXML>) readFromXML: (NSData *) xml
+{
+  Person *person;
+  xmlTextReaderPtr reader = xmlReaderForMemory([xml bytes], [xml length], NULL, NULL, 0);
+  if (reader == NULL) {
+    [NSException raise: @"XMLReadError"
+                 format: @"Error instantiating an XML reader."];
+    return nil;
+  }
+
+  person = (Person *) [Person readXMLElement: reader];
+  xmlFreeTextReader(reader); //free the reader
+  return person;
+}
+
+//documentation inherited.
+- (NSData *) writeToXML
+{
+  xmlBufferPtr buf;
+  xmlTextWriterPtr writer;
+  int rc;
+  NSData *data;
+
+  buf = xmlBufferCreate();
+  if (buf == NULL) {
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error creating an XML buffer."];
+    return nil;
+  }
+
+  writer = xmlNewTextWriterMemory(buf, 0);
+  if (writer == NULL) {
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error creating an XML writer."];
+    return nil;
+  }
+
+  rc = xmlTextWriterStartDocument(writer, NULL, "utf-8", NULL);
+  if (rc < 0) {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing XML start document."];
+    return nil;
+  }
+
+  NS_DURING
+  {
+    [self writeXMLElement: writer];
+  }
+  NS_HANDLER
+  {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [localException raise];
+  }
+  NS_ENDHANDLER
+
+  rc = xmlTextWriterEndDocument(writer);
+  if (rc < 0) {
+    xmlFreeTextWriter(writer);
+    xmlBufferFree(buf);
+    [NSException raise: @"XMLWriteError"
+                 format: @"Error writing XML end document."];
+    return nil;
+  }
+
+  xmlFreeTextWriter(writer);
+  data = [NSData dataWithBytes: buf->content length: buf->use];
+  xmlBufferFree(buf);
+  return data;
+}
 
 //documentation inherited.
 - (BOOL) readJAXBAttribute: (xmlTextReaderPtr) reader
