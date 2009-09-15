@@ -27,5 +27,8 @@ import org.apache.commons.digester.RuleSetBase;
 public class ObjCRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
+    digester.addObjectCreate("enunciate/modules/obj-c/package", PackageIdentifier.class);
+    digester.addSetProperties("enunciate/modules/obj-c/package");
+    digester.addSetNext("enunciate/modules/obj-c/package", "addPackageIdentifier");
   }
 }

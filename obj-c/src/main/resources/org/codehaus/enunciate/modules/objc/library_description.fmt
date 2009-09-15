@@ -27,29 +27,32 @@
 //...
 
 [#if input_element_name??]
-${input_element_name} *request_element = [[${input_element_name} alloc] init];
-NSData *request_data; //data holding the XML for the request.
+${input_element_name} *requestElement = [[${input_element_name} alloc] init];
+NSData *requestData; //data holding the XML for the request.
 [/#if]
-NSData *response_data; //data holding the XML from the response.
-${output_element_name} *response_element;
-NSFileHandle *conn = ...; //the connection to the server.
+${output_element_name} *responseElement;
+NSData *responseData; //data holding the XML from the response.
+NSURL *baseURL = ...; //the base url including the host and subpath.
+NSURL *url = [NSURL URLWithString: @"${resource_url}" relativeToURL: baseURL];
+NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+NSURLResponse *response = nil;
+NSError *error = NULL;
+[request setHTTPMethod: @"${resource_method}"];
 [#if input_element_name??]
+[request setValue:@"application/xml" forHTTPHeaderField:@"Content-Type"];  
 
 //set up the ${input_element_name}...
-response_data = [request_element writeToXML];
+
+requestData = [requestElement writeToXML];
+[request setHTTPBody: requestData];
 [/#if]
-xmlTextReaderPtr reader = ...; //set up the reader to the url.
-${output_element_name} *response_element = ...;
-[#if input_element_name??]
-//set up the ${input_element_name}...
-[request_element writeXMLElement: writer];
-[/#if]
-response_element = (${output_element_name} *) [${output_element_name} readXMLElement: reader];
-[response_element retain];
+
+//this example uses a synchronous request,
+//but you'll probably want to use an asynchronous call
+responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+${output_element_name} *responseElement = [${output_element_name} readFromXML: responseData];
+[responseElement retain];
 
 //handle the response as needed...
-
-//release the ${output_element_name}
-[response_element release];
 </code>
 [/#if]

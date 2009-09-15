@@ -16,24 +16,27 @@
 
 package org.codehaus.enunciate.modules.objc;
 
+import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.ClassType;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
-import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
+import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.objc.config.ObjCRuleSet;
+import org.codehaus.enunciate.modules.objc.config.PackageIdentifier;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,9 +45,6 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
-
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.ClassType;
 
 /**
  * <h1>Objective C Module</h1>
@@ -86,6 +86,9 @@ import com.sun.mirror.type.ClassType;
  * is in turn passed as an argument to the "enumConstantNamePattern" and to the "typeDefinitionNamePattern".</li>
  * </ul>
  *
+ * <p>In addition to the attributes specified above, the Objective C module configuration supports an arbitrary number of "package" child elements, used to
+ * explicitly assign package identifiers to each package. The "package" child element supports a "name" attribute (used to name the package) and an "identifier" attribute.</p>
+ *
  * @author Ryan Heaton
  * @docFileName module_obj_c.html
  */
@@ -101,6 +104,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   private String packageIdentifierPattern = null;
   private String typeDefinitionNamePattern = "%1$S%2$S%4$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
+  private final Map<String, String> packageIdentifiers = new HashMap<String, String>();
 
   /**
    * @return "obj-c"
@@ -121,6 +125,26 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
+    if (!isDisabled() && (this.packageIdentifierPattern != null)) {
+      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+          String pckg = typeDefinition.getPackage().getQualifiedName();
+          if (!this.packageIdentifiers.containsKey(pckg)) {
+            try {
+              this.packageIdentifiers.put(pckg, String.format(this.packageIdentifierPattern, pckg.split("\\.", 9)));
+            }
+            catch (IllegalFormatException e) {
+              warn("Unable to format package %s with format pattern %s (%s)", pckg, this.packageIdentifierPattern, e.getMessage());
+            }
+          }
+        }
+      }
+    }
+  }
+  @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException, EnunciateException {
     File genDir = getGenerateDir();
     String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
@@ -140,9 +164,9 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
       }
       model.put("schemaTypes", schemaTypes);
 
-      NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), getPackageIdentifierPattern(), label, model.getNamespacesToPrefixes());
+      NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, model.getNamespacesToPrefixes(), this.packageIdentifiers);
       model.put("nameForTypeDefinition", nameForTypeDefinition);
-      model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), getPackageIdentifierPattern(), label, model.getNamespacesToPrefixes()));
+      model.put("nameForEnumConstant", new NameForEnumConstantMethod(getEnumConstantNamePattern(), label, model.getNamespacesToPrefixes(), this.packageIdentifiers));
       TreeMap<String, String> conversions = new TreeMap<String, String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
@@ -194,7 +218,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     RESTResource exampleResource = getModelInternal().findExampleResource();
     String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
     model.put("label", label);
-    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), packageIdentifierPattern, label, getModelInternal().getNamespacesToPrefixes());
+    NameForTypeDefinitionMethod nameForTypeDefinition = new NameForTypeDefinitionMethod(getTypeDefinitionNamePattern(), label, getModelInternal().getNamespacesToPrefixes(), this.packageIdentifiers);
 
     if (exampleResource != null) {
       if (exampleResource.getInputPayload() != null && exampleResource.getInputPayload().getXmlElement() != null) {
@@ -226,6 +250,9 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
           model.put("output_element_name", nameForTypeDefinition.calculateName(typeDefinition));
         }
       }
+
+      model.put("resource_url", exampleResource.getPath());
+      model.put("resource_method", exampleResource.getSupportedOperations() == null || exampleResource.getSupportedOperations().isEmpty() ? "GET" : exampleResource.getSupportedOperations().iterator().next());
     }
 
     URL res = ObjCDeploymentModule.class.getResource(resource);
@@ -282,6 +309,35 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * The package-to-module conversions.
+   *
+   * @return The package-to-module conversions.
+   */
+  public Map<String, String> getPackageIdentifiers() {
+    return packageIdentifiers;
+  }
+
+  /**
+   * Add a client package conversion.
+   *
+   * @param conversion The conversion to add.
+   */
+  public void addPackageIdentifier(PackageIdentifier conversion) {
+    String name = conversion.getName();
+    String identifier = conversion.getIdentifier();
+
+    if (name == null) {
+      throw new IllegalArgumentException("A 'name' attribute must be specified on a 'package' element.");
+    }
+
+    if (identifier == null) {
+      throw new IllegalArgumentException("An 'identifer' attribute must be specified on 'package' element.");
+    }
+
+    this.packageIdentifiers.put(name, identifier);
   }
 
   /**

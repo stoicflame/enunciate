@@ -22,13 +22,13 @@ import java.util.Map;
 public class NameForEnumConstantMethod implements TemplateMethodModelEx {
 
   private final String pattern;
-  private final String packageIdentifierPattern;
   private final String projectLabel;
   private final Map<String, String> namespaces2ids;
+  private final Map<String, String> packages2ids;
 
-  public NameForEnumConstantMethod(String pattern, String packageIdentifierPattern, String projectLabel, Map<String, String> namespaces2ids) {
+  public NameForEnumConstantMethod(String pattern, String projectLabel, Map<String, String> namespaces2ids, Map<String, String> packages2ids) {
     this.pattern = pattern;
-    this.packageIdentifierPattern = packageIdentifierPattern;
+    this.packages2ids = packages2ids;
     this.projectLabel = ObjCDeploymentModule.scrubIdentifier(projectLabel);
     this.namespaces2ids = namespaces2ids;
   }
@@ -59,15 +59,8 @@ public class NameForEnumConstantMethod implements TemplateMethodModelEx {
       name = "anonymous_" + clientNameDecap;
     }
     PackageDeclaration pckg = ((TypeDeclaration) typeDefinition).getPackage();
-    String packageName = pckg.getQualifiedName();
-    String packageIdentifier;
-    if (this.packageIdentifierPattern != null) {
-      String[] subpackages = packageName.split("\\.", 9);
-      packageIdentifier = ObjCDeploymentModule.scrubIdentifier(String.format(this.packageIdentifierPattern, subpackages));
-    }
-    else {
-      packageIdentifier = ObjCDeploymentModule.scrubIdentifier(pckg != null ? packageName : "");
-    }
+    String packageName = pckg == null ? "" : pckg.getQualifiedName();
+    String packageIdentifier = this.packages2ids.containsKey(packageName) ? ObjCDeploymentModule.scrubIdentifier(this.packages2ids.get(packageName)) : ObjCDeploymentModule.scrubIdentifier(packageName);
     String nsid = ObjCDeploymentModule.scrubIdentifier(namespaces2ids.get(typeDefinition.getNamespace()));
 
     String constantName = ObjCDeploymentModule.scrubIdentifier(constant.getSimpleName());
