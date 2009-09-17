@@ -8,7 +8,7 @@ package ${endpointInterface.package.qualifiedName}.gwt;
 /**
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enunciate.modules.gwt.GWTEndpointImpl implements ${packageFor(endpointInterface)}.GWT${endpointInterface.simpleName} {
+public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enunciate.modules.gwt.GWTEndpointImpl implements ${packageFor(endpointInterface)}.${endpointInterface.simpleName} {
 
   public GWT${endpointInterface.simpleName}Impl() throws Exception {
     super(new ${endpointInterface.endpointImplementations[0].qualifiedName}());

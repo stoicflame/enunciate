@@ -15,8 +15,9 @@
  */
 package org.codehaus.enunciate.samples.petclinic.app.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import org.codehaus.enunciate.samples.petclinic.client.services.Clinic;
+import org.codehaus.enunciate.samples.petclinic.client.services.ClinicAsync;
 import org.codehaus.enunciate.samples.petclinic.client.schema.Owner;
 import org.codehaus.enunciate.samples.petclinic.client.schema.Pet;
 
@@ -47,7 +48,7 @@ public class Owners extends ClinicComponent {
   }
 
   public Owners() {
-    final Clinic clinic = new Clinic();
+    final ClinicAsync clinic = ClinicAsync.Util.getInstance();
     FlowPanel searchPanel = new FlowPanel();
     final Grid grid = new Grid();
     final VerticalPanel layout = new VerticalPanel();
@@ -56,8 +57,8 @@ public class Owners extends ClinicComponent {
     searchPanel.add(new Button("find", new ClickListener() {
       public void onClick(Widget widget) {
         if (searchBox.getText().length() > 0) {
-          clinic.findOwners(searchBox.getText(), new Clinic.FindOwnersResponseCallback() {
-            public void onResponse(Collection collection) {
+          clinic.findOwners(searchBox.getText(), new AsyncCallback<Collection<Owner>>() {
+            public void onSuccess(Collection<Owner> collection) {
               if (collection.size() == 0) {
                 grid.resize(1, 1);
                 grid.setWidget(0, 0, new Label("No owners of last name '" + searchBox.getText() + "' were found."));
@@ -75,9 +76,9 @@ public class Owners extends ClinicComponent {
                 grid.getCellFormatter().setHorizontalAlignment(0, 3, HasAlignment.ALIGN_CENTER);
                 grid.getRowFormatter().setStyleName(0, "clinic-tables-header");
                 int row = 1;
-                Iterator it = collection.iterator();
+                Iterator<Owner> it = collection.iterator();
                 while (it.hasNext()) {
-                  final Owner owner = (Owner) it.next();
+                  final Owner owner = it.next();
                   final Label nameLabel = new Label(owner.getFirstName() + " " + owner.getLastName());
                   nameLabel.addStyleName("clinic-clickable");
                   nameLabel.addClickListener(new ClickListener() {
@@ -94,12 +95,12 @@ public class Owners extends ClinicComponent {
                       Iterator petsIt = owner.getPetIds().iterator();
                       while (petsIt.hasNext()) {
                         final Integer petId = (Integer) petsIt.next();
-                        clinic.loadPet(petId.intValue(), new Clinic.LoadPetResponseCallback() {
-                          public void onResponse(Pet response) {
+                        clinic.loadPet(petId.intValue(), new AsyncCallback<Pet>() {
+                          public void onSuccess(Pet response) {
                             petList.add(new Label("A " + response.getType().getName() + " named " + response.getName() + "."));
                           }
 
-                          public void onError(Throwable throwable) {
+                          public void onFailure(Throwable throwable) {
                             petList.add(new Label("Error loading pet " + petId + ": " + throwable.getMessage()));
                           }
                         });
@@ -115,7 +116,7 @@ public class Owners extends ClinicComponent {
               }
             }
 
-            public void onError(Throwable throwable) {
+            public void onFailure(Throwable throwable) {
               grid.resize(1, 1);
               grid.setWidget(0, 0, new Label("ERROR: " + throwable.getMessage()));
             }

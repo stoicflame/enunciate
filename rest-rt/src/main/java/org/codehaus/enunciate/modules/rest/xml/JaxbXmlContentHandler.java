@@ -178,6 +178,7 @@ public class JaxbXmlContentHandler extends ApplicationObjectSupport implements R
   protected void marshal(Object data, Marshaller marshaller, HttpServletRequest request, HttpServletResponse response) throws Exception {
     data = prepareForJAXBMarshalling(data, request);
     marshaller.marshal(data, response.getOutputStream());
+    response.flushBuffer();
   }
 
   /**

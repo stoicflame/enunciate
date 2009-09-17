@@ -22,10 +22,7 @@
     <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.RemoteProcedureCalls.CreatingServices.html">service interfaces</a>
     (synchronous and asynchronous) and
     <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.JavaToJavaScriptCompiler.html">translatable objects</a>
-    in the "client" package of the main module.  In addition to these classes, this library also provides support classes for
-    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.RemoteProcedureCalls.MakingACall.html">actually making an RPC
-    call</a> with more type safety and without the need to configure the GWT
-    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.user.client.rpc.ServiceDefTarget.html">ServiceDefTarget</a>.
+    in the "client" package of the main module.
   </p>
 
 [#if sample_service_method??]
@@ -39,17 +36,17 @@
 
   <code>
 //instantiate a new service...
-${sample_service_method.declaringEndpointInterface.simpleName} service =
-  new ${sample_service_method.declaringEndpointInterface.simpleName}();
+${sample_service_method.declaringEndpointInterface.simpleName}ASync service =
+  ${sample_service_method.declaringEndpointInterface.simpleName}ASync.getInstance();
 
 //make the asynchronous remote call to read the result...
 service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.simpleName}, [/#list]
-  new ${sample_service_method.declaringEndpointInterface.simpleName}.${sample_service_method.simpleName?cap_first}ResponseCallback() {
-    onResponse(...) {
+  new AsyncCallback<...>() {
+    onSuccess(...) {
       //handle the result as needed...
     }
 
-    onError(Throwable error) {
+    onFailure(Throwable error) {
       //handle the error as needed...
     }
 });

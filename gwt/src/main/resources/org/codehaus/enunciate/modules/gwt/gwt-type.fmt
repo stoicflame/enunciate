@@ -69,17 +69,6 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
 [/#macro]
 [#macro propertyField property]
   [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
-    [#if !use15]
-      [#if property.accessorType.map?default(false)]
-  /**
-   * @gwt.typeArgs <${classnameFor(property.accessorType.keyType)},${classnameFor(property.accessorType.valueType)}>
-   */
-      [#elseif property.accessorType.collection]
-  /**
-   * @gwt.typeArgs <${componentTypeFor(property.accessorType)}>
-   */
-      [/#if]
-    [/#if]
   private ${classnameFor(property)} ${property.simpleName};
   [/#if]
 [/#macro]

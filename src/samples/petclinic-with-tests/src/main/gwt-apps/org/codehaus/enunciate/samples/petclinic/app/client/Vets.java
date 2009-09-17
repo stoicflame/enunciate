@@ -15,9 +15,10 @@
  */
 package org.codehaus.enunciate.samples.petclinic.app.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.Window;
-import org.codehaus.enunciate.samples.petclinic.client.services.Clinic;
+import org.codehaus.enunciate.samples.petclinic.client.services.ClinicAsync;
 import org.codehaus.enunciate.samples.petclinic.client.schema.Vet;
 import org.codehaus.enunciate.samples.petclinic.client.schema.Specialty;
 
@@ -44,9 +45,9 @@ public class Vets extends ClinicComponent {
 
   public Vets() {
     grid = new Grid();
-    Clinic clinic = new Clinic();
-    clinic.getVets(new Clinic.GetVetsResponseCallback() {
-      public void onResponse(Collection collection) {
+    final ClinicAsync clinic = ClinicAsync.Util.getInstance();
+    clinic.getVets(new AsyncCallback<Collection<Vet>>() {
+      public void onSuccess(Collection<Vet> collection) {
         grid.resize(collection.size() + 1, 2);
         grid.setWidget(0, 0, new Label("name"));
         grid.setWidget(0, 1, new Label("action"));
@@ -55,9 +56,9 @@ public class Vets extends ClinicComponent {
         grid.getCellFormatter().setHorizontalAlignment(0, 1, HasAlignment.ALIGN_CENTER);
         grid.getRowFormatter().setStyleName(0, "clinic-tables-header");
         int row = 1;
-        Iterator vetsIt = collection.iterator();
+        Iterator<Vet> vetsIt = collection.iterator();
         while (vetsIt.hasNext()) {
-          final Vet vet = (Vet) vetsIt.next();
+          final Vet vet = vetsIt.next();
           final Label details = new Label(vet.getFirstName() + " " + vet.getLastName());
           details.addClickListener(new ClickListener() {
             public void onClick(Widget widget) {
@@ -97,7 +98,7 @@ public class Vets extends ClinicComponent {
         }
       }
 
-      public void onError(Throwable throwable) {
+      public void onFailure(Throwable throwable) {
         grid.resize(1, 1);
         grid.setWidget(0, 0, new Label("ERROR: " + throwable.getMessage()));
       }

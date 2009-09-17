@@ -282,7 +282,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
         BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line = procReader.readLine();
         while (line != null) {
-          debug(line);
+          info(line);
           line = procReader.readLine();
         }
         int procCode;

@@ -1,8 +1,9 @@
 package net.java.apps.addressbook.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import net.java.ws.addressbook.client.services.AddressBook;
+import net.java.ws.addressbook.client.services.AddressBookAsync;
 import net.java.ws.addressbook.client.domain.ContactList;
 import net.java.ws.addressbook.client.domain.Contact;
 
@@ -21,7 +22,7 @@ public class AddressBookApp implements EntryPoint {
     VerticalPanel byNamePanel = new VerticalPanel();
 
     //the Enunciate-generated client-side GWT address book service
-    final AddressBook book = new AddressBook();
+    final AddressBookAsync book = AddressBookAsync.Util.getInstance();
 
     //the grid we will use to display the contacts that are found.
     final Grid contactGrid = new Grid();
@@ -32,8 +33,8 @@ public class AddressBookApp implements EntryPoint {
         String query = request.getQuery();
 
         //call the method to find contacts by name.
-        book.findContactsByName(query, new AddressBook.FindContactsByNameResponseCallback() {
-          public void onResponse(ContactList response) {
+        book.findContactsByName(query, new AsyncCallback<ContactList>() {
+          public void onSuccess(ContactList response) {
             Iterator contactIt = response.getContacts().iterator();
             Collection suggestions = new ArrayList();
             while (contactIt.hasNext()) {
@@ -55,7 +56,7 @@ public class AddressBookApp implements EntryPoint {
             callback.onSuggestionsReady(request, new Response(suggestions));
           }
 
-          public void onError(Throwable throwable) {
+          public void onFailure(Throwable throwable) {
             //do nothing if an error occurs while asking for suggestions
           }
         });
@@ -75,8 +76,8 @@ public class AddressBookApp implements EntryPoint {
       public void onClick(Widget widget) {
         //when "find" is clicked, make the query and populate the grid.
         String text = suggestBox.getText();
-        book.findContactsByName(text, new AddressBook.FindContactsByNameResponseCallback() {
-          public void onResponse(ContactList response) {
+        book.findContactsByName(text, new AsyncCallback<ContactList>() {
+          public void onSuccess(ContactList response) {
             contactGrid.resize(6 * response.getContacts().size(), 2);
             Iterator contactIt = response.getContacts().iterator();
             int i = 0;
@@ -97,7 +98,7 @@ public class AddressBookApp implements EntryPoint {
             }
           }
 
-          public void onError(Throwable throwable) {
+          public void onFailure(Throwable throwable) {
             //if an error while doing a "find," display it in the grid.
             contactGrid.resize(1, 1);
             contactGrid.setWidget(0, 0, new Label("ERROR: " + throwable.getMessage()));

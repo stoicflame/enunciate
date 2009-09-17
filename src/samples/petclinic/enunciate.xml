@@ -9,6 +9,7 @@
   </services>
   <modules>
     <c disabled="true"/>
+    <obj-c disabled="true"/>
     <csharp disabled="true"/>
     <jaxws-client disabled="true"/>
     <gwt disabled="false"

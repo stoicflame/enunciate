@@ -98,6 +98,7 @@ public class TestJaxbXmlContentHandler extends TestCase {
         writtenBytes.write(b);
       }
     });
+    response.flushBuffer();
     replay(request, response);
     handler.write(ex, request, response);
     verify(request, response);

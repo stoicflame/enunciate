@@ -649,7 +649,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
           BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
           String line = procReader.readLine();
           while (line != null) {
-            debug(line);
+            info(line);
             line = procReader.readLine();
           }
           int procCode;
@@ -727,7 +727,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
     BufferedReader procReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String line = procReader.readLine();
     while (line != null) {
-      debug(line);
+      info(line);
       line = procReader.readLine();
     }
     int procCode;

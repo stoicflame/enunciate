@@ -37,17 +37,6 @@ public class ${fault.simpleName} extends com.google.gwt.user.client.rpc.Serializ
     [#list fault.childElements as childElement]
       [#assign element=childElement.property/]
 
-  [#if !use15]
-    [#if childElement.type.map?default(false)]
-  /**
-   * @gwt.typeArgs <${classnameFor(childElement.type.keyType)},${classnameFor(childElement.type.valueType)}>
-   */
-    [#elseif childElement.type.collection]
-  /**
-   * @gwt.typeArgs <${componentTypeFor(childElement.type)}>
-   */
-    [/#if]
-  [/#if]
   private ${classnameFor(childElement)} ${element.simpleName};
 
   /**

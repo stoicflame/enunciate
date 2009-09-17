@@ -254,7 +254,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private String gwtCompilerClass;
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
-  private Boolean enableGWT15;
   private Boolean enableGWT16;
 
   public GWTDeploymentModule() {
@@ -303,7 +302,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      boolean aboutSays14 = false;
       boolean aboutSays16 = false;
       if (this.gwtHome != null) {
         File about = new File(gwtHome, "about.txt");
@@ -312,7 +310,12 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
             BufferedReader reader = new BufferedReader(new FileReader(about));
             String line = reader.readLine();
             if (line != null) {
-              aboutSays14 = line.contains("1.4");
+              if (line.contains("1.4")) {
+                throw new EnunciateException(String.format("As of version 1.15, Enunciate no longer supports GWT 1.4. It appears GWT 1.4 is being used, according to %s. " +
+                  "If this is an invalid assessment, you can get around this error by moving this file out of the way. " +
+                  "And please inform us on the Enunciate mailing lists.", (this.gwtHome + File.separatorChar + "about.txt")));
+              }
+
               aboutSays16 = line.contains("1.6") || line.contains("1.7");
             }
             reader.close();
@@ -324,17 +327,9 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       }
 
       if (getEnunciate().isDebug()) {
-        if (aboutSays14) {
-          debug("It appears GWT 1.4 is being used, according to %s.", (this.gwtHome + File.separatorChar + "about.txt"));
-        }
-
         if (aboutSays16) {
           debug("It appears GWT 1.6 is being used, according to %s.", (this.gwtHome + File.separatorChar + "about.txt"));
         }
-      }
-
-      if (getEnableGWT15() == null) {
-        setEnableGWT15(!aboutSays14);
       }
 
       if (getEnableGWT16() == null) {
@@ -355,7 +350,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if (!upToDate) {
       //load the references to the templates....
       URL typeMapperTemplate = getTemplateURL("gwt-type-mapper.fmt");
-      URL enum15TypeMapperTemplate = getTemplateURL("gwt-enum-15-type-mapper.fmt");
+      URL enumTypeMapperTemplate = getTemplateURL("gwt-enum-15-type-mapper.fmt");
       URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
       URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
 
@@ -363,8 +358,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
       URL faultTemplate = getTemplateURL("gwt-fault.fmt");
       URL typeTemplate = getTemplateURL("gwt-type.fmt");
-      URL enumTypeTemplate = getTemplateURL("gwt-enum-type.fmt");
-      URL enum15TypeTemplate = getTemplateURL("gwt-enum-15-type.fmt");
+      URL enumTypeTemplate = getTemplateURL("gwt-enum-15-type.fmt");
 
       //set up the model, first allowing for jdk 14 compatability.
       EnunciateFreemarkerModel model = getModel();
@@ -408,15 +402,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      if (getEnableGWT15()) {
-        debug("Generating source code targeting GWT 1.5.");
-      }
-
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
-      classnameFor.setJdk15(getEnableGWT15());
+      classnameFor.setJdk15(true);
       ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
       CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
-      model.put("use15", getEnableGWT15());
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
@@ -458,7 +447,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (!isGWTTransient(typeDefinition)) {
             model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? getEnableGWT15() ? enum15TypeTemplate : enumTypeTemplate : typeTemplate;
+            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
             processTemplate(template, model);
           }
         }
@@ -488,9 +477,9 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
               processTemplate(typeMapperTemplate, model);
               gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
             }
-            else if (typeDefinition.isEnum() && getEnableGWT15()) {
+            else if (typeDefinition.isEnum()) {
               model.put("type", typeDefinition);
-              processTemplate(enum15TypeMapperTemplate, model);
+              processTemplate(enumTypeMapperTemplate, model);
               gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
             }
           }
@@ -641,7 +630,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           String line = procReader.readLine();
           while (line != null) {
             line = URLDecoder.decode(line, "utf-8").replaceAll("%", "%%").trim(); //GWT URL-encodes spaces and other weird Windows characters.
-            debug(line);
+            info(line);
             line = procReader.readLine();
           }
           int procCode;
@@ -763,7 +752,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
       String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.       
-      enunciate.invokeJavac(clientClasspath, getEnableGWT15() ? "1.5" : "1.4", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
       info("Skipping compile of GWT client-side files because everything appears up-to-date...");
@@ -1321,24 +1310,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   }
 
   /**
-   * Whether we're using GWT 1.5.
-   *
-   * @return Whether we're using GWT 1.5.
-   */
-  public Boolean getEnableGWT15() {
-    return enableGWT15;
-  }
-
-  /**
-   * Whether we're using GWT 1.5.
-   *
-   * @param enableGWT15 Whether we're using GWT 1.5.
-   */
-  public void setEnableGWT15(Boolean enableGWT15) {
-    this.enableGWT15 = enableGWT15;
-  }
-
-  /**
    * Whether we're using GWT 1.6.
    *
    * @return Whether we're using GWT 1.6.
@@ -1354,9 +1325,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setEnableGWT16(Boolean enableGWT16) {
     this.enableGWT16 = enableGWT16;
-    if (enableGWT16) {
-      setEnableGWT15(true); //1.6 supports all 1.5 features.
-    }
   }
 
   // Inherited.
