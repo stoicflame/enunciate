@@ -29,22 +29,21 @@ import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
+import org.codehaus.enunciate.contract.validation.ConfigurableRules;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The validator for the xfire-client module.
  *
  * @author Ryan Heaton
  */
-public class AMFValidator extends BaseValidator {
+public class AMFValidator extends BaseValidator implements ConfigurableRules {
 
   private final Set<String> unsupportedTypes = new HashSet<String>();
+  private Set<String> disabledRules = new TreeSet<String>();
 
   public AMFValidator() {
     unsupportedTypes.add(QName.class.getName());
@@ -96,11 +95,13 @@ public class AMFValidator extends BaseValidator {
         result.addError(complexType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
 
-      if ("Date".equals(complexType.getClientSimpleName())) {
-        result.addError(complexType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
-      }
-      else if ("Event".equals(complexType.getClientSimpleName())) {
-        result.addError(complexType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+      if (!disabledRules.contains("as3.conflicting.names")) {
+        if ("Date".equals(complexType.getClientSimpleName())) {
+          result.addError(complexType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
+        else if ("Event".equals(complexType.getClientSimpleName())) {
+          result.addError(complexType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
       }
 
       for (Attribute attribute : complexType.getAttributes()) {
@@ -153,11 +154,13 @@ public class AMFValidator extends BaseValidator {
         result.addError(simpleType, "The mapping from AMF to JAXB requires a public no-arg constructor.");
       }
 
-      if ("Date".equals(simpleType.getClientSimpleName())) {
-        result.addError(simpleType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
-      }
-      else if ("Event".equals(simpleType.getClientSimpleName())) {
-        result.addError(simpleType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+      if (!disabledRules.contains("as3.conflicting.names")) {
+        if ("Date".equals(simpleType.getClientSimpleName())) {
+          result.addError(simpleType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
+        else if ("Event".equals(simpleType.getClientSimpleName())) {
+          result.addError(simpleType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
       }
     }
     return result;
@@ -167,11 +170,13 @@ public class AMFValidator extends BaseValidator {
   public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
     ValidationResult result = super.validateEnumType(enumType);
     if (!isAMFTransient(enumType)) {
-      if ("Date".equals(enumType.getClientSimpleName())) {
-        result.addError(enumType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
-      }
-      else if ("Event".equals(enumType.getClientSimpleName())) {
-        result.addError(enumType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+      if (!disabledRules.contains("as3.conflicting.names")) {
+        if ("Date".equals(enumType.getClientSimpleName())) {
+          result.addError(enumType, "ActionScript can't handle a class named 'Date'.  It conflicts with the top-level ActionScript class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
+        else if ("Event".equals(enumType.getClientSimpleName())) {
+          result.addError(enumType, "The Enunciate-generated ActionScript code can't handle a class named 'Event'.  It conflicts with the ActionScript remoting class of the same name. Either rename the class, or use the @org.codehaus.enunciate.ClientName annotation to rename the class on the client-side.");
+        }
       }
     }
     return result;
@@ -238,4 +243,12 @@ public class AMFValidator extends BaseValidator {
     return declaration != null && declaration.getAnnotation(AMFTransient.class) != null;
   }
 
+  /**
+   * Disables the specified rules.
+   * 
+   * @param ruleIds The ids of the rules to disable.
+   */
+  public void disableRules(Set<String> ruleIds) {
+    this.disabledRules.addAll(ruleIds);
+  }
 }
