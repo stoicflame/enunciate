@@ -105,11 +105,6 @@ public class CSharpValidator extends BaseValidator {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = super.validateSimpleType(simpleType);
     if (simpleType.getValue() != null) {
-      if (simpleType.getValue().isXmlIDREF()) {
-        result.addWarning(simpleType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                   "This may cause confusion to C# consumers.");
-      }
-
       if (capitalize(simpleType.getValue().getClientSimpleName()).equals(simpleType.getClientSimpleName())) {
         result.addError(simpleType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
@@ -141,33 +136,18 @@ public class CSharpValidator extends BaseValidator {
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = super.validateComplexType(complexType);
     for (Attribute attribute : complexType.getAttributes()) {
-      if (attribute.isXmlIDREF()) {
-        result.addWarning(attribute, "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                   "This may cause confusion to C# consumers.");
-      }
-
       if (capitalize(attribute.getClientSimpleName()).equals(complexType.getClientSimpleName())) {
         result.addError(attribute, "C# can't handle properties/fields that are of the same name as their containing class.");
       }
     }
 
     if (complexType.getValue() != null) {
-      if (complexType.getValue().isXmlIDREF()) {
-        result.addWarning(complexType.getValue(), "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                   "This may cause confusion to C# consumers.");
-      }
-
       if (capitalize(complexType.getValue().getClientSimpleName()).equals(complexType.getClientSimpleName())) {
         result.addError(complexType.getValue(), "C# can't handle properties/fields that are of the same name as their containing class. Either rename the property/field, or use the @org.codehaus.enunciate.ClientName annotation to rename the property/field on the client-side.");
       }
     }
 
     for (Element element : complexType.getElements()) {
-      if (element.isXmlIDREF()) {
-        result.addWarning(element, "C# doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from C#. " +
-                                   "This may cause confusion to C# consumers.");
-      }
-
       if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
         result.addError(element, "C# doesn't have a built-in way of serializing a Map. So you're going to have to use @XmlJavaTypeAdapter to supply " +
           "your own adapter for the Map, or disable the C# module.");

@@ -32,27 +32,9 @@ import org.codehaus.enunciate.util.MapType;
 public class ObjCValidator extends BaseValidator {
 
   @Override
-  public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
-    ValidationResult result = super.validateSimpleType(simpleType);
-    if (simpleType.getValue() != null) {
-      if (simpleType.getValue().isXmlIDREF()) {
-        result.addWarning(simpleType.getValue(), "The Objective-C client code doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from Objective-C. " +
-                                   "This may cause confusion to Objective-C consumers.");
-      }
-
-    }
-    return result;
-  }
-
-  @Override
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = super.validateComplexType(complexType);
     for (Attribute attribute : complexType.getAttributes()) {
-      if (attribute.isXmlIDREF()) {
-        result.addWarning(attribute, "The Objective-C client code doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from Objective-C. " +
-                                   "This may cause confusion to Objective-C consumers.");
-      }
-
       if (attribute.isXmlList()) {
         result.addWarning(attribute, "The Objective-C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to Objective-C consumers.");
       }
@@ -63,11 +45,6 @@ public class ObjCValidator extends BaseValidator {
     }
 
     if (complexType.getValue() != null) {
-      if (complexType.getValue().isXmlIDREF()) {
-        result.addWarning(complexType.getValue(), "The Objective-C client code doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from Objective-C. " +
-                                   "This may cause confusion to Objective-C consumers.");
-      }
-
       if (complexType.getValue().isXmlList()) {
         result.addWarning(complexType.getValue(), "The Objective-C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to Objective-C consumers.");
       }
@@ -78,11 +55,6 @@ public class ObjCValidator extends BaseValidator {
     }
 
     for (Element element : complexType.getElements()) {
-      if (element.isXmlIDREF()) {
-        result.addWarning(element, "The Objective-C client code doesn't support strict IDREF object references, so only the IDs of these objects will be (de)serialized from Objective-C. " +
-                                   "This may cause confusion to Objective-C consumers.");
-      }
-
       if (element.isXmlList()) {
         result.addWarning(element, "The Objective-C client code won't serialize xml lists as an array, instead passing the list as a string that will need to be parsed. This may cause confusion to Objective-C consumers.");
       }
