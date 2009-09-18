@@ -390,7 +390,7 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule implements 
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    if (!model.getNounsToRESTMethods().isEmpty()) {
+    if (!isDisabled()) {
       Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
       Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
       contentTypes2Ids.put("application/json", "json"); //it's assumed we've got some json provider on the classpath...

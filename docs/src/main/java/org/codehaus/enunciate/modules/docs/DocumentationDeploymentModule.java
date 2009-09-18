@@ -117,6 +117,10 @@ import java.util.*;
  *   <li>The "<b>title</b>" specifies the title of the generated HTML pages.  By default, the title is "Web API".</li>
  *   <li>The "<b>includeDefaultDownloads</b>" is a boolean attribute specifying whether the default downloads should
  * be included.  The default is "true".</li>
+ *   <li>The "<b>includeExampleXml</b>" is a boolean attribute specifying whether example XML should
+ * be included.  The default is "true".</li>
+ *   <li>The "<b>includeExampleJson</b>" is a boolean attribute specifying whether example JSON should
+ * be included.  The default is "true".</li>
  *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.  If one isn't supplied, a
  *  default will be provided.</p>
  *   <li>The "<b>xslt</b>" attribute specifies the file that is the XML Stylesheet Transform that will be applied to the
@@ -169,6 +173,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String copyright;
   private String title;
   private boolean includeDefaultDownloads = true;
+  private boolean includeExampleXml = true;
+  private boolean includeExampleJson = true;
   private URL xsltURL;
   private File css;
   private File base;
@@ -315,6 +321,42 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public void setIncludeDefaultDownloads(boolean includeDefaultDownloads) {
     this.includeDefaultDownloads = includeDefaultDownloads;
+  }
+
+  /**
+   * Whether to include example XML in the documentation.
+   *
+   * @return Whether to include example XML in the documentation.
+   */
+  public boolean isIncludeExampleXml() {
+    return includeExampleXml;
+  }
+
+  /**
+   * Whether to include example XML in the documentation.
+   *
+   * @param includeExampleXml Whether to include example XML in the documentation.
+   */
+  public void setIncludeExampleXml(boolean includeExampleXml) {
+    this.includeExampleXml = includeExampleXml;
+  }
+
+  /**
+   * Whether to include example JSON in the documentation.
+   *
+   * @return Whether to include example JSON in the documentation.
+   */
+  public boolean isIncludeExampleJson() {
+    return includeExampleJson;
+  }
+
+  /**
+   * Whether to include example JSON in the documentation.
+   *
+   * @param includeExampleJson Whether to include example JSON in the documentation.
+   */
+  public void setIncludeExampleJson(boolean includeExampleJson) {
+    this.includeExampleJson = includeExampleJson;
   }
 
   /**
@@ -501,7 +543,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
       model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
-      model.put("jacksonXcAvailble", jacksonXcAvailable);
+      model.put("includeExampleXml", isIncludeExampleXml());
+      model.put("includeExampleJson", (jacksonXcAvailable && isIncludeExampleJson()));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

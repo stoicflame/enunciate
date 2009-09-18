@@ -335,7 +335,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     return this.errors;
   }
 
-  // Inherited.
+  // Inherited.1
   public Map<String, Object> getMetaData() {
     return Collections.unmodifiableMap(this.metaData);
   }

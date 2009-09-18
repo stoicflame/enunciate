@@ -295,100 +295,18 @@ public class TestFullCXFAPI extends TestCase {
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "invalid")).openConnection();
     connection.setRequestMethod("GET");
     connection.connect();
-    assertEquals(200, connection.getResponseCode());
+    assertEquals(204, connection.getResponseCode());
     assertTrue("expected empty data returned", connection.getInputStream().read() < 0);
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "throw")).openConnection();
     connection.setRequestMethod("GET");
     connection.connect();
     assertEquals(500, connection.getResponseCode());
-    String message = connection.getResponseMessage();
-    assertTrue(message.startsWith("some") && message.endsWith("message")); //jetty replaces spaces with a "_"...
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "valid")).openConnection();
     connection.setRequestMethod("DELETE");
     connection.connect();
     assertFalse(200 == connection.getResponseCode());
-
-    String personConnectString = String.format("http://localhost:%s/%s/rest/pedigree/person", port, context);
-    url = new URL(personConnectString);
-    connection = (HttpURLConnection) url.openConnection();
-    connection.setDoOutput(true);
-    connection.setRequestMethod("PUT");
-    connection.connect();
-
-    PersonXFireType personType = new PersonXFireType();
-    personType.setTypeMapping(defaultTypeMapping);
-    Person person = new Person();
-    person.setId("new-person");
-
-    MessageContext messageContext = new MessageContext();
-    messageContext.setProperty(SoapConstants.MTOM_ENABLED, String.valueOf(false));
-    MessageExchange exchange = new MessageExchange(messageContext);
-    exchange.setOutMessage(new OutMessage("urn:hi"));
-    OutputStream out = connection.getOutputStream();
-    ElementWriter writer = new ElementWriter(out, "person", "http://enunciate.codehaus.org/samples/genealogy/data");
-    personType.writeObject(person, writer, messageContext);
-    writer.close();
-    writer.getXMLStreamWriter().close();
-    out.flush();
-    out.close();
-
-    Person resultPerson = (Person) personType.readObject(new ElementReader(connection.getInputStream()), messageContext);
-    assertEquals("new-person", resultPerson.getId());
-
-    byte[] pixBytes = "this is a bunch of bytes that I would like to make sure are serialized correctly so that I can prove out that attachments are working properly".getBytes();
-    person.setPicture(new DataHandler(new ByteArrayDataSource(pixBytes, "image/jpeg")));
-
-    connection = (HttpURLConnection) url.openConnection();
-    connection.setDoOutput(true);
-    connection.setRequestMethod("PUT");
-    connection.connect();
-    out = connection.getOutputStream();
-    writer = new ElementWriter(out, "person", "http://enunciate.codehaus.org/samples/genealogy/data");
-    personType.writeObject(person, writer, messageContext);
-    writer.close();
-    writer.getXMLStreamWriter().close();
-    out.flush();
-    out.close();
-
-    resultPerson = (Person) personType.readObject(new ElementReader(connection.getInputStream()), messageContext);
-    DataHandler returnedPix = resultPerson.getPicture();
-    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-    InputStream inputStream = returnedPix.getInputStream();
-    int byteIn = inputStream.read();
-    while (byteIn > -1) {
-      bytesOut.write(byteIn);
-      byteIn = inputStream.read();
-    }
-
-    assertTrue(Arrays.equals(pixBytes, bytesOut.toByteArray()));
-
-    String fileConnectString = String.format("http://localhost:%s/%s/rest/pedigree/file", port, context);
-    WebConversation wc = new WebConversation();
-    PostMethodWebRequest post = new PostMethodWebRequest(fileConnectString);
-    byte[] bytes1 = "this is some text for file 1".getBytes("utf-8");
-    UploadFileSpec upload1 = new UploadFileSpec("file1.txt", new ByteArrayInputStream(bytes1), "text/plain");
-    byte[] bytes2 = "this is some text for file 2".getBytes("utf-8");
-    UploadFileSpec upload2 = new UploadFileSpec("file2.txt", new ByteArrayInputStream(bytes2), "text/plain");
-    byte[] bytes3 = "this is some text for file 3".getBytes("utf-8");
-    UploadFileSpec upload3 = new UploadFileSpec("file3.txt", new ByteArrayInputStream(bytes3), "text/plain");
-    post.setMimeEncoded(true);
-    post.setParameter("up1", new UploadFileSpec[] { upload1 });
-    post.setParameter("up2", new UploadFileSpec[] { upload2 });
-    post.setParameter("up3", new UploadFileSpec[] { upload3 });
-    post.setParameter("length", "3;" + bytes1.length + ";" + bytes2.length + ";" + bytes3.length);
-    WebResponse response = wc.getResponse(post);
-    assertEquals(200, response.getResponseCode());
-
-    personConnectString = String.format("http://localhost:%s/%s/rest/remover/pedigree/person", port, context);
-    url = new URL(personConnectString + "/SPECIAL");
-    connection = (HttpURLConnection) url.openConnection();
-    connection.setDoOutput(true);
-    connection.setRequestMethod("DELETE");
-    connection.connect();
-    assertEquals(500, connection.getResponseCode());
-    assertTrue(connection.getResponseMessage().contains("SPECIAL"));
   }
 
 }

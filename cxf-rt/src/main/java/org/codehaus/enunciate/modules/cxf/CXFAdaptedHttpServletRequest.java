@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class CXFAdaptedHttpServletRequest extends HttpServletRequestWrapper {
 
   /**
-   * Create a request adapted for Jersey.
+   * Create a request adapted for CXF.
    *
    * @param request The request.
    */

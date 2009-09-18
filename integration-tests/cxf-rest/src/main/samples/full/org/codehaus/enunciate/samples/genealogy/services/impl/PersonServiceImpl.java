@@ -27,6 +27,10 @@ import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
+import javax.ws.rs.Path;
+import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PathParam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -37,9 +41,11 @@ import java.util.*;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"
 )
-@RESTEndpoint
+@Path ("")
 public class PersonServiceImpl implements PersonService {
 
+  @PUT
+  @Path ("/pedigree/person")
   public Person storePerson(Person person) {
     return person;
   }
@@ -72,7 +78,9 @@ public class PersonServiceImpl implements PersonService {
     return persons;
   }
 
-  public void deletePerson(String personId) throws ServiceException {
+  @DELETE
+  @Path("/remover/pedigree/person/{id}")
+  public void deletePerson(@PathParam ("id") String personId) throws ServiceException {
     if (personId == null) {
       throw new ServiceException("a person id must be supplied", "no person id.");
     }

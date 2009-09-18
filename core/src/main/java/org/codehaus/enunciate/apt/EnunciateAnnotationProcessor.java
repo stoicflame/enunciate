@@ -214,7 +214,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         }
 
         if (isJAXRSRootResource) {
-          RootResource rootResource = new RootResource((ClassDeclaration) declaration);
+          RootResource rootResource = new RootResource(declaration);
           debug("%s to be considered as a JAX-RS root resource.", declaration.getQualifiedName());
           model.add(rootResource);
         }
@@ -619,7 +619,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    */
   public boolean isJAXRSRootResource(TypeDeclaration declaration) {
     return declaration.getAnnotation(XmlTransient.class) == null
-      && declaration instanceof ClassDeclaration
       && declaration.getAnnotation(Path.class) != null;
   }
 

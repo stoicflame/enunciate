@@ -20,8 +20,11 @@ import freemarker.template.TemplateException;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
@@ -29,15 +32,14 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * <h1>CXF Module</h1>
@@ -49,7 +51,7 @@ import java.util.TreeSet;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="true"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-ri disabled="true"/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;cxf disabled="false"&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;...
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/cxf&gt;
@@ -73,7 +75,14 @@ import java.util.TreeSet;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>There are no additional configuration elements for the CXF module.</p>
+ * <p>The CXF module supports the following configuration attributes:</p>
+ *
+ * <ul>
+ * <li>The "validate" attribute (boolean) can be used to turn off CXF validation errors. Default: true</li>
+ * <li>The "enableJaxws" attribute (boolean) can be used to disable the JAX-WS support, leaving the JAX-WS support to another module if necessary. Default: true</li>
+ * <li>The "enableJaxrs" attribute (boolean) can be used to disable the JAX-RS support, leaving the JAX-RS support to another module if necessary. Default: true</li>
+ * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -82,9 +91,13 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  * @docFileName module_cxf.html
  */
-public class CXFDeploymentModule extends FreemarkerDeploymentModule {
+public class CXFDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener, SpecProviderModule {
 
+  private boolean enableJaxrs = true;
+  private boolean enableJaxws = true;
   private boolean validate = false;
+  private boolean useSubcontext = true;
+  private boolean jacksonAvailable = false;
 
   public CXFDeploymentModule() {
     setDisabled(true); //disabled by default; using JAXWS RI by default.
@@ -105,19 +118,16 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     return CXFDeploymentModule.class.getResource("cxf-servlet.xml.fmt");
   }
 
+  // Inherited.
+  public void onClassesFound(Set<String> classes) {
+    jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJsonProvider");
+  }
+
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
     if (!isDisabled()) {
-      if (enunciate.isModuleEnabled("xfire")) {
-        throw new EnunciateException("The CXF module requires you to disable the XFire module.");
-      }
-
-      if (enunciate.isModuleEnabled("jaxws-ri")) {
-        throw new EnunciateException("The CXF module requires you to disable the JAX-WS RI module.");
-      }
-
       if (!enunciate.isModuleEnabled("spring-app")) {
         throw new EnunciateException("The CXF module requires the spring-app module to be enabled.");
       }
@@ -125,14 +135,36 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
         List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
         for (DeploymentModule enabledModule : enabledModules) {
           if (enabledModule instanceof SpringAppDeploymentModule) {
+            List<SpringImport> springImports = ((SpringAppDeploymentModule) enabledModule).getSpringImports();
+
+            //standard cxf import.
             SpringImport cxfImport = new SpringImport();
-            cxfImport.setUri("classpath:cxf-boilerplate.xml");
-            ((SpringAppDeploymentModule) enabledModule).getSpringImports().add(cxfImport);
+            cxfImport.setUri("classpath:META-INF/cxf/cxf.xml");
+            springImports.add(cxfImport);
+
+            //standard cxf import.
+            cxfImport = new SpringImport();
+            cxfImport.setUri("classpath:META-INF/cxf/cxf-servlet.xml");
+            springImports.add(cxfImport);
+
+            if (enableJaxws) {
+              cxfImport = new SpringImport();
+              cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-soap.xml");
+              springImports.add(cxfImport);
+            }
+
+            if (enableJaxrs) {
+              cxfImport = new SpringImport();
+              cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml");
+              springImports.add(cxfImport);
+            }
           }
         }
       }
 
-      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+      if (this.enableJaxws) {
+        enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+      }
     }
 
   }
@@ -142,18 +174,36 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    EnunciateConfiguration config = model.getEnunciateConfig();
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        String path = "/soap/" + ei.getServiceName();
-        if (config != null) {
-          path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
-          if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
-            path = config.getSoapServices2Paths().get(ei.getServiceName());
+    if (!isDisabled()) {
+      EnunciateConfiguration config = model.getEnunciateConfig();
+      if (enableJaxws) {
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            String path = "/soap/" + ei.getServiceName();
+            if (config != null) {
+              path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+              if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+                path = config.getSoapServices2Paths().get(ei.getServiceName());
+              }
+            }
+
+            ei.putMetaData("soapPath", path);
           }
         }
+      }
 
-        ei.putMetaData("soapPath", path);
+      if (enableJaxrs) {
+        for (RootResource resource : model.getRootResources()) {
+          for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+            Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
+            String subcontext = this.useSubcontext ? getRestSubcontext() : "";
+            debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
+                  resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
+            subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
+            resourceMethod.putMetaData("defaultSubcontext", subcontext);
+            resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
+          }
+        }
       }
     }
   }
@@ -162,6 +212,11 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
+      model.put("provideJaxws", enableJaxws);
+      model.put("provideJaxrs", enableJaxrs);
+      model.put("jacksonAvailable", jacksonAvailable);
+      model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
+      model.put("restSubcontext", this.useSubcontext ? getRestSubcontext() : "/");
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       processTemplate(getCXFServletTemplateURL(), model);
     }
@@ -179,26 +234,71 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     File webappDir = getBuildDir();
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
-    getEnunciate().copyFile(new File(getGenerateDir(), "cxf-servlet.xml"), new File(webinf, "cxf-servlet.xml"));
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
-    WebAppComponent servletComponent = new WebAppComponent();
-    servletComponent.setName("cxf");
-    servletComponent.setClassname(CXFServlet.class.getName());
+
+    Set<String> urlMappings = new TreeSet<String>();
+    ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
+    if (enableJaxws) {
+      //jax-ws servlet config.
+      WebAppComponent jaxwsServletComponent = new WebAppComponent();
+      jaxwsServletComponent.setName("cxf-jaxws");
+      jaxwsServletComponent.setClassname(CXFServlet.class.getName());
+      TreeSet<String> jaxwsUrlMappings = new TreeSet<String>();
+      for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+        for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
+          jaxwsUrlMappings.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+        }
+      }
+      jaxwsServletComponent.setUrlMappings(jaxwsUrlMappings);
+      getEnunciate().copyFile(new File(getGenerateDir(), "cxf-jaxws-servlet.xml"), new File(webinf, "cxf-jaxws-servlet.xml"));
+      jaxwsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxws-servlet.xml");
+      servlets.add(jaxwsServletComponent);
+      urlMappings.addAll(jaxwsUrlMappings);
+    }
+
+    if (enableJaxrs) {
+      WebAppComponent jaxrsServletComponent = new WebAppComponent();
+      jaxrsServletComponent.setName("cxf-jaxrs");
+      jaxrsServletComponent.setClassname(CXFServlet.class.getName());
+      TreeSet<String> jaxrsUrlMappings = new TreeSet<String>();
+      for (RootResource rootResource : getModel().getRootResources()) {
+        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+          String resourceMethodPattern = resourceMethod.getServletPattern();
+          for (Set<String> subcontextList : ((Map<String, Set<String>>) resourceMethod.getMetaData().get("subcontexts")).values()) {
+            for (String subcontext : subcontextList) {
+              String servletPattern;
+              if ("".equals(subcontext)) {
+                servletPattern = resourceMethodPattern;
+              }
+              else {
+                servletPattern = subcontext + resourceMethodPattern;
+              }
+
+              if (jaxrsUrlMappings.add(servletPattern)) {
+                debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+                      resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+              }
+            }
+          }
+        }
+      }
+
+      jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
+      getEnunciate().copyFile(new File(getGenerateDir(), "cxf-jaxrs-servlet.xml"), new File(webinf, "cxf-jaxrs-servlet.xml"));
+      jaxrsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxrs-servlet.xml");
+      servlets.add(jaxrsServletComponent);
+      urlMappings.addAll(jaxrsUrlMappings);
+    }
+    webappFragment.setServlets(servlets);
+
     WebAppComponent filterComponent = new WebAppComponent();
     filterComponent.setName("cxf-filter");
     filterComponent.setClassname(CXFAdaptedServletFilter.class.getName());
-    TreeSet<String> urlMappings = new TreeSet<String>();
-    for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
-      for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
-        urlMappings.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
-      }
-    }
-    servletComponent.setUrlMappings(urlMappings);
     filterComponent.setUrlMappings(urlMappings);
-    webappFragment.setServlets(Arrays.asList(servletComponent));
     webappFragment.setFilters(Arrays.asList(filterComponent));
+
     enunciate.addWebAppFragment(webappFragment);
   }
 
@@ -211,6 +311,25 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     return enunciate.isUpToDateWithSources(getGenerateDir());
   }
 
+  // Inherited.
+  public boolean isJaxwsProvider() {
+    return this.enableJaxws;
+  }
+
+  // Inherited.
+  public boolean isJaxrsProvider() {
+    return this.enableJaxrs;
+  }
+
+  /**
+   * Whether to use the REST subcontext.
+   *
+   * @param useSubcontext Whether to use the REST subcontext.
+   */
+  public void setUseSubcontext(boolean useSubcontext) {
+    this.useSubcontext = useSubcontext;
+  }
+
   /**
    * Whether or not to apply the CXF validation rules.
    *
@@ -220,9 +339,33 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     this.validate = validate;
   }
 
+  /**
+   * Whether to enable the JAX-RS capabilities of CXF.
+   *
+   * @param enableJaxrs Whether to enable the JAX-RS capabilities of CXF.
+   */
+  public void setEnableJaxrs(boolean enableJaxrs) {
+    this.enableJaxrs = enableJaxrs;
+  }
+
+  /**
+   * Whether to enable the JAX-WS capabilities of CXF.
+   *
+   * @param enableJaxws Whether to enable the JAX-WS capabilities of CXF.
+   */
+  public void setEnableJaxws(boolean enableJaxws) {
+    this.enableJaxws = enableJaxws;
+  }
+
   @Override
   public Validator getValidator() {
-    return this.validate ? new CXFValidator() : null;
+    return this.validate ? new CXFValidator(enableJaxws, enableJaxrs) : null;
+  }
+
+  protected String getRestSubcontext() {
+    String restSubcontext = getEnunciate().getConfig().getDefaultRestSubcontext();
+    //todo: override default rest subcontext?
+    return restSubcontext;
   }
 
   // Inherited.
@@ -231,9 +374,17 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule {
     if (super.isDisabled()) {
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
-      debug("CXF module is disabled because there are no endpoint interfaces.");
+    else if (!enableJaxws && !enableJaxrs) {
+      debug("CXF module is disabled because both JAX-WS and JAX-RS support is disabled.");
       return true;
+    }
+    else if (getModelInternal() != null) {
+      boolean noJaxrsWorkToDo = !enableJaxrs || getModelInternal().getRootResources().isEmpty();
+      boolean noJaxwsWorkToDo = !enableJaxws || getModelInternal().getNamespacesToWSDLs().isEmpty();
+      if (noJaxrsWorkToDo && noJaxwsWorkToDo) {
+        debug("CXF module is disabled because there are no endpoint interfaces, nor any root resources to process.");
+        return true;
+      }
     }
 
     return false;

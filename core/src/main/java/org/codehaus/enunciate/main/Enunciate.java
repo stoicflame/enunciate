@@ -24,6 +24,7 @@ import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.util.AntPatternMatcher;
 import org.codehaus.enunciate.util.PackageInfoWriter;
 import org.xml.sax.SAXException;
@@ -564,9 +565,57 @@ public class Enunciate {
    */
   protected void initModules(Collection<DeploymentModule> deploymentModules) throws EnunciateException, IOException {
     info("initializing enunciate.");
+    Set<String> jaxwsProviderModules = new TreeSet<String>();
+    Set<String> jaxrsProviderModules = new TreeSet<String>();
     for (DeploymentModule deploymentModule : deploymentModules) {
       debug("initializing enunciate module %s.", deploymentModule.getName());
       deploymentModule.init(this);
+
+      if (!deploymentModule.isDisabled() && deploymentModule instanceof SpecProviderModule) {
+        if (((SpecProviderModule)deploymentModule).isJaxwsProvider()) {
+          jaxwsProviderModules.add(deploymentModule.getName());
+        }
+
+        if (((SpecProviderModule)deploymentModule).isJaxrsProvider()) {
+          jaxrsProviderModules.add(deploymentModule.getName());
+        }
+      }
+    }
+
+    if (jaxwsProviderModules.size() > 1) {
+      StringBuilder moduleList = new StringBuilder();
+      Iterator<String> it = jaxwsProviderModules.iterator();
+      String conjunction = "";
+      while (it.hasNext()) {
+        String module = it.next();
+        if (!it.hasNext()) {
+          conjunction = " and ";
+        }
+        moduleList.append(conjunction).append(module);
+        if (it.hasNext()) {
+          conjunction = ", ";
+        }
+      }
+      throw new EnunciateException("There are multiple modules that are configured to be JAX-WS providers: " + moduleList + 
+        ". You must disable all but one JAX-WS provider module.");
+    }
+
+    if (jaxrsProviderModules.size() > 1) {
+      StringBuilder moduleList = new StringBuilder();
+      Iterator<String> it = jaxrsProviderModules.iterator();
+      String conjunction = "";
+      while (it.hasNext()) {
+        String module = it.next();
+        if (!it.hasNext()) {
+          conjunction = " and ";
+        }
+        moduleList.append(conjunction).append(module);
+        if (it.hasNext()) {
+          conjunction = ", ";
+        }
+      }
+      throw new EnunciateException("There are multiple modules that are configured to be JAX-RS providers: " + moduleList +
+        ". You must disable all but one JAX-RS provider module.");
     }
   }
 

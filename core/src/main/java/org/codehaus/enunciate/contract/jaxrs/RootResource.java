@@ -16,10 +16,7 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.declaration.ConstructorDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.*;
 
 import javax.ws.rs.Path;
 import java.util.*;
@@ -33,7 +30,7 @@ public class RootResource extends Resource {
 
   private final Path path;
 
-  public RootResource(ClassDeclaration delegate) {
+  public RootResource(TypeDeclaration delegate) {
     super(delegate);
 
     this.path = delegate.getAnnotation(Path.class);
@@ -57,6 +54,16 @@ public class RootResource extends Resource {
    */
   public Resource getParent() {
     return null;
+  }
+
+  @Override
+  public boolean isInterface() {
+    return (getDelegate() instanceof InterfaceDeclaration);
+  }
+
+  @Override
+  public boolean isClass() {
+    return (getDelegate() instanceof ClassDeclaration);
   }
 
   /**

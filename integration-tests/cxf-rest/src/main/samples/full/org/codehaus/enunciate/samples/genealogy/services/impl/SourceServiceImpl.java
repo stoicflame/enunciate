@@ -19,18 +19,20 @@ package org.codehaus.enunciate.samples.genealogy.services.impl;
 import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
+import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.codehaus.enunciate.samples.genealogy.services.SourceService;
+import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
 import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceException;
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 
 import javax.jws.WebService;
-import java.net.URI;
-import java.io.InputStreamReader;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
 import java.io.BufferedReader;
 import java.io.IOException;
-
-import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
-import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
+import java.io.InputStreamReader;
+import java.net.URI;
 
 /**
  * @author Ryan Heaton
@@ -38,9 +40,10 @@ import org.codehaus.enunciate.samples.genealogy.services.UnknownSourceBean;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.SourceService"
 )
-@RESTEndpoint
+@Path ("source")
 public class SourceServiceImpl implements SourceService {
 
+  @POST
   public void addSource(Source source) {
     try {
       Thread.sleep(10 * 1000); //simulate a long wait time...  doens't matter, should be one-way...
@@ -50,7 +53,9 @@ public class SourceServiceImpl implements SourceService {
     }
   }
 
-  public Source getSource(String id) throws ServiceException, UnknownSourceException {
+  @GET
+  @Path ("{id}")
+  public Source getSource(@PathParam ("id") String id) throws ServiceException, UnknownSourceException {
     if ("valid".equals(id)) {
       Source source = new Source();
       source.setId("valid");

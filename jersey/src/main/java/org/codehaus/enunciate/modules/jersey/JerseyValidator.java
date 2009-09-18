@@ -45,9 +45,15 @@ public class JerseyValidator extends BaseValidator {
     ValidationResult result = new ValidationResult();
 
     for (RootResource rootResource : rootResources) {
+
+      if (rootResource.getDelegate() instanceof InterfaceDeclaration) {
+        result.addWarning(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
+      }
+
       List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
       boolean springManaged = rootResource.getAnnotation(SpringManagedLifecycle.class) != null;
-      CONSTRUCTOR_LOOP : for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
+      CONSTRUCTOR_LOOP:
+      for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
         if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
           for (ParameterDeclaration constructorParam : constructor.getParameters()) {
             if (springManaged) {
@@ -107,7 +113,7 @@ public class JerseyValidator extends BaseValidator {
         }
 
         for (String method : resourceMethod.getHttpMethods()) {
-          if ("GET".equalsIgnoreCase(method) && ((DecoratedTypeMirror)resourceMethod.getReturnType()).isVoid()) {
+          if ("GET".equalsIgnoreCase(method) && ((DecoratedTypeMirror) resourceMethod.getReturnType()).isVoid()) {
             result.addError(resourceMethod, "A resource method that is mapped to HTTP GET must not return void.");
           }
 

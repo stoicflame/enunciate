@@ -428,6 +428,9 @@
   <xs:complexType name="module-cxf">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:attribute name="validate" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1007,6 +1010,16 @@
         <xs:attribute name="includeDefaultDownloads" type="xs:boolean" default="true">
           <xs:annotation>
             <xs:documentation>whether the default downloads should be included.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeExampleXml" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>whether example XML should be included.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="includeExampleJson" type="xs:boolean" default="true">
+          <xs:annotation>
+            <xs:documentation>whether example JSON should be included.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="css" type="xs:string">

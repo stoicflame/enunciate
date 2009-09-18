@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.spring_app;
 import org.codehaus.enunciate.webapp.ComponentPostProcessor;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.context.ApplicationContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -60,7 +61,7 @@ public class SpringComponentPostProcessor implements ServletContextListener, Com
    * @param component the component.
    * @param applicationContext the application context to use to autowire the component.
    */
-  public static void autowire(Object component, WebApplicationContext applicationContext) {
+  public static void autowire(Object component, ApplicationContext applicationContext) {
     applicationContext.getAutowireCapableBeanFactory().autowireBean(component);
   }
 }

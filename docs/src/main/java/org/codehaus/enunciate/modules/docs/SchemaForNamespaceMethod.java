@@ -68,7 +68,7 @@ public class SchemaForNamespaceMethod implements TemplateMethodModelEx {
       namespace = element.getNamespace();
     }
     else {
-      throw new TemplateModelException("The schemaForNamespace requires a accessor or element declaration.");
+      return null;
     }
 
     return namespaces2Schemas.get(namespace);

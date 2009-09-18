@@ -101,8 +101,10 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
         [/#list]
       [/#list]
+      [#if includeExampleXml!false]
           <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
-      [#if jacksonXcAvailble!false]
+      [/#if]
+      [#if includeExampleJson!false]
           <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
       [/#if]
         </element>
@@ -121,8 +123,10 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
             [/#list]
           [/#list]
+          [#if includeExampleXml!false]
           <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
-          [#if jacksonXcAvailble!false]
+          [/#if]
+          [#if includeExampleJson!false]
           <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
           [/#if]
         </element>
@@ -225,12 +229,12 @@
           </parameter>
       [/#list]
       [#if resource.inputPayload??]
-          <inValue[#if resource.inputPayload.xmlElement?? && schemaForNamespace(resource.inputPayload)??] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
+          <inValue[#if schemaForNamespace(resource.inputPayload)??] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
             <![CDATA[${resource.inputPayload.docValue!"(no documentation provided)"}]]>
           </inValue>
       [/#if]
       [#if resource.outputPayload??]
-          <outValue[#if resource.outputPayload.xmlElement?? && schemaForNamespace(resource.outputPayload)??] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
+          <outValue[#if schemaForNamespace(resource.outputPayload)??] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
             <![CDATA[${resource.outputPayload.docValue!"(no documentation provided)"}]]>
           </outValue>
       [/#if]

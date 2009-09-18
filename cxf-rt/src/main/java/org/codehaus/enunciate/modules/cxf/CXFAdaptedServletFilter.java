@@ -25,8 +25,6 @@ import java.io.IOException;
  */
 public class CXFAdaptedServletFilter implements Filter {
 
-  public static final String PROPERTY_SERVLET_PATH = "org.codehaus.enunciate.modules.cxf.config.ServletPath";
-
   public void init(FilterConfig filterConfig) throws ServletException {
   }
 

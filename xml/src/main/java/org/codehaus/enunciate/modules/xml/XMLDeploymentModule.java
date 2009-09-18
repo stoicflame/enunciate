@@ -174,81 +174,83 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
-    Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
-    Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
+    if (!isDisabled()) {
+      Map<String, SchemaInfo> ns2schema = model.getNamespacesToSchemas();
+      Map<String, String> ns2prefix = model.getNamespacesToPrefixes();
+      Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
-    for (SchemaInfo schemaInfo : ns2schema.values()) {
-      //make sure each schema has a "file" and a "location" property.
-      String prefix = ns2prefix.get(schemaInfo.getNamespace());
-      if (prefix != null) {
-        String file = prefix + ".xsd";
-        schemaInfo.setProperty("filename", file);
-        schemaInfo.setProperty("location", file);
+      for (SchemaInfo schemaInfo : ns2schema.values()) {
+        //make sure each schema has a "file" and a "location" property.
+        String prefix = ns2prefix.get(schemaInfo.getNamespace());
+        if (prefix != null) {
+          String file = prefix + ".xsd";
+          schemaInfo.setProperty("filename", file);
+          schemaInfo.setProperty("location", file);
+        }
       }
-    }
 
-    for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
-      //make sure each wsdl has a "file" property.
-      String prefix = ns2prefix.get(wsdlInfo.getTargetNamespace());
-      if (prefix != null) {
-        String file = prefix + ".wsdl";
-        wsdlInfo.setProperty("filename", file);
-        wsdlInfo.setProperty("inlineSchema", inlineWSDLSchemas);
+      for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
+        //make sure each wsdl has a "file" property.
+        String prefix = ns2prefix.get(wsdlInfo.getTargetNamespace());
+        if (prefix != null) {
+          String file = prefix + ".wsdl";
+          wsdlInfo.setProperty("filename", file);
+          wsdlInfo.setProperty("inlineSchema", inlineWSDLSchemas);
+        }
       }
-    }
 
-    for (SchemaConfig customConfig : this.schemaConfigs) {
-      SchemaInfo schemaInfo = ns2schema.get(customConfig.getNamespace());
+      for (SchemaConfig customConfig : this.schemaConfigs) {
+        SchemaInfo schemaInfo = ns2schema.get(customConfig.getNamespace());
 
-      if (schemaInfo != null) {
-        if (customConfig.getUseFile() != null) {
-          File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
-          if (!useFile.exists()) {
-            throw new IllegalStateException("File " + useFile + " does not exist.");
+        if (schemaInfo != null) {
+          if (customConfig.getUseFile() != null) {
+            File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
+            if (!useFile.exists()) {
+              throw new IllegalStateException("File " + useFile + " does not exist.");
+            }
+            schemaInfo.setProperty("filename", useFile.getName());
+            schemaInfo.setProperty("location", useFile.getName());
+            schemaInfo.setProperty("file", useFile);
           }
-          schemaInfo.setProperty("filename", useFile.getName());
-          schemaInfo.setProperty("location", useFile.getName());
-          schemaInfo.setProperty("file", useFile);
-        }
 
-        if (customConfig.getFile() != null) {
-          schemaInfo.setProperty("filename", customConfig.getFile());
-          schemaInfo.setProperty("location", customConfig.getFile());
-        }
+          if (customConfig.getFile() != null) {
+            schemaInfo.setProperty("filename", customConfig.getFile());
+            schemaInfo.setProperty("location", customConfig.getFile());
+          }
 
-        if (customConfig.getLocation() != null) {
-          schemaInfo.setProperty("location", customConfig.getLocation());
-        }
+          if (customConfig.getLocation() != null) {
+            schemaInfo.setProperty("location", customConfig.getLocation());
+          }
 
-        if (customConfig.getJaxbBindingVersion() != null) {
-          schemaInfo.setProperty("jaxbBindingVersion", customConfig.getJaxbBindingVersion());
-        }
+          if (customConfig.getJaxbBindingVersion() != null) {
+            schemaInfo.setProperty("jaxbBindingVersion", customConfig.getJaxbBindingVersion());
+          }
 
-        if (customConfig.getAppinfo() != null) {
-          schemaInfo.setProperty("appinfo", customConfig.getAppinfo());
+          if (customConfig.getAppinfo() != null) {
+            schemaInfo.setProperty("appinfo", customConfig.getAppinfo());
+          }
         }
       }
-    }
 
-    for (WsdlConfig customConfig : this.wsdlConfigs) {
-      WsdlInfo wsdlInfo = ns2wsdl.get(customConfig.getNamespace());
+      for (WsdlConfig customConfig : this.wsdlConfigs) {
+        WsdlInfo wsdlInfo = ns2wsdl.get(customConfig.getNamespace());
 
-      if (wsdlInfo != null) {
-        if (customConfig.getUseFile() != null) {
-          File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
-          if (!useFile.exists()) {
-            throw new IllegalStateException("File " + useFile + " does not exist.");
+        if (wsdlInfo != null) {
+          if (customConfig.getUseFile() != null) {
+            File useFile = getEnunciate().resolvePath(customConfig.getUseFile());
+            if (!useFile.exists()) {
+              throw new IllegalStateException("File " + useFile + " does not exist.");
+            }
+            wsdlInfo.setProperty("filename", useFile.getName());
+            wsdlInfo.setProperty("file", useFile);
           }
-          wsdlInfo.setProperty("filename", useFile.getName());
-          wsdlInfo.setProperty("file", useFile);
-        }
 
-        if (customConfig.getFile() != null) {
-          wsdlInfo.setProperty("filename", customConfig.getFile());
-        }
+          if (customConfig.getFile() != null) {
+            wsdlInfo.setProperty("filename", customConfig.getFile());
+          }
 
-        wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());
+          wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());
+        }
       }
     }
   }

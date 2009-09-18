@@ -27,6 +27,7 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
 
 import javax.ws.rs.core.MediaType;
@@ -105,7 +106,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_jersey.html
  */
-public class JerseyDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener {
+public class JerseyDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener, SpecProviderModule {
 
   private boolean jacksonAvailable = false;
   private boolean useSubcontext = true;
@@ -161,7 +162,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    if (!model.getRootResources().isEmpty()) {
+    if (!isDisabled()) {
       Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
 
       if (getEnunciate().isModuleEnabled("amf")) { //if the amf module is enabled, we'll add amf rest endpoints.
@@ -330,6 +331,16 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   protected boolean isUpToDate() {
     return enunciate.isUpToDateWithSources(getGenerateDir());
+  }
+
+  // Inherited.
+  public boolean isJaxwsProvider() {
+    return false;
+  }
+
+  // Inherited.
+  public boolean isJaxrsProvider() {
+    return true;
   }
 
   /**

@@ -18,95 +18,20 @@ package org.codehaus.enunciate.contract.common.rest;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
-import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 
 /**
  * @author Ryan Heaton
  */
-public class ResourcePayloadTypeAdapter extends DecoratedTypeMirror implements RESTResourcePayload {
+public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
 
   private final DecoratedTypeMirror delegate;
 
   public ResourcePayloadTypeAdapter(DecoratedTypeMirror delegate) {
-    super(delegate);
     this.delegate = delegate;
-  }
-
-  public void accept(TypeVisitor v) {
-    delegate.accept(v);
-  }
-
-  public boolean equals(Object obj) {
-    return delegate.equals(obj);
-  }
-
-  public String toString() {
-    return delegate.toString();
-  }
-
-  public boolean isInstanceOf(String className) {
-    return delegate.isInstanceOf(className);
-  }
-
-  public boolean isAnnotation() {
-    return delegate.isAnnotation();
-  }
-
-  public boolean isArray() {
-    return delegate.isArray();
-  }
-
-  public boolean isCollection() {
-    return delegate.isCollection();
-  }
-
-  public boolean isClass() {
-    return delegate.isClass();
-  }
-
-  public boolean isDeclared() {
-    return delegate.isDeclared();
-  }
-
-  public boolean isEnum() {
-    return delegate.isEnum();
-  }
-
-  public boolean isInterface() {
-    return delegate.isInterface();
-  }
-
-  public boolean isPrimitive() {
-    return delegate.isPrimitive();
-  }
-
-  public boolean isReferenceType() {
-    return delegate.isReferenceType();
-  }
-
-  public boolean isTypeVariable() {
-    return delegate.isTypeVariable();
-  }
-
-  public boolean isVoid() {
-    return delegate.isVoid();
-  }
-
-  public boolean isWildcard() {
-    return delegate.isWildcard();
-  }
-
-  public String getDocComment() {
-    return delegate.getDocComment();
-  }
-
-  public void setDocComment(String docComment) {
-    delegate.setDocComment(docComment);
   }
 
   public String getDocValue() {

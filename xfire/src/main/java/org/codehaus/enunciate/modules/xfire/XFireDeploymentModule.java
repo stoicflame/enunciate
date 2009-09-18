@@ -28,6 +28,7 @@ import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
@@ -76,7 +77,7 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  * @docFileName module_xfire.html
  */
-public class XFireDeploymentModule extends FreemarkerDeploymentModule {
+public class XFireDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule {
 
   private String xfireBeansImport = "classpath:org/codehaus/xfire/spring/xfire.xml";
 
@@ -125,14 +126,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
     super.init(enunciate);
 
     if (!isDisabled()) {
-      if (enunciate.isModuleEnabled("jaxws-ri")) {
-        throw new EnunciateException("The XFire module requires you to disable the JAX-WS RI module.");
-      }
-
-      if (enunciate.isModuleEnabled("cxf")) {
-        throw new EnunciateException("The XFire module requires you to disable the CXF module.");
-      }
-
       if (!enunciate.isModuleEnabled("jaxws")) {
         throw new EnunciateException("The XFire module requires an enabled JAXWS module.");
       }
@@ -144,18 +137,20 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
-    EnunciateConfiguration config = model.getEnunciateConfig();
-    for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        String path = "/soap/" + ei.getServiceName();
-        if (config != null) {
-          path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
-          if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
-            path = config.getSoapServices2Paths().get(ei.getServiceName());
+    if (!isDisabled()) {
+      EnunciateConfiguration config = model.getEnunciateConfig();
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          String path = "/soap/" + ei.getServiceName();
+          if (config != null) {
+            path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+            if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+              path = config.getSoapServices2Paths().get(ei.getServiceName());
+            }
           }
-        }
 
-        ei.putMetaData("soapPath", path);
+          ei.putMetaData("soapPath", path);
+        }
       }
     }
   }
@@ -242,6 +237,16 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule {
 
   public void setXfireBeansImport(String xfireBeansImport) {
     this.xfireBeansImport = xfireBeansImport;
+  }
+
+  // Inherited.
+  public boolean isJaxwsProvider() {
+    return true;
+  }
+
+  // Inherited.
+  public boolean isJaxrsProvider() {
+    return false;
   }
 
   @Override

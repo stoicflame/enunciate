@@ -1,23 +1,67 @@
 [#ftl]
 [#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
-[@file name="cxf-servlet.xml" charset="utf-8"]
+[#if provideJaxws!false]
+  [@file name="cxf-jaxws-servlet.xml" charset="utf-8"]
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-  [@forEachWsdl]
-    [@forEachEndpointInterface wsdl=wsdl]
-      [#list endpointInterface.endpointImplementations as impl]
-        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+    [@forEachWsdl]
+      [@forEachEndpointInterface wsdl=wsdl]
+        [#list endpointInterface.endpointImplementations as impl]
+          [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
-        [#--todo: what about eis with the same name, different namespace?--]
+          [#--todo: what about eis with the same name, different namespace?--]
   <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${impl.serviceEndpointId}" address="${endpointInterface.metaData.soapPath}" implementorClass="${endpointInterface.qualifiedName}"/>
-        [/#if]
-      [/#list]
-    [/@forEachEndpointInterface]
-  [/@forEachWsdl]
-
+          [/#if]
+        [/#list]
+      [/@forEachEndpointInterface]
+    [/@forEachWsdl]
 </beans>
-[/@file]
+  [/@file]
+[/#if]
+[#if provideJaxrs!false]
+  [@file name="cxf-jaxrs-servlet.xml" charset="utf-8"]
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+    [#if rootResources?? && rootResources?size > 0]
+
+  <jaxrs:server id="jaxrs" address="${restSubcontext!"/rest"}">
+    <jaxrs:serviceBeans>
+      [#list rootResources as rootResource]
+      <bean class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">
+        <constructor-arg value="${rootResource.qualifiedName}"/>
+        <property name="defaultImplementationBeanName" value="${rootResource.simpleName}EndpointBean"/>
+        [#if !(rootResource.interface!true)]
+        <property name="defaultImplementationClass" value="${rootResource.qualifiedName}"/>
+        [/#if]
+        <property name="interceptors" ref="service-bean-interceptors"/>
+      </bean>
+      [/#list]
+    </jaxrs:serviceBeans>
+    <jaxrs:providers>
+      <bean class="org.apache.cxf.jaxrs.provider.JAXBElementProvider"/>
+      [#if jacksonAvailable!false]
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+        <constructor-arg>
+          <bean class="org.codehaus.enunciate.modules.cxf.JacksonObjectMapperFactory" factory-method="createObjectMapper"/>
+        </constructor-arg>
+      </bean>
+      [/#if]
+      [#if amfEnabled!false]
+      <bean class="org.codehaus.enunciate.modules.amf.JAXRSProvider"/>
+      [/#if]
+      [#list jaxrsProviders as provider]
+      <bean class="${provider.qualifiedName}"/>
+      [/#list]
+    </jaxrs:providers>
+  </jaxrs:server>
+    [/#if]
+</beans>
+  [/@file]
+[/#if]

@@ -18,8 +18,8 @@ package org.codehaus.enunciate.modules.spring_app;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
-import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -29,7 +29,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.*;
 
@@ -126,7 +125,7 @@ public class ServiceEndpointFactoryBean extends ApplicationObjectSupport impleme
         serviceImplementationBean = defaultImplementationClass.newInstance();
 
         //do the bean autowiring
-        SpringComponentPostProcessor.autowire(serviceImplementationBean, (WebApplicationContext) getApplicationContext());
+        SpringComponentPostProcessor.autowire(serviceImplementationBean, getApplicationContext());
       }
       catch (Exception e) {
         throw new ApplicationContextException("Unable to instantiate " + defaultImplementationClass.getName(), e);

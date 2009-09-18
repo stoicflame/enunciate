@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.samples.genealogy.services;
 
-import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.data.Event;
@@ -38,7 +37,6 @@ import javax.jws.WebService;
   serviceName = "source-service",
   portName = "source-service-port"
 )
-@RESTEndpoint
 public interface SourceService {
 
   /**
@@ -47,9 +45,7 @@ public interface SourceService {
    * @param source The source to add to the database.
    */
   @Oneway
-  @Noun ("source")
-  @Verb ( VerbType.create )
-  void addSource(@NounValue Source source);
+  void addSource(Source source);
 
   /**
    * Reads a source from the database.
@@ -59,9 +55,7 @@ public interface SourceService {
    * @throws ServiceException If a source couldn't be read from the database.
    * @throws UnknownSourceException If no source by that id was found in the database.
    */
-  @Noun ("source")
-  @Verb ( VerbType.read )
-  Source getSource(@ProperNoun String id) throws ServiceException, UnknownSourceException;
+  Source getSource(String id) throws ServiceException, UnknownSourceException;
 
   /**
    * Adds an infoset to a specified source.
@@ -71,6 +65,7 @@ public interface SourceService {
    * @return The id of the infoset that was added.
    * @throws ServiceException If the infoset couldn't be added to the source.
    */
+  @WebResult(name="myweirdresultname")
   String addInfoSet(String sourceId, InfoSet infoSet) throws ServiceException;
 
   /**

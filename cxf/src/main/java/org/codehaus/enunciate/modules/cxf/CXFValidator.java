@@ -32,42 +32,51 @@ import java.util.HashMap;
  */
 public class CXFValidator extends BaseValidator {
 
+  private final boolean enableJaxws;
+  private final boolean enableJaxrs;
   private final HashMap<String, EndpointInterface> visitedEndpoints = new HashMap<String, EndpointInterface>();
+
+  public CXFValidator(boolean enableJaxws, boolean enableJaxrs) {
+    this.enableJaxws = enableJaxws;
+    this.enableJaxrs = enableJaxrs;
+  }
 
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {
     ValidationResult result = super.validateEndpointInterface(ei);
 
-    EndpointInterface visited = visitedEndpoints.put(ei.getServiceName(), ei);
-    if (visited != null) {
-      if (visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
-        result.addError(ei, "Ummm... you already have a service named " + ei.getServiceName() + " at " +
-          visited.getPosition() + ".  You need to disambiguate.");
-      }
-    }
-
-    for (WebMethod webMethod : ei.getWebMethods()) {
-      for (WebParam webParam : webMethod.getWebParameters()) {
-        if ((webParam.isHeader()) && ("".equals(webParam.getAnnotation(javax.jws.WebParam.class).name()))) {
-          //todo: lift this constraint by serializing the parameter names to some file you can load for metadata...
-          result.addError(webParam, "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
+    if (enableJaxws) {
+      EndpointInterface visited = visitedEndpoints.put(ei.getServiceName(), ei);
+      if (visited != null) {
+        if (visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
+          result.addError(ei, "Ummm... you already have a service named " + ei.getServiceName() + " at " +
+            visited.getPosition() + ".  You need to disambiguate.");
         }
       }
 
-      for (WebFault webFault : webMethod.getWebFaults()) {
-        if (webFault.getExplicitFaultBean() != null) {
-          if (!webFault.getSimpleName().equals(webFault.getExplicitFaultBean().getName())) {
-            result.addError(webMethod, "Because of some inconsistencies with the JAX-WS implementation of CXF, the CXF module cannot have methods that " +
-              "throw exceptions that are named differently than the element name of their explicit fault beans. Apply @XmlRootElement ( name = \""
-              + webFault.getSimpleName() + "\" ) to  explicit fault bean " + webFault.getExplicitFaultBean().getQualifiedName() + " to apply the workaround.");
+      for (WebMethod webMethod : ei.getWebMethods()) {
+        for (WebParam webParam : webMethod.getWebParameters()) {
+          if ((webParam.isHeader()) && ("".equals(webParam.getAnnotation(javax.jws.WebParam.class).name()))) {
+            //todo: lift this constraint by serializing the parameter names to some file you can load for metadata...
+            result.addError(webParam, "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
           }
         }
-        else {
-          String ns = webFault.getTargetNamespace() == null ? "" : webFault.getTargetNamespace();
-          String eins = ei.getTargetNamespace() == null ? "" : ei.getTargetNamespace();
-          if (!ns.equals(eins)) {
-            result.addError(webMethod, "CXF doesn't handle throwing exceptions that are defined in a different namespace " +
-              "from the namespace of the endpoint interface.");
+
+        for (WebFault webFault : webMethod.getWebFaults()) {
+          if (webFault.getExplicitFaultBean() != null) {
+            if (!webFault.getSimpleName().equals(webFault.getExplicitFaultBean().getName())) {
+              result.addError(webMethod, "Because of some inconsistencies with the JAX-WS implementation of CXF, the CXF module cannot have methods that " +
+                "throw exceptions that are named differently than the element name of their explicit fault beans. Apply @XmlRootElement ( name = \""
+                + webFault.getSimpleName() + "\" ) to  explicit fault bean " + webFault.getExplicitFaultBean().getQualifiedName() + " to apply the workaround.");
+            }
+          }
+          else {
+            String ns = webFault.getTargetNamespace() == null ? "" : webFault.getTargetNamespace();
+            String eins = ei.getTargetNamespace() == null ? "" : ei.getTargetNamespace();
+            if (!ns.equals(eins)) {
+              result.addError(webMethod, "CXF doesn't handle throwing exceptions that are defined in a different namespace " +
+                "from the namespace of the endpoint interface.");
+            }
           }
         }
       }
