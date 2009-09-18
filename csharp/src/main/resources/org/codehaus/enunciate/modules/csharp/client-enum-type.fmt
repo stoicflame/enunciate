@@ -13,6 +13,13 @@ namespace ${namespaceFor(type)} {
   [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]
   [/#if]
   public enum ${type.clientSimpleName} {
+
+    /// <summary>
+    ///  Unspecified enum value.
+    /// </summary>
+    [System.Xml.Serialization.XmlEnumAttribute(Name="__Unspecified__")]
+    [System.Xml.Serialization.SoapEnumAttribute(Name="__Unspecified__")]
+    Unspecified[#if (type.enumConstants?size > 0)],[/#if]
     [#assign enumValueMap=type.enumValues/]
     [#list type.enumConstants as constant]
 

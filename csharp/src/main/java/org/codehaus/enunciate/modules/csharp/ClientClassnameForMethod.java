@@ -131,9 +131,6 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
           return kind.toString().toLowerCase();
       }
     }
-    else if (decorated.isEnum()) {
-      return super.convert(typeMirror) + "?";
-    }
     else if (decorated.isCollection()) {
       //collections will be converted to arrays.
       return getCollectionTypeConversion((DeclaredType) typeMirror);

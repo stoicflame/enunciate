@@ -2,21 +2,17 @@ package org.codehaus.enunciate.modules.csharp;
 
 import junit.framework.TestCase;
 import org.codehaus.enunciate.examples.csharp.schema.*;
-import org.codehaus.enunciate.examples.csharp.schema.draw.Canvas;
-import org.codehaus.enunciate.examples.csharp.schema.draw.CanvasAttachment;
 import org.codehaus.enunciate.examples.csharp.schema.animals.Cat;
+import org.codehaus.enunciate.examples.csharp.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.csharp.schema.structures.House;
 import org.codehaus.enunciate.examples.csharp.schema.vehicles.Bus;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.attachment.AttachmentMarshaller;
-import javax.activation.DataHandler;
-import javax.mail.util.ByteArrayDataSource;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -103,6 +99,23 @@ public class TestCSharpSerialization extends TestCase {
     triangle.setPositionY(-10);
     triangle = processThroughXml(triangle);
     assertSame(Color.RED, triangle.getColor());
+    assertEquals(90, triangle.getBase());
+    assertEquals(100, triangle.getHeight());
+    assertEquals("triangleId", triangle.getId());
+    assertSame(LineStyle.dashed, triangle.getLineStyle());
+    assertEquals(0, triangle.getPositionX());
+    assertEquals(-10, triangle.getPositionY());
+
+    //make sure enums don't get serialized when not set.
+    triangle = new Triangle();
+    triangle.setBase(90);
+    triangle.setHeight(100);
+    triangle.setId("triangleId");
+    triangle.setLineStyle(LineStyle.dashed);
+    triangle.setPositionX(0);
+    triangle.setPositionY(-10);
+    triangle = processThroughXml(triangle);
+    assertNull(triangle.getColor());
     assertEquals(90, triangle.getBase());
     assertEquals(100, triangle.getHeight());
     assertEquals("triangleId", triangle.getId());

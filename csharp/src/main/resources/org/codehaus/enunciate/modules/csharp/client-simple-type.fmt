@@ -39,6 +39,8 @@ namespace ${namespaceFor(type)} {
     ///  Property for the XML serializer indicating whether the "${accessor.clientSimpleName?cap_first}" property should be included in the output.
     /// </summary>
     [System.Xml.Serialization.XmlIgnoreAttribute]
+    [System.Xml.Serialization.SoapIgnoreAttribute]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool ${accessor.clientSimpleName?cap_first}Specified {
       get {
         return this._${accessor.clientSimpleName}Specified;
@@ -61,7 +63,25 @@ namespace ${namespaceFor(type)} {
         this._${accessor.clientSimpleName} = value;
       }
     }
+    [#if accessor.accessorType.enum]
 
+    /// <summary>
+    ///  Property for the XML serializer indicating whether the "${accessor.clientSimpleName?cap_first}" property should be included in the output.
+    /// </summary>
+    [System.Xml.Serialization.XmlIgnoreAttribute]
+    [System.Xml.Serialization.SoapIgnoreAttribute]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public bool ${accessor.clientSimpleName?cap_first}Specified {
+      get {
+        return this._${accessor.clientSimpleName} != ${cs_classname}.Unspecified;
+      }
+      set {
+        if (!value) {
+          this._${accessor.clientSimpleName} = ${cs_classname}.Unspecified;
+        }
+      }
+    }
+    [/#if]
   [/#if]
   }
 }
