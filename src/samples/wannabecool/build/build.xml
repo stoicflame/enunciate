@@ -35,12 +35,12 @@
       <export artifactId="spring.war.file" destination="target/wannabecool.war"/>
 
       <!--
-        The artifact identified by the id 'client.jdk15.library.binaries' will be exported to
+        The artifact identified by the id 'jaxws.client.library.binaries' will be exported to
         a file called 'wannabecool.client.jar' in the 'target' directory.
 
         (This artifact is the jar for accessing the published remote API via JDK 1.5)
       -->
-      <export artifactId="client.jdk15.library.binaries" destination="target/wannabecool-client.jar"/>
+      <export artifactId="jaxws.client.library.binariesb" destination="target/wannabecool-client.jar"/>
     </enunciate>
   </target>
 

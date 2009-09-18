@@ -359,6 +359,9 @@ public class ConfigMojo extends AbstractMojo {
     if (this.exports != null) {
       for (String exportId : this.exports.keySet()) {
         String filename = this.exports.get(exportId);
+        if (filename == null || "".equals(filename)) {
+          throw new MojoExecutionException("Invalid (empty or null) filename for export " + exportId + ".");
+        }
         File exportFile = new File(filename);
         if (!exportFile.isAbsolute()) {
           exportFile = new File(this.outputDir, filename);
