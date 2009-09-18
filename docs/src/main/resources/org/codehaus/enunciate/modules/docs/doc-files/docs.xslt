@@ -182,7 +182,12 @@
                       <xsl:call-template name="rest-resource"/>
                     </xsl:for-each>
                   </ul>
+                  <xsl:if test="/api-docs/rest/@wadl">
 
+                    <p>
+                      There is also a <a href="{/api-docs/rest/@wadl}">WADL document</a> describing the REST API.
+                    </p>
+                  </xsl:if>
                 </div>
               </xsl:if>
 

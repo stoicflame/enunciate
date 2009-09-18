@@ -20,6 +20,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.node.ObjectNode;
 import org.jdom.Comment;
+import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlElementDecl;
@@ -206,7 +207,14 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration implemen
       String namespace = getNamespace();
       EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
       String prefix = namespace == null ? null : model.getNamespacesToPrefixes().get(namespace);
-      org.jdom.Element rootElement = new org.jdom.Element(getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+      Namespace jdomNS;
+      if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+        jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+      }
+      else {
+        jdomNS = Namespace.getNamespace(prefix, namespace);
+      }
+      org.jdom.Element rootElement = new org.jdom.Element(getName(), jdomNS);
       TypeDeclaration elementTypeDeclaration = getElementTypeDeclaration();
       if (elementTypeDeclaration instanceof ClassDeclaration) {
         TypeDefinition typeDef = model.findTypeDefinition((ClassDeclaration) elementTypeDeclaration);

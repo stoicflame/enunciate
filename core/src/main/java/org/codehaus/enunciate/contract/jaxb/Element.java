@@ -39,6 +39,7 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.JsonNode;
 import org.jdom.Comment;
+import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -473,7 +474,14 @@ public class Element extends Accessor {
       if (isWrapped()) {
         String namespace = getNamespace();
         String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-        org.jdom.Element element = new org.jdom.Element(getWrapperName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+        Namespace jdomNS;
+        if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+          jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+        }
+        else {
+          jdomNS = Namespace.getNamespace(prefix, namespace);
+        }
+        org.jdom.Element element = new org.jdom.Element(getWrapperName(), jdomNS);
         parent.addContent(element);
         parent = element;
       }
@@ -485,7 +493,14 @@ public class Element extends Accessor {
           if (ref == null) {
             String namespace = choice.getNamespace();
             String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-            org.jdom.Element element = new org.jdom.Element(choice.getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+            Namespace jdomNS;
+            if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+              jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+            }
+            else {
+              jdomNS = Namespace.getNamespace(prefix, namespace);
+            }
+            org.jdom.Element element = new org.jdom.Element(choice.getName(), jdomNS);
             String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
             XmlType xmlType = choice.getBaseType();
             if (i == 0) {
@@ -501,7 +516,14 @@ public class Element extends Accessor {
             String namespace = ref.getNamespaceURI();
             String name = ref.getLocalPart();
             String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-            org.jdom.Element element = new org.jdom.Element(name, org.jdom.Namespace.getNamespace(prefix, namespace));
+            Namespace jdomNS;
+            if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+              jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+            }
+            else {
+              jdomNS = Namespace.getNamespace(prefix, namespace);
+            }
+            org.jdom.Element element = new org.jdom.Element(name, jdomNS);
             element.addContent(new org.jdom.Text("..."));
             parent.addContent(element);
           }

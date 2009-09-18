@@ -23,6 +23,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.jackson.node.ObjectNode;
 import org.codehaus.jackson.JsonNode;
+import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -133,7 +134,14 @@ public class Attribute extends Accessor {
       String namespace = getNamespace();
       String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
       String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
-      org.jdom.Attribute attr = new org.jdom.Attribute(getName(), exampleValue, org.jdom.Namespace.getNamespace(prefix, namespace));
+      Namespace jdomNS;
+      if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+        jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+      }
+      else {
+        jdomNS = Namespace.getNamespace(prefix, namespace);
+      }
+      org.jdom.Attribute attr = new org.jdom.Attribute(getName(), exampleValue, jdomNS);
       parent.setAttribute(attr);
     }
   }

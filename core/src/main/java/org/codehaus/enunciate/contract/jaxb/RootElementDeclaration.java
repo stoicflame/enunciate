@@ -26,6 +26,7 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.jdom.output.XMLOutputter;
+import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
@@ -145,7 +146,14 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
     try {
       String namespace = getNamespace();
       String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-      org.jdom.Element rootElement = new org.jdom.Element(getName(), org.jdom.Namespace.getNamespace(prefix, namespace));
+      Namespace jdomNS;
+      if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
+        jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+      }
+      else {
+        jdomNS = Namespace.getNamespace(prefix, namespace);
+      }
+      org.jdom.Element rootElement = new org.jdom.Element(getName(), jdomNS);
       getTypeDefinition().generateExampleXml(rootElement);
       org.jdom.Document document = new org.jdom.Document(rootElement);
 

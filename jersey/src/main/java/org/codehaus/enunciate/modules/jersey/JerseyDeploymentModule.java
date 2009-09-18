@@ -187,6 +187,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
                 resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
           subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
           resourceMethod.putMetaData("defaultSubcontext", subcontext);
+          model.put("wadl", subcontext + "/application.wadl");
 
           if (isUsePathBasedConneg()) {
             for (String producesMime : resourceMethod.getProducesMime()) {
