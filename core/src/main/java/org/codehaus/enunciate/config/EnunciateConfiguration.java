@@ -579,8 +579,8 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallParam("enunciate/api-classes/exclude", 0, "pattern");
 
     //set up the ability to disable certain rules
-    digester.addCallMethod("enunciate/validator/disable-rule", "addDisabledRule", 1);
-    digester.addCallParam("enunciate/validator/disable-rule", 0, "id");
+    digester.addCallMethod("enunciate/disable-rule", "addDisabledRule", 1);
+    digester.addCallParam("enunciate/disable-rule", 0, "id");
 
     //allow for classes and packages to be imported for JAXB.
     digester.addObjectCreate("enunciate/api-import", APIImport.class);

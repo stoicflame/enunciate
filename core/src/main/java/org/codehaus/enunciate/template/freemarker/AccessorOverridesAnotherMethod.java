@@ -27,6 +27,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
           accessors.add(typeDef.getValue());
           accessors.addAll(typeDef.getElements());
           for (Accessor accessor : accessors) {
-            if (accessor != null && name.equals(accessor.getName())) {
+            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getName())) {
               return Boolean.TRUE;
             }
           }

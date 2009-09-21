@@ -177,14 +177,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
     model.setBaseDeploymentAddress(baseURL);
 
-    boolean enunciateRestEnabled = false;
-    for (DeploymentModule module : config.getAllModules()) {
-      if ("rest".equals(module.getName())) {
-        enunciateRestEnabled = true;
-        break;
-      }
-    }
-
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -431,6 +423,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     for (DeploymentModule module : config.getEnabledModules()) {
       Validator moduleValidator = module.getValidator();
       if (moduleValidator != null) {
+        if (moduleValidator instanceof ConfigurableRules) {
+          ((ConfigurableRules)moduleValidator).disableRules(disabledRules);
+        }
         validator.addValidator(module.getName(), moduleValidator);
         debug("Validator for module %s added to the chain.", module.getName());
       }

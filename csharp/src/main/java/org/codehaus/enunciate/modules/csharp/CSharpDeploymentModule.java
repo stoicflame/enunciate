@@ -230,11 +230,14 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
     File genDir = getGenerateDir();
     if (!enunciate.isUpToDateWithSources(genDir)) {
       EnunciateFreemarkerModel model = getModel();
-      model.put("namespaceFor", new ClientPackageForMethod(this.packageToNamespaceConversions));
+      ClientPackageForMethod namespaceFor = new ClientPackageForMethod(this.packageToNamespaceConversions);
+      namespaceFor.setUseClientNameConversions(true);
+      model.put("namespaceFor", namespaceFor);
       model.put("findRootElement", new FindRootElementMethod());
       model.put("requestDocumentQName", new RequestDocumentQNameMethod());
       model.put("responseDocumentQName", new ResponseDocumentQNameMethod());
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToNamespaceConversions);
+      classnameFor.setUseClientNameConversions(true);
       model.put("classnameFor", classnameFor);
       model.put("listsAsArraysClassnameFor", new ListsAsArraysClientClassnameForMethod(this.packageToNamespaceConversions));
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));

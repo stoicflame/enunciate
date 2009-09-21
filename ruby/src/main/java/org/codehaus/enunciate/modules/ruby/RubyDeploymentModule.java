@@ -165,8 +165,11 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
       }
       model.put("schemaTypes", schemaTypes);
       model.put("packages2modules", this.packageToModuleConversions);
-      model.put("moduleFor", new ClientPackageForMethod(this.packageToModuleConversions));
+      ClientPackageForMethod moduleFor = new ClientPackageForMethod(this.packageToModuleConversions);
+      moduleFor.setUseClientNameConversions(true);
+      model.put("moduleFor", moduleFor);
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(this.packageToModuleConversions);
+      classnameFor.setUseClientNameConversions(true);
       model.put("classnameFor", classnameFor);
       SimpleNameWithParamsMethod simpleNameFor = new SimpleNameWithParamsMethod(classnameFor);
       model.put("simpleNameFor", simpleNameFor);

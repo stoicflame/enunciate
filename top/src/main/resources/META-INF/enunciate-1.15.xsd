@@ -23,6 +23,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="validator" type="validator" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="disable-rule" type="disable-rule" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="api-classes" type="api-classes" minOccurs="0" maxOccurs="1"/>
         <xs:element name="api-import" type="api-import" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element name="jaxb-import" type="jaxb-import" minOccurs="0" maxOccurs="unbounded"/>
@@ -48,10 +49,6 @@
         Used to define a custom validator to use to validate the web service declarations.
       </xs:documentation>
     </xs:annotation>
-
-    <xs:sequence>
-      <xs:element name="disable-rule" type="disable-rule" minOccurs="0" maxOccurs="unbounded"/>
-    </xs:sequence>
 
     <xs:attribute name="class" type="xs:string" use="required"/>
   </xs:complexType>
