@@ -7,6 +7,7 @@
     2a. Make sure the parent pom includes any new modules.
     2b. Make sure the top pom includes any new modules.
     2c. Make sure the rt pom includes any new modules.
+    2d. Make sure the build-site.xml file includes any new modules (either optional or in core.libs.fileset)
 3. replace all instances of old_version with new_version (do a replaceAll operation)
 4. ./local_install_new_version.sh
 5. mvn clean install (to run all the tests)

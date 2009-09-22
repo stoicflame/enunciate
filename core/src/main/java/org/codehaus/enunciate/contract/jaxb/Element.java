@@ -478,6 +478,9 @@ public class Element extends Accessor {
         if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
           jdomNS = org.jdom.Namespace.XML_NAMESPACE;
         }
+        else if (namespace == null || "".equals(namespace)) {
+          jdomNS = org.jdom.Namespace.NO_NAMESPACE;
+        }
         else {
           jdomNS = Namespace.getNamespace(prefix, namespace);
         }
@@ -496,6 +499,9 @@ public class Element extends Accessor {
             Namespace jdomNS;
             if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
               jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+            }
+            else if (namespace == null || "".equals(namespace)) {
+              jdomNS = org.jdom.Namespace.NO_NAMESPACE;
             }
             else {
               jdomNS = Namespace.getNamespace(prefix, namespace);
@@ -519,6 +525,9 @@ public class Element extends Accessor {
             Namespace jdomNS;
             if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
               jdomNS = org.jdom.Namespace.XML_NAMESPACE;
+            }
+            else if (namespace == null || "".equals(namespace)) {
+              jdomNS = org.jdom.Namespace.NO_NAMESPACE;
             }
             else {
               jdomNS = Namespace.getNamespace(prefix, namespace);

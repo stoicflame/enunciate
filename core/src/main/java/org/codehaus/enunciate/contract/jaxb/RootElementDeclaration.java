@@ -150,6 +150,9 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
       if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
         jdomNS = org.jdom.Namespace.XML_NAMESPACE;
       }
+      else if (namespace == null || "".equals(namespace)) {
+        jdomNS = org.jdom.Namespace.NO_NAMESPACE;
+      }
       else {
         jdomNS = Namespace.getNamespace(prefix, namespace);
       }

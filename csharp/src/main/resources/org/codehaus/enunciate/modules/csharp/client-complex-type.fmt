@@ -148,11 +148,11 @@ namespace ${namespaceFor(type)} {
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool ${accessor.clientSimpleName?cap_first}Specified {
       get {
-        return this._${accessor.clientSimpleName} != ${cs_classname}._Unspecified;
+        return this._${accessor.clientSimpleName} != ${cs_classname}.NULL;
       }
       set {
         if (!value) {
-          this._${accessor.clientSimpleName} = ${cs_classname}._Unspecified;
+          this._${accessor.clientSimpleName} = ${cs_classname}.NULL;
         }
       }
     }

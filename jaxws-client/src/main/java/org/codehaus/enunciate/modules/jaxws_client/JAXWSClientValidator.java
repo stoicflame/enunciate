@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.jaxws_client;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
+import org.codehaus.enunciate.contract.validation.ConfigurableRules;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
@@ -35,14 +36,19 @@ import freemarker.template.TemplateModelException;
  *
  * @author Ryan Heaton
  */
-public class JAXWSClientValidator extends BaseValidator {
+public class JAXWSClientValidator extends BaseValidator implements ConfigurableRules {
 
   private final Set<String> serverSideTypesToUse;
   private final ClientClassnameForMethod clientConversion;
+  private final TreeSet<String> disabledRules = new TreeSet<String>();
 
   public JAXWSClientValidator(Set<String> serverSideTypesToUse, Map<String, String> packageConversions) {
     this.serverSideTypesToUse = serverSideTypesToUse;
     this.clientConversion = new ClientClassnameForMethod(packageConversions);
+  }
+
+  public void disableRules(Set<String> ruleIds) {
+    this.disabledRules.addAll(ruleIds);
   }
 
   @Override
@@ -52,9 +58,10 @@ public class JAXWSClientValidator extends BaseValidator {
     String[] propOrder = complexType.getPropertyOrder();
     List<String> assertedProperties = propOrder != null ? new ArrayList<String>(Arrays.asList(propOrder)) : Collections.<String>emptyList();
     for (Element element : complexType.getElements()) {
-      if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
+      if (!this.disabledRules.contains("jaxws.client.disallow.maps") && element.getAccessorType() instanceof MapType && !element.isAdapted()) {
         result.addError(element, "Because of a bug in JAXB, an Map property can't have an @XmlElement annotation, which is required for the JAXWS client. " +
-          "So you're going to have to use @XmlJavaTypeAdapter to supply your own adapter for the Map. Or disable the jaxws-client module.");
+          "So you're going to have to use @XmlJavaTypeAdapter to supply your own adapter for the Map. Or disable the jaxws-client module. For more information," +
+          " see https://jaxb.dev.java.net/issues/show_bug.cgi?id=268 and http://forums.java.net/jive/thread.jspa?messageID=361990");
       }
 
       assertedProperties.remove(element.getSimpleName());

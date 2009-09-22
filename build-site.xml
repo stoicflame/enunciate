@@ -44,10 +44,11 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-csharp" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-docs" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws" version="${top.pom.version}"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-ri" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-client" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jersey" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-obj-c" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-rest" version="${top.pom.version}"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-ruby" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xml" version="${top.pom.version}"/>
     </artifact:dependencies>
@@ -310,7 +311,7 @@
       </fileset>
     </delete>
 
-    <!--copy the jaxws-ri module plus deps-->
+    <!--copy the rest module plus deps-->
     <mkdir dir="target/lib/modules/rest"/>
     <copy todir="target/lib/modules/rest">
       <fileset refid="rest.libs.fileset"/>
