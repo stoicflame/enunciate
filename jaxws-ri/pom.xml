@@ -20,12 +20,6 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws-ri-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core</artifactId>
       <version>${project.version}</version>
 

@@ -27,14 +27,14 @@ import junit.framework.Test;
 /**
  * @author Ryan Heaton
  */
-public class TestJAXWSValidator extends InAPTTestCase {
+public class TestJAXWSSupportValidator extends InAPTTestCase {
 
   /**
    * Tests the behavior of conflicting bean names.
    */
   public void testConflictingBeanNames() throws Exception {
     EndpointInterface ei = new EndpointInterface(getDeclaration("org.codehaus.enunciate.samples.jaxws.BasicEndpointInterface"));
-    JAXWSValidator validator = new JAXWSValidator();
+    JAXWSSupportValidator validator = new JAXWSSupportValidator();
     WebMethod alreadyExisting = null;
     WebMethod notConflictingMethod = null;
     for (WebMethod webMethod : ei.getWebMethods()) {
@@ -77,6 +77,6 @@ public class TestJAXWSValidator extends InAPTTestCase {
   }
 
   public static Test suite() {
-    return createSuite(TestJAXWSValidator.class);
+    return createSuite(TestJAXWSSupportValidator.class);
   }
 }

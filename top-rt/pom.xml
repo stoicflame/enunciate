@@ -53,7 +53,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws-ri-rt</artifactId>
+      <artifactId>enunciate-spring-jaxws-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -7,9 +7,9 @@
     <version>1.16-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-jaxws</artifactId>
-  <name>Enunciate - JAX-WS Module</name>
-  <description>The Enunciate JAX-WS module generates the JAX-WS wrapper classes for the Enunciated project.</description>
+  <artifactId>enunciate-jaxws-support</artifactId>
+  <name>Enunciate - JAX-WS Support Module</name>
+  <description>The Enunciate JAX-WS support module generates the JAX-WS wrapper classes for the Enunciated project.</description>
 
   <build>
     <plugins>

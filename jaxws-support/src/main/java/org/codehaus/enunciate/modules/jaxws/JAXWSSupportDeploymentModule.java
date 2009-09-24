@@ -39,12 +39,12 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * <h1>JAX-WS Module</h1>
+ * <h1>JAX-WS Support Module</h1>
  *
- * <p>The JAXWS deployment module is a simple module that generates the request/response/fault beans
+ * <p>The JAXWS support deployment module is a simple module that generates the request/response/fault beans
  * for doc/lit SOAP operations as specified in the <a href="https://jax-ws.dev.java.net/">JAX-WS specification</a>.</p>
  *
- * <p>The order of the JAXWS deployment module is 0, as it doesn't depend on any artifacts exported
+ * <p>The order of the JAXWS Support deployment module is 0, as it doesn't depend on any artifacts exported
  * by any other module.</p>
  *
  * <ul>
@@ -57,7 +57,7 @@ import java.util.TreeSet;
  *
  * <h3>generate</h3>
  *
- * <p>"Generate" is only one significant step in the JAX-WS module.  It generates the stubs according to the JAX-WS spec.</p>
+ * <p>"Generate" is only one significant step in the JAX-WS Support module.  It generates the stubs according to the JAX-WS spec.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -65,19 +65,19 @@ import java.util.TreeSet;
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
- * <p>The jaxws deployment module exports its source directory under artifact id "<b>jaxws.src.dir</b>" during the generate step.</p>
+ * <p>The jaxws support deployment module exports its source directory under artifact id "<b>jaxws.support.src.dir</b>" during the generate step.</p>
  *
  * @author Ryan Heaton
- * @docFileName module_jaxws.html
+ * @docFileName module_jaxws_support.html
  */
-public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
+public class JAXWSSupportDeploymentModule extends FreemarkerDeploymentModule {
 
   /**
    * @return "xml"
    */
   @Override
   public String getName() {
-    return "jaxws";
+    return "jaxws-support";
   }
 
   @Override
@@ -87,9 +87,9 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
       EnunciateFreemarkerModel model = getModel();
       Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
-      URL requestBeanTemplate = JAXWSDeploymentModule.class.getResource("request-bean.fmt");
-      URL responseBeanTemplate = JAXWSDeploymentModule.class.getResource("response-bean.fmt");
-      URL faultBeanTemplate = JAXWSDeploymentModule.class.getResource("fault-bean.fmt");
+      URL requestBeanTemplate = JAXWSSupportDeploymentModule.class.getResource("request-bean.fmt");
+      URL responseBeanTemplate = JAXWSSupportDeploymentModule.class.getResource("response-bean.fmt");
+      URL faultBeanTemplate = JAXWSSupportDeploymentModule.class.getResource("fault-bean.fmt");
 
       TreeSet<WebFault> visitedFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
       for (WsdlInfo wsdlInfo : ns2wsdl.values()) {
@@ -141,7 +141,7 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
       info("Skipping JAX-WS support generation as everything appears up-to-date...");
     }
 
-    getEnunciate().addArtifact(new FileArtifact(getName(), "jaxws.src.dir", genDir));
+    getEnunciate().addArtifact(new FileArtifact(getName(), "jaxws.support.src.dir", genDir));
     getEnunciate().addAdditionalSourceRoot(genDir);
   }
 
@@ -157,7 +157,7 @@ public class JAXWSDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public Validator getValidator() {
-    return new JAXWSValidator();
+    return new JAXWSSupportValidator();
   }
 
   // Inherited.

@@ -42,7 +42,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws</artifactId>
+      <artifactId>enunciate-jaxws-support</artifactId>
       <version>${project.version}</version>
     </dependency>
 

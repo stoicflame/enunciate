@@ -12,33 +12,39 @@
     <module>core-rt</module>
     <module>core</module>
     <module>xml</module>
-    <module>jaxws</module>
-    <module>spring-app-rt</module>
-    <module>spring-app</module>
-    <module>rest-rt</module>
-    <module>rest</module>
+    <module>jaxws-support</module>
+    <module>jaxws-ri</module>
     <module>jersey-rt</module>
     <module>jersey</module>
-    <module>xfire-rt</module>
-    <module>xfire</module>
-    <module>cxf-rt</module>
-    <module>cxf</module>
-    <module>jaxws-ri-rt</module>
-    <module>jaxws-ri</module>
-    <module>xfire-client-rt</module>
-    <module>xfire-client</module>
     <module>jaxws-client</module>
     <module>c</module>
     <module>obj-c</module>
     <module>csharp</module>
     <module>ruby</module>
     <module>docs</module>
+    <module>xfire-client-rt</module>
+    <module>xfire-client</module>
     <module>amf-rt</module>
     <module>amf</module>
     <module>gwt-rt</module>
     <module>gwt</module>
+
+    <module>rest-rt</module>
+    <module>rest</module>
+
+    <module>xfire-rt</module>
+    <module>xfire</module>
+
+    <module>cxf-rt</module>
+    <module>cxf</module>
+
+    <module>spring-jaxws-rt</module>
+    <module>spring-app-rt</module>
+    <module>spring-app</module>
+
     <module>top-rt</module>
     <module>top</module>
+
     <module>maven-enunciate-plugin</module>
     <module>integration-test-support</module>
     <module>integration-tests/xfire-rest</module>
@@ -263,7 +269,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <!--depending modules: jaxws-ri-rt-->
+        <!--depending modules: spring-jaxws-rt-->
         <groupId>org.jvnet.jax-ws-commons.spring</groupId>
         <artifactId>jaxws-spring</artifactId>
         <version>1.8</version>
@@ -336,7 +342,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <!--depending modules: jaxws-ri-rt-->
+        <!--depending modules: spring-jaxws-rt-->
         <groupId>org.jvnet.staxex</groupId>
         <artifactId>stax-ex</artifactId>
         <version>1.2</version>
@@ -400,14 +406,14 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <!--depending modules: jaxws-ri-rt-->
+        <!--depending modules: spring-jaxws-rt-->
         <groupId>com.sun.xml.stream.buffer</groupId>
         <artifactId>streambuffer</artifactId>
         <version>0.8</version>
       </dependency>
 
       <dependency>
-        <!--depending modules: jaxws-ri-rt-->
+        <!--depending modules: spring-jaxws-rt-->
         <groupId>com.sun.xml.stream</groupId>
         <artifactId>sjsxp</artifactId>
 

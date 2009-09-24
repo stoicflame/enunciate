@@ -48,7 +48,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Ryan Heaton
  */
-public class TestJAXWSDeploymentModule extends InAPTTestCase {
+public class TestJAXWSSupportDeploymentModule extends InAPTTestCase {
 
   /**
    * tests doing the freemarker generate.
@@ -62,7 +62,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
 
     final HashMap<URL, Integer> counts = new HashMap<URL, Integer>();
 
-    JAXWSDeploymentModule module = new JAXWSDeploymentModule() {
+    JAXWSSupportDeploymentModule module = new JAXWSSupportDeploymentModule() {
       @Override
       public void processTemplate(URL templateURL, Object mdl) throws IOException, TemplateException {
         assertSame(mdl, model);
@@ -214,7 +214,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
    * @return The wrapper class that was generated.
    */
   public Class createWrapperClass(RequestWrapper requestWrapper) throws Exception {
-    return createWrapperClass(requestWrapper, JAXWSDeploymentModule.class.getResource("request-bean.fmt"), requestWrapper.getRequestBeanName());
+    return createWrapperClass(requestWrapper, JAXWSSupportDeploymentModule.class.getResource("request-bean.fmt"), requestWrapper.getRequestBeanName());
   }
 
   /**
@@ -224,7 +224,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
    * @return The wrapper class that was generated.
    */
   public Class createWrapperClass(ResponseWrapper responseWrapper) throws Exception {
-    return createWrapperClass(responseWrapper, JAXWSDeploymentModule.class.getResource("response-bean.fmt"), responseWrapper.getResponseBeanName());
+    return createWrapperClass(responseWrapper, JAXWSSupportDeploymentModule.class.getResource("response-bean.fmt"), responseWrapper.getResponseBeanName());
   }
 
   /**
@@ -234,7 +234,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
    * @return The wrapper class that was generated.
    */
   public Class createWrapperClass(WebFault faultWrapper) throws Exception {
-    return createWrapperClass(faultWrapper, JAXWSDeploymentModule.class.getResource("fault-bean.fmt"), faultWrapper.getImplicitFaultBeanQualifiedName());
+    return createWrapperClass(faultWrapper, JAXWSSupportDeploymentModule.class.getResource("fault-bean.fmt"), faultWrapper.getImplicitFaultBeanQualifiedName());
   }
 
   /**
@@ -252,7 +252,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
     Enunciate enunciate = new Enunciate(new String[0]);
     File genDir = enunciate.createTempDir();
     enunciate.setGenerateDir(genDir);
-    JAXWSDeploymentModule module = new JAXWSDeploymentModule() {
+    JAXWSSupportDeploymentModule module = new JAXWSSupportDeploymentModule() {
       @Override
       protected EnunciateFreemarkerModel getModelInternal() {
         return (EnunciateFreemarkerModel) FreemarkerModel.get();
@@ -289,7 +289,7 @@ public class TestJAXWSDeploymentModule extends InAPTTestCase {
   }
 
   public static Test suite() {
-    return createSuite(TestJAXWSDeploymentModule.class);
+    return createSuite(TestJAXWSSupportDeploymentModule.class);
   }
 
 }

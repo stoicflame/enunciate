@@ -33,7 +33,7 @@ import java.util.TreeSet;
  *
  * @author Ryan Heaton
  */
-public class JAXWSValidator extends BaseValidator {
+public class JAXWSSupportValidator extends BaseValidator {
   
   private final HashSet<String> jaxwsBeans = new HashSet<String>();
   private final TreeSet<WebFault> faultSet = new TreeSet<WebFault>(new TypeDeclarationComparator());

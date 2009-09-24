@@ -40,9 +40,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeSet;
 
-import com.sun.xml.ws.transport.http.servlet.WSServlet;
-import com.sun.xml.ws.transport.http.servlet.WSServletContextListener;
-
 /**
  * <h1>JAX-WS RI Module</h1>
  *
@@ -110,8 +107,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     super.init(enunciate);
 
     if (!isDisabled()) {
-      if (!enunciate.isModuleEnabled("jaxws")) {
-        throw new EnunciateException("The JAX-WS RI module requires an enabled JAX-WS module.");
+      if (!enunciate.isModuleEnabled("jaxws-support")) {
+        throw new EnunciateException("The JAX-WS RI module requires an enabled JAX-WS Support module.");
       }
 
       if (springEnabled == null) {
@@ -188,7 +185,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     webappFragment.setBaseDir(webappDir);
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("jaxws");
-    String servletClass = springEnabled ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : WSServlet.class.getName();
+    String servletClass = springEnabled ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
     servletComponent.setClassname(servletClass);
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
@@ -199,7 +196,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
     if (!springEnabled) {
-      webappFragment.setListeners(Arrays.asList(WSServletContextListener.class.getName()));
+      webappFragment.setListeners(Arrays.asList("com.sun.xml.ws.transport.http.servlet.WSServletContextListener"));
     }
     enunciate.addWebAppFragment(webappFragment);
   }

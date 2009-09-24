@@ -7,9 +7,9 @@
     <version>1.16-SNAPSHOT</version>
   </parent>
 
-  <artifactId>enunciate-jaxws-ri-rt</artifactId>
-  <name>Enunciate - JAX-WS Reference Implementation Runtime</name>
-  <description>The Enunciate JAX-WS Reference Implementation runtime libraries support the JAX-WS RI-backed SOAP endpoints.</description>
+  <artifactId>enunciate-spring-jaxws-rt</artifactId>
+  <name>Enunciate - JAX-WS RI Runtime Spring Support</name>
+  <description>The Enunciate JAX-WS Reference Implementation runtime libraries support the Spring-based JAX-WS RI-backed SOAP endpoints.</description>
 
   <repositories>
     <repository>
