@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.15</version>
+    <version>1.16-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-jaxws-ri</artifactId>
@@ -21,13 +21,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-jaxws-ri-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <!--the JAX-WS module depends on the spring app-->
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-spring-app</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -57,6 +57,13 @@ public class ${endpointInterface.simpleName}Instrumented {
   /**
    * Construct an instrumented ${endpointInterface.simpleName} that just delegates to an instance of ${endpointInterface.simpleName}.
    */
+  public ${endpointInterface.simpleName}Instrumented() {
+    this(new ${endpointInterface.endpointImplementations[0].qualifiedName}());
+  }
+
+  /**
+   * Construct an instrumented ${endpointInterface.simpleName} that just delegates to an instance of ${endpointInterface.simpleName}.
+   */
   public ${endpointInterface.simpleName}Instrumented(${endpointInterface.simpleName} delegate) {
     this.delegate = delegate;
   }

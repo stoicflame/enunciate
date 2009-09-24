@@ -40,13 +40,22 @@ import java.util.TreeSet;
 /**
  * <h1>XFire Module</h1>
  *
- * <p>The XFire deployment module is a simple module that generates the request/response beans
- * for rpc/lit SOAP operations.</p>
+ * <p>The XFire deployment module that deploys the SOAP endpoints using XFire as a provider.</p>
  *
- * <p>The XFire module <i>used</i> to be the primary module for assembing the app.  As of release 1.5,
- * this functionality has been separated into the spring-app module. However, the XFire module still
- * depends on the spring-app module to function, as it assumes that the endpoint beans are defined
- * in the Spring root application context.</i>
+ * <p>Note that the XFire module is disabled by default, so you must enable it in the enunciate configuration file, e.g.:</p>
+ *
+ * <code class="console">
+ * &lt;enunciate&gt;
+ * &nbsp;&nbsp;&lt;modules&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-ri disabled="true"/&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="false"&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;...
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/xfire&gt;
+ * &nbsp;&nbsp;&lt;/modules&gt;
+ * &lt;/enunciate&gt;
+ *
+ * <p>You should also be aware that the XFire module is not, by default, on the classpath when invoking Enunciate. For more information,
+ * see <a href="http://docs.codehaus.org/display/ENUNCIATE/Using+CXF+or+XFire">using CXF or XFire</a>.</p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>

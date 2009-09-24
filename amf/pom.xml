@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.15</version>
+    <version>1.16-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-amf</artifactId>
@@ -22,12 +22,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <!--used to compile the generated code, which uses the spring annotations -->
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
     </dependency>
 
     <dependency>

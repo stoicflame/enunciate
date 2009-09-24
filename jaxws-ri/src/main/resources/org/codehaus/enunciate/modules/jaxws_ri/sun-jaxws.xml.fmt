@@ -1,0 +1,16 @@
+[#ftl]
+[#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
+[@file name="jaxws-servlet.xml" charset="utf-8"]
+<?xml version="1.0" encoding="UTF-8"?>
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
+  [@forEachWsdl]
+    [@forEachEndpointInterface wsdl=wsdl]
+      [#list endpointInterface.endpointImplementations as impl]
+        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+  <endpoint name="${endpointInterface.serviceName}" implementation="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}" url-pattern="${endpointInterface.metaData.soapPath}"/>
+        [/#if]
+      [/#list]
+    [/@forEachEndpointInterface]
+  [/@forEachWsdl]
+</endpoints>
+[/@file]

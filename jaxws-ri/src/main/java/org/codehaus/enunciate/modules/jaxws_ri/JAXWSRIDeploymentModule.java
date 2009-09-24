@@ -26,10 +26,8 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
-import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
@@ -37,27 +35,18 @@ import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeSet;
+
+import com.sun.xml.ws.transport.http.servlet.WSServlet;
+import com.sun.xml.ws.transport.http.servlet.WSServletContextListener;
 
 /**
  * <h1>JAX-WS RI Module</h1>
  *
  * <p>The JAX-WS RI module assembles a JAX-WS RI-based server-side application for hosting the SOAP endpoints.</p>
- *
- * <p>Note that the JAX-WS RI module is disabled by default, so you must enable it in the enunciate configuration file, e.g.:</p>
- *
- * <code class="console">
- * &lt;enunciate&gt;
- * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;xfire disabled="true"/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;jaxws-ri disabled="false"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;...
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/jaxws-ri&gt;
- * &nbsp;&nbsp;&lt;/modules&gt;
- * &lt;/enunciate&gt;
- *
- * <p>You should also be aware that the JAX-WS RI module is not, by default, on the classpath when invoking Enunciate. For more information,
- * see <a href="executables.html">invoking Enunciate</a></p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
@@ -69,11 +58,12 @@ import java.util.*;
  *
  * <h3>generate</h3>
  * 
- * <p>The "generate" step generates the spring configuration file.</p>
+ * <p>The "generate" step generates the necessary configuration files.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>There are no additional configuration elements for the JAX-WS RI module.</p>
+ * <p>The JAX-WS RI module accepts a single parameter, "springEnabled" that forces spring integration. By default, spring integration will only be enabled
+ * if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -84,8 +74,7 @@ import java.util.*;
  */
 public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule {
 
-  public JAXWSRIDeploymentModule() {
-  }
+  private Boolean springEnabled = null;
 
   /**
    * @return "cxf"
@@ -98,8 +87,15 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
   /**
    * @return The URL to "jaxws-servlet.xml.fmt"
    */
-  protected URL getJAXWSServletTemplateURL() {
+  protected URL getJAXWSSpringTemplateURL() {
     return JAXWSRIDeploymentModule.class.getResource("jaxws-servlet.xml.fmt");
+  }
+
+  /**
+   * @return The URL to "jaxws-servlet.xml.fmt"
+   */
+  protected URL getSunJAXWSTemplateURL() {
+    return JAXWSRIDeploymentModule.class.getResource("sun-jaxws.xml.fmt");
   }
 
   /**
@@ -118,11 +114,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
         throw new EnunciateException("The JAX-WS RI module requires an enabled JAX-WS module.");
       }
 
-      if (!enunciate.isModuleEnabled("spring-app")) {
-        throw new EnunciateException("The JAX-WS RI module requires the spring-app module to be enabled.");
+      if (springEnabled == null) {
+        this.springEnabled = enunciate.isModuleEnabled("spring-app");
       }
     }
-
   }
 
   // Inherited.
@@ -159,7 +154,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
-      processTemplate(getJAXWSServletTemplateURL(), model);
+      URL configTemplate = springEnabled ? getJAXWSSpringTemplateURL() : getSunJAXWSTemplateURL();
+      processTemplate(configTemplate, model);
 
       URL eiTemplate = getInstrumentedEndpointTemplateURL();
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
@@ -192,7 +188,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     webappFragment.setBaseDir(webappDir);
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("jaxws");
-    servletComponent.setClassname(WSSpringServlet.class.getName());
+    String servletClass = springEnabled ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : WSServlet.class.getName();
+    servletComponent.setClassname(servletClass);
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
@@ -201,6 +198,9 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     }
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
+    if (!springEnabled) {
+      webappFragment.setListeners(Arrays.asList(WSServletContextListener.class.getName()));
+    }
     enunciate.addWebAppFragment(webappFragment);
   }
 
@@ -226,6 +226,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
   @Override
   public Validator getValidator() {
     return new JAXWSRIValidator();
+  }
+
+  public void setSpringEnabled(Boolean springEnabled) {
+    this.springEnabled = springEnabled;
   }
 
   // Inherited.

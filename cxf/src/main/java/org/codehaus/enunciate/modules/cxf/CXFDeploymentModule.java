@@ -59,7 +59,7 @@ import java.util.*;
  * &lt;/enunciate&gt;
  *
  * <p>You should also be aware that the CXF module is not, by default, on the classpath when invoking Enunciate. For more information, 
- * see <a href="executables.html">invoking Enunciate</a></p>
+ * see <a href="http://docs.codehaus.org/display/ENUNCIATE/Using+CXF+or+XFire">using CXF or XFire</a>.</p>
  *
  * <ul>
  *   <li><a href="#steps">steps</a></li>
