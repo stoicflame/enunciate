@@ -1,9 +1,11 @@
 package org.codehaus.enunciate.samples.json;
 
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.json.JsonProperty;
-import org.codehaus.enunciate.json.JsonType;
+import org.codehaus.enunciate.json.JsonRootType;
 
-@JsonType(name = "person")
+@JsonRootType
+@JsonName("person")
 public class Person
 {
     private Name name;

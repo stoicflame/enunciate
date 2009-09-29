@@ -1,9 +1,10 @@
 package org.codehaus.enunciate.samples.json;
 
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.json.JsonProperty;
 import org.codehaus.enunciate.json.JsonType;
 
-@JsonType(name = "name")
+@JsonName("name")
 public class Name
 {
     private String first;
@@ -21,7 +22,8 @@ public class Name
         this.first = first;
     }
 
-    @JsonProperty(name = "surname")
+    @JsonProperty
+    @JsonName("surname")
     public String getLast()
     {
         return last;

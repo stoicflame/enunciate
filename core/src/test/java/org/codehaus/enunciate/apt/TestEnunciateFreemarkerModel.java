@@ -27,7 +27,6 @@ import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition;
 import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;

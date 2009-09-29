@@ -42,6 +42,7 @@ import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
+import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonType;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
@@ -357,13 +358,16 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       if (this.enunciate.getConfig() != null && !this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
         debug("%s to be considered as a %s", typeDefinition.getTypeName(), typeDefinition.getClass().getSimpleName());
         model.add(typeDefinition);
+
+        if(typeDefinition.getDelegate().getAnnotation(JsonRootType.class) != null)
+        {
+          debug("%s to be considered as a root element", typeDefinition.getTypeName());
+          model.add(new JsonRootElementDeclaration(typeDefinition));
+        }
       }
       else {
         debug("%s is a potential schema type definition, but we're not going to add it directly to the model. (It could still be indirectly added, though.)", typeDefinition.getTypeName());
       }
-
-      debug("%s to be considered as a root element", typeDefinition.getTypeName());
-      model.add(new JsonRootElementDeclaration(typeDefinition));
     }
   }
 
@@ -510,7 +514,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return Whether the specified declaration is a potential schema type for JSON data.
    */
   protected boolean isPotentialJsonSchemaType(TypeDeclaration declaration) {
-    return declaration instanceof ClassDeclaration && declaration.getAnnotation(JsonType.class) != null;
+    return declaration instanceof ClassDeclaration && (declaration.getAnnotation(JsonType.class) != null || declaration.getAnnotation(JsonRootType.class) != null);
   }
 
   /**
@@ -733,6 +737,8 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       debug("Validating %s...", rootElement.getQualifiedName());
       validationResult.aggregate(validator.validateRootElement(rootElement));
     }
+
+    // TODO Validate JSON root elements
 
     debug("Validating the REST API...");
     validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));

@@ -7,12 +7,12 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * Denotes that a type represents a JSON type.
+ * Denotes that a type represents a JSON type that can be the root of a RESTful resource representation or RPC message.
  * </p>
  *
  * @author Steven Cummings
  */
 @Target ( ElementType.TYPE )
 @Retention ( RetentionPolicy.RUNTIME )
-public @interface JsonType {
+public @interface JsonRootType {
 }

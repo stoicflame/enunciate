@@ -51,7 +51,8 @@ public class Main {
         //first see if the option can be handled without a value.
         boolean handled = false;
         for (Option opt : Option.values()) {
-          if (handled = opt.handle(option, enunciate)) {
+          handled = opt.handle(option, enunciate);
+          if (handled) {
             break;
           }
         }
@@ -61,7 +62,8 @@ public class Main {
           if (args.length > argIndex) {
             String value = args[argIndex];
             for (Option opt : Option.values()) {
-              if (handled = opt.handle(option, value, enunciate)) {
+              handled = opt.handle(option, value, enunciate);
+              if (handled) {
                 break;
               }
             }

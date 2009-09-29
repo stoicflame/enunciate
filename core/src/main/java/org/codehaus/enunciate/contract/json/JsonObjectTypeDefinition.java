@@ -4,13 +4,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.json.JsonProperty;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.TypeMirror;
 
 /**
  * <p>
@@ -20,18 +19,16 @@ import com.sun.mirror.type.TypeMirror;
  * @author Steven Cummings
  */
 public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
-  private final Map<String, Property> propertiesByName;
+  private final Map<String, JsonPropertyDeclaration> propertiesByName;
 
   JsonObjectTypeDefinition(final ClassDeclaration delegate) {
     super(delegate);
-    final Map<String, Property> propertiesByName = new HashMap<String, Property>();
+    @SuppressWarnings("hiding")
+    final Map<String, JsonPropertyDeclaration> propertiesByName = new HashMap<String, JsonPropertyDeclaration>();
     for (final PropertyDeclaration propertyDeclaration : getProperties()) {
-      final JsonProperty jsonProperty = propertyDeclaration.getAnnotation(JsonProperty.class);
-      if (jsonProperty != null) {
-        final String name = jsonProperty.name() == null || jsonProperty.name().trim().length() == 0 ? propertyDeclaration.getSimpleName() : jsonProperty.name();
-        final Property property = new Property(name, propertyDeclaration.getDocValue(), TypeMirrorDecorator.decorate(propertyDeclaration.getPropertyType()));
-
-        propertiesByName.put(name, property);
+      if (propertyDeclaration.getAnnotation(JsonProperty.class) != null) {
+        JsonPropertyDeclaration property = new JsonPropertyDeclaration(propertyDeclaration);
+        propertiesByName.put(property.getPropertyName(), property);
       }
     }
     this.propertiesByName = Collections.unmodifiableMap(propertiesByName);
@@ -40,43 +37,28 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
   /**
    * @return The propertiesByName.
    */
-  public Map<String, Property> getPropertiesByName() {
+  public Map<String, JsonPropertyDeclaration> getPropertiesByName() {
     return propertiesByName;
   }
 
-  public static final class Property {
-    private final String name;
-    private final String description;
-    private final TypeMirror type;
-
-    private Property(final String name, final String description, final TypeMirror type) {
-      assert name != null;
-      assert type != null;
-
-      this.name = name;
-      this.description = description;
-      this.type = type;
+  public static final class JsonPropertyDeclaration extends PropertyDeclaration {
+    private JsonPropertyDeclaration(final PropertyDeclaration propertyDeclaration) {
+      super(propertyDeclaration.getGetter(), propertyDeclaration.getSetter());
     }
 
     /**
      * @return The name.
      */
-    public String getName() {
-      return name;
+    public String getPropertyName() {
+      JsonName jsonName = getAnnotation(JsonName.class);
+      return jsonName == null ? getSimpleName() : jsonName.value();
     }
 
     /**
      * @return The description.
      */
-    public String getDescription() {
-      return description;
-    }
-
-    /**
-     * @return The type.
-     */
-    public TypeMirror getType() {
-      return type;
+    public String getPropertyDescription() {
+      return getDocValue();
     }
   }
 }

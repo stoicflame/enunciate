@@ -15,8 +15,4 @@ import java.lang.annotation.Target;
 @Target ( {ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER} )
 @Retention ( RetentionPolicy.RUNTIME )
 public @interface JsonProperty {
-  /**
-   * Optional. Defines the logical name for the property. If not given, the logical name for the property will be derived as the bean property name based on the field or method name.
-   */
-  String name() default "";
 }

@@ -22,6 +22,7 @@ import com.sun.mirror.type.*;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedInterfaceType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -40,7 +41,6 @@ import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition;
 import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
-import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition.Property;
 import org.codehaus.enunciate.contract.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
@@ -50,8 +50,7 @@ import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.doc.DocumentationExample;
-import org.codehaus.enunciate.json.JsonType;
-
+import org.codehaus.enunciate.json.JsonRootType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.xml.bind.annotation.XmlNsForm;
@@ -392,10 +391,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         jsonSchemaInfo.getTypes().put(typeDefinition.getTypeName(), typeDefinition);
         knownJsonTypes.put(typeDefinition.getQualifiedName(), typeDefinition);
 
-        if (includeReferencedClasses() && typeDefinition instanceof JsonObjectTypeDefinition) {
+        if (includeReferencedClasses() && (this.enunciateConfig == null || !this.enunciateConfig.isExcludeUnreferencedClasses()) && typeDefinition instanceof JsonObjectTypeDefinition) {
           JsonObjectTypeDefinition objectTypeDefinition = (JsonObjectTypeDefinition) typeDefinition;
-          for (Property property : objectTypeDefinition.getPropertiesByName().values()) {
-            property.getType().accept(new ReferencedJsonTypeDefinitionVisitor());
+          for (PropertyDeclaration property : objectTypeDefinition.getPropertiesByName().values()) {
+            property.getPropertyType().accept(new ReferencedJsonTypeDefinitionVisitor());
           }
           ClassType superclass = objectTypeDefinition.getSuperclass();
           if (superclass != null) {
@@ -669,6 +668,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           //only add referenced type definitions for root elements.
           add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
         }
+
+        if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
+          add(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
+        }
       }
     }
 
@@ -680,7 +683,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
       }
 
-      if (classDeclaration.getAnnotation(JsonType.class) != null) {
+      if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
         add(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
       }
     }
