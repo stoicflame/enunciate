@@ -143,6 +143,7 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     assertNotNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person")));
     assertNotNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.PersonType")));
     assertNotNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name")));
+    assertNotNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Address")));
     assertTrue(validated[0]);
     assertEquals("tContract", model.getNamespacesToPrefixes().get("http://enunciate.codehaus.org/samples/contract"));
     assertEquals("test", model.getNamespacesToPrefixes().get("urn:test"));
@@ -213,12 +214,11 @@ public class TestEnunciateAnnotationProcessor extends InAPTTestCase {
     assertNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanTwo")));
     assertNotNull(model.findTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
     assertNotNull(model.findRootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree")));
-
-    // TODO Add a JSON type to a JAX-RS resource and test for it here.
     assertNull(model.findJsonRootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person")));
     assertNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person")));
     assertNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.PersonType")));
     assertNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name")));
+    assertNotNull(model.findJsonTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Address")));
 
     assertTrue(validated[0]);
 
