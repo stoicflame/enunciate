@@ -37,7 +37,7 @@ public class TestJsonObjectTypeDefinition extends InAPTTestCase
         assertProperty("middle", null, String.class.getName(), actualNameProperties.get("middle"));
     }
 
-    public void testProperties_AnnotationRequired()
+    public void testProperties_JsonIgnored_Excluded()
     {
         final JsonObjectTypeDefinition personTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person"));
         final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getPropertiesByName();

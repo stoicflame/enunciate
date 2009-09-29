@@ -6,8 +6,8 @@ import java.util.Map;
 
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 
+import org.codehaus.enunciate.json.JsonIgnore;
 import org.codehaus.enunciate.json.JsonName;
-import org.codehaus.enunciate.json.JsonProperty;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 
@@ -26,10 +26,12 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
     @SuppressWarnings("hiding")
     final Map<String, JsonPropertyDeclaration> propertiesByName = new HashMap<String, JsonPropertyDeclaration>();
     for (final PropertyDeclaration propertyDeclaration : getProperties()) {
-      if (propertyDeclaration.getAnnotation(JsonProperty.class) != null) {
-        JsonPropertyDeclaration property = new JsonPropertyDeclaration(propertyDeclaration);
-        propertiesByName.put(property.getPropertyName(), property);
+      if(propertyDeclaration.getAnnotation(JsonIgnore.class) != null) {
+        continue;
       }
+
+      final JsonPropertyDeclaration property = new JsonPropertyDeclaration(propertyDeclaration);
+      propertiesByName.put(property.getPropertyName(), property);
     }
     this.propertiesByName = Collections.unmodifiableMap(propertiesByName);
   }

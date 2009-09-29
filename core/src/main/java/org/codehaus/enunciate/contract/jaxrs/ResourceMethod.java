@@ -17,9 +17,7 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;

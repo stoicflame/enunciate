@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.contract.common.rest;
 
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 /**
  * Payload for a REST resource.
@@ -39,4 +40,9 @@ public interface RESTResourcePayload {
    */
   ElementDeclaration getXmlElement();
 
+  /**
+   * The JSON element associated with the payload, or null if none (or unknown).
+   * @return The JSON element associated with the payload, or null if none (or unknown).
+   */
+  JsonTypeDefinition getJsonType();
 }

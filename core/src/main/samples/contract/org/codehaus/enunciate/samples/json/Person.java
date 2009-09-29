@@ -1,5 +1,6 @@
 package org.codehaus.enunciate.samples.json;
 
+import org.codehaus.enunciate.json.JsonIgnore;
 import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.json.JsonProperty;
 import org.codehaus.enunciate.json.JsonRootType;
@@ -26,6 +27,7 @@ public class Person
         this.name = name;
     }
 
+    @JsonIgnore
     public String getNotAJsonProperty()
     {
         return notAJsonProperty;
@@ -35,5 +37,4 @@ public class Person
     {
         this.notAJsonProperty = notAJsonProperty;
     }
-
 }
