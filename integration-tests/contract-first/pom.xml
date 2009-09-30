@@ -223,7 +223,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <deployables>
               <deployable>
                 <properties>
-                  <context>enunciate-integration-epcis</context>
+                  <context>enunciate-integration-contract-first</context>
                 </properties>
               </deployable>
             </deployables>
