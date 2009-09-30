@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:epcismd="urn:epcglobal:epcis-masterdata:xsd:1" xmlns:sbdh="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:epcglobal="urn:epcglobal:xsd:1" xmlns:epcis="urn:epcglobal:epcis:xsd:1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:epcglobal:epcis-masterdata:xsd:1" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="1.0">
+	<xsd:annotation>
+		<xsd:documentation xml:lang="en">
+			<epcglobal:copyright>Copyright (C) 2006, 2005, 2004 EPCglobal Inc., All Rights Reserved.</epcglobal:copyright>
+			<epcglobal:disclaimer>EPCglobal Inc., its members, officers, directors, employees, or agents shall not be liable for any injury, loss, damages, financial or otherwise, arising from, related to, or caused by the use of this document.  The use of said document shall constitute your express consent to the foregoing exculpation.</epcglobal:disclaimer>
+			<epcglobal:specification>EPC INFORMATION SERVICE (EPCIS) Version 1.0</epcglobal:specification>
+		</xsd:documentation>
+	</xsd:annotation>
+	<xsd:import namespace="urn:epcglobal:xsd:1" schemaLocation="./EPCglobal.xsd"/>
+	<xsd:import namespace="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" schemaLocation="./StandardBusinessDocumentHeader.xsd"/>
+	<xsd:import namespace="urn:epcglobal:epcis:xsd:1" schemaLocation="./EPCglobal-epcis-1_0.xsd"/>
+	<!-- MasterData CORE ELEMENTS -->
+	<xsd:element name="EPCISMasterDataDocument" type="epcismd:EPCISMasterDataDocumentType"/>
+	<xsd:complexType name="EPCISMasterDataDocumentType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+      MasterData document that contains a Header and a Body.
+              </xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="epcglobal:Document">
+				<xsd:sequence>
+					<xsd:element name="EPCISHeader" type="epcis:EPCISHeaderType" minOccurs="0"/>
+					<xsd:element name="EPCISBody" type="epcismd:EPCISMasterDataBodyType"/>
+					<xsd:element name="extension" type="epcismd:EPCISMasterDataDocumentExtensionType" minOccurs="0"/>
+					<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+				</xsd:sequence>
+				<xsd:anyAttribute processContents="lax"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="EPCISMasterDataBodyType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">
+      MasterData specific body that contains Vocabularies.
+              </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="VocabularyList" type="epcismd:VocabularyListType" minOccurs="0"/>
+			<xsd:element name="extension" type="epcismd:EPCISMasterDataBodyExtensionType" minOccurs="0"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<!-- MasterData CORE ELEMENT TYPES -->
+	<xsd:complexType name="VocabularyListType">
+		<xsd:sequence>
+			<xsd:element name="Vocabulary" type="epcismd:VocabularyType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="VocabularyType">
+		<xsd:sequence>
+			<xsd:element name="VocabularyElementList" type="epcismd:VocabularyElementListType" minOccurs="0"/>
+			<xsd:element name="extension" type="epcismd:VocabularyExtensionType" minOccurs="0"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="type" type="xsd:anyURI" use="required"/>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="VocabularyElementListType">
+		<xsd:sequence>
+			<xsd:element name="VocabularyElement" type="epcismd:VocabularyElementType" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- Implementations SHALL treat a <children list containing zero elements
+       in the same way as if the <children> element were omitted altogether.
+  -->
+	<xsd:complexType name="VocabularyElementType">
+		<xsd:sequence>
+			<xsd:element name="attribute" type="epcismd:AttributeType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="children" type="epcismd:IDListType" minOccurs="0"/>
+			<xsd:element name="extension" type="epcismd:VocabularyElementExtensionType" minOccurs="0"/>
+			<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:anyURI" use="required"/>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="AttributeType">
+		<xsd:complexContent>
+			<xsd:extension base="xsd:anyType">
+				<xsd:attribute name="id" type="xsd:anyURI" use="required"/>
+				<xsd:anyAttribute processContents="lax"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IDListType">
+		<xsd:sequence>
+			<xsd:element name="id" type="xsd:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="EPCISMasterDataDocumentExtensionType">
+		<xsd:sequence>
+			<xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="EPCISMasterDataHeaderExtensionType">
+		<xsd:sequence>
+			<xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="EPCISMasterDataBodyExtensionType">
+		<xsd:sequence>
+			<xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="VocabularyExtensionType">
+		<xsd:sequence>
+			<xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+	<xsd:complexType name="VocabularyElementExtensionType">
+		<xsd:sequence>
+			<xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:anyAttribute processContents="lax"/>
+	</xsd:complexType>
+</xsd:schema>

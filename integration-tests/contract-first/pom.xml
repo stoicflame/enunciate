@@ -1,0 +1,283 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>enunciate-integration-contract-first</artifactId>
+  <version>1.16-SNAPSHOT</version>
+  <name>Enunciate - Contract-First Example (EPCIS)</name>
+  <description>An example of how to use Enunciate for contract-first development.</description>
+  <packaging>war</packaging>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>require.gcc.or.skip</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireProperty>
+                  <property>gcc.executable</property>
+                  <message>In order to run the contract-first integration testse, you must have gcc installed along with libxml and gnustep.
+Define a profile in your settings.xml file that defines the path to your 'gcc'
+executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
+specifies the executable that exposes your libxml compiler flags and library includes.
+Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library includes.
+If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
+(And don't ask any questions about why that works. Maven mess.)</message>
+                </requireProperty>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <!--as part of the tests, we're going to make sure the c and obj-c code compiles.-->
+            <id>compile-obj-c</id>
+            <phase>test-compile</phase>
+            <configuration>
+              <tasks>
+                <property name="gcc.executable" value="${gcc.executable}"/>
+                <property name="libxml.config.executable" value="${libxml.config.executable}"/>
+                <property name="gnustep.config.executable" value="${gnustep.config.executable}"/>
+                <property name="project.build.directory" value="${project.build.directory}"/>
+                <property name="project.artifactId" value="${project.artifactId}"/>
+
+                <ant antfile="${basedir}/gcc-compile.xml">
+                  <target name="gcc"/>
+                </ant>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jaxws-maven-plugin</artifactId>
+        <version>1.10</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>wsimport</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <wsdlDirectory>src/main/contract</wsdlDirectory>
+          <!--turn off wsimport compilation-->
+          <destDir></destDir>
+          <sourceDestDir>${project.build.directory}/generated-sources</sourceDestDir>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>2.1-1</version>
+            <exclusions>
+              <exclusion>
+                <!--we're going to explicitly depend on jsr-181 annotations elsewhere.-->
+                <groupId>javax.jws</groupId>
+                <artifactId>jsr181</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <dependency>
+            <!--this dependency doesn't have anything to do with xfire.  It's just xfire's build of the jsr181 annotations.-->
+            <groupId>xfire</groupId>
+            <artifactId>xfire-jsr181-api</artifactId>
+            <version>1.0-M1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <!--now we need to add the generated sources we're testing to the test classpath-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.enunciate</groupId>
+        <artifactId>maven-enunciate-plugin</artifactId>
+        <version>${project.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <configuration>
+              <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
+            </configuration>
+          </execution>
+          <execution>
+            <id>validate-csharp-enabled</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>failIfModuleDisabled</goal>
+            </goals>
+            <configuration>
+              <moduleName>csharp</moduleName>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- skip unit test run, tests to be executed during integration-test -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>surefire-it</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skip>false</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven2-plugin</artifactId>
+        <version>1.0-beta-2</version>
+        <executions>
+          <execution>
+            <id>start-container</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <wait>false</wait>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-container</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <container>
+            <containerId>tomcat5x</containerId>
+            <zipUrlInstaller>
+              <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
+              <installDir>${basedir}/cargo-installs</installDir>
+            </zipUrlInstaller>
+            <append>false</append>
+          </container>
+          <configuration>
+            <properties>
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+            </properties>
+            <home>${project.build.directory}/tomcat5x</home>
+            <deployables>
+              <deployable>
+                <properties>
+                  <context>enunciate-integration-epcis</context>
+                </properties>
+              </deployable>
+            </deployables>
+          </configuration>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!--skip deploy (this is just a test module)-->
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.3</version>
+
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <distributionManagement>
+
+    <repository>
+      <id>codehaus.org</id>
+      <name>Enunciate Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>codehaus.org</id>
+      <name>Enunciate Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
+    </snapshotRepository>
+
+  </distributionManagement>
+
+</project>

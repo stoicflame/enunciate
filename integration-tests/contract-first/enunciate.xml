@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- Enunciate configuration for the integration tests. -->
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.15.xsd">
+  <modules>
+    <c forceEnable="true"/>
+    <obj-c forceEnable="true"/>
+    <jaxws-client>
+      <package-conversions>
+        <convert from="epcglobal" to="epcglobal.client"/>
+        <convert from="org.unece" to="org.unece.client"/>
+      </package-conversions>
+    </jaxws-client>
+    <jaxws-ri disabled="false"/>
+    <xfire disabled="true"/>
+  </modules>
+</enunciate>
