@@ -24,6 +24,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -238,7 +239,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_gwt.html
  */
-public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule {
+public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule, EnunciateClasspathListener {
 
   private boolean enforceNamespaceConformance = true;
   private boolean enforceNoFieldAccessors = true;
@@ -255,6 +256,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
   private Boolean enableGWT16;
+  private boolean gwtRtFound = false;
 
   public GWTDeploymentModule() {
     setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
@@ -340,6 +342,22 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         setGwtCompilerClass(getEnableGWT16() ? "com.google.gwt.dev.Compiler" : "com.google.gwt.dev.GWTCompiler");
       }
     }
+  }
+
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
+    if (!isDisabled()) {
+      if (!gwtRtFound) {
+        warn("WARNING! The GWT module is enabled, but the Enunciate GWT runtime libraries were found on the Enunciate classpath. " +
+          "Application startup will fail unless the Enunciate GWT runtime libraries are on the classpath.");
+      }
+    }
+  }
+
+  public void onClassesFound(Set<String> classes) {
+    gwtRtFound |= classes.contains("org.codehaus.enunciate.modules.gwt.GWTEndpointImpl");
   }
 
   @Override

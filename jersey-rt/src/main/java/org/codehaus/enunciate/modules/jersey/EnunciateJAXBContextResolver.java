@@ -18,7 +18,6 @@ package org.codehaus.enunciate.modules.jersey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.ClassUtils;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -49,32 +48,6 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
 
   private final Set<Class> types;
 
-  public Set<Class> loadTypes() {
-    HashSet<Class> types = new HashSet<Class>();
-    InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/jaxrs-jaxb-types.list");
-    if (stream != null) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
-        String line = reader.readLine();
-        while (line != null) {
-          try {
-            types.add(ClassUtils.forName(line));
-          }
-          catch (Throwable e) {
-            LOG.error("Error loading jaxb type for jersey.", e);
-          }
-          line = reader.readLine();
-        }
-      }
-      catch (Throwable e) {
-        LOG.error("Error reading jaxb types for jersey.", e);
-      }
-    }
-
-
-    return types;
-  }
-
   public EnunciateJAXBContextResolver() throws Exception {
     this.types = loadTypes();
     this.prefixMapper = loadPrefixMapper();
@@ -98,8 +71,34 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
     this.context = context;
   }
 
+  public Set<Class> loadTypes() {
+    HashSet<Class> types = new HashSet<Class>();
+    InputStream stream = loadResource("/jaxrs-jaxb-types.list");
+    if (stream != null) {
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "utf-8"));
+        String line = reader.readLine();
+        while (line != null) {
+          try {
+            types.add(loadClass(line));
+          }
+          catch (Throwable e) {
+            LOG.error("Error loading jaxb type for jersey.", e);
+          }
+          line = reader.readLine();
+        }
+      }
+      catch (Throwable e) {
+        LOG.error("Error reading jaxb types for jersey.", e);
+      }
+    }
+
+
+    return types;
+  }
+
   protected Object loadPrefixMapper() {
-    InputStream stream = ClassUtils.getDefaultClassLoader().getResourceAsStream("/ns2prefix.properties");
+    InputStream stream = loadResource("/ns2prefix.properties");
     Object prefixMapper = null;
     if (stream != null) {
       try {
@@ -113,6 +112,53 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
       }
     }
     return prefixMapper;
+  }
+
+  /**
+   * Return the default ClassLoader to use: typically the thread context
+   * ClassLoader, if available; the ClassLoader that loaded the EnunciateJAXBContextResolver
+   * class will be used as fallback.
+   * <p>Call this method if you intend to use the thread context ClassLoader
+   * in a scenario where you absolutely need a non-null ClassLoader reference:
+   * for example, for class path resource loading (but not necessarily for
+   * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
+   * reference as well).
+   * @return the default ClassLoader (never <code>null</code>)
+   * @see java.lang.Thread#getContextClassLoader()
+   */
+  public static ClassLoader getDefaultClassLoader() {
+    ClassLoader cl = null;
+    try {
+      cl = Thread.currentThread().getContextClassLoader();
+    }
+    catch (Throwable ex) {
+      //fall through...
+    }
+    if (cl == null) {
+      // No thread context class loader -> use class loader of this class.
+      cl = EnunciateJAXBContextResolver.class.getClassLoader();
+    }
+    return cl;
+  }
+
+  /**
+   * Loads a resource from the classpath.
+   *
+   * @param resource The resource to load.
+   * @return The resource.
+   */
+  protected InputStream loadResource(String resource) {
+    return getDefaultClassLoader().getResourceAsStream(resource);
+  }
+
+  /**
+   * Loads a class from the classpath.
+   *
+   * @param classname The class name.
+   * @return The class.
+   */
+  protected Class loadClass(String classname) throws ClassNotFoundException {
+    return getDefaultClassLoader().loadClass(classname);
   }
 
   public JAXBContext getContext(Class<?> objectType) {

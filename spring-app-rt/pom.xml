@@ -13,9 +13,23 @@
 
   <dependencies>
     <dependency>
+      <!--the core enunciate runtime dependencies (without spring)-->
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-core-rt</artifactId>
+      <artifactId>enunciate-rt</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <!--the jaxws-ri-spring integration dependencies-->
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-spring-jaxws-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <!--the jersey-spring dependencies-->
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-spring</artifactId>
     </dependency>
 
     <dependency>
@@ -27,7 +41,7 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
 
-      <scope>provided</scope>      
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

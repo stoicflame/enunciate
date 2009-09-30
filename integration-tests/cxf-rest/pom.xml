@@ -167,19 +167,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-cxf-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rest-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -245,13 +233,13 @@
 
     <repository>
       <id>codehaus.org</id>
-      <name>XFire Central Repository</name>
+      <name>Enunciate Central Repository</name>
       <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
     </repository>
 
     <snapshotRepository>
       <id>codehaus.org</id>
-      <name>XFire Central Development Repository</name>
+      <name>Enunciate Central Development Repository</name>
       <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
     </snapshotRepository>
 

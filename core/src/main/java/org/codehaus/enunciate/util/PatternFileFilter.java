@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
-
-import org.springframework.util.PathMatcher;
+package org.codehaus.enunciate.util;
 
 import java.io.FileFilter;
 import java.io.File;
@@ -30,10 +28,10 @@ import java.net.URI;
 public class PatternFileFilter implements FileFilter {
 
   private final File basedir;
-  private final PathMatcher matcher;
+  private final AntPatternMatcher matcher;
   private final String pattern;
 
-  public PatternFileFilter(File basedir, String pattern, PathMatcher matcher) {
+  public PatternFileFilter(File basedir, String pattern, AntPatternMatcher matcher) {
     this.basedir = basedir;
     this.matcher = matcher;
     this.pattern = pattern;

@@ -19,7 +19,6 @@ package org.codehaus.enunciate.modules.spring_app.config;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.RuleSetBase;
 import org.codehaus.enunciate.modules.spring_app.config.security.*;
-import org.codehaus.enunciate.main.webapp.WebAppComponent;
 
 /**
  * Rules for the configuration of the XFire client module.
@@ -30,62 +29,13 @@ public class SpringAppRuleSet extends RuleSetBase {
 
   public void addRuleInstances(Digester digester) {
     //allow the war file to be created.
-    digester.addObjectCreate("enunciate/modules/spring-app/war", WarConfig.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war");
-    digester.addSetNext("enunciate/modules/spring-app/war", "setWarConfig");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/lib", WarLib.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/lib");
-    digester.addSetNext("enunciate/modules/spring-app/war/lib", "addWarLib");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/resource-env-ref", WebAppResource.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/resource-env-ref");
-    digester.addSetNext("enunciate/modules/spring-app/war/resource-env-ref", "addResourceEnvRef");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/resource-ref", WebAppResource.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/resource-ref");
-    digester.addSetNext("enunciate/modules/spring-app/war/resource-ref", "addResourceRef");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/env", WebAppResource.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/env");
-    digester.addSetNext("enunciate/modules/spring-app/war/env", "addEnvEntry");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/excludeJar", IncludeExcludeLibs.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/excludeJar");
-    digester.addSetNext("enunciate/modules/spring-app/war/excludeJar", "addExcludeLibs");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/excludeLibs", IncludeExcludeLibs.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/excludeLibs");
-    digester.addSetNext("enunciate/modules/spring-app/war/excludeLibs", "addExcludeLibs");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/war/includeLibs", IncludeExcludeLibs.class);
-    digester.addSetProperties("enunciate/modules/spring-app/war/includeLibs");
-    digester.addSetNext("enunciate/modules/spring-app/war/includeLibs", "addIncludeLibs");
-
-    digester.addCallMethod("enunciate/modules/spring-app/war/manifest/attribute", "addManifestAttribute", 3);
-    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 0, "section");
-    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 1, "name");
-    digester.addCallParam("enunciate/modules/spring-app/war/manifest/attribute", 2, "value");
-
     digester.addObjectCreate("enunciate/modules/spring-app/springImport", SpringImport.class);
     digester.addSetProperties("enunciate/modules/spring-app/springImport");
     digester.addSetNext("enunciate/modules/spring-app/springImport", "addSpringImport");
 
-    digester.addObjectCreate("enunciate/modules/spring-app/copyResources", CopyResources.class);
-    digester.addSetProperties("enunciate/modules/spring-app/copyResources");
-    digester.addSetNext("enunciate/modules/spring-app/copyResources", "addCopyResources");
-
     digester.addObjectCreate("enunciate/modules/spring-app/globalServiceInterceptor", GlobalServiceInterceptor.class);
     digester.addSetProperties("enunciate/modules/spring-app/globalServiceInterceptor");
     digester.addSetNext("enunciate/modules/spring-app/globalServiceInterceptor", "addGlobalServiceInterceptor");
-
-    digester.addObjectCreate("enunciate/modules/spring-app/globalServletFilter", WebAppComponent.class);
-    digester.addSetProperties("enunciate/modules/spring-app/globalServletFilter");
-    digester.addSetNext("enunciate/modules/spring-app/globalServletFilter", "addGlobalServletFilter");
-
-    digester.addCallMethod("enunciate/modules/spring-app/globalServletFilter/init-param", "addInitParam", 2);
-    digester.addCallParam("enunciate/modules/spring-app/globalServletFilter/init-param", 0, "name");
-    digester.addCallParam("enunciate/modules/spring-app/globalServletFiltery/init-param", 1, "value");
 
     digester.addObjectCreate("enunciate/modules/spring-app/handlerInterceptor", HandlerInterceptor.class);
     digester.addSetProperties("enunciate/modules/spring-app/handlerInterceptor");

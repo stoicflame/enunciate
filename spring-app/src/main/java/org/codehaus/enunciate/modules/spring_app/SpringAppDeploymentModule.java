@@ -16,50 +16,40 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
-import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.main.webapp.WebAppFragment;
-import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.ProjectAssemblyModule;
-import org.codehaus.enunciate.modules.spring_app.config.*;
+import org.codehaus.enunciate.modules.spring_app.config.GlobalServiceInterceptor;
+import org.codehaus.enunciate.modules.spring_app.config.HandlerInterceptor;
+import org.codehaus.enunciate.modules.spring_app.config.SpringAppRuleSet;
+import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
 import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
-import org.springframework.util.AntPathMatcher;
-import org.w3c.dom.Document;
-import sun.misc.Service;
+import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.servlet.DispatcherServlet;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.Manifest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <h1>Spring App Module</h1>
  *
- * <p>The spring app deployment module produces the web app for hosting the API endpoints and documentation.</p>
- *
- * <p>The order of the spring app deployment module is 200, putting it after any of the other modules, including
- * the documentation deployment module.  The spring app deployment module maintains soft dependencies on the other
- * Enunciate modules.  If those modules are active, the spring app deployment modules will assemble their artifacts
- * into a <a href="http://www.springframework.org/">spring</a>-supported web application.</p>
+ * <p>The spring app deployment module produces the configuration files and application extensions needed to apply
+ * the <a href="http://www.springframework.org/">Spring</a> container to the Web service application. This allows users
+ * to take advantage of dependency injection, AOP, and security.</p>
  *
  * <ul>
  * <li><a href="#steps">steps</a></li>
@@ -72,45 +62,11 @@ import java.util.jar.Manifest;
  *
  * <h3>generate</h3>
  *
- * <p>The "generate" step generates the deployment descriptors, and the <a href="http://www.springframework.org/">Spring</a>
- * configuration file.  Refer to <a href="#config">configuration</a> to learn how to customize the deployment
- * descriptors and the spring config file.</p>
+ * <p>The "generate" step generates the <a href="http://www.springframework.org/">Spring</a>
+ * configuration file and application extensions.  Refer to <a href="#config">configuration</a>
+ * to learn how to customize these things.</p>
  *
- * <h3>compile</h3>
- *
- * <p>The "compile" step compiles all API source files, including the source files that were generated from other modules
- * (e.g. JAX-WS module, XFire module, GWT module, AMF module, etc.).</p>
- *
- * <h3>build</h3>
- *
- * <p>The "build" step assembles all the generated artifacts, compiled classes, and deployment descriptors into an (expanded)
- * war directory.</p>
- *
- * <p>All classes compiled in the compile step are copied to the WEB-INF/classes directory.</p>
- *
- * <p>A set of libraries are copied to the WEB-INF/lib directory.  This set of libraries can be specified in the
- * <a href="#config">configuration file</a>.  Unless specified otherwise in the configuration file, the
- * libraries copied will be filtered from the classpath specified to Enunciate at compile-time.  The filtered libraries
- * are those libraries that are determined to be specific to running the Enunciate compile-time engine.  All other
- * libraries on the classpath are assumed to be dependencies for the API and are therefore copied to WEB-INF/lib.
- * (If a directory is found on the classpath, its contents are copied to WEB-INF/classes.)</p>
- *
- * <p>The web.xml file is copied to the WEB-INF directory.  A tranformation can be applied to the web.xml file before the copy,
- * if specified in the config, allowing you to apply your own servlet filters, etc.  <i>Take care to preserve the existing elements
- * when applying a transformation to the web.xml file, as losing data will result in missing or malfunctioning endpoints.</i></p>
- *
- * <p>The spring-servlet.xml file is generated and copied to the WEB-INF directory.  You can specify other spring config files that
- * will be copied (and imported by the spring-servlet.xml file) in the configuration.  This option allows you to specify spring AOP
- * interceptors and XFire in/out handlers to wrap your endpoints, if desired. Additional spring configuration for security is also
- * copied.</p>
- *
- * <p>The documentation (if found) is copied to the configured location.</p>
- *
- * <p>The other modules application are copied to the configured location.  This includes GWT apps and Flex apps.</p>
- *
- * <h3>package</h3>
- *
- * <p>The "package" step packages the expanded war and exports it.</p>
+ * <p>The "generate" step is the only relevant step in the spring app deployment module.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -119,13 +75,10 @@ import java.util.jar.Manifest;
  * <li><a href="#config_attributes">attributes</a></li>
  * <li>elements<br/>
  * <ul>
- * <li><a href="#config_war_element">The "war" element</a></li>
  * <li><a href="#config_springImport">The "springImport" element</a></li>
  * <li><a href="#config_globalServiceInterceptor">The "globalServiceInterceptor" element</a></li>
- * <li><a href="#config_globalServletFilter">The "globalServletFilter" element</a></li>
  * <li><a href="#config_handlerInterceptor">The "handlerInterceptor" element</a></li>
  * <li><a href="#config_handlerMapping">The "handlerMapping" element</a></li>
- * <li><a href="#config_copyResources">The "copyResources" element</a></li>
  * </ul>
  * </li>
  * <li><a href="module_spring_app_security.html">Spring Application Security</a><br/>
@@ -151,37 +104,6 @@ import java.util.jar.Manifest;
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app contextLoaderListenerClass="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;war name="..." webXMLTransform="..." webXMLTransformURL="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mergeWebXML="..." mergeWebXMLURL="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;manifest&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute section="..." name="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/manifest&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/war&gt;
- *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;springImport file="..." uri="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;springImport file="..." uri="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -190,23 +112,12 @@ import java.util.jar.Manifest;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServiceInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
- *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerInterceptor interceptorClass="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerMapping pattern="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerMapping pattern="..." beanName="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;copyResources dir="..." pattern="..."/&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;copyResources dir="..." pattern="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security ...&gt;
@@ -223,60 +134,7 @@ import java.util.jar.Manifest;
  * <ul>
  * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="module_spring_app_security.html">security</a> should be enabled.  The default is "false."</li>
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
- * <li>The "<b>doCompile</b>" attribute specifies whether this module should take on the responsibility of compiling the server-side classes.  This may not be
- * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
- * <li>The "<b>doLibCopy</b>" attribute specifies whether this module should take on the responsibility of copying libraries to WEB-INF/lib.  This may not be
- * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
- * <li>The "<b>doPackage</b>" attribute specifies whether this module should take on the responsibility of packaging (zipping) up the war.  This may not be
- * desired if the module is being used only for generating the war structure and configuration files.  Default: "true".</li>
  * </ul>
- *
- * <h3><a name="config_war_element">The "war" element</a></h3>
- *
- * <p>The "war" element is used to specify configuration for the assembly of the war.  It supports the following attributes:</p>
- *
- * <ul>
- * <li>The "<b>name</b>" attribute specifies the name of the war.  The default is the enunciate configuration label.</li>
- * <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
- * directory.  No tranformation will be applied if none is specified.</li>
- * <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
- * directory.  No tranformation will be applied if none is specified.</li>
- * <li>The "<b>mergeWebXML</b>" attribute specifies the web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
- * none is specified.</li>
- * <li>The "<b>mergeWebXMLURL</b>" attribute specifies the URL to a web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
- * none is specified.</li>
- * <li>The "<b>preBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
- * the building war directory <i>before</i> it is provided with any Enunciate-specific files and directories.</li>
- * <li>The "<b>postBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
- * the building war directory <i>after</i> it is provided with any Enunciate-specific files and directories.</li>
- * <li>The "<b>includeClasspathLibs</b>" attribute specifies whether Enunciate will use the libraries from the classpath for applying the include/exclude
- * filters.  If "false" only the libs explicitly included by file (see below) will be filtered.</li>
- * <li>The "<b>excludeDefaultLibs</b>" attribute specifies whether Enunciate should perform its default filtering of known compile-time-only jars.</li>
- * </ul>
- *
- * <p><u>Including or excluding jars from the war</u></p>
- *
- * <p>By default, the war is constructed by copying jars that are on the classpath to its "lib" directory (the contents of <i>directories</i> on the classpath
- * will be copied to the "classes" directory).  You add a specific file to this list with the "file" attribute of the "includeLibs" element of the "war" element.</p>
- *
- * <p>Once the initial list of jars to be potentially copied is created, it is passed through an "include" filter that you may specify with nested "includeLibs"
- * elements. For each of these elements, you can specify a set of files to include with the "pattern" attribute.  This is an
- * ant-style pattern matcher against the absolute path of the file (or directory).  By default, all files are included.
- *
- * <p>Once the initial list is passed through the "include" filter, it will be passed through an "exclude" filter. There is a set of known jars that by default
- * will not be copied to the "lib" directory.  These include the jars that ship by default with the JDK and the jars that are known to be build-time-only jars
- * for Enunciate.  You can disable the default filter with the "excludeDefaultLibs" attribute of the "war" element. You can also specify additional jars that
- * are to be excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element
- * supports either a "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the
- * file (or directory) on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem
- * (relative paths are resolved relative to the configuration file). Furthermore, the "excludeLibs" element supports a "includeInManifest" attribute specifying
- * whether the exclude should be listed in the "Class-Path" attribute of the manifest, even though they are excluded in the war.  The is useful if, for example,
- * you're assembling an "ear" with multiple war files. By default, excluded jars are not included in the manifest.</p>
- *
- * <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
- * of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and
- * a "section" attribute.  If no section is specified, the default section is assumed.  If there is no "Class-Path" attribute in the main section, one will be
- * provided listing the jars on the classpath.</p>
  *
  * <h3><a name="config_springImport">The "springImport" element</a></h3>
  *
@@ -299,7 +157,7 @@ import java.util.jar.Manifest;
  * If there are more than one beans that are assignable to the endpoint interface, the bean that is named the name of the service will be used.  Otherwise,
  * the deployment of your endpoint will fail.</p>
  *
- * <p>The same procedure can be used to specify the beans to use as REST endpoints, although the XFire in/out/fault handlers will be ignored.  In this case,
+ * <p>The same procedure can be used to specify the beans to use as REST endpoints.  In this case,
  * the bean context will be searched for each <i>REST interface</i> that the endpoint implements.  If there is a bean that implements that interface, it will
  * used instead of the default implementation.  If there is more than one, the bean that is named the same as the REST endpoint will be used.</p>
  *
@@ -321,16 +179,6 @@ import java.util.jar.Manifest;
  *
  * <p>The "globalServiceInterceptor" element is used to specify a Spring interceptor (instance of org.aopalliance.aop.Advice or
  * org.springframework.aop.Advisor) that is to be injected on all service endpoint beans.</p>
- *
- * <ul>
- * <li>The "interceptorClass" attribute specified the class of the interceptor.</p>
- * <li>The "beanName" attribute specifies the bean name of the interceptor.</p>
- * </ul>
- *
- * <h3><a name="config_globalServletFilter">The "globalServletFilter" element</a></h3>
- *
- * <p>The "globalServletFilter" element is used to specify a servlet filter that will be applied to all web service requests. It requires a "name" attribute
- * and a "classname" attribute and supports an arbitrary number of "init-param" child elements, each supporting a "name" attribute and a "value" attribute.</p>
  *
  * <ul>
  * <li>The "interceptorClass" attribute specified the class of the interceptor.</p>
@@ -362,45 +210,19 @@ import java.util.jar.Manifest;
  * <p>For more information on spring handler mappings, see
  * <a href="http://static.springframework.org/spring/docs/2.5.x/reference/index.html">the spring reference documentation</a>.</p>
  *
- * <h3><a name="config_copyResources">The "copyResources" element</a></h3>
- *
- * <p>The "copyResources" element is used to specify a pattern of resources to copy to the compile directory.  It supports the following attributes:</p>
- *
- * <ul>
- * <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
- * <li>The "<b>pattern</b>" attribute specifies an <a href="http://ant.apache.org/">Ant</a>-style
- * pattern used to find the resources to copy.  For more information, see the documentation for the
- * <a href="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
- * JavaDocs.</li>
- * </ul>
- *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
- * <p>The spring app deployment module exports the following artifacts:</p>
- *
- * <ul>
- * <li>The "spring.app.dir" artifact is the (expanded) web app directory, exported during the build step.</li>
- * <li>The "spring.war.file" artifact is the packaged war, exported during the package step.</li>
- * </ul>
+ * <p>The spring app deployment module exports no artifacts.</p>
  *
  * @author Ryan Heaton
  * @docFileName module_spring_app.html
  */
-public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implements ProjectAssemblyModule {
+public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
 
-  private WarConfig warConfig;
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
-  private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
-  private final List<WebAppComponent> globalServletFilters = new ArrayList<WebAppComponent>();
-  private String defaultAutowire = null;
-  private String defaultDependencyCheck = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
-  private String dispatcherServletClass;
-  private boolean doCompile = true;
-  private boolean doLibCopy = true;
-  private boolean doPackage = true;
   private boolean enableSecurity = false;
   private SecurityConfig securityConfig = new SecurityConfig();
 
@@ -433,42 +255,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     return SpringAppDeploymentModule.class.getResource("security-context.xml.fmt");
   }
 
-  /**
-   * @return The URL to "web.xml.fmt"
-   */
-  protected URL getWebXmlTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("web.xml.fmt");
-  }
-
-  /**
-   * @return The URL to "web.xml.fmt"
-   */
-  protected URL getMergeWebXmlTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt");
-  }
-
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
     if (!isDisabled()) {
-      //spit out any deprecation warnings...
-      if (getDefaultDependencyCheck() != null) {
-        warn("As of Enunciate 1.8, defaultDependencyCheck is no longer supported.");
-      }
-
-      if (getDefaultAutowire() != null) {
-        warn("As of Enunciate 1.8, defaultAutowire is no longer supported.");
-      }
-
-      if (getDispatcherServletClass() != null) {
-        warn("As of Enunciate 1.8, specifying the dispatcherServletClass is no longer supported.");
-      }
-
-      if ((this.warConfig != null) && (this.warConfig.getDocsDir() != null)) {
-        warn("As of Enunciate 1.8, the \"docsDir\" attribute is no longer supported on the spring-app war config.  (It was moved to the docs module war config.)");
-      }
-
       if (isEnableSecurity()) {
         if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
           throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
@@ -480,23 +271,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
           }
         }
       }
-
-      if (!this.globalServletFilters.isEmpty()) {
-        for (WebAppComponent globalServletFilter : this.globalServletFilters) {
-          if (globalServletFilter.getName() == null) {
-            throw new EnunciateException("A global servlet filter (as specified in the enunciate config) requires a name.");
-          }
-          if (globalServletFilter.getClassname() == null) {
-            throw new EnunciateException("A global servlet filter (as specified in the enunciate config) requires a classname.");
-          }
-        }
-      }
     }
   }
 
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    if (!enunciate.isUpToDateWithSources(getConfigGenerateDir())) {
+    if (!enunciate.isUpToDateWithSources(getWebInfDir())) {
       EnunciateFreemarkerModel model = getModel();
 
       //standard spring configuration:
@@ -539,170 +319,80 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       }
       model.put("securityConfig", securityConfig);
 
-      model.setFileOutputDirectory(getConfigGenerateDir());
+      model.setFileOutputDirectory(getWebInfDir());
       processTemplate(getApplicationContextTemplateURL(), model);
+
+      copySpringConfig();
+
       if (isEnableSecurity()) {
         processTemplate(getSecurityServletTemplateURL(), model);
         processTemplate(getSecurityContextTemplateURL(), model);
+        createSecurityUI();
       }
     }
     else {
       info("Skipping generation of spring config files as everything appears up-to-date...");
     }
-  }
 
-  @Override
-  protected void doCompile() throws EnunciateException, IOException {
-    if (!isDoCompile()) {
-      debug("Compilation has been disabled.  No server-side classes will be compiled, nor will any resources be copied.");
-      return;
-    }
+    BaseWebAppFragment webAppFragment = new BaseWebAppFragment(getName());
+    webAppFragment.setBaseDir(getGenerateDir());
 
-    Enunciate enunciate = getEnunciate();
-    final File compileDir = getCompileDir();
-    if (!enunciate.isUpToDateWithSources(compileDir)) {
-      enunciate.compileSources(compileDir);
-      
-      if (!this.copyResources.isEmpty()) {
-        AntPathMatcher matcher = new AntPathMatcher();
-        for (CopyResources copyResource : this.copyResources) {
-          String pattern = copyResource.getPattern();
-          if (pattern == null) {
-            throw new EnunciateException("A pattern must be specified for copying resources.");
-          }
+    ArrayList<String> servletListeners = new ArrayList<String>();
+    servletListeners.add(getContextLoaderListenerClass());
+    servletListeners.add(SpringComponentPostProcessor.class.getName());
+    webAppFragment.setListeners(servletListeners);
 
-          if (!matcher.isPattern(pattern)) {
-            warn("'%s' is not a valid pattern.  Resources NOT copied!", pattern);
-            continue;
-          }
-
-          File basedir;
-          if (copyResource.getDir() == null) {
-            File configFile = enunciate.getConfigFile();
-            if (configFile != null) {
-              basedir = configFile.getAbsoluteFile().getParentFile();
-            }
-            else {
-              basedir = new File(System.getProperty("user.dir"));
-            }
-          }
-          else {
-            basedir = enunciate.resolvePath(copyResource.getDir());
-          }
-
-          for (String file : enunciate.getFiles(basedir, new PatternFileFilter(basedir, pattern, matcher))) {
-            enunciate.copyFile(new File(file), basedir, compileDir);
-          }
-        }
+    if (isEnableSecurity()) {
+      WebAppComponent securityFilter = new WebAppComponent();
+      securityFilter.setName("springSecurityFilterChain");
+      securityFilter.setClassname(DelegatingFilterProxy.class.getName());
+      EnunciateConfiguration config = enunciate.getConfig();
+      WebAppConfig appConfig = config.getWebAppConfig();
+      if (appConfig == null) {
+        appConfig = new WebAppConfig();
+        config.setWebAppConfig(appConfig);
       }
-    }
-    else {
-      info("Skipping compilation as everything appears up-to-date...");
-    }
-  }
+      appConfig.addGlobalServletFilter(securityFilter);
 
-  @Override
-  protected void doBuild() throws IOException, EnunciateException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
+      WebAppComponent securityServlet = new WebAppComponent();
+      securityServlet.setName("security");
+      securityServlet.setClassname(DispatcherServlet.class.getName());
 
-    if (!enunciate.isUpToDateWithSources(buildDir)) {
-      copyPreBase();
-
-      debug("Building the expanded WAR in %s", buildDir);
-
-      if (!this.globalServletFilters.isEmpty()) {
-        Set<String> allServletUrls = new TreeSet<String>();
-        for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
-          if (fragment.getServlets() != null) {
-            for (WebAppComponent servletComponent : fragment.getServlets()) {
-              allServletUrls.addAll(servletComponent.getUrlMappings());
-            }
-          }
-        }
-        for (WebAppComponent filter : this.globalServletFilters) {
-          filter.setUrlMappings(allServletUrls);
-        }
-        BaseWebAppFragment fragment = new BaseWebAppFragment("global-servlet-filters");
-        fragment.setFilters(this.globalServletFilters);
-        enunciate.addWebAppFragment(fragment);
+      if (getSecurityConfig().isEnableFormBasedLogin()) {
+        securityServlet.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getUrl());
       }
 
-      for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
-        if (fragment.getBaseDir() != null) {
-          enunciate.copyDir(fragment.getBaseDir(), buildDir);
+      if (getSecurityConfig().isEnableFormBasedLogout()) {
+        securityFilter.addUrlMapping(getSecurityConfig().getFormBasedLogoutConfig().getUrl());
+      }
+
+      if (getSecurityConfig().isEnableOAuth()) {
+        OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
+        securityFilter.addUrlMapping(oauthConfig.getRequestTokenURL());
+        securityFilter.addUrlMapping(oauthConfig.getAccessTokenURL());
+        securityFilter.addUrlMapping(oauthConfig.getGrantAccessURL());
+
+        securityServlet.addUrlMapping(oauthConfig.getInfoURL());
+        securityServlet.addUrlMapping(oauthConfig.getAccessConfirmationURL());
+        securityServlet.addUrlMapping(oauthConfig.getAccessConfirmedURL());
+      }
+
+      if (getSecurityConfig().getSecureUrls() != null) {
+        for (Map.Entry<String, String> secureUrl : getSecurityConfig().getSecureUrls().entrySet()) {
+          securityFilter.addUrlMapping(secureUrl.getKey());
         }
       }
 
-      if (isDoCompile()) {
-        //copy the compiled classes to WEB-INF/classes.
-        File webinf = new File(buildDir, "WEB-INF");
-        File webinfClasses = new File(webinf, "classes");
-        enunciate.copyDir(getCompileDir(), webinfClasses);
+      List<WebAppComponent> servlets = webAppFragment.getServlets();
+      if (servlets == null) {
+        servlets = new ArrayList<WebAppComponent>();
+        webAppFragment.setServlets(servlets);
       }
 
-      if (isDoLibCopy()) {
-        doLibCopy();
-      }
-      else {
-        debug("Lib copy has been disabled.  No libs will be copied, nor any manifest written.");
-      }
-
-      generateWebXml();
-
-      copySpringConfig();
-
-      if (isEnableSecurity()) {
-        createSecurityUI();
-      }
-
-      copyPostBase();
-    }
-    else {
-      info("Skipping the build of the expanded war as everything appears up-to-date...");
+      servlets.add(securityServlet);
     }
 
-    //export the expanded application directory.
-    enunciate.addArtifact(new FileArtifact(getName(), "spring.app.dir", buildDir));
-  }
-
-  /**
-   * Copy the post base.
-   */
-  protected void copyPostBase() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    //extract a post base if specified.
-    if ((this.warConfig != null) && (this.warConfig.getPostBase() != null)) {
-      File postBase = enunciate.resolvePath(this.warConfig.getPostBase());
-      if (postBase.isDirectory()) {
-        debug("Copying postBase directory %s to %s...", postBase, buildDir);
-        enunciate.copyDir(postBase, buildDir);
-      }
-      else {
-        debug("Extracting postBase zip file %s to %s...", postBase, buildDir);
-        enunciate.extractBase(new FileInputStream(postBase), buildDir);
-      }
-    }
-  }
-
-  /**
-   * Copy the pre base.
-   */
-  protected void copyPreBase() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    if ((this.warConfig != null) && (this.warConfig.getPreBase() != null)) {
-      File preBase = enunciate.resolvePath(this.warConfig.getPreBase());
-      if (preBase.isDirectory()) {
-        debug("Copying preBase directory %s to %s...", preBase, buildDir);
-        enunciate.copyDir(preBase, buildDir);
-      }
-      else {
-        debug("Extracting preBase zip file %s to %s...", preBase, buildDir);
-        enunciate.extractBase(new FileInputStream(preBase), buildDir);
-      }
-    }
+    getEnunciate().addWebAppFragment(webAppFragment);
   }
 
   /**
@@ -710,9 +400,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    */
   protected void createSecurityUI() throws IOException {
     Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
-    File jspDir = new File(webinf, "jsp");
+    File jspDir = new File(getWebInfDir(), "jsp");
     jspDir.mkdirs();
     if (getSecurityConfig().isEnableFormBasedLogin()) {
       //form-based login is enabled; we'll use the login page.
@@ -786,353 +474,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    * Copy the spring application context and servlet config from the build dir to the WEB-INF directory.
    */
   protected void copySpringConfig() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
-    File configDir = getConfigGenerateDir();
-    enunciate.copyFile(new File(configDir, "applicationContext.xml"), new File(webinf, "applicationContext.xml"));
-    if (isEnableSecurity()) {
-      enunciate.copyFile(new File(configDir, "security-servlet.xml"), new File(webinf, "security-servlet.xml"));
-      enunciate.copyFile(new File(configDir, "security-context.xml"), new File(webinf, "security-context.xml"));
-    }
-
     for (SpringImport springImport : springImports) {
       //copy the extra spring import files to the WEB-INF directory to be imported.
       if (springImport.getFile() != null) {
         File importFile = enunciate.resolvePath(springImport.getFile());
         String name = importFile.getName();
         name = resolveSpringImportFileName(name);
-        enunciate.copyFile(importFile, new File(webinf, name));
+        enunciate.copyFile(importFile, new File(getWebInfDir(), name));
       }
     }
-  }
-
-  /**
-   * generates web.xml to WEB-INF. Pass it through a stylesheet, if specified.
-   */
-  protected void generateWebXml() throws IOException, EnunciateException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
-    webinf.mkdirs();
-    File destWebXML = new File(webinf, "web.xml");
-
-    File configDir = getConfigGenerateDir();
-    File webXML = new File(configDir, "web.xml");
-    EnunciateFreemarkerModel model = getModel();
-    model.setFileOutputDirectory(configDir);
-    try {
-      //delayed to the "build" phase to enable modules to supply their web app fragments.
-      model.put("displayName", model.getEnunciateConfig().getLabel());
-      model.put("springContextLoaderListenerClass", getContextLoaderListenerClass());
-      model.put("webAppFragments", enunciate.getWebAppFragments());
-      List<WebAppResource> envEntries = Collections.<WebAppResource>emptyList();
-      List<WebAppResource> resourceEnvRefs = Collections.<WebAppResource>emptyList();
-      List<WebAppResource> resourceRefs = Collections.<WebAppResource>emptyList();
-      if (this.warConfig != null) {
-        envEntries = this.warConfig.getEnvEntries();
-        resourceEnvRefs = this.warConfig.getResourceEnvRefs();
-        resourceRefs = this.warConfig.getResourceRefs();
-      }
-      model.put("envEntries", envEntries);
-      model.put("resourceEnvRefs", resourceEnvRefs);
-      model.put("resourceRefs", resourceRefs);
-      model.put("securityEnabled", isEnableSecurity());
-      model.put("securityConfig", getSecurityConfig());
-      processTemplate(getWebXmlTemplateURL(), model);
-    }
-    catch (TemplateException e) {
-      throw new EnunciateException("Error processing web.xml template file.", e);
-    }
-
-    File mergedWebXml = webXML;
-    if ((this.warConfig != null) && (this.warConfig.getMergeWebXMLURL() != null || this.warConfig.getMergeWebXML() != null)) {
-      URL webXmlToMerge = this.warConfig.getMergeWebXMLURL();
-      if (webXmlToMerge == null) {
-        webXmlToMerge = enunciate.resolvePath(this.warConfig.getMergeWebXML()).toURL();
-      }
-
-      try {
-        model.put("source1", loadMergeXmlModel(webXmlToMerge.openStream()));
-        model.put("source2", loadMergeXmlModel(new FileInputStream(webXML)));
-        processTemplate(getMergeWebXmlTemplateURL(), model);
-      }
-      catch (TemplateException e) {
-        throw new EnunciateException("Error while merging web xml files.", e);
-      }
-
-      File mergeTarget = new File(getConfigGenerateDir(), "merged-web.xml");
-      if (!mergeTarget.exists()) {
-        throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
-      }
-
-      debug("Merged %s and %s into %s...", webXmlToMerge, webXML, mergeTarget);
-      mergedWebXml = mergeTarget;
-    }
-
-    if ((this.warConfig != null) && (this.warConfig.getWebXMLTransformURL() != null || this.warConfig.getWebXMLTransform() != null)) {
-      URL transformURL = this.warConfig.getWebXMLTransformURL();
-      if (transformURL == null) {
-        transformURL = enunciate.resolvePath(this.warConfig.getWebXMLTransform()).toURL();
-      }
-
-      debug("web.xml transform has been specified as %s.", transformURL);
-      try {
-        StreamSource source = new StreamSource(transformURL.openStream());
-        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
-        debug("Transforming %s to %s.", mergedWebXml, destWebXML);
-        transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
-      }
-      catch (TransformerException e) {
-        throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transformURL + ", file " + mergedWebXml + ")", e);
-      }
-    }
-    else {
-      enunciate.copyFile(mergedWebXml, destWebXML);
-    }
-  }
-
-  /**
-   * Loads the node model for merging xml.
-   *
-   * @param inputStream The input stream of the xml.
-   * @return The node model.
-   */
-  protected NodeModel loadMergeXmlModel(InputStream inputStream) throws EnunciateException {
-    try {
-      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      builderFactory.setNamespaceAware(false); //no namespace for the merging...
-      Document doc = builderFactory.newDocumentBuilder().parse(inputStream);
-      NodeModel.simplify(doc);
-      return NodeModel.wrap(doc.getDocumentElement());
-    }
-    catch (Exception e) {
-      throw new EnunciateException("Error parsing web.xml file for merging", e);
-    }
-  }
-
-  /**
-   * Copies the classpath elements to WEB-INF.
-   *
-   * @throws IOException
-   */
-  protected void doLibCopy() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File buildDir = getBuildDir();
-    File webinf = new File(buildDir, "WEB-INF");
-    File webinfClasses = new File(webinf, "classes");
-    File webinfLib = new File(webinf, "lib");
-
-    //initialize the include filters.
-    AntPathMatcher pathMatcher = new AntPathMatcher();
-    pathMatcher.setPathSeparator(File.separator);
-    List<File> explicitIncludes = new ArrayList<File>();
-    List<String> includePatterns = new ArrayList<String>();
-    if (this.warConfig != null) {
-      for (IncludeExcludeLibs el : this.warConfig.getIncludeLibs()) {
-        if (el.getFile() != null) {
-          //add explicit files to the include files list.
-          explicitIncludes.add(el.getFile());
-        }
-
-        String pattern = el.getPattern();
-        if (pattern != null) {
-          //normalize the pattern to the platform.
-          pattern = pattern.replace('/', File.separatorChar);
-          if (pathMatcher.isPattern(pattern)) {
-            //make sure that the includes pattern list only has patterns.
-            includePatterns.add(pattern);
-          }
-          else {
-            warn("Pattern '%s' is not a valid pattern, so it will not be applied.", pattern);
-          }
-        }
-      }
-    }
-
-    if (includePatterns.isEmpty()) {
-      //if no include patterns are specified, the implicit pattern is "**/*".
-      String starPattern = "**" + File.separatorChar + "*";
-      debug("No include patterns have been specified.  Using the implicit '%s' pattern.", starPattern);
-      includePatterns.add(starPattern);
-    }
-
-    List<String> warLibs = new ArrayList<String>();
-    if (this.warConfig == null || this.warConfig.isIncludeClasspathLibs()) {
-      debug("Using the Enunciate classpath as the initial list of libraries to be passed through the include/exclude filter.");
-      //prime the list of libs to include in the war with what's on the enunciate classpath.
-      warLibs.addAll(Arrays.asList(enunciate.getEnunciateRuntimeClasspath().split(File.pathSeparator)));
-    }
-
-    // Apply the "in filter" (i.e. the filter that specifies the files to be included).
-    List<File> includedLibs = new ArrayList<File>();
-    for (String warLib : warLibs) {
-      File libFile = new File(warLib);
-      if (libFile.exists()) {
-        for (String includePattern : includePatterns) {
-          String absolutePath = libFile.getAbsolutePath();
-          if (absolutePath.startsWith(File.separator)) {
-            //lob off the beginning "/" for Linux boxes.
-            absolutePath = absolutePath.substring(1);
-          }
-          if (pathMatcher.match(includePattern, absolutePath)) {
-            debug("Library '%s' passed the include filter. It matches pattern '%s'.", libFile.getAbsolutePath(), includePattern);
-            includedLibs.add(libFile);
-            break;
-          }
-          else if (enunciate.isDebug()) {
-            debug("Library '%s' did NOT match include pattern '%s'.", includePattern);
-          }
-        }
-      }
-    }
-
-    //Now, with what's left, apply the "exclude filter".
-    boolean excludeDefaults = this.warConfig == null || this.warConfig.isExcludeDefaultLibs();
-    List<String> manifestClasspath = new ArrayList<String>();
-    Iterator<File> toBeIncludedIt = includedLibs.iterator();
-    while (toBeIncludedIt.hasNext()) {
-      File toBeIncluded = toBeIncludedIt.next();
-      if (excludeDefaults && knownExclude(toBeIncluded)) {
-        toBeIncludedIt.remove();
-      }
-      else if (this.warConfig != null) {
-        for (IncludeExcludeLibs excludeLibs : this.warConfig.getExcludeLibs()) {
-          boolean exclude = false;
-          if ((excludeLibs.getFile() != null) && (excludeLibs.getFile().equals(toBeIncluded))) {
-            exclude = true;
-            debug("%s was explicitly excluded.", toBeIncluded);
-          }
-          else {
-            String pattern = excludeLibs.getPattern();
-            if (pattern != null) {
-              pattern = pattern.replace('/', File.separatorChar);
-              if (pathMatcher.isPattern(pattern)) {
-                String absolutePath = toBeIncluded.getAbsolutePath();
-                if (absolutePath.startsWith(File.separator)) {
-                  //lob off the beginning "/" for Linux boxes.
-                  absolutePath = absolutePath.substring(1);
-                }
-
-                if (pathMatcher.match(pattern, absolutePath)) {
-                  exclude = true;
-                  debug("%s was excluded because it matches pattern '%s'", toBeIncluded, pattern);
-                }
-              }
-            }
-          }
-
-          if (exclude) {
-            toBeIncludedIt.remove();
-            if ((excludeLibs.isIncludeInManifest()) && (!toBeIncluded.isDirectory())) {
-              //include it in the manifest anyway.
-              manifestClasspath.add(toBeIncluded.getName());
-              debug("'%s' will be included in the manifest classpath.", toBeIncluded.getName());
-            }
-            break;
-          }
-        }
-      }
-    }
-
-    //now add the lib files that are explicitly included.
-    includedLibs.addAll(explicitIncludes);
-
-    //now we've got the final list, copy the libs.
-    for (File includedLib : includedLibs) {
-      if (includedLib.isDirectory()) {
-        debug("Adding the contents of %s to WEB-INF/classes.", includedLib);
-        enunciate.copyDir(includedLib, webinfClasses);
-      }
-      else {
-        debug("Including %s in WEB-INF/lib.", includedLib);
-        enunciate.copyFile(includedLib, includedLib.getParentFile(), webinfLib);
-      }
-    }
-
-    // write the manifest file.
-    Manifest manifest = this.warConfig == null ? WarConfig.getDefaultManifest() : this.warConfig.getManifest();
-    if ((manifestClasspath.size() > 0) && (manifest.getMainAttributes().getValue("Class-Path") == null)) {
-      StringBuilder manifestClasspathValue = new StringBuilder();
-      Iterator<String> manifestClasspathIt = manifestClasspath.iterator();
-      while (manifestClasspathIt.hasNext()) {
-        String entry = manifestClasspathIt.next();
-        manifestClasspathValue.append(entry);
-        if (manifestClasspathIt.hasNext()) {
-          manifestClasspathValue.append(" ");
-        }
-      }
-      manifest.getMainAttributes().putValue("Class-Path", manifestClasspathValue.toString());
-    }
-    File metaInf = new File(buildDir, "META-INF");
-    metaInf.mkdirs();
-    FileOutputStream manifestFileOut = new FileOutputStream(new File(metaInf, "MANIFEST.MF"));
-    manifest.write(manifestFileOut);
-    manifestFileOut.flush();
-    manifestFileOut.close();
-  }
-
-  @Override
-  protected void doPackage() throws EnunciateException, IOException {
-    if (isDoPackage()) {
-      File buildDir = getBuildDir();
-      File warFile = getWarFile();
-      Enunciate enunciate = getEnunciate();
-
-      if (!enunciate.isUpToDate(buildDir, warFile)) {
-        if (!warFile.getParentFile().exists()) {
-          warFile.getParentFile().mkdirs();
-        }
-
-        debug("Creating %s", warFile.getAbsolutePath());
-
-        enunciate.zip(warFile, buildDir);
-      }
-      else {
-        info("Skipping war file creation as everything appears up-to-date...");
-      }
-
-      enunciate.addArtifact(new FileArtifact(getName(), "spring.war.file", warFile));
-    }
-    else {
-      debug("Packaging has been disabled.  No packaging will be performed.");
-    }
-  }
-
-  /**
-   * The configuration for the war.
-   *
-   * @return The configuration for the war.
-   */
-  public WarConfig getWarConfig() {
-    return warConfig;
-  }
-
-  /**
-   * The war file to create.
-   *
-   * @return The war file to create.
-   */
-  public File getWarFile() {
-    String filename = "enunciate.war";
-    if (getEnunciate().getConfig().getLabel() != null) {
-      filename = getEnunciate().getConfig().getLabel() + ".war";
-    }
-
-    if ((this.warConfig != null) && (this.warConfig.getName() != null)) {
-      filename = this.warConfig.getName();
-    }
-
-    return new File(getPackageDir(), filename);
-  }
-
-  /**
-   * Set the configuration for the war.
-   *
-   * @param warConfig The configuration for the war.
-   */
-  public void setWarConfig(WarConfig warConfig) {
-    this.warConfig = warConfig;
   }
 
   /**
@@ -1194,15 +544,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   }
 
   /**
-   * Add a copy resources.
-   *
-   * @param copyResources The copy resources to add.
-   */
-  public void addCopyResources(CopyResources copyResources) {
-    this.copyResources.add(copyResources);
-  }
-
-  /**
    * Add a global service interceptor to the spring configuration.
    *
    * @param interceptorConfig The interceptor configuration.
@@ -1212,57 +553,12 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   }
 
   /**
-   * Add a global servlet filter to be applied to all web service requests.
-   *
-   * @param filterConfig The filter configuration.
-   */
-  public void addGlobalServletFilter(WebAppComponent filterConfig) {
-    this.globalServletFilters.add(filterConfig);
-  }
-
-  /**
    * Add a handler interceptor to the spring configuration.
    *
    * @param interceptorConfig The interceptor configuration.
    */
   public void addHandlerInterceptor(HandlerInterceptor interceptorConfig) {
     this.handlerInterceptors.add(interceptorConfig);
-  }
-
-  /**
-   * The value for the spring default autowiring.
-   *
-   * @return The value for the spring default autowiring.
-   */
-  public String getDefaultAutowire() {
-    return defaultAutowire;
-  }
-
-  /**
-   * The value for the spring default autowiring.
-   *
-   * @param defaultAutowire The value for the spring default autowiring.
-   */
-  public void setDefaultAutowire(String defaultAutowire) {
-    this.defaultAutowire = defaultAutowire;
-  }
-
-  /**
-   * The value for the spring default dependency checking.
-   *
-   * @return The value for the spring default dependency checking.
-   */
-  public String getDefaultDependencyCheck() {
-    return defaultDependencyCheck;
-  }
-
-  /**
-   * The value for the spring default dependency checking.
-   *
-   * @param defaultDependencyCheck The value for the spring default dependency checking.
-   */
-  public void setDefaultDependencyCheck(String defaultDependencyCheck) {
-    this.defaultDependencyCheck = defaultDependencyCheck;
   }
 
   /**
@@ -1281,83 +577,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    */
   public void setContextLoaderListenerClass(String contextLoaderListenerClass) {
     this.contextLoaderListenerClass = contextLoaderListenerClass;
-  }
-
-  /**
-   * The class to use as the dispatcher servlet.
-   *
-   * @return The class to use as the dispatcher servlet.
-   */
-  public String getDispatcherServletClass() {
-    return dispatcherServletClass;
-  }
-
-  /**
-   * The class to use as the dispatcher servlet.
-   *
-   * @param dispatcherServletClass The class to use as the dispatcher servlet.
-   */
-  public void setDispatcherServletClass(String dispatcherServletClass) {
-    this.dispatcherServletClass = dispatcherServletClass;
-  }
-
-  /**
-   * whether this module should take on the responsibility of compiling the server-side classes.
-   *
-   * @return whether this module should take on the responsibility of compiling the server-side classes
-   */
-  public boolean isDoCompile() {
-    return doCompile;
-  }
-
-  /**
-   * whether this module should take on the responsibility of compiling the server-side classes
-   *
-   * @param doCompile whether this module should take on the responsibility of compiling the server-side classes
-   */
-  public void setDoCompile(boolean doCompile) {
-    this.doCompile = doCompile;
-  }
-
-  /**
-   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib.
-   *
-   * @return whether this module should take on the responsibility of copying libraries to WEB-INF/lib
-   */
-  public boolean isDoLibCopy() {
-    return doLibCopy;
-  }
-
-  /**
-   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib
-   *
-   * @param doLibCopy whether this module should take on the responsibility of copying libraries to WEB-INF/lib
-   */
-  public void setDoLibCopy(boolean doLibCopy) {
-    this.doLibCopy = doLibCopy;
-  }
-
-  /**
-   * whether this module should take on the responsibility of packaging (zipping) up the war
-   *
-   * @return whether this module should take on the responsibility of packaging (zipping) up the war
-   */
-  public boolean isDoPackage() {
-    return doPackage;
-  }
-
-  /**
-   * whether this module should take on the responsibility of packaging (zipping) up the war
-   *
-   * @param doPackage whether this module should take on the responsibility of packaging (zipping) up the war
-   */
-  public void setDoPackage(boolean doPackage) {
-    this.doPackage = doPackage;
-  }
-
-  // Inherited.
-  public void setOutputDirectory(File outputDir) {
-    setCompileDir(outputDir);
   }
 
   /**
@@ -1397,109 +616,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   }
 
   /**
-   * Whether to exclude a file from copying to the WEB-INF/lib directory.
-   *
-   * @param file The file to exclude.
-   * @return Whether to exclude a file from copying to the lib directory.
-   */
-  protected boolean knownExclude(File file) throws IOException {
-    //instantiate a loader with this library only in its path...
-    URLClassLoader loader = new URLClassLoader(new URL[]{file.toURL()}, null);
-    if (loader.findResource("META-INF/enunciate/preserve-in-war") != null) {
-      debug("%s is a known include because it contains the entry META-INF/enunciate/preserve-in-war.", file);
-      //if a jar happens to have the enunciate "preserve-in-war" file, it is NOT excluded.
-      return false;
-    }
-    else if (loader.findResource(com.sun.tools.apt.Main.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s is a known exclude because it appears to be tools.jar.", file);
-      //exclude tools.jar.
-      return true;
-    }
-    else if (loader.findResource(net.sf.jelly.apt.Context.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s is a known exclude because it appears to be apt-jelly.", file);
-      //exclude apt-jelly-core.jar
-      return true;
-    }
-    else if (loader.findResource(net.sf.jelly.apt.freemarker.FreemarkerModel.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s is a known exclude because it appears to be the apt-jelly-freemarker libs.", file);
-      //exclude apt-jelly-freemarker.jar
-      return true;
-    }
-    else if (loader.findResource(freemarker.template.Configuration.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s is a known exclude because it appears to be the freemarker libs.", file);
-      //exclude freemarker.jar
-      return true;
-    }
-    else if (loader.findResource(Enunciate.class.getName().replace('.', '/').concat(".class")) != null) {
-      debug("%s is a known exclude because it appears to be the enunciate core jar.", file);
-      //exclude enunciate-core.jar
-      return true;
-    }
-    else if (loader.findResource("javax/servlet/ServletContext.class") != null) {
-      debug("%s is a known exclude because it appears to be the servlet api.", file);
-      //exclude the servlet api.
-      return true;
-    }
-    else if (loader.findResource("org/codehaus/enunciate/modules/xfire_client/EnunciatedClientSoapSerializerHandler.class") != null) {
-      debug("%s is a known exclude because it appears to be the enunciated xfire client tools jar.", file);
-      //exclude xfire-client-tools
-      return true;
-    }
-    else if (loader.findResource("javax/swing/SwingBeanInfoBase.class") != null) {
-      debug("%s is a known exclude because it appears to be dt.jar.", file);
-      //exclude dt.jar
-      return true;
-    }
-    else if (loader.findResource("HTMLConverter.class") != null) {
-      debug("%s is a known exclude because it appears to be htmlconverter.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("sun/tools/jconsole/JConsole.class") != null) {
-      debug("%s is a known exclude because it appears to be jconsole.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("sun/jvm/hotspot/debugger/Debugger.class") != null) {
-      debug("%s is a known exclude because it appears to be sa-jdi.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("sun/io/ByteToCharDoubleByte.class") != null) {
-      debug("%s is a known exclude because it appears to be charsets.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("com/sun/deploy/ClientContainer.class") != null) {
-      debug("%s is a known exclude because it appears to be deploy.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("com/sun/javaws/Globals.class") != null) {
-      debug("%s is a known exclude because it appears to be javaws.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("javax/crypto/SecretKey.class") != null) {
-      debug("%s is a known exclude because it appears to be jce.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("sun/net/www/protocol/https/HttpsClient.class") != null) {
-      debug("%s is a known exclude because it appears to be jsse.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("sun/plugin/JavaRunTime.class") != null) {
-      debug("%s is a known exclude because it appears to be plugin.jar.", file);
-      return true;
-    }
-    else if (loader.findResource("com/sun/corba/se/impl/activation/ServerMain.class") != null) {
-      debug("%s is a known exclude because it appears to be rt.jar.", file);
-      return true;
-    }
-    else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
-      debug("%s is a known exclude because it appears to be an enunciate module.", file);
-      //exclude by default any deployment module libraries.
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
    * @return 200
    */
   @Override
@@ -1514,7 +630,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
 
   @Override
   public Validator getValidator() {
-    return new SpringAppValidator();
+    return null;
   }
 
   /**
@@ -1522,8 +638,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    *
    * @return The directory where the config files are generated.
    */
-  protected File getConfigGenerateDir() {
-    return new File(getGenerateDir(), "config");
+  protected File getWebInfDir() {
+    return new File(getGenerateDir(), "WEB-INF");
   }
 
 }

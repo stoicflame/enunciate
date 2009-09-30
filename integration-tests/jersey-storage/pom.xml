@@ -126,7 +126,13 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -142,18 +148,6 @@
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>1.4</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-jaxrs</artifactId>
-      <version>1.2.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-xc</artifactId>
-      <version>1.2.0</version>
     </dependency>
 
     <dependency>
@@ -177,13 +171,13 @@
 
     <repository>
       <id>codehaus.org</id>
-      <name>XFire Central Repository</name>
+      <name>Enunciate Central Repository</name>
       <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
     </repository>
 
     <snapshotRepository>
       <id>codehaus.org</id>
-      <name>XFire Central Development Repository</name>
+      <name>Enunciate Central Development Repository</name>
       <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
     </snapshotRepository>
 

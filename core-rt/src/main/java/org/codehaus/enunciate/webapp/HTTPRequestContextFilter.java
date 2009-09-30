@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
+package org.codehaus.enunciate.webapp;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

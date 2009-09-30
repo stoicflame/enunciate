@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.jaxws_ri;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
@@ -35,10 +36,7 @@ import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * <h1>JAX-WS RI Module</h1>
@@ -59,7 +57,7 @@ import java.util.TreeSet;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>The JAX-WS RI module accepts a single parameter, "springEnabled" that forces spring integration. By default, spring integration will only be enabled
+ * <p>The JAX-WS RI module accepts a single parameter, "forceSpringEnabled" that forces spring integration. By default, spring integration will only be enabled
  * if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</p>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
@@ -69,9 +67,11 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  * @docFileName module_jaxws_ri.html
  */
-public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule {
+public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule, EnunciateClasspathListener {
 
-  private Boolean springEnabled = null;
+  private boolean springModuleEnabled = false;
+  private boolean wsSpringServletFound = false;
+  private boolean forceSpringEnabled = false;
 
   /**
    * @return "cxf"
@@ -111,8 +111,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
         throw new EnunciateException("The JAX-WS RI module requires an enabled JAX-WS Support module.");
       }
 
-      if (springEnabled == null) {
-        this.springEnabled = enunciate.isModuleEnabled("spring-app");
+      this.springModuleEnabled = enunciate.isModuleEnabled("spring-app");
+      if (this.springModuleEnabled && !this.wsSpringServletFound) {
+        info("The spring module has been enabled, but the spring runtime libraries (specifically org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet) " +
+          "are not found on the classpath. Spring will therefore be disabled for JAXWS-RI.");
       }
     }
   }
@@ -140,6 +142,19 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     }
   }
 
+  public void onClassesFound(Set<String> classes) {
+    wsSpringServletFound |= classes.contains("org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet");
+  }
+
+  /**
+   * Spring is enabled if the spring-app module is enabled AND the spring runtime servlet is on the Enunciate classpath.
+   *
+   * @return Whether spring is enabled.
+   */
+  public boolean isSpringEnabled() {
+    return forceSpringEnabled || (wsSpringServletFound && springModuleEnabled);
+  }
+
   @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
@@ -151,7 +166,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       model.put("classnameFor", classnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
-      URL configTemplate = springEnabled ? getJAXWSSpringTemplateURL() : getSunJAXWSTemplateURL();
+      URL configTemplate = isSpringEnabled() ? getJAXWSSpringTemplateURL() : getSunJAXWSTemplateURL();
       processTemplate(configTemplate, model);
 
       URL eiTemplate = getInstrumentedEndpointTemplateURL();
@@ -185,7 +200,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     webappFragment.setBaseDir(webappDir);
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("jaxws");
-    String servletClass = springEnabled ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
+    String servletClass = isSpringEnabled() ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
     servletComponent.setClassname(servletClass);
     TreeSet<String> urlMappings = new TreeSet<String>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
@@ -195,7 +210,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     }
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
-    if (!springEnabled) {
+    if (!isSpringEnabled()) {
       webappFragment.setListeners(Arrays.asList("com.sun.xml.ws.transport.http.servlet.WSServletContextListener"));
     }
     enunciate.addWebAppFragment(webappFragment);
@@ -225,8 +240,8 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     return new JAXWSRIValidator();
   }
 
-  public void setSpringEnabled(Boolean springEnabled) {
-    this.springEnabled = springEnabled;
+  public void setForceSpringEnabled(boolean forceSpringEnabled) {
+    this.forceSpringEnabled = forceSpringEnabled;
   }
 
   // Inherited.

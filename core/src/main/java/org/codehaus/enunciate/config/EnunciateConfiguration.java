@@ -19,6 +19,12 @@ package org.codehaus.enunciate.config;
 import org.codehaus.enunciate.contract.validation.DefaultValidator;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.BasicAppModule;
+import org.codehaus.enunciate.config.war.WebAppConfig;
+import org.codehaus.enunciate.config.war.CopyResources;
+import org.codehaus.enunciate.config.war.WebAppResource;
+import org.codehaus.enunciate.config.war.IncludeExcludeLibs;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.Rule;
 import org.apache.commons.digester.RuleSet;
@@ -59,6 +65,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private boolean allowEmptyNamespace = true;
   private boolean includeReferencedClasses = true;
   private boolean excludeUnreferencedClasses = true;
+  private WebAppConfig webAppConfig;
 
   /**
    * Create a new enunciate configuration.  The module list will be constructed
@@ -72,6 +79,7 @@ public class EnunciateConfiguration implements ErrorHandler {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
       this.modules.add(discoveredModule);
     }
+    this.modules.add(new BasicAppModule());
   }
 
   /**
@@ -304,6 +312,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setExcludeUnreferencedClasses(boolean excludeUnreferencedClasses) {
     this.excludeUnreferencedClasses = excludeUnreferencedClasses;
+  }
+
+  /**
+   * The configuration for the web app.
+   *
+   * @return The configuration for web app.
+   */
+  public WebAppConfig getWebAppConfig() {
+    return webAppConfig;
+  }
+
+  /**
+   * The configuration for the web app.
+   *
+   * @param webAppConfig The configuration for the web app.
+   */
+  public void setWebAppConfig(WebAppConfig webAppConfig) {
+    this.webAppConfig = webAppConfig;
   }
 
   /**
@@ -561,7 +587,6 @@ public class EnunciateConfiguration implements ErrorHandler {
     Digester digester = createDigester();
     digester.setErrorHandler(this);
     digester.setValidating(false);
-//    digester.setSchema(EnunciateConfiguration.class.getResource("enunciate.xsd").toString());
     digester.push(this);
 
     //set any root-level attributes
@@ -589,13 +614,6 @@ public class EnunciateConfiguration implements ErrorHandler {
                               new String[] {"pattern", "pattern", "pattern", "seekSource"});
     digester.addSetNext("enunciate/api-import", "addAPIImport");
 
-    //allow for classes and packages to be imported for JAXB.
-    digester.addObjectCreate("enunciate/jaxb-import", APIImport.class);
-    digester.addSetProperties("enunciate/jaxb-import",
-                              new String[] {"class"},
-                              new String[] {"classname"});
-    digester.addSetNext("enunciate/jaxb-import", "addAPIImport");
-
     //allow for the deployment configuration to be specified.
     digester.addSetProperties("enunciate/deployment",
                               new String[] {"protocol", "host", "context"},
@@ -621,6 +639,51 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/services/soap/service", "addSoapEndpointLocation", 2);
     digester.addCallParam("enunciate/services/soap/service", 0, "name");
     digester.addCallParam("enunciate/services/soap/service", 1, "relativePath");
+
+    digester.addObjectCreate("enunciate/webapp", WebAppConfig.class);
+    digester.addSetProperties("enunciate/webapp");
+    digester.addSetNext("enunciate/webapp", "setWebAppConfig");
+
+    digester.addObjectCreate("enunciate/webapp/resource-env-ref", WebAppResource.class);
+    digester.addSetProperties("enunciate/webapp/resource-env-ref");
+    digester.addSetNext("enunciate/webapp/resource-env-ref", "addResourceEnvRef");
+
+    digester.addObjectCreate("enunciate/webapp/resource-ref", WebAppResource.class);
+    digester.addSetProperties("enunciate/webapp/resource-ref");
+    digester.addSetNext("enunciate/webapp/resource-ref", "addResourceRef");
+
+    digester.addObjectCreate("enunciate/webapp/env", WebAppResource.class);
+    digester.addSetProperties("enunciate/webapp/env");
+    digester.addSetNext("enunciate/webapp/env", "addEnvEntry");
+
+    digester.addObjectCreate("enunciate/webapp/excludeJar", IncludeExcludeLibs.class);
+    digester.addSetProperties("enunciate/webapp/excludeJar");
+    digester.addSetNext("enunciate/webapp/excludeJar", "addExcludeLibs");
+
+    digester.addObjectCreate("enunciate/webapp/excludeLibs", IncludeExcludeLibs.class);
+    digester.addSetProperties("enunciate/webapp/excludeLibs");
+    digester.addSetNext("enunciate/webapp/excludeLibs", "addExcludeLibs");
+
+    digester.addObjectCreate("enunciate/webapp/includeLibs", IncludeExcludeLibs.class);
+    digester.addSetProperties("enunciate/webapp/includeLibs");
+    digester.addSetNext("enunciate/webapp/includeLibs", "addIncludeLibs");
+
+    digester.addCallMethod("enunciate/webapp/manifest/attribute", "addManifestAttribute", 3);
+    digester.addCallParam("enunciate/webapp/manifest/attribute", 0, "section");
+    digester.addCallParam("enunciate/webapp/manifest/attribute", 1, "name");
+    digester.addCallParam("enunciate/webapp/manifest/attribute", 2, "value");
+
+    digester.addObjectCreate("enunciate/webapp/resources", CopyResources.class);
+    digester.addSetProperties("enunciate/webapp/resources");
+    digester.addSetNext("enunciate/webapp/resources", "addCopyResources");
+
+    digester.addObjectCreate("enunciate/webapp/globalServletFilter", WebAppComponent.class);
+    digester.addSetProperties("enunciate/webapp/globalServletFilter");
+    digester.addSetNext("enunciate/webapp/globalServletFilter", "addGlobalServletFilter");
+
+    digester.addCallMethod("enunciate/webapp/globalServletFilter/init-param", "addInitParam", 2);
+    digester.addCallParam("enunciate/webapp/globalServletFilter/init-param", 0, "name");
+    digester.addCallParam("enunciate/webapp/globalServletFiltery/init-param", 1, "value");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

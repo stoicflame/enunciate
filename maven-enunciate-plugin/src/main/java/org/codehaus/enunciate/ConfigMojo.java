@@ -511,12 +511,6 @@ public class ConfigMojo extends AbstractMojo {
 
       for (DeploymentModule module : modules) {
         if (!module.isDisabled()) {
-          if (module instanceof OutputDirectoryAware) {
-            String outputDir = project.getBuild().getOutputDirectory();
-            debug("Setting the output directory for module %s to %s...", module.getName(), outputDir);
-            ((OutputDirectoryAware) module).setOutputDirectory(new File(outputDir));
-          }
-
           if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
             ((ProjectTitleAware)module).setTitleConditionally(project.getName());
           }

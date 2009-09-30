@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app.config;
+package org.codehaus.enunciate.config.war;
 
 import java.io.File;
 

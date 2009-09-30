@@ -261,7 +261,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -321,13 +321,13 @@ If you just want to skip the Objective C tests, set the value of the property 'g
 
     <repository>
       <id>codehaus.org</id>
-      <name>XFire Central Repository</name>
+      <name>Enunciate Central Repository</name>
       <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
     </repository>
 
     <snapshotRepository>
       <id>codehaus.org</id>
-      <name>XFire Central Development Repository</name>
+      <name>Enunciate Central Development Repository</name>
       <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
     </snapshotRepository>
 

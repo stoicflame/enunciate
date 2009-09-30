@@ -21,11 +21,6 @@
       <id>java.net.2</id>
       <url>http://download.java.net/maven/2</url>
     </repository>
-    <repository>
-      <!--you know something's seriously wrong with sun's maven repositories when we have to go out to the jboss repository to get some of these artifacts.-->
-      <id>jboss.repo</id>
-      <url>http://repository.jboss.org/maven2</url>
-    </repository>
   </repositories>
 
   <dependencies>
@@ -43,13 +38,14 @@
     </dependency>
 
     <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxws-ri-rt</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
     </dependency>
 
     <dependency>
@@ -61,32 +57,17 @@
 
     <dependency>
       <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.jvnet.jax-ws-commons.spring</groupId>
       <artifactId>jaxws-spring</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jvnet.staxex</groupId>
-      <artifactId>stax-ex</artifactId>
-    </dependency>
-
-    <dependency>
-      <!--this dependency is NOT optional; I guess the spring-->
-      <!--extension for JAX-WS needs it for some reason-->
-      <groupId>com.sun.xml.stream.buffer</groupId>
-      <artifactId>streambuffer</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sun.xml.stream</groupId>
-      <artifactId>sjsxp</artifactId>
-
-      <!--needed only for MTOM-->
-      <optional>true</optional>
     </dependency>
   </dependencies>
 

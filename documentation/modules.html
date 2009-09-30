@@ -34,7 +34,7 @@
 
       <h1>Modules</h1>
 
-      <p>The work of Enunciate is divided into modules.  Modules can be thought of as loosly coupled, non-interdependant extensions to the Enunciate engine.
+      <p>The work of Enunciate is divided into modules.  Modules can be thought of as loosely coupled, loosely-interdependant extensions to the Enunciate engine.
       Each module has a specific set of work to perform.  For example, the XML module generates the WSDL and schemas for the API, the REST module validates
       the REST endpoints, the xfire-client module generates the xfire client libraries, etc.  Since each module has a specific set of work to do, each module
       has also a separate set of configuration options.</p>
@@ -54,9 +54,13 @@
           <p>Generates the API documentation.</p>
         </li>
         <li>
-          <h3><a href="module_jaxws.html">jaxws</a></h3>
-          <p>Generates and compiles the support files and classes necessary to support a REST application according to
-            <a href="https://jsr311.dev.java.net/">JSR-311</a>, using <a href="https://jersey.dev.java.net/">Jersey</a>.</p>
+          <h3><a href="module_xml.html">xml</a></h3>
+          <p>Generates the WSDL and schemas for the API.</p>
+        </li>
+        <li>
+          <h3><a href="module_jaxws_support.html">jaxws-support</a></h3>
+          <p>Generates and compiles the support files and classes necessary to support a JAX-WS application according to
+            <a href="https://jax-ws.dev.java.net/">the JAX-WS specification</a>.</p>
         </li>
         <li>
           <h3><a href="module_jersey.html">jersey</a></h3>
@@ -64,7 +68,16 @@
         </li>
         <li>
           <h3><a href="module_jaxws_ri.html">JAX-WS RI</a></h3>
-          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a> (disabled by default in deference to the XFire module).</p>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_basic_app.html">basic-app</a></h3>
+          <p>Compiles and builds a basic web application according to the <a href="http://enunciate.codehaus.org/user_guide.html#config_webapp">Enunciate configuration</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_spring_app.html">spring-app</a></h3>
+          <p>Enables the API to run in the <a href="http://www.springframework.org/">Spring</a> container so as to be able to take advantage of
+            things like dependency injection, AOP, and Spring security.</p>
         </li>
         <li>
           <h3><a href="module_xfire.html">xfire</a>*</h3>
@@ -75,14 +88,6 @@
           <p>Generates support classes for deploying SOAP endpoints using <a href="http://cxf.apache.org/">CXF</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
-          <h3><a href="module_spring_app.html">spring-app</a></h3>
-          <p>Builds and packages the war that will host the documentation and service the endpoints (via <a href="http://www.springframework.org/">Spring</a>).</p>
-        </li>
-        <li>
-          <h3><a href="module_xfire_client.html">xfire-client</a></h3>
-          <p>Builds the Java client libraries used to access the API (using <a href="http://xfire.codehaus.org/">XFire</a>)</p>
-        </li>
-        <li>
           <h3><a href="module_jaxws_client.html">jaxws-client</a></h3>
           <p>Builds the Java client libraries used to access the API (using <a href="https://jax-ws.dev.java.net/">JAX-WS</a>)</p>
         </li>
@@ -91,7 +96,7 @@
           <p>Builds the C client libraries used to access the API.</p>
         </li>
         <li>
-          <h3><a href="module_obj_c.html">c</a></h3>
+          <h3><a href="module_obj_c.html">obj-c</a></h3>
           <p>Builds the Objective C client libraries used to access the API.</p>
         </li>
         <li>
@@ -107,8 +112,8 @@
           <p>Builds the AMF endpoints (and ActionScript client libraries for Flex developers) used to access the API via <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>.  It also compiles the configured Flex applications.</p>
         </li>
         <li>
-          <h3><a href="module_xml.html">xml</a></h3>
-          <p>Generates the WSDL and schemas for the API.</p>
+          <h3><a href="module_xfire_client.html">xfire-client</a></h3>
+          <p>Builds the Java client libraries used to access the API (using <a href="http://xfire.codehaus.org/">XFire</a>)</p>
         </li>
         <li>
           <h3><a href="module_rest.html">rest</a>**</h3>

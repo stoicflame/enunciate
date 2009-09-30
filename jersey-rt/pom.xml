@@ -26,6 +26,14 @@
     </dependency>
 
     <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-spring</artifactId>
+
+      <!--optional for those not on spring-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-nodep</artifactId>
 
@@ -47,11 +55,6 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-spring</artifactId>
     </dependency>
 
     <dependency>

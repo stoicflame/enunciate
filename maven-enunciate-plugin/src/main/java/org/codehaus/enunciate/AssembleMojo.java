@@ -1,14 +1,14 @@
 package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.ProjectAssemblyModule;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * Assembles the whole Enunciate app without compilation or packaging of the war.
@@ -46,8 +46,6 @@ public class AssembleMojo extends ConfigMojo {
    */
   private String stepTo = null;
 
-  private AssembleOnlyMavenSpecificEnunciate enunciate = null;
-
   @Override
   public void execute() throws MojoExecutionException {
     if (forceWarPackaging && !"war".equalsIgnoreCase(this.project.getPackaging())) {
@@ -75,40 +73,27 @@ public class AssembleMojo extends ConfigMojo {
       throw new MojoExecutionException("Problem assembling the enunciate app.", e);
     }
 
+    Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
+    if (enunciate == null) {
+      throw new MojoExecutionException("No enunciate mechanism found in the project!");
+    }
     //now we have to include the generated sources into the compile source roots.
-    for (File additionalRoot : this.enunciate.getAdditionalSourceRoots()) {
+    for (File additionalRoot : enunciate.getAdditionalSourceRoots()) {
       addSourceDirToProject(additionalRoot);
     }
   }
 
   @Override
-  protected MavenSpecificEnunciate loadMavenSpecificEnunciate(Set<File> sourceFiles) {
-    enunciate = new AssembleOnlyMavenSpecificEnunciate(sourceFiles);
-    return enunciate;
-  }
-
-  /**
-   * A maven-specific enunciate mechanism that performs assembly-only (skips compilation/packaging of the war).
-   */
-  protected class AssembleOnlyMavenSpecificEnunciate extends MavenSpecificEnunciate {
-
-    public AssembleOnlyMavenSpecificEnunciate(Collection<File> rootDirs) {
-      super(rootDirs);
+  protected void loadConfig(EnunciateConfiguration config, File configFile) throws IOException, SAXException, MavenFilteringException {
+    super.loadConfig(config, configFile);
+    WebAppConfig webAppConfig = config.getWebAppConfig();
+    if (webAppConfig == null) {
+      webAppConfig = new WebAppConfig();
+      config.setWebAppConfig(webAppConfig);
     }
-
-    @Override
-    protected void initModules(Collection<DeploymentModule> modules) throws EnunciateException, IOException {
-      super.initModules(modules);
-
-      for (DeploymentModule module : modules) {
-        if (module instanceof ProjectAssemblyModule) {
-          ProjectAssemblyModule assemblyModule = (ProjectAssemblyModule) module;
-          assemblyModule.setDoCompile(false);
-          assemblyModule.setDoLibCopy(false);
-          assemblyModule.setDoPackage(false);
-          assemblyModule.setBuildDir(new File(project.getBasedir(), webappDirectory));
-        }
-      }
-    }
+    webAppConfig.setDoCompile(false);
+    webAppConfig.setDoLibCopy(false);
+    webAppConfig.setDoPackage(false);
+    webAppConfig.setDir(new File(project.getBasedir(), webappDirectory).getAbsolutePath());
   }
 }

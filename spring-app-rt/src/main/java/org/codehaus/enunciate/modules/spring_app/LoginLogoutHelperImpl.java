@@ -27,6 +27,7 @@ import org.springframework.security.ui.AuthenticationDetailsSourceImpl;
 import org.springframework.security.ui.logout.LogoutHandler;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.codehaus.enunciate.webapp.HTTPRequestContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

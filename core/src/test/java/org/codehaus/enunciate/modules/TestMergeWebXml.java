@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
+package org.codehaus.enunciate.modules;
 
 import freemarker.ext.dom.NodeModel;
 import junit.framework.TestCase;
@@ -23,15 +23,16 @@ import net.sf.jelly.apt.strategies.MissingParameterException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.template.freemarker.EnunciateFileTransform;
 import org.codehaus.enunciate.template.strategies.EnunciateFileStrategy;
-import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author Ryan Heaton
  */
-public class TestTestMergeWebXml extends TestCase {
+public class TestMergeWebXml extends TestCase {
 
   /**
    * tests merging two web.xml files.
@@ -40,7 +41,7 @@ public class TestTestMergeWebXml extends TestCase {
     ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
     final PrintWriter out = new PrintWriter(bytesOut);
 
-    SpringAppDeploymentModule module = new SpringAppDeploymentModule();
+    BasicAppModule module = new BasicAppModule();
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     EnunciateFileTransform transform = new EnunciateFileTransform(null) {
       @Override
@@ -54,11 +55,11 @@ public class TestTestMergeWebXml extends TestCase {
       }
     };
     model.put("file", transform);
-    model.put("source1", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.2.xml")));
-    module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
-    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.3.xml")));
-    module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
+    model.put("source1", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.2.xml")));
+    module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
+    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.3.xml")));
+    module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?
     assertTrue(bytesOut.size() > 0);
@@ -73,7 +74,7 @@ public class TestTestMergeWebXml extends TestCase {
     ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
     final PrintWriter out = new PrintWriter(bytesOut);
 
-    SpringAppDeploymentModule module = new SpringAppDeploymentModule();
+    BasicAppModule module = new BasicAppModule();
     EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
     EnunciateFileTransform transform = new EnunciateFileTransform(null) {
       @Override
@@ -90,9 +91,9 @@ public class TestTestMergeWebXml extends TestCase {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(false);
     NodeModel.setDocumentBuilderFactory(builderFactory);
-    model.put("source1", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source2", new SpringAppDeploymentModule().loadMergeXmlModel(TestTestMergeWebXml.class.getResourceAsStream("petclinic.web.xml")));
-    module.processTemplate(SpringAppDeploymentModule.class.getResource("merge-web-xml.fmt"), model);
+    model.put("source1", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("petclinic.web.xml")));
+    module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?
     assertTrue(bytesOut.size() > 0);

@@ -64,15 +64,17 @@
         </li>
         <li>
           <h3>compile</h3>
-          <p>Used to compile the source code (original and generated).</p>
+          <p>Used to compile the source code for the generated client-side libraries. Unless compilation is disabled,
+            Enunciate will also use this step to compile your Web service API. If you're using Maven, compilation of your
+            Web service API is not done by Enunciate.</p>
         </li>
         <li>
           <h3>build</h3>
-          <p>Used to assemble all the pieces of the API into a single logical structure.</p>
+          <p>Used to assemble all the pieces of the application (e.g. documentation, deployment descriptors, configuration files) into a single directory.</p>
         </li>
         <li>
           <h3>package</h3>
-          <p>Used to consolidate and package the assembled pieces.</p>
+          <p>Used to package up the application (e.g. zip up the war file).</p>
         </li>
       </ul>
 
@@ -106,9 +108,9 @@
       <a name="modules"><div class="break">&nbsp;</div></a>
       <h1>Modules</h1>
 
-      <p>The work of Enunciate is divided into modules.  Modules can be thought of as loosly coupled, non-interdependant extensions to the Enunciate engine.
+      <p>The work of Enunciate is divided into modules.  Modules can be thought of as loosely coupled, loosely-interdependant extensions to the Enunciate engine.
       Each module has a specific set of work to perform.  For example, the XML module generates the WSDL and schemas for the API, the REST module validates
-      the REST endpoints, the xfire-client module generates the xfire client libraries, etc.  Since each module has a specific set of work to do, each module
+      the REST endpoints, the JAX-WS client module generates the Java client libraries, etc.  Since each module has a specific set of work to do, each module
       has also a separate set of configuration options.</p>
 
       <p>The modules that are to be included in the Enunciate mechanism are discovered at runtime using <a href="http://java.sun.com/j2se/1.3/docs/guide/jar/jar.html#Service%20Provider">Sun's
@@ -122,9 +124,13 @@
           <p>Generates the API documentation.</p>
         </li>
         <li>
-          <h3><a href="module_jaxws.html">jaxws</a></h3>
-          <p>Generates and compiles the support files and classes necessary to support a REST application according to
-            <a href="https://jsr311.dev.java.net/">JSR-311</a>, using <a href="https://jersey.dev.java.net/">Jersey</a>.</p>
+          <h3><a href="module_xml.html">xml</a></h3>
+          <p>Generates the WSDL and schemas for the API.</p>
+        </li>
+        <li>
+          <h3><a href="module_jaxws_support.html">jaxws-support</a></h3>
+          <p>Generates and compiles the support files and classes necessary to support a JAX-WS application according to
+            <a href="https://jax-ws.dev.java.net/">the JAX-WS specification</a>.</p>
         </li>
         <li>
           <h3><a href="module_jersey.html">jersey</a></h3>
@@ -132,7 +138,16 @@
         </li>
         <li>
           <h3><a href="module_jaxws_ri.html">JAX-WS RI</a></h3>
-          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a> (disabled by default in deference to the XFire module).</p>
+          <p>Generates support classes for deploying SOAP endpoints using <a href="https://jax-ws.dev.java.net/">JAX-WS RI</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_basic_app.html">basic-app</a></h3>
+          <p>Compiles and builds a basic web application according to the <a href="http://enunciate.codehaus.org/user_guide.html#config_webapp">Enunciate configuration</a>.</p>
+        </li>
+        <li>
+          <h3><a href="module_spring_app.html">spring-app</a></h3>
+          <p>Enables the API to run in the <a href="http://www.springframework.org/">Spring</a> container so as to be able to take advantage of
+            things like dependency injection, AOP, and Spring security.</p>
         </li>
         <li>
           <h3><a href="module_xfire.html">xfire</a>*</h3>
@@ -143,14 +158,6 @@
           <p>Generates support classes for deploying SOAP endpoints using <a href="http://cxf.apache.org/">CXF</a> (disabled by default in deference to the XFire module).</p>
         </li>
         <li>
-          <h3><a href="module_spring_app.html">spring-app</a></h3>
-          <p>Builds and packages the war that will host the documentation and service the endpoints (via <a href="http://www.springframework.org/">Spring</a>).</p>
-        </li>
-        <li>
-          <h3><a href="module_xfire_client.html">xfire-client</a></h3>
-          <p>Builds the Java client libraries used to access the API (using <a href="http://xfire.codehaus.org/">XFire</a>)</p>
-        </li>
-        <li>
           <h3><a href="module_jaxws_client.html">jaxws-client</a></h3>
           <p>Builds the Java client libraries used to access the API (using <a href="https://jax-ws.dev.java.net/">JAX-WS</a>)</p>
         </li>
@@ -159,7 +166,7 @@
           <p>Builds the C client libraries used to access the API.</p>
         </li>
         <li>
-          <h3><a href="module_obj_c.html">c</a></h3>
+          <h3><a href="module_obj_c.html">obj-c</a></h3>
           <p>Builds the Objective C client libraries used to access the API.</p>
         </li>
         <li>
@@ -175,8 +182,8 @@
           <p>Builds the AMF endpoints (and ActionScript client libraries for Flex developers) used to access the API via <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>.  It also compiles the configured Flex applications.</p>
         </li>
         <li>
-          <h3><a href="module_xml.html">xml</a></h3>
-          <p>Generates the WSDL and schemas for the API.</p>
+          <h3><a href="module_xfire_client.html">xfire-client</a></h3>
+          <p>Builds the Java client libraries used to access the API (using <a href="http://xfire.codehaus.org/">XFire</a>)</p>
         </li>
         <li>
           <h3><a href="module_rest.html">rest</a>**</h3>
@@ -195,54 +202,194 @@
       <h1>Configuration</h1>
 
       <p>Configuration for the Enunciate engine (including any of its modules) is done in a single XML file that conforms to
-        <a href="schemas/enunciate-1.15.xsd">this schema</a>.  Here are some of the more interesting configuration options:</p>
+      <a href="schemas/enunciate-1.15.xsd">this schema</a>. The configuration is defined by a top-level <tt>&lt;enunciate&gt;</tt> element. Here are
+      some of the more interesting attributes applicable to this element:</p>
 
       <ul>
         <li>
           <h3><a name="config_label">label</a></h3>
-          <p>The "label" attribute of the root element specifies a label for your Enunciate project.</p>
-        </li>
-        <li>
-          <h3><a name="config_include_exclude">api-classes</a></h3>
-          <p>When Enunciate is invoked on a set of source files, Enunciate will (by default) attempt to determine whether each file is either an Web service
-          endpoint or a JAXB type.  If the class is not a Web service endpoint, Enunciate assumes it is a JAXB type and validates it as such. Often, there
-          exist "utility classes" in the project that should not be considered part of the public Web service API.  These classes
-          <a href="http://docs.codehaus.org/display/ENUNCIATE/Excluding+a+class+from+the+public+API">can be marked with @XmlTransient</a>, but sometimes this
-          is cumbersome.</p>
-          <p>The api-classes element can take an arbitrary number of "include" and "exclude" elements that can be used to give more control over what classes
-          are considered part of the API. Each "include" and "exclude" element takes a single attriute, "pattern" that specifies the Ant-style pattern of the
-          classes to match.  Note that the pattern is matched against the fully-qualified class name, so the path separator is ".".  By default, all classes are
-          included and no classes are excluded.</p>
-        </li>
-        <li>
-          <h3><a name="config_additional_classes">api-import</a></h3>
-          <p>If your API depends on classes outside your source base, these elements won't be included by default into the generated schemas and client code.
-          The 'pattern' attribute defines the pattern of classes that are on the classpath that are to be imported. The 'pattern' specifies an Ant-style pattern
-          of the classes to match. Note that the pattern is matched against the fully-qualified class name, so the path separator is ".". By default Enunciate
-          will scan the classpath for the source files that are associated with these additional classes.  If the sources are not found, Enunciate will not be
-          able to take advantage of source-specific information (e.g. documentation).  You can disable scanning for source files by setting the
-          'seekSource' attribute of the api-import to false.</p>
-          <p>For more information, see <a href="http://docs.codehaus.org/display/ENUNCIATE/Multi-Module+Projects">multi-module projects</a>.</p>
-        </li>
-        <li>
-          <h3><a name="config_deployment">deployment</a></h3>
-          <p>The deployment element is used to specify the hostname and context on which your API will be deployed, so the WSDL and client code will know where
-          the endpoints will be mounted.</p>
-        </li>
-        <li>
-          <h3><a name="config_namespaces">namespaces</a></h3>
-          <p>This section is used to define the prefixes for your namespaces.</p>
-        </li>
-        <li>
-          <h3><a name="config_services">services</a></h3>
-          <p>This section is used to define custom configuration for specific services (soap and rest), such as the URLs at which to mount the endpoints. For more
-          information, see the <a href="module_xfire.html">XFire module documentation</a> and <a href="module_rest.html">the REST module documentation</a>.</p>
-        </li>
-        <li>
-          <h3><a name="config_modules">modules</a></h3>
-          <p>This is where the configuration of the modules goes.  For specifics, see the <a href="#modules">documentation for each module</a>.</p>
+          <p>The "label" attribute of the root element specifies a label for your Enunciate project. A label is useful because it is what often determines the
+          names of some of the Enunciate-generated artifacts. For example, the names of your client-side libraries will be based on the project label. The default
+          label is "enunciate". For Maven users, the default label is the project artifact id.</p>
         </li>
       </ul>
+
+      <p>The <tt>&lt;enunciate&gt;</tt> element also is configured with the following child elements. Note that not all configuration elements are listed here,
+        but may be documented in other places like the <a href="http://docs.codehaus.org/display/ENUNCIATE/FAQ">FAQ</a>.</p>
+
+      <h3><a name="config_disable_rule">disable-rule</a></h3>
+      
+      <p>The <tt>disable-rule</tt> element is used to disable some Enunciate rules, identified by an id. Note that not all rules can be disabled.</p>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;disable-rule id="..."/&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
+      <h3><a name="config_deployment">deployment</a></h3>
+      <p>The <tt>deployment</tt> element is used to specify the hostname and context on which your API will be deployed. This may be necessary because Enunciate doesn't know at
+        compile-time (although it tries to make reasonable guesses) where the application will be deployed at run-time.</p>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;deployment protocol="https" host="mydomain.com" context="/api"/&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
+      <h3><a name="config_namespaces">namespaces</a></h3>
+      <p>This section is used to define the prefixes for your namespaces. For more information, see the <a
+            href="http://docs.codehaus.org/display/ENUNCIATE/Customizing+Namespace+Prefixes">FAQ entry</a>.</p>
+
+      <h3><a name="config_services">services</a></h3>
+      <p>This section is used to define custom configuration for specific services (SOAP and REST), such as the URLs at which to mount the endpoints.
+        For example, by default, Enunciate puts the SOAP endpoints under the "/soap" context and the REST endpoints under the "/rest" context. The
+        <tt>services</tt> element can be used to customize that.</p>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;services&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;soap defaultSoapSubcontext="/ws"/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;rest defaultRestSubcontext="/api"/&gt;
+&nbsp;&nbsp;&lt;/services&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
+      <h3><a name="config_webapp">webapp</a></h3>
+      
+      <p>This <tt>webapp</tt> configuration element is used to customize the way the application is compiled, built, and assembled. It provides hooks for
+        customizing the web.xml file, for customizing the classes and resources that get included into the web application, and for adding additional
+        files and resources to the application.</p>
+
+      <p>The <tt>webapp</tt> configuration element supports the following attributes:</p>
+
+      <ul>
+        <li>The "<b>disabled</b>" attribute can be used to disable the Enunciate application assembly. The default value is "false"</li>
+        <li>The "<b>dir</b>" attribute specifies the directory into which to build the web application. The default value is a temporary directory.</li>
+        <li>The "<b>war</b>" attribute specifies the war file that will be created. The default value is a temporary file.</li>
+        <li>The "<b>doCompile</b>" attribute specifies whether Enunciate should take on the responsibility of compiling the server-side classes.
+        This may not be desired if Enunciate is being used only for generating the war structure and configuration files. The default is "true" except
+        for Maven users, for whom the default is "false".</li>
+        <li>The "<b>doLibCopy</b>" attribute specifies Whether Enunciate should take on the responsibility of copying libraries to WEB-INF/lib.
+        This may not be desired if the Enunciate is being used only for generating the war structure and configuration files. The default is "true" except
+        for Maven users, for whom the default is "false".</li>
+        <li>The "<b>doPackage</b>" attribute specifies whether Enunciate should take on the responsibility of packaging (zipping) up the war.
+        This may not be desired if Enunicate is being used only for generating the war structure and configuration files. The default is "true" except
+        for Maven users, for whom the default is "false".</li>
+        <li>The "<b>webXMLTransform</b>" attribute specifies the XSLT tranform file that the web.xml file will pass through before being copied to the WEB-INF
+        directory.  No tranformation will be applied if none is specified.</li>
+        <li>The "<b>webXMLTransformURL</b>" attribute specifies the URL to an XSLT tranform that the web.xml file will pass through before being copied to the WEB-INF
+        directory.  No tranformation will be applied if none is specified.</li>
+        <li>The "<b>mergeWebXML</b>" attribute specifies the web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
+        none is specified.</li>
+        <li>The "<b>mergeWebXMLURL</b>" attribute specifies the URL to a web.xml file that is to be merged into the Enunciate-generated web.xml file. No file will be merged if
+        none is specified.</li>
+        <li>The "<b>preBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
+        the building war directory <i>before</i> it is provided with any Enunciate-specific files and directories.</li>
+        <li>The "<b>postBase</b>" attribute specifies a directory (could be gzipped) that supplies a "base" for the war.  The directory contents will be copied to
+        the building war directory <i>after</i> it is provided with any Enunciate-specific files and directories.</li>
+        <li>The "<b>includeClasspathLibs</b>" attribute specifies whether Enunciate will use the libraries from the classpath for applying the include/exclude
+        filters.  If "false" only the libs explicitly included by file (see below) will be filtered.</li>
+        <li>The "<b>excludeDefaultLibs</b>" attribute specifies whether Enunciate should perform its default filtering of known compile-time-only jars.</li>
+      </ul>
+
+      <p><u>Including or excluding jars from the war</u></p>
+
+      <p>By default, the war is constructed by copying jars that are on the Enunciate classpath to its "lib" directory (the contents of <i>directories</i> on the classpath
+      will be copied to the "classes" directory).  You add a specific file to this list with the "file" attribute of the "includeLibs" element of the "war" element.</p>
+
+      <p>Once the initial list of jars to be potentially copied is created, it is passed through an "include" filter that you may specify with nested "includeLibs"
+      elements. For each of these elements, you can specify a set of files to include with the "pattern" attribute.  This is an
+      ant-style pattern matcher against the absolute path of the file (or directory).  By default, all files are included.
+
+      <p>Once the initial list is passed through the "include" filter, it will be passed through an "exclude" filter. There is a set of known jars that by default
+      will not be copied to the "lib" directory.  These include the jars that ship by default with the JDK and the jars that are known to be build-time-only jars
+      for Enunciate.  You can disable the default filter with the "excludeDefaultLibs" attribute of the "war" element. You can also specify additional jars that
+      are to be excluded with an arbitrary number of "excludeLibs" child elements under the "war" element in the configuration file.  The "excludeLibs" element
+      supports either a "pattern" attribute or a "file" attribute.  The "pattern" attribute is an ant-style pattern matcher against the absolute path of the
+      file (or directory) on the classpath that should not be copied to the destination war.  The "file" attribute refers to a specific file on the filesystem
+      (relative paths are resolved relative to the configuration file). Furthermore, the "excludeLibs" element supports a "includeInManifest" attribute specifying
+      whether the exclude should be listed in the "Class-Path" attribute of the manifest, even though they are excluded in the war.  The is useful if, for example,
+      you're assembling an "ear" with multiple war files. By default, excluded jars are not included in the manifest.</p>
+
+      <p>You can customize the manifest for the war by the "manifest" element of the "war" element.  Underneath the "manifest" element can be an arbitrary number
+      of "attribute" elements that can be used to specify the manifest attributes.  Each "attribute" element supports a "name" attribute, a "value" attribute, and
+      a "section" attribute.  If no section is specified, the default section is assumed.  If there is no "Class-Path" attribute in the main section, one will be
+      provided listing the jars on the classpath.</p>
+
+      <h3><a name="config_globalServletFilter">The "globalServletFilter" element</a></h3>
+
+      <p>The "globalServletFilter" element is used to specify a servlet filter that will be applied to all web service requests. It requires a "name" attribute
+      and a "classname" attribute and supports an arbitrary number of "init-param" child elements, each supporting a "name" attribute and a "value" attribute.</p>
+
+      <h3><a name="config_resources">The "resources" element</a></h3>
+
+      <p>The "resources" element is used to specify a pattern of resources to copy to the compile directory.  It supports the following attributes:</p>
+
+      <ul>
+        <li>The "<b>dir</b>" attribute specifies the base directory of the resources to copy.</li>
+        <li>The "<b>pattern</b>" attribute specifies an <a href="http://ant.apache.org/">Ant</a>-style
+        pattern used to find the resources to copy.  For more information, see the documentation for the
+        <a href="http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/util/AntPathMatcher.html">ant path matcher</a> in the Spring
+        JavaDocs.</li>
+      </ul>
+
+      <h3><a name="config_resources">The "resources" element</a></h3>
+
+      <code class="console">&lt;enunciate ...&gt;
+&nbsp;&nbsp;...
+&nbsp;&nbsp;&lt;webapp disabled="[true|false] dir="..." war="..."
+&nbsp;&nbsp;&nbsp;&nbsp;doCompile="..." doLibCopy="..." doPackage="..."
+&nbsp;&nbsp;&nbsp;&nbsp;webXMLTransform="..." webXMLTransformURL="..."
+&nbsp;&nbsp;&nbsp;&nbsp;mergeWebXML="..." mergeWebXMLURL="..."
+&nbsp;&nbsp;&nbsp;&nbsp;preBase="..." postBase="..."
+&nbsp;&nbsp;&nbsp;&nbsp;includeClasspathLibs="[true|false]" excludeDefaultLibs="[true|false]"&gt;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;globalServletFilter name="..." classname="..."&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;init-param name="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/globalServletFilter&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resources dir="..." pattern="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resources dir="..." pattern="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;includeLibs pattern="..." file="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;excludeLibs pattern="..." file="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-env-ref name="..." type="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;resource-ref name="..." type="..." auth="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;env name="..." type="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;manifest&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute name="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;attribute section="..." name="..." value="..."/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/manifest&gt;
+&nbsp;&nbsp;&lt;/webapp&gt;
+&nbsp;&nbsp;...
+&lt;/enunciate ...&gt;</code>
+
+      <p>For more information, see the documentation for the <a href="module_basic_app.html">basic app module</a>.</p>
+
+      <h3><a name="config_modules">modules</a></h3>
+      <p>This is where the configuration of the modules goes.  For specifics, see the <a href="#modules">documentation for each module</a>.</p>
 
       <a name="further"><div class="break">&nbsp;</div></a>
       <h1>Further Reading</h1>

@@ -20,12 +20,8 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-cxf</artifactId>
+      <artifactId>enunciate-jaxws-support</artifactId>
       <version>${project.version}</version>
-
-      <!--optional to reduce dependency bloat, jaxws module is default-->
-      <!--if cxf is desired, this dependency will need to be explicitly added-->
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -42,22 +38,6 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws-support</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-rest</artifactId>
-      <version>${project.version}</version>
-
-      <!--optional to reduce dependency bloat, jaxrs (jersey) module is default-->
-      <!--if enunciate-rest is desired, this dependency will need to be explicitly added-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-jersey</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -66,16 +46,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-xml</artifactId>
       <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-xfire</artifactId>
-      <version>${project.version}</version>
-
-      <!--optional to reduce dependency bloat, jaxws module is default-->
-      <!--if xfire is desired, this dependency will need to be explicitly added-->
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -130,6 +100,36 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-amf</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-cxf</artifactId>
+      <version>${project.version}</version>
+
+      <!--optional to reduce dependency bloat, jaxws ri module is default-->
+      <!--if cxf is desired, this dependency will need to be explicitly added-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-rest</artifactId>
+      <version>${project.version}</version>
+
+      <!--optional to reduce dependency bloat, jaxrs (jersey) module is default-->
+      <!--if enunciate-rest is desired, this dependency will need to be explicitly added-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-xfire</artifactId>
+      <version>${project.version}</version>
+
+      <!--optional to reduce dependency bloat, jaxws module is default-->
+      <!--if xfire is desired, this dependency will need to be explicitly added-->
+      <optional>true</optional>
     </dependency>
   </dependencies>
 

@@ -14,61 +14,100 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app.config;
+package org.codehaus.enunciate.config.war;
 
-import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.main.webapp.WebAppComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
-import java.io.File;
 import java.net.URL;
 import java.net.MalformedURLException;
 
 /**
- * Configuration for the war.
+ * Configuration for the web app.
  *
  * @author Ryan Heaton
  */
-public class WarConfig {
+public class WebAppConfig {
 
   private boolean includeClasspathLibs = true;
   private boolean excludeDefaultLibs = true;
   private final List<IncludeExcludeLibs> excludeLibs = new ArrayList<IncludeExcludeLibs>();
   private final List<IncludeExcludeLibs> includeLibs = new ArrayList<IncludeExcludeLibs>();
-  private String name;
   private String webXMLTransform;
   private URL webXMLTransformURL;
   private String mergeWebXML;
   private URL mergeWebXMLURL;
   private String preBase;
   private String postBase;
-  private String docsDir;
-  private String gwtAppDir;
-  private String flexAppDir;
+  private String dir;
+  private String war;
   private final Manifest manifest = getDefaultManifest();
+  private boolean disabled = false;
+  private boolean doCompile = true;
+  private boolean doLibCopy = true;
+  private boolean doPackage = true;
 
+  private final List<WebAppComponent> globalServletFilters = new ArrayList<WebAppComponent>();
+  private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
   private final List<WebAppResource> envEntries = new ArrayList<WebAppResource>();
   private final List<WebAppResource> resourceEnvRefs = new ArrayList<WebAppResource>();
   private final List<WebAppResource> resourceRefs = new ArrayList<WebAppResource>();
 
   /**
-   * The name of the war.
+   * Whether the application assembly is disabled.
    *
-   * @return The name of the war.
+   * @return Whether the application assembly is disabled.
    */
-  public String getName() {
-    return name;
+  public boolean isDisabled() {
+    return disabled;
   }
 
   /**
-   * The name of the war.
+   * Whether the application assembly is disabled.
    *
-   * @param name The name of the war.
+   * @param disabled Whether the application assembly is disabled.
    */
-  public void setName(String name) {
-    this.name = name;
+  public void setDisabled(boolean disabled) {
+    this.disabled = disabled;
+  }
+
+  /**
+   * The directory where to build the (expanded) app.
+   *
+   * @return The directory where to build the (expanded) app.
+   */
+  public String getDir() {
+    return dir;
+  }
+
+  /**
+   * The directory where to build the (expanded) app.
+   *
+   * @param dir The directory where to build the (expanded) app.
+   */
+  public void setDir(String dir) {
+    this.dir = dir;
+  }
+
+  /**
+   * The war file.
+   *
+   * @return The war file.
+   */
+  public String getWar() {
+    return war;
+  }
+
+  /**
+   * The war file.
+   *
+   * @param war The war file.
+   */
+  public void setWar(String war) {
+    this.war = war;
   }
 
   /**
@@ -99,6 +138,60 @@ public class WarConfig {
   }
 
   /**
+   * whether this module should take on the responsibility of compiling the server-side classes.
+   *
+   * @return whether this module should take on the responsibility of compiling the server-side classes
+   */
+  public boolean isDoCompile() {
+    return doCompile;
+  }
+
+  /**
+   * whether this module should take on the responsibility of compiling the server-side classes
+   *
+   * @param doCompile whether this module should take on the responsibility of compiling the server-side classes
+   */
+  public void setDoCompile(boolean doCompile) {
+    this.doCompile = doCompile;
+  }
+
+  /**
+   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib.
+   *
+   * @return whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   */
+  public boolean isDoLibCopy() {
+    return doLibCopy;
+  }
+
+  /**
+   * whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   *
+   * @param doLibCopy whether this module should take on the responsibility of copying libraries to WEB-INF/lib
+   */
+  public void setDoLibCopy(boolean doLibCopy) {
+    this.doLibCopy = doLibCopy;
+  }
+
+  /**
+   * whether this module should take on the responsibility of packaging (zipping) up the war
+   *
+   * @return whether this module should take on the responsibility of packaging (zipping) up the war
+   */
+  public boolean isDoPackage() {
+    return doPackage;
+  }
+
+  /**
+   * whether this module should take on the responsibility of packaging (zipping) up the war
+   *
+   * @param doPackage whether this module should take on the responsibility of packaging (zipping) up the war
+   */
+  public void setDoPackage(boolean doPackage) {
+    this.doPackage = doPackage;
+  }
+
+  /**
    * Whether to exclude the default libs.
    *
    * @param excludeDefaultLibs Whether to exclude the default libs.
@@ -114,16 +207,6 @@ public class WarConfig {
    */
   public void setExludeDefaultLibs(boolean excludeDefaultLibs) {
     this.excludeDefaultLibs = excludeDefaultLibs;
-  }
-
-  /**
-   * Add a war lib.
-   *
-   * @param warLib The war lib to add.
-   * @deprecated use "addIncludeJars"
-   */
-  public void addWarLib(WarLib warLib) throws EnunciateException {
-    throw new EnunciateException("The \"lib\" element has been replaced by the more flexible \"includeLibs\" element.  See the Enunciate docs for details.");
   }
 
   /**
@@ -271,60 +354,6 @@ public class WarConfig {
   }
 
   /**
-   * The directory in the war in which to expand the documentation (including the WSDLs and schemas).
-   *
-   * @return The directory in the war in which to expand the documentation (including the WSDLs and schemas).
-   */
-  public String getDocsDir() {
-    return docsDir;
-  }
-
-  /**
-   * The directory in the war in which to expand the documentation (including the WSDLs and schemas).
-   *
-   * @param docsDir The directory in the war in which to expand the documentation (including the WSDLs and schemas).
-   */
-  public void setDocsDir(String docsDir) {
-    this.docsDir = docsDir;
-  }
-
-  /**
-   * The directory in the war in which to expand the gwt app(s).
-   *
-   * @return The directory in the war in which to expand the gwt app(s).
-   */
-  public String getGwtAppDir() {
-    return gwtAppDir;
-  }
-
-  /**
-   * The directory in the war in which to expand the gwt app(s).
-   *
-   * @param gwtAppDir The directory in the war in which to expand the gwt app(s).
-   */
-  public void setGwtAppDir(String gwtAppDir) {
-    this.gwtAppDir = gwtAppDir;
-  }
-
-  /**
-   * The directory in the war in which to expand the flex app(s).
-   *
-   * @return The directory in the war in which to expand the flex app(s).
-   */
-  public String getFlexAppDir() {
-    return flexAppDir;
-  }
-
-  /**
-   * The directory in the war in which to expand the flex app(s).
-   *
-   * @param flexAppDir The directory in the war in which to expand the flex app(s).
-   */
-  public void setFlexAppDir(String flexAppDir) {
-    this.flexAppDir = flexAppDir;
-  }
-
-  /**
    * The manifest for this war.
    *
    * @return The manifest for this war.
@@ -365,6 +394,42 @@ public class WarConfig {
     manifest.getMainAttributes().putValue(Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
     manifest.getMainAttributes().putValue("Created-By", "Enunciate");
     return manifest;
+  }
+
+  /**
+   * The resources to copy for this application.
+   *
+   * @return The resources to copy for this application.
+   */
+  public List<CopyResources> getCopyResources() {
+    return copyResources;
+  }
+
+  /**
+   * Add a copy resources.
+   *
+   * @param copyResources The copy resources to add.
+   */
+  public void addCopyResources(CopyResources copyResources) {
+    this.copyResources.add(copyResources);
+  }
+
+  /**
+   * The global servlet filters for this application.
+   *
+   * @return The global servlet filters for this application.
+   */
+  public List<WebAppComponent> getGlobalServletFilters() {
+    return globalServletFilters;
+  }
+
+  /**
+   * Add a global servlet filter to be applied to all web service requests.
+   *
+   * @param filterConfig The filter configuration.
+   */
+  public void addGlobalServletFilter(WebAppComponent filterConfig) {
+    this.globalServletFilters.add(filterConfig);
   }
 
   /**

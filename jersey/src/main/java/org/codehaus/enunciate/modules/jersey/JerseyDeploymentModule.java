@@ -274,7 +274,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
     webappFragment.setBaseDir(webappDir);
     WebAppComponent servletComponent = new WebAppComponent();
     servletComponent.setName("jersey");
-    servletComponent.setClassname(EnunciateSpringServlet.class.getName());
+    servletComponent.setClassname(EnunciateJerseyServletContainer.class.getName());
     TreeMap<String, String> initParams = new TreeMap<String, String>();
     initParams.putAll(getServletInitParams());
     if (!isUsePathBasedConneg()) {

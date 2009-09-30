@@ -25,6 +25,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -205,7 +206,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_amf.html
  */
-public class AMFDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, FlexHomeAwareModule {
+public class AMFDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, FlexHomeAwareModule, EnunciateClasspathListener {
 
   private String amfSubcontext = "/amf/";
   private String flexAppDir = null;
@@ -217,6 +218,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private String swcName;
   private boolean swcDownloadable = false;
   private boolean asSourcesDownloadable = false;
+  private boolean amfRtFound = false;
 
   public AMFDeploymentModule() {
     setDisabled(true);//disable the AMF module by default because it adds unnecessary contraints on the API.
@@ -255,6 +257,22 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
     }
+  }
+
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
+    if (!isDisabled()) {
+      if (!amfRtFound) {
+        warn("WARNING! The AMF module is enabled, but the Enunciate AMF runtime libraries were found on the Enunciate classpath. " +
+          "Application startup will fail unless the Enunciate AMF runtime libraries are on the classpath.");
+      }
+    }
+  }
+
+  public void onClassesFound(Set<String> classes) {
+    amfRtFound |= classes.contains("org.codehaus.enunciate.modules.amf.AMFEndpointImpl");
   }
 
   @Override

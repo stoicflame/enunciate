@@ -8,14 +8,50 @@
   </parent>
 
   <artifactId>enunciate-rt</artifactId>
-  <name>Enunciate - Full Runtime</name>
-  <description>The Enunciate full runtime is simply a reference to all known Enunciate runtime libraries.</description>
+  <name>Enunciate - Basic Runtime</name>
+  <description>The Enunciate basic runtime a reference to all basic Enunciate runtime libraries. This does not include runtime libraries for any "optional" modules.</description>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-rt</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <!--default REST runtime: Jersey-->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jersey-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!--default JAX-WS runtime: JAX-WS RI-->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jaxws-ri-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- ********************* -->
+    <!-- OPTIONAL DEPENDENCIES -->
+    <!-- ********************* -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-gwt-rt</artifactId>
+      <version>${project.version}</version>
+
+      <!--optional because gwt isn't enabled by default-->
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
+      <version>${project.version}</version>
+
+      <!--optional because amf isn't enabled by default-->
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -26,64 +62,6 @@
       <!--optional because jax-rs is now the default-->
       <optional>true</optional>
     </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jersey-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-xfire-rt</artifactId>
-      <version>${project.version}</version>
-
-      <!--optional because jaxws-ri is the default-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-cxf-rt</artifactId>
-      <version>${project.version}</version>
-
-      <!--optional because jaxws-ri is default-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-spring-jaxws-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-spring-app-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-xfire-client-rt</artifactId>
-      <version>${project.version}</version>
-
-      <!--optional because we don't need the client-side dependencies for server-side targets-->
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-gwt-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-amf-rt</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
   </dependencies>
 
 </project>

@@ -45,8 +45,8 @@ public class StatusMessageResponseWriter implements ContainerResponseWriter {
   // Inherited.
   public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response) throws IOException {
     OutputStream out = this.delegate.writeStatusAndHeaders(contentLength, response);
-    if (response.getResponse() instanceof HasStatusMessage && EnunciateSpringServlet.CURRENT_RESPONSE.get() != null) {
-      EnunciateSpringServlet.CURRENT_RESPONSE.get().setStatus(response.getStatus(), ((HasStatusMessage)response.getResponse()).getStatusMessage());
+    if (response.getResponse() instanceof HasStatusMessage && EnunciateJerseyServletContainer.CURRENT_RESPONSE.get() != null) {
+      EnunciateJerseyServletContainer.CURRENT_RESPONSE.get().setStatus(response.getStatus(), ((HasStatusMessage)response.getResponse()).getStatusMessage());
     }
     return out;
   }

@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.16-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-jaxws-ri-rt</artifactId>
+  <name>Enunciate - JAX-WS RI Runtime</name>
+  <description>The JAX-WS RI runtime is a reference to all JAX-WS RI dependencies. There are no significant classes; just a reference to the runtime dependencies.</description>
+
+  <repositories>
+    <repository>
+      <id>java.net.1</id>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+    </repository>
+    <repository>
+      <id>java.net.2</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
+    <repository>
+      <!--you know something's seriously wrong with sun's maven repositories when we have to go out to the jboss repository to get some of these artifacts.-->
+      <id>jboss.repo</id>
+      <url>http://repository.jboss.org/maven2</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jvnet.staxex</groupId>
+      <artifactId>stax-ex</artifactId>
+    </dependency>
+
+    <!--this dep is NOT optional; confirmed 8/09.-->
+    <dependency>
+      <groupId>com.sun.xml.stream.buffer</groupId>
+      <artifactId>streambuffer</artifactId>
+    </dependency>
+
+    <!--sjsxp needed only for MTOM-->
+    <dependency>
+      <groupId>com.sun.xml.stream</groupId>
+      <artifactId>sjsxp</artifactId>
+
+      <!--needed only for MTOM-->
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+
+</project>

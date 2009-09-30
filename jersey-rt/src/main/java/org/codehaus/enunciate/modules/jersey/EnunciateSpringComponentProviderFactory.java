@@ -13,10 +13,10 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.annotation.Resource;
-import javax.ws.rs.ext.Provider;
+import javax.servlet.ServletContext;
 import javax.ws.rs.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +33,9 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
   private final Map<Class, AdvisedResourceFactory> resourceFactories = new HashMap<Class, AdvisedResourceFactory>();
   private List<Object> interceptors;
 
-  public EnunciateSpringComponentProviderFactory(ResourceConfig rc, WebApplicationContext applicationContext) {
-    super(rc, (ConfigurableApplicationContext) applicationContext);
-    applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+  public EnunciateSpringComponentProviderFactory(ResourceConfig rc, ServletContext servletContext) {
+    super(rc, (ConfigurableApplicationContext) WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext));
+    WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext).getAutowireCapableBeanFactory().autowireBean(this);
   }
 
   @Override

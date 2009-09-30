@@ -27,6 +27,7 @@ import org.apache.tools.ant.types.Reference;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.modules.BasicAppModule;
 import org.xml.sax.SAXException;
 import sun.misc.Service;
 
@@ -103,6 +104,8 @@ public class EnunciateTask extends MatchingTask {
           getProject().log("Discovered module " + discoveredModule.getName());
           modules.add(discoveredModule);
         }
+        //make sure a basic app module is there.
+        modules.add(new BasicAppModule());
         config = new EnunciateConfiguration(modules);
       }
       else {
