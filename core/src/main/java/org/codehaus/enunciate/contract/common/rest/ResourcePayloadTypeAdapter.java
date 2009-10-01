@@ -18,6 +18,8 @@ package org.codehaus.enunciate.contract.common.rest;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.TypeMirror;
+
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -51,7 +53,12 @@ public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
   }
 
   public JsonTypeDefinition getJsonType() {
-    // TODO Implement me?
+    if (delegate instanceof ClassType) {
+      ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
+      if (declaration != null) {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findJsonTypeDefinition(declaration);
+      }
+    }
     return null;
   }
 }

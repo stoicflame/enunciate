@@ -230,7 +230,13 @@ public class RESTParameter extends DecoratedParameterDeclaration implements REST
   }
 
   public JsonTypeDefinition getJsonType() {
-    // TODO Implement me?
+    TypeMirror type = getType();
+    if (type instanceof ClassType) {
+      ClassDeclaration declaration = ((ClassType) type).getDeclaration();
+      if (declaration != null) {
+        return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findJsonTypeDefinition(declaration);
+      }
+    }
     return null;
   }
 }
