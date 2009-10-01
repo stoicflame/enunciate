@@ -252,8 +252,8 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
       assertNotNull(model.findJsonTypeDefinition(nameTypeDefinition));
       JsonSchemaInfo jsonSchemaInfo = model.getIdsToJsonSchemas().get(JsonSchemaInfo.schemaIdForType(nameTypeDefinition));
       assertNotNull(jsonSchemaInfo);
-      assertNotNull(jsonSchemaInfo.getTypes().get(nameTypeDefinition.getTypeName()));
-      assertNull(jsonSchemaInfo.getTopLevelTypes().get(nameTypeDefinition.getTypeName()));
+      assertNotNull(jsonSchemaInfo.getTypesByName().get(nameTypeDefinition.getTypeName()));
+      assertNull(jsonSchemaInfo.getTopLevelTypesByName().get(nameTypeDefinition.getTypeName()));
   }
 
   /**
@@ -326,8 +326,8 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
 
       JsonSchemaInfo jsonSchemaInfo = model.getIdsToJsonSchemas().get(JsonSchemaInfo.schemaIdForType(nameTypeDefinition));
       assertNotNull(jsonSchemaInfo);
-      assertNotNull(jsonSchemaInfo.getTypes().get(nameTypeDefinition.getTypeName()));
-      assertNotNull(jsonSchemaInfo.getTopLevelTypes().get(nameTypeDefinition.getTypeName()));
+      assertNotNull(jsonSchemaInfo.getTypesByName().get(nameTypeDefinition.getTypeName()));
+      assertNotNull(jsonSchemaInfo.getTopLevelTypesByName().get(nameTypeDefinition.getTypeName()));
   }
 
   /**

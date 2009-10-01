@@ -20,6 +20,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerTemplateBlock;
@@ -84,6 +85,14 @@ public abstract class EnunciateTemplateLoopStrategy<L> extends TemplateLoopStrat
    */
   protected Map<String, SchemaInfo> getNamespacesToSchemas() {
     return getModel().getNamespacesToSchemas();
+  }
+
+  /**
+   * The ID to json schema map.
+   * @return The ID to json schema map.
+   */
+  protected Map<String, JsonSchemaInfo> getIdsToJsonSchemas() {
+    return getModel().getIdsToJsonSchemas();
   }
 
   /**

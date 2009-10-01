@@ -1,5 +1,6 @@
 package org.codehaus.enunciate.contract.json;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,14 +60,21 @@ public final class JsonSchemaInfo {
   /**
    * @return Non-null Map of top-level JSON types by type name, keyed by type-name.
    */
-  public Map<String, JsonRootElementDeclaration> getTopLevelTypes() {
+  public Map<String, JsonRootElementDeclaration> getTopLevelTypesByName() {
     return topLevelTypes;
   }
 
   /**
    * @return Non-null Map of available JSON types in this schema, keyed by type-name.
    */
-  public Map<String, JsonTypeDefinition> getTypes() {
+  public Map<String, JsonTypeDefinition> getTypesByName() {
     return types;
+  }
+
+  /**
+   * @return Non-null Collection of available JSON types in this schema.
+   */
+  public Collection<JsonTypeDefinition> getTypes() {
+    return getTypesByName().values();
   }
 }

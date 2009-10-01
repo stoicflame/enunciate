@@ -1,5 +1,6 @@
 package org.codehaus.enunciate.contract.json;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,10 +38,18 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
   }
 
   /**
-   * @return The propertiesByName.
+   * @return Non null Map of JsonPropertyDeclarations, keyed by name.
    */
-  public Map<String, JsonPropertyDeclaration> getPropertiesByName() {
+  public Map<String, JsonPropertyDeclaration> getJsonPropertiesByName() {
     return propertiesByName;
+  }
+
+  /**
+   * @return Non null Collection of JsonPropertyDeclarations.
+   */
+  public Collection<JsonPropertyDeclaration> getJsonProperties()
+  {
+    return getJsonPropertiesByName().values();
   }
 
   public static final class JsonPropertyDeclaration extends PropertyDeclaration {
@@ -53,7 +62,7 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
      */
     public String getPropertyName() {
       JsonName jsonName = getAnnotation(JsonName.class);
-      return jsonName == null ? getSimpleName() : jsonName.value();
+      return jsonName == null ? super.getPropertyName() : jsonName.value();
     }
 
     /**

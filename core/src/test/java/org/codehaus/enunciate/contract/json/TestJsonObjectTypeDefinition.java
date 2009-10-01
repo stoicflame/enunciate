@@ -26,35 +26,35 @@ public class TestJsonObjectTypeDefinition extends InAPTTestCase
     public void testProperties_NameOverride()
     {
         final JsonObjectTypeDefinition nameTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
-        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getPropertiesByName();
+        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getJsonPropertiesByName();
         assertProperty("surname", null, String.class.getName(), actualNameProperties.get("surname"));
     }
 
     public void testProperties_AnnotationOnSetter()
     {
         final JsonObjectTypeDefinition nameTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
-        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getPropertiesByName();
+        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getJsonPropertiesByName();
         assertProperty("middle", null, String.class.getName(), actualNameProperties.get("middle"));
     }
 
     public void testProperties_JsonIgnored_Excluded()
     {
         final JsonObjectTypeDefinition personTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person"));
-        final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getPropertiesByName();
+        final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getJsonPropertiesByName();
         assertNull(actualPersonProperties.get("notAJsonProperty"));
     }
 
     public void testProperties_DescriptionFromDocComment()
     {
         final JsonObjectTypeDefinition personTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Person"));
-        final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getPropertiesByName();
+        final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getJsonPropertiesByName();
         assertProperty("name", "The name", "org.codehaus.enunciate.samples.json.Name", actualPersonProperties.get("name"));
     }
 
     public void testProperties_AllAnnotatedPresent()
     {
         final JsonObjectTypeDefinition nameTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
-        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getPropertiesByName();
+        final Map<String, JsonPropertyDeclaration> actualNameProperties = nameTypeDefinition.getJsonPropertiesByName();
         assertEquals(3, actualNameProperties.size());
         assertProperty("first", null, String.class.getName(), actualNameProperties.get("first"));
         assertProperty("middle", null, String.class.getName(), actualNameProperties.get("middle"));

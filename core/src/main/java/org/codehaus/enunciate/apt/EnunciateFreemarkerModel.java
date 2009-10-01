@@ -387,13 +387,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   public void add(JsonTypeDefinition typeDefinition) {
     if (!knownJsonTypes.containsKey(typeDefinition.getQualifiedName())) {
       JsonSchemaInfo jsonSchemaInfo = schemaForType(typeDefinition.classDeclaration());
-      if (!jsonSchemaInfo.getTypes().containsKey(typeDefinition.getTypeName())) {
-        jsonSchemaInfo.getTypes().put(typeDefinition.getTypeName(), typeDefinition);
+      if (!jsonSchemaInfo.getTypesByName().containsKey(typeDefinition.getTypeName())) {
+        jsonSchemaInfo.getTypesByName().put(typeDefinition.getTypeName(), typeDefinition);
         knownJsonTypes.put(typeDefinition.getQualifiedName(), typeDefinition);
 
         if (includeReferencedClasses() && (this.enunciateConfig == null || !this.enunciateConfig.isExcludeUnreferencedClasses()) && typeDefinition instanceof JsonObjectTypeDefinition) {
           JsonObjectTypeDefinition objectTypeDefinition = (JsonObjectTypeDefinition) typeDefinition;
-          for (PropertyDeclaration property : objectTypeDefinition.getPropertiesByName().values()) {
+          for (PropertyDeclaration property : objectTypeDefinition.getJsonPropertiesByName().values()) {
             property.getPropertyType().accept(new ReferencedJsonTypeDefinitionVisitor());
           }
           ClassType superclass = objectTypeDefinition.getSuperclass();
@@ -742,7 +742,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     JsonTypeDefinition typeDefinition = rootElementDeclaration.getTypeDefinition();
     add(typeDefinition);
     JsonSchemaInfo jsonSchemaInfo = schemaForType(typeDefinition.classDeclaration());
-    jsonSchemaInfo.getTopLevelTypes().put(typeDefinition.getTypeName(), rootElementDeclaration);
+    jsonSchemaInfo.getTopLevelTypesByName().put(typeDefinition.getTypeName(), rootElementDeclaration);
   }
 
   private JsonSchemaInfo schemaForType(final ClassDeclaration delegate) {
@@ -1200,7 +1200,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       return null;
     }
     String schemaId = JsonSchemaInfo.schemaIdForType(declaration);
-    return idsToJsonSchemas.get(schemaId).getTypes().get(jsonTypeDefinition.getTypeName());
+    return idsToJsonSchemas.get(schemaId).getTypesByName().get(jsonTypeDefinition.getTypeName());
   }
 
   /**
@@ -1232,7 +1232,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       return null;
     }
     String schemaId = JsonSchemaInfo.schemaIdForType(declaration);
-    return idsToJsonSchemas.get(schemaId).getTopLevelTypes().get(jsonTypeDefinition.getTypeName());
+    return idsToJsonSchemas.get(schemaId).getTopLevelTypesByName().get(jsonTypeDefinition.getTypeName());
   }
 
   /**
