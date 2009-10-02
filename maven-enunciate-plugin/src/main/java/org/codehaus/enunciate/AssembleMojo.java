@@ -1,5 +1,9 @@
 package org.codehaus.enunciate;
 
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -22,6 +26,42 @@ import java.io.IOException;
  * @author Ryan Heaton
  */
 public class AssembleMojo extends ConfigMojo {
+
+  /**
+   * Used to look up Artifacts in the remote repository.
+   *
+   * @parameter expression= "${component.org.apache.maven.artifact.factory.ArtifactFactory}"
+   * @required
+   * @readonly
+   */
+  private ArtifactFactory artifactFactory;
+
+  /**
+   * Used to look up Artifacts in the remote repository.
+   *
+   * @parameter expression= "${component.org.apache.maven.artifact.metadata.ArtifactMetadataSource}"
+   * @required
+   * @readonly
+   */
+  private ArtifactMetadataSource artifactMetadataSource;
+
+  /**
+   * Used to look up Artifacts in the remote repository.
+   *
+   * @parameter expression="${component.org.apache.maven.artifact.resolver.ArtifactResolver}"
+   * @required
+   * @readonly
+   */
+  private ArtifactResolver artifactResolver;
+
+  /**
+   * Location of the local repository.
+   *
+   * @parameter expression="${localRepository}"
+   * @readonly
+   * @required
+   */
+  private ArtifactRepository localRepository;
 
   /**
    * The directory where the webapp is built.  If using this goal along with "war" packaging, this must be configured to be the

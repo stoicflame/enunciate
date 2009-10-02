@@ -4,6 +4,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.war.WebAppConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +68,18 @@ public class DocsMojo extends ConfigMojo {
     return new DocsOnlyMavenSpecificEnunciate(sourceFiles);
   }
 
+  @Override
+  protected EnunciateConfiguration createEnunciateConfiguration() {
+    EnunciateConfiguration config = super.createEnunciateConfiguration();
+    WebAppConfig webAppConfig = config.getWebAppConfig();
+    if (webAppConfig == null) {
+      webAppConfig = new WebAppConfig();
+      config.setWebAppConfig(webAppConfig);
+    }
+    webAppConfig.setDisabled(true);
+    return config;
+  }
+
   /**
    * A maven-specific enunciate mechanism that performs assembly-only (skips compilation/packaging of the war).
    */
@@ -80,10 +94,7 @@ public class DocsMojo extends ConfigMojo {
       super.initModules(modules);
 
       for (DeploymentModule module : modules) {
-        if ("spring-app".equals(module.getName())) {
-          ((BasicDeploymentModule)module).setDisabled(true);
-        }
-        else if ("docs".equals(module.getName())) {
+        if ("docs".equals(module.getName())) {
           ((BasicDeploymentModule)module).setBuildDir(new File(docsDir));
         }
       }

@@ -46,11 +46,28 @@ public class ConfigMojo extends AbstractMojo {
   public static final String ENUNCIATE_STEPPER_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#stepper";
 
   /**
+   * The Maven project reference.
+   *
+   * @parameter expression="${project}"
+   * @required
+   * @readonly
+   */
+  protected MavenProject project;
+
+  /**
+   * Maven ProjectHelper
+   *
+   * @component
+   * @readonly
+   */
+  private MavenProjectHelper projectHelper;
+
+  /**
    * @parameter expression="${plugin.artifacts}"
    * @required
    * @readonly
    */
-  private Collection<org.apache.maven.artifact.Artifact> pluginDepdendencies;
+  protected Collection<org.apache.maven.artifact.Artifact> pluginDepdendencies;
 
   /**
    * Project dependencies.
@@ -59,14 +76,14 @@ public class ConfigMojo extends AbstractMojo {
    * @required
    * @readonly
    */
-  private Collection<org.apache.maven.artifact.Artifact> projectDependencies;
+  protected Collection<org.apache.maven.artifact.Artifact> projectDependencies;
 
   /**
    * Project artifacts.
    *
    * @parameter
    */
-  private Artifact[] artifacts;
+  private org.codehaus.enunciate.Artifact[] artifacts;
 
   /**
    * The enunciate configuration file to use.
@@ -190,45 +207,6 @@ public class ConfigMojo extends AbstractMojo {
    * The exclude patterns.
    */
   private String[] excludes;
-
-  /**
-   * The id of the Enunciate artifact that is to be the primary artifact for the maven project.
-   *
-   * @parameter default-value="spring.war.file"
-   */
-  private String warArtifactId = "spring.war.file";
-
-  /**
-   * The name of the generated WAR.
-   *
-   * @parameter expression="${project.build.finalName}"
-   * @required
-   */
-  private String warArtifactName;
-
-  /**
-   * Classifier to add to the artifact generated. If given, the artifact will be an attachment instead.
-   *
-   * @parameter
-   */
-  private String warArtifactClassifier = null;
-
-  /**
-   * The Maven project reference.
-   *
-   * @parameter expression="${project}"
-   * @required
-   * @readonly
-   */
-  protected MavenProject project;
-
-  /**
-   * Maven ProjectHelper
-   *
-   * @component
-   * @readonly
-   */
-  private MavenProjectHelper projectHelper;
 
   /**
    * @parameter expression="${session}"
@@ -512,7 +490,7 @@ public class ConfigMojo extends AbstractMojo {
       for (DeploymentModule module : modules) {
         if (!module.isDisabled()) {
           if (project.getName() != null && !"".equals(project.getName().trim()) && module instanceof ProjectTitleAware) {
-            ((ProjectTitleAware)module).setTitleConditionally(project.getName());
+            ((ProjectTitleAware) module).setTitleConditionally(project.getName());
           }
         }
       }
@@ -577,35 +555,8 @@ public class ConfigMojo extends AbstractMojo {
     protected void doClose() throws EnunciateException, IOException {
       super.doClose();
 
-      if (warArtifactId != null) {
-        org.codehaus.enunciate.main.Artifact warArtifact = null;
-        for (org.codehaus.enunciate.main.Artifact artifact : getArtifacts()) {
-          if (warArtifactId.equals(artifact.getId())) {
-            warArtifact = artifact;
-            break;
-          }
-        }
-
-        if (warArtifact != null) {
-          String classifier = warArtifactClassifier;
-          if (classifier == null) {
-            classifier = "";
-          }
-          else if (classifier.trim().length() > 0 && !classifier.startsWith("-")) {
-            classifier = "-" + classifier;
-          }
-
-          File warArtifactFile = new File(outputDir, warArtifactName + classifier + ".war");
-          warArtifact.exportTo(warArtifactFile, this);
-          project.getArtifact().setFile(warArtifactFile);
-        }
-        else {
-          getLog().debug("War artifact '" + warArtifactId + "' not found in the project...");
-        }
-      }
-
       if (artifacts != null) {
-        for (Artifact projectArtifact : artifacts) {
+        for (org.codehaus.enunciate.Artifact projectArtifact : artifacts) {
           if (projectArtifact.getEnunciateArtifactId() == null) {
             getLog().warn("No enunciate export id specified.  Skipping project artifact...");
             continue;
