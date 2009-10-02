@@ -74,12 +74,20 @@ public class EnunciateConfiguration implements ErrorHandler {
   public EnunciateConfiguration() {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
 
-    Iterator discoveredModules = Service.providers(DeploymentModule.class);
+    Iterator discoveredModules = discoverModules();
     while (discoveredModules.hasNext()) {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
       this.modules.add(discoveredModule);
     }
     this.modules.add(new BasicAppModule());
+  }
+
+  /**
+   * Discover the deployment modules.
+   * @return An iterator over the deployment modules.
+   */
+  protected Iterator discoverModules() {
+    return Service.providers(DeploymentModule.class);
   }
 
   /**

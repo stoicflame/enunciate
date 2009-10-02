@@ -46,6 +46,7 @@
     <module>top-rt</module>
     <module>top</module>
     <module>maven-enunciate-plugin</module>
+    <module>maven-enunciate-spring-plugin</module>
 
     <module>integration-test-support</module>
     <module>integration-tests/xfire-rest</module>
@@ -407,6 +408,11 @@ Then, define a profile in your settings.xml file that defines the path to your '
             <!--we'll use enunciate's version of stax-->
             <groupId>javax.xml.stream</groupId>
             <artifactId>stax-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <!--shouldn't be a runtime artifact.-->
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
           </exclusion>
         </exclusions>
       </dependency>

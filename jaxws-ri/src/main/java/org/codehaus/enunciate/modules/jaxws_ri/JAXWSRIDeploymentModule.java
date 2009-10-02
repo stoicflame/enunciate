@@ -67,10 +67,9 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_jaxws_ri.html
  */
-public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule, EnunciateClasspathListener {
+public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule {
 
   private boolean springModuleEnabled = false;
-  private boolean wsSpringServletFound = false;
   private boolean forceSpringEnabled = false;
 
   /**
@@ -112,10 +111,6 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       }
 
       this.springModuleEnabled = enunciate.isModuleEnabled("spring-app");
-      if (this.springModuleEnabled && !this.wsSpringServletFound) {
-        info("The spring module has been enabled, but the spring runtime libraries (specifically org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet) " +
-          "are not found on the classpath. Spring will therefore be disabled for JAXWS-RI.");
-      }
     }
   }
 
@@ -142,17 +137,13 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     }
   }
 
-  public void onClassesFound(Set<String> classes) {
-    wsSpringServletFound |= classes.contains("org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet");
-  }
-
   /**
    * Spring is enabled if the spring-app module is enabled AND the spring runtime servlet is on the Enunciate classpath.
    *
    * @return Whether spring is enabled.
    */
   public boolean isSpringEnabled() {
-    return forceSpringEnabled || (wsSpringServletFound && springModuleEnabled);
+    return forceSpringEnabled || springModuleEnabled;
   }
 
   @Override

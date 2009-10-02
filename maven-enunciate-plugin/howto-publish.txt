@@ -1,2 +1,0 @@
-1. mount "https://dav.codehaus.org/repository/enunciate/" somewhere via webdav (e.g. /home/heatonra/mnt/enunciate/m2)
-2. mvn -Denunciate.repo.url=file:///home/heatonra/mnt/enunciate/m2 deploy

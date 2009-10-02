@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.xfire;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.*;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.Set;
 
 /**
  * <h1>XFire Module</h1>
@@ -86,9 +88,10 @@ import java.util.TreeSet;
  * @author Ryan Heaton
  * @docFileName module_xfire.html
  */
-public class XFireDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule {
+public class XFireDeploymentModule extends FreemarkerDeploymentModule implements SpecProviderModule, EnunciateClasspathListener {
 
   private String xfireBeansImport = "classpath:org/codehaus/xfire/spring/xfire.xml";
+  private boolean exporterFound = false;
 
   public XFireDeploymentModule() {
     setDisabled(true); //disabled by default; using JAXWS RI by default.
@@ -130,6 +133,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
     return XFireDeploymentModule.class.getResource("enunciate-soap-parameter-names.properties.fmt");
   }
 
+  public void onClassesFound(Set<String> classes) {
+    exporterFound |= classes.contains(EnunciatedXFireExporter.class.getName());
+  }
+
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
@@ -137,6 +144,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
     if (!isDisabled()) {
       if (!enunciate.isModuleEnabled("jaxws-support")) {
         throw new EnunciateException("The XFire module requires an enabled JAXWS Support module.");
+      }
+
+      if (!exporterFound) {
+        warn("The Enunciate XFire runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
       }
     }
   }

@@ -20,6 +20,7 @@ import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.validation.Validator;
@@ -43,6 +44,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <h1>Spring App Module</h1>
@@ -217,7 +219,7 @@ import java.util.Map;
  * @author Ryan Heaton
  * @docFileName module_spring_app.html
  */
-public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
+public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener {
 
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
@@ -225,6 +227,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
   private boolean enableSecurity = false;
   private SecurityConfig securityConfig = new SecurityConfig();
+  private boolean factoryBeanFound = false;
 
   /**
    * @return "spring-app"
@@ -255,6 +258,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
     return SpringAppDeploymentModule.class.getResource("security-context.xml.fmt");
   }
 
+  public void onClassesFound(Set<String> classes) {
+    factoryBeanFound |= classes.contains(ServiceEndpointFactoryBean.class.getName());
+  }
+
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
@@ -270,6 +277,10 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule {
             throw new EnunciateException("Enabling OpenID requires you to specify a 'userDetailsService' bean.");
           }
         }
+      }
+
+      if (!factoryBeanFound) {
+        warn("The Spring module is enabled, but the Enunciate-Spring runtime classes weren't found on the Enunciate classpath. This could be fatal to the runtime application...");
       }
     }
   }

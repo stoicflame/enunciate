@@ -98,6 +98,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean validate = false;
   private boolean useSubcontext = true;
   private boolean jacksonAvailable = false;
+  private boolean filterFound = false;
 
   public CXFDeploymentModule() {
     setDisabled(true); //disabled by default; using JAXWS RI by default.
@@ -121,6 +122,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   // Inherited.
   public void onClassesFound(Set<String> classes) {
     jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJsonProvider");
+    filterFound |= classes.contains(CXFAdaptedServletFilter.class.getName());
   }
 
   @Override
@@ -164,6 +166,10 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 
       if (this.enableJaxws) {
         enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+      }
+
+      if (!filterFound) {
+        warn("The Enunciate CXF runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
       }
     }
 

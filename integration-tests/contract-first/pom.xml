@@ -140,7 +140,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       </plugin>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
+        <artifactId>maven-enunciate-spring-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
           <execution>
