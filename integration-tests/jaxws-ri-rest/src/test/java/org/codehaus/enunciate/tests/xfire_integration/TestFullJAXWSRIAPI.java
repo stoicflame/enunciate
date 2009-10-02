@@ -124,8 +124,6 @@ public class TestFullJAXWSRIAPI extends TestCase {
 
     assertEquals("newid", sourceService.addInfoSet("somesource", new InfoSet()));
     assertEquals("okay", sourceService.addInfoSet("othersource", new InfoSet()));
-    assertEquals("intercepted", sourceService.addInfoSet("SPECIAL", new InfoSet()));
-    assertEquals("intercepted2", sourceService.addInfoSet("SPECIAL2", new InfoSet()));
     assertEquals("resourceId", sourceService.addInfoSet("resource", new InfoSet()));
     try {
       sourceService.addInfoSet("unknown", new InfoSet());
@@ -169,13 +167,6 @@ public class TestFullJAXWSRIAPI extends TestCase {
     catch (ServiceException e) {
       assertEquals("a person id must be supplied", e.getMessage());
       assertEquals("no person id.", e.getAnotherMessage());
-    }
-    try {
-      personService.deletePerson("SPECIAL");
-      fail("should have thrown an exception.");
-    }
-    catch (Exception e) {
-      assertTrue(e.getMessage().contains("SPECIAL"));
     }
 
     Person person = new Person();

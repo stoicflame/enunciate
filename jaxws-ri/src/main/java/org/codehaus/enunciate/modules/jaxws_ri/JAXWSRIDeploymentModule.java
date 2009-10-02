@@ -185,7 +185,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     File webappDir = getBuildDir();
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
-    getEnunciate().copyFile(new File(getGenerateDir(), "jaxws-servlet.xml"), new File(webinf, "jaxws-servlet.xml"));
+    getEnunciate().copyDir(getGenerateDir(), webinf);
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);

@@ -1,6 +1,6 @@
 [#ftl]
 [#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
-[@file name="jaxws-servlet.xml" charset="utf-8"]
+[@file name="sun-jaxws.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 <endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
   [@forEachWsdl]

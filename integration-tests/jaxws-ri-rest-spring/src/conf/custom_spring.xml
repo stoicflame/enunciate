@@ -1,0 +1,20 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <bean id="globalServiceAdvice" class="org.codehaus.enunciate.test.integration.GlobalServiceAdvice"/>
+
+  <bean id="sourceAdvice" class="org.codehaus.enunciate.test.integration.SourceServiceAdvice"/>
+
+  <bean class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="proxyTargetClass" value="true"/>
+    <property name="target">
+      <bean class="org.codehaus.enunciate.samples.genealogy.services.impl.SourceServiceImpl"/>
+    </property>
+    <property name="interceptorNames">
+      <list>
+        <value>sourceAdvice</value>
+      </list>
+    </property>
+  </bean>
+
+</beans>

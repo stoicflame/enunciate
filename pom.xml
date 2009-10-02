@@ -47,11 +47,13 @@
     <module>top</module>
     <module>maven-enunciate-plugin</module>
     <module>maven-enunciate-spring-plugin</module>
+    <module>maven-enunciate-cxf-plugin</module>
 
     <module>integration-test-support</module>
     <module>integration-tests/xfire-rest</module>
     <module>integration-tests/cxf-rest</module>
     <module>integration-tests/jaxws-ri-rest</module>
+    <module>integration-tests/jaxws-ri-rest-spring</module>
     <module>integration-tests/contract-first</module>
     <module>integration-tests/jersey-storage</module>
   </modules>
@@ -652,26 +654,9 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: amf-->
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
-        <version>1.2.15</version>
-        <exclusions>
-          <!--irritating dependencies introduced with 1.2.15...-->
-          <exclusion>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jdmk</groupId>
-            <artifactId>jmxtools</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>com.sun.jmx</groupId>
-            <artifactId>jmxri</artifactId>
-          </exclusion>
-        </exclusions>
+
+        <!--todo: (heatonra, 2009/10/02) update to later log4j version. 1.14 has a bad pom and 1.15 has a serious bug that makes jersey-store tests fail.-->
+        <version>1.2.13</version>
       </dependency>
 
       <dependency>

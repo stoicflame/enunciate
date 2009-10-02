@@ -51,7 +51,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-spring-plugin</artifactId>
+        <artifactId>maven-enunciate-cxf-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
           <execution>
@@ -64,19 +64,12 @@
           </execution>
         </executions>
         <dependencies>
-          <!--As of Enunciate 1.12, CXF module is optional (JAXWS-RI is default)
-              so the dependency needs to be added explicitly. -->
           <!--There's a weird bug in Maven that I haven't been able to track down
           in that if I don't add the XFire module here, then the next project
           will fail because it won't find the XFire module.-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-xfire</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-cxf</artifactId>
             <version>${project.version}</version>
           </dependency>
           <dependency>

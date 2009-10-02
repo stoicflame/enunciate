@@ -38,8 +38,6 @@ namespace Jaxws.Ri.Rest {
 
       Assert.AreEqual("newid", sourceService.AddInfoSet("somesource", new InfoSet()));
       Assert.AreEqual("okay", sourceService.AddInfoSet("othersource", new InfoSet()));
-      Assert.AreEqual("intercepted", sourceService.AddInfoSet("SPECIAL", new InfoSet()));
-      Assert.AreEqual("intercepted2", sourceService.AddInfoSet("SPECIAL2", new InfoSet()));
       Assert.AreEqual("resourceId", sourceService.AddInfoSet("resource", new InfoSet()));
       try {
         sourceService.AddInfoSet("unknown", new InfoSet());
@@ -73,14 +71,6 @@ namespace Jaxws.Ri.Rest {
       try {
         personService.DeletePerson(null);
         Assert.Fail("Should have thrown the exception.");
-      }
-      catch (SoapException e) {
-        //fall through...
-      }
-
-      try {
-        personService.DeletePerson("SPECIAL");
-        Assert.Fail("should have thrown an exception.");
       }
       catch (SoapException e) {
         //fall through...

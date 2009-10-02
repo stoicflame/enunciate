@@ -126,7 +126,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-spring-app-rt</artifactId>
+      <artifactId>enunciate-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
