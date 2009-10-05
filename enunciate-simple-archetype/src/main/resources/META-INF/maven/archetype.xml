@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><archetype>
+  <id>wannabecool</id>
+  <sources>
+    <source>src/main/java/domain/persona/Name.java</source>
+    <source>src/main/java/domain/persona/package-info.java</source>
+    <source>src/main/java/domain/persona/Persona.java</source>
+    <source>src/main/java/domain/link/SocialGroup.java</source>
+    <source>src/main/java/domain/link/package-info.java</source>
+    <source>src/main/java/domain/link/Link.java</source>
+    <source>src/main/java/api/PersonaService.java</source>
+    <source>src/main/java/api/package-info.java</source>
+    <source>src/main/java/api/PermissionDeniedException.java</source>
+    <source>src/main/java/api/ExclusiveGroupException.java</source>
+    <source>src/main/java/api/SocialGroupService.java</source>
+    <source>src/main/java/impl/PersonaServiceImpl.java</source>
+    <source>src/main/java/impl/SocialGroupServiceImpl.java</source>
+  </sources>
+  <resources>
+    <resource>src/main/resources/link.xsd</resource>
+    <resource>src/main/resources/persona.xsd</resource>
+    <resource>src/enunciate/enunciate.xml</resource>
+    <resource>src/enunciate/LICENSE.txt</resource>
+  </resources>
+</archetype>

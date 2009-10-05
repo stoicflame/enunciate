@@ -1,0 +1,35 @@
+<xs:schema version="1.0" targetNamespace="http://api.ifyouwannabecool.com/persona" xmlns:persona="http://api.ifyouwannabecool.com/persona" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="persona" type="persona:persona"/>
+  <xs:complexType name="name">
+    <xs:annotation>
+      <xs:documentation>
+        <![CDATA[A name of a persona.]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="givenName" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[The given name.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="surname" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[The surname.]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="persona">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string" minOccurs="0"/>
+      <xs:element name="email" type="xs:string" minOccurs="0"/>
+      <xs:element name="alias" type="xs:string" minOccurs="0"/>
+      <xs:element name="name" type="persona:name" minOccurs="0"/>
+      <xs:element name="picture" type="xs:base64Binary" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,17 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0"?>
+<enunciate label="${artifactId}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.15.xsd">
+   <namespaces>
+      <namespace id="api" uri="http://api.example.com/" />
+      <namespace id="link" uri="http://api.example.com/link" />
+      <namespace id="persona" uri="http://api.example.com/persona" />
+   </namespaces>
+   <modules>
+      <!-- Docs -->
+      <docs splashPackage="${package}.api" title="${artifactId}" copyright="Example.com">
+         <download name="License" file="LICENSE.txt" description="The license file governing the use of this API." />
+      </docs>
+   </modules>
+</enunciate>
