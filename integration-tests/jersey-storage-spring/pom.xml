@@ -2,10 +2,10 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-integration-jersey-storage</artifactId>
+  <artifactId>enunciate-integration-jersey-storage-spring</artifactId>
   <version>1.16-SNAPSHOT</version>
-  <name>Enunciate - Jersey Integration Tests</name>
-  <description>Integration tests for Enunciate, testing the Jersey deployment.</description>
+  <name>Enunciate - Jersey/Spring Integration Tests</name>
+  <description>Integration tests for Enunciate, testing the Jersey deployment with Spring enabled.</description>
   <packaging>war</packaging>
 
   <repositories>
@@ -27,7 +27,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
+        <artifactId>maven-enunciate-spring-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
           <execution>
@@ -126,7 +126,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -4,5 +4,8 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.15.xsd">
   <modules>
     <amf disabled="false"/>
+    <spring-app>
+      <springImport file="custom-spring.xml"/>
+    </spring-app>
   </modules>
 </enunciate>

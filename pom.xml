@@ -56,6 +56,7 @@
     <module>integration-tests/jaxws-ri-rest-spring</module>
     <module>integration-tests/contract-first</module>
     <module>integration-tests/jersey-storage</module>
+    <module>integration-tests/jersey-storage-spring</module>
   </modules>
 
   <build>
@@ -654,9 +655,26 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: amf-->
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
-
-        <!--todo: (heatonra, 2009/10/02) update to later log4j version. 1.14 has a bad pom and 1.15 has a serious bug that makes jersey-store tests fail.-->
-        <version>1.2.13</version>
+        <version>1.2.15</version>
+        <exclusions>
+          <!--irritating dependencies introduced with 1.2.15...-->
+          <exclusion>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jdmk</groupId>
+            <artifactId>jmxtools</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.jmx</groupId>
+            <artifactId>jmxri</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -923,6 +941,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <groupId>org.springframework</groupId>
         <artifactId>spring-aop</artifactId>
         <version>${spring.version}</version>
+
       </dependency>
 
       <dependency>
@@ -944,13 +963,6 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <groupId>org.springframework</groupId>
         <artifactId>spring-core</artifactId>
         <version>${spring.version}</version>
-
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
