@@ -11,6 +11,7 @@
     <module>core-annotations</module>
     <module>core-rt</module>
     <module>core</module>
+    <module>maven-enunciate-slim-plugin</module>
     <module>xml</module>
     <module>jaxws-support</module>
     <module>jaxws-ri-rt</module>
@@ -49,7 +50,6 @@
     <module>maven-enunciate-spring-plugin</module>
     <module>maven-enunciate-cxf-plugin</module>
 
-    <module>integration-test-support</module>
     <module>integration-tests</module>
   </modules>
 

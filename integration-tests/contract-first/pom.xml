@@ -151,16 +151,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
             </configuration>
           </execution>
-          <execution>
-            <id>validate-csharp-enabled</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>failIfModuleDisabled</goal>
-            </goals>
-            <configuration>
-              <moduleName>csharp</moduleName>
-            </configuration>
-          </execution>
         </executions>
         <dependencies>
           <dependency>
