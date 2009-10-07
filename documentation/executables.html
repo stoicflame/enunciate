@@ -43,34 +43,115 @@
         <li><a href="#program">Programmatically in Java</a></li>
       </ul>
 
-      <p>A set of source files to be enunciated is always required.  While invoking Enunciate without any options is valid, doing so will probably not get you
-      the result that you want because Enunciate won't know where to put its artifacts, defaulting to an unspecified temporary location.  So make sure you
-      specify an artifact to export or a specific location to which to build.</p>
+      <p>Keep in mind that there are a set of "core" Enunciate modules that you will likely always want enabled. There are also a set of "optional" modules
+      that you may want to include depending on the features you want enabled. The default Enunciate invocation includes only the base set of modules, but
+      adding optional modules is only a matter of adjusting the classpath.</p>
 
-      <p>Each module exports its own set of artifacts. <a href="artifacts.html">Here's a quick reference</a> to the available artifacts.
-      Refer to the <a href="modules.html">module documentation</a> to find more details on what each module does.  Most often, it's the
-      fully-packaged war exported by the <a href="module_spring_app.html">spring app module</a>, so you'll want to export the artifact identified
-      by the id "spring.war.file".</p>
+      <p><a href="modules.html">See the available Enunciate modules for more information.</a></p>
 
       <a name="maven"><div class="break">&nbsp;</div></a>
       <h1>Maven</h1>
 
-      <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  The groupId of the artifact is "org.codehaus.enunciate" and
-      the artifact is "maven-enunciate-plugin". A goal named "assemble" is attached to the build lifecycle of a Maven "war" project.</p>
+      <p>The Maven 2 Enunciate plugin is used to invoke Enunciate in the context of a Maven 2 POM.  There are actually four different Enunciate plugins
+        available, the only difference between them being the modules that are included.</p>
 
-      <h2>Classpath Setup</h2>
+      <table cellspacing="0">
+        <tr>
+          <th>groupId</th>
+          <th>artifactId</th>
+          <th>modules included</th>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>maven-enunciate-plugin</td>
+          <td>all "base" modules</td>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>maven-enunciate-spring-plugin</td>
+          <td>all "base" modules + spring-app</td>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>maven-enunciate-cxf-plugin</td>
+          <td>all "base" modules except jaxws-ri and jersey + cxf</td>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>maven-enunciate-slim-plugin</td>
+          <td>basic-app only</td>
+        </tr>
+      </table>
+
+      <p>Note that some modules are not enabled in any plugin and will therefore have to be added to the plugin dependencies in order to include them.
+      Most notable are the <a href="module_gwt.html">gwt</a>, <a href="module_amf.html">amf</a>, and <a href="module_rest.html">enunciate-rest</a> modules.
+      Consider the following example demonstrating how to include the amf module:</p>
+
+      <code>...
+&lt;plugin&gt;
+  &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-enunciate-plugin&lt;/artifactId&gt;
+  &lt;version&gt;1.15&lt;/version&gt;
+
+  &lt;configuration&gt;
+    ...
+  &lt;/configuration&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;assemble&lt;/goal&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.codehaus.enunciate&lt;/groupId&gt;
+      &lt;artifactId&gt;enunciate-amf&lt;/artifactId&gt;
+      &lt;version&gt;1.15&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/plugin&gt;
+...</code>
+
+      <p>The <tt>maven-enunciate-slim-plugin</tt> can be used by those who want to have a tighter grip on which modules get included.</p>
+
+      <h2>Runtime Classpath</h2>
 
       <p>Maven users should already be aware that there are (at least) two different classpaths that are in play when invoking a Maven plugin: the plugin classpath
-      and the project dependency classpath. The Maven Enunciate plugin already establishes a default plugin classpath which shouldn't have to be manipulated unless
-      to enable modules that are not included by default. The project dependency classpath defines the libraries that are to be used to compile and run the application.</p>
+      and the project dependency classpath. The plugin classpath defines the modules that are included at compile-time and depends on which plugin is being
+      used (see above). The project dependency classpath defines the libraries that are to be used to compile and run the application.</p>
 
-      <p>Enunciate provides a top-level runtime ("rt") POM that can be conveniently included in the project dependencies of an Enunciate project. The groupId
-      is "org.codehaus.enunciate" and the artifactId is "enunciate-rt". This is used to include the core libraries needed at runtime to drive the Enunciate
-      application, including the Jersey runtime, the XFire runtime, the Spring application runtime, etc.</p>
+      <p>Note that some modules (invoked at compile-time) will require certain runtime dependencies to be on the classpath (i.e. in <tt>WEB-INF/lib</tt>) when
+        the application is run. For example, the spring-app module will require the spring dependencies in order for the application to run. To this end,
+        Enunciate supplies a top-level runtime ("rt") dependency for each (compile-time) maven plugin that can be conveniently included in the project
+        dependencies of an Enunciate project.</p>
+
+      <table cellspacing="0">
+        <tr>
+          <th>groupId</th>
+          <th>artifactId</th>
+          <th>use with plugin</th>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>enunciate-rt</td>
+          <td>maven-enunciate-plugin</td>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>enunciate-spring-app-rt</td>
+          <td>maven-enunciate-spring-plugin</td>
+        </tr>
+        <tr>
+          <td>org.codehaus.enunciate</td>
+          <td>enunciate-cxf-rt</td>
+          <td>maven-enunciate-cxf-plugin</td>
+        </tr>
+      </table>
 
       <h2>Configuration</h2>
 
-      <p>Note the following configuration parameters:</p>
+      <p>Note the following configuration parameters for each Maven plugin:</p>
 
       <table cellspacing="0">
         <tr>
@@ -195,7 +276,7 @@
         &lt;configuration&gt;
           &lt;configFile&gt;enunciate.xml&lt;/configFile&gt;
           &lt;exports&gt;
-            &lt;client.jdk14.library.binaries&gt;client.jar&lt;/client.jdk14.library.binaries&gt;
+            &lt;jaxws.client.library.binaries&gt;client.jar&lt;/jaxws.client.library.binaries&gt;
           &lt;/exports&gt;
         &lt;/configuration&gt;
         &lt;executions&gt;
@@ -243,14 +324,9 @@
       <h2>Defining the Enunciate Classpath</h2>
 
       <p>In order to set up the Enunciate classpath from Ant, you will need to know which modules are to be enabled when Enunciate is invoked. All jars
-        necessary to support the Enunciate "core" modules are found in <tt>$ENUNCIATE_HOME/lib</tt>, where <tt>$ENUNCIATE_HOME</tt> is the path on the
-        filesystem where the Enunciate distribution was unpacked. These "core" modules include the Enunciate engine itself, the documentation module, the
-        Jersey module, the Enunciate REST module, the XML module, and the Spring app module.</p>
-
-      <p>Note the conspicuous abscense of any module dealing with the SOAP endpoints.  This is because as of Enunciate 1.9, there are multiple modules available
-        for processing the SOAP endpoints.  You'll have to take your pick of XFire, CXF, or JAX-WS RI. You'll also note that the GWT and AMF modules are not
-        included in the "core" Enunciate modules. Make sure you include on the Enunciate classpath any module libraries that are not included in the "core"
-      module libraries.  These are found in the <tt>$ENUNCIATE_HOME/lib/modules</tt> directory.</p>
+        necessary to support the Enunciate "base" modules are found in <tt>$ENUNCIATE_HOME/lib</tt>, where <tt>$ENUNCIATE_HOME</tt> is the path on the
+        filesystem where the Enunciate distribution was unpacked. Optional modules (with their associated dependencies) are found in the
+        <tt>$ENUNCIATE_HOME/lib/modules</tt> directory.</p>
 
       <h2>Enunciate Task Attributes</h2>
 
@@ -367,7 +443,8 @@
   &lt;fileset dir="${enunciate.home}/lib"&gt;
     &lt;include name="*.jar"/&gt;
   &lt;/fileset&gt;
-  &lt;fileset dir="${enunciate.home}/lib/modules/xfire"&gt;
+  &lt;!--include (optional) spring module--&gt;
+  &lt;fileset dir="${enunciate.home}/lib/modules/spring"&gt;
     &lt;include name="*.jar"/&gt;
   &lt;/fileset&gt;
   &lt;fileset dir="${java.home}"&gt;
@@ -382,13 +459,13 @@
 &lt;enunciate basedir="src/main/java"&gt;
   &lt;include name="**/*.java"/&gt;
   &lt;classpath refid="enunciate.classpath"/&gt;
-  &lt;export artifactId="spring.war.file" destination="${tomcat.home}/webapps/myapp.war"/&gt;
+  &lt;export artifactId="war.file" destination="${tomcat.home}/webapps/myapp.war"/&gt;
 &lt;/enunciate&gt;
 
 ...
       </code>
 
-      <p>Exports the fully-packaged, fully operational war (the artifact identified by the id "spring.war.file") to
+      <p>Exports the fully-packaged, fully operational war (the artifact identified by the id "war.file") to
       ${tomcat.home}/webapps/myapp.war, assuming ${enunciate.home} refers to the enunciate home directory. <u>Note
       that it's important to include $JAVA_HOME/lib/tools.jar on the classpath when invoking Enunciate.</u></p>
 
@@ -396,7 +473,7 @@
       <h1>Command-Line Scripts</h1>
 
       <p>In the distribution bundle, you can find a bash script and a batch file that you should be able to use to invoke Enunciate.  The script attempts
-      to invoke <a href="api/org/codehaus/enunciate/main/Main.html">org.codehaus.enunciate.main.Main</a> with the full classpath.  The scripts rely on
+      to invoke <a href="api/org/codehaus/enunciate/main/Main.html">org.codehaus.enunciate.main.Main</a> with only the base modules classpath.  The scripts rely on
         the following environment variables being set:</p>
 
       <table cellspacing="0">
@@ -506,7 +583,7 @@
 
   </div>
 
-  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+  <div class="footer">&copy; 2006-2009 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
     href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
   </div>
 

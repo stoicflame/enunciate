@@ -7,12 +7,8 @@
   <property name="enunciate.home" value="${basedir}/../.."/>
 
   <target name="enunciate">
-    <!--The enunciate classpath points to all the jars in the "lib" directory, and selects the xfire module for managing the soap endpoints.-->
     <path id="enunciate.classpath">
       <fileset dir="${enunciate.home}/lib">
-        <include name="*.jar"/>
-      </fileset>
-      <fileset dir="${enunciate.home}/lib/modules/xfire">
         <include name="*.jar"/>
       </fileset>
     </path>
@@ -29,18 +25,16 @@
       <classpath refid="enunciate.classpath"/>
 
       <!--
-        The artifact identified by the id 'xfire.war' will be exported to
+        The artifact identified by the id 'war.file' will be exported to
         a file called 'wannabecool.war' in the 'target' directory.
       -->
-      <export artifactId="spring.war.file" destination="target/wannabecool.war"/>
+      <export artifactId="war.file" destination="target/wannabecool.war"/>
 
       <!--
         The artifact identified by the id 'jaxws.client.library.binaries' will be exported to
-        a file called 'wannabecool.client.jar' in the 'target' directory.
-
-        (This artifact is the jar for accessing the published remote API via JDK 1.5)
+        a file called 'wannabecool-client.jar' in the 'target' directory.
       -->
-      <export artifactId="jaxws.client.library.binariesb" destination="target/wannabecool-client.jar"/>
+      <export artifactId="jaxws.client.library.binaries" destination="target/wannabecool-client.jar"/>
     </enunciate>
   </target>
 

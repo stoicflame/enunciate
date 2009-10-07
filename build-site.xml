@@ -369,7 +369,6 @@ This directory contains jars that are optional for Enunciate because they suppor
     <path id="script.classpath">
       <fileset dir="target">
         <include name="lib/*.jar"/>
-        <include name="lib/modules/xfire/*.jar"/>
       </fileset>
     </path>
 

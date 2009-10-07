@@ -18,7 +18,7 @@
         <configuration>
           <configFile>src/main/java/enunciate.xml</configFile>
           <exports>
-            <client.jdk14.library.binaries>wannabecool-client.jar</client.jdk14.library.binaries>
+            <jaxws.client.library.binaries>wannabecool-client.jar</jaxws.client.library.binaries>
           </exports>
         </configuration>
         <executions>

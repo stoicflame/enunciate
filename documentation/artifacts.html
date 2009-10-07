@@ -34,7 +34,7 @@
 
       <h1>Artifacts</h1>
 
-      <p>The following is a list of known artifacts that are exportable.  Each artifact is associated with a module that
+      <p>The following is a list of known artifacts that Enunciate generates.  Each artifact is associated with a module that
       makes the artifacts available.  This list is based off the known set of modules that ship with Enunciate.</p>
 
       <table cellspacing="0" width="98%">
@@ -54,6 +54,76 @@
           <td class="last">The directory that contains the generated API documentation</td>
         </tr>
         <tr>
+          <td>app.dir</td>
+          <td><a href="module_basic_app.html">basic-app</a></td>
+          <td class="last">The expanded directory containing the fully-documented, fully functional war.</td>
+        </tr>
+        <tr>
+          <td>jaxws.client.library.binaries</td>
+          <td><a href="module_jaxws_client.html">jaxws-client</a></td>
+          <td class="last">The jar file for the generated JDK 1.5 JAX-WS client sources.</td>
+        </tr>
+        <tr>
+          <td>jaxws.client.library.sources</td>
+          <td><a href="module_jaxws_client.html">jaxws-client</a></td>
+          <td class="last">The source jar file for the generated JDK 1.5 JAX-WS client sources.</td>
+        </tr>
+        <tr>
+          <td>c.client.library</td>
+          <td><a href="module_c.html">c</a></td>
+          <td class="last">The generated C/C++ sources.</td>
+        </tr>
+        <tr>
+          <td>objc.client.h</td>
+          <td><a href="module_obj_c.html">obj-c</a></td>
+          <td class="last">The generated Objective C header source file.</td>
+        </tr>
+        <tr>
+          <td>objc.client.m</td>
+          <td><a href="module_obj_c.html">obj-c</a></td>
+          <td class="last">The generated Objective C implementation source file.</td>
+        </tr>
+        <tr>
+          <td>ruby.client.library</td>
+          <td><a href="module_ruby.html">ruby</a></td>
+          <td class="last">The generated Ruby sources.</td>
+        </tr>
+        <tr>
+          <td>csharp.assembly</td>
+          <td><a href="module_csharp.html">csharp</a></td>
+          <td class="last">The assembly (dll) for the generated C# sources.</td>
+        </tr>
+        <tr>
+          <td>gwt.client.jar</td>
+          <td><a href="module_gwt.html">gwt</a></td>
+          <td class="last">The gwt client-side jar.</td>
+        </tr>
+        <tr>
+          <td>as3.client.swc</td>
+          <td><a href="module_amf.html">amf</a></td>
+          <td class="last">The packaged client-side ActionScript SWC.</td>
+        </tr>
+        <tr>
+          <td>flex.app.dir</td>
+          <td><a href="module_amf.html">amf</a></td>
+          <td class="last">The directory to which the Flex apps are compiled.</td>
+        </tr>
+        <tr>
+          <td>[nsprefix].wsdl</td>
+          <td><a href="module_xml.html">xml</a></td>
+          <td class="last">The WSDL file for the namespace identified by the prefix [nsprefix].</td>
+        </tr>
+        <tr>
+          <td>[nsprefix].xsd</td>
+          <td><a href="module_xml.html">xml</a></td>
+          <td class="last">The XML-Schema file for the namespace identified by the prefix [nsprefix].</td>
+        </tr>
+      </table>
+
+      <p>And here are some more that are included just for the sake of completeness, but will likely not be very interesting to you:</p>
+
+      <table cellspacing="0" width="98%">
+        <tr>
           <td>jaxws.support.src.dir</td>
           <td><a href="module_jaxws.html">jaxws</a></td>
           <td class="last">The directory that contains the java source files for the generated JAX-WS support classes.</td>
@@ -62,11 +132,6 @@
           <td>xfire-server.src.dir</td>
           <td><a href="module_xfire.html">xfire</a></td>
           <td class="last">The directory that contains the java source files for the generated XFire support classes.</td>
-        </tr>
-        <tr>
-          <td>app.dir</td>
-          <td><a href="module_basic_app.html">basic-app</a></td>
-          <td class="last">The expanded directory containing the fully-documented, fully functional war.</td>
         </tr>
         <tr>
           <td>client.jdk14.library</td>
@@ -99,34 +164,9 @@
           <td class="last">The jar file for the generated JDK 1.5 client sources.</td>
         </tr>
         <tr>
-          <td>jaxws.client.library.binaries</td>
-          <td><a href="module_jaxws_client.html">jaxws-client</a></td>
-          <td class="last">The jar file for the generated JDK 1.5 JAX-WS client sources.</td>
-        </tr>
-        <tr>
-          <td>jaxws.client.library.sources</td>
-          <td><a href="module_jaxws_client.html">jaxws-client</a></td>
-          <td class="last">The source jar file for the generated JDK 1.5 JAX-WS client sources.</td>
-        </tr>
-        <tr>
-          <td>c.client.library</td>
-          <td><a href="module_c.html">c</a></td>
-          <td class="last">The generated C/C++ sources.</td>
-        </tr>
-        <tr>
-          <td>csharp.assembly</td>
-          <td><a href="module_csharp.html">csharp</a></td>
-          <td class="last">The assembly (dll) for the generated C# sources.</td>
-        </tr>
-        <tr>
           <td>csharp.docs.xml</td>
           <td><a href="module_csharp.html">csharp</a></td>
           <td class="last">The XML docs for the generated C# sources.</td>
-        </tr>
-        <tr>
-          <td>gwt.client.jar</td>
-          <td><a href="module_gwt.html">gwt</a></td>
-          <td class="last">The gwt client-side jar.</td>
         </tr>
         <tr>
           <td>gwt.client.src.dir</td>
@@ -158,26 +198,6 @@
           <td><a href="module_amf.html">amf</a></td>
           <td class="last">The directory where the server-side AMF support classes are generated.</td>
         </tr>
-        <tr>
-          <td>as3.client.swc</td>
-          <td><a href="module_amf.html">amf</a></td>
-          <td class="last">The packaged client-side ActionScript SWC.</td>
-        </tr>
-        <tr>
-          <td>flex.app.dir</td>
-          <td><a href="module_amf.html">amf</a></td>
-          <td class="last">The directory to which the Flex apps are compiled.</td>
-        </tr>
-        <tr>
-          <td>[nsprefix].wsdl</td>
-          <td><a href="module_xml.html">xml</a></td>
-          <td class="last">The WSDL file for the namespace identified by the prefix [nsprefix].</td>
-        </tr>
-        <tr>
-          <td>[nsprefix].xsd</td>
-          <td><a href="module_xml.html">xml</a></td>
-          <td class="last">The XML-Schema file for the namespace identified by the prefix [nsprefix].</td>
-        </tr>
       </table>
 
     </div>
@@ -190,7 +210,7 @@
 
   </div>
 
-  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+  <div class="footer">&copy; 2006-2009 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
     href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
   </div>
 

@@ -20,6 +20,18 @@
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-amf</artifactId>
+            <version>1.16-SNAPSHOT</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-gwt</artifactId>
+            <version>1.16-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>
@@ -70,6 +82,18 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
+      <version>1.16-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
+      <version>1.16-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-gwt-rt</artifactId>
       <version>1.16-SNAPSHOT</version>
     </dependency>
 

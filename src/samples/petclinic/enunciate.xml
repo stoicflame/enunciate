@@ -12,10 +12,9 @@
     <obj-c disabled="true"/>
     <csharp disabled="true"/>
     <jaxws-client disabled="true"/>
-    <gwt disabled="false"
-         rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">
+    <gwt rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">
       <app srcDir="src/main/gwt-apps" javascriptStyle="PRETTY">
-        <module name="org.codehaus.enunciate.samples.petclinic.app.PetClinicApp" outputDir="petclinic"/>
+        <module name="org.codehaus.enunciate.samples.petclinic.app.PetClinicApp" outputPath="petclinic"/>
       </app>
     </gwt>
     <amf disabled="true">

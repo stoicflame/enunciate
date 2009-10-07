@@ -10,7 +10,7 @@
     <plugins>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
+        <artifactId>maven-enunciate-spring-plugin</artifactId>
         <version>1.16-SNAPSHOT</version>
         <configuration>
           <configFile>enunciate.xml</configFile>
@@ -25,9 +25,23 @@
           </execution>
         </executions>
         <dependencies>
+          <!--we're using proprietary REST annotations here,-->
+          <!--so we need to include this module-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rest</artifactId>
+            <version>1.16-SNAPSHOT</version>
+          </dependency>
+          <!--...and amf...-->
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-amf</artifactId>
+            <version>1.16-SNAPSHOT</version>
+          </dependency>
+          <!--...and gwt...-->
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-gwt</artifactId>
             <version>1.16-SNAPSHOT</version>
           </dependency>
         </dependencies>
@@ -50,7 +64,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
       <version>1.16-SNAPSHOT</version>
     </dependency>
 
@@ -60,6 +74,18 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rest-rt</artifactId>
+      <version>1.16-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-gwt-rt</artifactId>
+      <version>1.16-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
       <version>1.16-SNAPSHOT</version>
     </dependency>
 

@@ -15,7 +15,7 @@
       <fileset dir="${enunciate.home}/lib">
         <include name="*.jar"/>
       </fileset>
-      <fileset dir="${enunciate.home}/lib/modules/xfire">
+      <fileset dir="${enunciate.home}/lib/modules/rest">
         <include name="*.jar"/>
       </fileset>
       <fileset dir="${enunciate.home}/lib/modules/gwt">
@@ -39,10 +39,10 @@
       <classpath refid="enunciate.classpath"/>
 
       <!--
-        The artifact identified by the id 'spring.war.file' will be exported to
+        The artifact identified by the id 'war.file' will be exported to
         a file called 'petclinic.war' in the 'target' directory.
       -->
-      <export artifactId="spring.war.file" destination="target/petclinic.war"/>
+      <export artifactId="war.file" destination="target/petclinic.war"/>
 
     </enunciate>
   </target>

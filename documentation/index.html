@@ -46,7 +46,7 @@
         code. Make sure it's well-documented and that the <a href="http://java.sun.com/j2se/1.5.0/docs/guide/language/annotations.html">metadata</a> is
         correct, but don't worry about deployment descriptors, servlet configuration, packaging, or even interoperability.</p>
 
-      <p>Then invoke Enunciate.</p>
+      <p>Then <a href="executables.html">invoke Enunciate</a>.</p>
 
       <p>Enunciate will build your web application <a href="http://webcohesion.com/compiled_contract.html">and enforce its
         interoperability</a>.  And the app will include some impressive features, too:</p>
@@ -56,7 +56,7 @@
         <li>The endpoint(s) published via SOAP, REST, JSON, <a href="http://code.google.com/webtoolkit/">GWT-RPC</a>, and <a
           href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a>.
         </li>
-        <li>Client-side libraries for rich client support.</li>
+        <li>Client-side libraries (e.g. Java, .NET, iPhone, Ruby, etc.) for rich client support.</li>
         <li>Interface Definition Documents (e.g. WSDL, XML-Schema, etc.)</li>
         <li>Etc.</li>
       </ul>
@@ -66,27 +66,32 @@
       <p>So let's say you're developing a rich <a href="http://en.wikipedia.org/wiki/Adobe_Flash">Flash</a> client using <a
         href="http://www.adobe.com/products/flex/">Flex</a>, and you've got to make some asynchronous
         Web service calls to your server. You've got your service interfaces defined in Java, and you need to
-        make those interfaces available to your client. Sure, you could use <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to
-        publish your services via <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>. Or you could use
-        <a href="http://www.restlet.org/">RESTlet</a> or <a href="https://jersey.dev.java.net/">Jersey</a> to make them available
-        via REST. Or perhaps you optimize for Flex and use <a href="http://labs.adobe.com/technologies/blazeds/">BlazeDS</a> to publish
-        your services as <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a> endpoints.</p>
+        make those interfaces available to your Flash client, but you also want to expose those services such that other
+        applications can invoke your API. Let's say you're especially interested in developing an iPhone application.</p>
+
+      <p>Sure, you could use <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to publish your services via
+        <a href="http://en.wikipedia.org/wiki/SOAP">SOAP</a>. Or you could use <a href="http://www.restlet.org/">RESTlet</a> or
+        <a href="https://jersey.dev.java.net/">Jersey</a> to make them available via REST. Or perhaps you optimize for Flex and
+        use <a href="http://labs.adobe.com/technologies/blazeds/">BlazeDS</a> to publish your services as
+        <a href="http://en.wikipedia.org/wiki/Action_Message_Format">AMF</a> endpoints.</p>
 
       <p>But for any of these choices, you've got to deal with the mess of deployment descriptors and keeping
         your documentation up-to-date. And let's face it, the Flex code you write isn't going to be pretty, since
-        you'll be working with remote calls and loosly-typed objects.</p>
+        you'll be working with remote calls and loosly-typed objects. And then you've got to train any other consumers
+        (for example, your iPhone developers) on how to consume your API.</p>
 
-      <p>This is a case where Enunciate is designed to make your life easier. Enunciate deals with
+      <p>This is one case of many where Enunciate is designed to make your life easier. Enunciate deals with
         your deployment difficulties, documentation, and client-side code. By using Enunciate to publish your service
         interfaces, not only will you have <i>all three</i> Web service interfaces (SOAP, REST, and AMF), but you'll
         also have full up-to-date documentation and generated, strongly typed ActionScript code that you can use
-        to invoke your remote services from your Flex code. And it's all nicely packaged in a standard war that
-        you can drop in your favorite application server.</p>
+        to invoke your remote services from your Flex code, and rich client-side libraries that can be used
+        to access your Web services from a variety of platforms (including Mac/iPhone). And it's all nicely packaged in
+        a standard war that you can drop in your favorite application server.</p>
 
-      <p>There are many more cases where Enunciate can be applied.  Whether you're developing a public API for application-to-application
+      <p>Again, there are many more cases where Enunciate can be applied.  Whether you're developing a public API for application-to-application
         development, creating an <a href="http://en.wikipedia.org/wiki/Ajax_%28programming%29">AJAX</a> application, or providing
         secure data to affiliate applications via <a href="http://oauth.net">OAuth</a>, Enunciate will simplify both server-side and client-side
-        development--<i>without</i> having to learn a any new development frameworks or libraries.</p>
+        development--<i>without</i> having to learn any new development frameworks or libraries.</p>
 
       <h1>How</h1>
 
@@ -145,8 +150,8 @@
             and preserving valuable information like method signatures, class structure, and variable names.
           </p>
           <p>
-            Currently, Enunciate generates code for the Java 1.4 platform and the Java 5 platform, but has plans to add modules that
-            generate code for other platforms (.NET, C++, PHP, etc.) in the future.  Consult the
+            Currently, Enunciate generates code for Java 1.4, Java 5+, C/C++, .NET, Ruby, and Objective-C (Mac/iPhone) platforms. There are also plans to
+            add modules that generate code for more platforms (PHP, Python, etc.) in the future.  Consult the
             <a href="http://docs.codehaus.org/display/ENUNCIATE/Roadmap">roadmap</a> for information on other modules in the pipe and how you can help.
           </p>
         </li>
@@ -203,7 +208,7 @@
 
   </div>
 
-  <div class="footer">&copy; 2006 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+  <div class="footer">&copy; 2006-2009 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
     href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
   </div>
 

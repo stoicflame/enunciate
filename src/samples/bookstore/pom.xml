@@ -129,7 +129,7 @@
     <!-- Enunciate dependency -->
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
       <version>1.16-SNAPSHOT</version>
     </dependency>
 

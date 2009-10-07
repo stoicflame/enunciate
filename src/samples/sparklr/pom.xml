@@ -11,7 +11,7 @@
     <plugins>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
+        <artifactId>maven-enunciate-spring-plugin</artifactId>
         <version>1.16-SNAPSHOT</version>
         <executions>
           <execution>
@@ -39,7 +39,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rt</artifactId>
+      <artifactId>enunciate-spring-app-rt</artifactId>
       <version>1.16-SNAPSHOT</version>
     </dependency>
 
