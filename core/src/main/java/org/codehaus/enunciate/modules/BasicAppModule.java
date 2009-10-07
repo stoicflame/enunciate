@@ -212,7 +212,9 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
         for (WebAppFragment fragment : enunciate.getWebAppFragments()) {
           if (fragment.getServlets() != null) {
             for (WebAppComponent servletComponent : fragment.getServlets()) {
-              allServletUrls.addAll(servletComponent.getUrlMappings());
+              if (servletComponent.getUrlMappings() != null) {
+                allServletUrls.addAll(servletComponent.getUrlMappings());
+              }
             }
           }
         }

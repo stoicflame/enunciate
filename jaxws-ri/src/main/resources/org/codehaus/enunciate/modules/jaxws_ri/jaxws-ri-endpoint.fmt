@@ -58,7 +58,15 @@ public class ${endpointInterface.simpleName}Instrumented {
    * Construct an instrumented ${endpointInterface.simpleName} that just delegates to an instance of ${endpointInterface.simpleName}.
    */
   public ${endpointInterface.simpleName}Instrumented() {
-    this(new ${endpointInterface.endpointImplementations[0].qualifiedName}());
+    try {
+      this.delegate = new ${endpointInterface.endpointImplementations[0].qualifiedName}();
+    }
+    catch (RuntimeException e) {
+      throw e;
+    }
+    catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
   }
 
   /**

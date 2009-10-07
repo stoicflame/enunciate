@@ -407,6 +407,11 @@ Then, define a profile in your settings.xml file that defines the path to your '
             <artifactId>stax-api</artifactId>
           </exclusion>
           <exclusion>
+            <!--we'll use enunciate's version of activation-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+          <exclusion>
             <!--shouldn't be a runtime artifact.-->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -464,10 +469,18 @@ Then, define a profile in your settings.xml file that defines the path to your '
       </dependency>
 
       <dependency>
-        <!--depending modules: spring-jaxws-rt-->
+        <!--depending modules: jaxws-rt-->
         <groupId>com.sun.xml.stream.buffer</groupId>
         <artifactId>streambuffer</artifactId>
         <version>0.8</version>
+
+        <exclusions>
+          <exclusion>
+            <!--we'll use enunciate's version of activation-->
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -834,7 +847,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.spring-security-oauth</groupId>
         <artifactId>spring-security-oauth</artifactId>
-        <version>3.1</version>
+        <version>3.7</version>
         <exclusions>
           <!--we'll depend on enunciate's version of these artifacts.-->
           <exclusion>

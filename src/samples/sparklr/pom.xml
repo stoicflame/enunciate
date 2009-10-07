@@ -20,6 +20,13 @@
             </goals>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
+            <version>1.16-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -44,9 +51,15 @@
     </dependency>
 
     <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-rest-rt</artifactId>
+      <version>1.16-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.codehaus.spring-security-oauth</groupId>
       <artifactId>spring-security-oauth</artifactId>
-      <version>3.1</version>
+      <version>3.7</version>
     </dependency>
 
     <dependency>
