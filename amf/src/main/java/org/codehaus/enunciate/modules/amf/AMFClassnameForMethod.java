@@ -16,31 +16,54 @@
 
 package org.codehaus.enunciate.modules.amf;
 
-import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.EnumType;
-import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.*;
 import freemarker.template.TemplateModelException;
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.Date;
+import java.net.URI;
+
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import javax.activation.DataHandler;
 
 /**
  * @author Ryan Heaton
  */
 public class AMFClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
 
+  private final Map<String, String> classConversions = new HashMap<String, String>();
+
   public AMFClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
+    this.classConversions.put(UUID.class.getName(), String.class.getName());
+    this.classConversions.put(XMLGregorianCalendar.class.getName(), Date.class.getName());
+    this.classConversions.put(QName.class.getName(), String.class.getName());
+    this.classConversions.put(URI.class.getName(), String.class.getName());
+    this.classConversions.put(DataHandler.class.getName(), "byte[]");
   }
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
     if ((typeMirror instanceof ArrayType) && (((ArrayType) typeMirror).getComponentType() instanceof PrimitiveType)) {
       //special case for primitive arrays.
       return super.convert(((ArrayType) typeMirror).getComponentType()) + "[]";
     }
-    else if (typeMirror instanceof EnumType) {
+    else if (decorated.isEnum()) {
       return String.class.getName();
+    }
+    else if (decorated.isDeclared()) {
+      DeclaredType declaredType = ((DeclaredType) decorated);
+      String fqn = declaredType.getDeclaration().getQualifiedName();
+      if (classConversions.containsKey(fqn)) {
+        return classConversions.get(fqn);
+      }
     }
 
     return super.convert(typeMirror);

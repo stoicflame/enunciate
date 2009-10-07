@@ -16,17 +16,12 @@
 
 package org.codehaus.enunciate.tests.xfire_integration;
 
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.UploadFileSpec;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Event;
 import org.codehaus.enunciate.samples.genealogy.client.data.Person;
-import org.codehaus.enunciate.samples.genealogy.client.data.PersonXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Relationship;
 import org.codehaus.enunciate.samples.genealogy.client.services.*;
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.PersonServiceImpl;
@@ -34,20 +29,13 @@ import org.codehaus.enunciate.samples.genealogy.client.services.impl.Relationshi
 import org.codehaus.enunciate.samples.genealogy.client.services.impl.SourceServiceImpl;
 import org.codehaus.xfire.MessageContext;
 import org.codehaus.xfire.aegis.stax.ElementReader;
-import org.codehaus.xfire.aegis.stax.ElementWriter;
 import org.codehaus.xfire.aegis.type.DefaultTypeMappingRegistry;
 import org.codehaus.xfire.aegis.type.TypeMapping;
-import org.codehaus.xfire.exchange.MessageExchange;
-import org.codehaus.xfire.exchange.OutMessage;
-import org.codehaus.xfire.soap.SoapConstants;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -266,6 +254,7 @@ public class TestFullJAXWSRIAPI extends TestCase {
     URL url = new URL(String.format(sourceConnectString, "valid"));
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertEquals(200, connection.getResponseCode());
 
@@ -280,17 +269,20 @@ public class TestFullJAXWSRIAPI extends TestCase {
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "invalid")).openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertEquals(204, connection.getResponseCode());
     assertTrue("expected empty data returned", connection.getInputStream().read() < 0);
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "throw")).openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertEquals(500, connection.getResponseCode());
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "valid")).openConnection();
     connection.setRequestMethod("DELETE");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertFalse(200 == connection.getResponseCode());
   }

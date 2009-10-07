@@ -278,7 +278,14 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
           }
         }
       }
+    }
+  }
 
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
+    if (!isDisabled()) {
       if (!factoryBeanFound) {
         warn("The Spring module is enabled, but the Enunciate-Spring runtime classes weren't found on the Enunciate classpath. This could be fatal to the runtime application...");
       }

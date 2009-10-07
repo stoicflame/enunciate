@@ -26,7 +26,6 @@ import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.*;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.RelationshipServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.SourceServiceImpl;
-import org.springframework.core.OverridingClassLoader;
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;

@@ -220,10 +220,6 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean asSourcesDownloadable = false;
   private boolean amfRtFound = false;
 
-  public AMFDeploymentModule() {
-    setDisabled(true);//disable the AMF module by default because it adds unnecessary contraints on the API.
-  }
-
   /**
    * @return "amf"
    */

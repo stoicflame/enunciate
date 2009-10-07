@@ -50,13 +50,7 @@
     <module>maven-enunciate-cxf-plugin</module>
 
     <module>integration-test-support</module>
-    <module>integration-tests/xfire-rest</module>
-    <module>integration-tests/cxf-rest</module>
-    <module>integration-tests/jaxws-ri-rest</module>
-    <module>integration-tests/jaxws-ri-rest-spring</module>
-    <module>integration-tests/contract-first</module>
-    <module>integration-tests/jersey-storage</module>
-    <module>integration-tests/jersey-storage-spring</module>
+    <module>integration-tests</module>
   </modules>
 
   <build>

@@ -275,6 +275,7 @@ public class TestFullJAXWSRIAPI extends TestCase {
     URL url = new URL(String.format(sourceConnectString, "valid"));
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertEquals(200, connection.getResponseCode());
 
@@ -289,6 +290,7 @@ public class TestFullJAXWSRIAPI extends TestCase {
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "invalid")).openConnection();
     connection.setRequestMethod("GET");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertEquals(204, connection.getResponseCode());
     assertTrue("expected empty data returned", connection.getInputStream().read() < 0);
@@ -300,6 +302,7 @@ public class TestFullJAXWSRIAPI extends TestCase {
 
     connection = (HttpURLConnection) new URL(String.format(sourceConnectString, "valid")).openConnection();
     connection.setRequestMethod("DELETE");
+    connection.setRequestProperty("Accept", "application/xml");
     connection.connect();
     assertFalse(200 == connection.getResponseCode());
   }

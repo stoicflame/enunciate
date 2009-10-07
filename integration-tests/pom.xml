@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.codehaus.enunciate</groupId>
+  <artifactId>enunciate-integration-tests</artifactId>
+  <packaging>pom</packaging>
+  <version>1.16-SNAPSHOT</version>
+  <name>Enunciate - Integration Tests</name>
+
+  <modules>
+    <module>xfire-rest</module>
+    <module>cxf-rest</module>
+    <module>jaxws-ri-rest</module>
+    <module>jaxws-ri-rest-spring</module>
+    <module>contract-first</module>
+    <module>jersey-storage</module>
+    <module>jersey-storage-spring</module>
+  </modules>
+
+  <distributionManagement>
+
+    <repository>
+      <id>codehaus.org</id>
+      <name>Enunciate Central Repository</name>
+      <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>codehaus.org</id>
+      <name>Enunciate Central Development Repository</name>
+      <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
+    </snapshotRepository>
+
+  </distributionManagement>
+
+</project>

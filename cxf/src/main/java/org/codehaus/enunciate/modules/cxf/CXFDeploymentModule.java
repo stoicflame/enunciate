@@ -100,10 +100,6 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean jacksonAvailable = false;
   private boolean filterFound = false;
 
-  public CXFDeploymentModule() {
-    setDisabled(true); //disabled by default; using JAXWS RI by default.
-  }
-
   /**
    * @return "cxf"
    */
@@ -168,9 +164,6 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
         enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
       }
 
-      if (!filterFound) {
-        warn("The Enunciate CXF runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
-      }
     }
 
   }
@@ -210,6 +203,10 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
             resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
           }
         }
+      }
+
+      if (!filterFound) {
+        warn("The Enunciate CXF runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
       }
     }
   }

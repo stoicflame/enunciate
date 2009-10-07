@@ -2,6 +2,7 @@
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.15.xsd">
+  <disable-rule id="as3.conflicting.names"/>
   <namespaces>
     <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
     <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
@@ -13,14 +14,12 @@
     </soap>
   </services>
   <modules>
-    <jaxws-ri disabled="false"/>
-    <xfire disabled="true"/>
     <xfire-client uuid="full.example" disable15Client="false">
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>
       </package-conversions>
     </xfire-client>
-    <jaxws-client disabled="false">
+    <jaxws-client>
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
       </package-conversions>

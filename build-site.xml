@@ -38,19 +38,10 @@
       </condition>
     </fail>
 
-    <artifact:dependencies filesetId="core.libs.fileset">
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-c" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-core" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-csharp" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-docs" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-ri" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jaxws-client" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jersey" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-obj-c" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-ruby" version="${top.pom.version}"/>
+    <artifact:dependencies filesetId="core.libs.fileset" pomRefId="top.pom"/>
+
+    <artifact:dependencies filesetId="spring.libs.fileset">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xml" version="${top.pom.version}"/>
     </artifact:dependencies>
 
     <artifact:dependencies filesetId="xfire.libs.fileset">
@@ -82,14 +73,12 @@
       <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.3"/>
       <dependency groupId="org.springframework.security" artifactId="spring-security-openid" version="2.0.3"/>
       <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.6"/>
-      <dependency groupId="org.codehaus.jackson" artifactId="jackson-jaxrs" version="0.9.9"/>
     </artifact:dependencies>
     <patternset id="optional.jars.dependencies.patternset">
       <exclude name="**/commons-fileupload*"/>
       <exclude name="**/commons-io*"/>
       <exclude name="**/spring-tx*"/>
       <exclude name="**/spring-security-*"/>
-      <exclude name="**/jackson*"/>
     </patternset>
 
     <!--filters for docs-->
@@ -286,6 +275,18 @@
       <fileset refid="core.libs.fileset"/>
       <mapper type="flatten"/>
     </copy>
+
+    <!--copy the spring module plus deps-->
+    <mkdir dir="target/lib/modules/spring"/>
+    <copy todir="target/lib/modules/spring">
+      <fileset refid="spring.libs.fileset"/>
+      <mapper type="flatten"/>
+    </copy>
+    <delete>
+      <fileset dir="target/lib/modules/spring">
+        <present targetdir="target/lib"/>
+      </fileset>
+    </delete>
 
     <!--copy the xfire module plus deps-->
     <mkdir dir="target/lib/modules/xfire"/>

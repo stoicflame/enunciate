@@ -112,6 +112,18 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             </configuration>
           </execution>
         </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-amf</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-xfire-client</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -263,6 +275,12 @@ If you just want to skip the Objective C tests, set the value of the property 'g
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 

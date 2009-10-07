@@ -266,18 +266,7 @@ public class ConfigMojo extends AbstractMojo {
       }
     }
 
-    if (this.includes != null) {
-      for (String include : this.includes) {
-        config.addApiIncludePattern(include);
-      }
-    }
-
-    if (this.excludes != null) {
-      for (String exclude : this.excludes) {
-        config.addApiExcludePattern(exclude);
-      }
-    }
-
+    postProcessConfig(config);
     enunciate.setConfig(config);
     Set<org.apache.maven.artifact.Artifact> classpathEntries = new HashSet<org.apache.maven.artifact.Artifact>();
     classpathEntries.addAll(this.projectDependencies);
@@ -359,6 +348,25 @@ public class ConfigMojo extends AbstractMojo {
     }
     catch (Exception e) {
       throw new MojoExecutionException("Error initializing Enunciate mechanism.", e);
+    }
+  }
+
+  /**
+   * Does any post-processing of the enunciate configuration.
+   *
+   * @param config The config.
+   */
+  protected void postProcessConfig(EnunciateConfiguration config) {
+    if (this.includes != null) {
+      for (String include : this.includes) {
+        config.addApiIncludePattern(include);
+      }
+    }
+
+    if (this.excludes != null) {
+      for (String exclude : this.excludes) {
+        config.addApiExcludePattern(exclude);
+      }
     }
   }
 

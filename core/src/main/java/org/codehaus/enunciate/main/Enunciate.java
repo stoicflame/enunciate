@@ -597,7 +597,7 @@ public class Enunciate {
         }
       }
       throw new EnunciateException("There are multiple modules that are configured to be JAX-WS providers: " + moduleList + 
-        ". You must disable all but one JAX-WS provider module.");
+        ". You might have unnecessary modules on the classpath. Anyway, you must disable all but one JAX-WS provider module.");
     }
 
     if (jaxrsProviderModules.size() > 1) {
@@ -615,7 +615,7 @@ public class Enunciate {
         }
       }
       throw new EnunciateException("There are multiple modules that are configured to be JAX-RS providers: " + moduleList +
-        ". You must disable all but one JAX-RS provider module.");
+        ". You might have unnecessary modules on the classpath. Anyway, you must disable all but one JAX-RS provider module.");
     }
   }
 

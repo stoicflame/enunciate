@@ -258,10 +258,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private Boolean enableGWT16;
   private boolean gwtRtFound = false;
 
-  public GWTDeploymentModule() {
-    setDisabled(true);//disable the GWT module by default because it adds unnecessary contraints on the API.
-  }
-
   /**
    * @return "gwt"
    */

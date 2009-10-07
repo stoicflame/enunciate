@@ -93,10 +93,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
   private String xfireBeansImport = "classpath:org/codehaus/xfire/spring/xfire.xml";
   private boolean exporterFound = false;
 
-  public XFireDeploymentModule() {
-    setDisabled(true); //disabled by default; using JAXWS RI by default.
-  }
-
   /**
    * @return "xfire"
    */
@@ -145,10 +141,6 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
       if (!enunciate.isModuleEnabled("jaxws-support")) {
         throw new EnunciateException("The XFire module requires an enabled JAXWS Support module.");
       }
-
-      if (!exporterFound) {
-        warn("The Enunciate XFire runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
-      }
     }
   }
 
@@ -171,6 +163,10 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
 
           ei.putMetaData("soapPath", path);
         }
+      }
+
+      if (!exporterFound) {
+        warn("The Enunciate XFire runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
       }
     }
   }

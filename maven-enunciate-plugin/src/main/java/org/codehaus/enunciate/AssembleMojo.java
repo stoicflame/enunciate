@@ -124,8 +124,8 @@ public class AssembleMojo extends ConfigMojo {
   }
 
   @Override
-  protected void loadConfig(EnunciateConfiguration config, File configFile) throws IOException, SAXException, MavenFilteringException {
-    super.loadConfig(config, configFile);
+  protected void postProcessConfig(EnunciateConfiguration config) {
+    super.postProcessConfig(config);
     WebAppConfig webAppConfig = config.getWebAppConfig();
     if (webAppConfig == null) {
       webAppConfig = new WebAppConfig();

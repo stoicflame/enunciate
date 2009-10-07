@@ -3,6 +3,7 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.15.xsd">
   <modules>
+    <amf disabled="true"/>
     <c forceEnable="true"/>
     <obj-c forceEnable="true"/>
     <jaxws-client>
@@ -11,7 +12,5 @@
         <convert from="org.unece" to="org.unece.client"/>
       </package-conversions>
     </jaxws-client>
-    <jaxws-ri disabled="false"/>
-    <xfire disabled="true"/>
   </modules>
 </enunciate>
