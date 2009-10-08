@@ -123,6 +123,7 @@ import java.util.*;
  * be included.  The default is "true".</li>
  *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.  If one isn't supplied, a
  *  default will be provided.</p>
+ *   <li>The "<b>indexPageName</b>" attribute is used to specify the name of the generated index page. Default: "index.html"</li>
  *   <li>The "<b>xslt</b>" attribute specifies the file that is the XML Stylesheet Transform that will be applied to the
  * documentation XML to generate the HTML docs.  If no XSLT is specified, a default one will be used.</p>
  *   <li>The "<b>xsltURL</b>" attribute specifies the URL to the XML Stylesheet Transform that will be applied to the
@@ -183,6 +184,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String javadocTagHandling;
   private boolean applyWsdlFilter = true;
   private boolean jacksonXcAvailable = false;
+  private String indexPageName = "index.html";
 
   /**
    * @return "docs"
@@ -478,6 +480,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
+   * The name of the index page.
+   *
+   * @return The name of the index page.
+   */
+  public String getIndexPageName() {
+    return indexPageName;
+  }
+
+  /**
+   * The name of the index page.
+   *
+   * @param indexPageName The name of the index page.
+   */
+  public void setIndexPageName(String indexPageName) {
+    this.indexPageName = indexPageName;
+  }
+
+  /**
    * The directory into which the documentation is put.
    *
    * @return The directory into which the documentation is put.
@@ -740,7 +760,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       buildDir.mkdirs();
       transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
       transformer.setParameter("api-relative-path", getRelativePathToRootDir());
-      File indexPage = new File(buildDir, "index.html");
+      transformer.setParameter("index-page-name", getIndexPageName());
+      File indexPage = new File(buildDir, getIndexPageName());
       debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));
     }

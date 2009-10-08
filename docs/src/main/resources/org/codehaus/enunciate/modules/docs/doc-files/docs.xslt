@@ -15,6 +15,9 @@
   <!--The relative path at which the endpoints are mounted.-->
   <xsl:param name="api-relative-path" select="'.'"/>
 
+  <!--The name of the index page.-->
+  <xsl:param name="index-page-name" select="'index.html'"/>
+
   <!-- Whether this API contains SOAP endpoints. -->
   <xsl:variable name="soapAvailable" select="boolean(/api-docs/soap/wsdls/wsdl/endpointInterface)"/>
 
@@ -33,7 +36,7 @@
   <xsl:variable name="global-sidnav">
     <h1>Home</h1>
     <ul>
-      <li><a href="index.html">Introduction</a></li>
+      <li><a href="{$index-page-name}">Introduction</a></li>
       <xsl:if test="$downloads-exists">
         <li>
           <a href="downloads.html">downloads</a>

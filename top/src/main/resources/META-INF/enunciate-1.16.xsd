@@ -1036,6 +1036,11 @@
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="indexPageName" type="xs:string" default="index.html">
+          <xs:annotation>
+            <xs:documentation>The name of the index page.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="xslt" type="xs:string">
           <xs:annotation>
             <xs:documentation>the file that is the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs. If no XSLT
