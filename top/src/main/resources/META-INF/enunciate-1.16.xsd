@@ -932,6 +932,12 @@
             <xs:documentation>Whether GWT 1.6+ is enabled (default:false)</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="useWrappedServices" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services.
+              This is an artifact from when GWT 1.4 was supported and the generic types were unavailable.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

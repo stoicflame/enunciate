@@ -122,6 +122,8 @@ import java.util.*;
  * <li>The "enforceNoFieldAccessors" attribute specifies whether to enforce that a field accessor cannot be used for GWT mapping.
  * <i>Note: whether this option is enabled or disabled, there currently MUST be a getter and setter for each accessor.  This option only
  * disables the compile-time validation check.</i></li>
+ * <li>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services. This is an artifact from when GWT 1.4 was supported
+ * and the generic types were unavailable. Default: false</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -256,6 +258,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
   private Boolean enableGWT16;
+  private boolean useWrappedServices = false;
   private boolean gwtRtFound = false;
 
   /**
@@ -368,7 +371,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       URL faultMapperTemplate = getTemplateURL("gwt-fault-mapper.fmt");
       URL moduleXmlTemplate = getTemplateURL("gwt-module-xml.fmt");
 
-      URL eiTemplate = getTemplateURL("gwt-endpoint-interface.fmt");
+      URL eiTemplate = isUseWrappedServices() ? getTemplateURL("gwt-legacy-endpoint-interface.fmt") : getTemplateURL("gwt-endpoint-interface.fmt");
       URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
       URL faultTemplate = getTemplateURL("gwt-fault.fmt");
       URL typeTemplate = getTemplateURL("gwt-type.fmt");
@@ -1341,7 +1344,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     this.enableGWT16 = enableGWT16;
   }
 
-  // Inherited.
+  /**
+   * Whether to generated wrapped GWT remote services in the client-code.
+   *
+   * @return Whether to generated wrapped GWT remote services in the client-code.
+   */
+  public boolean isUseWrappedServices() {
+    return useWrappedServices;
+  }
+
+  /**
+   * Whether to generated wrapped GWT remote services in the client-code.
+   *
+   * @param useWrappedServices Whether to generated wrapped GWT remote services in the client-code.
+   */
+  public void setUseWrappedServices(boolean useWrappedServices) {
+    this.useWrappedServices = useWrappedServices;
+  }
+
   @Override
   public boolean isDisabled() {
     if (super.isDisabled()) {
