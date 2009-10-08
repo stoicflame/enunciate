@@ -76,7 +76,7 @@ public class RootResource extends Resource {
   protected List<ResourceParameter> getResourceParameters(TypeDeclaration delegate) {
     List<ResourceParameter> resourceParams = super.getResourceParameters(delegate);
 
-    if (getDelegate() == delegate) {
+    if (getDelegate() == delegate && delegate instanceof ClassDeclaration) {
       //root resources also include constructor params.
 
       Collection<ConstructorDeclaration> constructors = ((ClassDeclaration) delegate).getConstructors();
