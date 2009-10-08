@@ -21,7 +21,6 @@ import flex.messaging.util.PropertyStringResourceLoader;
 import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
 import org.codehaus.enunciate.service.SecurityExceptionChecker;
 
-import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -127,7 +126,6 @@ public abstract class AMFEndpointImpl {
    *
    * @param securityChecker The security checker.
    */
-  @Resource
   public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
     this.securityChecker = securityChecker;
   }

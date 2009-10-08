@@ -219,6 +219,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean swcDownloadable = false;
   private boolean asSourcesDownloadable = false;
   private boolean amfRtFound = false;
+  private boolean springDIFound = false;
 
   /**
    * @return "amf"
@@ -269,6 +270,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
   public void onClassesFound(Set<String> classes) {
     amfRtFound |= classes.contains("org.codehaus.enunciate.modules.amf.AMFEndpointImpl");
+    springDIFound |= classes.contains("org.springframework.beans.factory.annotation.Autowired");
   }
 
   @Override
@@ -289,6 +291,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
       EnunciateFreemarkerModel model = getModel();
       model.setFileOutputDirectory(serverGenerateDir);
+      model.put("useSpringDI", this.springDIFound);
 
       TreeMap<String, String> packages = new TreeMap<String, String>(new Comparator<String>() {
         public int compare(String package1, String package2) {

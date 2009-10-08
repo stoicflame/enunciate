@@ -54,9 +54,19 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
     return ${endpointInterface.qualifiedName}.class;
   }
 
-  @javax.annotation.Resource ( name = "${endpointInterface.endpointImplementations[0].serviceEndpointId}" )
+  [#if useSpringDI!false]
+  @org.springframework.beans.factory.annotation.Autowired( required = false )
+  [/#if]
   public void setServiceBean(${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
+  [#if useSpringDI!false]
+
+  //just used for autowiring.
+  @org.springframework.beans.factory.annotation.Autowired( required = false )
+  public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
+    super.setSecurityChecker(securityChecker);
+  }
+  [/#if]
 }
 [/@file]

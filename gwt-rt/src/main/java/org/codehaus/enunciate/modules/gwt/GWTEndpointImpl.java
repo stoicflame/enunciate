@@ -21,7 +21,6 @@ import org.codehaus.enunciate.service.DefaultSecurityExceptionChecker;
 import org.codehaus.enunciate.service.SecurityExceptionChecker;
 import org.codehaus.enunciate.webapp.ComponentPostProcessor;
 
-import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -132,7 +131,6 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
    *
    * @param securityChecker The security exception checker.
    */
-  @Resource
   public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
     this.securityChecker = securityChecker;
   }

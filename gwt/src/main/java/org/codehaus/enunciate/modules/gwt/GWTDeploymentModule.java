@@ -260,6 +260,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private Boolean enableGWT16;
   private boolean useWrappedServices = false;
   private boolean gwtRtFound = false;
+  private boolean springDIFound = false;
 
   /**
    * @return "gwt"
@@ -357,6 +358,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
   public void onClassesFound(Set<String> classes) {
     gwtRtFound |= classes.contains("org.codehaus.enunciate.modules.gwt.GWTEndpointImpl");
+    springDIFound |= classes.contains("org.springframework.beans.factory.annotation.Autowired");
   }
 
   @Override
@@ -379,6 +381,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
       //set up the model, first allowing for jdk 14 compatability.
       EnunciateFreemarkerModel model = getModel();
+      model.put("useSpringDI", this.springDIFound);
       Map<String, String> conversions = new HashMap<String, String>();
       String clientNamespace = this.rpcModuleNamespace + ".client";
       conversions.put(this.rpcModuleNamespace, clientNamespace);
