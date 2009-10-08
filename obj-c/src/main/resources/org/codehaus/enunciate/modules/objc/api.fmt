@@ -24,7 +24,7 @@
 /**
  * Protocol defining an Enunciate XML I/O methods.
  */
-@protocol EnunciateXML
+@protocol EnunciateXML <NSObject>
 
 /**
  * Read an instance from XML.
@@ -362,7 +362,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 /**
  * Protocol defining a JAXB (see https://jaxb.dev.java.net/) type.
  */
-@protocol JAXBType
+@protocol JAXBType <NSObject>
 
 /**
  * Read an XML type from an XML reader.
@@ -392,7 +392,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 /**
  * Protocol defining a JAXB (see https://jaxb.dev.java.net/) element.
  */
-@protocol JAXBElement
+@protocol JAXBElement <NSObject>
 
 /**
  * Read the XML element from an XML reader. It is assumed
@@ -427,7 +427,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * when reading/parsing XML. Intended for internal
  * use only.
  */
-@protocol JAXBReading
+@protocol JAXBReading <NSObject>
 
 /**
  * Method for reading an attribute.
@@ -479,7 +479,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * when writing XML. Intended for internal
  * use only.
  */
-@protocol JAXBWriting
+@protocol JAXBWriting <NSObject>
 
 /**
  * Method for writing the attributes.

@@ -2,10 +2,7 @@ package org.codehaus.enunciate.jaxb;
 
 import junit.framework.TestCase;
 
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -49,6 +46,25 @@ public class TestJAXBBehavior extends TestCase {
     assertNull("The XMLID/IDREF tests have failed, meaning JAXB's doing some inference, and you may need add back the ID/IDREF warnings.", deserializedPerson.father);
     assertNull("The XMLID/IDREF tests have failed, meaning JAXB's doing some inference, and you may need add back the ID/IDREF warnings.", deserializedPerson.mother);
   }
+
+  /**
+   * tests the behavior of @XmlTransient on a field/property.
+   */
+  public void testTransientOnFieldOrProperty() throws Exception {
+    TransientPerson person = new TransientPerson();
+    person.field1 = "hi";
+    person.field2 = "hello";
+
+    Marshaller marshaller = JAXBContext.newInstance(TransientPerson.class).createMarshaller();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    marshaller.marshal(person, out);
+    Unmarshaller unmarshaller = JAXBContext.newInstance(TransientPerson.class).createUnmarshaller();
+    byte[] bytes = out.toByteArray();
+//    System.out.println(new String(bytes, "utf-8"));
+    TransientPerson deserializedPerson = (TransientPerson) unmarshaller.unmarshal(new ByteArrayInputStream(bytes));
+    assertEquals("hi", deserializedPerson.field1);
+    assertEquals("hello", deserializedPerson.field2);
+  }
   
   @XmlRootElement
   public static class Person {
@@ -72,6 +88,31 @@ public class TestJAXBBehavior extends TestCase {
     public String father;
     @XmlElement
     public String mother;
+  }
+
+  @XmlRootElement
+  public static class TransientPerson {
+
+    @XmlTransient
+    private String field1;
+    public String field2;
+
+    public String getField1() {
+      return field1;
+    }
+
+    public void setField1(String field1) {
+      this.field1 = field1;
+    }
+
+    @XmlTransient
+    public String getField2() {
+      return field2;
+    }
+
+    public void setField2(String field2) {
+      this.field2 = field2;
+    }
   }
 
 }
