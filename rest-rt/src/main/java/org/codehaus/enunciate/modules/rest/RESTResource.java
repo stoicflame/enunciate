@@ -214,7 +214,13 @@ public class RESTResource implements Comparable<RESTResource> {
    * @return The comparison.
    */
   public int compareTo(RESTResource other) {
-    return this.noun.compareTo(other.noun);
+    int comparison = this.noun.compareTo(other.noun);
+    if (comparison == 0) {
+      String thisContext = this.nounContext == null ? "" : this.nounContext;
+      String otherContext = other.getNounContext() == null ? "" : other.getNounContext();
+      comparison = thisContext.compareTo(otherContext);
+    }
+    return comparison;
   }
 
   /**
@@ -256,5 +262,33 @@ public class RESTResource implements Comparable<RESTResource> {
   @Override
   public String toString() {
     return noun;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    RESTResource that = (RESTResource) o;
+
+    if (noun != null ? !noun.equals(that.noun) : that.noun != null) {
+      return false;
+    }
+    if (nounContext != null ? !nounContext.equals(that.nounContext) : that.nounContext != null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = noun != null ? noun.hashCode() : 0;
+    result = 31 * result + (nounContext != null ? nounContext.hashCode() : 0);
+    return result;
   }
 }

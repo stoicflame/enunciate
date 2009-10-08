@@ -31,10 +31,7 @@ import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Content type handler for JAXB XML.
@@ -46,7 +43,7 @@ import java.util.TreeMap;
 )
 public class JaxbXmlContentHandler extends ApplicationObjectSupport implements RESTRequestContentTypeHandler {
 
-  protected final Map<RESTResource, JAXBContext> resourcesToContexts = new TreeMap<RESTResource, JAXBContext>();
+  protected final Map<RESTResource, JAXBContext> resourcesToContexts = new HashMap<RESTResource, JAXBContext>();
   private NamespacePrefixLookup namespaceLookup;
   private Object prefixMapper;
   private ValidationEventHandler validationEventHandler = new DefaultValidationEventHandler();
