@@ -52,7 +52,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${property.simpleName?cap_first}(${classnameFor(property)} ${property.simpleName}) {
     this.${property.simpleName} = ${property.simpleName};
   }
-    [#if property.accessorType.map?default(false)]
+    [#if property.accessorType.map!false && (!property.adapted)]
 
   /**
    * Puts an entry into the ${property.simpleName} map.
