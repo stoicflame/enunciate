@@ -248,7 +248,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
       FreemarkerModel.set(model);
       final JsonTypeDefinition nameTypeDefinition = JsonTypeDefinition.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));
       assertNull(model.findJsonTypeDefinition(nameTypeDefinition));
-      model.add(nameTypeDefinition);
+      model.addJsonType(nameTypeDefinition);
       assertNotNull(model.findJsonTypeDefinition(nameTypeDefinition));
       JsonSchemaInfo jsonSchemaInfo = model.getIdsToJsonSchemas().get(JsonSchemaInfo.schemaIdForType(nameTypeDefinition));
       assertNotNull(jsonSchemaInfo);
@@ -320,7 +320,7 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
       final JsonRootElementDeclaration rootElementDeclaration = new JsonRootElementDeclaration(nameTypeDefinition);
 
       assertNull(model.findJsonRootElementDeclaration(rootElementDeclaration));
-      model.add(rootElementDeclaration);
+      model.addJsonRootElement(rootElementDeclaration);
       assertNotNull(model.findJsonRootElementDeclaration(rootElementDeclaration));
       assertNotNull(model.findJsonTypeDefinition(nameTypeDefinition));
 

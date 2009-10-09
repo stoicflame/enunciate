@@ -357,12 +357,12 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     if (typeDefinition != null) {
       if (this.enunciate.getConfig() != null && !this.enunciate.getConfig().isExcludeUnreferencedClasses()) {
         debug("%s to be considered as a %s", typeDefinition.getTypeName(), typeDefinition.getClass().getSimpleName());
-        model.add(typeDefinition);
+        model.addJsonType(typeDefinition);
 
         if(typeDefinition.getDelegate().getAnnotation(JsonRootType.class) != null)
         {
           debug("%s to be considered as a root element", typeDefinition.getTypeName());
-          model.add(new JsonRootElementDeclaration(typeDefinition));
+          model.addJsonRootElement(new JsonRootElementDeclaration(typeDefinition));
         }
       }
       else {

@@ -384,7 +384,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @param typeDefinition The json type definition to add to the model.
    */
-  public void add(JsonTypeDefinition typeDefinition) {
+  public void addJsonType(JsonTypeDefinition typeDefinition) {
     if (!knownJsonTypes.containsKey(typeDefinition.getQualifiedName())) {
       JsonSchemaInfo jsonSchemaInfo = schemaForType(typeDefinition.classDeclaration());
       if (!jsonSchemaInfo.getTypesByName().containsKey(typeDefinition.getTypeName())) {
@@ -398,7 +398,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           }
           ClassType superclass = objectTypeDefinition.getSuperclass();
           if (superclass != null) {
-            add(JsonTypeDefinition.createTypeDefinition(superclass.getDeclaration()));
+            addJsonType(JsonTypeDefinition.createTypeDefinition(superclass.getDeclaration()));
           }
         }
       }
@@ -670,7 +670,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
 
         if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
-          add(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
+          addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
         }
       }
     }
@@ -684,7 +684,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       }
 
       if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
-        add(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
+        addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
       }
     }
 
@@ -738,9 +738,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @param rootElementDeclaration The root element to add.
    */
-  public void add(JsonRootElementDeclaration rootElementDeclaration) {
+  public void addJsonRootElement(JsonRootElementDeclaration rootElementDeclaration) {
     JsonTypeDefinition typeDefinition = rootElementDeclaration.getTypeDefinition();
-    add(typeDefinition);
+    addJsonType(typeDefinition);
     JsonSchemaInfo jsonSchemaInfo = schemaForType(typeDefinition.classDeclaration());
     jsonSchemaInfo.getTopLevelTypesByName().put(typeDefinition.getTypeName(), rootElementDeclaration);
   }
@@ -1517,7 +1517,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       if (!decorated.isCollection()) {
         ClassDeclaration declaration = classType.getDeclaration();
         if (declaration != null) {
-          add(JsonTypeDefinition.createTypeDefinition(declaration));
+          addJsonType(JsonTypeDefinition.createTypeDefinition(declaration));
         }
       }
 
@@ -1532,7 +1532,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     public void visitEnumType(EnumType enumType) {
       EnumDeclaration enumDeclaration = enumType.getDeclaration();
       if (enumDeclaration != null) {
-        add(JsonTypeDefinition.createTypeDefinition(enumDeclaration));
+        addJsonType(JsonTypeDefinition.createTypeDefinition(enumDeclaration));
       }
     }
   }
