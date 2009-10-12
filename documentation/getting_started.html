@@ -32,7 +32,24 @@
 
     <div class="content">
 
-      <h1>Introduction</h1>
+      <h1>Creating a New Project</h1>
+
+      <h2>enunciate-simple-archetype</h2>
+
+      <p>Enunciate provides a Maven archetype to seed a simple web service project. The project uses the basic modules and includes working sample service 
+      and model code. In fact that code is the example starting below. The archetype is invoked just like any other Maven archetype:</p>
+
+      <code>
+mvn archetype:generate \
+    -DarchetypeGroupId=org.codehaus.enunciate.archetypes \
+    -DarchetypeArtifactId=enunciate-simple-archetype \
+    -DarchetypeVersion=1.16-SNAPSHOT \
+    -DgroupId=org.codehaus.enunciate \
+    -DartifactId=wannabecool \
+    -DarchetypeRepository=https://dav.codehaus.org/snapshots.repository/enunciate/
+      </code>
+
+      <h1>Introduction to Example</h1>
 
       <p>One of the most irritating things about Web service development demos is that they attempt to wow you with the simplicity and interoperability
       of their development tool by exposing one of three things: a "Hello, World!" app, an echo example, or a stock quote service.  The data structures are
