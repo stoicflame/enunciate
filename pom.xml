@@ -50,6 +50,7 @@
     <module>maven-enunciate-spring-plugin</module>
     <module>maven-enunciate-cxf-plugin</module>
 
+    <module>enunciate-simple-archetype</module>
     <module>integration-tests</module>
   </modules>
 
