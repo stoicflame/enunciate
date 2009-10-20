@@ -27,6 +27,7 @@ import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
+import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
@@ -133,6 +134,7 @@ import java.util.*;
  *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN of an instance of
  *       <tt>net.sf.jelly.apt.util.JavaDocTagHandler</tt></li>
  *   <li>The "<b>applyWsdlFilter</b>" attribute specifies whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically. Default: "true".</li>
+ *   <li>The "<b>applyWadlFilter</b>" attribute specifies whether to apply a filter for the WADL files that will attempt to resolve the rest paths dynamically. Default: "true".</li>
  * </ul>
  *
  * <h3>The "download" element</h3>
@@ -183,6 +185,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String docsDir = null;
   private String javadocTagHandling;
   private boolean applyWsdlFilter = true;
+  private boolean applyWadlFilter = true;
   private boolean jacksonXcAvailable = false;
   private String indexPageName = "index.html";
 
@@ -480,6 +483,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
+   * Whether to apply a filter for the WADL files that will attempt to resolve the paths dynamically.
+   *
+   * @return Whether to apply a filter for the WADL files that will attempt to resolve the paths dynamically.
+   */
+  public boolean isApplyWadlFilter() {
+    return applyWadlFilter;
+  }
+
+  /**
+   * Whether to apply a filter for the WADL files that will attempt to resolve the paths dynamically.
+   *
+   * @param applyWadlFilter Whether to apply a filter for the WADL files that will attempt to resolve the paths dynamically.
+   */
+  public void setApplyWadlFilter(boolean applyWadlFilter) {
+    this.applyWadlFilter = applyWadlFilter;
+  }
+
+  /**
    * The name of the index page.
    *
    * @return The name of the index page.
@@ -560,7 +581,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       debug("Documentation title: %s", title);
       model.setVariable("title", title);
 
-      model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod(Collections.unmodifiableSet(model.getContentTypesToIds().keySet())));
+      model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
       model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
@@ -618,6 +639,26 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       }
       wsdlFilter.setUrlMappings(wsdls);
       webAppFragment.setFilters(Arrays.asList(wsdlFilter));
+    }
+    if (isApplyWadlFilter() && getModelInternal().getWadlFile() != null) {
+      WebAppComponent wadlFilter = new WebAppComponent();
+      wadlFilter.setName("wadl-filter");
+      wadlFilter.setClassname("org.codehaus.enunciate.webapp.WADLFilter");
+      HashMap<String, String> initParams = new HashMap<String, String>();
+      initParams.put("assumed-base-address", getModel().getBaseDeploymentAddress());
+      wadlFilter.setInitParams(initParams);
+      TreeSet<String> wadls = new TreeSet<String>();
+      String docsDir = getDocsDir() == null ? "" : getDocsDir();
+      if (!docsDir.startsWith("/")) {
+        docsDir = "/" + docsDir;
+      }
+      while (docsDir.endsWith("/")) {
+        docsDir = docsDir.substring(0, docsDir.length() - 1);
+      }
+
+      wadls.add(docsDir + "/" + getModelInternal().getWadlFile().getName());
+      wadlFilter.setUrlMappings(wadls);
+      webAppFragment.setFilters(Arrays.asList(wadlFilter));
     }
     getEnunciate().addWebAppFragment(webAppFragment);
 
@@ -680,6 +721,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         File to = new File(getDocsBuildDir(), filename);
         enunciate.copyFile(from, to);
       }
+    }
+
+    File wadlFile = getModelInternal().getWadlFile();
+    if (wadlFile != null) {
+      enunciate.copyFile(wadlFile, new File(getDocsBuildDir(), wadlFile.getName()));
     }
 
     HashSet<String> explicitArtifacts = new HashSet<String>();

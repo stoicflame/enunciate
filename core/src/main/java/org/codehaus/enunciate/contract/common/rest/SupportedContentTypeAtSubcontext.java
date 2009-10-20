@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs;
-
-import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
+package org.codehaus.enunciate.contract.common.rest;
 
 import java.util.Set;
 

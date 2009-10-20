@@ -1064,6 +1064,9 @@
         <xs:attribute name="applyWsdlFilter" type="xs:boolean" default="true">
           <xs:annotation><xs:documentation>Whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="applyWadlFilter" type="xs:boolean" default="true">
+          <xs:annotation><xs:documentation>Whether to apply a filter for the WADL files that will attempt to resolve the rest paths dynamically.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

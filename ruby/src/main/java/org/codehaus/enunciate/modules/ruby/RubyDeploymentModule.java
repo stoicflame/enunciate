@@ -369,12 +369,18 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
     for (RootResource rootResource : rootResources) {
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
         for (String mime : resourceMethod.getProducesMime()) {
-          if (mime.toLowerCase().contains("json")) {
+          if ("*/*".equals(mime)) {
+            return true;
+          }
+          else if (mime.toLowerCase().contains("json")) {
             return true;
           }
         }
         for (String mime : resourceMethod.getConsumesMime()) {
-          if (mime.toLowerCase().contains("json")) {
+          if ("*/*".equals(mime)) {
+            return true;
+          }
+          else if (mime.toLowerCase().contains("json")) {
             return true;
           }
         }

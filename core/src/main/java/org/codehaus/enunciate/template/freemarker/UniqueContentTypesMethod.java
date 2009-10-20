@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.docs;
+package org.codehaus.enunciate.template.freemarker;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
@@ -22,6 +22,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
+import org.codehaus.enunciate.contract.common.rest.SupportedContentTypeAtSubcontext;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.rest.MimeType;
 
@@ -35,12 +36,6 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
  * @author Ryan Heaton
  */
 public class UniqueContentTypesMethod implements TemplateMethodModelEx {
-
-  private final Set<String> allKnownContentTypes;
-
-  public UniqueContentTypesMethod(Set<String> allKnownContentTypes) {
-    this.allKnownContentTypes = allKnownContentTypes;
-  }
 
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
@@ -94,12 +89,13 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
    * @return The supported types.
    */
   protected List<String> findAllSupportedTypes(SupportedContentType contentType) {
+    Set<String> allKnownContentTypes = ((EnunciateFreemarkerModel)FreemarkerModel.get()).getContentTypesToIds().keySet();
     String typeValue = contentType.getType();
     List<String> typeSet = new ArrayList<String>();
     typeSet.add(typeValue);
     try {
       MimeType mimeType = MimeType.parse(typeValue);
-      for (String knownType : this.allKnownContentTypes) {
+      for (String knownType : allKnownContentTypes) {
         try {
           MimeType knownMimeType = MimeType.parse(knownType);
           if (mimeType.isAcceptable(knownMimeType)) {

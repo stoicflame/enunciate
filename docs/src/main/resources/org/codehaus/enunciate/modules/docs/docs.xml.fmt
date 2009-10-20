@@ -190,7 +190,7 @@
 [/@forEachWsdl]
     </wsdls>
   </soap>
-  <rest baseAddress="${baseDeploymentAddress}"[#if wadl??] wadl="${wadl}"[/#if]>
+  <rest baseAddress="${baseDeploymentAddress}"[#if wadlFilename??] wadl="${wadlFilename}"[/#if]>
     <resources>
 [@forEachRESTResourceListByPath]
       <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">

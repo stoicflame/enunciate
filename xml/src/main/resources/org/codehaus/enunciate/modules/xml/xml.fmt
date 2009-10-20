@@ -1,6 +1,7 @@
 [#ftl strip_text=true]
 
 [#import "wsdl.fmt" as libWsdl/]
+[#import "wadl.fmt" as libWadl/]
 [#import "schema.fmt" as libSchema/]
 
 [#--first generate each wsdl.--]
@@ -13,6 +14,11 @@
     [/@file]
   [/#if]
 [/@forEachWsdl]
+
+[#--then generate each wadl--]
+[@file name="application.wadl" charset="utf-8"]
+  [@libWadl.processWadl/]
+[/@file]
 
 [#--then generate each schema.--]
 [@forEachSchema]

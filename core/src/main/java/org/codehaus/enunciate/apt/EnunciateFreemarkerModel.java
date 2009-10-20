@@ -96,6 +96,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   private String baseDeploymentAddress = null;
   private EnunciateConfiguration enunciateConfig = null;
   final Map<String, JsonSchemaInfo> idsToJsonSchemas;
+  private File wadlFile = null;
 
   public EnunciateFreemarkerModel() {
     this.namespacesToPrefixes = loadKnownNamespaces();
@@ -150,6 +151,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema", "xs");
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
     knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
+    knownNamespaces.put("http://research.sun.com/wadl/2006/10", "wadl");
 
     return knownNamespaces;
   }
@@ -1486,6 +1488,26 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void setFileOutputDirectory(File fileOutputDirectory) {
     this.fileOutputDirectory = fileOutputDirectory;
+  }
+
+  /**
+   * The wadl file for the model.
+   *
+   * @return The wadl file for the model.
+   */
+  public File getWadlFile() {
+    return wadlFile;
+  }
+
+  /**
+   * The wadl file for the model.
+   *
+   * @param wadlFile The wadl file for the model.
+   */
+  public void setWadlFile(File wadlFile) {
+    this.wadlFile = wadlFile;
+    setVariable("wadlFile", wadlFile);
+    setVariable("wadlFilename", wadlFile.getName());
   }
 
   /**

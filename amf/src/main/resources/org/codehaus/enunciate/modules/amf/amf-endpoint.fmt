@@ -65,7 +65,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
 
   //just used for autowiring.
   @org.springframework.beans.factory.annotation.Autowired( required = false )
-  public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
+  public void setSecurityChecker(org.codehaus.enunciate.service.SecurityExceptionChecker securityChecker) {
     super.setSecurityChecker(securityChecker);
   }
   [/#if]

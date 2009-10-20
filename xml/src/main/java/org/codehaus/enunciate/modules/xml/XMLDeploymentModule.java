@@ -30,6 +30,7 @@ import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
+import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 import org.apache.commons.digester.RuleSet;
 
 import javax.xml.parsers.SAXParser;
@@ -264,6 +265,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     model.put("prefix", new PrefixMethod());
     model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
+    model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);
@@ -310,6 +312,15 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       FileArtifact schemaArtifact = new FileArtifact(getName(), schemaInfo.getId() + ".xsd", schemaFile);
       schemaArtifact.setDescription("Schema file for namespace " + schemaInfo.getNamespace());
       getEnunciate().addArtifact(schemaArtifact);
+    }
+
+    File wadl = new File(artifactDir, "application.wadl");
+    if (wadl.exists()) {
+      FileArtifact wadlArtifact = new FileArtifact(getName(), "application.wadl", wadl);
+      wadlArtifact.setDescription("WADL document");
+      getEnunciate().addArtifact(wadlArtifact);
+      prettyPrint(wadl);
+      model.setWadlFile(wadl);
     }
   }
 
