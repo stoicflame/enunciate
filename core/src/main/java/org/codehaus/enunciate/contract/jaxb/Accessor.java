@@ -45,6 +45,8 @@ import org.codehaus.enunciate.ClientName;
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An accessor for a field or method value into a type.
@@ -384,5 +386,18 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    */
   public boolean isElementRef() {
     return false;
+  }
+
+  /**
+   * Set of (human-readable) locations that this type definition is referenced from.
+   *
+   * @return The referenced-from list.
+   */
+  public Set<String> getReferencedFrom() {
+    TreeSet<String> referenceFrom = new TreeSet<String>();
+    for (String location : this.typeDefinition.getReferencedFrom()) {
+      referenceFrom.add("type definition " + this.typeDefinition.getQualifiedName() + " referenced from " + location);
+    }
+    return referenceFrom;
   }
 }

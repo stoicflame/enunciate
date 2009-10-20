@@ -56,6 +56,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final Accessor xmlID;
   private final boolean hasAnyAttribute;
   private final AnyElement anyElement;
+  private final Set<String> referencedFrom = new TreeSet<String>();
 
   protected TypeDefinition(ClassDeclaration delegate) {
     super(delegate);
@@ -589,6 +590,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public boolean isBaseObject() {
     return true;
+  }
+
+  /**
+   * Set of (human-readable) locations that this type definition is referenced from.
+   *
+   * @return The referenced-from list.
+   */
+  public Set<String> getReferencedFrom() {
+    return referencedFrom;
   }
 
   /**

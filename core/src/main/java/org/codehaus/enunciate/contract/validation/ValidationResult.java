@@ -24,6 +24,11 @@ import com.sun.mirror.declaration.ParameterDeclaration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.Iterator;
+
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxb.Accessor;
 
 /**
  * The result of validation.
@@ -84,11 +89,41 @@ public class ValidationResult {
     if (declaration == null) {
       this.errors.add(new ValidationMessage(null, text));
     }
-    else if (declaration.getPosition() != null) {
-      this.errors.add(new ValidationMessage(declaration.getPosition(), text));
+    else {
+      if (declaration instanceof TypeDefinition) {
+        //type definitions get extra context.
+        text = appendReferenceInformation(text, ((TypeDefinition)declaration).getReferencedFrom());
+      }
+      else if (declaration instanceof Accessor) {
+        //accessors get extra context.
+        text = appendReferenceInformation(text, ((Accessor)declaration).getReferencedFrom());
+      }
+
+
+      if (declaration.getPosition() != null) {
+        this.errors.add(new ValidationMessage(declaration.getPosition(), text));
+      }
+      else {
+        this.errors.add(new ValidationMessage(null, toString(declaration) + ": " + text));
+      }
+    }
+  }
+
+  protected String appendReferenceInformation(String text, Set<String> referencedFrom) {
+    if (referencedFrom.isEmpty()) {
+      return text;
     }
     else {
-      this.errors.add(new ValidationMessage(null, toString(declaration) + ": " + text));
+      StringBuilder builder = new StringBuilder(text).append("\nThis was added to the model from ");
+      Iterator<String> locations = referencedFrom.iterator();
+      while (locations.hasNext()) {
+        String location = locations.next();
+        builder.append(location);
+        if (locations.hasNext()) {
+          builder.append("and from ");
+        }
+      }
+      return builder.toString();
     }
   }
 

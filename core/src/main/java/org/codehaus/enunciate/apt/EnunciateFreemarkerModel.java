@@ -67,6 +67,13 @@ import java.util.*;
  */
 public class EnunciateFreemarkerModel extends FreemarkerModel {
 
+  private static final ThreadLocal<LinkedList<String>> REFERENCE_STACK = new ThreadLocal<LinkedList<String>>() {
+    @Override
+    protected LinkedList<String> initialValue() {
+      return new LinkedList<String>();
+    }
+  };
+  
   private static final Comparator<TypeDeclaration> CLASS_COMPARATOR = new TypeDeclarationComparator();
 
   int prefixIndex = 0;
@@ -366,7 +373,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.endpointInterfaces.add(ei);
 
     if (includeReferencedClasses()) {
+      REFERENCE_STACK.get().addFirst("endpoint interface " + ei.getQualifiedName());
       addReferencedTypeDefinitions(ei);
+      REFERENCE_STACK.get().removeFirst();
     }
   }
 
@@ -394,11 +403,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         if (includeReferencedClasses() && (this.enunciateConfig == null || !this.enunciateConfig.isExcludeUnreferencedClasses()) && typeDefinition instanceof JsonObjectTypeDefinition) {
           JsonObjectTypeDefinition objectTypeDefinition = (JsonObjectTypeDefinition) typeDefinition;
           for (PropertyDeclaration property : objectTypeDefinition.getJsonPropertiesByName().values()) {
+            REFERENCE_STACK.get().addFirst("json property " + property.getSimpleName() + " of json object definition " + typeDefinition.getQualifiedName());
             property.getPropertyType().accept(new ReferencedJsonTypeDefinitionVisitor());
+            REFERENCE_STACK.get().removeFirst();
           }
           ClassType superclass = objectTypeDefinition.getSuperclass();
           if (superclass != null) {
+            REFERENCE_STACK.get().addFirst("json type definition subclass " + typeDefinition.getQualifiedName());
             addJsonType(JsonTypeDefinition.createTypeDefinition(superclass.getDeclaration()));
+            REFERENCE_STACK.get().removeFirst();
           }
         }
       }
@@ -415,6 +428,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
       int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
       if (position < 0 && !isKnownType(typeDef)) {
+        typeDef.getReferencedFrom().add(currentReferenceLocation());
         this.typeDefinitions.add(-position - 1, typeDef);
         add(typeDef.getSchema());
 
@@ -430,11 +444,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
         schemaInfo.getTypeDefinitions().add(typeDef);
 
+        REFERENCE_STACK.get().addFirst("\"see also\" annotation");
         addSeeAlsoTypeDefinitions(typeDef);
-        
+        REFERENCE_STACK.get().removeFirst();
+
         for (Element element : typeDef.getElements()) {
           if (includeReferencedClasses()) {
+            REFERENCE_STACK.get().addFirst("accessor " + element.getSimpleName() + " of type definition " + typeDef.getQualifiedName());
             addReferencedTypeDefinitions(element);
+            REFERENCE_STACK.get().removeFirst();
           }
 
           ImplicitSchemaElement implicitElement = getImplicitElement(element);
@@ -453,7 +471,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
         for (Attribute attribute : typeDef.getAttributes()) {
           if (includeReferencedClasses()) {
+            REFERENCE_STACK.get().addFirst("accessor " + attribute.getSimpleName() + " of type definition " + typeDef.getQualifiedName());
             addReferencedTypeDefinitions(attribute);
+            REFERENCE_STACK.get().removeFirst();
           }
           ImplicitSchemaAttribute implicitAttribute = getImplicitAttribute(attribute);
           if (implicitAttribute != null) {
@@ -472,16 +492,38 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         if ((includeReferencedClasses())) {
           Value value = typeDef.getValue();
           if (value != null) {
+            REFERENCE_STACK.get().addFirst("accessor " + value.getSimpleName() + " of type definition " + typeDef.getQualifiedName());
             addReferencedTypeDefinitions(value);
+            REFERENCE_STACK.get().removeFirst();
           }
 
           ClassType superClass = typeDef.getSuperclass();
           if (!typeDef.isEnum() && superClass != null) {
+            REFERENCE_STACK.get().addFirst("type definition subclass " + typeDef.getQualifiedName());
             addReferencedTypeDefinitions(superClass);
+            REFERENCE_STACK.get().removeFirst();
           }
         }
       }
     }
+  }
+
+  /**
+   * A descrition of the current reference location.
+   *
+   * @return A descrition of the current reference location.
+   */
+  protected String currentReferenceLocation() {
+    StringBuilder builder = new StringBuilder();
+    Iterator<String> step = REFERENCE_STACK.get().iterator();
+    while (step.hasNext()) {
+      String location = step.next();
+      builder.append(location).append('\n');
+      if (step.hasNext()) {
+        builder.append("  of ");
+      }
+    }
+    return builder.toString();
   }
 
   /**
@@ -578,6 +620,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param endpoint The REST endpoint to add.
    */
   public void add(RESTEndpoint endpoint) {
+    if (includeReferencedClasses()) {
+      REFERENCE_STACK.get().addFirst("\"see also\" annotation of REST endpoint " + endpoint.getQualifiedName());
+      addSeeAlsoTypeDefinitions(endpoint);
+      REFERENCE_STACK.get().removeFirst();
+    }
+
     for (RESTMethod restMethod : endpoint.getRESTMethods()) {
       RESTNoun noun = restMethod.getNoun();
       List<RESTMethod> restMethods = this.nounsToRESTMethods.get(noun);
@@ -598,8 +646,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       }
 
       if (includeReferencedClasses()) {
-        addSeeAlsoTypeDefinitions(endpoint);
+        REFERENCE_STACK.get().addFirst("method " + restMethod.getSimpleName() + " of REST endpoint " + endpoint.getQualifiedName());
         addReferencedTypeDefinitions(restMethod);
+        REFERENCE_STACK.get().removeFirst();
       }
     }
 
@@ -643,13 +692,18 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param rootResource The root resource to add to the model.
    */
   public void add(RootResource rootResource) {
-    this.rootResources.add(rootResource);
     if (includeReferencedClasses()) {
+      REFERENCE_STACK.get().addFirst("\"see also\" annotation of root resource " + rootResource.getQualifiedName());
       addSeeAlsoTypeDefinitions(rootResource);
+      REFERENCE_STACK.get().removeFirst();
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        REFERENCE_STACK.get().addFirst("resource method " + resourceMethod.getSimpleName() + " of root resource " + rootResource.getQualifiedName());
         addReferencedTypeDefinitions(resourceMethod);
+        REFERENCE_STACK.get().removeFirst();
       }
     }
+
+    this.rootResources.add(rootResource);
   }
 
   /**
@@ -658,9 +712,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param resourceMethod The resource method.
    */
   protected void addReferencedTypeDefinitions(ResourceMethod resourceMethod) {
+    REFERENCE_STACK.get().addFirst("\"see also\" annotation");
     addSeeAlsoTypeDefinitions(resourceMethod);
+    REFERENCE_STACK.get().removeFirst();
     ParameterDeclaration ep = resourceMethod.getEntityParameter();
     if (ep != null) {
+      REFERENCE_STACK.get().addFirst("entity parameter " + ep.getSimpleName());
       TypeMirror type = ep.getType();
       if (type instanceof ClassType) {
         ClassDeclaration classDeclaration = ((ClassType) type).getDeclaration();
@@ -673,10 +730,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
         }
       }
+      REFERENCE_STACK.get().removeFirst();
     }
 
     TypeMirror returnType = resourceMethod.getReturnType();
     if (returnType instanceof ClassType) {
+      REFERENCE_STACK.get().addFirst("return type");
       ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
       if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
         //only add referenced type definitions for root elements.
@@ -686,6 +745,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
         addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
       }
+      REFERENCE_STACK.get().removeFirst();
     }
 
     //todo: include referenced type definitions from the errors?
@@ -780,7 +840,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       schemaInfo.getGlobalElements().add(rootElement);
 
       if (includeReferencedClasses()) {
+        REFERENCE_STACK.get().addFirst("root element " + rootElement.getQualifiedName());
         addReferencedTypeDefinitions(rootElement);
+        REFERENCE_STACK.get().removeFirst();
       }
     }
   }
@@ -807,9 +869,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param ei The endpoint interface.
    */
   protected void addReferencedTypeDefinitions(EndpointInterface ei) {
+    REFERENCE_STACK.get().addFirst("\"see also\" annotation");
     addSeeAlsoTypeDefinitions(ei);
+    REFERENCE_STACK.get().removeFirst();
     for (WebMethod webMethod : ei.getWebMethods()) {
+      REFERENCE_STACK.get().addFirst("method " + webMethod.getSimpleName());
       addReferencedTypeDefinitions(webMethod);
+      REFERENCE_STACK.get().removeFirst();
     }
   }
 
@@ -819,14 +885,22 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param webMethod The web method.
    */
   protected void addReferencedTypeDefinitions(WebMethod webMethod) {
+    REFERENCE_STACK.get().addFirst("\"see also\" annotation");
     addSeeAlsoTypeDefinitions(webMethod);
+    REFERENCE_STACK.get().removeFirst();
     WebResult result = webMethod.getWebResult();
+    REFERENCE_STACK.get().addFirst("return type");
     addReferencedTypeDefinitions(result.isAdapted() ? result.getAdapterType() : result.getType());
+    REFERENCE_STACK.get().removeFirst();
     for (WebParam webParam : webMethod.getWebParameters()) {
+      REFERENCE_STACK.get().addFirst("parameter " + webParam.getSimpleName());
       addReferencedTypeDefinitions(webParam.isAdapted() ? webParam.getAdapterType() : webParam.getType());
+      REFERENCE_STACK.get().removeFirst();
     }
     for (WebFault webFault : webMethod.getWebFaults()) {
+      REFERENCE_STACK.get().addFirst("thrown fault " + webFault.getSimpleName());
       addReferencedTypeDefinitions(webFault);
+      REFERENCE_STACK.get().removeFirst();
     }
   }
 
@@ -839,11 +913,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     if (webFault.isImplicitSchemaElement()) {
       for (ImplicitChildElement childElement : webFault.getChildElements()) {
         WebFault.FaultBeanChildElement fbce = (WebFault.FaultBeanChildElement) childElement;
+        REFERENCE_STACK.get().addFirst("property " + fbce.getProperty().getSimpleName());    
         addReferencedTypeDefinitions(fbce.isAdapted() ? fbce.getAdapterType() : fbce.getType());
+        REFERENCE_STACK.get().removeFirst();
       }
     }
     else {
+      REFERENCE_STACK.get().addFirst("explicit fault bean");
       addReferencedTypeDefinitions(webFault.getExplicitFaultBean());
+      REFERENCE_STACK.get().removeFirst();
     }
   }
 
@@ -988,10 +1066,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       namespacesToSchemas.put(namespace, schemaInfo);
     }
     schemaInfo.getRegistries().add(registry);
+    REFERENCE_STACK.get().addFirst("registry " + registry.getQualifiedName());
     addReferencedTypeDefinitions(registry);
     for (LocalElementDeclaration led : registry.getLocalElementDeclarations()) {
+      REFERENCE_STACK.get().addFirst("method " + led.getSimpleName());
       add(led);
+      REFERENCE_STACK.get().removeFirst();
     }
+    REFERENCE_STACK.get().removeFirst();
   }
 
   /**
@@ -1000,9 +1082,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param registry The registry.
    */
   protected void addReferencedTypeDefinitions(Registry registry) {
+    REFERENCE_STACK.get().addFirst("\"see also\" annotation");
     addSeeAlsoTypeDefinitions(registry);
+    REFERENCE_STACK.get().removeFirst();
     for (MethodDeclaration methodDeclaration : registry.getInstanceFactoryMethods()) {
+      REFERENCE_STACK.get().addFirst("method " + methodDeclaration.getSimpleName());
       addReferencedTypeDefinitions(methodDeclaration.getReturnType());
+      REFERENCE_STACK.get().removeFirst();
     }
   }
 
@@ -1030,7 +1116,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     addSeeAlsoTypeDefinitions(led);
     TypeDeclaration scope = led.getElementScope();
     if (scope instanceof ClassDeclaration) {
+      REFERENCE_STACK.get().addFirst("scope");
       add(createTypeDefinition((ClassDeclaration) scope));
+      REFERENCE_STACK.get().removeFirst();
     }
     TypeDeclaration typeDeclaration = led.getElementTypeDeclaration();
     if (typeDeclaration instanceof ClassDeclaration) {
