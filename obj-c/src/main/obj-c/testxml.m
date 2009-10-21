@@ -1195,67 +1195,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  return [NSCalendarDate readXMLType: reader];
-}
-
-/**
- * Read an XML type from an XML reader into an existing instance.
- *
- * @param reader The reader.
- * @param existing The existing instance into which to read values.
- */
-- (id) initWithReader: (xmlTextReaderPtr) reader
-{
-  [NSException raise: @"XMLReadError"
-               format: @"An existing date cannot be modified."];
-  return nil;
-}
-
-/**
- * Write the NSDate to the writer.
- *
- * @param writer The writer.
- */
-- (void) writeXMLType: (xmlTextWriterPtr) writer
-{
-  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
-  xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
-  timevalue[19] = timevalue[20];
-  timevalue[20] = timevalue[21];
-  timevalue[21] = timevalue[22];
-  timevalue[22] = ':';
-  xmlTextWriterWriteString(writer, timevalue);
-  [formatter release];
-}
-@end /*NSDate (JAXBType)*/
-
-
-
-/**
- * Declaration of the JAXB type for a big number.
- */
-@interface NSCalendarDate (JAXBType) <JAXBType>
-@end
-
-/**
- * Implementation of the JAXB type for a big number.
- */
-@implementation NSCalendarDate (JAXBType)
-
-/**
- * Read the XML type from the reader.
- *
- * @param reader The reader.
- * @return The NSCalendarDate that was read from the reader.
- */
-+ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
-{
   xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
   NSInteger year = 0;
   NSUInteger month = 1, day = 1, hour = 0, minute = 0, second = 0;
-  NSTimeZone *tz = nil;
   BOOL skip_time = NO;
-  int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_seconds = 0;
+  int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hour = 0, offset_minute = 0;
   char token[len];
 
   if (len > (index + 5) && timevalue[index + 4] == '-') {
@@ -1355,7 +1299,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
     token[token_index++] = timevalue[index++];
   }
   token[token_index] = '\0';
-  offset_seconds += atoi(token) * 60 * 60;
+  offset_hour += atoi(token);
   index++;
 
   //go to end.
@@ -1364,11 +1308,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
     token[token_index++] = timevalue[index++];
   }
   token[token_index] = '\0';
-  offset_seconds += atoi(token) * 60;
+  offset_minute += atoi(token);
 
-  tz = [NSTimeZone timeZoneForSecondsFromGMT: offset_seconds];
+  //YYYY-MM-DD HH:MM:SS -HHHMM
   free(timevalue);
-  return [NSCalendarDate dateWithYear: year month: month day: day hour: hour minute: minute second: second timeZone: tz];
+  return [NSDate dateWithString: [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", year, month, day, hour, minute, second, offset_hour, offset_minute]];
 }
 
 /**
@@ -1391,10 +1335,17 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
-  [super writeXMLType: writer];
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
+  xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
+  timevalue[19] = timevalue[20];
+  timevalue[20] = timevalue[21];
+  timevalue[21] = timevalue[22];
+  timevalue[22] = ':';
+  xmlTextWriterWriteString(writer, timevalue);
+  [formatter release];
 }
+@end /*NSDate (JAXBType)*/
 
-@end /*NSCalendarDate (JAXBType)*/
 #endif /* ENUNCIATE_OBJC_CLASSES */
 
 #ifndef ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
@@ -2318,7 +2269,7 @@ int main() {
   xmlTextWriterPtr writer;
   int rc;
   JAXBBasicXMLNode *node;
-  NSCalendarDate *cal;
+  NSDate *cal;
 
   [person setId: pid];
   [person setGender: f];
@@ -2384,7 +2335,7 @@ int main() {
   printf("%s\n\n", buf->content);
   xmlBufferFree(buf);
 
-  cal = [NSCalendarDate dateWithString:@"2009-08-31T16:47:03 -0700" calendarFormat:@"%Y-%m-%dT%H:%M:%S %z"];
+  cal = [NSDate dateWithString:@"2009-08-31 16:47:03 -0700"];
   printf("writing reading calendar: %s...\n", [[cal description] cString]);
   buf = xmlBufferCreate();
   writer = xmlNewTextWriterMemory(buf, 0);
@@ -2393,7 +2344,7 @@ int main() {
   rc = xmlTextWriterStartElementNS(writer, NULL, BAD_CAST "date", NULL);
   [cal writeXMLType: writer];
   rc = xmlTextWriterEndDocument(writer);
-  printf("%s\n\n", buf->content);
+  printf("\n\n%s", buf->content);
   reader = xmlReaderForMemory(buf->content, strlen(buf->content), NULL, NULL, 0);
   if (reader == NULL) {
     printf("BAD READER!");
@@ -2403,7 +2354,7 @@ int main() {
   if (rc != 1) {
     printf("BAD READ!");
   }
-  cal = (NSCalendarDate*) [NSCalendarDate readXMLType: reader];
+  cal = (NSDate*) [NSDate readXMLType: reader];
   printf("read calendar: %s...\n", [[cal description] cString]);
 
   buf = xmlBufferCreate();
@@ -2413,7 +2364,7 @@ int main() {
   rc = xmlTextWriterStartElementNS(writer, NULL, BAD_CAST "date", NULL);
   xmlTextWriterWriteString(writer, "2009-09-10T20:26:34.902-06:00");
   rc = xmlTextWriterEndDocument(writer);
-  printf("%s\n\n", buf->content);
+  printf("\n\n%s", buf->content);
   reader = xmlReaderForMemory(buf->content, strlen(buf->content), NULL, NULL, 0);
   if (reader == NULL) {
     printf("BAD READER!");
@@ -2423,7 +2374,7 @@ int main() {
   if (rc != 1) {
     printf("BAD READ!");
   }
-  cal = (NSCalendarDate*) [NSCalendarDate readXMLType: reader];
+  cal = (NSDate*) [NSDate readXMLType: reader];
   printf("read calendar: %s...\n", [[cal description] cString]);
 
   buf = xmlBufferCreate();
@@ -2433,7 +2384,7 @@ int main() {
   rc = xmlTextWriterStartElementNS(writer, NULL, BAD_CAST "date", NULL);
   xmlTextWriterWriteString(writer, "2009-09-10-06:00");
   rc = xmlTextWriterEndDocument(writer);
-  printf("%s\n\n", buf->content);
+  printf("\n\n%s", buf->content);
   reader = xmlReaderForMemory(buf->content, strlen(buf->content), NULL, NULL, 0);
   if (reader == NULL) {
     printf("BAD READER!");
@@ -2443,7 +2394,7 @@ int main() {
   if (rc != 1) {
     printf("BAD READ!");
   }
-  cal = (NSCalendarDate*) [NSCalendarDate readXMLType: reader];
+  cal = (NSDate*) [NSDate readXMLType: reader];
   printf("read calendar: %s...\n", [[cal description] cString]);
 
   buf = xmlBufferCreate();
@@ -2453,7 +2404,7 @@ int main() {
   rc = xmlTextWriterStartElementNS(writer, NULL, BAD_CAST "date", NULL);
   xmlTextWriterWriteString(writer, "20:26:34.902-06:00");
   rc = xmlTextWriterEndDocument(writer);
-  printf("%s\n\n", buf->content);
+  printf("\n\n%s", buf->content);
   reader = xmlReaderForMemory(buf->content, strlen(buf->content), NULL, NULL, 0);
   if (reader == NULL) {
     printf("BAD READER!");
@@ -2463,7 +2414,7 @@ int main() {
   if (rc != 1) {
     printf("BAD READ!");
   }
-  cal = (NSCalendarDate*) [NSCalendarDate readXMLType: reader];
+  cal = (NSDate*) [NSDate readXMLType: reader];
   printf("read calendar: %s...\n", [[cal description] cString]);
 
   [pool release];

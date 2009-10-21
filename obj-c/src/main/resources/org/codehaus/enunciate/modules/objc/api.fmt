@@ -1366,67 +1366,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
-  return [NSCalendarDate readXMLType: reader];
-}
-
-/**
- * Read an XML type from an XML reader into an existing instance.
- *
- * @param reader The reader.
- * @param existing The existing instance into which to read values.
- */
-- (id) initWithReader: (xmlTextReaderPtr) reader
-{
-  [NSException raise: @"XMLReadError"
-               format: @"An existing date cannot be modified."];
-  return nil;
-}
-
-/**
- * Write the NSDate to the writer.
- *
- * @param writer The writer.
- */
-- (void) writeXMLType: (xmlTextWriterPtr) writer
-{
-  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
-  xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
-  timevalue[19] = timevalue[20];
-  timevalue[20] = timevalue[21];
-  timevalue[21] = timevalue[22];
-  timevalue[22] = ':';
-  xmlTextWriterWriteString(writer, timevalue);
-  [formatter release];
-}
-@end /*NSDate (JAXBType)*/
-
-
-
-/**
- * Declaration of the JAXB type for a big number.
- */
-@interface NSCalendarDate (JAXBType) <JAXBType>
-@end
-
-/**
- * Implementation of the JAXB type for a big number.
- */
-@implementation NSCalendarDate (JAXBType)
-
-/**
- * Read the XML type from the reader.
- *
- * @param reader The reader.
- * @return The NSCalendarDate that was read from the reader.
- */
-+ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
-{
   xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
   NSInteger year = 0;
   NSUInteger month = 1, day = 1, hour = 0, minute = 0, second = 0;
-  NSTimeZone *tz = nil;
   BOOL skip_time = NO;
-  int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_seconds = 0;
+  int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hour = 0, offset_minute = 0;
   char token[len];
 
   if (len > (index + 5) && timevalue[index + 4] == '-') {
@@ -1526,7 +1470,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
     token[token_index++] = timevalue[index++];
   }
   token[token_index] = '\0';
-  offset_seconds += atoi(token) * 60 * 60;
+  offset_hour += atoi(token);
   index++;
 
   //go to end.
@@ -1535,11 +1479,11 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
     token[token_index++] = timevalue[index++];
   }
   token[token_index] = '\0';
-  offset_seconds += atoi(token) * 60;
+  offset_minute += atoi(token);
 
-  tz = [NSTimeZone timeZoneForSecondsFromGMT: offset_seconds];
+  //YYYY-MM-DD HH:MM:SS -HHHMM
   free(timevalue);
-  return [NSCalendarDate dateWithYear: year month: month day: day hour: hour minute: minute second: second timeZone: tz];
+  return [NSDate dateWithString: [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", year, month, day, hour, minute, second, offset_hour, offset_minute]];
 }
 
 /**
@@ -1562,10 +1506,17 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
-  [super writeXMLType: writer];
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
+  xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
+  timevalue[19] = timevalue[20];
+  timevalue[20] = timevalue[21];
+  timevalue[21] = timevalue[22];
+  timevalue[22] = ':';
+  xmlTextWriterWriteString(writer, timevalue);
+  [formatter release];
 }
+@end /*NSDate (JAXBType)*/
 
-@end /*NSCalendarDate (JAXBType)*/
 #endif /* ENUNCIATE_OBJC_CLASSES */
 
 #ifndef ENUNCIATE_XML_OBJC_PRIMITIVE_FUNCTIONS
