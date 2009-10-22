@@ -23,6 +23,12 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
     [/#list]
   [/#if]
 
+  /**
+   * Create an instance of ${simpleNameFor(type)} from JSON text.
+   */
+  public static native ${simpleNameFor(type)} fromJson(String json) /*-{
+    return eval('(' + json + ')');
+  }-*/;
 }
 [/@file]
 [#macro propertyAccessors property]

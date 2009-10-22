@@ -25,8 +25,6 @@
     <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.JavaToJavaScriptCompiler.html">translatable objects</a>
     in the "client" package of the main module.
   </p>
-[/#if]
-[#if sample_service_method??]
 
   <h1>
     GWT-RPC Example
@@ -47,6 +45,43 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
     onFailure(Throwable error) {
       //handle the error as needed...
     }
+});
+  </code>
+[/#if]
+[#if sample_resource??]
+
+  <p>
+    This GWT library provides all <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.ClientSide.html">client-side
+    code</a> necessary to invoke a REST endpoint that provides its data as JSON.  In accordance with the standard
+    <a href="http://code.google.com/webtoolkit/documentation/com.google.gwt.doc.DeveloperGuide.Fundamentals.ProjectStructure.html">GWT project structure</a>,
+    the library provides all <a href="http://googlewebtoolkit.blogspot.com/2008/08/getting-to-really-know-gwt-part-2.html">JSON overlays</a> that can be
+    used to read and write the JSON data.
+  </p>
+
+  <h1>
+    JSON-REST Example
+  </h1>
+
+  <code>
+String url = GWT.getModuleBaseURL() + ...;
+RequestBuilder request = new RequestBuilder(RequestBuilder.GET, url);
+request.sendRequest(null, new RequestCallback() {
+  public void onResponseReceived(Request request, Response response) {
+    if (200 == response.getStatusCode()) {
+      //handle the successful data...
+  [#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+    ${sample_resource.outputPayload.xmlElement.simpleName} data = ${sample_resource.outputPayload.xmlElement.simpleName}.fromJson(response.getText());
+    //handle the ${sample_resource.outputPayload.xmlElement.simpleName}...
+  [/#if]
+    }
+    else {
+      //handle the error...
+    }
+  }
+
+  public void onError(Request request, Throwable throwable) {
+    //handle the error...
+  }
 });
   </code>
 [/#if]

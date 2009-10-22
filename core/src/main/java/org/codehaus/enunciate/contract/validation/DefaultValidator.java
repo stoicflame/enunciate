@@ -528,7 +528,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(typeDef, "An xml type must be either a top-level class or a nested static class.");
     }
 
-    boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition));
+    boolean needsNoArgConstructor = (!(typeDef instanceof EnumTypeDefinition) && (!disabledRules.contains("jaxb.noarg.constructor")));
     if (needsNoArgConstructor && (xmlType != null)) {
       String factoryClassFqn = null;
       try {

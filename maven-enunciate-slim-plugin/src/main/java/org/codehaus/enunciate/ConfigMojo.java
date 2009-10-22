@@ -200,13 +200,24 @@ public class ConfigMojo extends AbstractMojo {
 
   /**
    * The include patterns.
+   *
+   * @parameter
    */
   private String[] includes;
 
   /**
    * The exclude patterns.
+   *
+   * @parameter
    */
   private String[] excludes;
+
+  /**
+   * Additional classpath entries.
+   *
+   * @parameter
+   */
+  private String[] additionalClasspathEntries;
 
   /**
    * @parameter expression="${session}"
@@ -298,6 +309,11 @@ public class ConfigMojo extends AbstractMojo {
       classpath.append(classpathIt.next().getFile().getAbsolutePath());
       if (classpathIt.hasNext()) {
         classpath.append(File.pathSeparatorChar);
+      }
+    }
+    if (additionalClasspathEntries != null) {
+      for (String additionalClasspathEntry : additionalClasspathEntries) {
+        classpath.append(File.pathSeparatorChar).append(additionalClasspathEntry);
       }
     }
     enunciate.setBuildClasspath(classpath.toString());

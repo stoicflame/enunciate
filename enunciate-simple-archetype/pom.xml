@@ -24,15 +24,18 @@
   </build>
 
   <distributionManagement>
+
     <repository>
-      <id>codehaus-main</id>
+      <id>codehaus.org</id>
       <name>Enunciate Central Repository</name>
       <url>dav:https://dav.codehaus.org/repository/enunciate/</url>
     </repository>
+
     <snapshotRepository>
-      <id>codehaus-snapshots</id>
+      <id>codehaus.org</id>
       <name>Enunciate Central Development Repository</name>
       <url>dav:https://dav.codehaus.org/snapshots.repository/enunciate/</url>
     </snapshotRepository>
+
   </distributionManagement>
 </project>
