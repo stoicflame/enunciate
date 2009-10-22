@@ -58,7 +58,7 @@ public class AMF${endpointInterface.simpleName} extends org.codehaus.enunciate.m
   [#if useSpringDI!false]
   @org.springframework.beans.factory.annotation.Autowired( required = false )
   [/#if]
-  public void setServiceBean(${endpointInterface.qualifiedName} serviceBean) {
+  public void setServiceBean([#if useSpringDI!false]@org.springframework.beans.factory.annotation.Qualifier("${endpointInterface.endpointImplementations[0].serviceEndpointId}") [/#if]${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
   [#if useSpringDI!false]

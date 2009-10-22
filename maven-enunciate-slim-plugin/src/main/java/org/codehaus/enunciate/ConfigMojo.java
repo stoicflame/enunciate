@@ -459,6 +459,16 @@ public class ConfigMojo extends AbstractMojo {
   }
 
   /**
+   * Looks up the source jar for the path entry.
+   *
+   * @param pathEntry The path entry.
+   * @return The source jar.
+   */
+  protected String lookupSourceJar(File pathEntry) {
+    return null;
+  }
+
+  /**
    * Enunciate mechanism that logs via the Maven logging mechanism.
    */
   protected class MavenSpecificEnunciate extends Enunciate {
@@ -532,6 +542,11 @@ public class ConfigMojo extends AbstractMojo {
           }
         }
       }
+    }
+
+    @Override
+    protected String lookupSourceEntry(File pathEntry) {
+      return lookupSourceJar(pathEntry);
     }
 
     @Override

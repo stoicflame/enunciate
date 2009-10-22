@@ -29,6 +29,7 @@ import org.codehaus.enunciate.util.AntPatternMatcher;
 import org.codehaus.enunciate.util.PackageInfoWriter;
 import org.xml.sax.SAXException;
 
+import javax.xml.ws.Holder;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
@@ -328,9 +329,11 @@ public class Enunciate {
   protected Map<String, File> scanForClassesToImport() throws IOException {
     final Map<String, File> classes2sources = new HashMap<String, File>();
     File tempSourcesDir = createTempDir();
-    List<String> classpath = new ArrayList<String>(Arrays.asList(getEnunciateRuntimeClasspath().split(File.pathSeparator)));
-    for (String pathItem : classpath) {
+    LinkedList<String> classpathToScan = new LinkedList<String>(Arrays.asList(getEnunciateRuntimeClasspath().split(File.pathSeparator)));
+    while (!classpathToScan.isEmpty()) {
+      String pathItem = classpathToScan.removeFirst();
       final File pathFile = new File(pathItem);
+      final Holder<Boolean> classesImported = new Holder<Boolean>(false);
       final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
       if (pathFile.exists()) {
         //scan the file on the classpath to find any classes that are to be imported.
@@ -355,6 +358,7 @@ public class Enunciate {
                   Set<String> autoImports = readAutoImports(autoImportList);
                   autoImportList.close();
                   for (String autoImport : autoImports) {
+                    classesImported.value = classesImported.value || !classes2sources.containsKey(autoImport);
                     classes2sources.put(autoImport, classes2sources.get(autoImport));
                   }
                 }
@@ -436,6 +440,7 @@ public class Enunciate {
                   Set<String> autoImports = readAutoImports(in);
                   in.close();
                   for (String autoImport : autoImports) {
+                    classesImported.value = classesImported.value || !classes2sources.containsKey(autoImport);
                     classes2sources.put(autoImport, classes2sources.get(autoImport));
                   }
                 }
@@ -451,10 +456,17 @@ public class Enunciate {
         debug("Classpath entry %s cannot be scanned because it doesn't exist on the filesystem.", pathItem);
       }
 
-      copyImportedClasses(foundClasses2Sources, classes2sources);
+      classesImported.value = copyImportedClasses(foundClasses2Sources, classes2sources) || classesImported.value;
       for (DeploymentModule module : this.config.getAllModules()) {
         if (module instanceof EnunciateClasspathListener) {
           ((EnunciateClasspathListener) module).onClassesFound(foundClasses2Sources.keySet());
+        }
+      }
+
+      if (classesImported.value) {
+        String sourceEntry = lookupSourceEntry(pathFile);
+        if (sourceEntry != null) {
+          classpathToScan.add(sourceEntry);
         }
       }
     }
@@ -471,6 +483,16 @@ public class Enunciate {
       }
     }
     return classes2sources;
+  }
+
+  /**
+   * Lookup the source entry for the specified classpath entry. Default implementation returns null.
+   *
+   * @param pathEntry The path entry for which to lookup the source entry.
+   * @return The source entry, or null if not found.
+   */
+  protected String lookupSourceEntry(File pathEntry) {
+    return null;
   }
 
   /**
@@ -491,13 +513,16 @@ public class Enunciate {
    *
    * @param foundClasses2Sources the found classes.
    * @param classes2sources      the target map.
+   * @return whether any of the found classes were imported.
    */
-  protected void copyImportedClasses(Map<String, File> foundClasses2Sources, Map<String, File> classes2sources) {
+  protected boolean copyImportedClasses(Map<String, File> foundClasses2Sources, Map<String, File> classes2sources) {
+    boolean imported = false;
     for (Map.Entry<String, File> foundEntry : foundClasses2Sources.entrySet()) {
       if (foundEntry.getKey().endsWith(".package-info")) {
         File sourceFile = foundEntry.getValue();
         if (sourceFile != null) {
           //APT has a bug where it won't find the package-info file unless it's on the source path.
+          imported |= !classes2sources.containsKey(foundEntry.getKey());
           classes2sources.put(foundEntry.getKey(), sourceFile);
         }
       }
@@ -510,20 +535,25 @@ public class Enunciate {
             if (!classes2sources.containsKey(foundEntry.getKey())) {
               if (pattern.equals(foundEntry.getKey())) {
                 debug("Class %s will be imported because it was explicitly listed.", foundEntry.getKey());
+                imported |= !classes2sources.containsKey(foundEntry.getKey());
                 classes2sources.put(foundEntry.getKey(), apiImport.isSeekSource() ? foundEntry.getValue() : null);
               }
               else if (matcher.isPattern(pattern) && matcher.match(pattern, foundEntry.getKey())) {
                 debug("Class %s will be imported because it matches pattern %s.", foundEntry.getKey(), pattern);
+                imported |= !classes2sources.containsKey(foundEntry.getKey());
                 classes2sources.put(foundEntry.getKey(), apiImport.isSeekSource() ? foundEntry.getValue() : null);
               }
             }
             else if (foundEntry.getValue() != null) {
+              imported |= !classes2sources.containsKey(foundEntry.getKey());
               classes2sources.put(foundEntry.getKey(), foundEntry.getValue());
             }
           }
         }
       }
     }
+
+    return imported;
   }
 
   /**

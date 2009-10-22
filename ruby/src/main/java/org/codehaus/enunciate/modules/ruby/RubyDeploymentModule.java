@@ -255,18 +255,18 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   }
 
   /**
-   * Whether to require the Ruby client code.
+   * Whether to force-enable the Ruby module.
    *
-   * @return Whether to require the Ruby client code.
+   * @return Whether to force-enable the Ruby module.
    */
   public boolean isForceEnable() {
     return forceEnable;
   }
 
   /**
-   * Whether to require the Ruby client code.
+   * Whether to force-enable the Ruby module.
    *
-   * @param forceEnable Whether to require the Ruby client code.
+   * @param forceEnable Whether to force-enable the Ruby module.
    */
   public void setForceEnable(boolean forceEnable) {
     this.forceEnable = forceEnable;
@@ -333,7 +333,7 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
   @Override
   public boolean isDisabled() {
     if (isForceEnable()) {
-      debug("Ruby module is force-enabled via the 'require' attribute in the config.");
+      debug("Ruby module is force-enabled via the 'forceEnable' attribute in the config.");
       return false;
     }
     else if (super.isDisabled()) {

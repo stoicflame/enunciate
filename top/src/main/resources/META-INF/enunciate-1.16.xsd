@@ -932,6 +932,11 @@
             <xs:documentation>Whether GWT 1.6+ is enabled (default:false)</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="generateJsonOverlays" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to generate JSON overlays (default:false)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="useWrappedServices" type="xs:boolean" default="false">
           <xs:annotation>
             <xs:documentation>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services.

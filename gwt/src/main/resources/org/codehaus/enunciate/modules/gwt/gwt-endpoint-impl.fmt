@@ -57,14 +57,14 @@ public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enuncia
   [#if useSpringDI!false]
   @org.springframework.beans.factory.annotation.Autowired( required = false )
   [/#if]
-  public void setServiceBean(${endpointInterface.qualifiedName} serviceBean) {
+  public void setServiceBean([#if useSpringDI!false]@org.springframework.beans.factory.annotation.Qualifier("${endpointInterface.endpointImplementations[0].serviceEndpointId}") [/#if]${endpointInterface.qualifiedName} serviceBean) {
     this.serviceBean = serviceBean;
   }
   [#if useSpringDI!false]
 
   //just used for autowiring.
   @org.springframework.beans.factory.annotation.Autowired( required = false )
-  public void setSecurityChecker(SecurityExceptionChecker securityChecker) {
+  public void setSecurityChecker(org.codehaus.enunciate.service.SecurityExceptionChecker securityChecker) {
     super.setSecurityChecker(securityChecker);
   }
   [/#if]

@@ -32,6 +32,8 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -42,9 +44,8 @@ import org.codehaus.enunciate.modules.gwt.config.GWTApp;
 import org.codehaus.enunciate.modules.gwt.config.GWTAppModule;
 import org.codehaus.enunciate.modules.gwt.config.GWTRuleSet;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
-import org.codehaus.enunciate.template.freemarker.CollectionTypeForMethod;
-import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
 import java.io.*;
@@ -243,6 +244,7 @@ import java.util.*;
  */
 public class GWTDeploymentModule extends FreemarkerDeploymentModule implements ProjectExtensionModule, GWTHomeAwareModule, EnunciateClasspathListener {
 
+  private boolean forceGenerateJsonOverlays = false;
   private boolean enforceNamespaceConformance = true;
   private boolean enforceNoFieldAccessors = true;
   private String rpcModuleNamespace = null;
@@ -261,6 +263,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean useWrappedServices = false;
   private boolean gwtRtFound = false;
   private boolean springDIFound = false;
+  private boolean jacksonXcAvailable = false;
 
   /**
    * @return "gwt"
@@ -359,6 +362,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   public void onClassesFound(Set<String> classes) {
     gwtRtFound |= classes.contains("org.codehaus.enunciate.modules.gwt.GWTEndpointImpl");
     springDIFound |= classes.contains("org.springframework.beans.factory.annotation.Autowired");
+    jacksonXcAvailable |= classes.contains("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
   }
 
   @Override
@@ -377,14 +381,17 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       URL endpointImplTemplate = getTemplateURL("gwt-endpoint-impl.fmt");
       URL faultTemplate = getTemplateURL("gwt-fault.fmt");
       URL typeTemplate = getTemplateURL("gwt-type.fmt");
+      URL overlayTypeTemplate = getTemplateURL("gwt-overlay-type.fmt");
       URL enumTypeTemplate = getTemplateURL("gwt-enum-15-type.fmt");
+      URL overlayEnumTypeTemplate = getTemplateURL("gwt-enum-overlay-type.fmt");
 
-      //set up the model, first allowing for jdk 14 compatability.
       EnunciateFreemarkerModel model = getModel();
       model.put("useSpringDI", this.springDIFound);
       Map<String, String> conversions = new HashMap<String, String>();
+      Map<String, String> overlayConversions = new HashMap<String, String>();
       String clientNamespace = this.rpcModuleNamespace + ".client";
       conversions.put(this.rpcModuleNamespace, clientNamespace);
+      overlayConversions.put(this.rpcModuleNamespace, clientNamespace + ".json");
       if (!this.enforceNamespaceConformance) {
         TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
@@ -416,6 +423,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
               String pckg = typeDefinition.getPackage().getQualifiedName();
               if (!conversions.containsKey(pckg)) {
                 conversions.put(pckg, clientNamespace + "." + pckg);
+                overlayConversions.put(pckg, clientNamespace + ".json." + pckg);
               }
             }
           }
@@ -424,51 +432,67 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
       classnameFor.setJdk15(true);
-      ComponentTypeForMethod componentTypeFor = new ComponentTypeForMethod(conversions);
-      CollectionTypeForMethod collectionTypeFor = new CollectionTypeForMethod(conversions);
+      ClientClassnameForMethod overlayClassnameFor = new ClientClassnameForMethod(overlayConversions);
+      overlayClassnameFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
+      model.put("overlayPackageFor", new ClientPackageForMethod(overlayConversions));
       model.put("classnameFor", classnameFor);
+      model.put("overlayClassnameFor", overlayClassnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
-      model.put("componentTypeFor", componentTypeFor);
-      model.put("collectionTypeFor", collectionTypeFor);
       model.put("gwtSubcontext", getGwtSubcontext());
+      model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 
       model.setFileOutputDirectory(clientSideGenerateDir);
-
       Properties gwt2jaxbMappings = new Properties();
-
       TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
-      debug("Generating the GWT endpoints...");
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          if (!isGWTTransient(ei)) {
-            model.put("endpointInterface", ei);
-            processTemplate(eiTemplate, model);
 
-            for (WebMethod webMethod : ei.getWebMethods()) {
-              for (WebFault webFault : webMethod.getWebFaults()) {
-                allFaults.add(webFault);
+      if (isGenerateRPCSupport()) {
+        debug("Generating the GWT endpoints...");
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            if (!isGWTTransient(ei)) {
+              model.put("endpointInterface", ei);
+              processTemplate(eiTemplate, model);
+
+              for (WebMethod webMethod : ei.getWebMethods()) {
+                for (WebFault webFault : webMethod.getWebFaults()) {
+                  allFaults.add(webFault);
+                }
               }
+            }
+          }
+        }
+
+        debug("Generating the GWT faults...");
+        for (WebFault webFault : allFaults) {
+          if (!isGWTTransient(webFault)) {
+            model.put("fault", webFault);
+            processTemplate(faultTemplate, model);
+          }
+        }
+
+        debug("Generating the GWT types...");
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            if (!isGWTTransient(typeDefinition)) {
+              model.put("type", typeDefinition);
+
+              URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
+              processTemplate(template, model);
             }
           }
         }
       }
 
-      debug("Generating the GWT faults...");
-      for (WebFault webFault : allFaults) {
-        if (!isGWTTransient(webFault)) {
-          model.put("fault", webFault);
-          processTemplate(faultTemplate, model);
-        }
-      }
-
-      debug("Generating the GWT types...");
-      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isGWTTransient(typeDefinition)) {
-            model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
-            processTemplate(template, model);
+      if (isGenerateJsonOverlays()) {
+        debug("Generating the GWT json overlay types...");
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            if (!isGWTTransient(typeDefinition)) {
+              model.put("type", typeDefinition);
+              URL template = typeDefinition.isEnum() ? overlayEnumTypeTemplate : overlayTypeTemplate;
+              processTemplate(template, model);
+            }
           }
         }
       }
@@ -477,45 +501,46 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       processTemplate(moduleXmlTemplate, model);
 
       model.setFileOutputDirectory(serverSideGenerateDir);
-
-      debug("Generating the GWT endpoint implementations...");
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          if (!isGWTTransient(ei)) {
-            model.put("endpointInterface", ei);
-            processTemplate(endpointImplTemplate, model);
-          }
-        }
-      }
-
-      debug("Generating the GWT type mappers...");
-      for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
-        for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
-          if (!isGWTTransient(typeDefinition)) {
-            if (!typeDefinition.isEnum()) {
-              model.put("type", typeDefinition);
-              processTemplate(typeMapperTemplate, model);
-              gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
-            }
-            else if (typeDefinition.isEnum()) {
-              model.put("type", typeDefinition);
-              processTemplate(enumTypeMapperTemplate, model);
-              gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+      if (isGenerateRPCSupport()) {
+        debug("Generating the GWT endpoint implementations...");
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            if (!isGWTTransient(ei)) {
+              model.put("endpointInterface", ei);
+              processTemplate(endpointImplTemplate, model);
             }
           }
         }
-      }
 
-      debug("Generating the GWT fault mappers...");
-      for (WebFault webFault : allFaults) {
-        if (!isGWTTransient(webFault)) {
-          model.put("fault", webFault);
-          processTemplate(faultMapperTemplate, model);
-          gwt2jaxbMappings.setProperty(classnameFor.convert(webFault), webFault.getQualifiedName());
+        debug("Generating the GWT type mappers...");
+        for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+          for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+            if (!isGWTTransient(typeDefinition)) {
+              if (!typeDefinition.isEnum()) {
+                model.put("type", typeDefinition);
+                processTemplate(typeMapperTemplate, model);
+                gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+              }
+              else if (typeDefinition.isEnum()) {
+                model.put("type", typeDefinition);
+                processTemplate(enumTypeMapperTemplate, model);
+                gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+              }
+            }
+          }
         }
-      }
 
-      gwt2jaxbMappings.store(new FileOutputStream(new File(serverSideGenerateDir, "gwt-to-jaxb-mappings.properties")), "mappings for gwt classes to jaxb classes.");
+        debug("Generating the GWT fault mappers...");
+        for (WebFault webFault : allFaults) {
+          if (!isGWTTransient(webFault)) {
+            model.put("fault", webFault);
+            processTemplate(faultMapperTemplate, model);
+            gwt2jaxbMappings.setProperty(classnameFor.convert(webFault), webFault.getQualifiedName());
+          }
+        }
+
+        gwt2jaxbMappings.store(new FileOutputStream(new File(serverSideGenerateDir, "gwt-to-jaxb-mappings.properties")), "mappings for gwt classes to jaxb classes.");
+      }
     }
     else {
       info("Skipping GWT source generation as everything appears up-to-date...");
@@ -1365,16 +1390,60 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     this.useWrappedServices = useWrappedServices;
   }
 
-  @Override
-  public boolean isDisabled() {
-    if (super.isDisabled()) {
-      return true;
-    }
-    else if (getModelInternal() != null && getModelInternal().getNamespacesToWSDLs().isEmpty()) {
-      debug("GWT module is disabled because there are no endpoint interfaces.");
-      return true;
-    }
+  /**
+   * Whether to generate JSON overlays.
+   *
+   * @return Whether to generate JSON overlays.
+   */
+  public boolean isGenerateJsonOverlays() {
+    return forceGenerateJsonOverlays || (jacksonXcAvailable && existsAnyJsonResourceMethod(getModelInternal().getRootResources()));
+  }
 
+  /**
+   * Whether to generate the RPC support classes.
+   *
+   * @return Whether to generate the RPC support classes.
+   */
+  public boolean isGenerateRPCSupport() {
+    return !getModelInternal().getNamespacesToWSDLs().isEmpty();
+  }
+
+  /**
+   * Whether to generate JSON overlays.
+   *
+   * @param generateJsonOverlays Whether to generate JSON overlays.
+   */
+  public void setGenerateJsonOverlays(boolean generateJsonOverlays) {
+    this.forceGenerateJsonOverlays = generateJsonOverlays;
+  }
+
+  /**
+   * Whether any root resources exist that produce json.
+   *
+   * @param rootResources The root resources.
+   * @return Whether any root resources exist that produce json.
+   */
+  protected boolean existsAnyJsonResourceMethod(List<RootResource> rootResources) {
+    for (RootResource rootResource : rootResources) {
+      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+        for (String mime : resourceMethod.getProducesMime()) {
+          if ("*/*".equals(mime)) {
+            return true;
+          }
+          else if (mime.toLowerCase().contains("json")) {
+            return true;
+          }
+        }
+        for (String mime : resourceMethod.getConsumesMime()) {
+          if ("*/*".equals(mime)) {
+            return true;
+          }
+          else if (mime.toLowerCase().contains("json")) {
+            return true;
+          }
+        }
+      }
+    }
     return false;
   }
 

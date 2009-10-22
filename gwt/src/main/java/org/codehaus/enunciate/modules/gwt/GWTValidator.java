@@ -31,7 +31,7 @@ import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import java.util.*;
 
 /**
- * The validator for the xfire-client module.
+ * The validator for the gwt module.
  *
  * @author Ryan Heaton
  */

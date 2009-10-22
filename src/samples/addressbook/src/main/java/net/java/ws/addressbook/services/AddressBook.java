@@ -24,7 +24,7 @@ public interface AddressBook {
    */
   @GET
   @Path("/{id}")
-  @Produces ( { "application/xml", "application/x-amf" } )
+  @Produces ( { "application/xml", "application/x-amf", "application/json" } )
   Contact getContact(@PathParam("id") Integer id) throws AddressBookException;
 
   /**
