@@ -1,8 +1,11 @@
 package net.java.apps.addressbook.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.http.client.*;
 import net.java.ws.addressbook.client.services.AddressBookAsync;
 import net.java.ws.addressbook.client.domain.ContactList;
 import net.java.ws.addressbook.client.domain.Contact;
@@ -110,6 +113,8 @@ public class AddressBookApp implements EntryPoint {
     //add the find button.
     findForm.add(findButton);
 
+    byNamePanel.add(new Label("This demonstrates GWT-RPC"));
+
     //add the find form to the panel.
     byNamePanel.add(findForm);
 
@@ -120,7 +125,49 @@ public class AddressBookApp implements EntryPoint {
     TabPanel panel = new TabPanel();
 
     //add the find by name panel to the tab panel.
-    panel.add(byNamePanel, "&nbsp;<a href=\"#byname\">by name</a>&nbsp;", true);
+    panel.add(byNamePanel, "&nbsp;<a href=\"#byname\">by name (RPC)</a>&nbsp;", true);
+
+    final VerticalPanel byIdPanel = new VerticalPanel();
+
+    byIdPanel.add(new Label("This demonstrates using GWT to access a JSON-REST endpoint and using GWT JSON overlays"));
+
+    HorizontalPanel findByIdForm = new HorizontalPanel();
+    findByIdForm.add(new Label("id:"));
+    final TextBox idBox = new TextBox();
+    idBox.setText("1");
+    findByIdForm.add(idBox);
+    Button findByIdButton = new Button("find");
+    findByIdForm.add(findByIdButton);
+    findByIdButton.addClickListener(new ClickListener() {
+      public void onClick(Widget widget) {
+        final RequestBuilder restRequestBuilder = new RequestBuilder(RequestBuilder.GET, GWT.getModuleBaseURL() + "../json/contact/" + idBox.getText());
+        try {
+          restRequestBuilder.sendRequest(null, new RequestCallback() {
+            public void onResponseReceived(Request request, Response response) {
+              if (200 == response.getStatusCode()) {
+                net.java.ws.addressbook.client.json.domain.Contact contact = net.java.ws.addressbook.client.json.domain.Contact.fromJson(response.getText());
+                byIdPanel.add(new Label("Found " + contact.getContactType().toString() + ": " + contact.getName()));
+              }
+              else {
+                byIdPanel.add(new Label("ERROR: " + response.getStatusText() + ": REQUEST URL: " + restRequestBuilder.getUrl()));
+              }
+            }
+
+            public void onError(Request request, Throwable throwable) {
+              byIdPanel.add(new Label("ERROR: " + throwable.getMessage() + ": REQUEST URL: " + restRequestBuilder.getUrl()));
+            }
+          });
+        }
+        catch (RequestException e) {
+          byIdPanel.add(new Label("ERROR: " + e.getMessage() + ": REQUEST URL: " + restRequestBuilder.getUrl()));
+        }
+      }
+    });
+
+    byIdPanel.add(findByIdForm);
+
+    //add the find by id panel to the tab panel.
+    panel.add(byIdPanel, "&nbsp;<a href=\"#byid\">by id (JSON-REST)</a>&nbsp;", true);
 
     //create some HTML that will embed our flash component.
     HTML flashHTML = new HTML("<object width=\"550\" height=\"400\">\n" +
@@ -135,4 +182,9 @@ public class AddressBookApp implements EntryPoint {
     //add the tab panel to the root HTML.
     RootPanel.get().add(panel);
   }
+
+  public static native net.java.ws.addressbook.client.json.domain.Contact contactFromJson(String json) /*-{
+    return eval('(' + json + ')');
+  }-*/;
+
 }
