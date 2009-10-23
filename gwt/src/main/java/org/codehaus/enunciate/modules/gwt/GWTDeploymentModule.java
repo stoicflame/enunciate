@@ -432,7 +432,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
       classnameFor.setJdk15(true);
-      ClientClassnameForMethod overlayClassnameFor = new ClientClassnameForMethod(overlayConversions);
+      OverlayClientClassnameForMethod overlayClassnameFor = new OverlayClientClassnameForMethod(overlayConversions);
       overlayClassnameFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("overlayPackageFor", new ClientPackageForMethod(overlayConversions));
