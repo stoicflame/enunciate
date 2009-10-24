@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.contract.common.rest;
 
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 /**
@@ -44,5 +45,5 @@ public interface RESTResourcePayload {
    * The JSON element associated with the payload, or null if none (or unknown).
    * @return The JSON element associated with the payload, or null if none (or unknown).
    */
-  JsonTypeDefinition getJsonType();
+  JsonType getJsonType();
 }

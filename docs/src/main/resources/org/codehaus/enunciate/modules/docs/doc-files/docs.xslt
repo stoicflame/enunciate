@@ -74,8 +74,19 @@
       </ul>
     </xsl:if>
 
+    <xsl:if test="/api-docs/data/jsonSchema/type">
+      <h1>JSON Data Types</h1>
+      <ul>
+        <xsl:for-each select="/api-docs/data/jsonSchema/type">
+          <xsl:sort select="@name" />
+          <xsl:sort select="../@schemaId" />
+          <li><a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../@schemaId"/>)</xsl:if></a></li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
+
     <xsl:if test="/api-docs/data/schema/elements/element">
-      <h1>Data Elements</h1>
+      <h1>XML Data Elements</h1>
       <ul>
         <xsl:for-each select="/api-docs/data/schema/elements/element">
           <xsl:sort select="@name"/>
@@ -97,7 +108,7 @@
     </xsl:if>
 
     <xsl:if test="/api-docs/data/schema/types/type">
-      <h1>Data Types</h1>
+      <h1>XML Data Types</h1>
       <ul>
         <xsl:for-each select="/api-docs/data/schema/types/type">
           <xsl:sort select="@name"/>
@@ -265,6 +276,20 @@
                       <th>namespace</th>
                       <th>schema file</th>
                     </tr>
+                    <xsl:for-each select="/api-docs/data/jsonSchema">
+                      <xsl:sort select="@schemaId"/>
+                      <tr>
+                        <td><xsl:value-of select="@schemaId"/></td>
+                        <td>N/A</td>
+                        <td>
+                          <xsl:choose>
+                            <xsl:when test="@file"><a href="{@file}"><xsl:value-of select="@file"/></a></xsl:when>
+                            <xsl:otherwise>(none)</xsl:otherwise>
+                          </xsl:choose>
+                        </td>
+                      </tr>
+                      <xsl:call-template name="data-json-schema"/>
+                    </xsl:for-each>
                     <xsl:for-each select="/api-docs/data/schema">
                       <xsl:sort select="@namespace"/>
                       <xsl:variable name="nsid" select="@namespaceId"/>
@@ -288,8 +313,30 @@
                     </xsl:for-each>
                   </table>
 
+                  <xsl:if test="/api-docs/data/jsonSchema">
+                    <h2>JSON Data Types</h2>
+                    <ul>
+                      <xsl:for-each select="/api-docs/data/jsonSchema">
+                        <xsl:sort select="@schemaId"/>
+                        <xsl:if test="type">
+                          <li>
+                            schema <a href="data_{@schemaId}.html"><xsl:value-of select="@schemaId"/></a>
+                            <ul>
+                              <xsl:for-each select="type">
+                                <xsl:sort select="@name"/>
+                                <li>
+                                  <a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/></a>
+                                </li>
+                              </xsl:for-each>
+                            </ul>
+                          </li>
+                        </xsl:if>
+                      </xsl:for-each>
+                    </ul>
+                  </xsl:if>
+
                   <xsl:if test="/api-docs/data/schema/elements/element">
-                    <h2>Data Elements</h2>
+                    <h2>XML Data Elements</h2>
                     <ul>
                       <xsl:for-each select="/api-docs/data/schema">
                         <xsl:sort select="@namespace"/>
@@ -320,7 +367,7 @@
                     </ul>
                   </xsl:if>
 
-                  <h2>Data Types</h2>
+                  <h2>XML Data Types</h2>
                   <ul>
                     <xsl:for-each select="/api-docs/data/schema">
                       <xsl:sort select="@namespace"/>
@@ -845,17 +892,7 @@
                           <th>consumeable content type(s)</th>
                         </tr>
                         <tr>
-                          <td>
-                            <xsl:choose>
-                              <xsl:when test="inValue/@elementName">
-                                <xsl:choose>
-                                  <xsl:when test="inValue/@elementSchemaId"><a href="data_{inValue/@elementSchemaId}.html#element_{inValue/@elementName}"><xsl:value-of select="inValue/@elementName"/></a></xsl:when>
-                                  <xsl:otherwise><xsl:value-of select="inValue/@elementName"/></xsl:otherwise>
-                                </xsl:choose>
-                              </xsl:when>
-                              <xsl:otherwise>(custom)</xsl:otherwise>
-                            </xsl:choose>
-                          </td>
+                          <xsl:apply-templates select="inValue" mode="schemaLinking" />
                           <td>
                             <ul>
                               <xsl:for-each select="contentType[@consumable='true']">
@@ -864,14 +901,7 @@
                             </ul>
                           </td>
                         </tr>
-                        <xsl:if test="string-length(normalize-space(inValue)) &gt; 1">
-                          <tr>
-                            <th colspan="2">description</th>
-                          </tr>
-                          <tr>
-                            <td colspan="2"><xsl:value-of select="inValue" disable-output-escaping="yes"/></td>
-                          </tr>
-                        </xsl:if>
+                        <xsl:apply-templates select="inValue" mode="documentation" />
                       </table>
                     </xsl:if>
 
@@ -883,17 +913,7 @@
                           <th>produceable content type(s)</th>
                         </tr>
                         <tr>
-                          <td>
-                            <xsl:choose>
-                              <xsl:when test="outValue/@elementName">
-                                <xsl:choose>
-                                  <xsl:when test="outValue/@elementSchemaId"><a href="data_{outValue/@elementSchemaId}.html#element_{outValue/@elementName}"><xsl:value-of select="outValue/@elementName"/></a></xsl:when>
-                                  <xsl:otherwise><xsl:value-of select="outValue/@elementName"/></xsl:otherwise>
-                                </xsl:choose>
-                              </xsl:when>
-                              <xsl:otherwise>(custom)</xsl:otherwise>
-                            </xsl:choose>
-                          </td>
+                          <xsl:apply-templates select="outValue" mode="schemaLinking" />
                           <td>
                             <ul>
                               <xsl:for-each select="contentType[@produceable='true']">
@@ -902,14 +922,7 @@
                             </ul>
                           </td>
                         </tr>
-                        <xsl:if test="string-length(normalize-space(outValue)) &gt; 1">
-                          <tr>
-                            <th colspan="2">description</th>
-                          </tr>
-                          <tr>
-                            <td colspan="2"><xsl:value-of select="outValue" disable-output-escaping="yes"/></td>
-                          </tr>
-                        </xsl:if>
+                        <xsl:apply-templates select="outValue" mode="documentation" />
                       </table>
                     </xsl:if>
 
@@ -972,6 +985,146 @@
     </redirect:write>
   </xsl:template>
 
+  <xsl:template match="inValue|outValue" mode="schemaLinking">
+    <td>
+      <xsl:choose>
+        <xsl:when test="xmlElement/@elementName or jsonElement/@elementName">
+          <xsl:if test="xmlElement/@elementName">
+            <xsl:choose>
+              <xsl:when test="xmlElement/@elementSchemaId">
+                <a href="data_{xmlElement/@elementSchemaId}.html#element_{xmlElement/@elementName}"><xsl:value-of select="xmlElement/@elementName" /> (XML)</a>
+              </xsl:when>
+              <xsl:otherwise><xsl:value-of select="xmlElement/@elementName" /> (XML)</xsl:otherwise>
+            </xsl:choose>
+          </xsl:if>
+          <xsl:if test="jsonElement/@elementName">
+            <xsl:choose>
+              <xsl:when test="jsonElement/@elementSchemaId">
+                <a href="data_{jsonElement/@elementSchemaId}.html#element_{jsonElement/@elementName}"><xsl:value-of select="jsonElement/@elementName" /> (JSON)</a>
+              </xsl:when>
+              <xsl:otherwise><xsl:value-of select="jsonElement/@elementName" /> (JSON)</xsl:otherwise>
+            </xsl:choose>
+          </xsl:if>
+        </xsl:when>
+        <xsl:otherwise>(custom)</xsl:otherwise>
+      </xsl:choose>
+    </td>
+  </xsl:template>
+
+  <xsl:template match="inValue|outValue" mode="documentation">
+    <xsl:if test="string-length(normalize-space(inValue/documentation)) &gt; 1">
+      <tr>
+        <th colspan="2">description</th>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <xsl:value-of select="inValue/documentation" disable-output-escaping="yes" />
+        </td>
+      </tr>
+    </xsl:if>
+  </xsl:template>
+
+  <xsl:template name="data-json-schema">
+    <redirect:write file="{$output-dir}/data_{@schemaId}.html">
+      <html>
+        <head>
+          <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+          <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+          <title>
+            <xsl:value-of select="/api-docs/@title"/>
+          </title>
+        </head>
+        <body>
+          <div class="container">
+            <div class="main">
+              <div class="header">
+                <div class="title">
+                  <h1><xsl:value-of select="/api-docs/@title"/></h1>
+                </div>
+              </div>
+              <div class="content">
+                <div class="item">
+                  <h1>Data<xsl:if test="$multiple_schemas and (string-length(@schemaId) &gt; 0)">: <xsl:value-of select="@schemaId"/></xsl:if></h1>
+                  <ul>
+                    <li>JSON Schema ID: <u><xsl:value-of select="@schemaId"/></u></li>
+                    <xsl:if test="@file">
+                      <li>JSON Schema File: <a href="{@file}"><xsl:value-of select="@file"/></a></li>
+                    </xsl:if>
+                  </ul>
+                  <xsl:if test="type">
+                    <p>
+                      The following types are members of this schema:
+                    </p>
+                    <ul>
+                      <xsl:for-each select="type">
+                        <xsl:sort select="@name"/>
+                        <li>
+                          <a href="#{@name}"><xsl:value-of select="@name"/></a>
+                        </li>
+                      </xsl:for-each>
+                    </ul>
+                  </xsl:if>
+                </div>
+                <xsl:for-each select="type">
+                  <xsl:sort select="@name"/>
+                  <div class="item">
+                    <h1><a name="{@name}">Type <xsl:value-of select="@name"/></a></h1>
+                    <xsl:if test="documentation">
+                      <p>
+                        <xsl:value-of select="documentation" disable-output-escaping="yes"/>
+                      </p>
+                    </xsl:if>
+                    <xsl:if test="property">
+                      <h2>Properties</h2>
+                      <table>
+                        <tr>
+                          <th>name</th>
+                          <th>type</th>
+                          <th>description</th>
+                        </tr>
+                        <xsl:for-each select="property">
+                          <tr>
+                            <td><xsl:value-of select="@name"/></td>
+                            <td>
+                              <xsl:choose>
+                                <xsl:when test="@typeSchemaId"><a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></xsl:when>
+                                <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>
+                              </xsl:choose>
+                            </td>
+                            <td><xsl:value-of select="@documentation"/></td>
+                          </tr>
+                        </xsl:for-each>
+                      </table>
+                    </xsl:if>
+                    <xsl:if test="values">
+                      <h2>Possible Values</h2>
+                      <table>
+                        <tr>
+                          <th>value</th>
+                          <th>description</th>
+                        </tr>
+                        <xsl:for-each select="enumValue">
+                          <tr>
+                            <td><xsl:value-of select="value"/></td>
+                            <td><xsl:value-of select="documentation" disable-output-escaping="yes"/></td>
+                          </tr>
+                        </xsl:for-each>
+                      </table>
+                    </xsl:if>
+                  </div>
+                </xsl:for-each>
+              </div>
+              <div class="sidenav">
+                <xsl:copy-of select="$global-sidnav"/>
+              </div>
+              <div class="clearer"><span></span></div>
+            </div>
+          <xsl:copy-of select="$footer"/>
+          </div>
+        </body>
+      </html>
+    </redirect:write>
+  </xsl:template>
 
   <!--The documentation page for a schema.-->
   <xsl:template name="data-schema">

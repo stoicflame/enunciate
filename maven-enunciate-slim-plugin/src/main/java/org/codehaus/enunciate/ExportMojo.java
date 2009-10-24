@@ -12,6 +12,8 @@ import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
+import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 
 import java.io.File;
@@ -87,6 +89,12 @@ public class ExportMojo extends ConfigMojo {
 
         for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
           exportedClasses.add(rootElementDeclaration.getQualifiedName());
+        }
+      }
+
+      for (JsonSchemaInfo jsonSchemaInfo : model.getIdsToJsonSchemas().values()) {
+        for (JsonTypeDefinition jsonTypeDefinition : jsonSchemaInfo.getTypes()) {
+          exportedClasses.add(jsonTypeDefinition.getQualifiedName());
         }
       }
 

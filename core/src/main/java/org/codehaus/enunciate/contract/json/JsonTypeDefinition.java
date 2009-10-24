@@ -3,10 +3,10 @@ package org.codehaus.enunciate.contract.json;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 
 import org.codehaus.enunciate.json.JsonName;
-import org.codehaus.enunciate.json.JsonType;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
+import com.sun.mirror.declaration.TypeDeclaration;
 
 /**
  * <p>
@@ -15,7 +15,7 @@ import com.sun.mirror.declaration.EnumDeclaration;
  *
  * @author Steven Cummings
  */
-public abstract class JsonTypeDefinition extends DecoratedClassDeclaration {
+public abstract class JsonTypeDefinition extends DecoratedClassDeclaration implements JsonType {
 
   public static JsonTypeDefinition createTypeDefinition(final ClassDeclaration delegate) {
     if (delegate instanceof EnumDeclaration) {
@@ -33,7 +33,11 @@ public abstract class JsonTypeDefinition extends DecoratedClassDeclaration {
   }
 
   public final String getTypeName() {
-    JsonName jsonName = getDelegate().getAnnotation(JsonName.class);
-    return jsonName == null ? classDeclaration().getQualifiedName() : jsonName.value();
+    return getTypeName(classDeclaration());
+  }
+
+  public static String getTypeName(final TypeDeclaration delegate) {
+    JsonName jsonName = delegate.getAnnotation(JsonName.class);
+    return jsonName == null ? delegate.getQualifiedName() : jsonName.value();
   }
 }

@@ -24,6 +24,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 /**
@@ -52,7 +53,7 @@ public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
     return null;
   }
 
-  public JsonTypeDefinition getJsonType() {
+  public JsonType getJsonType() {
     if (delegate instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
       if (declaration != null) {

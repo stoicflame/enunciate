@@ -24,7 +24,6 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
 
   JsonObjectTypeDefinition(final ClassDeclaration delegate) {
     super(delegate);
-    @SuppressWarnings("hiding")
     final Map<String, JsonPropertyDeclaration> propertiesByName = new HashMap<String, JsonPropertyDeclaration>();
     for (final PropertyDeclaration propertyDeclaration : getProperties()) {
       if(propertyDeclaration.getAnnotation(JsonIgnore.class) != null) {
@@ -47,8 +46,7 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
   /**
    * @return Non null Collection of JsonPropertyDeclarations.
    */
-  public Collection<JsonPropertyDeclaration> getJsonProperties()
-  {
+  public Collection<JsonPropertyDeclaration> getJsonProperties() {
     return getJsonPropertiesByName().values();
   }
 
@@ -70,6 +68,11 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
      */
     public String getPropertyDescription() {
       return getDocValue();
+    }
+
+    public String getPropertyTypeName()
+    {
+      return getPropertyType().toString();
     }
   }
 }

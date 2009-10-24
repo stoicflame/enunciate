@@ -38,6 +38,7 @@
 
     <xs:sequence>
       <xs:element name="schema" type="schema" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="jsonSchema" type="jsonSchema" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -294,6 +295,61 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="jsonSchema">
+    <xs:annotation>
+      <xs:documentation>
+        Contains information about formal and informal JSON schemas.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" />
+      <xs:element name="type" type="jsonType" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="schemaId" type="xs:string" use="required" />
+    <xs:attribute name="file" type="xs:string" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="jsonType">
+    <xs:annotation>
+      <xs:documentation>
+        Contains information about a JSON type.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="documentation" type="xs:string" minOccurs="0" />
+      <xs:element name="property" type="jsonProperty" maxOccurs="unbounded" />
+      <xs:element name="enumValue" type="jsonEnumValue" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="jsonProperty">
+    <xs:annotation>
+      <xs:documentation>
+        Contains information about a JSON property.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="typeName" type="xs:string" use="required" />
+    <xs:attribute name="typeSchemaId" type="xs:string" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="jsonEnumValue">
+    <xs:annotation>
+      <xs:documentation>
+        An enum value for a JSON type.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="value" type="xs:string" />
+      <xs:element name="documentation" type="xs:string" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="soap">
 
     <xs:annotation>
@@ -480,8 +536,8 @@
           <xs:element name="alias" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="contentType" type="contentType" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="parameter" type="restParameter" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element name="inValue" type="inValue" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="outValue" type="outValue" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="inValue" type="entity" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="outValue" type="entity" minOccurs="0" maxOccurs="1"/>
           <xs:element name="error" type="restError" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
@@ -540,38 +596,41 @@
     </xs:simpleContent>
   </xs:complexType>
 
-  <xs:complexType name="inValue">
+  <xs:complexType name="entity">
     <xs:annotation>
       <xs:documentation>
-        The documentation for a REST input value.
+        The documentation for the entity representation of a ReSTful resource.
       </xs:documentation>
     </xs:annotation>
 
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="custom" type="xs:boolean"/>
-        <xs:attribute name="elementName" type="xs:string"/>
-        <xs:attribute name="elementNamespace" type="xs:string"/>
-        <xs:attribute name="elementSchemaId" type="xs:string"/>
-      </xs:extension>
-    </xs:simpleContent>
+    <xs:sequence>
+      <xs:element name="jsonElement" type="jsonElementRef" minOccurs="0" />
+      <xs:element name="xmlElement" type="xmlElementRef" minOccurs="0" />
+      <xs:element name="documentation" type="xs:string" minOccurs="0" />
+    </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="outValue">
+  <xs:complexType name="jsonElementRef">
     <xs:annotation>
       <xs:documentation>
-        The documentation for a REST output value.
+        Reference to an JSON schema element
       </xs:documentation>
     </xs:annotation>
 
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="custom" type="xs:boolean"/>
-        <xs:attribute name="elementName" type="xs:string"/>
-        <xs:attribute name="elementNamespace" type="xs:string"/>
-        <xs:attribute name="elementSchemaId" type="xs:string"/>
-      </xs:extension>
-    </xs:simpleContent>
+    <xs:attribute name="elementName" type="xs:string"/>
+    <xs:attribute name="elementSchemaId" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="xmlElementRef">
+    <xs:annotation>
+      <xs:documentation>
+        Reference to an XML schema element
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="elementName" type="xs:string"/>
+    <xs:attribute name="elementNamespace" type="xs:string"/>
+    <xs:attribute name="elementSchemaId" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="taggedDocumentation">

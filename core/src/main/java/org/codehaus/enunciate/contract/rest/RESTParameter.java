@@ -25,6 +25,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
+import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
@@ -229,7 +230,7 @@ public class RESTParameter extends DecoratedParameterDeclaration implements REST
     return null;
   }
 
-  public JsonTypeDefinition getJsonType() {
+  public JsonType getJsonType() {
     TypeMirror type = getType();
     if (type instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) type).getDeclaration();

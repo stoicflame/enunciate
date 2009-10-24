@@ -136,6 +136,49 @@
     </schema>
   [/#if]
 [/@forEachSchema]
+[@forEachJsonSchema]
+  [#if schema.types?size > 0]
+    <jsonSchema schemaId="${schema.schemaId}">
+    [#if schema.documentation??]
+      <documentation>${schema.documentation}</documentation>
+    [/#if]
+    [#list schema.types as type]
+      <type name="${type.typeName}">
+      [#if type.docValue??]
+        <documentation><![CDATA[${type.docValue}]]></documentation>
+      [/#if]
+      [#if type.jsonProperties?? && type.jsonProperties?size > 0]
+      [#list type.jsonProperties as property]
+        <property name="${property.propertyName}" 
+                  [#if jsonTypeForQualifiedName(property.propertyTypeName)??]
+                  typeName="${jsonTypeForQualifiedName(property.propertyTypeName).typeName}"
+                  [/#if]
+                  [#if jsonSchemaForType(jsonTypeForQualifiedName(property.propertyTypeName))??]
+                  typeSchemaId="${jsonSchemaForType(jsonTypeForQualifiedName(property.propertyTypeName)).schemaId}"
+                  [/#if]
+                  [#if property.propertyDescription??]
+                  [#assign d = property.propertyDescription]
+                  [#escape d as d?html]
+                  documentation="${d}"
+                  [/#escape]
+                  [/#if] />
+      [/#list]
+      [/#if]
+      [#if type.enumValues?? && type.enumValues?size > 0]
+        [#list type.enumValues as enumValue]
+          <enumValue>
+            <value>${enumValue.name}</value>
+          [#if enumValue.description??]
+            <documentation><![CDATA[${enumValue.description}]]></documentation>
+          [/#if]
+          </enumValue>
+        [/#list]
+      [/#if]
+      </type>
+    [/#list]
+    </jsonSchema>
+  [/#if]
+[/@forEachJsonSchema]
   </data>
   <soap>
     <wsdls>
@@ -229,13 +272,17 @@
           </parameter>
       [/#list]
       [#if resource.inputPayload??]
-          <inValue[#if schemaForNamespace(resource.inputPayload)??] elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
-            <![CDATA[${resource.inputPayload.docValue!"(no documentation provided)"}]]>
+          <inValue>
+            [#if schemaForNamespace(resource.inputPayload)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}" />[/#if]
+            [#if jsonSchemaForType(resource.inputPayload)??]<jsonElementRef elementName="${resource.inputPayload.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.inputPayload).schemaId}"/>[/#if]
+            <documentation><![CDATA[${resource.inputPayload.docValue!"(no documentation provided)"}]]></documentation>
           </inValue>
       [/#if]
       [#if resource.outputPayload??]
-          <outValue[#if schemaForNamespace(resource.outputPayload)??] elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}"[#else] custom="true"[/#if]>
-            <![CDATA[${resource.outputPayload.docValue!"(no documentation provided)"}]]>
+          <outValue>
+            [#if schemaForNamespace(resource.outputPayload)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}" />[/#if]
+            [#if jsonSchemaForType(resource.outputPayload)??]<jsonElement elementName="${resource.outputPayload.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.outputPayload).schemaId}"/>[/#if]
+            <documentation><![CDATA[${resource.outputPayload.docValue!"(no documentation provided)"}]]></documentation>
           </outValue>
       [/#if]
       [#list resource.resourceErrors as error]

@@ -583,6 +583,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
       model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
       model.setVariable("schemaForNamespace", new SchemaForNamespaceMethod(model.getNamespacesToSchemas()));
+      model.setVariable(JsonSchemaForType.NAME, new JsonSchemaForType(model.getIdsToJsonSchemas()));
+      model.setVariable(JsonTypeForQualifiedName.NAME, new JsonTypeForQualifiedName(model));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
       model.put("includeExampleJson", (jacksonXcAvailable && isIncludeExampleJson()));

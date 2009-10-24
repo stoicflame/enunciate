@@ -37,9 +37,12 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.contract.json.JsonAnyTypeDefinition;
 import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition;
 import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
+import org.codehaus.enunciate.contract.json.JsonSimpleTypeDefinition;
+import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -53,6 +56,7 @@ import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonRootType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.XmlNsForm;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
@@ -82,7 +86,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final Map<String, SchemaInfo> namespacesToSchemas;
   final Map<String, WsdlInfo> namespacesToWsdls;
   final Map<String, XmlType> knownTypes;
-  final Map<String, JsonTypeDefinition> knownJsonTypes;
+  final Map<String, JsonType> knownJsonTypes;
   final Map<RESTNoun, List<RESTMethod>> nounsToRESTMethods;
   final Map<RESTNoun, Set<String>> nounsToContentTypes;
   final List<ContentTypeHandler> contentTypeHandlers;
@@ -161,35 +165,38 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @return The map of known JSON types, keyed off the Java fqn.
    */
-  private HashMap<String, JsonTypeDefinition> loadKnownJsonTypes() {
-    HashMap<String, JsonTypeDefinition> knownJsonTypes = new HashMap<String, JsonTypeDefinition>();
+  private HashMap<String, JsonType> loadKnownJsonTypes() {
+    HashMap<String, JsonType> knownJsonTypes = new HashMap<String, JsonType>();
     // NOTE Simply account for the primitives and other basic types. There is currently no need for JSON type definitions for them.
-    knownJsonTypes.put(Boolean.class.getName(), null);
-    knownJsonTypes.put(Boolean.TYPE.getName(), null);
-    knownJsonTypes.put(Float.class.getName(), null);
-    knownJsonTypes.put(Float.TYPE.getName(), null);
-    knownJsonTypes.put(Double.class.getName(), null);
-    knownJsonTypes.put(Double.TYPE.getName(), null);
-    knownJsonTypes.put(Character.class.getName(), null);
-    knownJsonTypes.put(Character.TYPE.getName(), null);
-    knownJsonTypes.put(Byte.class.getName(), null);
-    knownJsonTypes.put(Byte.TYPE.getName(), null);
-    knownJsonTypes.put(Short.class.getName(), null);
-    knownJsonTypes.put(Short.TYPE.getName(), null);
-    knownJsonTypes.put(Integer.class.getName(), null);
-    knownJsonTypes.put(Integer.TYPE.getName(), null);
-    knownJsonTypes.put(Long.class.getName(), null);
-    knownJsonTypes.put(Long.TYPE.getName(), null);
-    knownJsonTypes.put(String.class.getName(), null);
-    knownJsonTypes.put(java.math.BigInteger.class.getName(), null);
-    knownJsonTypes.put(java.math.BigDecimal.class.getName(), null);
-    knownJsonTypes.put(java.util.Calendar.class.getName(), null);
-    knownJsonTypes.put(java.util.Date.class.getName(), null);
-    knownJsonTypes.put(java.net.URI.class.getName(), null);
-    knownJsonTypes.put(java.lang.Object.class.getName(), null);
-    knownJsonTypes.put(byte[].class.getName(), null);
-    knownJsonTypes.put(java.util.UUID.class.getName(), null);
-    knownJsonTypes.put(java.util.GregorianCalendar.class.getName(), null);
+
+    // TODO Then go check for the places where we couldn't assume a non-null in the model...
+    knownJsonTypes.put(Boolean.class.getName(), JsonSimpleTypeDefinition.BOOLEAN);
+    knownJsonTypes.put(Boolean.TYPE.getName(), JsonSimpleTypeDefinition.BOOLEAN);
+    knownJsonTypes.put(Float.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Float.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Double.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Double.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Character.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(Character.TYPE.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(Byte.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Byte.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Short.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Short.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Integer.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Integer.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Long.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(Long.TYPE.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(String.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.math.BigInteger.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(java.math.BigDecimal.class.getName(), JsonSimpleTypeDefinition.NUMBER);
+    knownJsonTypes.put(java.util.Calendar.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.util.Date.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.net.URI.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.lang.Object.class.getName(), JsonAnyTypeDefinition.INSTANCE);
+    knownJsonTypes.put(byte[].class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.util.UUID.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put(java.util.GregorianCalendar.class.getName(), JsonSimpleTypeDefinition.STRING);
+    knownJsonTypes.put("javax.activation.DataHandler", JsonSimpleTypeDefinition.STRING);
     return knownJsonTypes;
   }
 
@@ -401,20 +408,20 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       if (!jsonSchemaInfo.getTypesByName().containsKey(typeDefinition.getTypeName())) {
         jsonSchemaInfo.getTypesByName().put(typeDefinition.getTypeName(), typeDefinition);
         knownJsonTypes.put(typeDefinition.getQualifiedName(), typeDefinition);
+      }
 
-        if (includeReferencedClasses() && (this.enunciateConfig == null || !this.enunciateConfig.isExcludeUnreferencedClasses()) && typeDefinition instanceof JsonObjectTypeDefinition) {
-          JsonObjectTypeDefinition objectTypeDefinition = (JsonObjectTypeDefinition) typeDefinition;
-          for (PropertyDeclaration property : objectTypeDefinition.getJsonPropertiesByName().values()) {
-            REFERENCE_STACK.get().addFirst("json property " + property.getSimpleName() + " of json object definition " + typeDefinition.getQualifiedName());
-            property.getPropertyType().accept(new ReferencedJsonTypeDefinitionVisitor());
-            REFERENCE_STACK.get().removeFirst();
-          }
-          ClassType superclass = objectTypeDefinition.getSuperclass();
-          if (superclass != null) {
-            REFERENCE_STACK.get().addFirst("json type definition subclass " + typeDefinition.getQualifiedName());
-            addJsonType(JsonTypeDefinition.createTypeDefinition(superclass.getDeclaration()));
-            REFERENCE_STACK.get().removeFirst();
-          }
+      if (includeReferencedClasses() && (this.enunciateConfig == null || typeDefinition instanceof JsonObjectTypeDefinition)) {
+        JsonObjectTypeDefinition objectTypeDefinition = (JsonObjectTypeDefinition) typeDefinition;
+        for (PropertyDeclaration property : objectTypeDefinition.getJsonPropertiesByName().values()) {
+          REFERENCE_STACK.get().addFirst("json property " + property.getSimpleName() + " of json object definition " + typeDefinition.getQualifiedName());
+          addReferencedJsonTypeDefinitions(property.getPropertyType());
+          REFERENCE_STACK.get().removeFirst();
+        }
+        ClassType superclass = objectTypeDefinition.getSuperclass();
+        if (superclass != null) {
+          REFERENCE_STACK.get().addFirst("json type definition subclass " + typeDefinition.getQualifiedName());
+          addJsonType(JsonTypeDefinition.createTypeDefinition(superclass.getDeclaration()));
+          REFERENCE_STACK.get().removeFirst();
         }
       }
     }
@@ -671,7 +678,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         ClassDeclaration classDeclaration = ((ClassType) nounValueType).getDeclaration();
         if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
           //only add referenced type definitions for root elements.
-          add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+          final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
+          add(rootElement);
+
+          // NOTE Someday we'll probably need to also match "application/json+*"
+          if (jacksonAvailable() && restMethod.getContentTypes().contains(MediaType.APPLICATION_JSON)) {
+            addJsonRootElement(rootElement);
+          }
         }
       }
     }
@@ -681,7 +694,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
       if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
         //only add referenced type definitions for root elements.
-        add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+        final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
+        add(rootElement);
+
+        // NOTE Someday we'll probably need to also match "application/json+*"
+        if (jacksonAvailable() && restMethod.getContentTypes().contains(MediaType.APPLICATION_JSON)) {
+          addJsonRootElement(rootElement);
+        }
       }
     }
 
@@ -725,7 +744,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         ClassDeclaration classDeclaration = ((ClassType) type).getDeclaration();
         if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
           //only add referenced type definitions for root elements.
-          add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+          final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
+          add(rootElement);
+
+          // NOTE Someday we'll probably need to also match "application/json+*"
+          if (jacksonAvailable() && resourceMethod.getConsumesMime().contains(MediaType.APPLICATION_JSON)) {
+            addJsonRootElement(rootElement);
+          }
         }
 
         if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
@@ -741,7 +766,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
       if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
         //only add referenced type definitions for root elements.
-        add(new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration)));
+        final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
+        add(rootElement);
+
+        // NOTE Someday we'll probably need to also match "application/json+*"
+        if (jacksonAvailable() && resourceMethod.getProducesMime().contains(MediaType.APPLICATION_JSON)) {
+          addJsonRootElement(rootElement);
+        }
       }
 
       if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
@@ -751,6 +782,15 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     }
 
     //todo: include referenced type definitions from the errors?
+  }
+
+  private static boolean jacksonAvailable() {
+    try {
+      Class.forName("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
+      return true;
+    } catch(ClassNotFoundException e) {
+      return false;
+    }
   }
 
   /**
@@ -796,6 +836,68 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * Add a JSON root element to the model to reflect an XML root element being serialized as JSON with jackson.
+   *
+   * @param rootElement The root element to add.
+   */
+  public void addJsonRootElement(final RootElementDeclaration rootElement) {
+    assert rootElement != null : "rootElement must not be null";
+
+    if (rootElement.getAnnotation(XmlTransient.class) == null) {
+      addJsonRootElement(new JsonRootElementDeclaration(createJsonTypeDefinition(rootElement.getTypeDefinition())));
+    }
+  }
+
+  private JsonTypeDefinition createJsonTypeDefinition(final TypeDefinition typeDefinition) {
+    assert typeDefinition != null : "typeDefinition must not be null";
+
+    JsonTypeDefinition jsonTypeDefinition = JsonTypeDefinition.createTypeDefinition(typeDefinition);
+
+    REFERENCE_STACK.get().addFirst("\"see also\" annotation");
+    addJsonSeeAlsoTypeDefinitions(typeDefinition);
+    REFERENCE_STACK.get().removeFirst();
+
+    for (Element element : typeDefinition.getElements()) {
+      if (includeReferencedClasses()) {
+        REFERENCE_STACK.get().addFirst("accessor " + element.getSimpleName() + " of type definition " + typeDefinition.getQualifiedName());
+        addJsonSeeAlsoTypeDefinitions(element);
+        for (Element chioce : element.getChoices()) {
+          addReferencedJsonTypeDefinitions(chioce.isAdapted() ? chioce.getAdapterType() : chioce.getAccessorType());
+        }
+        REFERENCE_STACK.get().removeFirst();
+      }
+    }
+
+    for (Attribute attribute : typeDefinition.getAttributes()) {
+      if (includeReferencedClasses()) {
+        REFERENCE_STACK.get().addFirst("accessor " + attribute.getSimpleName() + " of type definition " + typeDefinition.getQualifiedName());
+        addJsonSeeAlsoTypeDefinitions(attribute);
+        addReferencedJsonTypeDefinitions(attribute.isAdapted() ? attribute.getAdapterType() : attribute.getAccessorType());
+        REFERENCE_STACK.get().removeFirst();
+      }
+    }
+
+    if ((includeReferencedClasses())) {
+      Value value = typeDefinition.getValue();
+      if (value != null) {
+        REFERENCE_STACK.get().addFirst("accessor " + value.getSimpleName() + " of type definition " + typeDefinition.getQualifiedName());
+        addJsonSeeAlsoTypeDefinitions(value);
+        addReferencedJsonTypeDefinitions(value.isAdapted() ? value.getAdapterType() : value.getAccessorType());
+        REFERENCE_STACK.get().removeFirst();
+      }
+
+      ClassType superClass = typeDefinition.getSuperclass();
+      if (!typeDefinition.isEnum() && superClass != null) {
+        REFERENCE_STACK.get().addFirst("type definition subclass " + typeDefinition.getQualifiedName());
+        addReferencedJsonTypeDefinitions(superClass);
+        REFERENCE_STACK.get().removeFirst();
+      }
+    }
+
+    return jsonTypeDefinition;
+  }
+
+  /**
    * Add a JSON root element to the model.
    *
    * @param rootElementDeclaration The root element to add.
@@ -811,8 +913,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     String schemaId = JsonSchemaInfo.schemaIdForType(delegate);
     JsonSchemaInfo jsonSchemaInfo = getIdsToJsonSchemas().get(schemaId);
     if (jsonSchemaInfo == null) {
-      jsonSchemaInfo = new JsonSchemaInfo();
-      jsonSchemaInfo.setSchemaId(schemaId);
+      jsonSchemaInfo = new JsonSchemaInfo(delegate.getPackage());
       getIdsToJsonSchemas().put(schemaId, jsonSchemaInfo);
     }
     return jsonSchemaInfo;
@@ -936,6 +1037,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     type.accept(new ReferencedXmlTypeDefinitionVisitor());
   }
 
+  /**
+   * Adds any referenced type definitions for the specified type mirror.
+   *
+   * @param type The type mirror.
+   */
+  protected void addReferencedJsonTypeDefinitions(TypeMirror type) {
+    type.accept(new ReferencedJsonTypeDefinitionVisitor());
+  }
 
   /**
    * Add any type definitions that are referenced using {@link XmlSeeAlso}.
@@ -963,6 +1072,41 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
             ClassDeclaration typeDeclaration = ((ClassType) mirror).getDeclaration();
             if (typeDeclaration != null) {
               add(createTypeDefinition(typeDeclaration));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Add any type definitions that are referenced using {@link XmlSeeAlso} as JSON serializable types.
+   *
+   * @param declaration The declaration.
+   */
+  protected void addJsonSeeAlsoTypeDefinitions(Declaration declaration) {
+    assert declaration != null : "declaration must not be null";
+
+    XmlSeeAlso seeAlso = declaration.getAnnotation(XmlSeeAlso.class);
+    if (seeAlso != null) {
+      try {
+        Class[] classes = seeAlso.value();
+        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        for (Class clazz : classes) {
+          ClassType type = (ClassType) ape.getTypeUtils().getDeclaredType(ape.getTypeDeclaration(clazz.getName()));
+          ClassDeclaration typeDeclaration = type.getDeclaration();
+          if (typeDeclaration != null) {
+            addJsonType(JsonTypeDefinition.createTypeDefinition(typeDeclaration));
+          }
+        }
+      }
+      catch (MirroredTypesException e) {
+        Collection<TypeMirror> mirrors = e.getTypeMirrors();
+        for (TypeMirror mirror : mirrors) {
+          if (mirror instanceof ClassType) {
+            ClassDeclaration typeDeclaration = ((ClassType) mirror).getDeclaration();
+            if (typeDeclaration != null) {
+              addJsonType(JsonTypeDefinition.createTypeDefinition(typeDeclaration));
             }
           }
         }
@@ -1277,20 +1421,25 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * Find the JSON type definition for a class given the class's qualified name, or null if the class hasn't been added to the model.
+   * @param qualifiedName Qualified name of the class to find the JSON type for.
+   *
+   * @return The JSON type definition.
+   */
+  public JsonType findJsonTypeDefinition(final String qualifiedName) {
+    return knownJsonTypes.get(qualifiedName);
+  }
+
+  /**
    * Find the JSON type definition for a class given the class's declaration, or null if the class hasn't been added to the model.
    *
    * @param declaration The declaration.
    * @return The JSON type definition.
    */
-  public JsonTypeDefinition findJsonTypeDefinition(ClassDeclaration declaration) {
+  public JsonType findJsonTypeDefinition(ClassDeclaration declaration) {
     assert declaration != null;
 
-    JsonTypeDefinition jsonTypeDefinition = knownJsonTypes.get(declaration.getQualifiedName());
-    if (jsonTypeDefinition == null) {
-      return null;
-    }
-    String schemaId = JsonSchemaInfo.schemaIdForType(declaration);
-    return idsToJsonSchemas.get(schemaId).getTypesByName().get(jsonTypeDefinition.getTypeName());
+    return knownJsonTypes.get(declaration.getQualifiedName());
   }
 
   /**
@@ -1317,7 +1466,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   public JsonRootElementDeclaration findJsonRootElementDeclaration(ClassDeclaration declaration) {
     assert declaration != null;
 
-    JsonTypeDefinition jsonTypeDefinition = knownJsonTypes.get(declaration.getQualifiedName());
+    JsonType jsonTypeDefinition = knownJsonTypes.get(declaration.getQualifiedName());
     if (jsonTypeDefinition == null) {
       return null;
     }

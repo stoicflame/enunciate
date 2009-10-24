@@ -18,6 +18,8 @@ package org.codehaus.enunciate.samples.docs.pckg1;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.enunciate.json.JsonRootType;
+
 /**
  * some text that can be used to describe
  * a class on multiple lines <a href="#hi">with some markup</a>
@@ -30,6 +32,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Ryan Heaton
  * @sometag some <b>value<b> that has some markup
  */
+@JsonRootType
 @XmlRootElement
 public class BeanOne {
 
