@@ -664,6 +664,27 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.restEndpoints.add(endpoint);
   }
 
+  private static boolean contentTypeIncluded(final Collection<String> contentTypes, final String targetContentType) {
+    assert contentTypes != null : "contentTypes must not be null";
+    assert targetContentType != null : "targetContentType must not be null";
+
+    if (contentTypes.isEmpty()) {
+      return false;
+    }
+
+    if (contentTypes.contains(MediaType.WILDCARD) || contentTypes.contains(targetContentType)) {
+      return true;
+    }
+
+    for (final String contentType : contentTypes) {
+      // NOTE Looking for <targetContentType>+*. e.g. application/json+*
+      if (contentType.startsWith(targetContentType)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Add all the type definitions referenced by the specified REST method.
    *
@@ -681,8 +702,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
           add(rootElement);
 
-          // NOTE Someday we'll probably need to also match "application/json+*"
-          if (jacksonAvailable() && restMethod.getContentTypes().contains(MediaType.APPLICATION_JSON)) {
+          if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
             addJsonRootElement(rootElement);
           }
         }
@@ -697,8 +717,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
         add(rootElement);
 
-        // NOTE Someday we'll probably need to also match "application/json+*"
-        if (jacksonAvailable() && restMethod.getContentTypes().contains(MediaType.APPLICATION_JSON)) {
+        if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
           addJsonRootElement(rootElement);
         }
       }
@@ -747,8 +766,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
           add(rootElement);
 
-          // NOTE Someday we'll probably need to also match "application/json+*"
-          if (jacksonAvailable() && resourceMethod.getConsumesMime().contains(MediaType.APPLICATION_JSON)) {
+          if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getConsumesMime(), MediaType.APPLICATION_JSON)) {
             addJsonRootElement(rootElement);
           }
         }
@@ -769,8 +787,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
         add(rootElement);
 
-        // NOTE Someday we'll probably need to also match "application/json+*"
-        if (jacksonAvailable() && resourceMethod.getProducesMime().contains(MediaType.APPLICATION_JSON)) {
+        if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getProducesMime(), MediaType.APPLICATION_JSON)) {
           addJsonRootElement(rootElement);
         }
       }
