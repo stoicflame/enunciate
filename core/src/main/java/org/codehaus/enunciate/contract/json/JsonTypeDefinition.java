@@ -38,6 +38,6 @@ public abstract class JsonTypeDefinition extends DecoratedClassDeclaration imple
 
   public static String getTypeName(final TypeDeclaration delegate) {
     JsonName jsonName = delegate.getAnnotation(JsonName.class);
-    return jsonName == null ? delegate.getQualifiedName() : jsonName.value();
+    return jsonName == null ? delegate.getSimpleName() : jsonName.value();
   }
 }
