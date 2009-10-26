@@ -74,17 +74,6 @@
       </ul>
     </xsl:if>
 
-    <xsl:if test="/api-docs/data/jsonSchema/type">
-      <h1>JSON Data Types</h1>
-      <ul>
-        <xsl:for-each select="/api-docs/data/jsonSchema/type">
-          <xsl:sort select="@name" />
-          <xsl:sort select="../@schemaId" />
-          <li><a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../@schemaId"/>)</xsl:if></a></li>
-        </xsl:for-each>
-      </ul>
-    </xsl:if>
-
     <xsl:if test="/api-docs/data/schema/elements/element">
       <h1>XML Data Elements</h1>
       <ul>
@@ -125,6 +114,17 @@
               </xsl:otherwise>
             </xsl:choose>
           </li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
+
+    <xsl:if test="/api-docs/data/jsonSchema/type">
+      <h1>JSON Data Types</h1>
+      <ul>
+        <xsl:for-each select="/api-docs/data/jsonSchema/type">
+          <xsl:sort select="@name" />
+          <xsl:sort select="../@schemaId" />
+          <li><a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/><xsl:if test="$multiple_schemas"> (<xsl:value-of select="../@schemaId"/>)</xsl:if></a></li>
         </xsl:for-each>
       </ul>
     </xsl:if>
@@ -249,7 +249,7 @@
                 </div>
               </xsl:if>
 
-              <xsl:if test="/api-docs/data/schema/types/type">
+              <xsl:if test="/api-docs/data/schema/types/type|/api-docs/data/jsonSchema">
                 <div class="item">
 
                   <h1>Data</h1>
@@ -313,28 +313,6 @@
                     </xsl:for-each>
                   </table>
 
-                  <xsl:if test="/api-docs/data/jsonSchema">
-                    <h2>JSON Data Types</h2>
-                    <ul>
-                      <xsl:for-each select="/api-docs/data/jsonSchema">
-                        <xsl:sort select="@schemaId"/>
-                        <xsl:if test="type">
-                          <li>
-                            schema <a href="data_{@schemaId}.html"><xsl:value-of select="@schemaId"/></a>
-                            <ul>
-                              <xsl:for-each select="type">
-                                <xsl:sort select="@name"/>
-                                <li>
-                                  <a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/></a>
-                                </li>
-                              </xsl:for-each>
-                            </ul>
-                          </li>
-                        </xsl:if>
-                      </xsl:for-each>
-                    </ul>
-                  </xsl:if>
-
                   <xsl:if test="/api-docs/data/schema/elements/element">
                     <h2>XML Data Elements</h2>
                     <ul>
@@ -397,6 +375,28 @@
                     </xsl:for-each>
                   </ul>
                 </div>
+
+                  <xsl:if test="/api-docs/data/jsonSchema">
+                    <h2>JSON Data Types</h2>
+                    <ul>
+                      <xsl:for-each select="/api-docs/data/jsonSchema">
+                        <xsl:sort select="@schemaId"/>
+                        <xsl:if test="type">
+                          <li>
+                            schema <a href="data_{@schemaId}.html"><xsl:value-of select="@schemaId"/></a>
+                            <ul>
+                              <xsl:for-each select="type">
+                                <xsl:sort select="@name"/>
+                                <li>
+                                  <a href="data_{../@schemaId}.html#{@name}"><xsl:value-of select="@name"/></a>
+                                </li>
+                              </xsl:for-each>
+                            </ul>
+                          </li>
+                        </xsl:if>
+                      </xsl:for-each>
+                    </ul>
+                  </xsl:if>
               </xsl:if>
 
             </div>
