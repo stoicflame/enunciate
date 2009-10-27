@@ -40,28 +40,28 @@
 
     <artifact:dependencies filesetId="core.libs.fileset" pomRefId="top.pom"/>
 
-    <artifact:dependencies filesetId="spring.libs.fileset">
+    <artifact:dependencies filesetId="spring.libs.fileset" pathId="spring.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="xfire.libs.fileset">
+    <artifact:dependencies filesetId="xfire.libs.fileset" pathId="xfire.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xfire" version="${top.pom.version}"/>
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xfire-client" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="cxf.libs.fileset">
+    <artifact:dependencies filesetId="cxf.libs.fileset" pathId="cxf.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="rest.libs.fileset">
+    <artifact:dependencies filesetId="rest.libs.fileset" pathId="rest.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-rest" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="gwt.libs.fileset">
+    <artifact:dependencies filesetId="gwt.libs.fileset" pathId="gwt.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-gwt" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="amf.libs.fileset">
+    <artifact:dependencies filesetId="amf.libs.fileset" pathId="amf.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-amf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
@@ -101,7 +101,8 @@
           <exclude name="**/samples/**"/>
           <exclude name="**/integration-tests/**"/>
           <exclude name="**/integration-test-support/**"/>
-          <exclude name="**/maven-enunciate-plugin/**"/>
+          <exclude name="**/maven-enunciate-*/**"/>
+          <exclude name="**/enunciate-simple-archetype/**"/>
         </fileset>
       </path>
     </pathconvert>
@@ -109,6 +110,12 @@
 
     <path id="module.docs.classpath">
       <path refid="dist.libs.path"/>
+      <path refid="spring.libs.path"/>
+      <path refid="rest.libs.path"/>
+      <path refid="xfire.libs.path"/>
+      <path refid="cxf.libs.path"/>
+      <path refid="gwt.libs.path"/>
+      <path refid="amf.libs.path"/>
       <path refid="optional.jars.path"/>
       <path location="${java.home}/../lib/tools.jar"/>
       <fileset dir="${ant.home}/lib">
@@ -225,7 +232,8 @@
         <exclude name="**/samples/**"/>
         <exclude name="**/integration-tests/**"/>
         <exclude name="**/integration-test-support/**"/>
-        <exclude name="**/maven-enunciate-plugin/**"/>
+        <exclude name="**/maven-enunciate-*/**"/>
+        <exclude name="**/enunciate-simple-archetype/**"/>
       </fileset>
 
       <sourcepath>
@@ -234,13 +242,19 @@
           <exclude name="**/samples/**"/>
           <exclude name="**/integration-tests/**"/>
           <exclude name="**/integration-test-support/**"/>
-          <exclude name="**/maven-enunciate-plugin/**"/>
+          <exclude name="**/maven-enunciate-*/**"/>
+          <exclude name="**/enunciate-simple-archetype/**"/>
         </dirset>
       </sourcepath>
 
       <classpath>
         <path refid="dist.libs.path"/>
-        <path refid="optional.jars.path"/>
+        <path refid="spring.libs.path"/>
+        <path refid="rest.libs.path"/>
+        <path refid="xfire.libs.path"/>
+        <path refid="cxf.libs.path"/>
+        <path refid="gwt.libs.path"/>
+        <path refid="amf.libs.path"/>
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <path path="${java.class.path}"/>
       </classpath>
