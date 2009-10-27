@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.16-SNAPSHOT</version>
+  <version>1.16-RC1</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -31,6 +31,13 @@
     <module>gwt-rt</module>
     <module>gwt</module>
 
+    <module>top-rt</module>
+    <module>top</module>
+
+    <module>spring-jaxws-rt</module>
+    <module>spring-app-rt</module>
+    <module>spring-app</module>
+
     <module>rest-rt</module>
     <module>rest</module>
 
@@ -40,12 +47,6 @@
     <module>cxf-rt</module>
     <module>cxf</module>
 
-    <module>spring-jaxws-rt</module>
-    <module>spring-app-rt</module>
-    <module>spring-app</module>
-
-    <module>top-rt</module>
-    <module>top</module>
     <module>maven-enunciate-plugin</module>
     <module>maven-enunciate-spring-plugin</module>
     <module>maven-enunciate-cxf-plugin</module>
