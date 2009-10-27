@@ -299,6 +299,11 @@ public class ConfigMojo extends AbstractMojo {
         classpath.append(File.pathSeparatorChar);
       }
     }
+    if (additionalClasspathEntries != null) {
+      for (String additionalClasspathEntry : additionalClasspathEntries) {
+        classpath.append(File.pathSeparatorChar).append(additionalClasspathEntry);
+      }
+    }
     enunciate.setRuntimeClasspath(classpath.toString());
 
     classpathEntries.clear();
@@ -309,11 +314,6 @@ public class ConfigMojo extends AbstractMojo {
       classpath.append(classpathIt.next().getFile().getAbsolutePath());
       if (classpathIt.hasNext()) {
         classpath.append(File.pathSeparatorChar);
-      }
-    }
-    if (additionalClasspathEntries != null) {
-      for (String additionalClasspathEntry : additionalClasspathEntries) {
-        classpath.append(File.pathSeparatorChar).append(additionalClasspathEntry);
       }
     }
     enunciate.setBuildClasspath(classpath.toString());
