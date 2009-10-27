@@ -41,6 +41,6 @@ public final class TestJsonTypeDefinition extends InAPTTestCase
     public void testTypeName_NoLogicalName()
     {
         final JsonTypeDefinition jsonTypeDefinition = JsonTypeDefinition.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.PersonType"));
-        assertEquals("org.codehaus.enunciate.samples.json.PersonType", jsonTypeDefinition.getTypeName());
+        assertEquals("PersonType", jsonTypeDefinition.getTypeName());
     }
 }
