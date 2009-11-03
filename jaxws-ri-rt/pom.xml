@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.16-RC1</version>
+    <version>1.16-RC2</version>
   </parent>
 
   <artifactId>enunciate-jaxws-ri-rt</artifactId>
@@ -20,11 +20,6 @@
     <repository>
       <id>java.net.2</id>
       <url>http://download.java.net/maven/2</url>
-    </repository>
-    <repository>
-      <!--you know something's seriously wrong with sun's maven repositories when we have to go out to the jboss repository to get some of these artifacts.-->
-      <id>jboss.repo</id>
-      <url>http://repository.jboss.org/maven2</url>
     </repository>
   </repositories>
 
@@ -49,15 +44,6 @@
     <dependency>
       <groupId>com.sun.xml.stream.buffer</groupId>
       <artifactId>streambuffer</artifactId>
-    </dependency>
-
-    <!--sjsxp needed only for MTOM-->
-    <dependency>
-      <groupId>com.sun.xml.stream</groupId>
-      <artifactId>sjsxp</artifactId>
-
-      <!--needed only for MTOM-->
-      <optional>true</optional>
     </dependency>
   </dependencies>
 

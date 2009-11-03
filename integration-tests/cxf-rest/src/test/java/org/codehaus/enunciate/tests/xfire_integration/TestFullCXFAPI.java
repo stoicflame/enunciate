@@ -22,7 +22,6 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.client.cite.InfoSet;
-import org.codehaus.enunciate.samples.genealogy.client.cite.Note;
 import org.codehaus.enunciate.samples.genealogy.client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.client.cite.SourceXFireType;
 import org.codehaus.enunciate.samples.genealogy.client.data.Event;
@@ -158,10 +157,6 @@ public class TestFullCXFAPI extends TestCase {
       Person person = (Person) o;
       assertTrue(ids.remove(person.getId()));
       assertEquals(new Date(1L), ((Event) person.getEvents().iterator().next()).getDate());
-
-      Map notes = person.getNotes();
-      assertEquals("text1", ((Note) notes.get("contributor1")).getText());
-      assertEquals("text2", ((Note) notes.get("contributor2")).getText());
     }
 
     assertNull(personService.readPersons(null));

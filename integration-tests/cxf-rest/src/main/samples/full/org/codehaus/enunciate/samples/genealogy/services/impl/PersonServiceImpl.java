@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PathParam;
+import javax.xml.ws.soap.MTOM;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -42,6 +43,7 @@ import java.util.*;
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"
 )
 @Path ("")
+@MTOM
 public class PersonServiceImpl implements PersonService {
 
   @PUT
@@ -64,15 +66,6 @@ public class PersonServiceImpl implements PersonService {
       Event event = new Event();
       event.setDate(new DateTime(1L));
       person.setEvents(Arrays.asList(event));
-
-      HashMap<String, Note> notes = new HashMap<String, Note>();
-      Note note1 = new Note();
-      note1.setText("text1");
-      notes.put("contributor1", note1);
-      Note note2 = new Note();
-      note2.setText("text2");
-      notes.put("contributor2", note2);
-      person.setNotes(notes);
     }
 
     return persons;

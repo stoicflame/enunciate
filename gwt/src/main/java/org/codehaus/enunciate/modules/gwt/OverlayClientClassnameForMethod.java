@@ -43,6 +43,9 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     if (isCollection(declaration)) {
       return "com.google.gwt.core.client.JsArray";
     }
+    else if (String.class.getName().equals(declaration.getQualifiedName())) {
+      return "";
+    }
 
     return super.convert(declaration);
   }
@@ -96,6 +99,9 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
           default:
             return "com.google.gwt.core.client.JsArray";
         }
+      }
+      else if (componentType.isInstanceOf(String.class.getName())) {
+        return "com.google.gwt.core.client.JsArrayString";
       }
       else {
         return "com.google.gwt.core.client.JsArray<" + super.convert(componentType) + ">";

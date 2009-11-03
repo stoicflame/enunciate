@@ -39,7 +39,6 @@ public class Person {
   private Collection<Event> events;
   private Collection<Fact> facts;
   private Collection<Relationship> relationships;
-  private Map<String, Note> notes;
 
   private DataHandler picture;
 
@@ -171,21 +170,4 @@ public class Person {
     this.picture = picture;
   }
 
-  /**
-   * A map of contributor ids to notes.
-   *
-   * @return A map of contributor ids to notes.
-   */
-  public Map<String, Note> getNotes() {
-    return notes;
-  }
-
-  /**
-   * A map of contributor ids to notes.
-   *
-   * @param notes A map of contributor ids to notes.
-   */
-  public void setNotes(Map<String, Note> notes) {
-    this.notes = notes;
-  }
 }

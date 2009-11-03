@@ -19,7 +19,11 @@
     <cxf disabled="false"/>
     <jaxws-ri disabled="true"/>
     <xfire disabled="true"/>
-    <jaxws-client disabled="true"/>
+    <jaxws-client>
+      <package-conversions>
+        <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
+      </package-conversions>
+    </jaxws-client>
     <jersey disabled="true"/>
     <xfire-client uuid="full.example" disable15Client="false">
       <package-conversions>
