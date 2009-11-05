@@ -12,6 +12,14 @@
   <description>The JAX-WS RI runtime is a reference to all JAX-WS RI dependencies. There are no significant classes; just a reference to the runtime dependencies.</description>
 
   <repositories>
+    <!--this has to be here to make sure the central m2-->
+    <!--repo gets consulted FIRST because if not, the-->
+    <!--crazy m2 server at java.net will return bogus artifacts-->
+    <!--when its really not supposed to return anything -->
+    <repository>
+      <id>m2.central</id>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
     <repository>
       <id>java.net.1</id>
       <url>http://download.java.net/maven/1</url>

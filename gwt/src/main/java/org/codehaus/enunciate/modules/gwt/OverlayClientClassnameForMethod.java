@@ -22,6 +22,7 @@ import com.sun.mirror.type.*;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 
 import java.util.Collection;
 import java.util.Map;
@@ -42,9 +43,6 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
     if (isCollection(declaration)) {
       return "com.google.gwt.core.client.JsArray";
-    }
-    else if (String.class.getName().equals(declaration.getQualifiedName())) {
-      return "";
     }
 
     return super.convert(declaration);
@@ -106,6 +104,29 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
       else {
         return "com.google.gwt.core.client.JsArray<" + super.convert(componentType) + ">";
       }
+    }
+    else if (decorated.isCollection()) {
+      Collection<TypeMirror> typeArgs = ((DecoratedDeclaredType) decorated).getActualTypeArguments();
+      if (typeArgs != null && typeArgs.size() == 1) {
+        DecoratedTypeMirror componentType = (DecoratedTypeMirror) typeArgs.iterator().next();
+        if (componentType.isInstanceOf(String.class.getName())) {
+          return "com.google.gwt.core.client.JsArrayString";
+        }
+        else if (componentType.isInstanceOf(Boolean.class.getName())) {
+          return "com.google.gwt.core.client.JsArrayBoolean";
+        }
+        else if (componentType.isInstanceOf(Integer.class.getName())
+          || componentType.isInstanceOf(Character.class.getName())
+          || componentType.isInstanceOf(Short.class.getName())) {
+          return "com.google.gwt.core.client.JsArrayInteger";
+        }
+        else if (componentType.isInstanceOf(Double.class.getName())
+          || componentType.isInstanceOf(Float.class.getName())
+          || componentType.isInstanceOf(Long.class.getName())) {
+          return "com.google.gwt.core.client.JsArrayNumber";
+        }
+      }
+      return "com.google.gwt.core.client.JsArray";
     }
 
     return super.convert(typeMirror);

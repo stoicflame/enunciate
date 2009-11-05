@@ -47,7 +47,7 @@ public class TestFullCXFAPIWithJAXWSClient extends TestCase {
    * Tests the full API
    */
   public void testFullSOAPAPI() throws Exception {
-    int port = 8088;
+    int port = 8080;
     if (System.getProperty("container.port") != null) {
       port = Integer.parseInt(System.getProperty("container.port"));
     }

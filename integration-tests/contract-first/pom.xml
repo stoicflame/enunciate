@@ -10,8 +10,21 @@
   <packaging>war</packaging>
 
   <pluginRepositories>
+    <!--this has to be here to make sure the central m2-->
+    <!--repo gets consulted FIRST because if not, the-->
+    <!--crazy m2 server at java.net will return bogus artifacts-->
+    <!--when its really not supposed to return anything -->
     <pluginRepository>
-      <id>java.net</id>
+      <id>m2.central</id>
+      <url>http://repo1.maven.org/maven2/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>java.net.1</id>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+    </pluginRepository>
+    <pluginRepository>
+      <id>java.net.2</id>
       <url>http://download.java.net/maven/2</url>
     </pluginRepository>
   </pluginRepositories>
@@ -83,7 +96,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jaxws-maven-plugin</artifactId>
-        <version>1.10</version>
+        <version>1.12</version>
         <executions>
           <execution>
             <phase>generate-sources</phase>

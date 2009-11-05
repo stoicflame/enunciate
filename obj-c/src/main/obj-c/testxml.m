@@ -1543,7 +1543,7 @@ static short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
-  return xmlTextWriterWriteFormatString(writer, "%h", *value);
+  return xmlTextWriterWriteFormatString(writer, "%hi", *value);
 }
 
 /*******************char************************************/

@@ -12,6 +12,14 @@
   <description>The Enunciate JAX-WS Reference Implementation runtime libraries support the Spring-based JAX-WS RI-backed SOAP endpoints.</description>
 
   <repositories>
+    <!--this has to be here to make sure the central m2-->
+    <!--repo gets consulted FIRST because if not, the-->
+    <!--crazy m2 server at java.net will return bogus artifacts-->
+    <!--when its really not supposed to return anything -->
+    <repository>
+      <id>m2.central</id>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
     <repository>
       <id>java.net.1</id>
       <url>http://download.java.net/maven/1</url>
