@@ -676,10 +676,13 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       return true;
     }
 
-    for (final String contentType : contentTypes) {
-      // NOTE Looking for <targetContentType>+*. e.g. application/json+*
-      if (contentType.startsWith(targetContentType)) {
-        return true;
+    if (targetContentType.contains("/")) {
+      // NOTE Looking for, e.g., application/*+json
+      final String[] contentTypeParts = targetContentType.split("\\/", 2);
+      for (final String contentType : contentTypes) {
+        if (contentType.startsWith(contentTypeParts[0]) && contentType.endsWith(contentTypeParts[1])) {
+          return true;
+        }
       }
     }
     return false;
