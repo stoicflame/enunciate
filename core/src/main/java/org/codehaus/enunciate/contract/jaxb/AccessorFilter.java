@@ -66,6 +66,13 @@ public class AccessorFilter {
     if (declaration instanceof PropertyDeclaration) {
       PropertyDeclaration property = ((PropertyDeclaration) declaration);
 
+      for (String annotationName : property.getAnnotations().keySet()) {
+        if (annotationName.startsWith("javax.xml.bind.annotation")) {
+          //if the property has an explicit annotation, we'll include it.
+          return true;
+        }
+      }
+
       DecoratedMethodDeclaration getter = property.getGetter();
       if (getter == null) {
         //needs a getter.

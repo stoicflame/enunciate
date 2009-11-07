@@ -64,7 +64,7 @@ public class AccessorOverridesAnotherMethod implements TemplateMethodModelEx {
           accessors.add(typeDef.getValue());
           accessors.addAll(typeDef.getElements());
           for (Accessor accessor : accessors) {
-            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getName())) {
+            if (accessor != null && accessor.getAnnotation(XmlTransient.class) == null && name.equals(accessor.getSimpleName())) {
               return Boolean.TRUE;
             }
           }

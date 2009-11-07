@@ -40,6 +40,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.AbstractCollection;
+import java.util.Iterator;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -70,10 +72,11 @@ public class ElementRef extends Element {
     }
 
     this.xmlElementRef = xmlElementRef;
-    this.choices = new ArrayList<ElementRef>();
+    Collection<ElementRef> choices;
     if (xmlElementRefs != null) {
+      choices = new ArrayList<ElementRef>();
       for (XmlElementRef elementRef : xmlElementRefs.value()) {
-        this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), elementRef));
+        choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), elementRef));
       }
 
       this.ref = null;
@@ -81,32 +84,20 @@ public class ElementRef extends Element {
     else if (((DecoratedTypeMirror) getBareAccessorType()).isInstanceOf(JAXBElement.class.getName())) {
       //this is either a single-valued JAXBElement, or a parametric collection of them...
       //todo: throw an exception if this is referencing a non-global element for this namespace?
-      this.choices.add(this);
+      choices = new ArrayList<ElementRef>();
+      choices.add(this);
       this.ref = new QName(xmlElementRef.namespace(), xmlElementRef.name());
     }
     else if (isCollectionType()) {
-      //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
-      TypeMirror typeMirror = getBareAccessorType();
-      if (typeMirror instanceof DeclaredType) {
-        String fqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
-        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
-        for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
-          if (isInstanceOf(rootElement, fqn)) {
-            this.choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
-          }
-        }
-      }
-
-      if (this.choices.isEmpty()) {
-        throw new ValidationException(getPosition(), String.format("Member %s of %s: no known root element subtypes of %s", getSimpleName(), typedef.getQualifiedName(), typeMirror));
-      }
-
+      choices = new CollectionOfElementRefChoices();
       this.ref = null;
     }
     else {
-      this.choices.add(this);
+      choices = new ArrayList<ElementRef>();
+      choices.add(this);
       this.ref = loadRef();
     }
+    this.choices = choices;
   }
 
   /**
@@ -169,7 +160,7 @@ public class ElementRef extends Element {
         declaration = getEnv().getTypeDeclaration(typeClass.getName());
       }
       else {
-        TypeMirror accessorType = getAccessorType();
+        TypeMirror accessorType = getBareAccessorType();
         elementDeclaration = accessorType.toString();
         if (accessorType instanceof DeclaredType) {
           declaration = ((DeclaredType) accessorType).getDeclaration();
@@ -203,7 +194,7 @@ public class ElementRef extends Element {
     }
 
     if (refQName == null) {
-      throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
+      throw new ValidationException(getPosition(), "Member " + getSimpleName() + " of " + getTypeDefinition().getQualifiedName() + ": " + elementDeclaration + " is neither JAXBElement nor a root element declaration.");
     }
 
     return refQName;
@@ -381,5 +372,39 @@ public class ElementRef extends Element {
   @Override
   public String getJsonElementName() {
     return isElementRefs() ? getSimpleName() : getName();
+  }
+
+  /**
+   * Lazy-loaded collection of element ref choices.
+   *
+   * @author Ryan Heaton
+   */
+  private class CollectionOfElementRefChoices extends AbstractCollection<ElementRef> {
+
+    public Iterator<ElementRef> iterator() {
+      return lookupRefs().iterator();
+    }
+
+    public int size() {
+      return lookupRefs().size();
+    }
+
+    private Collection<ElementRef> lookupRefs() {
+      Collection<ElementRef> choices = new ArrayList<ElementRef>();
+
+      //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
+      TypeMirror typeMirror = getBareAccessorType();
+      if (typeMirror instanceof DeclaredType) {
+        String fqn = ((DeclaredType) typeMirror).getDeclaration().getQualifiedName();
+        EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
+        for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
+          if (isInstanceOf(rootElement, fqn)) {
+            choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
+          }
+        }
+      }
+
+      return choices;
+    }
   }
 }

@@ -65,6 +65,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private boolean allowEmptyNamespace = true;
   private boolean includeReferencedClasses = true;
   private boolean excludeUnreferencedClasses = true;
+  private boolean includeReferenceTrailInErrors = false;
   private WebAppConfig webAppConfig;
 
   /**
@@ -284,6 +285,24 @@ public class EnunciateConfiguration implements ErrorHandler {
    */
   public void setAllowEmptyNamespace(boolean allowEmptyNamespace) {
     this.allowEmptyNamespace = allowEmptyNamespace;
+  }
+
+  /**
+   * Whether to include referencing type information in error messages.
+   *
+   * @return Whether to include referencing type information in error messages.
+   */
+  public boolean isIncludeReferenceTrailInErrors() {
+    return includeReferenceTrailInErrors;
+  }
+
+  /**
+   * Whether to include referencing type information in error messages.
+   *
+   * @param includeReferenceTrailInErrors Whether to include referencing type information in error messages.
+   */
+  public void setIncludeReferenceTrailInErrors(boolean includeReferenceTrailInErrors) {
+    this.includeReferenceTrailInErrors = includeReferenceTrailInErrors;
   }
 
   /**

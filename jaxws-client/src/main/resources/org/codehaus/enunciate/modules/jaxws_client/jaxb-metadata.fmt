@@ -38,7 +38,7 @@
     @javax.xml.bind.annotation.XmlElementRef (
       name = "${choice.ref.localPart}",
       namespace = "${choice.ref.namespaceURI}",
-      type = ${classnameFor(choice)}.class
+      type = ${classnameFor(choice.bareAccessorType)}.class
     )[#if choice_has_next], [/#if]
   [/#list]
   } )

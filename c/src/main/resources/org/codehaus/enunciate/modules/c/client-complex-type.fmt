@@ -945,7 +945,13 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
     [#elseif accessor.collectionType]
   if (_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName} != NULL) {
     for (i = 0; i < _${type.clientSimpleName?uncap_first}->_sizeof_${accessor.clientSimpleName}; i++) {
-      [#if accessor.ref??]
+      [#if accessor.elementRefs!false]
+      [#--special case for element refs of size 1--]
+#if DEBUG_ENUNCIATE > 1
+      printf("Freeing accessor ${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
+#endif
+      free${xmlFunctionIdentifier(accessor.choices?first)?cap_first}Element(&(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName}[i]));
+      [#elseif accessor.ref??]
 #if DEBUG_ENUNCIATE > 1
       printf("Freeing accessor ${accessor.clientSimpleName}[%i] of type ${typeName}...\n", i);
 #endif

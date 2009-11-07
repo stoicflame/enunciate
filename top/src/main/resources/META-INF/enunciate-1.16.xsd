@@ -38,6 +38,7 @@
       <xs:attribute name="allowEmptyNamespace" type="xs:boolean" default="true"/>
       <xs:attribute name="includeReferencedClasses" type="xs:boolean" default="true"/>
       <xs:attribute name="excludeUnreferencedClasses" type="xs:boolean" default="true"/>
+      <xs:attribute name="includeReferenceTrailInErrors" type="xs:boolean" default="true"/>
     </xs:complexType>
 
   </xs:element>

@@ -114,15 +114,16 @@ public class ValidationResult {
       return text;
     }
     else {
-      StringBuilder builder = new StringBuilder(text).append("\nThis was added to the model from ");
+      StringBuilder builder = new StringBuilder(text).append(" (This was added to the model from ");
       Iterator<String> locations = referencedFrom.iterator();
       while (locations.hasNext()) {
         String location = locations.next();
         builder.append(location);
         if (locations.hasNext()) {
-          builder.append("and from ");
+          builder.append(", and from ");
         }
       }
+      builder.append(')');
       return builder.toString();
     }
   }

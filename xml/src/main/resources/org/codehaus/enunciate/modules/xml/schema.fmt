@@ -164,7 +164,7 @@
           <${xs}:complexType>
             <${xs}:sequence>
           [/#if]
-          [#if element.choices?size > 1]
+          [#if ((element.elementRefs!false) || (element.choices?size > 1))]
               <${xs}:choice minOccurs="0" maxOccurs="unbounded">
             [#list element.choices as elementChoice]
               [#if elementChoice.ref?exists]

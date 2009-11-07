@@ -16,9 +16,12 @@
 
 package org.codehaus.enunciate.samples.anotherschema;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class BeanOne {
 
   private int property1;

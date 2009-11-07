@@ -171,6 +171,13 @@ public class ConfigMojo extends AbstractMojo {
   private String[] excludeProjectExtensions;
 
   /**
+   * Whether to include reference trail information in validation errors.
+   *
+   * @parameter expression="${includeReferenceTrailInErrors}" default-value="false"
+   */
+  private boolean includeReferenceTrailInErrors = false;
+
+  /**
    * The GWT home.
    *
    * @parameter

@@ -434,10 +434,16 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public void add(TypeDefinition typeDef) {
     if (typeDef.getAnnotation(XmlTransient.class) == null) { //make sure we don't add a transient type definition.
+      if (typeDef.getAnnotation(XmlRootElement.class) != null && Collections.binarySearch(this.rootElements, typeDef, CLASS_COMPARATOR) < 0) {
+        //if the type definition is a root element, we want to make sure it's added to the model.
+        add(new RootElementDeclaration((ClassDeclaration) typeDef.getDelegate(), typeDef));
+      }
 
       int position = Collections.binarySearch(this.typeDefinitions, typeDef, CLASS_COMPARATOR);
       if (position < 0 && !isKnownType(typeDef)) {
-        typeDef.getReferencedFrom().add(currentReferenceLocation());
+        if (getEnunciateConfig() != null && getEnunciateConfig().isIncludeReferenceTrailInErrors()) {
+          typeDef.getReferencedFrom().add(currentReferenceLocation());
+        }
         this.typeDefinitions.add(-position - 1, typeDef);
         add(typeDef.getSchema());
 
@@ -527,9 +533,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     Iterator<String> step = REFERENCE_STACK.get().iterator();
     while (step.hasNext()) {
       String location = step.next();
-      builder.append(location).append('\n');
+      builder.append(location);
       if (step.hasNext()) {
-        builder.append("  of ");
+        builder.append(" of ");
       }
     }
     return builder.toString();
@@ -574,8 +580,14 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   protected void addReferencedTypeDefinitions(Element element) {
     addSeeAlsoTypeDefinitions(element);
-    for (Element chioce : element.getChoices()) {
-      addReferencedTypeDefinitions(chioce.isAdapted() ? chioce.getAdapterType() : chioce.getAccessorType());
+    if (element instanceof ElementRef && element.isCollectionType()) {
+      //special case for collections of element refs because the collection is lazy-loaded.
+      addReferencedTypeDefinitions(element.getAccessorType());
+    }
+    else {
+      for (Element choice : element.getChoices()) {
+        addReferencedTypeDefinitions(choice.isAdapted() ? choice.getAdapterType() : choice.getAccessorType());
+      }
     }
   }
 
@@ -1831,6 +1843,11 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       }
       else {
         DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
+        if (decorated.getDeclaration() != null && Object.class.getName().equals(decorated.getDeclaration().getQualifiedName())) {
+          //skip base object; not a type definition.
+          return;
+        }
+
         if (!decorated.isCollection() && !decorated.isInstanceOf(JAXBElement.class.getName())) {
           ClassDeclaration declaration = classType.getDeclaration();
           if (declaration != null) {

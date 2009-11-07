@@ -783,6 +783,12 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       result.addError(elementRef, "The xml element ref cannot be annotated also with XmlElement or XmlElements.");
     }
 
+    if (elementRef.isCollectionType() && elementRef.getChoices().isEmpty()) {
+      result.addError(elementRef, String.format("Member %s of %s: no known root element subtypes of %s",
+                                                                            elementRef.getSimpleName(), elementRef.getTypeDefinition().getQualifiedName(),
+                                                                            elementRef.getBareAccessorType()));
+    }
+
     return result;
   }
 
@@ -803,9 +809,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
             result.addError(setter, "'" + annotation + "' is on both the getter and setter.");
           }
         }
-      }
-      else {
-        result.addError(accessor, "A property accessor needs both a setter and a getter.");
       }
     }
 

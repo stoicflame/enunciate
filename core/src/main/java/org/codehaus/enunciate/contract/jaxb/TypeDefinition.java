@@ -207,6 +207,10 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    * @return Whether the given method declaration overrides any method.
    */
   protected boolean overrides(DecoratedMethodDeclaration method) {
+    if (method == null) {
+      return false;
+    }
+    
     AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
     Declarations decls = env.getDeclarationUtils();
 
