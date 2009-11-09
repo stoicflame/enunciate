@@ -17,7 +17,7 @@ Template library for WADL.
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <${wadl}:application xmlns:${wadl}="http://research.sun.com/wadl/2006/10" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
-  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.16-RC2"/>
+  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.16-RC3"/>
   
   <${wadl}:grammars>
     [@forEachSchema]

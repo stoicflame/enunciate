@@ -32,4 +32,14 @@ public class TestAntPatternMatcher extends TestCase {
     assertTrue(matcher.match("org.codehaus.enunciate.**", "org.codehaus.enunciate.subpackage.SomeClass"));
   }
 
+  /**
+   * tests the match with backslash
+   */
+  public void testMatch2() throws Exception {
+    AntPatternMatcher matcher = new AntPatternMatcher();
+    matcher.setPathSeparator("\\");
+    assertFalse(matcher.match("org\\codehaus\\enunciate\\*", "org\\codehaus\\enunciate\\subpackage\\SomeClass"));
+    assertTrue(matcher.match("org\\codehaus\\enunciate\\**", "org\\codehaus\\enunciate\\subpackage\\SomeClass"));
+  }
+
 }

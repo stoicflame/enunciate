@@ -71,6 +71,7 @@ public class AntPatternMatcher {
     }
 
     String pathSeparatorSplitPattern = ".".equals(this.pathSeparator) ? "\\." : this.pathSeparator; //escape the special '.' for regexp splitting.
+    pathSeparatorSplitPattern = "\\".equals(pathSeparatorSplitPattern) ? "\\\\" : pathSeparatorSplitPattern; //escape the special '\' for regexp splitting.
     String[] pattDirs = pattern.split(pathSeparatorSplitPattern);
     String[] pathDirs = path.split(pathSeparatorSplitPattern);
 

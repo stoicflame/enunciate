@@ -1,15 +1,15 @@
 package org.codehaus.enunciate.modules.jersey;
 
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
@@ -17,9 +17,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Properties;
 import java.util.Map;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 
 /**
  * Enunciate-specific servlet container that adds additional Enunciate-supported functionality to the Jersey JAX-RS container. This additional functionality
