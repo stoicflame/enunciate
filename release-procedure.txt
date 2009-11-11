@@ -17,16 +17,15 @@
 (Your new version should now be deployed.)
 
 8. Build the distribution from the LAST RELEASE TAG (e.g. "ant -f build-site.xml dist")
-9. mount the dist repo (e.g. "mount /home/heatonra/mnt/enunciate/dist")
-10. mount the web repo (e.g. "mount /home/heatonra/mnt/enunciate/web")
-11. Copy the dist files to the dist repo (e.g. "cp -v target/*.zip target/*.tar.gz /home/heatonra/mnt/enunciate/dist")
-    11a. Make sure the links you have on the downloads page are correct.
-12. Copy the web content to the web repo (e.g. "rsync -rcv --delete target/docs/ /home/heatonra/mnt/enunciate/web")
-13. Make your announcements.
-    13a. Codehaus news
-    13b. Java.net
-    13c. Webcohesion?
-    13d. Mailing lists.
-    13e. Serverside.com?
-    13f. Javalobby?
-14. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.
+9. cadaver
+    9a. put target/enunciate-VERSION.zip
+    9b. put target/enunciate-VERSION.tar.gz
+10. sitecopy --update enunciate
+11. Make your announcements.
+    11a. Codehaus news
+    11b. Java.net
+    11c. Webcohesion?
+    11d. Mailing lists.
+    11e. Serverside.com?
+    11f. Javalobby?
+12. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.

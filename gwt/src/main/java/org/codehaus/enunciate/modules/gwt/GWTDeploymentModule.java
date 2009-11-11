@@ -412,7 +412,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (WebFault webFault : allFaults) {
           if (!isGWTTransient(webFault)) {
             String pckg = webFault.getPackage().getQualifiedName();
-            if (!conversions.containsKey(pckg)) {
+            if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
               conversions.put(pckg, clientNamespace + "." + pckg);
             }
           }
@@ -421,7 +421,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
               String pckg = typeDefinition.getPackage().getQualifiedName();
-              if (!conversions.containsKey(pckg)) {
+              if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
                 conversions.put(pckg, clientNamespace + "." + pckg);
                 overlayConversions.put(pckg, clientNamespace + ".json." + pckg);
               }
@@ -539,7 +539,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           }
         }
 
-        gwt2jaxbMappings.store(new FileOutputStream(new File(serverSideGenerateDir, "gwt-to-jaxb-mappings.properties")), "mappings for gwt classes to jaxb classes.");
+        FileOutputStream mappingsOut = new FileOutputStream(new File(serverSideGenerateDir, "gwt-to-jaxb-mappings.properties"));
+        gwt2jaxbMappings.store(mappingsOut, "mappings for gwt classes to jaxb classes.");
+        mappingsOut.flush();
+        mappingsOut.close();
       }
     }
     else {
@@ -830,11 +833,14 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     webAppFragment.setBaseDir(webappDir);
 
     File classesDir = new File(new File(webappDir, "WEB-INF"), "classes");
-    if (!enunciate.isUpToDate(new File(getServerSideGenerateDir(), "gwt-to-jaxb-mappings.properties"), new File(classesDir, "gwt-to-jaxb-mappings.properties"))) {
-      enunciate.copyFile(new File(getServerSideGenerateDir(), "gwt-to-jaxb-mappings.properties"), new File(classesDir, "gwt-to-jaxb-mappings.properties"));
-    }
-    else {
-      info("Skipping gwt-to-jaxb mappings copy because everything appears up to date!");
+    File gwtToJaxbMappings = new File(getServerSideGenerateDir(), "gwt-to-jaxb-mappings.properties");
+    if (gwtToJaxbMappings.exists()) {
+      if (!enunciate.isUpToDate(gwtToJaxbMappings, new File(classesDir, "gwt-to-jaxb-mappings.properties"))) {
+        enunciate.copyFile(gwtToJaxbMappings, new File(classesDir, "gwt-to-jaxb-mappings.properties"));
+      }
+      else {
+        info("Skipping gwt-to-jaxb mappings copy because everything appears up to date!");
+      }
     }
 
     //servlets.

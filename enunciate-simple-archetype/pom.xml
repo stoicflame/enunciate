@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate.archetypes</groupId>
   <artifactId>enunciate-simple-archetype</artifactId>
-  <version>1.16-RC3</version>
+  <version>1.16</version>
   <packaging>maven-archetype</packaging>
   <name>enunciate-simple-archetype</name>
   <build>

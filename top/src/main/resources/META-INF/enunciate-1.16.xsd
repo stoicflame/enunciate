@@ -938,10 +938,40 @@
             <xs:documentation>Whether to generate JSON overlays (default:false)</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="clientJarName" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The name of the client jar.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="gwtCompilerClass" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The GWT compiler class. Enunciate will determine the correct class based on the GWT version.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="gwtSubcontext" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>The GWT subcontext.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
         <xs:attribute name="useWrappedServices" type="xs:boolean" default="false">
           <xs:annotation>
             <xs:documentation>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services.
               This is an artifact from when GWT 1.4 was supported and the generic types were unavailable.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enforceNamespaceConformance" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to enforce namespace conformace on the server-side classes.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="enforceNoFieldAccessors" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether to enforce that field accessors can't be used.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="clientJarDownloadable" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>Whether the client jar is downloadable.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>

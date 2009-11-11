@@ -38,10 +38,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.AbstractCollection;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -391,6 +388,7 @@ public class ElementRef extends Element {
 
     private Collection<ElementRef> lookupRefs() {
       Collection<ElementRef> choices = new ArrayList<ElementRef>();
+      Collection<QName> qnamesAdded = new HashSet<QName>();
 
       //if it's a parametric collection type, we need to provide a choice between all subclasses of the base type.
       TypeMirror typeMirror = getBareAccessorType();
@@ -399,7 +397,9 @@ public class ElementRef extends Element {
         EnunciateFreemarkerModel model = ((EnunciateFreemarkerModel) FreemarkerModel.get());
         for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
           if (isInstanceOf(rootElement, fqn)) {
-            choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
+            if (qnamesAdded.add(rootElement.getQname())) {
+              choices.add(new ElementRef((MemberDeclaration) getDelegate(), getTypeDefinition(), rootElement));
+            }
           }
         }
       }
