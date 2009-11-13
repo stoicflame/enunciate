@@ -54,6 +54,9 @@ import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonRootType;
+import org.codehaus.enunciate.json.JsonTypeMapping;
+import org.codehaus.enunciate.json.JsonTypeMappings;
+
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
@@ -951,10 +954,34 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     String schemaId = JsonSchemaInfo.schemaIdForType(delegate);
     JsonSchemaInfo jsonSchemaInfo = getIdsToJsonSchemas().get(schemaId);
     if (jsonSchemaInfo == null) {
-      jsonSchemaInfo = new JsonSchemaInfo(delegate.getPackage());
+      PackageDeclaration schemaPackage = delegate.getPackage();
+      jsonSchemaInfo = new JsonSchemaInfo(schemaPackage);
       getIdsToJsonSchemas().put(schemaId, jsonSchemaInfo);
+
+      if(schemaPackage.getAnnotation(JsonTypeMapping.class) != null) {
+        applyJsonTypeMapping(schemaPackage.getAnnotation(JsonTypeMapping.class));
+      } else if(schemaPackage.getAnnotation(JsonTypeMappings.class) != null) {
+        for (final JsonTypeMapping jsonTypeMapping : schemaPackage.getAnnotation(JsonTypeMappings.class).value()) {
+          applyJsonTypeMapping(jsonTypeMapping);
+        }
+      }
     }
     return jsonSchemaInfo;
+  }
+
+  private void applyJsonTypeMapping(final JsonTypeMapping jsonTypeMapping) {
+    assert jsonTypeMapping != null : "jsonTypeMapping must not be null";
+
+    String jsonType = jsonTypeMapping.jsonType();
+    if(jsonType.equalsIgnoreCase(JsonSimpleTypeDefinition.BOOLEAN.getTypeName())) {
+      knownJsonTypes.put(jsonTypeMapping.javaType(), JsonSimpleTypeDefinition.BOOLEAN);
+    } else if(jsonType.equalsIgnoreCase(JsonSimpleTypeDefinition.NUMBER.getTypeName())) {
+      knownJsonTypes.put(jsonTypeMapping.javaType(), JsonSimpleTypeDefinition.NUMBER);
+    } else if(jsonType.equalsIgnoreCase(JsonSimpleTypeDefinition.STRING.getTypeName())) {
+      knownJsonTypes.put(jsonTypeMapping.javaType(), JsonSimpleTypeDefinition.STRING);
+    } else {
+      knownJsonTypes.put(jsonTypeMapping.javaType(), findJsonTypeDefinition(jsonType));
+    }
   }
 
   /**
