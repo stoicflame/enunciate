@@ -979,6 +979,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       knownJsonTypes.put(jsonTypeMapping.javaType(), JsonSimpleTypeDefinition.NUMBER);
     } else if(jsonType.equalsIgnoreCase(JsonSimpleTypeDefinition.STRING.getTypeName())) {
       knownJsonTypes.put(jsonTypeMapping.javaType(), JsonSimpleTypeDefinition.STRING);
+    } else if(jsonType.equalsIgnoreCase(JsonAnyTypeDefinition.INSTANCE.getTypeName())) {
+        knownJsonTypes.put(jsonTypeMapping.javaType(), JsonAnyTypeDefinition.INSTANCE);
     } else {
       knownJsonTypes.put(jsonTypeMapping.javaType(), findJsonTypeDefinition(jsonType));
     }
