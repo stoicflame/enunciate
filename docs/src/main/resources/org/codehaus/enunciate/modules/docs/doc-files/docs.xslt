@@ -1096,7 +1096,7 @@
                         </xsl:for-each>
                       </table>
                     </xsl:if>
-                    <xsl:if test="values">
+                    <xsl:if test="enumValue">
                       <h2>Possible Values</h2>
                       <table>
                         <tr>
