@@ -47,6 +47,7 @@ public class JsonTypeNameForQualifiedName implements TemplateMethodModelEx {
       if (jsonType != null) {
         return jsonType.getTypeName();
       }
+      return typeName;
     }
     return null;
   }

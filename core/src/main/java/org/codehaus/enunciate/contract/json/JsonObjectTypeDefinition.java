@@ -13,6 +13,7 @@ import org.codehaus.enunciate.json.JsonIgnore;
 import org.codehaus.enunciate.json.JsonName;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 
@@ -62,18 +63,20 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
     private JsonPropertyDeclaration(final PropertyDeclaration propertyDeclaration) {
       super(propertyDeclaration.getGetter(), propertyDeclaration.getSetter());
 
-      // TODO Last remaining problem: I'm only getting the FQN from the TypeMirror. At doc time I need to be able to resolve the simple-or-given name
-
       DecoratedTypeMirror decoratedPropertyType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getPropertyType());
       isList = decoratedPropertyType.isCollection() || decoratedPropertyType.isArray();
-      if (isList && getPropertyType() instanceof DeclaredType) {
-        DeclaredType declaredType = (DeclaredType) getPropertyType();
-        Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
+
+      if (decoratedPropertyType.isCollection() && getPropertyType() instanceof DeclaredType) {
+        final DeclaredType declaredType = (DeclaredType) getPropertyType();
+        final Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
         if(actualTypeArguments != null && actualTypeArguments.size() == 1) {
           targetType = TypeMirrorDecorator.decorate(actualTypeArguments.iterator().next());
         } else {
           targetType = getPropertyType();
         }
+      } else if (decoratedPropertyType.isArray() && getPropertyType() instanceof ArrayType) {
+        final ArrayType arrayType = (ArrayType) getPropertyType();
+        targetType = TypeMirrorDecorator.decorate(arrayType.getComponentType());
       } else {
         targetType = getPropertyType();
       }
