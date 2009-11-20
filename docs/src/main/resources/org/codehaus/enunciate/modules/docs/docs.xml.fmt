@@ -150,11 +150,10 @@
       [#if type.jsonProperties?? && type.jsonProperties?size > 0]
       [#list type.jsonProperties as property]
         <property name="${property.propertyName}" 
-                  [#if jsonTypeForQualifiedName(property.propertyTypeName)??]
-                  typeName="${jsonTypeForQualifiedName(property.propertyTypeName).typeName}"
-                  [/#if]
-                  [#if jsonSchemaForType(jsonTypeForQualifiedName(property.propertyTypeName))??]
-                  typeSchemaId="${jsonSchemaForType(jsonTypeForQualifiedName(property.propertyTypeName)).schemaId}"
+                  isList="${property.list}"
+                  typeName="${jsonTypeNameForQualifiedName(property.typeName)}"
+                  [#if jsonSchemaForType(property.targetType)??]
+                  typeSchemaId="${jsonSchemaForType(property.targetType).schemaId}"
                   [/#if]
                   [#if property.propertyDescription??]
                   [#assign d = property.propertyDescription]

@@ -1085,7 +1085,7 @@
                         <xsl:for-each select="property">
                           <tr>
                             <td><xsl:value-of select="@name"/></td>
-                            <td>
+                            <td><xsl:if test="@isList = 'true'">List of </xsl:if>
                               <xsl:choose>
                                 <xsl:when test="@typeSchemaId"><a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></xsl:when>
                                 <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>

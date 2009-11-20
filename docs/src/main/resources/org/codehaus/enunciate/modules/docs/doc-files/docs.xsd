@@ -333,8 +333,10 @@
     </xs:annotation>
 
     <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="isList" type="xs:boolean" use="required" />
     <xs:attribute name="typeName" type="xs:string" use="required" />
     <xs:attribute name="typeSchemaId" type="xs:string" use="optional" />
+    <xs:attribute name="documentation" type="xs:string" use="optional" />
   </xs:complexType>
 
   <xs:complexType name="jsonEnumValue">

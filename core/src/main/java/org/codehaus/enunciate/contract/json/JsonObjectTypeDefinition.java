@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 import org.codehaus.enunciate.json.JsonIgnore;
 import org.codehaus.enunciate.json.JsonName;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
 
 /**
  * <p>
@@ -51,8 +55,28 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
   }
 
   public static final class JsonPropertyDeclaration extends PropertyDeclaration {
+
+    private final boolean isList;
+    private final TypeMirror targetType;
+
     private JsonPropertyDeclaration(final PropertyDeclaration propertyDeclaration) {
       super(propertyDeclaration.getGetter(), propertyDeclaration.getSetter());
+
+      // TODO Last remaining problem: I'm only getting the FQN from the TypeMirror. At doc time I need to be able to resolve the simple-or-given name
+
+      DecoratedTypeMirror decoratedPropertyType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getPropertyType());
+      isList = decoratedPropertyType.isCollection() || decoratedPropertyType.isArray();
+      if (isList && getPropertyType() instanceof DeclaredType) {
+        DeclaredType declaredType = (DeclaredType) getPropertyType();
+        Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
+        if(actualTypeArguments != null && actualTypeArguments.size() == 1) {
+          targetType = TypeMirrorDecorator.decorate(actualTypeArguments.iterator().next());
+        } else {
+          targetType = getPropertyType();
+        }
+      } else {
+        targetType = getPropertyType();
+      }
     }
 
     /**
@@ -70,9 +94,16 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
       return getDocValue();
     }
 
-    public String getPropertyTypeName()
-    {
-      return getPropertyType().toString();
+    public boolean isList() {
+      return isList;
+    }
+
+    public String getTypeName() {
+      return targetType.toString();
+    }
+
+    public TypeMirror getTargetType() {
+      return targetType;
     }
   }
 }

@@ -18,7 +18,6 @@ package org.codehaus.enunciate.contract.common.rest;
 
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonType;
-import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 /**
  * Payload for a REST resource.

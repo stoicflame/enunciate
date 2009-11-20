@@ -10,7 +10,6 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonType;
-import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 
 /**
  * An entity parameter.

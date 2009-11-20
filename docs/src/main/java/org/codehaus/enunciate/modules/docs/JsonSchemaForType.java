@@ -1,12 +1,14 @@
 package org.codehaus.enunciate.modules.docs;
 
 import java.util.List;
-import java.util.Map;
 
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
+
+import com.sun.mirror.type.TypeMirror;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
@@ -20,19 +22,18 @@ import freemarker.template.TemplateModelException;
  * @author Steven Cummings
  */
 public class JsonSchemaForType implements TemplateMethodModelEx {
-
   /**
    * Method name.
    */
   public static final String NAME = "jsonSchemaForType";
 
-  private final Map<String, JsonSchemaInfo> idsToJsonSchemas;
+  private final EnunciateFreemarkerModel model;
 
-  public JsonSchemaForType(final Map<String, JsonSchemaInfo> idsToJsonSchemas)
+  public JsonSchemaForType(final EnunciateFreemarkerModel model)
   {
-    assert idsToJsonSchemas != null : "idsToJsonSchemas:null";
-
-    this.idsToJsonSchemas = idsToJsonSchemas;
+    assert model != null : "model must not be null";
+    
+    this.model = model;
   }
 
   /**
@@ -43,21 +44,38 @@ public class JsonSchemaForType implements TemplateMethodModelEx {
       throw new TemplateModelException("The " + NAME + " method expects exactly one argument");
     }
 
-    Object object = BeansWrapper.getDefaultInstance().unwrap((TemplateModel) arguments.get(0));
+    final Object object = BeansWrapper.getDefaultInstance().unwrap((TemplateModel) arguments.get(0));
 
-    if (object instanceof JsonTypeDefinition) {
-      final JsonTypeDefinition jsonTypeDefinition = (JsonTypeDefinition) object;
-      return idsToJsonSchemas.get(JsonSchemaInfo.schemaIdForType(jsonTypeDefinition.classDeclaration()));
+    if (object instanceof String) {
+      final String typeName = (String) object;
+      final JsonType jsonType = model.findJsonTypeDefinition(typeName);
+      return jsonSchemaForType(jsonType);
+    }
+
+    if (object instanceof TypeMirror) {
+      TypeMirror typeMirror = (TypeMirror) object;
+      final JsonType jsonType = model.findJsonTypeDefinition(typeMirror.toString());
+      return jsonSchemaForType(jsonType);
+    }
+
+    if (object instanceof JsonType) {
+      final JsonType jsonType = (JsonType) object;
+      return jsonSchemaForType(jsonType);
     }
 
     if (object instanceof RESTResourcePayload) {
       final RESTResourcePayload restResourcePayload = (RESTResourcePayload) object;
       final JsonType jsonType = restResourcePayload.getJsonType();
-      if (jsonType instanceof JsonTypeDefinition) {
-        JsonTypeDefinition jsonTypeDefinition = (JsonTypeDefinition) jsonType;
-        final String schemaId = JsonSchemaInfo.schemaIdForType(jsonTypeDefinition.classDeclaration());
-        return idsToJsonSchemas.get(schemaId);
-      }
+      return jsonSchemaForType(jsonType);
+    }
+    return null;
+  }
+
+  private JsonSchemaInfo jsonSchemaForType(final JsonType jsonType) {
+    if (jsonType instanceof JsonTypeDefinition) {
+      final JsonTypeDefinition jsonTypeDefinition = (JsonTypeDefinition) jsonType;
+      final String schemaId = JsonSchemaInfo.schemaIdForType(jsonTypeDefinition.classDeclaration());
+      return model.getIdsToJsonSchemas().get(schemaId);
     }
     return null;
   }
