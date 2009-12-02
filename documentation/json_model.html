@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <link rel="stylesheet" type="text/css" href="default.css" media="screen"/>
+  <title>enunciate</title>
+  <meta name="author" content="Steven Cummings" />
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+
+    <div class="title">
+      <h1>enunciate</h1>
+      <p>articulate your web api.</p>
+    </div>
+
+  </div>
+
+  <div class="navigation">
+@TOPNAV@
+
+    <div class="clearer"><span></span></div>
+  </div>
+
+  <div class="main">
+
+    <div class="content">
+
+      <h1>Introduction, Motivation</h1>
+
+      <p>With the existence of the JAXB architecture and API, Enunciate is able to automatically detect and document XML-based models in your API with little or no extra 
+      assistance. Unfortunately, there is no such common architecture, model, nor declarative mechanisms (e.g. annotations) for JSON models in Java. There are various options,
+      including Gson, json-lib, and jackson, but Enunciate could use a general way to know what your JSON model is. This is especially true when any of those options provide
+      no declarative link between the model and serialization process. So, in the absence of serialization-specific Enunciate modules like gson, (which may appear in the 
+      future), the following annotations can be used to inform Enunciate of your JSON-serializable models.</p>
+
+      <p>All of these annotations are located in package org.codehaus.enunciate.json in artifact org.codehaus.enunciate:enunciate-core-annotations.</p>
+
+      <h1>Enunciate JSON Annotations</h1>
+
+      <h2>@JsonRootType</h2>
+      <p>This annotation causes Enunciate to add the type as a JSON root type. Root types are those that can be the primary type of a payload. If excludeUnreferencedClasses is 
+      true in the enunciate configuration, then the type must be used as a JAX-RS entity type to be added to the model. The default name of a root type is the simple name (i.e.
+      unqualified class name) of the Java type. This can be overridden with @JsonName.</p>
+
+      <h2>@JsonType</h2>
+      <p>This annotation causes Enunciate to add the type as a JSON type. If excludeUnreferencedClasses is  true in the enunciate configuration, then the type must be 
+      referenced by a JAX-RS entity type to be added to the model. The default name of a type is the simple name (i.e. unqualified class name) of the Java type. This can be 
+      overridden with @JsonName.</p>
+
+      <h2>@JsonProperty</h2>
+      <p>Used to indicate a property on a JSON type. Currently this isn't required as properties are automatically detected on types (TODO add opt-in mode on per-type basis).
+      The default name of a property is the JavaBean property name.</p>
+
+      <h2>@JsonName</h2>
+      <p>Used to override the default JSON type-name of the annotated Java type or property.</p>
+
+      <h2>@JsonIgnore</h2>
+      <p>This annotation causes Enunciate to ignore a property on an otherwise documented JSON type.</p>
+
+      <h2>@JsonSchema</h2>
+      <p>Used on a Java package to give a specific schema ID to any JSON types detected within it. If a specific schema ID is used on multiple Java packages, then they are 
+      composed into a larger schema. The default ID of a schema is the Java package name.</p>
+
+      <h2>@JsonTypeMappings, @JsonTypeMapping</h2>
+      <p>Package-level annotations used to directly specify mappings from Java to JSON types. This is normally used for (but not limited to) the following purposes.</p>
+      <ul>
+      <li>Java type is being handled in custom adapter code or whose JSON structure is otherwise not exposed in a project-specific declaration.</li>
+      <li>Java type comes from a 3rd-party library and so annotations can not be applied to it.</li>
+      </ul>
+
+      <h1>Type/Property-level mapping annotations</h1>
+
+      <p><em>Coming soon!</em></p>
+
+      <h1>Arrays and Collections</h1>
+
+      <p>When an array or collection is encountered, Enunciate will determine the component type and document it as a JSON list.</p>
+
+      <h1>Maps</h1>
+
+      <p><em>Coming soon!</em></p>
+
+      <h1>Enunciate Jackson-JAXB Detection</h1>
+
+      <p><em>Coming soon!</em></p>
+    </div>
+
+    <div class="sidenav">
+@SIDENAV@
+    </div>
+
+    <div class="clearer"><span></span></div>
+
+  </div>
+
+  <div class="footer">&copy; 2006-2009 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+    href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
+  </div>
+</div>
+</body>
+</html>
