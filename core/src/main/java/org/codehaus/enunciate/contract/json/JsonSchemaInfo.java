@@ -51,6 +51,10 @@ public final class JsonSchemaInfo {
   private final Map<String, JsonRootElementDeclaration> topLevelTypes = new HashMap<String, JsonRootElementDeclaration>();
   private final Map<String, JsonTypeDefinition> types = new HashMap<String, JsonTypeDefinition>();
 
+  /**
+   * Create a new JsonSchemaInfo.
+   * @param schemaPackage Declaration to create a JSON schema from.
+   */
   public JsonSchemaInfo(final PackageDeclaration schemaPackage) {
     assert schemaPackage != null : "schemaPackage:null";
 

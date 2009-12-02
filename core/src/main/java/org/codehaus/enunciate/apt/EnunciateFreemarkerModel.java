@@ -172,7 +172,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     HashMap<String, JsonType> knownJsonTypes = new HashMap<String, JsonType>();
     // NOTE Simply account for the primitives and other basic types. There is currently no need for JSON type definitions for them.
 
-    // TODO Then go check for the places where we couldn't assume a non-null in the model...
     knownJsonTypes.put(Boolean.class.getName(), JsonSimpleTypeDefinition.BOOLEAN);
     knownJsonTypes.put(Boolean.TYPE.getName(), JsonSimpleTypeDefinition.BOOLEAN);
     knownJsonTypes.put(Float.class.getName(), JsonSimpleTypeDefinition.NUMBER);
