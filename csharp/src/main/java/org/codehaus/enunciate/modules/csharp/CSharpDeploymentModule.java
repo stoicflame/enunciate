@@ -124,6 +124,13 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
           debug("Attempting to execute command \"csc /help\" for the current environment (%s).", osName);
           try {
             Process process = new ProcessBuilder("csc", "/help").redirectErrorStream(true).start();
+            InputStream in = process.getInputStream();
+            byte[] buffer = new byte[1024];
+            int len = in.read(buffer);
+            while (len >- 0) {
+              len = in.read(buffer);
+            }
+            
             int exitCode = process.waitFor();
             if (exitCode != 0) {
               debug("Command \"csc /help\" failed with exit code " + exitCode + ".");
@@ -143,6 +150,13 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
           debug("Attempting to execute command \"gmcs /help\" for the current environment (%s).", osName);
           try {
             Process process = new ProcessBuilder("gmcs", "/help").redirectErrorStream(true).start();
+            InputStream in = process.getInputStream();
+            byte[] buffer = new byte[1024];
+            int len = in.read(buffer);
+            while (len >- 0) {
+              len = in.read(buffer);
+            }
+
             int exitCode = process.waitFor();
             if (exitCode != 0) {
               debug("Command \"gmcs /help\" failed with exit code " + exitCode + ".");

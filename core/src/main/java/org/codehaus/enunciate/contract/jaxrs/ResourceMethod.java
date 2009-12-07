@@ -27,6 +27,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -106,7 +107,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
         resourceParameters.add(new ResourceParameter(parameterDeclaration));
       }
-      else {
+      else if (parameterDeclaration.getAnnotation(Context.class) == null) {
         entityParameter = parameterDeclaration;
       }
     }
