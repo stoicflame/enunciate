@@ -55,7 +55,7 @@ public class JSR250SecurityAnnotationAttributes implements org.springframework.m
     else {
       PermitAll permitAll = targetMethod.getAnnotation(PermitAll.class);
       if (permitAll != null) {
-        attributes.add(JSR250SecurityConfig.PERMIT_ALL_ATTRIBUTE);
+        return Collections.emptyList();
       }
       else {
         RolesAllowed rolesAllowed = targetMethod.getAnnotation(RolesAllowed.class);
@@ -73,7 +73,7 @@ public class JSR250SecurityAnnotationAttributes implements org.springframework.m
           else {
             permitAll = targetMethod.getDeclaringClass().getAnnotation(PermitAll.class);
             if (permitAll != null) {
-              attributes.add(JSR250SecurityConfig.PERMIT_ALL_ATTRIBUTE);
+              return Collections.emptyList();
             }
             else {
               rolesAllowed = targetMethod.getDeclaringClass().getAnnotation(RolesAllowed.class);
