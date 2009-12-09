@@ -32,6 +32,7 @@ import org.codehaus.enunciate.contract.jaxb.LocalElementDeclaration;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
+import org.codehaus.enunciate.main.ArtifactType;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.c.config.CRuleSet;
 
@@ -155,6 +156,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
 
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "c.client.library", "C Client Library");
     NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "c.client", new File(getGenerateDir(), getSourceFileName()));
+    sourceScript.setArtifactType(ArtifactType.sources);
     sourceScript.setPublic(false);
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);

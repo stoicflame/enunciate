@@ -99,6 +99,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
         <version>${project.version}</version>
         <executions>
           <execution>
+            <id>assemble</id>
             <goals>
               <goal>assemble</goal>
             </goals>
@@ -109,6 +110,16 @@ If you just want to skip the Objective C tests, set the value of the property 'g
                 <csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>
               </exports>
               <springEnabled>true</springEnabled>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install-and-deploy</id>
+            <goals>
+              <goal>install-artifact</goal>
+              <goal>deploy-artifact</goal>
+            </goals>
+            <configuration>
+              <enunciateArtifactId>jaxws.client.library</enunciateArtifactId>
             </configuration>
           </execution>
         </executions>
@@ -259,13 +270,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               </deployable>
             </deployables>
           </configuration>
-        </configuration>
-      </plugin>
-      <plugin>
-        <!--skip deploy (this is just a test module)-->
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
         </configuration>
       </plugin>
     </plugins>

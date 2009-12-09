@@ -29,6 +29,7 @@ public class FileArtifact extends BaseArtifact {
   private boolean publicArtifact = true;
   private final File file;
   private String description;
+  private ArtifactType artifactType;
 
   public FileArtifact(String module, String id, File file) {
     super(module, id);
@@ -116,5 +117,23 @@ public class FileArtifact extends BaseArtifact {
    */
   public void setPublic(boolean bundled) {
     this.publicArtifact = bundled;
+  }
+
+  /**
+   * The artifact type.
+   *
+   * @return The artifact type.
+   */
+  public ArtifactType getArtifactType() {
+    return artifactType;
+  }
+
+  /**
+   * The artifact type.
+   *
+   * @param artifactType The artifact type.
+   */
+  public void setArtifactType(ArtifactType artifactType) {
+    this.artifactType = artifactType;
   }
 }

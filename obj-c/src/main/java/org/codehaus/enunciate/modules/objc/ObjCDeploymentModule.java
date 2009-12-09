@@ -33,6 +33,7 @@ import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
 import org.codehaus.enunciate.main.NamedFileArtifact;
+import org.codehaus.enunciate.main.ArtifactType;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.objc.config.ObjCRuleSet;
 import org.codehaus.enunciate.modules.objc.config.PackageIdentifier;
@@ -198,8 +199,10 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "objc.client.library", "Objective C Client Library");
     NamedFileArtifact sourceHeader = new NamedFileArtifact(getName(), "objc.client.h", new File(getGenerateDir(), label + ".h"));
     sourceHeader.setPublic(false);
+    sourceHeader.setArtifactType(ArtifactType.sources);
     NamedFileArtifact sourceImpl = new NamedFileArtifact(getName(), "objc.client.m", new File(getGenerateDir(), label + ".m"));
     sourceImpl.setPublic(false);
+    sourceImpl.setArtifactType(ArtifactType.sources);
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);
     artifactBundle.addArtifact(sourceHeader);

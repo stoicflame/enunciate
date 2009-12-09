@@ -900,6 +900,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
     clientArtifact.setDescription("The binaries and sources for the GWT client library.");
     clientArtifact.setPublic(clientJarDownloadable);
+    clientArtifact.setArtifactType(ArtifactType.binaries);
     gwtClientArtifact.addArtifact(clientArtifact);
     gwtClientArtifact.setDependencies(clientDeps);
     enunciate.addArtifact(clientArtifact);

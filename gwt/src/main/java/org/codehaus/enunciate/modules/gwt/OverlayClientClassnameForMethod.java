@@ -125,6 +125,9 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
           || componentType.isInstanceOf(Long.class.getName())) {
           return "com.google.gwt.core.client.JsArrayNumber";
         }
+        else {
+          return "com.google.gwt.core.client.JsArray<" + super.convert(componentType) + ">";
+        }
       }
       return "com.google.gwt.core.client.JsArray";
     }

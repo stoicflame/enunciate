@@ -717,6 +717,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.swc", swcFile);
         clientArtifact.setDescription("The compiled SWC.");
         clientArtifact.setPublic(false);
+        clientArtifact.setArtifactType(ArtifactType.binaries);
         as3ClientArtifact.addArtifact(clientArtifact);
         enunciate.addArtifact(clientArtifact);
       }
@@ -725,6 +726,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "as3.client.sources", asSources);
         clientArtifact.setDescription("The client-side ActionScript sources.");
         clientArtifact.setPublic(false);
+        clientArtifact.setArtifactType(ArtifactType.sources);
         as3ClientArtifact.addArtifact(clientArtifact);
         enunciate.addArtifact(clientArtifact);
       }

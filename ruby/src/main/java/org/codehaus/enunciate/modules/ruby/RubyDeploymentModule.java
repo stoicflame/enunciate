@@ -32,6 +32,7 @@ import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.main.NamedFileArtifact;
 import org.codehaus.enunciate.main.ClientLibraryArtifact;
+import org.codehaus.enunciate.main.ArtifactType;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ruby.config.PackageModuleConversion;
 import org.codehaus.enunciate.modules.ruby.config.RubyRuleSet;
@@ -186,6 +187,7 @@ public class RubyDeploymentModule extends FreemarkerDeploymentModule implements 
     ClientLibraryArtifact artifactBundle = new ClientLibraryArtifact(getName(), "ruby.client.library", "Ruby Client Library");
     artifactBundle.setPlatform("Ruby");
     NamedFileArtifact sourceScript = new NamedFileArtifact(getName(), "ruby.client", new File(getGenerateDir(), getSourceFileName()));
+    sourceScript.setArtifactType(ArtifactType.binaries); //binaries and sources are the same thing in ruby
     sourceScript.setPublic(false);
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);
