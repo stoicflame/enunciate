@@ -387,6 +387,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
       EnunciateFreemarkerModel model = getModel();
       model.put("useSpringDI", this.springDIFound);
+      model.put("useWrappedServices", this.isUseWrappedServices());
       Map<String, String> conversions = new HashMap<String, String>();
       Map<String, String> overlayConversions = new HashMap<String, String>();
       String clientNamespace = this.rpcModuleNamespace + ".client";
