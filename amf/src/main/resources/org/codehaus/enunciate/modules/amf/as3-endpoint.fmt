@@ -53,7 +53,7 @@ package ${packageFor(endpointInterface)} {
      * ${webMethod.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
      */
     public function ${webMethod.clientSimpleName}([#list webMethod.webParameters as param]${param.clientSimpleName}:${classnameFor(param)}[#if param_has_next], [/#if][/#list]):void {
-      var ro:RemoteObject = new RemoteObject();
+      var ro:RemoteObject = createRemoteObject();
       ro.requestTimeout = _requestTimeout;
       ro.destination = "${endpointInterface.simpleName}";
       ro.addEventListener("result", handle${webMethod.clientSimpleName?cap_first}Result);
@@ -67,6 +67,14 @@ package ${packageFor(endpointInterface)} {
       [/#if]
     [/@forEachWebMethod]
     
+    /**
+     * Function to create a new remote object. Clients may override this
+     * function to provide custom preparation of the RemoteObject.
+     */
+    public function createRemoteObject():RemoteObject {
+      return new RemoteObject();
+    }
+
     /**
      * The request timeout, in seconds.
      */
