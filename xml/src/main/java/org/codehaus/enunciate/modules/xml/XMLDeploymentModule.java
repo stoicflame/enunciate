@@ -108,6 +108,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private boolean prettyPrint = true;
   private boolean validateSchemas = true;
   private boolean inlineWSDLSchemas = true;
+  private String wadlStylesheetUri = null;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
   private final ArrayList<SchemaConfig> schemaConfigs = new ArrayList<SchemaConfig>();
@@ -266,6 +267,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.put("prefix", new PrefixMethod());
     model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
     model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
+    model.put("wadlStylesheetUri", this.wadlStylesheetUri);
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);
