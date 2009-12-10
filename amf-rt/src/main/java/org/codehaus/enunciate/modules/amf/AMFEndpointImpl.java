@@ -46,7 +46,12 @@ public abstract class AMFEndpointImpl {
     for (Method method : getServiceInterface().getMethods()) {
       String operationName = method.getName();
       WebMethod webMethodInfo = method.getAnnotation(WebMethod.class);
-      if ((webMethodInfo != null) && (!"".equals(webMethodInfo.operationName()))) {
+      
+      // If the annotation exclude the method, don't add it to the possible operations.
+      if ((webMethodInfo != null) && (webMethodInfo.exclude())) {
+          continue;
+      }
+      else if ((webMethodInfo != null) && (!"".equals(webMethodInfo.operationName()))) {
         operationName = webMethodInfo.operationName();
       }
 
