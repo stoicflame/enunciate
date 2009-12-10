@@ -34,7 +34,7 @@
 [#elseif accessor.choices?size > 1]
     [[#list accessor.choices as choice]System.Xml.Serialization.[#if accessor.wrapped]XmlArrayItemAttribute[#else]XmlElementAttribute[/#if](typeof(${classnameFor(choice)}),ElementName="${choice.name}",Namespace="${choice.namespace!""}"[#if choice.nillable?? && choice.nillable],IsNullable=true[/#if])[#if choice_has_next],
      [/#if][/#list]]
-[#elseif accessor.accessorType.map!false]
+[#elseif ((!accessor.adapted) && (accessor.accessorType.map!false))]
     [#--can't do an @XmlElementAnnotation on a map--]
 [#else]
     [System.Xml.Serialization.[#if accessor.wrapped]XmlArrayItemAttribute[#else]XmlElementAttribute[/#if](ElementName="${accessor.name}",Namespace="${accessor.namespace!""}"[#if accessor.nillable?? && accessor.nillable],IsNullable=true[/#if][#if accessor.xmlID],DataType="ID"[#elseif accessor.xmlIDREF],DataType="IDREF"[/#if])]
