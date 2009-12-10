@@ -222,7 +222,7 @@ public class Element extends Accessor {
           }
           specifiedType = TypeMirrorDecorator.decorate(types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) accessorType).getDeclaration().getQualifiedName()), specifiedType));
         }
-        else if (accessorType.isArray()) {
+        else if (accessorType.isArray() && !(specifiedType instanceof ArrayType)) {
           Types types = Context.getCurrentEnvironment().getTypeUtils();
           if (specifiedType instanceof PrimitiveType) {
             specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
