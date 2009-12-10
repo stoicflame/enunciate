@@ -188,6 +188,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean applyWadlFilter = true;
   private boolean jacksonXcAvailable = false;
   private String indexPageName = "index.html";
+  private boolean disableRestMountpoint = false;
 
   /**
    * @return "docs"
@@ -519,6 +520,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
+   * Whether to disable the REST mountpoint documentation.
+   *
+   * @return Whether to disable the REST mountpoint documentation.
+   */
+  public boolean isDisableRestMountpoint() {
+    return disableRestMountpoint;
+  }
+
+  /**
+   * Whether to disable the REST mountpoint documentation.
+   *
+   * @param disableRestMountpoint Whether to disable the REST mountpoint documentation.
+   */
+  public void setDisableRestMountpoint(boolean disableRestMountpoint) {
+    this.disableRestMountpoint = disableRestMountpoint;
+  }
+
+  /**
    * The directory into which the documentation is put.
    *
    * @return The directory into which the documentation is put.
@@ -809,6 +828,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       transformer.setParameter("output-dir", buildDir.getAbsolutePath() + File.separator);
       transformer.setParameter("api-relative-path", getRelativePathToRootDir());
       transformer.setParameter("index-page-name", getIndexPageName());
+      transformer.setParameter("disable-rest-mountpoint", isDisableRestMountpoint());
       File indexPage = new File(buildDir, getIndexPageName());
       debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));

@@ -32,6 +32,9 @@
   <xsl:variable name="rest_translate_chars">/:{}</xsl:variable>
   <xsl:variable name="rest_translate_replacements">.-</xsl:variable>
 
+  <!--Whether the XML file describing the downloads exists.-->
+  <xsl:param name="disable-rest-mountpoint" select="false()"/>
+
   <!--The global side navigation (the navigation that is always there).-->
   <xsl:variable name="global-sidnav">
     <h1>Home</h1>
@@ -805,7 +808,7 @@
                 <div class="item">
 
                   <h1><xsl:value-of select="@name"/></h1>
-                  <xsl:if test="@subcontext">
+                  <xsl:if test="((@subcontext) and (not($disable-rest-mountpoint)))">
                     <ul>
                       <li>Mount Point: <a href="{concat($api-relative-path,@subcontext,@name)}"><xsl:value-of select="concat(@subcontext,@name)"/></a></li>
                     </ul>
@@ -917,7 +920,7 @@
                           <td>
                             <ul>
                               <xsl:for-each select="contentType[@produceable='true']">
-                                <li><xsl:value-of select="@type"/><xsl:if test="@subcontext"> (alternative mount point: <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
+                                <li><xsl:value-of select="@type"/><xsl:if test="((@subcontext) and (not($disable-rest-mountpoint)))"> (alternative mount point: <a href="{concat($api-relative-path,@subcontext,../../@name)}"><xsl:value-of select="@subcontext"/></a>)</xsl:if></li>
                               </xsl:for-each>
                             </ul>
                           </td>
