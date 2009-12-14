@@ -10,11 +10,14 @@ import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.Registry;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.contract.rest.RESTEndpoint;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +26,7 @@ import java.io.FileWriter;
 import java.util.*;
 
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import com.sun.mirror.declaration.TypeDeclaration;
 
 /**
  * "Exports" the JAXB/JAX-WS classes in the current project. For use with the "jar" packaging.
@@ -90,6 +94,10 @@ public class ExportMojo extends ConfigMojo {
         for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
           exportedClasses.add(rootElementDeclaration.getQualifiedName());
         }
+
+        for (Registry registry : schemaInfo.getRegistries()) {
+          exportedClasses.add(registry.getQualifiedName());
+        }
       }
 
       for (JsonSchemaInfo jsonSchemaInfo : model.getIdsToJsonSchemas().values()) {
@@ -110,6 +118,18 @@ public class ExportMojo extends ConfigMojo {
 
       for (RESTEndpoint endpoint : model.getRESTEndpoints()) {
         exportedClasses.add(endpoint.getQualifiedName());
+      }
+
+      for (ContentTypeHandler contentTypeHandler : model.getContentTypeHandlers()) {
+        exportedClasses.add(contentTypeHandler.getQualifiedName());
+      }
+
+      for (RootResource rootResource : model.getRootResources()) {
+        exportedClasses.add(rootResource.getQualifiedName());
+      }
+
+      for (TypeDeclaration jaxrsProvider : model.getJAXRSProviders()) {
+        exportedClasses.add(jaxrsProvider.getQualifiedName());
       }
 
       File apiExportsFile = new File(classesDirectory, "META-INF/enunciate/api-exports");

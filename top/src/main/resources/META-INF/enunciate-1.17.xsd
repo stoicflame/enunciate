@@ -464,6 +464,7 @@
         </xs:sequence>
         <xs:attribute name="label" type="xs:string"/>
         <xs:attribute name="require" type="xs:boolean"/>
+        <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

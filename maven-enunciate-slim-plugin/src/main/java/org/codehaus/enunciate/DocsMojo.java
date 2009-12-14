@@ -1,6 +1,7 @@
 package org.codehaus.enunciate;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.reporting.MavenReport;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
@@ -22,7 +23,7 @@ import java.util.Set;
 
  * @author Ryan Heaton
  */
-public class DocsMojo extends ConfigMojo {
+public class DocsMojo extends ConfigMojo /*implements MavenReport*/ {
 
   /**
    * The directory where the docs are put.

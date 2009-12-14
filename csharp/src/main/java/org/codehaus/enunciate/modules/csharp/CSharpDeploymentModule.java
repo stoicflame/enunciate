@@ -92,6 +92,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean require = false;
+  private boolean disableCompile = false;
   private String label = null;
   private String compileExecutable = null;
   private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s";
@@ -113,67 +114,73 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
     super.init(enunciate);
 
     if (!super.isDisabled()) { //if we're explicitly disabled, we can ignore this...
-      String compileExectuable = getCompileExecutable();
-      if (compileExectuable == null) {
-        String osName = System.getProperty("os.name");
-        if (osName != null && osName.toUpperCase().contains("WINDOWS")) {
-          //try the "csc" command on Windows environments.
-          debug("Attempting to execute command \"csc /help\" for the current environment (%s).", osName);
-          try {
-            Process process = new ProcessBuilder("csc", "/help").redirectErrorStream(true).start();
-            InputStream in = process.getInputStream();
-            byte[] buffer = new byte[1024];
-            int len = in.read(buffer);
-            while (len >- 0) {
-              len = in.read(buffer);
-            }
-            
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-              debug("Command \"csc /help\" failed with exit code " + exitCode + ".");
-            }
-            else {
-              compileExectuable = "csc";
-              debug("C# compile executable to be used: csc");
-            }
-          }
-          catch (Throwable e) {
-            debug("Command \"csc /help\" failed (" + e.getMessage() + ").");
-          }
-        }
-
+      if (isDisableCompile()) {
+        info("C# compilation is disabled, but the source code will still be generated.");
+        setCompileExecutable(null);
+      }
+      else {
+        String compileExectuable = getCompileExecutable();
         if (compileExectuable == null) {
-          //try the "gmcs" command (Mono)
-          debug("Attempting to execute command \"gmcs /help\" for the current environment (%s).", osName);
-          try {
-            Process process = new ProcessBuilder("gmcs", "/help").redirectErrorStream(true).start();
-            InputStream in = process.getInputStream();
-            byte[] buffer = new byte[1024];
-            int len = in.read(buffer);
-            while (len >- 0) {
-              len = in.read(buffer);
-            }
+          String osName = System.getProperty("os.name");
+          if (osName != null && osName.toUpperCase().contains("WINDOWS")) {
+            //try the "csc" command on Windows environments.
+            debug("Attempting to execute command \"csc /help\" for the current environment (%s).", osName);
+            try {
+              Process process = new ProcessBuilder("csc", "/help").redirectErrorStream(true).start();
+              InputStream in = process.getInputStream();
+              byte[] buffer = new byte[1024];
+              int len = in.read(buffer);
+              while (len >- 0) {
+                len = in.read(buffer);
+              }
 
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-              debug("Command \"gmcs /help\" failed with exit code " + exitCode + ".");
+              int exitCode = process.waitFor();
+              if (exitCode != 0) {
+                debug("Command \"csc /help\" failed with exit code " + exitCode + ".");
+              }
+              else {
+                compileExectuable = "csc";
+                debug("C# compile executable to be used: csc");
+              }
             }
-            else {
-              compileExectuable = "gmcs";
-              debug("C# compile executable to be used: %s", compileExectuable);
+            catch (Throwable e) {
+              debug("Command \"csc /help\" failed (" + e.getMessage() + ").");
             }
           }
-          catch (Throwable e) {
-            debug("Command \"gmcs /help\" failed (" + e.getMessage() + ").");
+
+          if (compileExectuable == null) {
+            //try the "gmcs" command (Mono)
+            debug("Attempting to execute command \"gmcs /help\" for the current environment (%s).", osName);
+            try {
+              Process process = new ProcessBuilder("gmcs", "/help").redirectErrorStream(true).start();
+              InputStream in = process.getInputStream();
+              byte[] buffer = new byte[1024];
+              int len = in.read(buffer);
+              while (len >- 0) {
+                len = in.read(buffer);
+              }
+
+              int exitCode = process.waitFor();
+              if (exitCode != 0) {
+                debug("Command \"gmcs /help\" failed with exit code " + exitCode + ".");
+              }
+              else {
+                compileExectuable = "gmcs";
+                debug("C# compile executable to be used: %s", compileExectuable);
+              }
+            }
+            catch (Throwable e) {
+              debug("Command \"gmcs /help\" failed (" + e.getMessage() + ").");
+            }
           }
-        }
 
-        if (compileExectuable == null && isRequire()) {
-          throw new EnunciateException("C# client code generation is required, but there was no valid compile executable found. " +
-            "Please supply one in the configuration file, or set it up on your system path.");
-        }
+          if (compileExectuable == null && isRequire()) {
+            throw new EnunciateException("C# client code generation is required, but there was no valid compile executable found. " +
+              "Please supply one in the configuration file, or set it up on your system path.");
+          }
 
-        setCompileExecutable(compileExectuable);
+          setCompileExecutable(compileExectuable);
+        }
       }
     }
   }
@@ -553,6 +560,24 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
    */
   public Map<String, String> getPackageToNamespaceConversions() {
     return packageToNamespaceConversions;
+  }
+
+  /**
+   * Whether to disable the compile step.
+   *
+   * @return Whether to disable the compile step.
+   */
+  public boolean isDisableCompile() {
+    return disableCompile;
+  }
+
+  /**
+   * Whether to disable the compile step.
+   *
+   * @param disableCompile Whether to disable the compile step.
+   */
+  public void setDisableCompile(boolean disableCompile) {
+    this.disableCompile = disableCompile;
   }
 
   /**
