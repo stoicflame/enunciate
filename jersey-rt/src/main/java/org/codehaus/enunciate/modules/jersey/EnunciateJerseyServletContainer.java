@@ -40,6 +40,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
 
   private static final Log LOG = LogFactory.getLog(EnunciateJerseyServletContainer.class);
   private ResourceConfig resourceConfig;
+  private String resourceProviderFactory = "org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory";
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
@@ -103,6 +104,11 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     }
     rc.getFeatures().put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, Boolean.valueOf(pathBasedConneg));
 
+    String resourceProvider = sc.getInitParameter( JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY);
+    if (resourceProvider != null) {
+      this.resourceProviderFactory = resourceProvider;
+    }
+
     String servletPath = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH);
     if (servletPath != null) {
       rc.getProperties().put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, servletPath);
@@ -138,7 +144,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
    */
   protected IoCComponentProviderFactory loadResourceProviderFacotry(ResourceConfig rc) {
     try {
-      return (IoCComponentProviderFactory) loadClass("org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory")
+      return (IoCComponentProviderFactory) loadClass(this.resourceProviderFactory)
         .getConstructor(ResourceConfig.class, ServletContext.class)
         .newInstance(rc, getServletContext());
     }

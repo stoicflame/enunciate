@@ -811,6 +811,9 @@
         <xs:attribute name="disableWildcardServletError" type="xs:boolean" default="false">
           <xs:annotation><xs:documentation>used to enable/disable the Enunciate "wildcard" resource check.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="resourceProviderFactory" type="xs:string">
+          <xs:annotation><xs:documentation>The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

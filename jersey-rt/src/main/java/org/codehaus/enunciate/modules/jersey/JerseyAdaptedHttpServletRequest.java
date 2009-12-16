@@ -30,6 +30,7 @@ import java.util.*;
 public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
 
   public static final String PROPERTY_SERVLET_PATH = "org.codehaus.enunciate.modules.jersey.config.ServletPath";
+  public static final String PROPERTY_RESOURCE_PROVIDER_FACTORY = "org.codehaus.enunciate.modules.jersey.config.ResourceProviderFactory";
   public static final String FEATURE_PATH_BASED_CONNEG = "org.codehaus.enunciate.modules.jersey.config.PathBasedConneg";
 
   private final String rawpath;

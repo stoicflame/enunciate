@@ -94,6 +94,9 @@ import java.util.*;
  * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  * <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
  * <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
+ * <li>The "resourceProviderFactory" attribute is used to specify the fully-qualified classname of an instance of
+ * com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use. The default is the spring-based factory or the
+ * jersey default instance if spring isn't enabled.</a></li>
  * </ul>
  *
  * <p>The Jersey module also supports an arbitrary number of "init-param" child elements that can be used to specify the init parameters (e.g.
@@ -112,6 +115,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   private boolean useSubcontext = true;
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
+  private String resourceProviderFactory = null;
   private final Map<String, String> servletInitParams = new HashMap<String, String>();
 
   /**
@@ -282,6 +286,9 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
     if (isUseSubcontext()) {
       initParams.put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, getRestSubcontext());
     }
+    if (getResourceProviderFactory() != null) {
+      initParams.put(JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY, getResourceProviderFactory());
+    }
     servletComponent.setInitParams(initParams);
 
     TreeSet<String> urlMappings = new TreeSet<String>();
@@ -376,6 +383,24 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   public void setUsePathBasedConneg(boolean usePathBasedConneg) {
     this.usePathBasedConneg = usePathBasedConneg;
+  }
+
+  /**
+   * The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.
+   *
+   * @return The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.
+   */
+  public String getResourceProviderFactory() {
+    return resourceProviderFactory;
+  }
+
+  /**
+   * The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.
+   *
+   * @param resourceProviderFactory The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.
+   */
+  public void setResourceProviderFactory(String resourceProviderFactory) {
+    this.resourceProviderFactory = resourceProviderFactory;
   }
 
   /**
