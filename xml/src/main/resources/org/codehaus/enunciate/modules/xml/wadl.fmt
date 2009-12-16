@@ -66,7 +66,7 @@ Template library for WADL.
           <${wadl}:doc><![CDATA[${resource.inputPayload.docValue}]]></${wadl}:doc>
         [/#if]
         [#list contentTypes as contentType]
-          [#if contentType.produceable]
+          [#if contentType.consumable]
           <${wadl}:representation mediaType="${contentType.type}"[#if resource.inputPayload.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.inputPayload.xmlElement.namespace?? && resource.inputPayload.xmlElement.namespace != ""]${prefix(resource.inputPayload.xmlElement.namespace)}:[/#if]${resource.inputPayload.xmlElement.name}"[#if resource.inputPayload.xmlElement.namespace?? && resource.inputPayload.xmlElement.namespace != ""] xmlns:${prefix(resource.inputPayload.xmlElement.namespace)}="${resource.inputPayload.xmlElement.namespace}"[/#if][/#if]/>
           [/#if]
         [/#list]
@@ -88,7 +88,7 @@ Template library for WADL.
           <${wadl}:doc><![CDATA[${resource.outputPayload.docValue}]]></${wadl}:doc>
       [/#if]
       [#list contentTypes as contentType]
-        [#if contentType.consumable]
+        [#if contentType.produceable]
           <${wadl}:representation mediaType="${contentType.type}"[#if resource.outputPayload.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""]${prefix(resource.outputPayload.xmlElement.namespace)}:[/#if]${resource.outputPayload.xmlElement.name}"[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""] xmlns:${prefix(resource.outputPayload.xmlElement.namespace)}="${resource.outputPayload.xmlElement.namespace}"[/#if][/#if]/>
         [/#if]
       [/#list]
