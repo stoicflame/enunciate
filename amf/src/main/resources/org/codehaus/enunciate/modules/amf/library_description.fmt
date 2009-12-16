@@ -31,10 +31,26 @@
 
   <code>
 //instantiate a new service...
-${sample_service_method.declaringEndpointInterface.simpleName} service =
+var service:${sample_service_method.declaringEndpointInterface.simpleName} =
   new ${sample_service_method.declaringEndpointInterface.simpleName}();
 
-service.addEventListener("${sample_service_method.simpleName}",
+  [#assign words = webMethod.operationName?cap_first?matches("[A-Z]?[a-z]+")]
+  [#assign eid = ""]
+  [#list words as word]
+    [#if eid == "" ]
+      [#assign eid = word?upper_case]
+    [#else]
+      [#assign eid = "${eid}_${word?upper_case}"]
+    [/#if]
+  [/#list]
+
+  [#if eid != ""]
+    [#assign eid = "${sample_service_method.simpleName?cap_first}ResultEvent.${eid}"]
+  [#else]
+    [#assign eid = '"' + sample_service_method.simpleName + '"']
+  [/#if]
+
+service.addEventListener(${eid},
     do${sample_service_method.simpleName?cap_first});
 service.addEventListener("fault", doFault);
 

@@ -115,10 +115,27 @@ package ${packageFor(endpointInterface)}.events.${simpleNameFor(endpointInterfac
   [/@forEachAS3Import]
 
   /**
-   * Event triggered when a response is recieved.
+   * Event triggered when a response is received.
    */
   public class ${webMethod.operationName?cap_first}ResultEvent extends Event {
 
+      [#assign words = webMethod.operationName?cap_first?matches("[A-Z]?[a-z]+")]
+      [#assign eid = ""]
+      [#list words as word]
+        [#if eid == "" ]
+          [#assign eid = word?upper_case]
+        [#else]
+          [#assign eid = "${eid}_${word?upper_case}"]
+        [/#if]
+      [/#list]
+
+      [#if eid != ""]
+    /**
+     * The ${eid} event type.
+     */
+    public static const ${eid}:String = "${webMethod.operationName}";
+
+      [/#if]
       [#if !webMethod.returnType.void]
     private var _result:${classnameFor(webMethod.webResult)};
 
