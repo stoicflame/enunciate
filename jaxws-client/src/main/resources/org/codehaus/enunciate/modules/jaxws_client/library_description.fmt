@@ -20,7 +20,7 @@
 <code>
 // instantiate a new service with an impl
 // (or through dependency injection, or whatever)...
-${sample_service_method.declaringEndpointInterface.simpleName} service = [#if sample_service_method.declaringEndpointInterface.endpointImplementations?size > 0]new ${sample_service_method.declaringEndpointInterface.endpointImplementations?first.simpleName}()[#else]...[/#if];
+${sample_service_method.declaringEndpointInterface.simpleName} service = new ${sample_service_method.declaringEndpointInterface.simpleName}();
 
 //make the remote call to read the result...
 result = service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.clientSimpleName}[#if param_has_next], [/#if][/#list]);
