@@ -876,12 +876,14 @@
                           <th>name</th>
                           <th>description</th>
                           <th>type</th>
+                          <th>defaultValue</th>
                         </tr>
                         <xsl:for-each select="parameter">
                           <tr>
                             <td><xsl:value-of select="@name"/></td>
                             <td><xsl:value-of select="." disable-output-escaping="yes"/></td>
                             <td><xsl:value-of select="@type"/></td>
+                            <td><xsl:value-of select="@defaultValue"/></td>
                           </tr>
                         </xsl:for-each>
                       </table>

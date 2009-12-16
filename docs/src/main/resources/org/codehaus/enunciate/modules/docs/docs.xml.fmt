@@ -266,7 +266,7 @@
         [/#if]
       [/#list]
       [#list resource.resourceParameters as parameter]
-          <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}">
+          <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}"[#if parameter.defaultValue??] defaultValue="${parameter.defaultValue}"[/#if]>
             <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
           </parameter>
       [/#list]

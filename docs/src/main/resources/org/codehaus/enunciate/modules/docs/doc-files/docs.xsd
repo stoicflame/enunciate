@@ -569,6 +569,7 @@
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restParameterType"/>
+        <xs:attribute name="defaultValue" type="xs:string" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
