@@ -571,6 +571,28 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     }
   }
 
+  @Override
+  public void initModel(EnunciateFreemarkerModel model) {
+    super.initModel(model);
+
+    if (!getModelInternal().getNamespacesToWSDLs().isEmpty()) {
+      String docsDir = getDocsDir() == null ? "" : getDocsDir();
+      if (!docsDir.startsWith("/")) {
+        docsDir = "/" + docsDir;
+      }
+      while (docsDir.endsWith("/")) {
+        docsDir = docsDir.substring(0, docsDir.length() - 1);
+      }
+
+      for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
+        Object filename = wsdlInfo.getProperty("filename");
+        if (filename != null) {
+          wsdlInfo.setProperty("redirectLocation", docsDir + "/" + filename);
+        }
+      }
+    }
+  }
+
   /**
    * The generate logic builds the XML documentation structure for the enunciated API.
    */
@@ -644,24 +666,15 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       initParams.put("assumed-base-address", getModel().getBaseDeploymentAddress());
       wsdlFilter.setInitParams(initParams);
       TreeSet<String> wsdls = new TreeSet<String>();
-      String docsDir = getDocsDir() == null ? "" : getDocsDir();
-      if (!docsDir.startsWith("/")) {
-        docsDir = "/" + docsDir;
-      }
-      while (docsDir.endsWith("/")) {
-        docsDir = docsDir.substring(0, docsDir.length() - 1);
-      }
 
       for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
-        Object filename = wsdlInfo.getProperty("filename");
-        if (filename != null) {
-
-          wsdls.add(docsDir + "/" + filename);
-        }
+        String wsdlLocation = (String) wsdlInfo.getProperty("redirectLocation");
+        wsdls.add(wsdlLocation);
       }
       wsdlFilter.setUrlMappings(wsdls);
       webAppFragment.setFilters(Arrays.asList(wsdlFilter));
     }
+
     if (isApplyWadlFilter() && getModelInternal().getWadlFile() != null) {
       WebAppComponent wadlFilter = new WebAppComponent();
       wadlFilter.setName("wadl-filter");

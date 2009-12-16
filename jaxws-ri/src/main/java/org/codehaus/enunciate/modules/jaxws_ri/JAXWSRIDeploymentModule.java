@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.jaxws_ri;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -194,13 +195,27 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     String servletClass = isSpringEnabled() ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
     servletComponent.setClassname(servletClass);
     TreeSet<String> urlMappings = new TreeSet<String>();
+    ArrayList<WebAppComponent> filters = new ArrayList<WebAppComponent>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+      TreeSet<String> urlMappingsForNs = new TreeSet<String>();
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
-        urlMappings.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+        urlMappingsForNs.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+      }
+      urlMappings.addAll(urlMappingsForNs);
+
+      String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
+      if (redirectLocation != null) {
+        WebAppComponent wsdlFilter = new WebAppComponent();
+        wsdlFilter.setName("wsdl-redirect-filter");
+        wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
+        wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
+        wsdlFilter.setUrlMappings(urlMappingsForNs);
+        filters.add(wsdlFilter);
       }
     }
     servletComponent.setUrlMappings(urlMappings);
     webappFragment.setServlets(Arrays.asList(servletComponent));
+    webappFragment.setFilters(filters);
     if (!isSpringEnabled()) {
       webappFragment.setListeners(Arrays.asList("com.sun.xml.ws.transport.http.servlet.WSServletContextListener"));
     }

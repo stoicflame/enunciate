@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.cxf;
 import freemarker.template.TemplateException;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -243,6 +244,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 
     Set<String> urlMappings = new TreeSet<String>();
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
+    ArrayList<WebAppComponent> filters = new ArrayList<WebAppComponent>();
     if (enableJaxws) {
       //jax-ws servlet config.
       WebAppComponent jaxwsServletComponent = new WebAppComponent();
@@ -250,8 +252,20 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       jaxwsServletComponent.setClassname(CXFServlet.class.getName());
       TreeSet<String> jaxwsUrlMappings = new TreeSet<String>();
       for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
+        TreeSet<String> urlMappingsForNs = new TreeSet<String>();
         for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
-          jaxwsUrlMappings.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+          urlMappingsForNs.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+        }
+        jaxwsUrlMappings.addAll(urlMappingsForNs);
+
+        String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
+        if (redirectLocation != null) {
+          WebAppComponent wsdlFilter = new WebAppComponent();
+          wsdlFilter.setName("wsdl-redirect-filter");
+          wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
+          wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
+          wsdlFilter.setUrlMappings(urlMappingsForNs);
+          filters.add(wsdlFilter);
         }
       }
       jaxwsServletComponent.setUrlMappings(jaxwsUrlMappings);
@@ -295,6 +309,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       urlMappings.addAll(jaxrsUrlMappings);
     }
     webappFragment.setServlets(servlets);
+    webappFragment.setFilters(filters);
 
     WebAppComponent filterComponent = new WebAppComponent();
     filterComponent.setName("cxf-filter");
