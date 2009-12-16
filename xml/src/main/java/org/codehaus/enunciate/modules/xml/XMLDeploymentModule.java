@@ -108,6 +108,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
   private boolean prettyPrint = true;
   private boolean validateSchemas = true;
   private boolean inlineWSDLSchemas = true;
+  private boolean disableWadl = false;
   private String wadlStylesheetUri = null;
   private final XMLAPIObjectWrapper xmlWrapper = new XMLAPIObjectWrapper();
   private final XMLRuleSet rules = new XMLRuleSet();
@@ -316,13 +317,15 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
       getEnunciate().addArtifact(schemaArtifact);
     }
 
-    File wadl = new File(artifactDir, "application.wadl");
-    if (wadl.exists()) {
-      FileArtifact wadlArtifact = new FileArtifact(getName(), "application.wadl", wadl);
-      wadlArtifact.setDescription("WADL document");
-      getEnunciate().addArtifact(wadlArtifact);
-      prettyPrint(wadl);
-      model.setWadlFile(wadl);
+    if (!isDisableWadl()) {
+      File wadl = new File(artifactDir, "application.wadl");
+      if (wadl.exists()) {
+        FileArtifact wadlArtifact = new FileArtifact(getName(), "application.wadl", wadl);
+        wadlArtifact.setDescription("WADL document");
+        getEnunciate().addArtifact(wadlArtifact);
+        prettyPrint(wadl);
+        model.setWadlFile(wadl);
+      }
     }
   }
 
@@ -405,5 +408,23 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setInlineWSDLSchemas(boolean inlineWSDLSchemas) {
     this.inlineWSDLSchemas = inlineWSDLSchemas;
+  }
+
+  /**
+   * Whether to disable the WADL.
+   *
+   * @return Whether to disable the WADL.
+   */
+  public boolean isDisableWadl() {
+    return disableWadl;
+  }
+
+  /**
+   * Whether to disable the WADL.
+   *
+   * @param disableWadl Whether to disable the WADL.
+   */
+  public void setDisableWadl(boolean disableWadl) {
+    this.disableWadl = disableWadl;
   }
 }

@@ -389,6 +389,7 @@
         </xs:sequence>
         <xs:attribute name="prettyPrint" type="xs:boolean" default="true"/>
         <xs:attribute name="wadlStylesheetUri" type="xs:string"/>
+        <xs:attribute name="disableWadl" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
