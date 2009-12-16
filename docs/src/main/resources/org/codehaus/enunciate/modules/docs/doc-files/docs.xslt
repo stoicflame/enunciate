@@ -876,7 +876,7 @@
                           <th>name</th>
                           <th>description</th>
                           <th>type</th>
-                          <th>defaultValue</th>
+                          <th>default</th>
                         </tr>
                         <xsl:for-each select="parameter">
                           <tr>
