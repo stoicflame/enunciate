@@ -91,6 +91,7 @@ import java.util.*;
  * enunciate configuration file.  It supports the following attributes:</p>
  *
  * <ul>
+ * <li>The "label" attribute is used to determine the name of the client-side artifact files. The default is the Enunciate project label.</li>
  * <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
  * <li>The "disable14Client" attributes disables the generation of the JDK 1.4 client.</li>
@@ -138,6 +139,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
   private List<String> generatedTypeList = null;
   private boolean disable14Client = false;
   private boolean disable15Client = true; //we've got the JAX-WS client module now.  we'll disable this by default.
+  private String label = null;
 
   public XFireClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
@@ -632,7 +634,10 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
 
     if (jarName == null) {
       String label = "enunciate";
-      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+      if (getLabel() != null) {
+          label = getLabel();
+      }
+      else if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
         label = enunciate.getConfig().getLabel();
       }
 
@@ -730,7 +735,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
         info("Skipping creation of JDK 1.4 client jar as everything appears up-to-date...");
       }
 
-      File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-src.jar"));
+      File jdk14Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.4-sources.jar"));
       if (!enunciate.isUpToDate(getJdk14GenerateDir(), jdk14Sources)) {
         enunciate.zip(jdk14Sources, getJdk14GenerateDir());
         enunciate.setProperty("client.jdk14.sources", jdk14Sources);
@@ -774,7 +779,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
         info("Skipping creation of JDK 1.5 client jar as everything appears up-to-date...");
       }
 
-      File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-src.jar"));
+      File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-1.5-sources.jar"));
       if (!enunciate.isUpToDate(getJdk15GenerateDir(), jdk15Sources)) {
         enunciate.zip(jdk15Sources, getJdk15GenerateDir());
         enunciate.setProperty("client.jdk15.sources", jdk15Sources);
@@ -959,6 +964,24 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
    */
   public void setUuid(String uuid) {
     this.uuid = uuid;
+  }
+
+  /**
+   * The label for the xfire-client API.
+   *
+   * @return The label for the xfire-client API.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label for the xfire-client API.
+   *
+   * @param label The label for the xfire-client API.
+   */
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   /**

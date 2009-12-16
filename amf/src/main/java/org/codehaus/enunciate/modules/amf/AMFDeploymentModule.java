@@ -102,6 +102,7 @@ import java.util.*;
  *
  * <ul>
  * <li>The "flexHome" attribute <b>must</b> be supplied. It is the path to the directory where the Flex SDK is installed.</li>
+ * <li>The "label" attribute is used to determine the name of the client-side artifact files. The default is the Enunciate project label.</li>
  * <li>The "swcName" attribute specifies the name of the compiled SWC. By default, the name is determined by the Enunciate
  * project label (see the main configuration docs).</li>
  * <li>The "swcDownloadable" attribute specifies whether the generated SWC is to be made available as a download from the
@@ -213,6 +214,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private final List<FlexApp> flexApps = new ArrayList<FlexApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
 
+  private String label = "enunciate";
   private String flexHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
   private FlexCompilerConfig compilerConfig = new FlexCompilerConfig();
   private String swcName;
@@ -560,7 +562,10 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
       if (swcName == null) {
         String label = "enunciate";
-        if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+        if (getLabel() != null) {
+          label = getLabel();
+        }
+        else if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
           label = enunciate.getConfig().getLabel();
         }
 
@@ -1116,6 +1121,24 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setFlexAppDir(String flexAppDir) {
     this.flexAppDir = flexAppDir;
+  }
+
+  /**
+   * The label for the ActionScript API.
+   *
+   * @return The label for the ActionScript API.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label for the ActionScript API.
+   *
+   * @param label The label for the ActionScript API.
+   */
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   // Inherited.

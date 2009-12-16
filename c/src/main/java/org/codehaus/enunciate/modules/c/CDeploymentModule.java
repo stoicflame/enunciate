@@ -261,18 +261,18 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
-   * The label for the Ruby API.
+   * The label for the C API.
    *
-   * @return The label for the Ruby API.
+   * @return The label for the C API.
    */
   public String getLabel() {
     return label;
   }
 
   /**
-   * The label for the Ruby API.
+   * The label for the C API.
    *
-   * @param label The label for the Ruby API.
+   * @param label The label for the C API.
    */
   public void setLabel(String label) {
     this.label = label;

@@ -98,6 +98,7 @@ import java.util.*;
  * enunciate configuration file.  It supports the following attributes:</p>
  *
  * <ul>
+ * <li>The "label" attribute is used to determine the name of the client-side artifact files. The default is the Enunciate project label.</li>
  * <li>The "jarName" attribute specifies the name of the jar file(s) that are to be created.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
  * </ul>
@@ -146,6 +147,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
   private final Map<String, String> clientPackageConversions;
   private final JAXWSClientRuleSet configurationRules;
   private final Set<String> serverSideTypesToUse;
+  private String label = "enunciate";
 
   public JAXWSClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();
@@ -390,7 +392,10 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
 
     if (jarName == null) {
       String label = "enunciate";
-      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+      if (getLabel() != null) {
+        label = getLabel();
+      }
+      else if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
         label = enunciate.getConfig().getLabel();
       }
 
@@ -406,7 +411,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
       info("Skipping creation of JAX-WS client jar as everything appears up-to-date...");
     }
 
-    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-src.jar"));
+    File jdk15Sources = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-sources.jar"));
     if (!enunciate.isUpToDate(getGenerateDir(), jdk15Sources)) {
       enunciate.zip(jdk15Sources, getGenerateDir());
       enunciate.setProperty("jaxws.client.sources", jdk15Sources);
@@ -568,6 +573,24 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
    */
   public void addServerSideTypeToUse(String serverSideTypeToUse) {
     this.serverSideTypesToUse.add(serverSideTypeToUse);
+  }
+
+  /**
+   * The label for the JAX-WS Client API.
+   *
+   * @return The label for the  JAX-WS Client API.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label for the  JAX-WS Client API.
+   *
+   * @param label The label for the  JAX-WS Client API.
+   */
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   // Inherited.

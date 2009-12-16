@@ -415,6 +415,7 @@
         <xs:attribute name="disable14Client" type="xs:boolean" default="false"/>
         <xs:attribute name="disable15Client" type="xs:boolean" default="true"/>
         <xs:attribute name="uuid" type="xs:string"/>
+        <xs:attribute name="label" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -442,6 +443,7 @@
           </xs:element>
         </xs:sequence>
         <xs:attribute name="jarName" type="xs:string"/>
+        <xs:attribute name="label" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -466,6 +468,10 @@
         <xs:attribute name="label" type="xs:string"/>
         <xs:attribute name="require" type="xs:boolean"/>
         <xs:attribute name="disableCompile" type="xs:boolean" default="false"/>
+        <xs:attribute name="bundleFileName" type="xs:string"/>
+        <xs:attribute name="DLLFileName" type="xs:string"/>
+        <xs:attribute name="docXmlFileName" type="xs:string"/>
+        <xs:attribute name="sourceFileName" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -980,6 +986,12 @@
             <xs:documentation>Whether the client jar is downloadable.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="label" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The "label" attribute specifies a label for the generated GWT client filenames. By default, the label is determined by the Enunciate project label.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1224,6 +1236,12 @@
         <xs:attribute name="flexHome" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>The filesystem path to the Flex home directory.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="label" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>The "label" attribute specifies a label for the generated ActionScript client filenames. By default, the label is determined by the Enunciate project label.
+            </xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="swcName" type="xs:string" use="optional">

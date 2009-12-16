@@ -113,6 +113,7 @@ import java.util.*;
  * be subpackaged by the client namespace.  <i>NOTE: You may not like this because the package mapping might be ugly.</i>  For example,
  * if your module namespace is "com.mycompany" and you have a class "org.othercompany.OtherClass", it will be mapped to a client-side GWT class
  * named "com.mycompany.client.org.othercompany.OtherClass".</li>
+ * <li>The "label" attribute is used to determine the name of the client-side artifact files. The default is the Enunciate project label.</li>
  * <li>The "clientJarName" attribute specifies the name of the client-side jar file that is to be created.
  * If no jar name is specified, the name will be calculated from the enunciate label, or a default will
  * be supplied.</li>
@@ -264,6 +265,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean gwtRtFound = false;
   private boolean springDIFound = false;
   private boolean jacksonXcAvailable = false;
+  private String label = "enunciate";
 
   /**
    * @return "gwt"
@@ -868,7 +870,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
     if (clientJarName == null) {
       String label = "enunciate";
-      if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
+      if (getLabel() != null) {
+        label = getLabel();
+      }
+      else if ((enunciate.getConfig() != null) && (enunciate.getConfig().getLabel() != null)) {
         label = enunciate.getConfig().getLabel();
       }
 
@@ -1423,6 +1428,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setGenerateJsonOverlays(boolean generateJsonOverlays) {
     this.forceGenerateJsonOverlays = generateJsonOverlays;
+  }
+
+  /**
+   * The label for the GWT client API.
+   *
+   * @return The label for the GWT client API.
+   */
+  public String getLabel() {
+    return label;
+  }
+
+  /**
+   * The label for the ActionScript API.
+   *
+   * @param label The label for the ActionScript API.
+   */
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   /**

@@ -63,7 +63,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  *
  * <ul>
  * <li>The "label" attribute is the label for the C# API.  This is the name by which the files will be identified, producing [label].cs and [label].dll.
- * By default the label is the same as the Enunciate project label.</li>
+ * By default the label is the same as the Enunciate project label. For a more custom configuration of the generated file names, use the
+ * "bundleFileName", "DLLFileName", "docXmlFileName", and "sourceFileName" attributes.</li>
  * <li>The "compileExecutable" attribute is the executable for invoking the C# compiler. If not supplied, an attempt will be made to find a C# compiler on the
  * system path.  If the attempt fails, the C# code will not be compiled (but the source code will still be made available as a download artifact).</li>
  * <li>The "compileCommand" is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax">Java format string</a> that represents the
@@ -97,6 +98,10 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   private String compileExecutable = null;
   private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s";
   private final Map<String, String> packageToNamespaceConversions = new HashMap<String, String>();
+  private String bundleFileName = null;
+  private String DLLFileName = null;
+  private String docXmlFileName = null;
+  private String sourceFileName = null;
 
   public CSharpDeploymentModule() {
   }
@@ -400,7 +405,16 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
 
   }
 
+  /**
+   * The name of the bundle file.
+   *
+   * @return The name of the bundle file.
+   */
   protected String getBundleFileName() {
+    if (this.bundleFileName != null) {
+      return this.bundleFileName;
+    }
+
     String label = getLabel();
     if (label == null) {
       label = getEnunciate().getConfig().getLabel();
@@ -409,11 +423,24 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The name of the bundle file.
+   *
+   * @param bundleFileName The name of the bundle file.
+   */
+  public void setBundleFileName(String bundleFileName) {
+    this.bundleFileName = bundleFileName;
+  }
+
+  /**
    * The name of the generated C# dll.
    *
    * @return The name of the generated C# file.
    */
   protected String getDLLFileName() {
+    if (this.DLLFileName != null) {
+      return this.DLLFileName;
+    }
+
     String label = getLabel();
     if (label == null) {
       label = getEnunciate().getConfig().getLabel();
@@ -422,11 +449,24 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The name of the generated C# dll.
+   *
+   * @param DLLFileName The name of the generated C# dll.
+   */
+  public void setDLLFileName(String DLLFileName) {
+    this.DLLFileName = DLLFileName;
+  }
+
+  /**
    * The name of the generated C# xml documentation.
    *
    * @return The name of the generated C# xml documentation.
    */
   protected String getDocXmlFileName() {
+    if (this.docXmlFileName != null) {
+      return this.docXmlFileName;
+    }
+
     String label = getLabel();
     if (label == null) {
       label = getEnunciate().getConfig().getLabel();
@@ -435,16 +475,38 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   }
 
   /**
+   * The name of the generated C# xml documentation.
+   *
+   * @param docXmlFileName The name of the generated C# xml documentation.
+   */
+  public void setDocXmlFileName(String docXmlFileName) {
+    this.docXmlFileName = docXmlFileName;
+  }
+
+  /**
    * The name of the generated C# source file.
    *
    * @return The name of the generated C# source file.
    */
   protected String getSourceFileName() {
+    if (this.sourceFileName != null) {
+      return this.sourceFileName;
+    }
+    
     String label = getLabel();
     if (label == null) {
       label = getEnunciate().getConfig().getLabel();
     }
     return label + ".cs";
+  }
+
+  /**
+   * The name of the generated C# source file.
+   *
+   * @param sourceFileName The name of the generated C# source file.
+   */
+  public void setSourceFileName(String sourceFileName) {
+    this.sourceFileName = sourceFileName;
   }
 
   @Override
