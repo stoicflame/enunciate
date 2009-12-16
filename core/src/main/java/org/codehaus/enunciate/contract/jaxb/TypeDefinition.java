@@ -99,7 +99,9 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       else if (isElementRef(accessor)) {
         ElementRef elementRef = new ElementRef(accessor, this);
         if (!elementAccessors.add(elementRef)) {
-          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": duplicate XML element.");
+          //see http://jira.codehaus.org/browse/ENUNCIATE-381; the case for this is when an annotated field has an associated public property
+          //we'll just silently continue
+          continue;
         }
         added = elementRef;
       }
@@ -126,7 +128,9 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
 
         Element element = new Element(accessor, this);
         if (!elementAccessors.add(element)) {
-          throw new ValidationException(accessor.getPosition(), "Accessor " + accessor.getSimpleName() + " of " + getQualifiedName() + ": duplicate XML element.");
+          //see http://jira.codehaus.org/browse/ENUNCIATE-381; the case for this is when an annotated field has an associated public property
+          //we'll just silently continue
+          continue;
         }
         added = element;
       }
