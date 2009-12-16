@@ -50,6 +50,11 @@ import ${packageFor(endpointInterface) + "." + endpointInterface.simpleName};
   memoryThreshold = ${impl.annotations["com.sun.xml.ws.developer.StreamingAttachment"].memoryThreshold?c}L
 )
 [/#if]
+[#if ((impl??) && (impl.annotations["javax.jws.HandlerChain"]??))]
+@javax.jws.HandlerChain (
+  file = "${impl.annotations["javax.jws.HandlerChain"].file?string}"
+)
+[/#if]
 public class ${endpointInterface.simpleName}Instrumented {
 
   private final ${endpointInterface.simpleName} delegate;
