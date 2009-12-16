@@ -10,7 +10,7 @@ import org.codehaus.enunciate.main.Enunciate;
  *
  * @author Ryan Heaton
  * @goal failIfModuleDisabled
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  */
 public class FailIfModuleDisabledMojo extends AbstractMojo {
 

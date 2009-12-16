@@ -6,7 +6,7 @@ package org.codehaus.enunciate;
  * @goal assemble
  * @extendsPlugin maven-enunciate-slim-plugin
  * @phase process-sources
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  * @executionStrategy once-per-session
  *
  * @author Ryan Heaton

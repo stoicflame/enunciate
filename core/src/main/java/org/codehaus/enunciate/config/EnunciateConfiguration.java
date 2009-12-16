@@ -73,9 +73,19 @@ public class EnunciateConfiguration implements ErrorHandler {
    * using Sun's discovery mechanism.
    */
   public EnunciateConfiguration() {
+    this((ClassLoader) null);
+  }
+
+  /**
+   * Create a new enunciate configuration.  The module list will be constructed
+   * using Sun's discovery mechanism and the specified classloader.
+   *
+   * @param loader the classloader to use.
+   */
+  public EnunciateConfiguration(ClassLoader loader) {
     this.modules = new TreeSet<DeploymentModule>(new DeploymentModuleComparator());
 
-    Iterator discoveredModules = discoverModules();
+    Iterator discoveredModules = discoverModules(loader);
     while (discoveredModules.hasNext()) {
       DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();
       this.modules.add(discoveredModule);
@@ -86,9 +96,10 @@ public class EnunciateConfiguration implements ErrorHandler {
   /**
    * Discover the deployment modules.
    * @return An iterator over the deployment modules.
+   * @param loader The classloader, or null if none.
    */
-  protected Iterator discoverModules() {
-    return Service.providers(DeploymentModule.class);
+  protected Iterator discoverModules(ClassLoader loader) {
+    return loader == null ? Service.providers(DeploymentModule.class) : Service.providers(DeploymentModule.class, loader);
   }
 
   /**

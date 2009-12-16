@@ -24,6 +24,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.filtering.MavenFileFilter;
 import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.apache.maven.artifact.*;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.*;
@@ -38,7 +39,7 @@ import java.util.*;
  *
  * @goal config
  * @phase validate
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  */
 public class ConfigMojo extends AbstractMojo {
 
@@ -68,15 +69,6 @@ public class ConfigMojo extends AbstractMojo {
    * @readonly
    */
   protected Collection<org.apache.maven.artifact.Artifact> pluginDepdendencies;
-
-  /**
-   * Project dependencies.
-   *
-   * @parameter expression="${project.artifacts}"
-   * @required
-   * @readonly
-   */
-  protected Collection<org.apache.maven.artifact.Artifact> projectDependencies;
 
   /**
    * Project artifacts.
@@ -287,7 +279,7 @@ public class ConfigMojo extends AbstractMojo {
     postProcessConfig(config);
     enunciate.setConfig(config);
     Set<org.apache.maven.artifact.Artifact> classpathEntries = new HashSet<org.apache.maven.artifact.Artifact>();
-    classpathEntries.addAll(this.projectDependencies);
+    classpathEntries.addAll(((Set<org.apache.maven.artifact.Artifact>)this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = classpathEntries.iterator();
     while (it.hasNext()) {
       org.apache.maven.artifact.Artifact artifact = it.next();

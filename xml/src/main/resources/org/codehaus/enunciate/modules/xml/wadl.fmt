@@ -31,7 +31,7 @@ Template library for WADL.
   <${wadl}:resources base="${baseDeploymentAddress}">
     [@forEachRESTResourceListByPath]
 
-    <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).path.starts_with("/")]/[/#if]${(resources?first).path}">
+    <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).path?starts_with("/")]/[/#if]${(resources?first).path}">
       [#list resources as resource]
         [@handleResourceMethod resource=resource contentTypes=uniqueContentTypes(resource)/]
       [/#list]

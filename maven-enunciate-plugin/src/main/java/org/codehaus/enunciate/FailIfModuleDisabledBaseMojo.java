@@ -6,7 +6,7 @@ package org.codehaus.enunciate;
  * @author Ryan Heaton
  * @extendsPlugin maven-enunciate-slim-plugin
  * @goal failIfModuleDisabled
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  * @executionStrategy once-per-session
  */
 public class FailIfModuleDisabledBaseMojo extends FailIfModuleDisabledMojo {

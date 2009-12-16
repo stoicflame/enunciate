@@ -33,7 +33,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
  *
  * @goal export
  * @phase process-sources
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
 
  * @author Ryan Heaton
  * @link http://docs.codehaus.org/display/ENUNCIATE/Working+With+Precompiled+Classes

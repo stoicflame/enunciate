@@ -40,6 +40,7 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ProjectTitleAware;
+import org.codehaus.enunciate.modules.DocumentationAwareModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
 
@@ -170,7 +171,7 @@ import java.util.*;
  * @author Ryan Heaton
  * @docFileName module_docs.html
  */
-public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements ProjectTitleAware, EnunciateClasspathListener {
+public class DocumentationDeploymentModule extends FreemarkerDeploymentModule implements DocumentationAwareModule, EnunciateClasspathListener {
 
   private String splashPackage;
   private String copyright;

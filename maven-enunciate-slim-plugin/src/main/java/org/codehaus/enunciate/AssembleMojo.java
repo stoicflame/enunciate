@@ -18,6 +18,8 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Assembles the whole Enunciate app without compilation or packaging of the war.
@@ -25,7 +27,7 @@ import java.util.Set;
  *
  * @goal assemble
  * @phase process-sources
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution runtime
  * @executionStrategy once-per-session
 
  * @author Ryan Heaton
@@ -144,7 +146,7 @@ public class AssembleMojo extends ConfigMojo {
 
   @Override
   protected String lookupSourceJar(File pathEntry) {
-    for (Artifact projectDependency : this.projectDependencies) {
+    for (Artifact projectDependency : ((Set<Artifact>)this.project.getArtifacts())) {
       if (pathEntry.equals(projectDependency.getFile())) {
         getLog().debug("Attemping to lookup source artifact for " + projectDependency.toString() + "...");
         try {
