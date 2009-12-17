@@ -58,8 +58,14 @@ import java.util.*;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
- * <p>The JAX-WS RI module accepts a single parameter, "forceSpringEnabled" that forces spring integration. By default, spring integration will only be enabled
- * if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</p>
+ * <p>The JAX-WS RI module accepts the following parameters:</p>
+ *
+ * <ul>
+ *   <li>The "forceSpringEnabled" that forces spring integration. By default, spring integration will only be enabled
+ *       if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</li>
+ *   <li>The "forceSpringDisabled" that forces spring integration to be disabled. By default, spring integration will be enabled
+ *       if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</li>
+ * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
@@ -72,6 +78,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
 
   private boolean springModuleEnabled = false;
   private boolean forceSpringEnabled = false;
+  private boolean forceSpringDisabled = false;
 
   /**
    * @return "cxf"
@@ -112,6 +119,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       }
 
       this.springModuleEnabled = enunciate.isModuleEnabled("spring-app");
+
+      if (forceSpringEnabled && forceSpringDisabled) {
+        throw new EnunciateException("jaxws-ri module must not be configured to force spring to be both enabled and disabled.");
+      }
     }
   }
 
@@ -144,7 +155,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
    * @return Whether spring is enabled.
    */
   public boolean isSpringEnabled() {
-    return forceSpringEnabled || springModuleEnabled;
+    return !forceSpringDisabled && (forceSpringEnabled || springModuleEnabled);
   }
 
   @Override
@@ -248,6 +259,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
 
   public void setForceSpringEnabled(boolean forceSpringEnabled) {
     this.forceSpringEnabled = forceSpringEnabled;
+  }
+
+  public void setForceSpringDisabled(boolean forceSpringDisabled) {
+    this.forceSpringDisabled = forceSpringDisabled;
   }
 
   // Inherited.

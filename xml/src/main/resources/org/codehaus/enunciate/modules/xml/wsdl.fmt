@@ -172,7 +172,7 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processSOAPBinding endpointInterface]
-  <${wsdldef}:binding name="${endpointInterface.simpleName}SOAPBinding" type="${tns}:${endpointInterface.portTypeName}">
+  <${wsdldef}:binding name="${endpointInterface.simpleName}PortBinding" type="${tns}:${endpointInterface.portTypeName}">
     <${wsdldef}:documentation>
       <![CDATA[SOAP Binding for ${endpointInterface.portTypeName}]]>
     </${wsdldef}:documentation>
@@ -256,7 +256,7 @@ Template library for WSDL.
   @param endpointInterface The endpoint interface to output.  (Instance of org.codehaus.enunciate.contract.jaxws.EndpointInterface)
 --]
 [#macro processSOAPServicePort endpointInterface]
-    <${wsdldef}:port name="${endpointInterface.simpleName}SOAPPort" binding="${tns}:${endpointInterface.simpleName}SOAPBinding">
+    <${wsdldef}:port name="${endpointInterface.simpleName}Port" binding="${tns}:${endpointInterface.simpleName}PortBinding">
       <${soap}:address location="${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}"/>
     </${wsdldef}:port>
 [/#macro]

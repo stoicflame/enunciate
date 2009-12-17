@@ -532,7 +532,10 @@
 
   <xs:complexType name="module-jaxws-ri">
     <xs:complexContent>
-      <xs:extension base="module-base"/>
+      <xs:extension base="module-base">
+        <xs:attribute name="forceSpringEnabled" type="xs:boolean" default="false" use="optional"/>
+        <xs:attribute name="forceSpringDisabled" type="xs:boolean" default="false" use="optional"/>
+      </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
