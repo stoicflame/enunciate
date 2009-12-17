@@ -38,7 +38,6 @@ public class AMFRuleSet extends RuleSetBase {
     digester.addCallParam("enunciate/modules/amf/compiler/JVMArg", 0);
 
     digester.addCallMethod("enunciate/modules/amf/compiler/arg", "addArg", 1);
-    digester.addCallParam("enunciate/modules/amf/compiler/arg", 0, "value");
     digester.addCallParam("enunciate/modules/amf/compiler/arg", 0);
 
     digester.addObjectCreate("enunciate/modules/amf/compiler/license", License.class);

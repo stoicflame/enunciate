@@ -47,41 +47,42 @@ public class JerseyValidator extends BaseValidator {
     for (RootResource rootResource : rootResources) {
 
       if (rootResource.getDelegate() instanceof InterfaceDeclaration) {
-        result.addWarning(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
-      }
-
-      List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
-      boolean springManaged = rootResource.getAnnotation(SpringManagedLifecycle.class) != null;
-      CONSTRUCTOR_LOOP:
-      for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
-        if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
-          for (ParameterDeclaration constructorParam : constructor.getParameters()) {
-            if (springManaged) {
-              if (isSuppliableByJAXRS(constructorParam)) {
-                result.addWarning(constructorParam, "Constructor parameter will not be supplied by JAX-RS if the lifecycle of this resource is Spring-managed.");
-              }
-            }
-            else if (!isSuppliableByJAXRS(constructorParam)) {
-              //none of those annotation are available. not a candidate constructor.
-              continue CONSTRUCTOR_LOOP;
-            }
-          }
-
-          candidates.add(constructor);
-        }
-      }
-
-      if (candidates.isEmpty() && !springManaged) {
-        result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values. " +
-          "If the resource lifecycle is to be managed by Spring (which will handle the construction of the bean), then please apply the @" +
-          SpringManagedLifecycle.class.getName() + " annotation to the resource.");
+        result.addError(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
       }
       else {
-        while (!candidates.isEmpty()) {
-          ConstructorDeclaration candidate = candidates.remove(0);
-          for (ConstructorDeclaration other : candidates) {
-            if (candidate.getParameters().size() == other.getParameters().size()) {
-              result.addWarning(rootResource, "Ambiguous JAX-RS constructors (same parameter count).");
+        List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
+        boolean springManaged = rootResource.getAnnotation(SpringManagedLifecycle.class) != null;
+        CONSTRUCTOR_LOOP:
+        for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
+          if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
+            for (ParameterDeclaration constructorParam : constructor.getParameters()) {
+              if (springManaged) {
+                if (isSuppliableByJAXRS(constructorParam)) {
+                  result.addWarning(constructorParam, "Constructor parameter will not be supplied by JAX-RS if the lifecycle of this resource is Spring-managed.");
+                }
+              }
+              else if (!isSuppliableByJAXRS(constructorParam)) {
+                //none of those annotation are available. not a candidate constructor.
+                continue CONSTRUCTOR_LOOP;
+              }
+            }
+
+            candidates.add(constructor);
+          }
+        }
+
+        if (candidates.isEmpty() && !springManaged) {
+          result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values. " +
+            "If the resource lifecycle is to be managed by Spring (which will handle the construction of the bean), then please apply the @" +
+            SpringManagedLifecycle.class.getName() + " annotation to the resource.");
+        }
+        else {
+          while (!candidates.isEmpty()) {
+            ConstructorDeclaration candidate = candidates.remove(0);
+            for (ConstructorDeclaration other : candidates) {
+              if (candidate.getParameters().size() == other.getParameters().size()) {
+                result.addWarning(rootResource, "Ambiguous JAX-RS constructors (same parameter count).");
+              }
             }
           }
         }
