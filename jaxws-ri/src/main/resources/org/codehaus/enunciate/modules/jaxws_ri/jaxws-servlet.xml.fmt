@@ -1,6 +1,10 @@
 [#ftl]
 [#-- @ftlvariable name="endpointInterface" type="org.codehaus.enunciate.contract.jaxws.EndpointInterface" --]
-[@file name="jaxws-servlet.xml" charset="utf-8"]
+[@forEachWsdl]
+  [@forEachEndpointInterface wsdl=wsdl]
+    [#list endpointInterface.endpointImplementations as impl]
+      [#if impl.bindingType.soap11 || impl.bindingType.soap12]
+        [@file name="jaxws-${endpointInterface.serviceName}-servlet.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -9,11 +13,6 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
                       http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd
                       http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/servlet.xsd">
-
-  [@forEachWsdl]
-    [@forEachEndpointInterface wsdl=wsdl]
-      [#list endpointInterface.endpointImplementations as impl]
-        [#if impl.bindingType.soap11 || impl.bindingType.soap12]
 
         [#--todo: what about eis with the same name, different namespace?--]
   <bean name="${impl.serviceEndpointId}:instrumented" class="${packageFor(endpointInterface) + "." + endpointInterface.simpleName + "Instrumented"}">
@@ -50,10 +49,9 @@
     </ws:features>
           [/#if]
   </ws:service>
-        [/#if]
-      [/#list]
-    [/@forEachEndpointInterface]
-  [/@forEachWsdl]
-
 </beans>
-[/@file]
+        [/@file]
+      [/#if]
+    [/#list]
+  [/@forEachEndpointInterface]
+[/@forEachWsdl]

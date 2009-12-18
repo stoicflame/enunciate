@@ -201,18 +201,22 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
-    WebAppComponent servletComponent = new WebAppComponent();
-    servletComponent.setName("jaxws");
-    String servletClass = isSpringEnabled() ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
-    servletComponent.setClassname(servletClass);
-    TreeSet<String> urlMappings = new TreeSet<String>();
+    List<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
     ArrayList<WebAppComponent> filters = new ArrayList<WebAppComponent>();
     for (WsdlInfo wsdlInfo : getModel().getNamespacesToWSDLs().values()) {
-      TreeSet<String> urlMappingsForNs = new TreeSet<String>();
+      TreeSet<String> urlMappings = new TreeSet<String>();
       for (EndpointInterface endpointInterface : wsdlInfo.getEndpointInterfaces()) {
-        urlMappingsForNs.add(String.valueOf(endpointInterface.getMetaData().get("soapPath")));
+        WebAppComponent servletComponent = new WebAppComponent();
+        servletComponent.setName("jaxws-" + endpointInterface.getServiceName());
+        String servletClass = isSpringEnabled() ? "org.codehaus.enunciate.modules.jaxws_ri.WSSpringServlet" : "com.sun.xml.ws.transport.http.servlet.WSServlet";
+        servletComponent.setClassname(servletClass);
+        String soapPath = String.valueOf(endpointInterface.getMetaData().get("soapPath"));
+        if (soapPath != null) {
+          servletComponent.setUrlMappings(new TreeSet<String>(Arrays.asList(soapPath)));
+          servlets.add(servletComponent);
+          urlMappings.add(soapPath);
+        }
       }
-      urlMappings.addAll(urlMappingsForNs);
 
       String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
       if (redirectLocation != null) {
@@ -220,12 +224,11 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
         wsdlFilter.setName("wsdl-redirect-filter");
         wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
         wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
-        wsdlFilter.setUrlMappings(urlMappingsForNs);
+        wsdlFilter.setUrlMappings(urlMappings);
         filters.add(wsdlFilter);
       }
     }
-    servletComponent.setUrlMappings(urlMappings);
-    webappFragment.setServlets(Arrays.asList(servletComponent));
+    webappFragment.setServlets(servlets);
     webappFragment.setFilters(filters);
     if (!isSpringEnabled()) {
       webappFragment.setListeners(Arrays.asList("com.sun.xml.ws.transport.http.servlet.WSServletContextListener"));

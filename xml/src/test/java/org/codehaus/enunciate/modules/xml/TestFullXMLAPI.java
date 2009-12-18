@@ -185,21 +185,21 @@ public class TestFullXMLAPI extends TestCase {
         Map ports = service.getPorts();
         assertEquals(1, ports.size());
         Port port = (Port) ports.values().iterator().next();
-        assertEquals("PersonServiceSOAPPort", port.getName());
+        assertEquals("PersonServicePort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
         assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/PersonServiceService", address.getLocationURI());
 
-        assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "PersonServiceSOAPBinding")), port.getBinding());
+        assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "PersonServicePortBinding")), port.getBinding());
       }
       else if ("source-service".equals(serviceName)) {
         Map ports = service.getPorts();
         assertEquals(1, ports.size());
         Port port = (Port) ports.values().iterator().next();
-        assertEquals("SourceServiceSOAPPort", port.getName());
+        assertEquals("SourceServicePort", port.getName());
         SOAPAddress address = (SOAPAddress) port.getExtensibilityElements().get(0);
         assertEquals("https://www.thebestgenealogywebsite.com/genealogy/soap/source-service", address.getLocationURI());
 
-        assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "SourceServiceSOAPBinding")), port.getBinding());
+        assertEquals(definition.getBindings().get(new QName(FULL_NAMESPACE, "SourceServicePortBinding")), port.getBinding());
       }
       else {
         fail("Unknown service: " + serviceName);
@@ -214,7 +214,7 @@ public class TestFullXMLAPI extends TestCase {
       Binding binding = (Binding) b;
       assertEquals(FULL_NAMESPACE, binding.getQName().getNamespaceURI());
       String bindingName = binding.getQName().getLocalPart();
-      if ("PersonServiceSOAPBinding".equals(bindingName)) {
+      if ("PersonServicePortBinding".equals(bindingName)) {
         for (Object bo : binding.getBindingOperations()) {
           BindingOperation operation = (BindingOperation) bo;
           String operationName = operation.getName();
@@ -273,12 +273,12 @@ public class TestFullXMLAPI extends TestCase {
             assertEquals("literal", soapFault.getUse());
           }
           else {
-            fail("Unknown binding operation on PersonServiceSOAPBinding: " + operationName);
+            fail("Unknown binding operation on PersonServicePortBinding: " + operationName);
           }
 
         }
       }
-      else if ("SourceServiceSOAPBinding".equals(bindingName)) {
+      else if ("SourceServicePortBinding".equals(bindingName)) {
         for (Object bo : binding.getBindingOperations()) {
           BindingOperation operation = (BindingOperation) bo;
           String operationName = operation.getName();
@@ -348,7 +348,7 @@ public class TestFullXMLAPI extends TestCase {
             assertEquals("literal", soapFault.getUse());
           }
           else {
-            fail("Unknown binding operation on SourceServiceSOAPBinding: " + operationName);
+            fail("Unknown binding operation on SourceServicePortBinding: " + operationName);
           }
 
         }

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.17-SNAPSHOT</version>
+    <version>1.17-RC1</version>
   </parent>
 
   <artifactId>maven-enunciate-cxf-plugin</artifactId>
