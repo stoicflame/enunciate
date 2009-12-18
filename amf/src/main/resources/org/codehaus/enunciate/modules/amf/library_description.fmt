@@ -34,7 +34,7 @@
 var service:${sample_service_method.declaringEndpointInterface.simpleName} =
   new ${sample_service_method.declaringEndpointInterface.simpleName}();
 
-  [#assign words = webMethod.operationName?cap_first?matches("[A-Z]?[a-z]+")]
+  [#assign words = sample_service_method.simpleName?cap_first?matches("[A-Z]?[a-z]+")]
   [#assign eid = ""]
   [#list words as word]
     [#if eid == "" ]
