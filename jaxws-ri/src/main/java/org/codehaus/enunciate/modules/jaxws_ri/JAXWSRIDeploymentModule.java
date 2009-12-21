@@ -83,7 +83,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
   private boolean useWsdlRedirectFilter = true;
 
   /**
-   * @return "cxf"
+   * @return "jaxws-ri"
    */
   @Override
   public String getName() {
