@@ -18,6 +18,7 @@ package org.codehaus.enunciate.webapp;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
@@ -37,7 +38,8 @@ public class WSDLRedirectFilter implements Filter {
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
     if (this.wsdlLocation != null && servletRequest.getParameterMap().containsKey("wsdl")) {
-      ((HttpServletResponse)servletResponse).sendRedirect(this.wsdlLocation);
+      HttpServletResponse res = (HttpServletResponse) servletResponse;
+      res.sendRedirect(((HttpServletRequest)servletRequest).getContextPath() + this.wsdlLocation);
     }
     else {
       chain.doFilter(servletRequest, servletResponse);

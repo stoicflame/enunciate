@@ -83,6 +83,8 @@ import java.util.*;
  * <li>The "enableJaxws" attribute (boolean) can be used to disable the JAX-WS support, leaving the JAX-WS support to another module if necessary. Default: true</li>
  * <li>The "enableJaxrs" attribute (boolean) can be used to disable the JAX-RS support, leaving the JAX-RS support to another module if necessary. Default: true</li>
  * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ * <li>The "useWsdlRedirectFilter" attribute is used to disable the use of the Enunciate-provided wsdl redirect filter that
+ *     handles the requests to ?wsdl</li>
  * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
@@ -100,6 +102,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean useSubcontext = true;
   private boolean jacksonAvailable = false;
   private boolean filterFound = false;
+  private boolean useWsdlRedirectFilter = true;
 
   /**
    * @return "cxf"
@@ -259,9 +262,9 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
         jaxwsUrlMappings.addAll(urlMappingsForNs);
 
         String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
-        if (redirectLocation != null) {
+        if (redirectLocation != null && isUseWsdlRedirectFilter()) {
           WebAppComponent wsdlFilter = new WebAppComponent();
-          wsdlFilter.setName("wsdl-redirect-filter");
+          wsdlFilter.setName("wsdl-redirect-filter-" + wsdlInfo.getId());
           wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
           wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
           wsdlFilter.setUrlMappings(urlMappingsForNs);
@@ -373,6 +376,14 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
    */
   public void setEnableJaxws(boolean enableJaxws) {
     this.enableJaxws = enableJaxws;
+  }
+
+  public boolean isUseWsdlRedirectFilter() {
+    return useWsdlRedirectFilter;
+  }
+
+  public void setUseWsdlRedirectFilter(boolean useWsdlRedirectFilter) {
+    this.useWsdlRedirectFilter = useWsdlRedirectFilter;
   }
 
   @Override

@@ -18,9 +18,7 @@ package org.codehaus.enunciate.modules.jaxws_ri;
 
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
@@ -33,6 +31,7 @@ import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
+import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +64,8 @@ import java.util.*;
  *       if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</li>
  *   <li>The "forceSpringDisabled" that forces spring integration to be disabled. By default, spring integration will be enabled
  *       if the spring-app module is enabled and the JAX-WS spring components are found on the classpath.</li>
+ *   <li>The "useWsdlRedirectFilter" attribute is used to disable the use of the Enunciate-provided wsdl redirect filter that
+ *       handles the requests to ?wsdl</li>
  * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
@@ -79,6 +80,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
   private boolean springModuleEnabled = false;
   private boolean forceSpringEnabled = false;
   private boolean forceSpringDisabled = false;
+  private boolean useWsdlRedirectFilter = true;
 
   /**
    * @return "cxf"
@@ -219,9 +221,9 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       }
 
       String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
-      if (redirectLocation != null) {
+      if (redirectLocation != null && isUseWsdlRedirectFilter()) {
         WebAppComponent wsdlFilter = new WebAppComponent();
-        wsdlFilter.setName("wsdl-redirect-filter");
+        wsdlFilter.setName("wsdl-redirect-filter-" + wsdlInfo.getId());
         wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
         wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
         wsdlFilter.setUrlMappings(urlMappings);
@@ -268,7 +270,14 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     this.forceSpringDisabled = forceSpringDisabled;
   }
 
-  // Inherited.
+  public boolean isUseWsdlRedirectFilter() {
+    return useWsdlRedirectFilter;
+  }
+
+  public void setUseWsdlRedirectFilter(boolean useWsdlRedirectFilter) {
+    this.useWsdlRedirectFilter = useWsdlRedirectFilter;
+  }
+
   @Override
   public boolean isDisabled() {
     if (super.isDisabled()) {

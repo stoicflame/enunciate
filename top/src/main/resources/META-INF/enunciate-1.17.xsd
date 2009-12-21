@@ -535,6 +535,7 @@
       <xs:extension base="module-base">
         <xs:attribute name="forceSpringEnabled" type="xs:boolean" default="false" use="optional"/>
         <xs:attribute name="forceSpringDisabled" type="xs:boolean" default="false" use="optional"/>
+        <xs:attribute name="useWsdlRedirectFilter" type="xs:boolean" default="true" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -553,6 +554,7 @@
         <xs:attribute name="validate" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="useWsdlRedirectFilter" type="xs:boolean" default="true" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

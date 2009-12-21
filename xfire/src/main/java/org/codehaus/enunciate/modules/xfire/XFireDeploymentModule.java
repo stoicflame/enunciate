@@ -236,7 +236,7 @@ public class XFireDeploymentModule extends FreemarkerDeploymentModule implements
       String redirectLocation = (String) wsdlInfo.getProperty("redirectLocation");
       if (redirectLocation != null) {
         WebAppComponent wsdlFilter = new WebAppComponent();
-        wsdlFilter.setName("wsdl-redirect-filter");
+        wsdlFilter.setName("wsdl-redirect-filter-" + wsdlInfo.getId());
         wsdlFilter.setClassname(WSDLRedirectFilter.class.getName());
         wsdlFilter.addInitParam(WSDLRedirectFilter.WSDL_LOCATION_PARAM, redirectLocation);
         wsdlFilter.setUrlMappings(urlMappingsForNs);
