@@ -906,7 +906,16 @@
                             </ul>
                           </td>
                         </tr>
-                        <xsl:apply-templates select="inValue" mode="documentation" />
+                        <xsl:if test="inValue/documentation">
+                          <tr>
+                            <th colspan="2">description</th>
+                          </tr>
+                          <tr>
+                            <td colspan="2">
+                              <xsl:value-of select="inValue/documentation" disable-output-escaping="yes" />
+                            </td>
+                          </tr>
+                        </xsl:if>
                       </table>
                     </xsl:if>
 
@@ -927,7 +936,16 @@
                             </ul>
                           </td>
                         </tr>
-                        <xsl:apply-templates select="outValue" mode="documentation" />
+                        <xsl:if test="outValue/documentation">
+                          <tr>
+                            <th colspan="2">description</th>
+                          </tr>
+                          <tr>
+                            <td colspan="2">
+                              <xsl:value-of select="outValue/documentation" disable-output-escaping="yes" />
+                            </td>
+                          </tr>
+                        </xsl:if>
                       </table>
                     </xsl:if>
 
@@ -1014,19 +1032,6 @@
         <xsl:otherwise>(custom)</xsl:otherwise>
       </xsl:choose>
     </td>
-  </xsl:template>
-
-  <xsl:template match="inValue|outValue" mode="documentation">
-    <xsl:if test="string-length(normalize-space(inValue/documentation)) &gt; 1">
-      <tr>
-        <th colspan="2">description</th>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <xsl:value-of select="inValue/documentation" disable-output-escaping="yes" />
-        </td>
-      </tr>
-    </xsl:if>
   </xsl:template>
 
   <xsl:template name="data-json-schema">
