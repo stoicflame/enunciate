@@ -719,7 +719,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
           add(rootElement);
 
-          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.16 release.
+          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
 //          if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
 //            addJsonRootElement(rootElement);
 //          }
@@ -735,7 +735,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
         add(rootElement);
 
-        // TODO Uncomment when jackson-jaxb detection is corrected or after 1.16 release.
+        // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
 //        if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
 //          addJsonRootElement(rootElement);
 //        }
@@ -785,7 +785,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
           add(rootElement);
 
-          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.16 release.
+          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
 //          if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getConsumesMime(), MediaType.APPLICATION_JSON)) {
 //            addJsonRootElement(rootElement);
 //          }
@@ -808,7 +808,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
           add(rootElement);
 
-          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.16 release.
+          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
   //        if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getProducesMime(), MediaType.APPLICATION_JSON)) {
   //          addJsonRootElement(rootElement);
   //        }
