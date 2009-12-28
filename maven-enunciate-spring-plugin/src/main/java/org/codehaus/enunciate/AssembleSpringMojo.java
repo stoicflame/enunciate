@@ -1,7 +1,7 @@
 package org.codehaus.enunciate;
 
 /**
- * Assembles the whole Enunciate app, withc Spring support, without compilation or packaging of the war.
+ * Assembles the whole Enunciate app, with Spring support, without compilation or packaging of the war.
  * For use with the "war" packaging.
  *
  * @goal assemble

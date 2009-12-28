@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.17</version>
+  <version>1.18-SNAPSHOT</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -572,7 +572,7 @@ Then, define a profile in your settings.xml file that defines the path to your '
         <!--depending modules: core-rt-->
         <groupId>javax.ws.rs</groupId>
         <artifactId>jsr311-api</artifactId>
-        <version>1.0</version>
+        <version>1.1.1</version>
       </dependency>
 
       <dependency>
