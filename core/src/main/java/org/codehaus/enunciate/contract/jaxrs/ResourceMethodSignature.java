@@ -1,6 +1,10 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
 import javax.ws.rs.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Annotation used to "override" the method signature of a REST method that doesn't conform to JAX-RS specification. Used for
@@ -8,6 +12,8 @@ import javax.ws.rs.*;
  *
  * @author Ryan Heaton
  */
+@Retention ( RetentionPolicy.RUNTIME )
+@Target ( ElementType.METHOD )
 public @interface ResourceMethodSignature {
 
   /**
