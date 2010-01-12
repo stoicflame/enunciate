@@ -208,7 +208,8 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
 
       FileArtifact artifact = (FileArtifact) findArtifact("docs");
       if (artifact != null) {
-        artifact.exportTo(getReportOutputDirectory(), this); 
+        getReportOutputDirectory().mkdirs();
+        artifact.exportTo(getReportOutputDirectory(), this);
       }
       else {
         warn("Unable to copy the Enunciate documentation: no documentation directory artifact found.");

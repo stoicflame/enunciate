@@ -39,6 +39,11 @@
       [/#list]
     [/#if]
   [/#list]
+
+  <filter-mapping>
+    <filter-name>http-request-context</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   [#list webAppFragments as fragment]
     [#if fragment.filters??]
       [#list fragment.filters as filter]
@@ -54,11 +59,6 @@
       [/#list]
     [/#if]
   [/#list]
-
-  <filter-mapping>
-    <filter-name>http-request-context</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
   [#list webAppFragments as fragment]
     [#if fragment.listeners??]
       [#list fragment.listeners as listener]
