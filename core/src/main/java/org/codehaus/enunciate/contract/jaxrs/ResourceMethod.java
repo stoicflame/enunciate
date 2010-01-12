@@ -16,23 +16,22 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.MirroredTypeException;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import com.sun.mirror.declaration.MethodDeclaration;
-import com.sun.mirror.declaration.AnnotationMirror;
-import com.sun.mirror.declaration.AnnotationTypeDeclaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import org.codehaus.enunciate.contract.common.rest.*;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.rest.MimeType;
 
 /**
@@ -49,10 +48,11 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final Resource parent;
-  private final List<ResourceParameter> resourceParameters;
+  private final List<RESTResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends RESTResourceError> errors;
+  private final ResourcePayloadTypeAdapter outputPayload;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
@@ -101,22 +101,128 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       subpath = pathInfo.value();
     }
 
-    ParameterDeclaration entityParameter = null;
-    List<ResourceParameter> resourceParameters = new ArrayList<ResourceParameter>();
-    for (ParameterDeclaration parameterDeclaration : getParameters()) {
-      if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
-        resourceParameters.add(new ResourceParameter(parameterDeclaration));
+    ResourceEntityParameter entityParameter;
+    List<RESTResourceParameter> resourceParameters;
+    ResourcePayloadTypeAdapter outputPayload;
+    ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
+    if (signatureOverride == null) {
+      entityParameter = null;
+      resourceParameters = new ArrayList<RESTResourceParameter>();
+      //if we're not overriding the signature, assume we use the real method signature.
+      for (ParameterDeclaration parameterDeclaration : getParameters()) {
+        if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
+          resourceParameters.add(new ResourceParameter(parameterDeclaration));
+        }
+        else if (parameterDeclaration.getAnnotation(Context.class) == null) {
+          entityParameter = new ResourceEntityParameter(parameterDeclaration);
+        }
       }
-      else if (parameterDeclaration.getAnnotation(Context.class) == null) {
-        entityParameter = parameterDeclaration;
-      }
+
+      DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
+      outputPayload = returnType.isVoid() ? null : new ResourcePayloadTypeAdapter(returnType);
+    }
+    else {
+      entityParameter = loadEntityParameter(signatureOverride);
+      resourceParameters = loadResourceParameters(signatureOverride);
+      outputPayload = loadOutputPayload(signatureOverride);
     }
 
-    this.entityParameter = entityParameter == null ? null : new ResourceEntityParameter(entityParameter);
+    this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
     this.errors = new ArrayList<RESTResourceError>();
+    this.outputPayload = outputPayload;
+  }
+
+  /**
+   * Loads the explicit output payload.
+   *
+   * @param signatureOverride The method signature override.
+   * @return The output payload (explicit in the signature override.
+   */
+  protected ResourcePayloadTypeAdapter loadOutputPayload(ResourceMethodSignature signatureOverride) {
+    DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
+
+    try {
+      Class<?> outputType = signatureOverride.output();
+      if (outputType != ResourceMethodSignature.NONE.class) {
+        AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
+        TypeDeclaration type = env.getTypeDeclaration(outputType.getName());
+        return new ResourcePayloadTypeAdapter(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
+      }
+    }
+    catch (MirroredTypeException e) {
+      TypeMirror typeMirror = e.getTypeMirror();
+      if (e instanceof DeclaredType) {
+        return new ResourcePayloadTypeAdapter(typeMirror, returnType.getDocValue());
+      }
+      else {
+        throw new ValidationException(getPosition(), "Illegal output type (must be a declared type): " + typeMirror);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Loads the overridden resource parameter values.
+   *
+   * @param signatureOverride The signature override.
+   * @return The explicit resource parameters.
+   */
+  protected List<RESTResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
+    HashMap<String, String> paramComments = parseParamComments(getJavaDoc());
+    
+    ArrayList<RESTResourceParameter> params = new ArrayList<RESTResourceParameter>();
+    for (CookieParam cookieParam : signatureOverride.cookieParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(cookieParam.value()), cookieParam.value(), RESTResourceParameterType.COOKIE));
+    }
+    for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(matrixParam.value()), matrixParam.value(), RESTResourceParameterType.MATRIX));
+    }
+    for (QueryParam queryParam : signatureOverride.queryParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(queryParam.value()), queryParam.value(), RESTResourceParameterType.QUERY));
+    }
+    for (PathParam pathParam : signatureOverride.pathParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(pathParam.value()), pathParam.value(), RESTResourceParameterType.PATH));
+    }
+    for (HeaderParam headerParam : signatureOverride.headerParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(headerParam.value()), headerParam.value(), RESTResourceParameterType.HEADER));
+    }
+    for (FormParam formParam : signatureOverride.formParams()) {
+      params.add(new ExplicitResourceParameter(paramComments.get(formParam.value()), formParam.value(), RESTResourceParameterType.FORM));
+    }
+    
+    return params;
+  }
+
+  /**
+   * Loads the specified entity parameter according to the method signature override.
+   *
+   * @param signatureOverride The signature override.
+   * @return The resource entity parameter.
+   */
+  protected ResourceEntityParameter loadEntityParameter(ResourceMethodSignature signatureOverride) {
+    try {
+      Class<?> entityType = signatureOverride.input();
+      if (entityType != ResourceMethodSignature.NONE.class) {
+        AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
+        TypeDeclaration type = env.getTypeDeclaration(entityType.getName());
+        return new ResourceEntityParameter(type, env.getTypeUtils().getDeclaredType(type));
+      }
+    }
+    catch (MirroredTypeException e) {
+      TypeMirror typeMirror = e.getTypeMirror();
+      if (e instanceof DeclaredType) {
+        return new ResourceEntityParameter(((DeclaredType)typeMirror).getDeclaration(), typeMirror);
+      }
+      else {
+        throw new ValidationException(getPosition(), "Illegal input type (must be a declared type): " + typeMirror);
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -252,8 +358,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    *
    * @return The list of resource parameters that this method requires to be invoked.
    */
-  public List<ResourceParameter> getResourceParameters() {
-    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
+  public List<RESTResourceParameter> getResourceParameters() {
+    ArrayList<RESTResourceParameter> resourceParams = new ArrayList<RESTResourceParameter>(this.resourceParameters);
     resourceParams.addAll(getParent().getResourceParameters());
     return resourceParams;
   }
@@ -325,8 +431,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
 
   // Inherited.
   public RESTResourcePayload getOutputPayload() {
-    DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
-    return returnType.isVoid() ? null : new ResourcePayloadTypeAdapter(returnType);
+    return this.outputPayload;
   }
 
   // Inherited.

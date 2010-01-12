@@ -34,6 +34,7 @@ import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxws.*;
@@ -774,7 +775,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     REFERENCE_STACK.get().addFirst("\"see also\" annotation");
     addSeeAlsoTypeDefinitions(resourceMethod);
     REFERENCE_STACK.get().removeFirst();
-    ParameterDeclaration ep = resourceMethod.getEntityParameter();
+    ResourceEntityParameter ep = resourceMethod.getEntityParameter();
     if (ep != null) {
       REFERENCE_STACK.get().addFirst("entity parameter " + ep.getSimpleName());
       TypeMirror type = ep.getType();

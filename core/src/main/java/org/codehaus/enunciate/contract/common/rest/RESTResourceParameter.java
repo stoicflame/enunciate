@@ -24,6 +24,13 @@ package org.codehaus.enunciate.contract.common.rest;
 public interface RESTResourceParameter {
 
   /**
+   * The documentation value for the parameter.
+   *
+   * @return The documentation value for the parameter.
+   */
+  String getDocValue();
+
+  /**
    * The name of the parameter.
    *
    * @return The name of the parameter.

@@ -19,6 +19,7 @@ package org.codehaus.enunciate.contract.common.rest;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
 
+import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -30,14 +31,21 @@ import org.codehaus.enunciate.contract.json.JsonType;
  */
 public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
 
-  private final DecoratedTypeMirror delegate;
+  private final TypeMirror delegate;
+  private final String docValue;
 
   public ResourcePayloadTypeAdapter(DecoratedTypeMirror delegate) {
     this.delegate = delegate;
+    this.docValue = delegate.getDocValue();
+  }
+
+  public ResourcePayloadTypeAdapter(TypeMirror delegate, String docValue) {
+    this.delegate = delegate;
+    this.docValue = docValue;
   }
 
   public String getDocValue() {
-    return delegate.getDocValue();
+    return this.docValue;
   }
 
   // Inherited.
