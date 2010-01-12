@@ -154,7 +154,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     }
     catch (MirroredTypeException e) {
       TypeMirror typeMirror = e.getTypeMirror();
-      if (e instanceof DeclaredType) {
+      if (typeMirror instanceof DeclaredType) {
         return new ResourcePayloadTypeAdapter(typeMirror, returnType.getDocValue());
       }
       else {
@@ -214,7 +214,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     }
     catch (MirroredTypeException e) {
       TypeMirror typeMirror = e.getTypeMirror();
-      if (e instanceof DeclaredType) {
+      if (typeMirror instanceof DeclaredType) {
         return new ResourceEntityParameter(((DeclaredType)typeMirror).getDeclaration(), typeMirror);
       }
       else {
