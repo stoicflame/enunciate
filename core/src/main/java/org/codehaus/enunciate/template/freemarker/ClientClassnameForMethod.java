@@ -159,7 +159,7 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
     if (declaration instanceof ClassDeclaration) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((ClassDeclaration) declaration).getSuperclass());
-      if (superType.isInstanceOf(JAXBElement.class.getName())) {
+      if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {
         //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement
         return convert(superType);
       }
