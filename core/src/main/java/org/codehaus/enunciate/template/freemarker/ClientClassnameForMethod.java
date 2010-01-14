@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
@@ -26,11 +27,14 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModel;
 import freemarker.ext.beans.BeansWrapper;
 import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.ClientName;
 
+import javax.xml.bind.JAXBElement;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -153,6 +157,13 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
+    if (declaration instanceof ClassDeclaration) {
+      DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((ClassDeclaration) declaration).getSuperclass());
+      if (superType.isInstanceOf(JAXBElement.class.getName())) {
+        //for client conversions, we're going to generalize subclasses of JAXBElement to JAXBElement
+        return convert(superType);
+      }
+    }
     String convertedPackage = super.convert(declaration.getPackage());
     ClientName specifiedName = isUseClientNameConversions() ? declaration.getAnnotation(ClientName.class) : null;
     String simpleName = specifiedName == null ? declaration.getSimpleName() : specifiedName.value();

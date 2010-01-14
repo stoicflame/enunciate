@@ -150,11 +150,13 @@ public class ElementRef extends Element {
   protected QName loadRef() {
     TypeDeclaration declaration = null;
     String elementDeclaration;
+    DecoratedTypeMirror refType;
     try {
       if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
         Class typeClass = xmlElementRef.type();
         elementDeclaration = typeClass.getName();
         declaration = getEnv().getTypeDeclaration(typeClass.getName());
+        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(getEnv().getTypeUtils().getDeclaredType(declaration));
       }
       else {
         TypeMirror accessorType = getBareAccessorType();
@@ -162,6 +164,7 @@ public class ElementRef extends Element {
         if (accessorType instanceof DeclaredType) {
           declaration = ((DeclaredType) accessorType).getDeclaration();
         }
+        refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(accessorType);
       }
     }
     catch (MirroredTypeException e) {
@@ -171,23 +174,22 @@ public class ElementRef extends Element {
       if (typeMirror instanceof DeclaredType) {
         declaration = ((DeclaredType) typeMirror).getDeclaration();
       }
+      refType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(typeMirror);
     }
 
     QName refQName = null;
-    if (declaration instanceof ClassDeclaration) {
-      if (declaration.getQualifiedName().equals(JAXBElement.class.getName())) {
-        String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
-        String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
-        if (localName == null) {
-          throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
-        }
-        refQName = new QName(namespace, localName);
+    if (refType.isInstanceOf(JAXBElement.class.getName())) {
+      String localName = xmlElementRef != null && !"##default".equals(xmlElementRef.name()) ? xmlElementRef.name() : null;
+      String namespace = xmlElementRef != null ? xmlElementRef.namespace() : "";
+      if (localName == null) {
+        throw new ValidationException(getPosition(), "Member " + getName() + " of " + getTypeDefinition().getQualifiedName() + ": @XmlElementRef annotates a type JAXBElement without specifying the name of the JAXB element.");
       }
-      else if (declaration.getAnnotation(XmlRootElement.class) != null) {
-        ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
-        RootElementDeclaration refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
-        refQName = new QName(refElement.getNamespace(), refElement.getName());
-      }
+      refQName = new QName(namespace, localName);
+    }
+    else if (declaration instanceof ClassDeclaration && declaration.getAnnotation(XmlRootElement.class) != null) {
+      ClassDeclaration classDeclaration = (ClassDeclaration) declaration;
+      RootElementDeclaration refElement = new RootElementDeclaration(classDeclaration, ((EnunciateFreemarkerModel) FreemarkerModel.get()).findTypeDefinition(classDeclaration));
+      refQName = new QName(refElement.getNamespace(), refElement.getName());
     }
 
     if (refQName == null) {

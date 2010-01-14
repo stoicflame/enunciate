@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" targetNamespace="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:element name="dummyvalue" nillable="true">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
 	<xs:complexType name="BusinessScope">
 		<xs:sequence>
 			<xs:element name="Scope" type="Scope" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="dummyvalue" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="Scope">
@@ -22,6 +32,7 @@
 	<xs:element name="CorrelationInformation" type="CorrelationInformation" substitutionGroup="ScopeInformation"/>
 	<xs:complexType name="CorrelationInformation">
 		<xs:sequence>
+      <xs:element ref="dummyvalue"/>
 			<xs:element name="RequestingDocumentCreationDateTime" type="xs:dateTime" minOccurs="0"/>
 			<xs:element name="RequestingDocumentInstanceIdentifier" type="xs:string" minOccurs="0"/>
 			<xs:element name="ExpectedResponseDateTime" type="xs:dateTime" minOccurs="0"/>
