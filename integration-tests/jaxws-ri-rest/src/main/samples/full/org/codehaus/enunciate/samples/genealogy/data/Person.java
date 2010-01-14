@@ -16,11 +16,15 @@
 
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAdapter;
+
 import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * A person.  The central data in genealogical information.
@@ -36,6 +40,7 @@ public class Person {
   private Collection<Event> events;
   private Collection<Fact> facts;
   private Collection<Relationship> relationships;
+  private Map<EventType, String> eventDescriptions;
 
   private DataHandler picture;
 
@@ -167,4 +172,12 @@ public class Person {
     this.picture = picture;
   }
 
+  @XmlJavaTypeAdapter ( EventDescriptionAdapter.class )
+  public Map<EventType, String> getEventDescriptions() {
+    return eventDescriptions;
+  }
+
+  public void setEventDescriptions(Map<EventType, String> eventDescriptions) {
+    this.eventDescriptions = eventDescriptions;
+  }
 }

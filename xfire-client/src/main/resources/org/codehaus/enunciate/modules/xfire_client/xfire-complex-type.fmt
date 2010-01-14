@@ -199,7 +199,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
         [/#if]
         [#list element.choices as elementChoice]
     [#if (elementChoice_index + element_codeblock_index) > 0]else [/#if]if ("${elementChoice.namespace?default("")}".equals(name.getNamespaceURI()) && ("${elementChoice.name}".equals(name.getLocalPart()))) {
-          [#if elementChoice.accessorType.map?default(false)]
+          [#if (!element.adapted) && elementChoice.accessorType.map?default(false)]
       Type type = [@mapTypeOrRegisteredType type=elementChoice.accessorType/];
       ${classnameFor(elementChoice)} value = (${classnameFor(elementChoice)}) type.readObject(elementReader, context);
           [#elseif elementChoice.xmlList]
@@ -236,7 +236,11 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${typ
           [#if element.collectionType]
             [#if (element.adapted && element.adapterType.adaptingType.collection) || element.accessorType.collection]
       if (instance.get${elementChoice.simpleName?cap_first}() == null) {
+              [#if (element.adapted && element.adapterType.adaptingType.collection)]
+        instance.set${elementChoice.simpleName?cap_first}((${element.adapterType.adaptingType.declaration.qualifiedName}) ListParser.newCollectionInstance(${collectionTypeFor(element)}.class));
+              [#else]
         instance.set${elementChoice.simpleName?cap_first}((${element.accessorType.declaration.qualifiedName}) ListParser.newCollectionInstance(${collectionTypeFor(element)}.class));
+              [/#if]
       }
       instance.get${elementChoice.simpleName?cap_first}().add(value);
             [#else]
