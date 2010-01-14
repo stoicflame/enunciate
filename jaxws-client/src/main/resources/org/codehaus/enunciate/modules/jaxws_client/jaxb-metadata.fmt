@@ -60,7 +60,7 @@
     )[#if choice_has_next], [/#if]
     [/#list]
   } )
-[#elseif accessor.accessorType.map!false]
+[#elseif ((!accessor.adapted) && (accessor.accessorType.map!false))]
   [#--can't do an @XmlElementAnnotation on a map--]
 [#else]
   @javax.xml.bind.annotation.XmlElement (
