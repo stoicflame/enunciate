@@ -24,10 +24,13 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
+import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.ResourceParameter;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
@@ -211,30 +214,25 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       }
 
       for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        ParameterDeclaration entityParam = null;
-        boolean formParamFound = false;
-        for (ParameterDeclaration param : resourceMethod.getParameters()) {
-          if (param.getAnnotation(javax.ws.rs.core.Context.class) != null) {
-            continue;
-          }
-          
-          if (ResourceParameter.isResourceParameter(param)) {
-            formParamFound |= param.getAnnotation(FormParam.class) != null;
-          }
-          else if (entityParam != null) {
-            result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with a JAX-RS resource parameter annotation).");
-          }
-          else {
-            entityParam = param;
-          }
+        if (resourceMethod.getDeclaredEntityParameters().size() > 1) {
+          result.addError(resourceMethod, "No more than one JAX-RS entity parameter is allowed (all other parameters must be annotated with one of the JAX-RS resource parameter annotations).");
+        }
 
-          if (entityParam != null && formParamFound) {
-            DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(entityParam.getType());
-            if (!decorated.isInstanceOf(MultivaluedMap.class.getName())) {
-              result.addError(entityParam, "An entity must be of type MultivaluedMap<String, String> if there is another parameter annotated with @FormParam.");
-            }
+        int formParamCount = 0;
+        for (RESTResourceParameter resourceParameter : resourceMethod.getResourceParameters()) {
+          if (resourceParameter.getResourceParameterType() == RESTResourceParameterType.FORM) {
+            formParamCount++;
           }
         }
+
+        ResourceEntityParameter entityParam = resourceMethod.getEntityParameter();
+        if (entityParam != null && (formParamCount > 0)) {
+          DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(entityParam.getType());
+          if (!decorated.isInstanceOf(MultivaluedMap.class.getName())) {
+            result.addError(entityParam, "An entity parameter must be of type MultivaluedMap<String, String> if there is another parameter annotated with @FormParam.");
+          }
+        }
+
         //todo: warn about resource methods that are not public?
         //todo: error out with ambiguous resource methods (produce same thing at same path with same method)?
       }

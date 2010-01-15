@@ -50,6 +50,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final Resource parent;
   private final List<RESTResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
+  private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends RESTResourceError> errors;
   private final ResourcePayloadTypeAdapter outputPayload;
@@ -102,6 +103,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     }
 
     ResourceEntityParameter entityParameter;
+    List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
     List<RESTResourceParameter> resourceParameters;
     ResourcePayloadTypeAdapter outputPayload;
     ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
@@ -115,6 +117,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         }
         else if (parameterDeclaration.getAnnotation(Context.class) == null) {
           entityParameter = new ResourceEntityParameter(parameterDeclaration);
+          declaredEntityParameters.add(entityParameter);
         }
       }
 
@@ -123,6 +126,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);
+      declaredEntityParameters.add(entityParameter);
       resourceParameters = loadResourceParameters(signatureOverride);
       outputPayload = loadOutputPayload(signatureOverride);
     }
@@ -133,6 +137,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     this.parent = parent;
     this.errors = new ArrayList<RESTResourceError>();
     this.outputPayload = outputPayload;
+    this.declaredEntityParameters = declaredEntityParameters;
   }
 
   /**
@@ -371,6 +376,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    */
   public ResourceEntityParameter getEntityParameter() {
     return entityParameter;
+  }
+
+  /**
+   * The entity parameters that were declared. According to JAX-RS, there should be only one for now.
+   *
+   * @return The entity parameters that were declared.
+   */
+  public List<ResourceEntityParameter> getDeclaredEntityParameters() {
+    return declaredEntityParameters;
   }
 
   // Inherited.
