@@ -179,6 +179,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeDefaultDownloads = true;
   private boolean includeExampleXml = true;
   private boolean includeExampleJson = true;
+  private boolean forceExampleJson = true;
   private URL xsltURL;
   private File css;
   private File base;
@@ -364,6 +365,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public void setIncludeExampleJson(boolean includeExampleJson) {
     this.includeExampleJson = includeExampleJson;
+  }
+
+  /**
+   * Whether to force example JSON. Default is to only include the example JSON only if Jackson is available on the classpath.
+   *
+   * @return Whether to force example JSON.
+   */
+  public boolean isForceExampleJson() {
+    return forceExampleJson;
+  }
+
+  /**
+   * Whether to force example JSON.
+   *
+   * @param forceExampleJson Whether to force example JSON.
+   */
+  public void setForceExampleJson(boolean forceExampleJson) {
+    this.forceExampleJson = forceExampleJson;
   }
 
   /**
@@ -629,7 +648,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.setVariable(JsonTypeNameForQualifiedName.NAME, new JsonTypeNameForQualifiedName(model));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
-      model.put("includeExampleJson", (jacksonXcAvailable && isIncludeExampleJson()));
+      model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {
