@@ -18,22 +18,19 @@ package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.contract.common.rest.*;
+import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.rest.MimeType;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import org.codehaus.enunciate.contract.common.rest.*;
-import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.rest.MimeType;
+import java.util.regex.Pattern;
 
 /**
  * A JAX-RS resource method.
