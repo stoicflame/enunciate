@@ -222,9 +222,11 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       }
     }
     catch (MirroredTypeException e) {
-      TypeMirror typeMirror = e.getTypeMirror();
-      if (typeMirror instanceof DeclaredType) {
-        return new ResourceEntityParameter(((DeclaredType)typeMirror).getDeclaration(), typeMirror);
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+      if (typeMirror.isDeclared()) {
+        if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
+          return null;
+        }
       }
       else {
         throw new ValidationException(getPosition(), "Illegal input type (must be a declared type): " + typeMirror);
