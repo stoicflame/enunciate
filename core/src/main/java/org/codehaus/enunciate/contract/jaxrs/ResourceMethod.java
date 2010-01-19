@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
@@ -158,8 +159,11 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       }
     }
     catch (MirroredTypeException e) {
-      TypeMirror typeMirror = e.getTypeMirror();
-      if (typeMirror instanceof DeclaredType) {
+      DecoratedTypeMirror typeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+      if (typeMirror.isDeclared()) {
+        if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
+          return null;
+        }
         return new ResourcePayloadTypeAdapter(typeMirror, returnType.getDocValue());
       }
       else {

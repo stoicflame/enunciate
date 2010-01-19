@@ -284,6 +284,13 @@ If you just want to skip the Objective C tests, set the value of the property 'g
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
+      <artifactId>enunciate-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
