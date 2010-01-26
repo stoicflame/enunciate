@@ -20,39 +20,119 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import org.codehaus.enunciate.modules.jersey.response.HasStatusMessage;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
+//todo: it would be SO much nicer just to extend com.sun.jersey.spi.container.servlet.WebComponent.Writer, but alas, it's private and final.
 /**
  * Response writer that writes the status message along with the rest of the response.
  *
  * @author Ryan Heaton
  */
-public class StatusMessageResponseWriter implements ContainerResponseWriter {
-  //todo: it would be SO much nicer just to extend com.sun.jersey.spi.container.servlet.ServletContainer$Writer, but alas, it's private.
+public class StatusMessageResponseWriter extends OutputStream implements ContainerResponseWriter {
 
-  private final ContainerResponseWriter delegate;
+  private final HttpServletResponse response;
+  private ContainerResponse cResponse;
+  private long contentLength;
+  private OutputStream out;
 
-  /**
-   * Construct a new status message response writer.
-   *
-   * @param delegate The delegate.
-   */
-  public StatusMessageResponseWriter(ContainerResponseWriter delegate) {
-    this.delegate = delegate;
+  StatusMessageResponseWriter(HttpServletResponse response) {
+    this.response = response;
   }
 
-  // Inherited.
-  public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse response) throws IOException {
-    OutputStream out = this.delegate.writeStatusAndHeaders(contentLength, response);
-    if (response.getResponse() instanceof HasStatusMessage && EnunciateJerseyServletContainer.CURRENT_RESPONSE.get() != null) {
-      EnunciateJerseyServletContainer.CURRENT_RESPONSE.get().setStatus(response.getStatus(), ((HasStatusMessage)response.getResponse()).getStatusMessage());
-    }
-    return out;
+  public OutputStream writeStatusAndHeaders(long contentLength, ContainerResponse cResponse) throws IOException {
+    this.contentLength = contentLength;
+    this.cResponse = cResponse;
+    return this;
   }
 
-  // Inherited.
   public void finish() throws IOException {
-    this.delegate.finish();
+    if (out != null) {
+      return;
+    }
+
+    // Note that the writing of headers MUST be performed before
+    // the invocation of sendError as on some Servlet implementations
+    // modification of the response headers will have no effect
+    // after the invocation of sendError.
+    writeHeaders();
+
+    if (cResponse instanceof HasStatusMessage) {
+      response.setStatus(cResponse.getStatus(), ((HasStatusMessage) cResponse).getStatusMessage());
+    }
+    else {
+      response.setStatus(cResponse.getStatus());
+    }
+    
+    response.flushBuffer();
+  }
+
+  public void write(int b) throws IOException {
+    initiate();
+    out.write(b);
+  }
+
+  @Override
+  public void write(byte b[]) throws IOException {
+    if (b.length > 0) {
+      initiate();
+      out.write(b);
+    }
+  }
+
+  @Override
+  public void write(byte b[], int off, int len) throws IOException {
+    if (len > 0) {
+      initiate();
+      out.write(b, off, len);
+    }
+  }
+
+  @Override
+  public void flush() throws IOException {
+    if (out != null) {
+      out.flush();
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    initiate();
+    out.close();
+  }
+
+  void initiate() throws IOException {
+    if (out == null) {
+      writeStatusAndHeaders();
+      out = response.getOutputStream();
+    }
+  }
+
+  void writeStatusAndHeaders() {
+    writeHeaders();
+    if (cResponse instanceof HasStatusMessage) {
+      response.setStatus(cResponse.getStatus(), ((HasStatusMessage) cResponse).getStatusMessage());
+    }
+    else {
+      response.setStatus(cResponse.getStatus());
+    }
+  }
+
+  void writeHeaders() {
+    if (contentLength != -1 && contentLength < Integer.MAX_VALUE) {
+      response.setContentLength((int) contentLength);
+    }
+
+    MultivaluedMap<String, Object> headers = cResponse.getHttpHeaders();
+    for (Map.Entry<String, List<Object>> e : headers.entrySet()) {
+      for (Object v : e.getValue()) {
+        response.addHeader(e.getKey(), ContainerResponse.getHeaderValue(v));
+      }
+    }
   }
 }

@@ -26,6 +26,7 @@ import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseWriter;
 import com.sun.jersey.spi.container.WebApplication;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -71,7 +72,13 @@ public class EnunciateWebApplication implements WebApplication {
   }
 
   public void handleRequest(ContainerRequest request, ContainerResponseWriter responseWriter) throws IOException {
-    delegate.handleRequest(request, new StatusMessageResponseWriter(responseWriter));
+    HttpServletResponse response = EnunciateJerseyServletContainer.CURRENT_RESPONSE.get();
+    if (response != null) {
+      delegate.handleRequest(request, new StatusMessageResponseWriter(response));
+    }
+    else {
+      delegate.handleRequest(request, responseWriter);
+    }
   }
 
   public void handleRequest(ContainerRequest request, ContainerResponse response) throws IOException {
