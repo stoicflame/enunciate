@@ -602,20 +602,24 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
     //now we have to find gwt-dev.jar.
     //start by assuming linux...
-    File linuxDevJar = new File(gwtHomeDir, "gwt-dev-linux.jar");
-    File gwtDevJar = linuxDevJar;
+    File gwtDevJar = new File(gwtHomeDir, "gwt-dev.jar");
     if (!gwtDevJar.exists()) {
-      //linux not found. try mac...
-      File macDevJar = new File(gwtHomeDir, "gwt-dev-mac.jar");
-      gwtDevJar = macDevJar;
+      File linuxDevJar = new File(gwtHomeDir, "gwt-dev-linux.jar");
+      gwtDevJar = linuxDevJar;
 
       if (!gwtDevJar.exists()) {
-        //okay, we'll try windows if we have to...
-        File windowsDevJar = new File(gwtHomeDir, "gwt-dev-windows.jar");
-        gwtDevJar = windowsDevJar;
+        //linux not found. try mac...
+        File macDevJar = new File(gwtHomeDir, "gwt-dev-mac.jar");
+        gwtDevJar = macDevJar;
 
         if (!gwtDevJar.exists()) {
-          throw new EnunciateException(String.format("Unable to find GWT dev jar. Looked for %s, %s, and %s.", linuxDevJar.getAbsolutePath(), macDevJar.getAbsolutePath(), windowsDevJar.getAbsolutePath()));
+          //okay, we'll try windows if we have to...
+          File windowsDevJar = new File(gwtHomeDir, "gwt-dev-windows.jar");
+          gwtDevJar = windowsDevJar;
+
+          if (!gwtDevJar.exists()) {
+            throw new EnunciateException(String.format("Unable to find GWT dev jar. Looked for %s, %s, and %s.", linuxDevJar.getAbsolutePath(), macDevJar.getAbsolutePath(), windowsDevJar.getAbsolutePath()));
+          }
         }
       }
     }
