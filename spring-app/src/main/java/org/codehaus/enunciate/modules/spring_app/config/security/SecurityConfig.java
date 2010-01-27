@@ -350,6 +350,7 @@ public class SecurityConfig {
   private EntryPointConfig onAccessDenied;
 
   private BeanReference userDetailsService;
+  private BeanReference primaryProvider;
   private List<BeanReference> additionalAuthenticationFilters;
 
   private final Map<String, String> secureUrls = new LinkedHashMap<String, String>();
@@ -680,6 +681,24 @@ public class SecurityConfig {
    */
   public void setUserDetailsService(BeanReference userDetailsService) {
     this.userDetailsService = userDetailsService;
+  }
+
+  /**
+   * The bean to use for the primary provider.
+   *
+   * @return The bean to use for the primary provider.
+   */
+  public BeanReference getPrimaryProvider() {
+    return primaryProvider;
+  }
+
+  /**
+   * The bean to use for the primary provider.
+   *
+   * @param primaryProvider The bean to use for the primary provider.
+   */
+  public void setPrimaryProvider(BeanReference primaryProvider) {
+    this.primaryProvider = primaryProvider;
   }
 
   /**

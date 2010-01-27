@@ -19,11 +19,14 @@ package org.codehaus.enunciate.contract.jaxrs;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.MirroredTypeException;
+import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.VoidType;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.common.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.codehaus.enunciate.rest.MimeType;
 
 import javax.ws.rs.*;
@@ -119,8 +122,24 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         }
       }
 
-      DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
-      outputPayload = returnType.isVoid() ? null : new ResourcePayloadTypeAdapter(returnType);
+      DecoratedTypeMirror returnTypeMirror;
+      TypeHint hintInfo = getAnnotation(TypeHint.class);
+      if (hintInfo != null) {
+        try {
+          Class hint = hintInfo.value();
+          AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
+          TypeDeclaration type = env.getTypeDeclaration(hint.getName());
+          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+        }
+        catch (MirroredTypeException e) {
+          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
+        }
+      }
+      else {
+        returnTypeMirror = (DecoratedTypeMirror) getReturnType();
+      }
+
+      outputPayload = returnTypeMirror.isVoid() ? null : new ResourcePayloadTypeAdapter(returnTypeMirror);
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);

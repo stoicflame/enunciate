@@ -18,17 +18,17 @@ package ${packageFor(type)};
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass, true)} [#else]implements java.io.Serializable [/#if]{
 
   [#list type.attributes as attribute]
-  private ${classnameFor(attribute)} ${attribute.simpleName};
+  private ${classnameFor(attribute)} _${attribute.simpleName};
   [/#list]
   [#if type.value?exists]
-  private ${classnameFor(type.value)} ${type.value.simpleName};
+  private ${classnameFor(type.value)} _${type.value.simpleName};
   [#else]
     [#list type.elements as element]
-  private ${classnameFor(element)} ${element.simpleName};
+  private ${classnameFor(element)} _${element.simpleName};
     [/#list]
   [/#if]
   [#if type.anyElement?exists]
-  private java.util.List<Object> ${type.anyElement.simpleName};
+  private java.util.List<Object> _${type.anyElement.simpleName};
   [/#if]
   [#if type.hasAnyAttribute]
   private java.util.Map<javax.xml.namespace.QName, String> otherAttributes;
@@ -40,14 +40,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=attribute /]
   public ${classnameFor(attribute)} get${attribute.simpleName?cap_first}() {
-    return this.${attribute.simpleName};
+    return this._${attribute.simpleName};
   }
 
   /**
    * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} ${attribute.simpleName}) {
-    this.${attribute.simpleName} = ${attribute.simpleName};
+  public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
+    this._${attribute.simpleName} = _${attribute.simpleName};
   }
   [/#list]
   [#if type.value?exists]
@@ -57,14 +57,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=type.value /]
   public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
-    return this.${type.value.simpleName};
+    return this._${type.value.simpleName};
   }
 
   /**
    * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} ${type.value.simpleName}) {
-    this.${type.value.simpleName} = ${type.value.simpleName};
+  public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
+    this._${type.value.simpleName} = _${type.value.simpleName};
   }
   [#else]
     [#list type.elements as element]
@@ -74,14 +74,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=element /]
   public ${classnameFor(element)} get${element.simpleName?cap_first}() {
-    return this.${element.simpleName};
+    return this._${element.simpleName};
   }
 
   /**
    * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${element.simpleName?cap_first}(${classnameFor(element)} ${element.simpleName}) {
-    this.${element.simpleName} = ${element.simpleName};
+  public void set${element.simpleName?cap_first}(${classnameFor(element)} _${element.simpleName}) {
+    this._${element.simpleName} = _${element.simpleName};
   }
     [/#list]
   [/#if]
@@ -92,14 +92,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
    */
   @javax.xml.bind.annotation.XmlAnyElement[#if type.anyElement.lax?exists && type.anyElement.lax]( lax = true )[/#if]
   public java.util.List<Object> get${type.anyElement.simpleName?cap_first}() {
-    return this.${type.anyElement.simpleName};
+    return this._${type.anyElement.simpleName};
   }
 
   /**
    * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
    */
-  public void set${type.anyElement.simpleName?cap_first}(java.util.List<Object> ${type.anyElement.simpleName}) {
-    this.${type.anyElement.simpleName} = ${type.anyElement.simpleName};
+  public void set${type.anyElement.simpleName?cap_first}(java.util.List<Object> _${type.anyElement.simpleName}) {
+    this._${type.anyElement.simpleName} = _${type.anyElement.simpleName};
   }
   [/#if]
   [#if type.hasAnyAttribute]

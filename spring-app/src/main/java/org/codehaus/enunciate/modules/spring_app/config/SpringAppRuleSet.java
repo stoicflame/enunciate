@@ -118,6 +118,9 @@ public class SpringAppRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/spring-app/security/userDetailsService");
     digester.addSetNext("enunciate/modules/spring-app/security/userDetailsService", "setUserDetailsService");
 
+    digester.addObjectCreate("enunciate/modules/spring-app/security/primaryProvider", BeanReference.class);
+    digester.addSetProperties("enunciate/modules/spring-app/security/primaryProvider");
+    digester.addSetNext("enunciate/modules/spring-app/security/primaryProvider", "setPrimaryProvider");
   }
 
 }

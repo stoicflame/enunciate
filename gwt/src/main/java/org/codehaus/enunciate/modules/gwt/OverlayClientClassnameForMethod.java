@@ -24,8 +24,13 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 
-import java.util.Collection;
-import java.util.Map;
+import javax.activation.DataHandler;
+import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.namespace.QName;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.util.*;
 
 /**
  * Conversion from java types to C# types.
@@ -35,13 +40,27 @@ import java.util.Map;
  */
 public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
 
+  private final Map<String, String> classConversions = new HashMap<String, String>();
+
   public OverlayClientClassnameForMethod(Map<String, String> conversions) {
     super(conversions);
+    classConversions.put(BigDecimal.class.getName(), String.class.getName());
+    classConversions.put(BigInteger.class.getName(), String.class.getName());
+    classConversions.put(Calendar.class.getName(), Integer.class.getName());
+    classConversions.put(DataHandler.class.getName(), String.class.getName());
+    classConversions.put(QName.class.getName(), String.class.getName());
+    classConversions.put(URI.class.getName(), String.class.getName());
+    classConversions.put(UUID.class.getName(), String.class.getName());
+    classConversions.put(XMLGregorianCalendar.class.getName(), Integer.class.getName());
+    classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "com.google.gwt.core.client.JavaScriptObject");
   }
 
   @Override
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
-    if (isCollection(declaration)) {
+    if (classConversions.containsKey(declaration.getQualifiedName())) {
+      return classConversions.get(declaration.getQualifiedName());
+    }
+    else if (isCollection(declaration)) {
       return "com.google.gwt.core.client.JsArray";
     }
 
@@ -130,6 +149,13 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
         }
       }
       return "com.google.gwt.core.client.JsArray";
+    }
+    else if (decorated.isDeclared()) {
+      DeclaredType declaredType = ((DeclaredType) decorated);
+      String fqn = declaredType.getDeclaration().getQualifiedName();
+      if (classConversions.containsKey(fqn)) {
+        return classConversions.get(fqn);
+      }
     }
 
     return super.convert(typeMirror);

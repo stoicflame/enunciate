@@ -52,6 +52,8 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <h1>GWT Module</h1>
@@ -260,12 +262,12 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private String gwtCompilerClass;
   private String gwtSubcontext = "/gwt";
   private String gwtAppDir = null;
-  private Boolean enableGWT16;
   private boolean useWrappedServices = false;
   private boolean gwtRtFound = false;
   private boolean springDIFound = false;
   private boolean jacksonXcAvailable = false;
   private String label = "enunciate";
+  private int[] gwtVersion = null;
 
   /**
    * @return "gwt"
@@ -309,44 +311,65 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
-      boolean aboutSays16 = false;
-      if (this.gwtHome != null) {
-        File about = new File(gwtHome, "about.txt");
-        if (about.exists()) {
-          try {
-            BufferedReader reader = new BufferedReader(new FileReader(about));
-            String line = reader.readLine();
-            if (line != null) {
-              if (line.contains("1.4")) {
-                throw new EnunciateException(String.format("As of version 1.15, Enunciate no longer supports GWT 1.4. It appears GWT 1.4 is being used, according to %s. " +
-                  "If this is an invalid assessment, you can get around this error by moving this file out of the way. " +
-                  "And please inform us on the Enunciate mailing lists.", (this.gwtHome + File.separatorChar + "about.txt")));
+      if (this.gwtVersion == null) {
+        int[] gwtVersion = null; //default to 1.5
+        if (this.gwtHome != null) {
+          File about = new File(gwtHome, "about.txt");
+          if (about.exists()) {
+            try {
+              BufferedReader reader = new BufferedReader(new FileReader(about));
+              String line = reader.readLine();
+              if (line != null) {
+                Matcher matcher = Pattern.compile("[\\d\\.]+").matcher(line);
+                if (matcher.find()) {
+                  String gwtVersionStr = matcher.group();
+                  if (getEnunciate().isDebug()) {
+                    getEnunciate().debug("Targeting GWT version %s according to %s.", gwtVersionStr, (this.gwtHome + File.separatorChar + "about.txt"));
+                  }
+
+                  try {
+                    gwtVersion = parseGwtVersion(gwtVersionStr);
+                  }
+                  catch (NumberFormatException e) {
+                    getEnunciate().warn("Invalid GWT version %s according to %s.", gwtVersionStr, (this.gwtHome + File.separatorChar + "about.txt"));
+                  }
+                }
+                else {
+                  getEnunciate().warn("Unable to determine GWT version from %s.", (this.gwtHome + File.separatorChar + "about.txt"));
+                }
               }
-
-              aboutSays16 = line.contains("1.6") || line.contains("1.7");
+              reader.close();
             }
-            reader.close();
-          }
-          catch (IOException e) {
-            //fall through...
+            catch (IOException e) {
+              //fall through...
+            }
           }
         }
+
+        this.gwtVersion = gwtVersion;
       }
 
-      if (getEnunciate().isDebug()) {
-        if (aboutSays16) {
-          debug("It appears GWT 1.6 is being used, according to %s.", (this.gwtHome + File.separatorChar + "about.txt"));
-        }
+      if (this.gwtVersion.length < 2) {
+        throw new IllegalStateException("Illegal GWT version.");
       }
 
-      if (getEnableGWT16() == null) {
-        setEnableGWT16(aboutSays16);
+      if (!gwtVersionGreaterThan(1, 4)) {
+        throw new EnunciateException(String.format("As of version 1.15, Enunciate no longer supports versions of GWT less than 1.5. " +
+          "It appears GWT %s.%s is being used, according to %s. If this is an invalid assessment, you can get around this error by " +
+          "setting the correct version with the 'gwtVersion' attribute of the Enunciate GWT module configuration.",
+                                                   this.gwtVersion[0],
+                                                   this.gwtVersion[1], 
+                                                   (this.gwtHome + File.separatorChar + "about.txt")));
       }
 
       if (getGwtCompilerClass() == null) {
-        setGwtCompilerClass(getEnableGWT16() ? "com.google.gwt.dev.Compiler" : "com.google.gwt.dev.GWTCompiler");
+        setGwtCompilerClass(gwtVersionGreaterThan(1, 5) ? "com.google.gwt.dev.Compiler" : "com.google.gwt.dev.GWTCompiler");
       }
     }
+  }
+
+  protected boolean gwtVersionGreaterThan(int major, int minor) {
+    return (this.gwtVersion[0] == major) ? (this.gwtVersion[1] > minor) : (this.gwtVersion[0] > major);
   }
 
   @Override
@@ -640,7 +663,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     gwtcCommand.add(argIndex++, "-style");
     int styleArgIndex = argIndex;
     gwtcCommand.add(argIndex++, null); //app-specific arg.
-    gwtcCommand.add(argIndex++, getEnableGWT16() ? "-war" : "-out");
+    gwtcCommand.add(argIndex++, gwtVersionGreaterThan(1, 5) ? "-war" : "-out");
     int outArgIndex = argIndex;
     gwtcCommand.add(argIndex++, null); //app-specific arg.
     for (String arg : compilerArgs) {
@@ -696,7 +719,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
             throw new EnunciateException("GWT compile failed for module " + moduleName);
           }
 
-          if (!getEnableGWT16()) {
+          if (!gwtVersionGreaterThan(1, 5)) {
             File moduleOutputDir = appDir;
             String outputPath = appModule.getOutputPath();
             if ((outputPath != null) && (!"".equals(outputPath.trim()))) {
@@ -715,7 +738,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           for (int i = 0; i < moduleNameIndex; i++) {
             String commandArg = gwtcCommand.get(i);
             if (i == compileClassIndex) {
-              commandArg = getEnableGWT16() ? "com.google.gwt.dev.HostedMode" : "com.google.gwt.dev.GWTShell";
+              commandArg = gwtVersionGreaterThan(1, 5) ? "com.google.gwt.dev.HostedMode" : "com.google.gwt.dev.GWTShell";
             }
             else if (commandArg.indexOf(' ') >= 0) {
               commandArg = '"' + commandArg + '"';
@@ -732,7 +755,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
             shellPage = appModule.getShellPage();
           }
 
-          if (!getEnableGWT16()) {
+          if (!gwtVersionGreaterThan(1, 5)) {
             //when invoking the shell for GWT 1.4 or 1.5, it requires a URL to load.
             //The URL is the [moduleName]/[shellPage.html]
             shellCommand.append(moduleName).append('/').append(shellPage);
@@ -1368,24 +1391,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   }
 
   /**
-   * Whether we're using GWT 1.6.
-   *
-   * @return Whether we're using GWT 1.6.
-   */
-  public Boolean getEnableGWT16() {
-    return enableGWT16;
-  }
-
-  /**
-   * Whether we're using GWT 1.6.
-   *
-   * @param enableGWT16 Whether we're using GWT 1.6.
-   */
-  public void setEnableGWT16(Boolean enableGWT16) {
-    this.enableGWT16 = enableGWT16;
-  }
-
-  /**
    * Whether to generated wrapped GWT remote services in the client-code.
    *
    * @return Whether to generated wrapped GWT remote services in the client-code.
@@ -1446,6 +1451,25 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  /**
+   * Sets the GWT version that Enunciate will target.
+   *
+   * @param version The GWT version Enunciate will target.
+   */
+  public void setGwtVersion(String version) {
+    this.gwtVersion = parseGwtVersion(version);
+  }
+
+  protected int[] parseGwtVersion(String version) throws NumberFormatException {
+    String[] versionStr = version.split("\\.");
+    int[] gwtVersion = new int[Math.max(versionStr.length, 2)];
+    for (int i = 0; i < versionStr.length; i++) {
+      String versionToken = versionStr[i];
+      gwtVersion[i] = Integer.parseInt(versionToken);
+    }
+    return gwtVersion;
   }
 
   /**

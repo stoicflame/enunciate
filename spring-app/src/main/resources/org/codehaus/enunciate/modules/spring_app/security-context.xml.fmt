@@ -152,6 +152,18 @@
     <custom-authentication-provider/>
   </beans:bean>
     [/#if]
+  [#elseif securityConfig.primaryProvider??]
+    [#if securityConfig.primaryProvider.beanName??]
+
+  <beans:bean id="enunciate-auth-provider" parent="${securityConfig.primaryProvider.beanName}">
+    <custom-authentication-provider/>
+  </beans:bean>
+    [#elseif securityConfig.primaryProvider.className??]
+
+  <beans:bean id="enunciate-auth-provider" class="${securityConfig.primaryProvider.className}">
+    <custom-authentication-provider/>
+  </beans:bean>
+    [/#if]
   [/#if]
 
   <!-- service method interceptor (used to lock down the service methods.)-->

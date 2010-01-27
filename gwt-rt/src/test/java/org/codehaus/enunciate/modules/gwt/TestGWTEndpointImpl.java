@@ -22,6 +22,8 @@ import static org.easymock.EasyMock.replay;
 
 import javax.servlet.ServletConfig;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Ryan Heaton
@@ -33,6 +35,19 @@ public class TestGWTEndpointImpl extends TestCase {
    */
   public void testLineEscape() throws Exception {
     assertEquals("hi%%20", "hi%20".replaceAll("%", "%%"));
+  }
+
+  /**
+   * tests parsing a gwt version.
+   */
+  public void testParseGWTVersion() throws Exception {
+    Pattern pattern = Pattern.compile("[\\d\\.]+");
+    Matcher matcher = pattern.matcher("Google Web Toolkit 2.0.0");
+    assertTrue(matcher.find());
+    assertEquals("2.0.0", matcher.group());
+    matcher = pattern.matcher("Google Web Toolkit 1.6.0");
+    assertTrue(matcher.find());
+    assertEquals("1.6.0", matcher.group());
   }
 
   /**

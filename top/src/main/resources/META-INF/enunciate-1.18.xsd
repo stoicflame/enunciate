@@ -940,14 +940,9 @@
             <xs:documentation>The name of the generated GWT rpc module.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="enableGWT15" type="xs:boolean" default="true">
+        <xs:attribute name="gwtVersion" type="xs:string">
           <xs:annotation>
-            <xs:documentation>Whether GWT 1.5+ is enabled (default: true).</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="enableGWT16" type="xs:boolean" default="false">
-          <xs:annotation>
-            <xs:documentation>Whether GWT 1.6+ is enabled (default:false)</xs:documentation>
+            <xs:documentation>Set the version of GWT Enunciate will target for compiling purposes.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="generateJsonOverlays" type="xs:boolean" default="false">
