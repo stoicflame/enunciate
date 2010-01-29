@@ -46,12 +46,13 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     super(conversions);
     classConversions.put(BigDecimal.class.getName(), String.class.getName());
     classConversions.put(BigInteger.class.getName(), String.class.getName());
-    classConversions.put(Calendar.class.getName(), Integer.class.getName());
+    classConversions.put(Date.class.getName(), Long.class.getName());
+    classConversions.put(Calendar.class.getName(), Long.class.getName());
     classConversions.put(DataHandler.class.getName(), String.class.getName());
     classConversions.put(QName.class.getName(), String.class.getName());
     classConversions.put(URI.class.getName(), String.class.getName());
     classConversions.put(UUID.class.getName(), String.class.getName());
-    classConversions.put(XMLGregorianCalendar.class.getName(), Integer.class.getName());
+    classConversions.put(XMLGregorianCalendar.class.getName(), Long.class.getName());
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "com.google.gwt.core.client.JavaScriptObject");
   }
 
@@ -155,6 +156,11 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
       String fqn = declaredType.getDeclaration().getQualifiedName();
       if (classConversions.containsKey(fqn)) {
         return classConversions.get(fqn);
+      }
+    }
+    else if (decorated.isPrimitive()) {
+      if (((PrimitiveType) decorated).getKind() == PrimitiveType.Kind.LONG) {
+        return Long.class.getName();
       }
     }
 
