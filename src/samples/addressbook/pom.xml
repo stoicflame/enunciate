@@ -12,7 +12,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.18-SNAPSHOT</version>
+        <version>1.18-RC1</version>
         <executions>
           <execution>
             <goals>
@@ -24,12 +24,12 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
-            <version>1.18-SNAPSHOT</version>
+            <version>1.18-RC1</version>
           </dependency>
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
-            <version>1.18-SNAPSHOT</version>
+            <version>1.18-RC1</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -82,19 +82,19 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
-      <version>1.18-SNAPSHOT</version>
+      <version>1.18-RC1</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
-      <version>1.18-SNAPSHOT</version>
+      <version>1.18-RC1</version>
     </dependency>
     
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-gwt-rt</artifactId>
-      <version>1.18-SNAPSHOT</version>
+      <version>1.18-RC1</version>
     </dependency>
 
     <dependency>
