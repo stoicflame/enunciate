@@ -2,6 +2,8 @@
 [#--template for the client-side enum type.--]
 [#macro writeEnumTypeHeader type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_H
+#define DEF_${typeName}_H
 
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
@@ -33,9 +35,13 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
  * @return The bytes written (may be 0 in case of buffering) or -1 in case of error.
  */
 static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first});
+
+#endif /* DEF_${typeName}_H */
 [/#macro]
 [#macro writeEnumTypeImpl type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_M
+#define DEF_${typeName}_M
 
 /**
  * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
@@ -91,4 +97,6 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
 #endif
   return -1;
 }
+
+#endif /* DEF_${typeName}_M */
 [/#macro]

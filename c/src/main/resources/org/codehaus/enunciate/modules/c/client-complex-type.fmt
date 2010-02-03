@@ -3,6 +3,8 @@
 [#--template for the client-side complex type.--]
 [#macro writeComplexTypeHeader type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_H
+#define DEF_${typeName}_H
 
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
@@ -158,12 +160,16 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
  * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to free.
  */
 static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} *_${type.clientSimpleName?uncap_first});
+
+#endif /* DEF_${typeName}_H */
 [/#macro]
 
 
 
 [#macro writeComplexTypeImpl type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_M
+#define DEF_${typeName}_M
   [#if findRootElement(type)??]
     [#assign rootElement=findRootElement(type)/]
 
@@ -1009,4 +1015,5 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
   }
   [/#if]
 }
+#endif /* DEF_${typeName}_M */
 [/#macro]

@@ -33,9 +33,8 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Conversion from java types to C# types.
+ * Conversion from java types to GWT json overlay types.
  *
- * @link http://livedocs.adobe.com/flex/2/docs/wwhelp/wwhimpl/common/html/wwhelp.htm?context=LiveDocs_Parts&file=00001104.html#270405
  * @author Ryan Heaton
  */
 public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod {
@@ -46,13 +45,13 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     super(conversions);
     classConversions.put(BigDecimal.class.getName(), String.class.getName());
     classConversions.put(BigInteger.class.getName(), String.class.getName());
-    classConversions.put(Date.class.getName(), Long.class.getName());
-    classConversions.put(Calendar.class.getName(), Long.class.getName());
+    classConversions.put(Date.class.getName(), Double.class.getName());
+    classConversions.put(Calendar.class.getName(), Double.class.getName());
     classConversions.put(DataHandler.class.getName(), String.class.getName());
     classConversions.put(QName.class.getName(), String.class.getName());
     classConversions.put(URI.class.getName(), String.class.getName());
     classConversions.put(UUID.class.getName(), String.class.getName());
-    classConversions.put(XMLGregorianCalendar.class.getName(), Long.class.getName());
+    classConversions.put(XMLGregorianCalendar.class.getName(), Double.class.getName());
     classConversions.put(javax.xml.bind.JAXBElement.class.getName(), "com.google.gwt.core.client.JavaScriptObject");
   }
 

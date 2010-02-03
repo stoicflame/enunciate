@@ -3,6 +3,8 @@
 [#--template for the client-side complex type.--]
 [#macro writeComplexTypeHeader type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_H
+#define DEF_${typeName}_H
 
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
@@ -109,12 +111,16 @@
 - (void) setOtherAttributes: (NSArray *) otherAttributes;
 [/#if]
 @end /* interface ${typeName} */
+
+#endif /* DEF_${typeName}_H */
 [/#macro]
 
 
 
 [#macro writeComplexTypeImpl type]
   [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_M
+#define DEF_${typeName}_M
 
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
@@ -1147,4 +1153,6 @@
 }
 [/#if]
 @end /* implementation ${typeName} (JAXB) */
+
+#endif /* DEF_${typeName}_M */
 [/#macro]

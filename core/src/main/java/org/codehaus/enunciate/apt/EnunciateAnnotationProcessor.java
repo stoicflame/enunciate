@@ -178,6 +178,13 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
     model.setBaseDeploymentAddress(baseURL);
 
+    List<EnunciateTypeDeclarationListener> typeDeclarationListeners = new ArrayList<EnunciateTypeDeclarationListener>();
+    for (DeploymentModule module : config.getAllModules()) {
+      if (module instanceof EnunciateTypeDeclarationListener) {
+        typeDeclarationListeners.add((EnunciateTypeDeclarationListener) module);
+      }
+    }
+
     debug("Reading classes to enunciate...");
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
@@ -241,14 +248,22 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
         }
 
         if (!xmlType && !jsonType) {
-          debug("%s is neither an endpoint interface, rest endpoint, or a schema type, so it'll be ignored.", declaration.getQualifiedName());
+          onUnhandledDeclaration(model, declaration);
         }
+      }
+
+      for (EnunciateTypeDeclarationListener declarationListener : typeDeclarationListeners) {
+        declarationListener.onTypeDeclarationInspected(declaration);
       }
     }
 
     validate(model);
 
     return model;
+  }
+
+  protected void onUnhandledDeclaration(EnunciateFreemarkerModel model, TypeDeclaration declaration) {
+    debug("%s is neither an endpoint interface, rest endpoint, or a schema type, so it'll be ignored.", declaration.getQualifiedName());
   }
 
   /**

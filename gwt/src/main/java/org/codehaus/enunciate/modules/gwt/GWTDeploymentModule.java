@@ -346,6 +346,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           }
         }
 
+        if (gwtVersion == null) {
+          gwtVersion = new int[]{1, 5};
+        }
+
         this.gwtVersion = gwtVersion;
       }
 
@@ -378,8 +382,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
     if (!isDisabled()) {
       if (!gwtRtFound) {
-        warn("WARNING! The GWT module is enabled, but the Enunciate GWT runtime libraries were found on the Enunciate classpath. " +
-          "Application startup will fail unless the Enunciate GWT runtime libraries are on the classpath.");
+        info("GWT runtime wasn't found on the classpath. If you're doing GWT-RPC, you're going to fail at runtime.");
       }
     }
   }
