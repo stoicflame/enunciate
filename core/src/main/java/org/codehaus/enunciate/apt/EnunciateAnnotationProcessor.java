@@ -643,7 +643,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return Whether the specified type is a JAX-RS support class.
    */
   public boolean isJAXRSSupport(TypeDeclaration declaration) {
-    if (declaration.getAnnotation(XmlTransient.class) == null) {
+    if (declaration.getAnnotation(XmlTransient.class) != null) {
       return false;
     }
 
