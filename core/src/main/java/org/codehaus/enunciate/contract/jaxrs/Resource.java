@@ -141,6 +141,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
           if (annotationDeclaration != null) {
             if (annotationDeclaration.getAnnotation(HttpMethod.class) != null) {
               resourceMethods.add(new ResourceMethod(methodDeclaration, this));
+              break;
             }
           }
         }

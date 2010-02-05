@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.18-RC2</version>
+  <version>1.18</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>

@@ -67,7 +67,6 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       if (httpMethodInfo != null) {
         //request method designator found.
         httpMethods.add(httpMethodInfo.value());
-        break;
       }
     }
 
