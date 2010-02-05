@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.18</version>
+    <version>1.19-SNAPSHOT</version>
   </parent>
 
   <artifactId>enunciate-jaxws-client</artifactId>
