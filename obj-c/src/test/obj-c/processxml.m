@@ -18,13 +18,13 @@ int main ( int argc, char *argv[] ) {
     return 1;
   }
 
-  in = [NSData dataWithContentsOfFile: [NSString stringWithCString: argv[2]]];
+  in = [NSData dataWithContentsOfFile: [NSString stringWithCString: argv[2] encoding: NSUTF8StringEncoding]];
   [in retain];
   if (strcmp("circle", argv[1]) == 0) {
     circle = (ENUNCIATENS0Circle *) [ENUNCIATENS0Circle readFromXML: in];
     out = [circle writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [circle dealloc];
     [in release];
@@ -34,7 +34,7 @@ int main ( int argc, char *argv[] ) {
     triangle = (ENUNCIATENS0Triangle *) [ENUNCIATENS0Triangle readFromXML: in];
     out = [triangle writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [triangle dealloc]; //free the triangle.
     [in release];
@@ -44,7 +44,7 @@ int main ( int argc, char *argv[] ) {
     rectangle = (ENUNCIATENS0Rectangle *) [ENUNCIATENS0Rectangle readFromXML: in];
     out = [rectangle writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [rectangle dealloc]; //free the rectangle.
     [in release];
@@ -54,7 +54,7 @@ int main ( int argc, char *argv[] ) {
     cat = (ENUNCIATENS2Cat *) [ENUNCIATENS2Cat readFromXML: in];
     out = [cat writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [cat dealloc]; //free the cat.
     [in release];
@@ -64,7 +64,7 @@ int main ( int argc, char *argv[] ) {
     canvas = (ENUNCIATENS3Canvas *) [ENUNCIATENS3Canvas readFromXML: in];
     out = [canvas writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [canvas dealloc]; //free the canvas.
     [in release];
@@ -74,7 +74,7 @@ int main ( int argc, char *argv[] ) {
     house = (ENUNCIATENS4House *) [ENUNCIATENS4House readFromXML: in];
     out = [house writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [house dealloc]; //free the house.
     [in release];
@@ -84,7 +84,7 @@ int main ( int argc, char *argv[] ) {
     bus = (ENUNCIATENS5Bus *) [ENUNCIATENS5Bus readFromXML: in];
     out = [bus writeToXML];
     [out retain];
-    [out writeToFile: [NSString stringWithCString: argv[3]] atomically: NO];
+    [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
     [bus dealloc]; //free the bus.
     [in release];

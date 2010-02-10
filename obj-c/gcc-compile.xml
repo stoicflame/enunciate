@@ -2,10 +2,18 @@
 
 <project name="gcccompile">
 
+  <condition property="isMac">
+    <os family="mac" />
+  </condition>
+
   <target name="skip-if-necessary">
     <condition property="skip.gcc">
       <istrue value="${gcc.executable}"/>
     </condition>
+  </target>
+
+  <target name="get-mac-flags" if="isMac" unless="skip.gcc">
+    <property name="mac.config.flags" value="-L /System/Library/Frameworks/Foundation.framework/Foundation"/>
   </target>
 
   <target name="get-gnustep-flags" if="gnustep.config.executable" unless="skip.gcc">
@@ -33,12 +41,15 @@
   </target>
 
   <target name="-gcc" unless="skip.gcc">
+    <property name="mac.config.flags" value=""/>
     <property name="gnustep.config.flags" value=""/>
     <property name="gnustep.config.libs" value=""/>
     <property name="libxml.config.flags" value=""/>
     <property name="libxml.config.libs" value=""/>
 
     <exec executable="${gcc.executable}" failonerror="true" dir="${project.build.directory}">
+      <!--include the mac compile flags-->
+      <arg line="${mac.config.flags}"/>
       <!--include the gnustep compile flags-->
       <arg line="${gnustep.config.flags}"/>
       <!--include the libxml compile flags-->
@@ -64,6 +75,6 @@
     </exec>
   </target>
 
-  <target name="gcc" depends="skip-if-necessary, get-gnustep-flags, get-gnustep-libs, get-libxml-flags, get-libxml-libs, -gcc"/>
+  <target name="gcc" depends="skip-if-necessary, get-mac-flags, get-gnustep-flags, get-gnustep-libs, get-libxml-flags, get-libxml-libs, -gcc"/>
 
 </project>
