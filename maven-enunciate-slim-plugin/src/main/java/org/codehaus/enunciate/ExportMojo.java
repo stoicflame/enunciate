@@ -1,31 +1,34 @@
 package org.codehaus.enunciate;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.codehaus.enunciate.main.Enunciate;
-import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.modules.BasicDeploymentModule;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.config.SchemaInfo;
-import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.Registry;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
-import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
-import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
-
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.SchemaInfo;
+import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxb.Registry;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
+import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
+import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
+import org.codehaus.enunciate.contract.rest.RESTEndpoint;
+import org.codehaus.enunciate.main.Enunciate;
+import org.codehaus.enunciate.modules.BasicDeploymentModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
+
 import com.sun.mirror.declaration.TypeDeclaration;
 
 /**
@@ -33,7 +36,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
  *
  * @goal export
  * @phase process-sources
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
 
  * @author Ryan Heaton
  * @link http://docs.codehaus.org/display/ENUNCIATE/Working+With+Precompiled+Classes

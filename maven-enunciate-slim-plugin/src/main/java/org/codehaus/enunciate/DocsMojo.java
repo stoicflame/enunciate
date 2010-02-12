@@ -23,8 +23,7 @@ import java.util.Set;
  *
  * @goal docs
  * @phase process-sources
- * @requiresDependencyResolution runtime
- * @execute phase="generate-sources"
+ * @requiresDependencyResolution test
  *
  * @author Ryan Heaton
  */

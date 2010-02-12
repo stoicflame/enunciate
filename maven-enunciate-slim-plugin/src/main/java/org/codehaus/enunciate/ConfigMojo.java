@@ -38,7 +38,7 @@ import java.util.*;
  *
  * @goal config
  * @phase validate
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  */
 public class ConfigMojo extends AbstractMojo {
 
@@ -277,7 +277,7 @@ public class ConfigMojo extends AbstractMojo {
 
     postProcessConfig(config);
     enunciate.setConfig(config);
-    Set<org.apache.maven.artifact.Artifact> classpathEntries = new HashSet<org.apache.maven.artifact.Artifact>();
+    Set<org.apache.maven.artifact.Artifact> classpathEntries = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
     classpathEntries.addAll(((Set<org.apache.maven.artifact.Artifact>)this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = classpathEntries.iterator();
     while (it.hasNext()) {

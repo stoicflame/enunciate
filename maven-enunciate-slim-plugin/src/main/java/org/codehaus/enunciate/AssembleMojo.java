@@ -1,25 +1,17 @@
 package org.codehaus.enunciate;
 
+import java.io.File;
+import java.util.Set;
+
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.*;
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.main.Enunciate;
-import org.xml.sax.SAXException;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Set;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Assembles the whole Enunciate app without compilation or packaging of the war.
@@ -27,8 +19,7 @@ import java.util.List;
  *
  * @goal assemble
  * @phase process-sources
- * @requiresDependencyResolution runtime
- * @executionStrategy once-per-session
+ * @requiresDependencyResolution test
 
  * @author Ryan Heaton
  */

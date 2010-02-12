@@ -7,8 +7,7 @@ package org.codehaus.enunciate;
  * @goal assemble
  * @extendsPlugin enunciate
  * @phase process-sources
- * @requiresDependencyResolution compile
- * @executionStrategy once-per-session
+ * @requiresDependencyResolution test
  *
  * @author Ryan Heaton
  */

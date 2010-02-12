@@ -2,13 +2,15 @@ package org.codehaus.enunciate;
 
 /**
  * Simple relocation of the {@link FailIfModuleDisabledMojo}.
- *
- * @author Ryan Heaton
- * @extendsPlugin maven-enunciate-slim-plugin
+ * 
  * @goal failIfModuleDisabled
  * @requiresDependencyResolution runtime
- * @executionStrategy once-per-session
+ * @extendsPlugin maven-enunciate-slim-plugin
+ * 
+ * @author Ryan Heaton
  */
-public class FailIfModuleDisabledBaseMojo extends FailIfModuleDisabledMojo {
+public class FailIfModuleDisabledBaseMojo
+    extends FailIfModuleDisabledMojo
+{
 
 }

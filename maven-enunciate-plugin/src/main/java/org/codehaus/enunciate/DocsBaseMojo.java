@@ -4,10 +4,9 @@ package org.codehaus.enunciate;
  * Simple relocation of the {@link DocsMojo}.
  *
  * @goal docs
- * @extendsPlugin maven-enunciate-slim-plugin
  * @phase process-sources
- * @requiresDependencyResolution runtime
- * @executionStrategy once-per-session
+ * @requiresDependencyResolution test
+ * @extendsPlugin maven-enunciate-slim-plugin
  *
  * @author Ryan Heaton
  */
