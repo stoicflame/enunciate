@@ -75,14 +75,16 @@ public interface PersonService {
    *
    * @param files The files
    * @param length The length(s) of the files.
+   * @param somename Another name.
    */
   @WebMethod ( exclude = true )
-//  @POST
-//  @Path("/posterdude")
-//  @ResourceMethodSignature(
-//    input = Person.class,
-//    queryParams = { @QueryParam("length") }
-//  )
+  @POST
+  @Path("/posterdude")
+  @ResourceMethodSignature(
+    input = Person.class,
+    output = Person.class,
+    queryParams = { @QueryParam("length"), @QueryParam("somename") }
+  )
   void uploadFiles(DataHandler[] files, String length) throws ServiceException;
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**

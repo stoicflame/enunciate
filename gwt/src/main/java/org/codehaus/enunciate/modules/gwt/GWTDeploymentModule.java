@@ -266,7 +266,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean gwtRtFound = false;
   private boolean springDIFound = false;
   private boolean jacksonXcAvailable = false;
-  private String label = "enunciate";
+  private String label = null;
   private int[] gwtVersion = null;
 
   /**

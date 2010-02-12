@@ -147,7 +147,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
   private final Map<String, String> clientPackageConversions;
   private final JAXWSClientRuleSet configurationRules;
   private final Set<String> serverSideTypesToUse;
-  private String label = "enunciate";
+  private String label = null;
 
   public JAXWSClientDeploymentModule() {
     this.clientPackageConversions = new HashMap<String, String>();

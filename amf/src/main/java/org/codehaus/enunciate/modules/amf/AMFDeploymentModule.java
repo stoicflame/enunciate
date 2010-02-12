@@ -214,7 +214,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private final List<FlexApp> flexApps = new ArrayList<FlexApp>();
   private final AMFRuleSet configurationRules = new AMFRuleSet();
 
-  private String label = "enunciate";
+  private String label = null;
   private String flexHome = System.getProperty("flex.home") == null ? System.getenv("FLEX_HOME") : System.getProperty("flex.home");
   private FlexCompilerConfig compilerConfig = new FlexCompilerConfig();
   private String swcName;
