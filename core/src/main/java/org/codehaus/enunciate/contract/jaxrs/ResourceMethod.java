@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.VoidType;
@@ -241,6 +242,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       if (typeMirror.isDeclared()) {
         if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
           return null;
+        }
+        else {
+          return new ResourceEntityParameter(((DeclaredType)typeMirror).getDeclaration(), typeMirror);
         }
       }
       else {
