@@ -743,11 +743,18 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     File buildDir = getDocsBuildDir();
     buildDir.mkdirs();
     if (this.base == null) {
-      debug("Default base to be used for documentation base.");
-      enunciate.extractBase(loadDefaultBase(), buildDir);
+      InputStream discoveredBase = DocumentationDeploymentModule.class.getResourceAsStream("/META-INF/enunciate/docs-base.zip");
+      if (discoveredBase == null) {
+        debug("Default base to be used for documentation base.");
+        enunciate.extractBase(loadDefaultBase(), buildDir);
 
-      if (this.css != null) {
-        enunciate.copyFile(this.css, new File(buildDir, "default.css"));
+        if (this.css != null) {
+          enunciate.copyFile(this.css, new File(buildDir, "default.css"));
+        }
+      }
+      else {
+        debug("Discovered documentation base at /META-INF/enunciate/docs-base.zip");
+        enunciate.extractBase(discoveredBase, buildDir);
       }
     }
     else if (this.base.isDirectory()) {
@@ -838,6 +845,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   protected void doXSLT() throws IOException, EnunciateException {
     debug("Executing documentation stylesheet transformation.");
     URL xsltURL = this.xsltURL;
+
+    if (xsltURL == null) {
+      xsltURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.xslt");
+    }
+
     if (xsltURL == null) {
       xsltURL = DocumentationDeploymentModule.class.getResource("doc-files/docs.xslt");
     }
