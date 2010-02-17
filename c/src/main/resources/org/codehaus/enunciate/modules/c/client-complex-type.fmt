@@ -612,10 +612,10 @@ static struct ${typeName} *xmlTextReaderRead${xmlFunctionIdentifier(type)?cap_fi
       else {
 #if DEBUG_ENUNCIATE > 1
         if (xmlTextReaderConstNamespaceUri(reader) == NULL) {
-          printf("unknown child element {}%s for type {${type.namespace!""}}${type.name}.  Skipping...\n",  xmlTextReaderConstLocalName(reader));
+          printf("unknown child element {}%s for type {${type.namespace!""}}${type.name!"(anonymous)"}.  Skipping...\n",  xmlTextReaderConstLocalName(reader));
         }
         else {
-          printf("unknown child element {%s}%s for type {${type.namespace!""}}${type.name}. Skipping...\n", xmlTextReaderConstNamespaceUri(reader), xmlTextReaderConstLocalName(reader));
+          printf("unknown child element {%s}%s for type {${type.namespace!""}}${type.name!"(anonymous)"}. Skipping...\n", xmlTextReaderConstNamespaceUri(reader), xmlTextReaderConstLocalName(reader));
         }
 #endif
         status = xmlTextReaderSkipElement(reader);
