@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.JavaDoc.JavaDocTagList;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
@@ -94,7 +95,26 @@ public final class JsonObjectTypeDefinition extends JsonTypeDefinition {
      * @return The description.
      */
     public String getPropertyDescription() {
-      return getDocValue();
+      final String docValue = getDocValue();
+      if(docValue != null && docValue.trim().length() > 0) {
+        return docValue;
+      }
+      JavaDocTagList javaDocTagList = getJavaDoc().get("return");
+      if(javaDocTagList == null) {
+        return null;
+      }
+      StringBuilder builder = new StringBuilder();
+      boolean firstValue = true;
+      for(String value : javaDocTagList)
+      {
+        if(firstValue) {
+          firstValue = false;
+        } else {
+          builder.append('\n');
+        }
+        builder.append(value);
+      }
+      return builder.toString();
     }
 
     public boolean isList() {

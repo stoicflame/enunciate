@@ -51,6 +51,13 @@ public class TestJsonObjectTypeDefinition extends InAPTTestCase
         assertProperty("name", "The name", "org.codehaus.enunciate.samples.json.Name", actualPersonProperties.get("name"));
     }
 
+    public void testProperties_DescriptionFromJavaDocReturnTag()
+    {
+        final JsonObjectTypeDefinition personTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Address"));
+        final Map<String, JsonPropertyDeclaration> actualPersonProperties = personTypeDefinition.getJsonPropertiesByName();
+        assertProperty("streetAddress", "Street\naddress.", String.class.getName(), actualPersonProperties.get("streetAddress"));
+    }
+
     public void testProperties_AllAnnotatedPresent()
     {
         final JsonObjectTypeDefinition nameTypeDefinition = new JsonObjectTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.json.Name"));

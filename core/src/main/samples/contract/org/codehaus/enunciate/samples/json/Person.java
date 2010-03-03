@@ -14,7 +14,6 @@ public class Person
 
     /**
      * The name
-     * @return The name
      */
     @JsonProperty
     public Name getName()
