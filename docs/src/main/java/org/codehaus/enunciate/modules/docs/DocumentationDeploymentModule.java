@@ -677,6 +677,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     mimeMappings.put("wsdl", "text/xml");
     mimeMappings.put("xsd", "text/xml");
     webAppFragment.setMimeMappings(mimeMappings);
+    ArrayList<WebAppComponent> filters = new ArrayList<WebAppComponent>();
     if (isApplyWsdlFilter() && !getModelInternal().getNamespacesToWSDLs().isEmpty()) {
       WebAppComponent wsdlFilter = new WebAppComponent();
       wsdlFilter.setName("wsdl-filter");
@@ -691,7 +692,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         wsdls.add(wsdlLocation);
       }
       wsdlFilter.setUrlMappings(wsdls);
-      webAppFragment.setFilters(Arrays.asList(wsdlFilter));
+      filters.add(wsdlFilter);
     }
 
     if (isApplyWadlFilter() && getModelInternal().getWadlFile() != null) {
@@ -712,8 +713,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
       wadls.add(docsDir + "/" + getModelInternal().getWadlFile().getName());
       wadlFilter.setUrlMappings(wadls);
-      webAppFragment.setFilters(Arrays.asList(wadlFilter));
+      filters.add(wadlFilter);
     }
+    webAppFragment.setFilters(filters);
     getEnunciate().addWebAppFragment(webAppFragment);
 
   }
