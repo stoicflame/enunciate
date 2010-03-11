@@ -17,17 +17,20 @@
 package org.codehaus.enunciate.contract.jaxws;
 
 import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.ArrayType;
+import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.PrimitiveType;
+import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
@@ -35,15 +38,14 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.soap.annotations.WebFaultPropertyOrder;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
-import org.codehaus.enunciate.soap.annotations.WebFaultPropertyOrder;
-import org.codehaus.enunciate.ClientName;
 
-import javax.xml.namespace.QName;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.bind.annotation.XmlAttachmentRef;
+import javax.xml.bind.annotation.XmlMimeType;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
@@ -54,14 +56,14 @@ import java.util.*;
 public class WebFault extends DecoratedClassDeclaration implements WebMessage, WebMessagePart, ImplicitRootElement {
 
   private final javax.xml.ws.WebFault annotation;
-  private final RootElementDeclaration explicitFaultBean;
+  private final ClassType explicitFaultBeanType;
 
   public WebFault(ClassDeclaration delegate) {
     super(delegate);
 
     this.annotation = getAnnotation(javax.xml.ws.WebFault.class);
 
-    RootElementDeclaration explicitFaultBean = null;
+    ClassType explicitFaultBeanType = null;
     Collection<PropertyDeclaration> properties = getProperties();
     PropertyDeclaration faultInfoProperty = null;
     for (PropertyDeclaration propertyDeclaration : properties) {
@@ -100,11 +102,11 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       }
 
       if (messageConstructorFound && messageAndThrowableConstructorFound) {
-        explicitFaultBean = new RootElementDeclaration(faultInfoType.getDeclaration(), null);
+        explicitFaultBeanType = faultInfoType;
       }
     }
 
-    this.explicitFaultBean = explicitFaultBean;
+    this.explicitFaultBeanType = explicitFaultBeanType;
   }
 
   /**
@@ -216,10 +218,29 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * <li>A constructor taking a message, a bean instance, and a cause.
    * </ol>
    *
+   * @return The type of the explicit fault bean, if exists, or null otherwise.
+   */
+  public ClassType getExplicitFaultBeanType() {
+    return explicitFaultBeanType;
+  }
+
+  /**
+   * A web fault has an explicit fault bean if all three of the following are present:
+   * <p/>
+   * <ol>
+   * <li>A getFaultInfo method that returns the bean instance of a class type.
+   * <li>A constructor taking a message and bean instance.
+   * <li>A constructor taking a message, a bean instance, and a cause.
+   * </ol>
+   *
    * @return The explicit fault bean of this web fault, if exists, or null otherwise.
    */
-  public RootElementDeclaration getExplicitFaultBean() {
-    return this.explicitFaultBean;
+  public ElementDeclaration findExplicitFaultBean() {
+    if (this.explicitFaultBeanType == null || this.explicitFaultBeanType.getDeclaration() == null) {
+      return null;
+    }
+
+    return ((EnunciateFreemarkerModel) FreemarkerModel.get()).findElementDeclaration(this.explicitFaultBeanType.getDeclaration());
   }
 
   /**
@@ -235,8 +256,9 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return The qname reference to the fault info.
    */
   public QName getParticleQName() {
-    if (this.explicitFaultBean != null) {
-      return new QName(this.explicitFaultBean.getNamespace(), this.explicitFaultBean.getName());
+    ElementDeclaration faultBean = findExplicitFaultBean();
+    if (faultBean != null) {
+      return new QName(faultBean.getNamespace(), faultBean.getName());
     }
     else {
       return new QName(getTargetNamespace(), getElementName());
@@ -306,7 +328,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return Whether this web fault defines an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    return (this.explicitFaultBean == null);
+    return (this.explicitFaultBeanType == null);
   }
 
   /**

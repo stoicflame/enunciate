@@ -240,7 +240,7 @@ public class JAXWSClientDeploymentModule extends FreemarkerDeploymentModule impl
       //gather the annotation information and process the possible beans for each web fault.
       for (WebFault webFault : allFaults.values()) {
         boolean implicit = webFault.isImplicitSchemaElement();
-        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBeanType());
         seeAlsos.add(faultBean);
 
         if (implicit) {

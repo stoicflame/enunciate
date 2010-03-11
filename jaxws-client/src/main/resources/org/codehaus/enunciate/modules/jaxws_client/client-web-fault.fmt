@@ -8,11 +8,11 @@ package ${packageFor(fault)};
  * ${fault.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 @javax.xml.ws.WebFault (
-  faultBean = "${fault.implicitFaultBeanQualifiedName?default(classnameFor(fault.explicitFaultBean))}"
+  faultBean = "${fault.implicitFaultBeanQualifiedName?default(classnameFor(fault.explicitFaultBeanType))}"
 )
 public class ${fault.simpleName} extends Exception {
   [#if !fault.implicitSchemaElement]
-    [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
+    [#assign beanfqn=classnameFor(fault.explicitFaultBeanType)/]
 
   private ${beanfqn} faultInfo;
 

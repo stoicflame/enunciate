@@ -16,7 +16,7 @@ public class ${fault.simpleName} extends com.google.gwt.user.client.rpc.Serializ
     super(message);
   }
   [#if !fault.implicitSchemaElement]
-    [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
+    [#assign beanfqn=classnameFor(fault.explicitFaultBeanType)/]
 
   private ${beanfqn} faultInfo;
 

@@ -25,6 +25,7 @@ import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -257,7 +258,7 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
       for (WebFault webFault : allFaults.values()) {
         String faultClass = classnameFor.convert(webFault);
         boolean implicit = webFault.isImplicitSchemaElement();
-        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBean());
+        String faultBean = implicit ? getBeanName(classnameFor, webFault.getImplicitFaultBeanQualifiedName()) : classnameFor.convert(webFault.getExplicitFaultBeanType());
 
         if (implicit) {
           model.put("fault", webFault);
@@ -265,8 +266,9 @@ public class XFireClientDeploymentModule extends FreemarkerDeploymentModule impl
           generatedTypeList.add(faultBean);
         }
 
-        String faultElementName = webFault.isImplicitSchemaElement() ? webFault.getElementName() : webFault.getExplicitFaultBean().getName();
-        String faultElementNamespace = webFault.isImplicitSchemaElement() ? webFault.getTargetNamespace() : webFault.getExplicitFaultBean().getNamespace();
+        ElementDeclaration explicitFaultBean = webFault.findExplicitFaultBean();
+        String faultElementName = explicitFaultBean == null ? webFault.getElementName() : explicitFaultBean.getName();
+        String faultElementNamespace = explicitFaultBean == null ? webFault.getTargetNamespace() : explicitFaultBean.getNamespace();
         this.generatedAnnotations.fault2WebFault.put(faultClass, new WebFaultAnnotation(faultElementName, faultElementNamespace, faultBean, implicit));
       }
 

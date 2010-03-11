@@ -21,6 +21,7 @@ import junit.framework.Test;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 
@@ -45,7 +46,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals("org.codehaus.enunciate.samples.services.jaxws.ImplicitWebFaultBean", webFault.getImplicitFaultBeanQualifiedName());
     assertEquals("http://services.samples.enunciate.codehaus.org/", webFault.getTargetNamespace());
     assertEquals("ImplicitWebFault", webFault.getPartName());
-    assertNull(webFault.getExplicitFaultBean());
+    assertNull(webFault.getExplicitFaultBeanType());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webFault.getParticleType());
     assertEquals(new QName("http://services.samples.enunciate.codehaus.org/", "ImplicitWebFault"), webFault.getParticleQName());
     assertNull("The type of a web fault is always implicit.", webFault.getTypeQName());
@@ -92,7 +93,7 @@ public class TestWebFault extends InAPTTestCase {
     assertEquals("implicit-fault", webFault.getElementName());
     assertEquals("urn:implicit-fault", webFault.getTargetNamespace());
     assertEquals("ImplicitWebFaultTwo", webFault.getPartName());
-    assertNull(webFault.getExplicitFaultBean());
+    assertNull(webFault.getExplicitFaultBeanType());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webFault.getParticleType());
     assertEquals(new QName("urn:implicit-fault", "implicit-fault"), webFault.getParticleQName());
     assertNull("The type of a web fault is always implicit.", webFault.getTypeQName());
@@ -139,9 +140,11 @@ public class TestWebFault extends InAPTTestCase {
    * tests the explicit web fault.
    */
   public void testExplicitWebFault() throws Exception {
-    FreemarkerModel.set(new EnunciateFreemarkerModel());
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    model.add(new RootElementDeclaration((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.BeanThree"), null));
+    FreemarkerModel.set(model);
     WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.ExplicitFaultBean"));
-    assertNotNull(webFault.getExplicitFaultBean());
+    assertNotNull(webFault.getExplicitFaultBeanType());
     assertEquals("ExplicitFaultBean", webFault.getMessageName());
     assertNull(webFault.getElementName());
     assertNull(webFault.getTargetNamespace());
@@ -178,7 +181,7 @@ public class TestWebFault extends InAPTTestCase {
     FreemarkerModel.set(new EnunciateFreemarkerModel());
     WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanTwo"));
     assertNull("A web fault without both constructors shouldn't have an explicit fault bean.",
-               webFault.getExplicitFaultBean());
+               webFault.getExplicitFaultBeanType());
   }
 
   /**
@@ -188,7 +191,7 @@ public class TestWebFault extends InAPTTestCase {
     FreemarkerModel.set(new EnunciateFreemarkerModel());
     WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanThree"));
     assertNull("A web fault without both PUBLIC constructors shouldn't have an explicit fault bean.",
-               webFault.getExplicitFaultBean());
+               webFault.getExplicitFaultBeanType());
   }
 
   public static Test suite() {

@@ -70,6 +70,10 @@
     [#if !isDefinedGlobally(localElement)]
       [#if localElement.substitutionGroupQName?exists]
   <${xs}:element name="${localElement.name}" substitutionGroup="${localElement.substitutionGroupQName}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
+      [#elseif localElement.elementXmlType.anonymous && localElement.elementXmlType.typeDefinition??]
+  <${xs}:element name="${localElement.name}">
+    [@processTypeDef typeDef=localElement.elementXmlType.typeDefinition/]
+  </${xs}:element>
       [#else]
   <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
       [/#if]

@@ -9,7 +9,7 @@ package ${packageFor(fault)};
  */
 public class ${fault.simpleName} extends [#if superFault?exists]${classnameFor(superFault, true)}[#else]Exception[/#if] {
   [#if !fault.implicitSchemaElement]
-    [#assign beanfqn=classnameFor(fault.explicitFaultBean)/]
+    [#assign beanfqn=classnameFor(fault.explicitFaultBeanType)/]
 
   private ${beanfqn} faultInfo;
 

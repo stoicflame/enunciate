@@ -61,10 +61,7 @@ import org.codehaus.enunciate.json.JsonTypeMappings;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlNsForm;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
@@ -1090,7 +1087,10 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     }
     else {
       REFERENCE_STACK.get().addFirst("explicit fault bean");
-      addReferencedTypeDefinitions(webFault.getExplicitFaultBean());
+      ClassType faultBeanType = webFault.getExplicitFaultBeanType();
+      if (faultBeanType != null) {
+        addReferencedTypeDefinitions(faultBeanType);
+      }
       REFERENCE_STACK.get().removeFirst();
     }
   }
@@ -1128,7 +1128,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           ClassType type = (ClassType) ape.getTypeUtils().getDeclaredType(ape.getTypeDeclaration(clazz.getName()));
           ClassDeclaration typeDeclaration = type.getDeclaration();
           if (typeDeclaration != null) {
-            add(createTypeDefinition(typeDeclaration));
+            addSeeAlsoReference(typeDeclaration);
           }
         }
       }
@@ -1138,11 +1138,22 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           if (mirror instanceof ClassType) {
             ClassDeclaration typeDeclaration = ((ClassType) mirror).getDeclaration();
             if (typeDeclaration != null) {
-              add(createTypeDefinition(typeDeclaration));
+              addSeeAlsoReference(typeDeclaration);
             }
           }
         }
       }
+    }
+  }
+
+  /**
+   * Add a "see also" reference.
+   *
+   * @param typeDeclaration The reference.
+   */
+  protected void addSeeAlsoReference(ClassDeclaration typeDeclaration) {
+    if (typeDeclaration.getAnnotation(XmlRegistry.class) == null) {
+      add(createTypeDefinition(typeDeclaration));
     }
   }
 

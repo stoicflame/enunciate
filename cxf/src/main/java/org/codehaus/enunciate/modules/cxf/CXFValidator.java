@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.modules.cxf;
 
+import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
@@ -63,11 +64,12 @@ public class CXFValidator extends BaseValidator {
         }
 
         for (WebFault webFault : webMethod.getWebFaults()) {
-          if (webFault.getExplicitFaultBean() != null) {
-            if (!webFault.getSimpleName().equals(webFault.getExplicitFaultBean().getName())) {
+          if (webFault.getExplicitFaultBeanType() != null) {
+            ElementDeclaration faultBean = webFault.findExplicitFaultBean();
+            if (!webFault.getSimpleName().equals(faultBean.getName())) {
               result.addError(webMethod, "Because of some inconsistencies with the JAX-WS implementation of CXF, the CXF module cannot have methods that " +
                 "throw exceptions that are named differently than the element name of their explicit fault beans. Apply @XmlRootElement ( name = \""
-                + webFault.getSimpleName() + "\" ) to  explicit fault bean " + webFault.getExplicitFaultBean().getQualifiedName() + " to apply the workaround.");
+                + webFault.getSimpleName() + "\" ) to  explicit fault bean " + webFault.getExplicitFaultBeanType() + " to apply the workaround.");
             }
           }
           else {
