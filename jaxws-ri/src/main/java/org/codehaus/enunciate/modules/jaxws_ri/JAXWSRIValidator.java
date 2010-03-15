@@ -16,12 +16,14 @@
 
 package org.codehaus.enunciate.modules.jaxws_ri;
 
+import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -52,6 +54,18 @@ public class JAXWSRIValidator extends BaseValidator {
           result.addError(webParam, "For now, Enunciate requires you to specify a 'name' on the @WebParam annotation if it's a header.");
         }
       }
+    }
+
+    if (ei.getEndpointImplementations().size() > 1) {
+      ArrayList<String> impls = new ArrayList<String>();
+      for (EndpointImplementation impl : ei.getEndpointImplementations()) {
+        impls.add(impl.getQualifiedName());
+      }
+      result.addError(ei, "Sorry, JAXWS-RI module doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
+        "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
+    }
+    else if (ei.getEndpointImplementations().isEmpty()) {
+      result.addError(ei, "JAXWS-RI module requires an implementation for each service interface.");
     }
 
     return result;

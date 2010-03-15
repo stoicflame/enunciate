@@ -134,6 +134,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         catch (MirroredTypeException e) {
           returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());
         }
+        returnTypeMirror.setDocComment(((DecoratedTypeMirror) getReturnType()).getDocComment());
       }
       else {
         returnTypeMirror = (DecoratedTypeMirror) getReturnType();

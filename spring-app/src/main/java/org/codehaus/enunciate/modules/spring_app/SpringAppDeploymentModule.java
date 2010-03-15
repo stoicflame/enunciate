@@ -377,7 +377,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       securityServlet.setClassname(DispatcherServlet.class.getName());
 
       if (getSecurityConfig().isEnableFormBasedLogin()) {
-        securityServlet.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getUrl());
+        securityFilter.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getUrl());
+        securityServlet.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getLoginPageURL());
       }
 
       if (getSecurityConfig().isEnableFormBasedLogout()) {

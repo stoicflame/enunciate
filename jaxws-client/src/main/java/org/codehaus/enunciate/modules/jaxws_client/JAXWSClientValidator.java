@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.jaxws_client;
 
 import org.codehaus.enunciate.contract.jaxb.*;
+import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.ConfigurableRules;
@@ -113,6 +114,19 @@ public class JAXWSClientValidator extends BaseValidator implements ConfigurableR
         }
       }
     }
+
+    if (ei.getEndpointImplementations().size() > 1) {
+      ArrayList<String> impls = new ArrayList<String>();
+      for (EndpointImplementation impl : ei.getEndpointImplementations()) {
+        impls.add(impl.getQualifiedName());
+      }
+      result.addError(ei, "Sorry, JAX-WS client module doesn't support two endpoint implementations for interface '" + ei.getQualifiedName() +
+        "'.  Found " + ei.getEndpointImplementations().size() + " implementations (" + impls.toString() + ").");
+    }
+    else if (ei.getEndpointImplementations().isEmpty()) {
+      result.addError(ei, "JAX-WS client module requires an implementation for each endpoint interface.");
+    }
+
     return result;
   }
 
