@@ -61,7 +61,7 @@ public class TestWebResult extends InAPTTestCase {
 
     WebResult webResult = docLitBareMethod.getWebResult();
     assertEquals("return", webResult.getName());
-    assertEquals("", webResult.getTargetNamespace());
+    assertEquals("urn:web-method-examples", webResult.getTargetNamespace());
     assertEquals("return", webResult.getPartName());
     assertEquals("WebMethodExamples.docLitBareMethodResponse", webResult.getMessageName());
     assertFalse(webResult.isInput());
@@ -89,7 +89,7 @@ public class TestWebResult extends InAPTTestCase {
     assertTrue(webResult.isHeader());
     assertFalse(webResult.isFault());
     assertEquals(WebMessagePart.ParticleType.ELEMENT, webResult.getParticleType());
-    assertEquals(new QName("urn:web-method-examples", "doc-lit-wrapped-return"), webResult.getParticleQName());
+    assertEquals(new QName("urn:docLitWrapped", "doc-lit-wrapped-return"), webResult.getParticleQName());
     assertTrue(webResult.isImplicitSchemaElement());
     assertEquals(1, webResult.getParts().size());
     assertEquals(new QName(null, "beanThree"), webResult.getTypeQName());

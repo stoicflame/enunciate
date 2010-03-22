@@ -58,7 +58,7 @@ public class TestGenerateDocsXml extends TestCase {
     enunciate.setConfig(config);
     enunciate.setTarget(Enunciate.Target.BUILD);
     enunciate.setRuntimeClasspath(getInAPTClasspath());
-    module.setBase(enunciate.createTempDir());
+    module.setBase(enunciate.createTempDir().getAbsolutePath());
     ClientLibraryArtifact artifact1 = new ClientLibraryArtifact("module1", "1", "lib1") {
 
       @Override

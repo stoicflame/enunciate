@@ -32,8 +32,8 @@
 
   <code>
 //instantiate a new service...
-${sample_service_method.declaringEndpointInterface.simpleName}ASync service =
-  ${sample_service_method.declaringEndpointInterface.simpleName}ASync.getInstance();
+${sample_service_method.declaringEndpointInterface.simpleName}Async service =
+  ${sample_service_method.declaringEndpointInterface.simpleName}Async.Util.getInstance();
 
 //make the asynchronous remote call to read the result...
 service.${sample_service_method.simpleName}([#list sample_service_method.webParameters as param]${param.simpleName}, [/#list]

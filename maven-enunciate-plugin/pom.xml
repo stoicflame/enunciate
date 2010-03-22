@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.19-RC1</version>
+    <version>1.19-RC2</version>
   </parent>
 
   <artifactId>maven-enunciate-plugin</artifactId>

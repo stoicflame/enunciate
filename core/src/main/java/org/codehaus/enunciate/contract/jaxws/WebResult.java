@@ -47,34 +47,28 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   private final boolean header;
   private final String name;
   private final String elementName;
-  private final String targetNamespace;
   private final String partName;
   private final WebMethod method;
   private final AdapterType adapterType;
+  private final javax.jws.WebResult annotation;
 
   protected WebResult(TypeMirror delegate, WebMethod method) {
     super(delegate);
     this.method = method;
 
-    javax.jws.WebResult annotation = method.getAnnotation(javax.jws.WebResult.class);
-
-    String targetNamespace = "";
-    if ((annotation != null) && (annotation.targetNamespace() != null) && (!"".equals(annotation.targetNamespace()))) {
-      targetNamespace = annotation.targetNamespace();
-    }
-    this.targetNamespace = targetNamespace;
+    this.annotation = method.getAnnotation(javax.jws.WebResult.class);
 
     String partName = "return";
-    if ((annotation != null) && (!"".equals(annotation.partName()))) {
-      partName = annotation.partName();
+    if ((this.annotation != null) && (!"".equals(this.annotation.partName()))) {
+      partName = this.annotation.partName();
     }
     this.partName = partName;
-    this.header = ((annotation != null) && (annotation.header()));
+    this.header = ((this.annotation != null) && (this.annotation.header()));
     this.adapterType = AdapterUtil.findAdapterType(method);
 
     String name = "return";
-    if ((annotation != null) && (annotation.name() != null) && (!"".equals(annotation.name()))) {
-      name = annotation.name();
+    if ((this.annotation != null) && (this.annotation.name() != null) && (!"".equals(this.annotation.name()))) {
+      name = this.annotation.name();
       this.elementName = name;
     }
     else if (!isHeader() && isImplicitSchemaElement()) {
@@ -108,6 +102,10 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
    * @return The namespace of the web result.
    */
   public String getTargetNamespace() {
+    String targetNamespace = isImplicitSchemaElement() ? method.getDeclaringEndpointInterface().getTargetNamespace() : "";
+    if ((this.annotation != null) && (this.annotation.targetNamespace() != null) && (!"".equals(this.annotation.targetNamespace()))) {
+      targetNamespace = this.annotation.targetNamespace();
+    }
     return targetNamespace;
   }
 
@@ -232,7 +230,7 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
       return getTypeQName();
     }
     else {      
-      return new QName(method.getDeclaringEndpointInterface().getTargetNamespace(), getElementName());
+      return new QName(getTargetNamespace(), getElementName());
     }
   }
 

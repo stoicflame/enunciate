@@ -181,8 +181,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeExampleJson = true;
   private boolean forceExampleJson = true;
   private URL xsltURL;
-  private File css;
-  private File base;
+  private String css;
+  private String base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
   private String docsDir = null;
   private String javadocTagHandling;
@@ -417,7 +417,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @return The cascading stylesheet to use.
    */
-  public File getCss() {
+  public String getCss() {
     return css;
   }
 
@@ -426,7 +426,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @param css The cascading stylesheet to use instead of the default.
    */
-  public void setCss(File css) {
+  public void setCss(String css) {
     this.css = css;
   }
 
@@ -436,7 +436,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @return The documentation "base".
    */
-  public File getBase() {
+  public String getBase() {
     return base;
   }
 
@@ -445,7 +445,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @param base The documentation "base".
    */
-  public void setBase(File base) {
+  public void setBase(String base) {
     this.base = base;
   }
 
@@ -751,7 +751,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         enunciate.extractBase(loadDefaultBase(), buildDir);
 
         if (this.css != null) {
-          enunciate.copyFile(this.css, new File(buildDir, "default.css"));
+          enunciate.copyFile(enunciate.resolvePath(this.css), new File(buildDir, "default.css"));
         }
       }
       else {
@@ -759,13 +759,16 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         enunciate.extractBase(discoveredBase, buildDir);
       }
     }
-    else if (this.base.isDirectory()) {
-      debug("Directory %s to be used as the documentation base.", this.base);
-      enunciate.copyDir(this.base, buildDir);
-    }
     else {
-      debug("Zip file %s to be extracted as the documentation base.", this.base);
-      enunciate.extractBase(new FileInputStream(this.base), buildDir);
+      File baseFile = enunciate.resolvePath(this.base);
+      if (baseFile.isDirectory()) {
+        debug("Directory %s to be used as the documentation base.", baseFile);
+        enunciate.copyDir(baseFile, buildDir);
+      }
+      else {
+        debug("Zip file %s to be extracted as the documentation base.", baseFile);
+        enunciate.extractBase(new FileInputStream(baseFile), buildDir);
+      }
     }
 
     for (SchemaInfo schemaInfo : getModel().getNamespacesToSchemas().values()) {

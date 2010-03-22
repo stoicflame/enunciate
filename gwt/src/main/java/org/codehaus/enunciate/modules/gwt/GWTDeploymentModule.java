@@ -926,11 +926,11 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     gwtUserDependency.setDescription("Base GWT classes.");
     gwtUserDependency.setGroupId("com.google.gwt");
     gwtUserDependency.setURL("http://code.google.com/webtoolkit/");
-    gwtUserDependency.setVersion("1.5.2");
+    gwtUserDependency.setVersion(String.format("%s.%s", this.gwtVersion[0], this.gwtVersion[1]));
     clientDeps.add(gwtUserDependency);
 
     ClientLibraryArtifact gwtClientArtifact = new ClientLibraryArtifact(getName(), "gwt.client.library", "GWT Client Library");
-    gwtClientArtifact.setPlatform("JavaScript/GWT (Version 1.4.59)");
+    gwtClientArtifact.setPlatform("JavaScript/GWT");
     //read in the description from file:
     gwtClientArtifact.setDescription(readResource("library_description.fmt"));
     NamedFileArtifact clientArtifact = new NamedFileArtifact(getName(), "gwt.client.jar", clientJar);
@@ -940,9 +940,6 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     gwtClientArtifact.addArtifact(clientArtifact);
     gwtClientArtifact.setDependencies(clientDeps);
     enunciate.addArtifact(clientArtifact);
-    if (clientJarDownloadable) {
-      enunciate.addArtifact(gwtClientArtifact);
-    }
   }
 
   /**
