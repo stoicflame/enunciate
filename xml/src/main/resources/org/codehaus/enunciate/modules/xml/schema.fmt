@@ -156,83 +156,85 @@
       [#if !typeDef.contentType.empty]
       <${xs}:${typeDef.compositorName}>
         [#list typeDef.elements as element]
-          [#if element.wrapped]
+          [#if !accessorOverridesAnother(element)]
+            [#if element.wrapped]
         <${xs}:element name="${element.wrapperName}" minOccurs="0">
-            [#if element.docValue?exists]
+              [#if element.docValue?exists]
           <${xs}:annotation>
             <${xs}:documentation>
               <![CDATA[${element.docValue}]]>
             </${xs}:documentation>
           </${xs}:annotation>
-            [/#if]
+              [/#if]
           <${xs}:complexType>
             <${xs}:sequence>
-          [/#if]
-          [#if ((element.elementRefs!false) || (element.choices?size > 1))]
+            [/#if]
+            [#if ((element.elementRefs!false) || (element.choices?size > 1))]
               <${xs}:choice minOccurs="0" maxOccurs="unbounded">
-            [#list element.choices as elementChoice]
-              [#if elementChoice.ref?exists]
+              [#list element.choices as elementChoice]
+                [#if elementChoice.ref?exists]
                 <${xs}:element ref="${elementChoice.ref}"/>
-              [#elseif elementChoice.baseType.anonymous]
+                [#elseif elementChoice.baseType.anonymous]
                 <${xs}:element name="${elementChoice.name}">
                   [@processAnonymousType type=elementChoice.baseType/]
                 </${xs}:element>
-              [#else]
+                [#else]
                 <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
-              [/#if]
-            [/#list]
+                [/#if]
+              [/#list]
               </${xs}:choice>
-          [#else]
-            [#if element.ref?exists]
+            [#else]
+              [#if element.ref?exists]
               <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-              [#if element.docValue?exists]
+                [#if element.docValue?exists]
               <${xs}:annotation>
                 <${xs}:documentation>
                   <![CDATA[${element.docValue}]]>
                 </${xs}:documentation>
               </${xs}:annotation>
-              [/#if]
+                [/#if]
               </${xs}:element>
-            [#elseif element.baseType.anonymous]
+              [#elseif element.baseType.anonymous]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-              [#if element.docValue?exists]
+                [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
                     <![CDATA[${element.docValue}]]>
                   </${xs}:documentation>
                 </${xs}:annotation>
-              [/#if]
+                [/#if]
                 [@processAnonymousType type=element.baseType/]
               </${xs}:element>
-            [#elseif element.xmlList]
+              [#elseif element.xmlList]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-              [#if element.docValue?exists]
+                [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
                     <![CDATA[${element.docValue}]]>
                   </${xs}:documentation>
                 </${xs}:annotation>
-              [/#if]
+                [/#if]
                 <${xs}:simpleType>
                   <${xs}:list itemType="${element.baseType.qname}"/>
                 </${xs}:simpleType>
               </${xs}:element>
-            [#else]
+              [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-              [#if element.docValue?exists]
+                [#if element.docValue?exists]
                 <${xs}:annotation>
                   <${xs}:documentation>
                     <![CDATA[${element.docValue}]]>
                   </${xs}:documentation>
                 </${xs}:annotation>
-              [/#if]
+                [/#if]
               </${xs}:element>
+              [/#if]
             [/#if]
-          [/#if]
-          [#if element.wrapped]
+            [#if element.wrapped]
             </${xs}:sequence>
           </${xs}:complexType>
         </${xs}:element>
+            [/#if]
           [/#if]
         [/#list]
         [#if typeDef.anyElement?exists]
@@ -258,37 +260,39 @@
 [#t]
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
-      [#if attribute.ref?exists]
+      [#if !accessorOverridesAnother(attribute)]
+        [#if attribute.ref?exists]
       <${xs}:attribute[#if attribute.required] use="required"[/#if] ref="${attribute.ref}">
-        [#if attribute.docValue?exists]
+          [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
         </${xs}:annotation>
-        [/#if]
+          [/#if]
       </${xs}:attribute>
-      [#elseif attribute.baseType.anonymous]
+        [#elseif attribute.baseType.anonymous]
       <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if]>
-        [#if attribute.docValue?exists]
+          [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
         </${xs}:annotation>
-        [/#if]
-        [@processAnonymousType type=attribute.baseType/]
+          [/#if]
+          [@processAnonymousType type=attribute.baseType/]
       </${xs}:attribute>
-      [#else]
+        [#else]
       <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}">
-        [#if attribute.docValue?exists]
+          [#if attribute.docValue?exists]
         <${xs}:annotation>
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
         </${xs}:annotation>
-        [/#if]
+          [/#if]
       </${xs}:attribute>
+        [/#if]
       [/#if]
     [/#list]
     [#if typeDef.hasAnyAttribute]

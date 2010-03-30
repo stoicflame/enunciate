@@ -1113,18 +1113,12 @@ public class TestFullXMLAPI extends TestCase {
     XSModelGroup modelGroup = particle.getTerm().asModelGroup();
     assertEquals(XSModelGroup.Compositor.SEQUENCE, modelGroup.getCompositor());
     XSParticle[] childElements = modelGroup.getChildren();
-    assertEquals(4, childElements.length);
+    assertEquals(3, childElements.length);
     for (XSParticle childElement : childElements) {
       assertTrue(childElement.getTerm().isElementDecl());
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
-      if ("id".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
-        XSType relationshipIdType = elementDecl.getType();
-        assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", relationshipIdType);
-      }
-      else if ("type".equals(childElementName)) {
+      if ("type".equals(childElementName)) {
         assertEquals(0, childElement.getMinOccurs());
         assertEquals(1, childElement.getMaxOccurs());
         XSType relationshipTypeType = elementDecl.getType();

@@ -20,7 +20,7 @@ Template library for WADL.
 [/#if]
 <${wadl}:application xmlns:${wadl}="http://research.sun.com/wadl/2006/10" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
-  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.18"/>
+  <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.19"/>
   
   <${wadl}:grammars>
     [@forEachSchema]

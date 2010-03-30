@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <enunciate label="ifyouwannabecool"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.18.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.19.xsd">
   <deployment host="www.ifyouwannabecool.com" context="api"/>
   <namespaces>
     <namespace id="api" uri="http://api.ifyouwannabecool.com/"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.18.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.19.xsd">
   <modules>
     <spring-app>
       <springImport file="custom-spring.xml"/>

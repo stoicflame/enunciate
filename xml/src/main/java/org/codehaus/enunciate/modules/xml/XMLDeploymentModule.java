@@ -29,6 +29,7 @@ import org.codehaus.enunciate.modules.xml.config.XMLRuleSet;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 import org.apache.commons.digester.RuleSet;
@@ -269,6 +270,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
     model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
     model.put("wadlStylesheetUri", this.wadlStylesheetUri);
+    model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);
