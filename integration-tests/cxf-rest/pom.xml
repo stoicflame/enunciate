@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-cxf-rest</artifactId>
-  <version>1.19</version>
+  <version>1.20-SNAPSHOT</version>
   <name>Enunciate - CXF/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
   <packaging>war</packaging>
