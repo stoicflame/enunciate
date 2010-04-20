@@ -41,6 +41,8 @@ import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Item;
 import com.sun.jersey.samples.storageservice.MemoryStore;
+import org.codehaus.enunciate.jaxrs.TypeHint;
+
 import java.net.URI;
 import java.util.Iterator;
 import javax.ws.rs.DELETE;
@@ -94,6 +96,7 @@ public class ContainerResource {
     }    
 
     @PUT
+    @TypeHint (Container.class)
     public Response putContainer() {
         System.out.println("PUT CONTAINER " + container);
         
