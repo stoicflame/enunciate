@@ -145,14 +145,6 @@
   ${el.@@markup}
 
   [/#list]
-  [#list source1["security-constraint"] as el]
-  ${el.@@markup}
-
-  [/#list]
-  [#list source2["security-constraint"] as el]
-  ${el.@@markup}
-
-  [/#list]
   [#if source1["login-config"]?size > 0]
   ${source1["login-config"].@@markup}
 
