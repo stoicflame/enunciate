@@ -18,7 +18,6 @@ package org.codehaus.enunciate.main;
 
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
-import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.APIImport;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
@@ -26,10 +25,8 @@ import org.codehaus.enunciate.main.webapp.WebAppFragmentComparator;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.util.AntPatternMatcher;
-import org.codehaus.enunciate.util.PackageInfoWriter;
 import org.xml.sax.SAXException;
 
-import javax.xml.ws.Holder;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
@@ -97,6 +94,7 @@ public class Enunciate {
   private final List<String> sourceFiles = new ArrayList<String>();
   private final Set<File> additionalSourceRoots = new TreeSet<File>();
   private final Set<WebAppFragment> webAppFragments = new TreeSet<WebAppFragment>(new WebAppFragmentComparator());
+  private final List<ClasspathHandler> classpathHandlers = new ArrayList<ClasspathHandler>();
 
   public static void main(String[] args) throws Exception {
     Main.main(args);
@@ -295,9 +293,38 @@ public class Enunciate {
       setGenerateDir(genDir);
     }
 
+    // we need to invoke APT with (1) the source files APT is to read and (2) the additional classes, not on the classpath,
+    // that need to be "imported" so Enunciate can include them in the API.
     List<String> sourceFiles = new ArrayList<String>(Arrays.asList(getSourceFiles()));
     List<String> importClasses = new ArrayList<String>();
-    final Map<String, File> classes2sources = scanForClassesToImport();
+
+    //set up the list of classpath handlers for scanning.
+    ArrayList<ClasspathHandler> handlers = new ArrayList<ClasspathHandler>();
+    ImportedClassesClasspathHandler importedClassesHandler = new ImportedClassesClasspathHandler(this);
+    PackageInfoClasspathHandler packageInfoHandler = new PackageInfoClasspathHandler(this);
+    handlers.add(importedClassesHandler);
+    handlers.add(packageInfoHandler);
+    handlers.addAll(this.classpathHandlers);
+
+    //now scan the classpath.
+    scanClasspath(handlers);
+
+    // initialize the list classes that were imported.
+    final Map<String, File> classes2sources = importedClassesHandler.getClassesToSources();
+
+    //now add any explicit api imports that are not patterns (i.e. they're assumed to be class names).
+    if (this.config != null && this.config.getAPIImports() != null && !this.config.getAPIImports().isEmpty()) {
+      AntPatternMatcher matcher = new AntPatternMatcher();
+      matcher.setPathSeparator(".");
+      for (APIImport apiImport : this.config.getAPIImports()) {
+        if (!matcher.isPattern(apiImport.getPattern()) && !classes2sources.containsKey(apiImport.getPattern())) {
+          warn("Class %s was explicitly imported, but it was not found on the classpath. We'll try to import it anyway.", apiImport.getPattern());
+          classes2sources.put(apiImport.getPattern(), null);
+        }
+      }
+    }
+
+    //iterate through the imported classes and put them in the right bag (sources if we have them, otherwise imported classes).
     for (Map.Entry<String, File> importClass : classes2sources.entrySet()) {
       if (importClass.getValue() != null) {
         debug("Class %s has a source file that Enunciate will use.", importClass.getKey());
@@ -306,6 +333,14 @@ public class Enunciate {
       else {
         importClasses.add(importClass.getKey());
       }
+    }
+
+    // APT has a bug where it won't find the package-info file unless it's in source-code form. So since we don't know
+    // which package-info files are relevant to the public api, we have to include the source files for all package-info
+    // files.
+    Set<File> packageInfoFiles = packageInfoHandler.getPackageInfoSources();
+    for (File packageInfoFile : packageInfoFiles) {
+      sourceFiles.add(packageInfoFile.getAbsolutePath());
     }
 
     if (sourceFiles.isEmpty()) {
@@ -322,52 +357,34 @@ public class Enunciate {
   }
 
   /**
-   * Scans the Enunciate classpath for classes to be imported.
-   *
-   * @return The classes to be imported, associated with their source file if it was found.
+   * Scans the Enunciate classpath, handling each entry according too each {@link ClasspathHandler}.
    */
-  protected Map<String, File> scanForClassesToImport() throws IOException {
-    final Map<String, File> classes2sources = new HashMap<String, File>();
-    File tempSourcesDir = createTempDir();
+  protected void scanClasspath(final Collection<ClasspathHandler> classpathHandlers) throws IOException {
     LinkedList<String> classpathToScan = new LinkedList<String>(Arrays.asList(getEnunciateRuntimeClasspath().split(File.pathSeparator)));
     while (!classpathToScan.isEmpty()) {
       String pathItem = classpathToScan.removeFirst();
       final File pathFile = new File(pathItem);
-      final Holder<Boolean> classesImported = new Holder<Boolean>(false);
-      final Map<String, File> foundClasses2Sources = new HashMap<String, File>();
       if (pathFile.exists()) {
+        boolean lookupSourceEntry = false;
+
         //scan the file on the classpath to find any classes that are to be imported.
         if (pathFile.isDirectory()) {
+          for (ClasspathHandler handler : classpathHandlers) {
+            handler.startPathEntry(pathFile);
+          }
+
           visitFiles(pathFile, null, new FileVisitor() {
             public void visit(File file) {
-              String path = pathFile.toURI().relativize(file.toURI()).getPath();
-              if (path.endsWith(".class")) {
-                String classname = path.substring(0, path.length() - 6).replace('/', '.').replace('$', '.');
-                debug("Noticed class %s at %s.", classname, file);
-                foundClasses2Sources.put(classname, foundClasses2Sources.get(classname));
-              }
-              else if (path.endsWith(".java")) {
-                String classname = path.substring(0, path.length() - 5).replace('/', '.');
-                debug("Noticed the source for class %s at %s.", classname, file);
-                foundClasses2Sources.put(classname, pathFile);
-              }
-              else if ("META-INF/enunciate/api-exports".equals(path)) {
-                debug("Importing classes listed in %s.", file);
-                try {
-                  FileInputStream autoImportList = new FileInputStream(file);
-                  Set<String> autoImports = readAutoImports(autoImportList);
-                  autoImportList.close();
-                  for (String autoImport : autoImports) {
-                    classesImported.value = classesImported.value || !classes2sources.containsKey(autoImport);
-                    classes2sources.put(autoImport, classes2sources.get(autoImport));
-                  }
-                }
-                catch (IOException e) {
-                  warn("Unable to export classes listed in %s: %s", file, e.getMessage());
-                }
+              FileClasspathResource entry = new FileClasspathResource(file, pathFile);
+              for (ClasspathHandler handler : classpathHandlers) {
+                handler.handleResource(entry);
               }
             }
           });
+
+          for (ClasspathHandler handler : classpathHandlers) {
+            lookupSourceEntry |= handler.endPathEntry(pathFile);
+          }
         }
         else {
           //assume it's a jar file.
@@ -389,100 +406,34 @@ public class Enunciate {
             }
           }
 
+          for (ClasspathHandler handler : classpathHandlers) {
+            handler.startPathEntry(pathFile);
+          }
+
           Enumeration<JarEntry> entries = jarFile.entries();
           while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (!entry.isDirectory()) {
-              String path = entry.getName();
-              if (path.endsWith(".class")) {
-                String classname = path.substring(0, path.length() - 6).replace('/', '.').replace('$', '.');
-                if (classname.endsWith(".package-info")) {
-                  //APT has a bug where it won't find the package-info file unless it's on the source path. So we have to generate
-                  //the source from bytecode.
-                  if (foundClasses2Sources.get(classname) == null) {
-                    File packageSourceFile = new File(tempSourcesDir, path.substring(0, path.length() - 6) + ".java");
-                    debug("Generating package source file %s...", packageSourceFile);
-                    writePackageSourceFile(jarFile.getInputStream(entry), packageSourceFile);
-                    foundClasses2Sources.put(classname, packageSourceFile);
-                  }
-                }
-                else {
-                  debug("Noticed class %s in jar file %s.", classname, pathFile);
-                  foundClasses2Sources.put(classname, foundClasses2Sources.get(classname));
-                }
-              }
-              else if (path.endsWith(".java")) {
-                String classname = path.substring(0, path.length() - 5).replace('/', '.');
-                File sourcesFile = new File(tempSourcesDir, path);
-                debug("Noticed the source for class %s in jar file %s, extracting to %s.", classname, pathFile, sourcesFile);
-                try {
-                  InputStream in = jarFile.getInputStream(entry);
-                  sourcesFile.getParentFile().mkdirs();
-                  FileOutputStream out = new FileOutputStream(sourcesFile);
-                  byte[] buffer = new byte[1024 * 2]; //2 kb buffer should suffice.
-                  int len;
-                  while ((len = in.read(buffer)) > 0) {
-                    out.write(buffer, 0, len);
-                  }
-                  out.flush();
-                  out.close();
-                  in.close();
-                  foundClasses2Sources.put(classname, sourcesFile);
-                }
-                catch (IOException e) {
-                  warn("Unable to extract source file %s (%s).", sourcesFile, e.getMessage());
-                }
-              }
-              else if ("META-INF/enunciate/api-exports".equals(path)) {
-                debug("Importing classes listed in META-INF/enunciate/api-exports in %s.", pathFile);
-                try {
-                  InputStream in = jarFile.getInputStream(entry);
-                  Set<String> autoImports = readAutoImports(in);
-                  in.close();
-                  for (String autoImport : autoImports) {
-                    classesImported.value = classesImported.value || !classes2sources.containsKey(autoImport);
-                    classes2sources.put(autoImport, classes2sources.get(autoImport));
-                  }
-                }
-                catch (IOException e) {
-                  warn("Unable to read export list found in %s: %s.", pathFile, e.getMessage());
-                }
-              }
+            JarClasspathResource entry = new JarClasspathResource(jarFile, entries.nextElement());
+            for (ClasspathHandler handler : classpathHandlers) {
+              handler.handleResource(entry);
             }
+          }
+
+          for (ClasspathHandler handler : classpathHandlers) {
+            lookupSourceEntry |= handler.endPathEntry(pathFile);
+          }
+        }
+
+        if (lookupSourceEntry) {
+          String sourceEntry = lookupSourceEntry(pathFile);
+          if (sourceEntry != null) {
+            classpathToScan.add(sourceEntry);
           }
         }
       }
       else {
         debug("Classpath entry %s cannot be scanned because it doesn't exist on the filesystem.", pathItem);
       }
-
-      classesImported.value = copyImportedClasses(foundClasses2Sources, classes2sources) || classesImported.value;
-      for (DeploymentModule module : this.config.getAllModules()) {
-        if (module instanceof EnunciateClasspathListener) {
-          ((EnunciateClasspathListener) module).onClassesFound(foundClasses2Sources.keySet());
-        }
-      }
-
-      if (classesImported.value) {
-        String sourceEntry = lookupSourceEntry(pathFile);
-        if (sourceEntry != null) {
-          classpathToScan.add(sourceEntry);
-        }
-      }
     }
-
-    //now add any explicit api imports that are not patterns (i.e. they're assumed to be class names).
-    if (this.config != null && this.config.getAPIImports() != null && !this.config.getAPIImports().isEmpty()) {
-      AntPatternMatcher matcher = new AntPatternMatcher();
-      matcher.setPathSeparator(".");
-      for (APIImport apiImport : this.config.getAPIImports()) {
-        if (!matcher.isPattern(apiImport.getPattern()) && !classes2sources.containsKey(apiImport.getPattern())) {
-          warn("Class %s was explicitly imported, but it was not found on the classpath. We'll try to import it anyway.", apiImport.getPattern());
-          classes2sources.put(apiImport.getPattern(), null);
-        }
-      }
-    }
-    return classes2sources;
   }
 
   /**
@@ -493,84 +444,6 @@ public class Enunciate {
    */
   protected String lookupSourceEntry(File pathEntry) {
     return null;
-  }
-
-  /**
-   * Write the package-info.java source to the specified file.
-   *
-   * @param bytecode The bytecode for the package-info.class
-   * @param packageSourceFile The source file.
-   */
-  protected void writePackageSourceFile(InputStream bytecode, File packageSourceFile) throws IOException {
-    packageSourceFile.getParentFile().mkdirs();
-    PackageInfoWriter writer = new PackageInfoWriter(new FileWriter(packageSourceFile));
-    writer.write(bytecode);
-    writer.close();
-  }
-
-  /**
-   * Copy the relevant found classes that are imported to the specified map.
-   *
-   * @param foundClasses2Sources the found classes.
-   * @param classes2sources      the target map.
-   * @return whether any of the found classes were imported.
-   */
-  protected boolean copyImportedClasses(Map<String, File> foundClasses2Sources, Map<String, File> classes2sources) {
-    boolean imported = false;
-    for (Map.Entry<String, File> foundEntry : foundClasses2Sources.entrySet()) {
-      if (foundEntry.getKey().endsWith(".package-info")) {
-        File sourceFile = foundEntry.getValue();
-        if (sourceFile != null) {
-          //APT has a bug where it won't find the package-info file unless it's on the source path.
-          imported |= !classes2sources.containsKey(foundEntry.getKey());
-          classes2sources.put(foundEntry.getKey(), sourceFile);
-        }
-      }
-      else if (this.config != null && this.config.getAPIImports() != null && !this.config.getAPIImports().isEmpty()) {
-        AntPatternMatcher matcher = new AntPatternMatcher();
-        matcher.setPathSeparator(".");
-        for (APIImport apiImport : this.config.getAPIImports()) {
-          String pattern = apiImport.getPattern();
-          if (pattern != null) {
-            if (!classes2sources.containsKey(foundEntry.getKey())) {
-              if (pattern.equals(foundEntry.getKey())) {
-                debug("Class %s will be imported because it was explicitly listed.", foundEntry.getKey());
-                imported |= !classes2sources.containsKey(foundEntry.getKey());
-                classes2sources.put(foundEntry.getKey(), apiImport.isSeekSource() ? foundEntry.getValue() : null);
-              }
-              else if (matcher.isPattern(pattern) && matcher.match(pattern, foundEntry.getKey())) {
-                debug("Class %s will be imported because it matches pattern %s.", foundEntry.getKey(), pattern);
-                imported |= !classes2sources.containsKey(foundEntry.getKey());
-                classes2sources.put(foundEntry.getKey(), apiImport.isSeekSource() ? foundEntry.getValue() : null);
-              }
-            }
-            else if (foundEntry.getValue() != null) {
-              imported |= !classes2sources.containsKey(foundEntry.getKey());
-              classes2sources.put(foundEntry.getKey(), foundEntry.getValue());
-            }
-          }
-        }
-      }
-    }
-
-    return imported;
-  }
-
-  /**
-   * Read the set of auto-imports from the input stream.
-   *
-   * @param in The input stream.
-   * @return The auto imports.
-   */
-  private Set<String> readAutoImports(InputStream in) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    Set<String> autoImports = new TreeSet<String>();
-    String classname = reader.readLine();
-    while (classname != null) {
-      autoImports.add(classname);
-      classname = reader.readLine();
-    }
-    return autoImports;
   }
 
   /**
@@ -602,11 +475,11 @@ public class Enunciate {
       deploymentModule.init(this);
 
       if (!deploymentModule.isDisabled() && deploymentModule instanceof SpecProviderModule) {
-        if (((SpecProviderModule)deploymentModule).isJaxwsProvider()) {
+        if (((SpecProviderModule) deploymentModule).isJaxwsProvider()) {
           jaxwsProviderModules.add(deploymentModule.getName());
         }
 
-        if (((SpecProviderModule)deploymentModule).isJaxrsProvider()) {
+        if (((SpecProviderModule) deploymentModule).isJaxrsProvider()) {
           jaxrsProviderModules.add(deploymentModule.getName());
         }
       }
@@ -626,7 +499,7 @@ public class Enunciate {
           conjunction = ", ";
         }
       }
-      throw new EnunciateException("There are multiple modules that are configured to be JAX-WS providers: " + moduleList + 
+      throw new EnunciateException("There are multiple modules that are configured to be JAX-WS providers: " + moduleList +
         ". You might have unnecessary modules on the classpath. Anyway, you must disable all but one JAX-WS provider module.");
     }
 
@@ -708,7 +581,7 @@ public class Enunciate {
    * Creates a temporary file. Same as {@link File#createTempFile(String, String)} but in the Enunciate scratch directory.
    *
    * @param baseName The base name of the file.
-   * @param suffix The suffix.
+   * @param suffix   The suffix.
    * @return The temp file.
    */
   public File createTempFile(String baseName, String suffix) throws IOException {
@@ -981,8 +854,8 @@ public class Enunciate {
   /**
    * Copy an entire directory from one place to another.
    *
-   * @param from The source directory.
-   * @param to   The destination directory.
+   * @param from     The source directory.
+   * @param to       The destination directory.
    * @param excludes The files to exclude from the copy
    */
   public void copyDir(File from, File to, File... excludes) throws IOException {
@@ -993,7 +866,8 @@ public class Enunciate {
         to.mkdirs();
       }
 
-      COPY_LOOP : for (File file : files) {
+      COPY_LOOP:
+      for (File file : files) {
         if (excludes != null) {
           for (File exclude : excludes) {
             if (file.equals(exclude)) {
@@ -1627,6 +1501,15 @@ public class Enunciate {
    */
   public void addWebAppFragment(WebAppFragment fragment) {
     this.webAppFragments.add(fragment);
+  }
+
+  /**
+   * Add a classpath handler.
+   *
+   * @param handler The classpath handler.
+   */
+  public void addClasspathHandler(ClasspathHandler handler) {
+    this.classpathHandlers.add(handler);
   }
 
   /**

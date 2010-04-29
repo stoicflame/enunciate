@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Collections;
 
@@ -15,7 +16,7 @@ import org.codehaus.enunciate.modules.DeploymentModule;
 /**
  * @author Ryan Heaton
  */
-public class TestEnunciate extends TestCase {
+public class TestImportedClassesClasspathHandler extends TestCase {
 
   /**
    * tests for classes to import.
@@ -72,8 +73,10 @@ public class TestEnunciate extends TestCase {
     apiImport.setPattern("some.other.class.that.is.Explicit");
     config.addAPIImport(apiImport);
     enunciate.setConfig(config);
-    Map<String,File> classes2Import = enunciate.scanForClassesToImport();
-    assertTrue(classes2Import.containsKey("some.other.class.that.is.Explicit"));
+
+    ImportedClassesClasspathHandler handler = new ImportedClassesClasspathHandler(enunciate);
+    enunciate.scanClasspath(Arrays.asList((ClasspathHandler) handler));
+    Map<String,File> classes2Import = handler.getClassesToSources();
     assertNull(classes2Import.get("some.other.class.that.is.Explicit"));
     assertNotNull(classes2Import.get("org.codehaus.enunciate.pckg1.SampleClassOne"));
     assertNotNull(classes2Import.get("org.codehaus.enunciate.pckg1.with.nested.pckg.SampleClassTwo"));

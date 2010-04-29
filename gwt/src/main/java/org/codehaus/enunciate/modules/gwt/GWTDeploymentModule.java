@@ -381,7 +381,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     super.initModel(model);
 
     if (!isDisabled()) {
-      if (!gwtRtFound) {
+      if (!gwtRtFound && !isGenerateJsonOverlays()) {
         info("GWT runtime wasn't found on the classpath. If you're doing GWT-RPC, you're going to fail at runtime.");
       }
     }
