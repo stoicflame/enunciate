@@ -40,10 +40,12 @@ public class GWTValidator extends BaseValidator {
   private final boolean enforceNoFieldAccessors;
   private final boolean enforceNamespaceConformance;
   private final String gwtModuleNamespace;
+  private final Set<String> knownGwtPackages;
   private final Set<String> unsupportedTypes = new HashSet<String>();
 
-  public GWTValidator(String gwtModuleNamespace, boolean enforceNamespaceConformance, boolean enforceNoFieldAccessors) {
+  public GWTValidator(String gwtModuleNamespace, Set<String> knownGwtPackages, boolean enforceNamespaceConformance, boolean enforceNoFieldAccessors) {
     this.gwtModuleNamespace = gwtModuleNamespace;
+    this.knownGwtPackages = knownGwtPackages;
     unsupportedTypes.add(javax.xml.datatype.Duration.class.getName());
     unsupportedTypes.add(java.awt.Image.class.getName());
     unsupportedTypes.add(javax.xml.transform.Source.class.getName());
@@ -100,6 +102,17 @@ public class GWTValidator extends BaseValidator {
     return result;
   }
 
+  private boolean isKnownGwtType(TypeDeclaration declaration) {
+    String declPackage = declaration.getPackage() == null ? "" : declaration.getPackage().getQualifiedName();
+    for (String knownGwtPackage : knownGwtPackages) {
+      if (declPackage.startsWith(knownGwtPackage)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   @Override
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
     ValidationResult result = super.validateComplexType(complexType);
@@ -108,7 +121,9 @@ public class GWTValidator extends BaseValidator {
         result.addError(complexType, "The mapping from GWT to JAXB requires a public no-arg constructor.");
       }
 
-      if ((this.enforceNamespaceConformance) && (!complexType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
+      if ((this.enforceNamespaceConformance)
+        && (!complexType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))
+        && (isKnownGwtType(complexType))) {
         result.addError(complexType, String.format("The package of the complex type, %s, must start with the GWT module namespace, %s.", complexType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
@@ -158,7 +173,9 @@ public class GWTValidator extends BaseValidator {
   public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
     ValidationResult result = super.validateSimpleType(simpleType);
     if (!isGWTTransient(simpleType)) {
-      if ((this.enforceNamespaceConformance) && (!simpleType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
+      if ((this.enforceNamespaceConformance)
+        && (!simpleType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))
+        && (!isKnownGwtType(simpleType))) {
         result.addError(simpleType, String.format("The package of the simple type, %s, must start with the GWT module namespace, %s.", simpleType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 
@@ -174,7 +191,9 @@ public class GWTValidator extends BaseValidator {
   public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
     ValidationResult result = super.validateEnumType(enumType);
     if (!isGWTTransient(enumType)) {
-      if ((this.enforceNamespaceConformance) && (!enumType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
+      if ((this.enforceNamespaceConformance)
+        && (!enumType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))
+        && (!isKnownGwtType(enumType))) {
         result.addError(enumType, String.format("The package of the enum type, %s, must start with the GWT module namespace, %s.", enumType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
     }

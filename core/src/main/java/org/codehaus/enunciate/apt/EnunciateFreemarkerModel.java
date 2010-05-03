@@ -157,6 +157,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     knownNamespaces.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
     knownNamespaces.put("http://ws-i.org/profiles/basic/1.1/xsd", "wsi");
     knownNamespaces.put("http://research.sun.com/wadl/2006/10", "wadl");
+    knownNamespaces.put("http://www.w3.org/XML/1998/namespace", "xml");
 
     return knownNamespaces;
   }
