@@ -123,7 +123,7 @@ public class GWTValidator extends BaseValidator {
 
       if ((this.enforceNamespaceConformance)
         && (!complexType.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))
-        && (isKnownGwtType(complexType))) {
+        && (!isKnownGwtType(complexType))) {
         result.addError(complexType, String.format("The package of the complex type, %s, must start with the GWT module namespace, %s.", complexType.getPackage().getQualifiedName(), gwtModuleNamespace));
       }
 

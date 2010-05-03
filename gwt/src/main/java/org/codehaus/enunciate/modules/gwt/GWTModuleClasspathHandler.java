@@ -70,13 +70,13 @@ public class GWTModuleClasspathHandler implements ClasspathHandler {
             Element node = (Element) sourceNodes.item(i);
             String subPackage = node.getAttribute("path");
             String pckg = modulePackage + "." + subPackage;
-            enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.");
+            enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.", pckg);
             this.sourcePackagesToModules.put(pckg, modulename);
           }
         }
         else {
           String pckg = modulePackage + ".client";
-          enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.");
+          enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.", pckg);
           this.sourcePackagesToModules.put(pckg, modulename);
         }
       }

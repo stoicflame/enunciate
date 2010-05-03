@@ -28,6 +28,11 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
   public void handleResource(ClasspathResource resource) {
     String path = resource.getPath();
 
+    if (path.startsWith("com/google/gwt")) {
+      //we're assuming gwt doesn't have any enunciate-model-relevant annotations... 
+      return;
+    }
+
     //we're only going to notice the packages packed up in jars. This is to avoid duplicate package-info.java files. Someday, we may need
     //to revisit this.
     if (resource instanceof JarClasspathResource) {
@@ -35,13 +40,13 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
         //APT has a bug where it won't find the package-info file unless it's on the source path. So we have to generate
         //the source from bytecode.
         File sourceFile = new File(tempSourcesDir, path.substring(0, path.length() - 6) + ".java");
-        if (!packageInfoSources.containsKey(resource.getPath())) {
+        if (!packageInfoSources.containsKey(path)) {
           enunciate.debug("Generating package source file %s...", sourceFile);
           try {
             InputStream resourceStream = resource.read();
             writePackageSourceFile(resourceStream, sourceFile);
             resourceStream.close();
-            packageInfoSources.put(resource.getPath(), sourceFile);
+            packageInfoSources.put(path, sourceFile);
           }
           catch (IOException e) {
             enunciate.warn("Unable to generate package source file %s (%s).", sourceFile, e.getMessage());
@@ -63,7 +68,7 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
           out.flush();
           out.close();
           in.close();
-          packageInfoSources.put(resource.getPath(), sourceFile);
+          packageInfoSources.put(path, sourceFile);
         }
         catch (IOException e) {
           enunciate.warn("Unable to extract source file %s (%s).", sourceFile, e.getMessage());

@@ -1,6 +1,8 @@
 package org.codehaus.enunciate.main;
 
+import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.APIImport;
+import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.util.AntPatternMatcher;
 
 import java.io.*;
@@ -88,6 +90,15 @@ public class ImportedClassesClasspathHandler implements ClasspathHandler {
   }
 
   public boolean endPathEntry(File pathEntry) {
+    if (this.enunciate.getConfig() != null) {
+      Set<String> classesFound = this.currentEntryClassesToSources.keySet();
+      for (DeploymentModule deploymentModule : this.enunciate.getConfig().getEnabledModules()) {
+        if (deploymentModule instanceof EnunciateClasspathListener) {
+          ((EnunciateClasspathListener)deploymentModule).onClassesFound(classesFound);
+        }
+      }
+    }
+
     this.classesImportedFromCurrentEntry = copyImportedClasses(this.currentEntryClassesToSources, this.classesToSources) || this.classesImportedFromCurrentEntry;
 
     this.currentEntry = null;
