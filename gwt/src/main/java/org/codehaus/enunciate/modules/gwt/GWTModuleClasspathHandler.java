@@ -12,15 +12,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ryan Heaton
  */
 public class GWTModuleClasspathHandler implements ClasspathHandler {
 
-  private final Set<String> gwtSourcePackages = new TreeSet<String>();
+  private final Map<String, String> sourcePackagesToModules = new HashMap<String, String>();
   private final DocumentBuilder documentBuilder;
   private final Enunciate enunciate;
 
@@ -37,8 +37,12 @@ public class GWTModuleClasspathHandler implements ClasspathHandler {
     }
   }
 
-  public Set<String> getGwtSourcePackages() {
-    return gwtSourcePackages;
+  public boolean isKnownGwtType(String pckg) {
+    return sourcePackagesToModules.containsKey(pckg);
+  }
+
+  public Map<String, String> getSourcePackagesToModules() {
+    return sourcePackagesToModules;
   }
 
   public void startPathEntry(File pathEntry) {
@@ -61,12 +65,19 @@ public class GWTModuleClasspathHandler implements ClasspathHandler {
         resourceStream.close();
 
         NodeList sourceNodes = document.getDocumentElement().getElementsByTagName("source");
-        for (int i = 0; i < sourceNodes.getLength(); i++) {
-          Element node = (Element) sourceNodes.item(i);
-          String subPackage = node.getAttribute("path");
-          String pckg = modulePackage + "." + subPackage;
+        if (sourceNodes.getLength() > 0) {
+          for (int i = 0; i < sourceNodes.getLength(); i++) {
+            Element node = (Element) sourceNodes.item(i);
+            String subPackage = node.getAttribute("path");
+            String pckg = modulePackage + "." + subPackage;
+            enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.");
+            this.sourcePackagesToModules.put(pckg, modulename);
+          }
+        }
+        else {
+          String pckg = modulePackage + ".client";
           enunciate.debug("Any class in package %s (and any subpackages) will be preserved as GWT-compatible code.");
-          this.gwtSourcePackages.add(pckg);
+          this.sourcePackagesToModules.put(pckg, modulename);
         }
       }
       catch (Exception e) {

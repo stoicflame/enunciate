@@ -422,7 +422,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       model.put("useSpringDI", this.springDIFound);
       model.put("useWrappedServices", this.isUseWrappedServices());
       Map<String, String> conversions = new LinkedHashMap<String, String>();
-      Set<String> knownGwtPackages = this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getGwtSourcePackages() : Collections.<String>emptySet();
+      Set<String> knownGwtPackages = this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getSourcePackagesToModules().keySet() : Collections.<String>emptySet();
       for (String knownGwtPackage : knownGwtPackages) {
         //makes sure any known gwt packages are preserved.
         conversions.put(knownGwtPackage, knownGwtPackage);
@@ -460,7 +460,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
               String pckg = typeDefinition.getPackage().getQualifiedName();
-              if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg) && !isKnownGwtType(typeDefinition)) {
+              if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg) && (getKnownGwtModule(typeDefinition) == null)) {
                 conversions.put(pckg, clientNamespace + "." + pckg);
                 overlayConversions.put(pckg, clientNamespace + ".json." + pckg);
               }
@@ -485,6 +485,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       Properties gwt2jaxbMappings = new Properties();
       TreeSet<WebFault> allFaults = new TreeSet<WebFault>(new TypeDeclarationComparator());
 
+      Set<String> importedModules = new TreeSet<String>();
       if (isGenerateRPCSupport()) {
         debug("Generating the GWT endpoints...");
         for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
@@ -514,13 +515,16 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
-              if (!isKnownGwtType(typeDefinition)) {
+              String knownGwtModule = getKnownGwtModule(typeDefinition);
+              if (knownGwtModule == null) {
+
                 model.put("type", typeDefinition);
 
                 URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeTemplate;
                 processTemplate(template, model);
               }
               else {
+                importedModules.add(knownGwtModule);
                 debug("Skipping generating GWT type for %s because it's in a known GWT module.", typeDefinition.getQualifiedName());
               }
             }
@@ -542,6 +546,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       }
 
       model.put("gwtModuleName", this.rpcModuleName);
+      model.put("importedGwtModules", importedModules);
       processTemplate(moduleXmlTemplate, model);
 
       model.setFileOutputDirectory(serverSideGenerateDir);
@@ -560,7 +565,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
-              if (!isKnownGwtType(typeDefinition)) {
+              if (getKnownGwtModule(typeDefinition) == null) {
                 if (!typeDefinition.isEnum()) {
                   model.put("type", typeDefinition);
                   processTemplate(typeMapperTemplate, model);
@@ -605,16 +610,16 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     enunciate.addAdditionalSourceRoot(serverSideGenerateDir);
   }
 
-  private boolean isKnownGwtType(TypeDeclaration declaration) {
-    Set<String> knownGwtPackages = this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getGwtSourcePackages() : Collections.<String>emptySet();
+  private String getKnownGwtModule(TypeDeclaration declaration) {
+    Set<String> knownGwtPackages = this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getSourcePackagesToModules().keySet() : Collections.<String>emptySet();
     String declPackage = declaration.getPackage() == null ? "" : declaration.getPackage().getQualifiedName();
     for (String knownGwtPackage : knownGwtPackages) {
       if (declPackage.startsWith(knownGwtPackage)) {
-        return true;
+        return this.gwtClasspathHandler.getSourcePackagesToModules().get(knownGwtPackage);
       }
     }
 
-    return false;
+    return null;
   }
 
   /**
@@ -1172,7 +1177,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   @Override
   public Validator getValidator() {
     return new GWTValidator(this.rpcModuleNamespace,
-                            this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getGwtSourcePackages() : Collections.<String>emptySet(),
+                            this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getSourcePackagesToModules().keySet() : Collections.<String>emptySet(),
                             this.enforceNamespaceConformance,
                             this.enforceNoFieldAccessors);
   }

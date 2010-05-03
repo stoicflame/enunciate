@@ -5,6 +5,9 @@
 <module>
 
   <inherits name='com.google.gwt.user.User'/>
+  [#list importedGwtModules as importedGwtModule]
+  <inherits name='${importedGwtModule}'/>
+  [/#list]
 
   [@forEachWsdl]
     [@forEachEndpointInterface wsdl=wsdl]
