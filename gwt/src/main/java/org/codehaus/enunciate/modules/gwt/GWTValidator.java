@@ -93,7 +93,7 @@ public class GWTValidator extends BaseValidator {
     
     for (WebFault fault : allFaults) {
       if (!isGWTTransient(fault)) {
-        if ((this.enforceNamespaceConformance) && (!fault.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace))) {
+        if ((this.enforceNamespaceConformance) && (!fault.getPackage().getQualifiedName().startsWith(this.gwtModuleNamespace)) && (!isKnownGwtType(fault))) {
           result.addError(fault, String.format("The package of the fault, %s, must start with the GWT module namespace, %s.", fault.getPackage().getQualifiedName(), gwtModuleNamespace));
         }
       }

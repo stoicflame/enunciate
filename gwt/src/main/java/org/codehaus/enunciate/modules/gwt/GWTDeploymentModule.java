@@ -451,7 +451,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (WebFault webFault : allFaults) {
           if (!isGWTTransient(webFault)) {
             String pckg = webFault.getPackage().getQualifiedName();
-            if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
+            if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg) && (getKnownGwtModule(webFault) == null)) {
               conversions.put(pckg, clientNamespace + "." + pckg);
             }
           }
@@ -460,8 +460,10 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
               String pckg = typeDefinition.getPackage().getQualifiedName();
-              if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg) && (getKnownGwtModule(typeDefinition) == null)) {
-                conversions.put(pckg, clientNamespace + "." + pckg);
+              if (!pckg.startsWith(this.rpcModuleNamespace) && !conversions.containsKey(pckg)) {
+                if (getKnownGwtModule(typeDefinition) == null) {
+                  conversions.put(pckg, clientNamespace + "." + pckg);
+                }
                 overlayConversions.put(pckg, clientNamespace + ".json." + pckg);
               }
             }
@@ -506,8 +508,15 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         debug("Generating the GWT faults...");
         for (WebFault webFault : allFaults) {
           if (!isGWTTransient(webFault)) {
-            model.put("fault", webFault);
-            processTemplate(faultTemplate, model);
+            String knownGwtModule = getKnownGwtModule(webFault);
+            if (knownGwtModule == null) {
+              model.put("fault", webFault);
+              processTemplate(faultTemplate, model);
+            }
+            else {
+              importedModules.add(knownGwtModule);
+              debug("Skipping generating fault for %s because it's in a known GWT module.", webFault.getQualifiedName());
+            }
           }
         }
 
@@ -869,7 +878,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.       
+      String clientClasspath = enunciate.getEnunciateBuildClasspath() + File.pathSeparator + enunciate.getRuntimeClasspath();       
       enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
