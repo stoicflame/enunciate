@@ -595,7 +595,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
         debug("Generating the GWT fault mappers...");
         for (WebFault webFault : allFaults) {
-          if (!isGWTTransient(webFault)) {
+          if (!isGWTTransient(webFault) && (getKnownGwtModule(webFault) == null)) {
             model.put("fault", webFault);
             processTemplate(faultMapperTemplate, model);
             gwt2jaxbMappings.setProperty(classnameFor.convert(webFault), webFault.getQualifiedName());
