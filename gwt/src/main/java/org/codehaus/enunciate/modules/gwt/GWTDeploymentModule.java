@@ -367,7 +367,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
           "It appears GWT %s.%s is being used, according to %s. If this is an invalid assessment, you can get around this error by " +
           "setting the correct version with the 'gwtVersion' attribute of the Enunciate GWT module configuration.",
                                                    this.gwtVersion[0],
-                                                   this.gwtVersion[1], 
+                                                   this.gwtVersion[1],
                                                    (this.gwtHome + File.separatorChar + "about.txt")));
       }
 
@@ -574,15 +574,15 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             if (!isGWTTransient(typeDefinition)) {
-              if (getKnownGwtModule(typeDefinition) == null) {
+              if (typeDefinition.isEnum()) {
+                model.put("type", typeDefinition);
+                processTemplate(enumTypeMapperTemplate, model);
+                gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
+              }
+              else if (getKnownGwtModule(typeDefinition) == null) {
                 if (!typeDefinition.isEnum()) {
                   model.put("type", typeDefinition);
                   processTemplate(typeMapperTemplate, model);
-                  gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
-                }
-                else if (typeDefinition.isEnum()) {
-                  model.put("type", typeDefinition);
-                  processTemplate(enumTypeMapperTemplate, model);
                   gwt2jaxbMappings.setProperty(classnameFor.convert(typeDefinition), typeDefinition.getQualifiedName());
                 }
               }
@@ -878,7 +878,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      String clientClasspath = enunciate.getEnunciateBuildClasspath() + File.pathSeparator + enunciate.getRuntimeClasspath();       
+      String clientClasspath = enunciate.getEnunciateBuildClasspath() + File.pathSeparator + enunciate.getRuntimeClasspath();
       enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {
