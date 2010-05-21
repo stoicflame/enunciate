@@ -151,9 +151,16 @@ If you just want to skip the Ruby tests, set the value of the property 'ruby.exe
     </dependency>
 
     <dependency>
-      <!--depending modules: jersey-rt-->
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-xc</artifactId>
+
       <scope>test</scope>
     </dependency>
 

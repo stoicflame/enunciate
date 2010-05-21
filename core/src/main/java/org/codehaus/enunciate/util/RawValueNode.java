@@ -2,6 +2,7 @@ package org.codehaus.enunciate.util;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.node.ValueNode;
 
@@ -35,5 +36,10 @@ public class RawValueNode extends ValueNode {
 
   public boolean equals(Object o) {
     return (o == this);
+  }
+
+  @Override
+  public JsonToken asToken() {
+    return JsonToken.VALUE_EMBEDDED_OBJECT;
   }
 }

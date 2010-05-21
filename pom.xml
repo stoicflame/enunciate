@@ -230,7 +230,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>2.5.4</spring.version>
     <spring.security.version>2.0.3</spring.security.version>
-    <jersey.version>1.1.4.1</jersey.version>
+    <jersey.version>1.2</jersey.version>
     <cxf.version>2.2.3</cxf.version>
   </properties>
 
@@ -819,28 +819,28 @@
         <!--depending modules: core-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.2.0</version>
+        <version>1.5.2</version>
       </dependency>
 
       <dependency>
         <!--depending modules: core-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.2.0</version>
+        <version>1.5.2</version>
       </dependency>
 
       <dependency>
         <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
-        <version>1.2.0</version>
+        <version>1.5.2</version>
       </dependency>
 
       <dependency>
         <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-xc</artifactId>
-        <version>1.2.0</version>
+        <version>1.5.2</version>
       </dependency>
 
       <dependency>

@@ -121,7 +121,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 
   // Inherited.
   public void onClassesFound(Set<String> classes) {
-    jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJsonProvider");
+    jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
     filterFound |= classes.contains(CXFAdaptedServletFilter.class.getName());
   }
 

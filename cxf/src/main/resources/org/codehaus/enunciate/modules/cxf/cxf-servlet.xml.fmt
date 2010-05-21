@@ -60,11 +60,7 @@
     <jaxrs:providers>
       <bean class="org.apache.cxf.jaxrs.provider.JAXBElementProvider"/>
       [#if jacksonAvailable!false]
-      <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
-        <constructor-arg>
-          <bean class="org.codehaus.enunciate.modules.cxf.JacksonObjectMapperFactory" factory-method="createObjectMapper"/>
-        </constructor-arg>
-      </bean>
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"/>
       [/#if]
       [#if amfEnabled!false]
       <bean class="org.codehaus.enunciate.modules.amf.JAXRSProvider"/>

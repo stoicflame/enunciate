@@ -35,12 +35,10 @@ import java.util.Properties;
  */
 public class EnunciateJerseyServletContainer extends ServletContainer {
 
-  static final ThreadLocal<HttpServletRequest> CURRENT_REQUEST = new ThreadLocal<HttpServletRequest>();
-  static final ThreadLocal<HttpServletResponse> CURRENT_RESPONSE = new ThreadLocal<HttpServletResponse>();
-
   private static final Log LOG = LogFactory.getLog(EnunciateJerseyServletContainer.class);
   private ResourceConfig resourceConfig;
   private String resourceProviderFactory = "org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory";
+  private WebApplication wa;
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
@@ -84,18 +82,10 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     }
 
     try {
-      rc.getClasses().add(loadClass("org.codehaus.jackson.jaxrs.JacksonJsonProvider"));
+      rc.getClasses().add(loadClass("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"));
     }
     catch (Throwable e) {
-      LOG.info("org.codehaus.jackson.jaxrs.JacksonJsonProvider not loaded. Perhaps Jackson isn't on the classpath?");
-    }
-
-    try {
-      loadClass("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
-      rc.getClasses().add(loadClass("org.codehaus.enunciate.modules.jersey.JacksonObjectMapperContextResolver"));
-    }
-    catch (Throwable e) {
-      LOG.info("org.codehaus.enunciate.modules.jersey.JacksonObjectMapperContextResolver not loaded. Perhaps Jackson-XC isn't on the classpath?");
+      LOG.info("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider not loaded. Perhaps Jackson isn't on the classpath?");
     }
 
     String pathBasedConneg = sc.getInitParameter(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);
@@ -104,7 +94,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     }
     rc.getFeatures().put(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG, Boolean.valueOf(pathBasedConneg));
 
-    String resourceProvider = sc.getInitParameter( JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY);
+    String resourceProvider = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY);
     if (resourceProvider != null) {
       this.resourceProviderFactory = resourceProvider;
     }
@@ -137,6 +127,13 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     this.resourceConfig = rc;
   }
 
+  @Override
+  protected WebApplication create() {
+    WebApplication wa = super.create();
+    this.wa = wa;
+    return wa;
+  }
+
   /**
    * Attempts to load the spring component provider factory, if spring is enabled.
    * @param rc The resource config.
@@ -157,20 +154,8 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     request = new JerseyAdaptedHttpServletRequest(request, this.resourceConfig);
-    try {
-      CURRENT_REQUEST.set(request);
-      CURRENT_RESPONSE.set(response);
-      super.service(request, response);
-    }
-    finally {
-      CURRENT_REQUEST.remove();
-      CURRENT_RESPONSE.remove();
-    }
-  }
-
-  @Override
-  protected WebApplication create() {
-    return new EnunciateWebApplication(super.create());
+    response = new JerseyAdapterHttpServletResponse(response, this.wa);
+    super.service(request, response);
   }
 
   /**
