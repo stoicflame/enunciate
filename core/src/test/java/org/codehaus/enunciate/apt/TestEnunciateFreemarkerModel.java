@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.contract.validation.DefaultValidator;
+import org.codehaus.enunciate.contract.validation.ValidationMessage;
+import org.codehaus.enunciate.contract.validation.ValidationResult;
 
 /**
  * @author Ryan Heaton
@@ -410,6 +413,52 @@ public class TestEnunciateFreemarkerModel extends InAPTTestCase {
    */
   public void testAddRESTEndpoint() throws Exception {
     //todo: implement
+  }
+
+  /**
+   * tests creating an adapetd type definition.
+   */
+  public void testCreateAdaptedTypeDefinition() throws Exception {
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
+    TypeDefinition typeDef = model.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.RootElementMap"));
+    model.add(typeDef);
+    typeDef = model.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.RootElementMapAdapted"));
+    model.add(typeDef);
+    DefaultValidator validator = new DefaultValidator();
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        ValidationResult result = validator.validateTypeDefinition(typeDefinition);
+        if (result.hasErrors()) {
+          for (ValidationMessage validationMessage : result.getErrors()) {
+            fail(validationMessage.getText());
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * tests referencing an extended map.
+   */
+  public void testReferenceMapExtended() throws Exception {
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
+    TypeDefinition typeDef = model.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.MapExtendedReference"));
+    model.add(typeDef);
+    typeDef = model.createTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.RootElementMapAdapted"));
+    model.add(typeDef);
+    DefaultValidator validator = new DefaultValidator();
+    for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
+      for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
+        ValidationResult result = validator.validateTypeDefinition(typeDefinition);
+        if (result.hasErrors()) {
+          for (ValidationMessage validationMessage : result.getErrors()) {
+            fail(validationMessage.getText());
+          }
+        }
+      }
+    }
   }
 
   public static Test suite() {

@@ -32,6 +32,7 @@ import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
@@ -63,6 +64,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.util.*;
@@ -1200,6 +1203,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @return The type definition.
    */
   protected TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
+    declaration = narrowToAdaptingType(declaration);
     if (isEnumType(declaration)) {
       return new EnumTypeDefinition((EnumDeclaration) declaration);
     }
@@ -1210,6 +1214,31 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       //assume its a complex type.
       return new ComplexTypeDefinition(declaration);
     }
+  }
+
+  /**
+   * Narrows the existing declaration down to its adapting declaration, if it's being adapted. Otherwise, the original declaration will be returned.
+   *
+   * @param declaration The declaration to narrow.
+   * @return The narrowed declaration.
+   */
+  protected ClassDeclaration narrowToAdaptingType(ClassDeclaration declaration) {
+    AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+    if (adapterType != null) {
+      TypeMirror adaptingType = adapterType.getAdaptingType();
+      if (!(adaptingType instanceof ClassType)) {
+        return declaration;
+      }
+      else {
+        ClassDeclaration adaptingDeclaration = ((ClassType) adaptingType).getDeclaration();
+        if (adaptingDeclaration == null) {
+          throw new ValidationException(declaration.getPosition(), String.format("Class %s is being adapted by a type (%s) that doesn't seem to be on the classpath.", declaration.getQualifiedName(), adaptingType));
+        }
+        return adaptingDeclaration;
+      }
+    }
+
+    return declaration;
   }
 
   /**

@@ -16,9 +16,12 @@
 
 package org.codehaus.enunciate.util;
 
+import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.InterfaceType;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedInterfaceType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 
 /**
  * A decorated map type.
@@ -29,6 +32,7 @@ public class MapType extends DecoratedInterfaceType {
 
   private final TypeMirror keyType;
   private final TypeMirror valueType;
+  private DeclaredType originalType;
 
   public MapType(InterfaceType interfaceType, TypeMirror keyType, TypeMirror valueType) {
     super(interfaceType);
@@ -48,6 +52,8 @@ public class MapType extends DecoratedInterfaceType {
     else {
       this.valueType = valueType;
     }
+
+    this.originalType = interfaceType;
   }
 
   /**
@@ -66,6 +72,30 @@ public class MapType extends DecoratedInterfaceType {
    */
   public TypeMirror getValueType() {
     return valueType;
+  }
+
+  /**
+   * The original map type.
+   *
+   * @return The original map type.
+   */
+  public DeclaredType getOriginalType() {
+    return originalType;
+  }
+
+  /**
+   * The original map type.
+   *
+   * @param originalType The original map type.
+   */
+  public void setOriginalType(DeclaredType originalType) {
+    this.originalType = originalType;
+  }
+
+  @Override
+  public boolean isInstanceOf(String className) {
+    DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(this.originalType);
+    return decorated.isInstanceOf(className);
   }
 
   /**

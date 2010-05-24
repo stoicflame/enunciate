@@ -88,6 +88,10 @@ public class MapTypeUtil {
         mapType = findMapType(((ClassType) declaredType).getSuperclass());
       }
 
+      if (mapType != null) {
+        mapType.setOriginalType(declaredType);
+      }
+
       return mapType;
     }
   }
