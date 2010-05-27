@@ -832,6 +832,9 @@
         <xs:attribute name="resourceProviderFactory" type="xs:string">
           <xs:annotation><xs:documentation>The fully-qualified classname of an instance of com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="defaultNamespace" type="xs:string">
+          <xs:annotation><xs:documentation>his namespace will have no prefix during XML serialization.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

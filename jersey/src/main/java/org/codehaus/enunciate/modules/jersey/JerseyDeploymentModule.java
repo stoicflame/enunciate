@@ -97,6 +97,7 @@ import java.util.*;
  * <li>The "resourceProviderFactory" attribute is used to specify the fully-qualified classname of an instance of
  * com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use. The default is the spring-based factory or the
  * jersey default instance if spring isn't enabled.</a></li>
+ * <li>The "defaultNamespace" attribute is used to specify the default XML namespace. This namespace will have no prefix during XML serialization.</li>
  * </ul>
  *
  * <p>The Jersey module also supports an arbitrary number of "init-param" child elements that can be used to specify the init parameters (e.g.
@@ -116,6 +117,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
   private String resourceProviderFactory = null;
+  private String defaultNamespace = null;
   private final Map<String, String> servletInitParams = new HashMap<String, String>();
 
   /**
@@ -247,6 +249,9 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
       mappings = new Properties();
       for (Map.Entry<String, String> ns2prefix : ns2prefixes.entrySet()) {
         mappings.put(ns2prefix.getKey() == null ? "" : ns2prefix.getKey(), ns2prefix.getValue());
+      }
+      if (this.defaultNamespace != null) {
+        mappings.put("--DEFAULT_NAMESPACE_ALIAS--", this.defaultNamespace);
       }
       file = new File(getGenerateDir(), "ns2prefix.properties");
       out = new FileOutputStream(file);
@@ -419,6 +424,24 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   public void setDisableWildcardServletError(boolean disableWildcardServletError) {
     this.disableWildcardServletError = disableWildcardServletError;
+  }
+
+  /**
+   * The default namespace. This namespace will have no prefix associated with it during XML serialization.
+   *
+   * @return The default namespace.
+   */
+  public String getDefaultNamespace() {
+    return defaultNamespace;
+  }
+
+  /**
+   * The default namespace.
+   *
+   * @param defaultNamespace The default namespace.
+   */
+  public void setDefaultNamespace(String defaultNamespace) {
+    this.defaultNamespace = defaultNamespace;
   }
 
   /**

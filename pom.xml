@@ -114,29 +114,41 @@
           <tagBase>https://svn.codehaus.org/enunciate/tags/</tagBase>
         </configuration>
       </plugin>
-      <!-- todo: ENUNCIATE-428
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>animal-sniffer-maven-plugin</artifactId>
-              <version>1.5</version>
-              <configuration>
-                <signature>
-                  <groupId>org.codehaus.mojo.signature</groupId>
-                  <artifactId>java15</artifactId>
-                  <version>1.0</version>
-                </signature>
-              </configuration>
-              <executions>
-                <execution>
-                  <id>enforce-java-5</id>
-                  <phase>test</phase>
-                  <goals>
-                    <goal>check</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-      -->
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>animal-sniffer-maven-plugin</artifactId>-->
+        <!--<version>1.5</version>-->
+        <!--<configuration>-->
+          <!--<signature>-->
+            <!--<groupId>org.codehaus.mojo.signature</groupId>-->
+            <!--<artifactId>java15</artifactId>-->
+            <!--<version>1.0</version>-->
+          <!--</signature>-->
+        <!--</configuration>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<id>enforce-java-5</id>-->
+            <!--<phase>test</phase>-->
+            <!--<goals>-->
+              <!--<goal>check</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<ignores>-->
+                <!--&lt;!&ndash;allow references to JAXB, JAX-WS since they can be referenced as external dependencies for Java 5&ndash;&gt;-->
+                <!--<ignore>javax.xml.bind.*</ignore>-->
+                <!--<ignore>javax.xml.ws.*</ignore>-->
+                <!--<ignore>javax.xml.stream.*</ignore>-->
+                <!--<ignore>javax.jws.*</ignore>-->
+                <!--<ignore>javax.activation.*</ignore>-->
+
+                <!--&lt;!&ndash;allow dependencies on internal Sun APIs for now. Someday fix these: http://jira.codehaus.org/browse/ENUNCIATE-437. &ndash;&gt;-->
+                <!--<ignore>sun.misc.*</ignore>-->
+                <!--<ignore>com.sun.org.apache.xalan.internal.xsltc.trax.*</ignore>-->
+              <!--</ignores>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>

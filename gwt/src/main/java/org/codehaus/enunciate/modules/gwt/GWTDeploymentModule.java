@@ -878,7 +878,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     if (!enunciate.isUpToDate(getClientSideGenerateDir(), getClientSideCompileDir())) {
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
-      String clientClasspath = enunciate.getEnunciateBuildClasspath() + File.pathSeparator + enunciate.getRuntimeClasspath();
+      String clientClasspath = enunciate.getRuntimeClasspath();
       enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
     }
     else {

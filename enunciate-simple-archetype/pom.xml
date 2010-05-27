@@ -5,7 +5,7 @@
   <artifactId>enunciate-simple-archetype</artifactId>
   <version>1.20-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
-  <name>enunciate-simple-archetype</name>
+  <name>Enunciate - Simple Archetype</name>
   <build>
     <extensions>
       <extension>

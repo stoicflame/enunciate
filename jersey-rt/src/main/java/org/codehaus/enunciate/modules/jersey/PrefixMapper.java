@@ -27,6 +27,8 @@ import java.util.Properties;
  */
 public class PrefixMapper extends NamespacePrefixMapper {
 
+  public static final String DEFAULT_NAMESPACE_ALIAS = "--DEFAULT_NAMESPACE_ALIAS--";
+
   private final Properties ns2prefix;
 
   public PrefixMapper(Properties ns2prefix) {
@@ -36,7 +38,11 @@ public class PrefixMapper extends NamespacePrefixMapper {
     }
   }
 
-  public String getPreferredPrefix(String nsuri, String suggestion, boolean defaultPossible) {
-    return this.ns2prefix.containsKey(nsuri) ? this.ns2prefix.getProperty(nsuri) : suggestion;
+  public String getPreferredPrefix(String nsuri, String suggestion, boolean requirePrefix) {
+    String prefix = this.ns2prefix.containsKey(nsuri) ? this.ns2prefix.getProperty(nsuri) : suggestion;
+    if (!requirePrefix && nsuri.equals(this.ns2prefix.get(DEFAULT_NAMESPACE_ALIAS))) {
+      prefix = "";
+    }
+    return prefix;
   }
 }
