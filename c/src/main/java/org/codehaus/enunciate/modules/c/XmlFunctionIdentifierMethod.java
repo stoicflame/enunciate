@@ -105,10 +105,11 @@ public class XmlFunctionIdentifierMethod implements TemplateMethodModelEx {
       namespace = null;
     }
     
-    String prefix = lookupPrefix(namespace).replace('-', '_');
+    String prefix = lookupPrefix(namespace);
     if (prefix == null) {
       throw new TemplateModelException("No prefix specified for {" + namespace + "}");
     }
+    prefix = prefix.replace('-', '_');
 
     String localName = qname.getLocalPart();
     if ("".equals(localName)) {

@@ -50,23 +50,36 @@ public class IsDefinedGloballyMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    if (!LocalElementDeclaration.class.isInstance(unwrapped)) {
-      throw new TemplateModelException("The isDefinedGlobally method must have a local element declaration as a parameter.");
+    String namespace;
+    String name;
+    if (LocalElementDeclaration.class.isInstance(unwrapped)) {
+      LocalElementDeclaration decl = (LocalElementDeclaration) unwrapped;
+      namespace = decl.getNamespace();
+      name = decl.getName();
+    }
+    else if (ImplicitSchemaElement.class.isInstance(unwrapped)) {
+      ImplicitSchemaElement ise = (ImplicitSchemaElement) unwrapped;
+      namespace = ise.getTargetNamespace();
+      name = ise.getElementName();
+    }
+    else {
+      throw new TemplateModelException("The isDefinedGlobally method must have a local element declaration or an implicit schema element as a parameter.");
     }
 
-    LocalElementDeclaration decl = (LocalElementDeclaration) unwrapped;
-    String namespace = decl.getNamespace();
     SchemaInfo schemaInfo = getModel().getNamespacesToSchemas().get(namespace);
     if (schemaInfo != null) {
       for (RootElementDeclaration rootElementDeclaration : schemaInfo.getGlobalElements()) {
-        if (rootElementDeclaration.getName().equals(decl.getName())) {
+        if (rootElementDeclaration.getName().equals(name)) {
           return true;
         }
       }
 
-      for (ImplicitSchemaElement implicitSchemaElement : schemaInfo.getImplicitSchemaElements()) {
-        if (implicitSchemaElement.getElementName().equals(decl.getName())) {
-          return true;
+      if (LocalElementDeclaration.class.isInstance(unwrapped)) {
+        //local element declarations have to check implicit schema elements, too.
+        for (ImplicitSchemaElement implicitSchemaElement : schemaInfo.getImplicitSchemaElements()) {
+          if (implicitSchemaElement.getElementName().equals(name)) {
+            return true;
+          }
         }
       }
     }

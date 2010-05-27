@@ -347,55 +347,57 @@
 [/#macro]
 [#t]
 [#macro processImplicitElement implicitElement]
-  [#if implicitElement.typeQName?exists]
+  [#if !isDefinedGlobally(implicitElement)]
+    [#if implicitElement.typeQName?exists]
 <${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">
-    [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
     </${xs}:documentation>
   </${xs}:annotation>
-    [/#if]
+      [/#if]
 </${xs}:element>
-  [#elseif implicitElement.anonymousTypeDefinition?exists]
+    [#elseif implicitElement.anonymousTypeDefinition?exists]
 <${xs}:element name="${implicitElement.elementName}">
-    [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
     </${xs}:documentation>
   </${xs}:annotation>
-    [/#if]
+      [/#if]
   [@processTypeDef typeDef=implicitElement.anonymousTypeDefinition/]
 </${xs}:element>
-  [#else]
-    [#assign childElements=implicitElement.childElements]
+    [#else]
+      [#assign childElements=implicitElement.childElements]
 <${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"/>
 <${xs}:complexType name="${implicitElement.elementName}">
-    [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs?exists]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
     </${xs}:documentation>
   </${xs}:annotation>
-    [/#if]
+      [/#if]
   <${xs}:sequence>
-      [#list childElements as childElement]
+        [#list childElements as childElement]
     <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if]>
-        [#if childElement.elementDocs?exists]
+          [#if childElement.elementDocs?exists]
       <${xs}:annotation>
         <${xs}:documentation>
           <![CDATA[${childElement.elementDocs?trim}]]>
         </${xs}:documentation>
       </${xs}:annotation>
-        [/#if]
-        [#if childElement.xmlType.anonymous]
-          [@processAnonymousType type=childElement.xmlType/]
-        [/#if]
+          [/#if]
+          [#if childElement.xmlType.anonymous]
+            [@processAnonymousType type=childElement.xmlType/]
+          [/#if]
     </${xs}:element>
-      [/#list]
+        [/#list]
   </${xs}:sequence>
 </${xs}:complexType>
+    [/#if]
   [/#if]
 [/#macro]
 [#macro processImplicitAttribute implicitAttribute]

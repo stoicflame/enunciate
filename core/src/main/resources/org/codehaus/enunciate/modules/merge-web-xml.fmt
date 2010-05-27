@@ -32,10 +32,8 @@
 
   [/#if]
   [#list source1["context-param"] as el]
-    [#if el["param-name"] != "contextConfigLocation"] [#--skip any "contextConfigLocation" params since Enunciate needs them.--]
   ${el.@@markup}
 
-    [/#if]
   [/#list]
   [#list source2["context-param"] as el]
   ${el.@@markup}
@@ -58,10 +56,8 @@
 
   [/#list]
   [#list source1["listener"] as el]
-    [#if el["listener-class"] != "org.springframework.web.context.ContextLoaderListener"] [#--skip any "org.springframework.web.context.ContextLoaderListener" listeners.  Enunciate will already load this.--]
   ${el.@@markup}
 
-    [/#if]
   [/#list]
   [#list source2["listener"] as el]
   ${el.@@markup}

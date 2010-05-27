@@ -45,6 +45,16 @@ public interface ${endpointInterface.simpleName}Async {
     }
 
     /**
+     * Get an instance of this async interface for ${endpointInterface.simpleName}. This method assumes the endpoint is
+     * mounted at url + "${gwtSubcontext[1..]}/${endpointInterface.serviceName}".
+     *
+     * @return The async instance.
+     */
+    public static ${endpointInterface.simpleName}Async getInstanceRelativeToUrl(String url) {
+      return getInstance(url + "${gwtSubcontext[1..]}/${endpointInterface.serviceName}");
+    }
+
+    /**
      * Get an instance of this async interface for ${endpointInterface.simpleName}.
      *
      * @param url The url where the remote endpoint is mounted.

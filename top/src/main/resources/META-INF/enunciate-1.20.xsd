@@ -612,6 +612,12 @@
         <xs:attribute name="contextLoaderListenerClass" type="xs:string" default="org.springframework.web.context.ContextLoaderListener">
           <xs:annotation><xs:documentation>FQN of the class to use as the Spring context loader listener</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="applicationContextFilename" type="xs:string" default="applicationContext.xml">
+          <xs:annotation><xs:documentation>the name of the Enunciate-generated application context file.</xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="contextConfigLocation" type="xs:string" default="org.springframework.web.context.ContextLoaderListener">
+          <xs:annotation><xs:documentation>the value of the contextConfigLocation init parameter supplied to the Spring ContextLoaderListener.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

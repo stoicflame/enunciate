@@ -182,6 +182,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean forceExampleJson = true;
   private URL xsltURL;
   private String css;
+  private String cssUri;
   private String base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
   private String docsDir = null;

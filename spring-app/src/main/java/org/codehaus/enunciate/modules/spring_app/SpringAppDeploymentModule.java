@@ -41,10 +41,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <h1>Spring App Module</h1>
@@ -136,6 +133,9 @@ import java.util.Set;
  * <ul>
  * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="module_spring_app_security.html">security</a> should be enabled.  The default is "false."</li>
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
+ * <li>The "<b>applicationContextFilename</b>" attribute specifies the name of the Enunciate-generated application context file.  The default is "applicationContext.xml".</li>
+ * <li>The "<b>contextConfigLocation</b>" attribute specifies the value of the contextConfigLocation init parameter supplied to the Spring
+ *     <a href="http://static.springsource.org/spring/docs/2.0.x/api/org/springframework/web/context/ContextLoaderListener.html">ContextLoaderListener</a>.  The default is "/WEB-INF/" + <tt>applicationContextFilename</tt>.</li>
  * </ul>
  *
  * <h3><a name="config_springImport">The "springImport" element</a></h3>
@@ -224,6 +224,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   private final List<SpringImport> springImports = new ArrayList<SpringImport>();
   private final List<GlobalServiceInterceptor> globalServiceInterceptors = new ArrayList<GlobalServiceInterceptor>();
   private final List<HandlerInterceptor> handlerInterceptors = new ArrayList<HandlerInterceptor>();
+  private String applicationContextFilename = "applicationContext.xml";
+  private String contextConfigLocation = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
   private boolean enableSecurity = false;
   private SecurityConfig securityConfig = new SecurityConfig();
@@ -299,6 +301,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
 
       //standard spring configuration:
       model.put("springImports", getSpringImportURIs());
+      model.put("applicationContextFilename", getApplicationContextFilename());
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {
         docsDir = "";
@@ -359,6 +362,14 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     servletListeners.add(getContextLoaderListenerClass());
     servletListeners.add(SpringComponentPostProcessor.class.getName());
     webAppFragment.setListeners(servletListeners);
+
+    Map<String, String> contextParams = new HashMap<String, String>();
+    String contextConfigLocation = getContextConfigLocation();
+    if (contextConfigLocation == null) {
+      contextConfigLocation = "/WEB-INF/" + getApplicationContextFilename();
+    }
+    contextParams.put("contextConfigLocation", contextConfigLocation);
+    webAppFragment.setContextParameters(contextParams);
 
     if (isEnableSecurity()) {
       WebAppComponent securityFilter = new WebAppComponent();
@@ -538,6 +549,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    * @return The resolved file name.
    */
   protected String resolveSpringImportFileName(String fileName) {
+    if (!"applicationContext.xml".equals(getApplicationContextFilename())) {
+      //if we're not using the default applicationContext.xml filename, we'll assume the user knows what they're doing.
+      return fileName;
+    }
+    
     if ("applicationContext.xml".equalsIgnoreCase(fileName)) {
       fileName = "applicationContext-" + getModel().getEnunciateConfig().getLabel() + ".xml";
     }
@@ -596,6 +612,42 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    */
   public void setContextLoaderListenerClass(String contextLoaderListenerClass) {
     this.contextLoaderListenerClass = contextLoaderListenerClass;
+  }
+
+  /**
+   * The name of the application context file.
+   *
+   * @return The name of the application context file.
+   */
+  public String getApplicationContextFilename() {
+    return applicationContextFilename;
+  }
+
+  /**
+   * The name of the application context file.
+   *
+   * @param applicationContextFilename The name of the application context file.
+   */
+  public void setApplicationContextFilename(String applicationContextFilename) {
+    this.applicationContextFilename = applicationContextFilename;
+  }
+
+  /**
+   * The context config location.
+   *
+   * @return The context config location.
+   */
+  public String getContextConfigLocation() {
+    return contextConfigLocation;
+  }
+
+  /**
+   * The context config location.
+   *
+   * @param contextConfigLocation The context config location.
+   */
+  public void setContextConfigLocation(String contextConfigLocation) {
+    this.contextConfigLocation = contextConfigLocation;
   }
 
   /**
