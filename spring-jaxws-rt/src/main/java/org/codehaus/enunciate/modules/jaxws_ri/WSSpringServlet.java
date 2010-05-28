@@ -20,7 +20,6 @@ import com.sun.xml.ws.transport.http.servlet.ServletAdapterList;
 import com.sun.xml.ws.transport.http.servlet.SpringBinding;
 import com.sun.xml.ws.transport.http.servlet.SpringBindingList;
 import com.sun.xml.ws.transport.http.servlet.WSServletDelegate;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;

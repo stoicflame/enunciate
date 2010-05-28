@@ -35,8 +35,6 @@ import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
 import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
 import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
-import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,7 +100,10 @@ import java.util.*;
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app contextLoaderListenerClass="..."&gt;
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app enableSecurity="..." contextLoaderListenerClass="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;applicationContextFilename="..." contextConfigLocation="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;springVersion="..."&gt;
+ *
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;springImport file="..." uri="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;springImport file="..." uri="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
@@ -136,6 +137,7 @@ import java.util.*;
  * <li>The "<b>applicationContextFilename</b>" attribute specifies the name of the Enunciate-generated application context file.  The default is "applicationContext.xml".</li>
  * <li>The "<b>contextConfigLocation</b>" attribute specifies the value of the contextConfigLocation init parameter supplied to the Spring
  *     <a href="http://static.springsource.org/spring/docs/2.0.x/api/org/springframework/web/context/ContextLoaderListener.html">ContextLoaderListener</a>.  The default is "/WEB-INF/" + <tt>applicationContextFilename</tt>.</li>
+ * <li>The "springVersion" attribute specifies the spring version to use. If not set, an attempt will be made to autodetect it.</li>
  * </ul>
  *
  * <h3><a name="config_springImport">The "springImport" element</a></h3>
@@ -230,6 +232,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   private boolean enableSecurity = false;
   private SecurityConfig securityConfig = new SecurityConfig();
   private boolean factoryBeanFound = false;
+  private boolean spring3 = false;
 
   /**
    * @return "spring-app"
@@ -261,7 +264,9 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   }
 
   public void onClassesFound(Set<String> classes) {
-    factoryBeanFound |= classes.contains(ServiceEndpointFactoryBean.class.getName());
+    factoryBeanFound |= classes.contains("org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean");
+    //we'll key off the Converter class since that's new in Spring 3.
+    spring3 |= classes.contains("org.springframework.core.convert.converter.Converter");
   }
 
   @Override
@@ -302,6 +307,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       //standard spring configuration:
       model.put("springImports", getSpringImportURIs());
       model.put("applicationContextFilename", getApplicationContextFilename());
+      model.put("spring3", this.spring3);
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {
         docsDir = "";
@@ -360,7 +366,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
 
     ArrayList<String> servletListeners = new ArrayList<String>();
     servletListeners.add(getContextLoaderListenerClass());
-    servletListeners.add(SpringComponentPostProcessor.class.getName());
+    servletListeners.add("org.codehaus.enunciate.modules.spring_app.SpringComponentPostProcessor");
     webAppFragment.setListeners(servletListeners);
 
     Map<String, String> contextParams = new HashMap<String, String>();
@@ -374,7 +380,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     if (isEnableSecurity()) {
       WebAppComponent securityFilter = new WebAppComponent();
       securityFilter.setName("springSecurityFilterChain");
-      securityFilter.setClassname(DelegatingFilterProxy.class.getName());
+      securityFilter.setClassname("org.springframework.web.filter.DelegatingFilterProxy");
       EnunciateConfiguration config = enunciate.getConfig();
       WebAppConfig appConfig = config.getWebAppConfig();
       if (appConfig == null) {
@@ -385,7 +391,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
 
       WebAppComponent securityServlet = new WebAppComponent();
       securityServlet.setName("security");
-      securityServlet.setClassname(DispatcherServlet.class.getName());
+      securityServlet.setClassname("org.springframework.web.servlet.DispatcherServlet");
 
       if (getSecurityConfig().isEnableFormBasedLogin()) {
         securityFilter.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getUrl());
@@ -684,6 +690,15 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    */
   public void setSecurityConfig(SecurityConfig securityConfig) {
     this.securityConfig = securityConfig;
+  }
+
+  /**
+   * The spring version to use.
+   *
+   * @param version The spring version to use.
+   */
+  public void setSpringVersion(String version) {
+    this.spring3 = version.startsWith("3");
   }
 
   /**

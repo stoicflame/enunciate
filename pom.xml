@@ -36,6 +36,7 @@
 
     <module>spring-jaxws-rt</module>
     <module>spring-app-rt</module>
+    <module>spring3-app-rt</module>
     <module>spring-app</module>
 
     <module>rest-rt</module>

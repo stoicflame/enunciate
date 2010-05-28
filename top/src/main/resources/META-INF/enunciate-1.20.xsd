@@ -618,6 +618,9 @@
         <xs:attribute name="contextConfigLocation" type="xs:string" default="org.springframework.web.context.ContextLoaderListener">
           <xs:annotation><xs:documentation>the value of the contextConfigLocation init parameter supplied to the Spring ContextLoaderListener.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="springVersion" type="xs:string">
+          <xs:annotation><xs:documentation>The spring version to target. If none is specified, an attempt will be made to autodect.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
