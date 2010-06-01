@@ -35,9 +35,9 @@ import org.codehaus.enunciate.ClientName;
  */
 public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
 
-  private final ClientClassnameForMethod typeConversion;
+  private final ClassnameForMethod typeConversion;
 
-  public SimpleNameWithParamsMethod(ClientClassnameForMethod typeConversion) {
+  public SimpleNameWithParamsMethod(ClassnameForMethod typeConversion) {
     this.typeConversion = typeConversion;
   }
 

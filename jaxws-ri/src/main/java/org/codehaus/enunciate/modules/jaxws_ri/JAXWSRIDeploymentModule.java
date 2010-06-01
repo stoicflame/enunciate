@@ -28,6 +28,7 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
+import org.codehaus.enunciate.template.freemarker.ClassnameForMethod;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
@@ -165,7 +166,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
       Map<String, String> conversions = Collections.<String, String>emptyMap();
-      ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
+      ClassnameForMethod classnameFor = new ClassnameForMethod(conversions);
       classnameFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("classnameFor", classnameFor);
