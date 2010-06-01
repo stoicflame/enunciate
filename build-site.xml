@@ -99,6 +99,7 @@
         <fileset dir="${basedir}">
           <include name="**/src/main/java/**/*.java"/>
           <exclude name="**/samples/**"/>
+          <exclude name="**/*-rt/**"/>
           <exclude name="**/integration-tests/**"/>
           <exclude name="**/integration-test-support/**"/>
           <exclude name="**/maven-enunciate-*/**"/>

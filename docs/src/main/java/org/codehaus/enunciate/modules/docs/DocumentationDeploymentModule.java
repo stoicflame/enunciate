@@ -750,7 +750,11 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         debug("Default base to be used for documentation base.");
         enunciate.extractBase(loadDefaultBase(), buildDir);
 
-        if (this.css != null) {
+        URL discoveredCss = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/default.css");
+        if (discoveredCss != null) {
+          enunciate.copyResource(discoveredCss, new File(buildDir, "default.css"));
+        }
+        else if (this.css != null) {
           enunciate.copyFile(enunciate.resolvePath(this.css), new File(buildDir, "default.css"));
         }
       }

@@ -33,6 +33,8 @@ import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 
 import javax.xml.bind.JAXBElement;
 import java.util.Collection;
@@ -157,6 +159,10 @@ public class ClientClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public String convert(TypeDeclaration declaration) throws TemplateModelException {
+    AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+    if (adapterType != null) {
+      return convert(adapterType.getAdaptingType());
+    }
     if (declaration instanceof ClassDeclaration) {
       DecoratedTypeMirror superType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((ClassDeclaration) declaration).getSuperclass());
       if (superType != null && superType.isInstanceOf(JAXBElement.class.getName())) {

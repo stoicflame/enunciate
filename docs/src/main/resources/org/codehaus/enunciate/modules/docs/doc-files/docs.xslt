@@ -51,6 +51,7 @@
       <h1>REST Endpoints</h1>
       <ul>
         <xsl:for-each select="/api-docs/rest/resources/resource">
+          <xsl:sort select="@name"/>
           <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
         </xsl:for-each>
       </ul>
@@ -195,6 +196,7 @@
 
                   <ul>
                     <xsl:for-each select="/api-docs/rest/resources/resource">
+                      <xsl:sort select="@name"/>
                       <li><a href="rest{translate(@name,$rest_translate_chars,$rest_translate_replacements)}.html"><xsl:value-of select="@name"/></a></li>
                       <xsl:call-template name="rest-resource"/>
                     </xsl:for-each>

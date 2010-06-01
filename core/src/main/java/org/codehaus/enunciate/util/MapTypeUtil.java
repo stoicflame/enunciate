@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import net.sf.jelly.apt.Context;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
+import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 
 /**
  * Utility for handling map types.
@@ -75,24 +77,30 @@ public class MapTypeUtil {
       return new MapType((InterfaceType) declaredType, keyType, valueType);
     }
     else {
-      MapType mapType = null;
-      Collection<InterfaceType> superInterfaces = declaredType.getSuperinterfaces();
-      for (InterfaceType superInterface : superInterfaces) {
-        mapType = findMapType(superInterface);
-        if (mapType != null) {
-          break;
+      AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+      if (adapterType != null) {
+        return findMapType(adapterType.getAdaptingType());
+      }
+      else {
+        MapType mapType = null;
+        Collection<InterfaceType> superInterfaces = declaredType.getSuperinterfaces();
+        for (InterfaceType superInterface : superInterfaces) {
+          mapType = findMapType(superInterface);
+          if (mapType != null) {
+            break;
+          }
         }
-      }
 
-      if ((mapType == null) && (declaredType instanceof ClassType)) {
-        mapType = findMapType(((ClassType) declaredType).getSuperclass());
-      }
+        if ((mapType == null) && (declaredType instanceof ClassType)) {
+          mapType = findMapType(((ClassType) declaredType).getSuperclass());
+        }
 
-      if (mapType != null) {
-        mapType.setOriginalType(declaredType);
-      }
+        if (mapType != null) {
+          mapType.setOriginalType(declaredType);
+        }
 
-      return mapType;
+        return mapType;
+      }
     }
   }
 }

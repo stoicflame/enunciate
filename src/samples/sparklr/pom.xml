@@ -12,7 +12,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-spring-plugin</artifactId>
-        <version>1.20-SNAPSHOT</version>
+        <version>1.20-RC1</version>
         <executions>
           <execution>
             <goals>
@@ -24,7 +24,7 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rest</artifactId>
-            <version>1.20-SNAPSHOT</version>
+            <version>1.20-RC1</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -47,13 +47,13 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app-rt</artifactId>
-      <version>1.20-SNAPSHOT</version>
+      <version>1.20-RC1</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rest-rt</artifactId>
-      <version>1.20-SNAPSHOT</version>
+      <version>1.20-RC1</version>
     </dependency>
 
     <dependency>
