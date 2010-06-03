@@ -16,9 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
-import org.codehaus.enunciate.samples.genealogy.data.Event;
-import org.codehaus.enunciate.samples.genealogy.data.Person;
-import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
+import org.codehaus.enunciate.samples.genealogy.data.*;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
 import org.joda.time.DateTime;
@@ -84,6 +82,10 @@ public class PersonServiceImpl implements PersonService {
     child.setId(personId);
     pedigree.put(RelationshipType.child, child);
     return pedigree;
+  }
+
+  public RootElementMapWrapper storeGenericProperties(RootElementMapWrapper map) throws ServiceException {
+    return map;
   }
 
   public void uploadFiles(DataHandler[] files, String length) throws ServiceException {

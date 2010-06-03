@@ -17,10 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.FieldDeclaration;
-import com.sun.mirror.declaration.MemberDeclaration;
+import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
@@ -44,9 +41,7 @@ import org.codehaus.enunciate.ClientName;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * An accessor for a field or method value into a type.
@@ -356,6 +351,29 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
     }
 
     return getXmlIDAccessor(classType.getSuperclass());
+  }
+
+  /**
+   * @return The list of class names that this type definition wants you to "see also".
+   */
+  public Collection<TypeMirror> getSeeAlsos() {
+    Collection<TypeMirror> seeAlsos = null;
+    XmlSeeAlso seeAlsoInfo = getAnnotation(XmlSeeAlso.class);
+    if (seeAlsoInfo != null) {
+      seeAlsos = new ArrayList<TypeMirror>();
+      try {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        for (Class clazz : seeAlsoInfo.value()) {
+          TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
+          DeclaredType undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
+          seeAlsos.add(undecorated);
+        }
+      }
+      catch (MirroredTypesException e) {
+        seeAlsos.addAll(e.getTypeMirrors());
+      }
+    }
+    return seeAlsos;
   }
 
   // Inherited.

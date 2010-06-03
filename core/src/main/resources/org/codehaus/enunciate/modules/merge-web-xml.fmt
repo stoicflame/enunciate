@@ -117,19 +117,11 @@
   ${el.@@markup}
 
   [/#list]
-  [#list source1["resource-env-ref"] as el]
+  [#list source1["jsp-config"] as el]
   ${el.@@markup}
 
   [/#list]
-  [#list source2["resource-env-ref"] as el]
-  ${el.@@markup}
-
-  [/#list]
-  [#list source1["resource-ref"] as el]
-  ${el.@@markup}
-
-  [/#list]
-  [#list source2["resource-ref"] as el]
+  [#list source2["jsp-config"] as el]
   ${el.@@markup}
 
   [/#list]
@@ -141,13 +133,14 @@
   ${el.@@markup}
 
   [/#list]
-  [#if source1["login-config"]?size > 0]
-  ${source1["login-config"].@@markup}
+  [#list source1["login-config"] as el]
+  ${el.@@markup}
 
-  [#elseif source2["login-config"]?size > 0]
-  ${source2["login-config"].@@markup}
+  [/#list]
+  [#list source2["login-config"] as el]
+  ${el.@@markup}
 
-  [/#if]
+  [/#list]
   [#list source1["security-role"] as el]
   ${el.@@markup}
 
@@ -177,6 +170,94 @@
 
   [/#list]
   [#list source2["ejb-local-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["service-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["service-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["resource-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["resource-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["resource-env-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["resource-env-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["message-destination-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["message-destination-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["persistence-context-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["persistence-context-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["persistence-unit-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["persistence-unit-ref"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["post-construct"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["post-construct"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["pre-destroy"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["pre-destroy"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["data-source"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["data-source"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["message-destination"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["message-destination"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source1["locale-encoding-mapping-list"] as el]
+  ${el.@@markup}
+
+  [/#list]
+  [#list source2["locale-encoding-mapping-list"] as el]
   ${el.@@markup}
 
   [/#list]

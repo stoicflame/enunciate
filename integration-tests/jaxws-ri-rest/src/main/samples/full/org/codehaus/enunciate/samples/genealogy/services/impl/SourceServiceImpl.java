@@ -55,6 +55,7 @@ public class SourceServiceImpl implements SourceService {
       source.setId("valid");
       source.setLink(URI.create("uri:some-uri"));
       source.setTitle("some-title");
+      source.setSomethingTransient("transient");
       return source;
     }
     else if ("throw".equals(id)) {

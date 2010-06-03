@@ -21,6 +21,8 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.doc.DocumentationExample;
+import org.codehaus.enunciate.doc.ExampleType;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonFactory;
@@ -32,6 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
@@ -143,6 +146,11 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
    * @return Some example XML.
    */
   public String generateExampleXml() {
+    DocumentationExample example = getAnnotation(DocumentationExample.class);
+    if (example != null && !Arrays.asList(example.validTypes()).contains(ExampleType.XML)) {
+      return "";
+    }
+
     try {
       String namespace = getNamespace();
       String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
@@ -177,6 +185,11 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
    * @return Some example JSON for this root element.
    */
   public String generateExampleJson() {
+    DocumentationExample example = getAnnotation(DocumentationExample.class);
+    if (example != null && !Arrays.asList(example.validTypes()).contains(ExampleType.JSON)) {
+      return "";
+    }
+
     try {
       ObjectNode node = getTypeDefinition().generateExampleJson();
       StringWriter sw = new StringWriter();

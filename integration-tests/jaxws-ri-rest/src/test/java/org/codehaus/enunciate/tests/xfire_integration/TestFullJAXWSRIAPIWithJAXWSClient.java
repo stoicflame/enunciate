@@ -19,9 +19,7 @@ package org.codehaus.enunciate.tests.xfire_integration;
 import junit.framework.TestCase;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.cite.Source;
-import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Event;
-import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Person;
-import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.Relationship;
+import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.*;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.*;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.RelationshipServiceImpl;
@@ -131,6 +129,55 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
       bytesOut.write(byteIn);
       byteIn = inputStream.read();
     }
+
+    RootElementMapAdapted map = new RootElementMapAdapted();
+    ArrayList<RootElementMapAdaptedEntry> entries = new ArrayList<RootElementMapAdaptedEntry>();
+    RootElementMapAdaptedEntry entry1 = new RootElementMapAdaptedEntry();
+    entry1.setKey("person1");
+    RootElementMapAdaptedValue value1 = new RootElementMapAdaptedValue();
+    Person person1 = new Person();
+    person1.setId("person1id");
+    value1.setValue(Arrays.asList((Object) person1));
+    entry1.setValue(value1);
+    entries.add(entry1);
+
+    RootElementMapAdaptedEntry entry2 = new RootElementMapAdaptedEntry();
+    entry2.setKey("person2");
+    RootElementMapAdaptedValue value2 = new RootElementMapAdaptedValue();
+    Person person2 = new Person();
+    person2.setId("person2id");
+    value2.setValue(Arrays.asList((Object) person2));
+    entry2.setValue(value2);
+    entries.add(entry2);
+
+    RootElementMapAdaptedEntry entry3 = new RootElementMapAdaptedEntry();
+    entry3.setKey("source1");
+    RootElementMapAdaptedValue value3 = new RootElementMapAdaptedValue();
+    Source source1 = new Source();
+    source1.setId("source1id");
+    value3.setValue(Arrays.asList((Object) source1));
+    entry3.setValue(value3);
+    entries.add(entry3);
+
+    RootElementMapAdaptedEntry entry4 = new RootElementMapAdaptedEntry();
+    entry4.setKey("source2");
+    RootElementMapAdaptedValue value4 = new RootElementMapAdaptedValue();
+    Source source2 = new Source();
+    source2.setId("source2id");
+    value4.setValue(Arrays.asList((Object) source2));
+    entry4.setValue(value4);
+    entries.add(entry4);
+    map.setEntry(entries);
+    RootElementMapWrapper wrapper = new RootElementMapWrapper();
+    wrapper.setMap(map);
+    wrapper = personService.storeGenericProperties(wrapper);
+    RootElementMapAdapted retVal = wrapper.getMap();
+    assertNotNull(retVal.getEntry());
+    assertEquals(4, retVal.getEntry().size());
+//    assertTrue(retVal.getEntry().get(0).getValue().getValue() instanceof Person);
+//    assertTrue(retVal.getEntry().get(1).getValue().getValue() instanceof Person);
+//    assertTrue(retVal.getEntry().get(2).getValue().getValue() instanceof Source);
+//    assertTrue(retVal.getEntry().get(3).getValue().getValue() instanceof Source);
 
     RelationshipService relationshipService = new RelationshipServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/RelationshipServiceService");
     List list = relationshipService.getRelationships("someid");

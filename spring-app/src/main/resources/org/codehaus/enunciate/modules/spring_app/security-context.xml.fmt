@@ -141,40 +141,56 @@
     <beans:property name="accessConfirmedUrl" value="${securityConfig.OAuthConfig.accessConfirmedURL}"/>
   </beans:bean>
   [/#if]
-  [#if !securityConfig.disableDefaultProvider]
-    [#if securityConfig.userDetailsService?exists]
-      [#if spring3!false]
-        [#assign authManagerAliased=true/]
+  [#if spring3!false]
+    [#if !securityConfig.disableDefaultProvider]
+  <beans:bean id="enunciate-auth-provider" class="org.codehaus.enunciate.modules.spring_app.DefaultEnunciateAuthenticationProvider">
+      [#if securityConfig.userDetailsService?exists]
+    <beans:property name="userDetailsService" ref="${_enunciate_user_details_ref}"/>
+      [/#if]
+  </beans:bean>
+      [#assign _auth_provider_ref="enunciate-auth-provider"/]
+    [#elseif securityConfig.primaryProvider??]
+      [#if securityConfig.primaryProvider.beanName??]
+        [#assign _auth_provider_ref=securityConfig.primaryProvider.beanName/]
+      [#elseif securityConfig.primaryProvider.className??]
+
+  <beans:bean id="enunciate-auth-provider" class="${securityConfig.primaryProvider.className}"/>
+        [#assign _auth_provider_ref="enunciate-auth-provider"/]
+      [/#if]
+    [/#if]
+    [#if _auth_provider_ref??]
   <authentication-manager alias="authenticationManager">
-      [/#if]
-  <authentication-provider user-service-ref="${_enunciate_user_details_ref}"/>
-      [#if spring3!false]
+    <authentication-provider ref="${_auth_provider_ref}"/>
   </authentication-manager>
-      [/#if]
-    [#else]
+    [/#if]
+  [#else]
+    [#if !securityConfig.disableDefaultProvider]
+      [#if securityConfig.userDetailsService?exists]
+  <authentication-provider user-service-ref="${_enunciate_user_details_ref}"/>
+      [#else]
 
   <beans:bean id="enunciate-auth-provider" class="org.codehaus.enunciate.modules.spring_app.DefaultEnunciateAuthenticationProvider">
     <custom-authentication-provider/>
   </beans:bean>
-    [/#if]
-  [#elseif securityConfig.primaryProvider??]
-    [#if securityConfig.primaryProvider.beanName??]
+      [/#if]
+    [#elseif securityConfig.primaryProvider??]
+      [#if securityConfig.primaryProvider.beanName??]
 
   <beans:bean id="enunciate-auth-provider" parent="${securityConfig.primaryProvider.beanName}">
     <custom-authentication-provider/>
   </beans:bean>
-    [#elseif securityConfig.primaryProvider.className??]
+      [#elseif securityConfig.primaryProvider.className??]
 
   <beans:bean id="enunciate-auth-provider" class="${securityConfig.primaryProvider.className}">
     <custom-authentication-provider/>
   </beans:bean>
+      [/#if]
     [/#if]
+
+  <authentication-manager alias="authenticationManager"/>
   [/#if]
 
   <!-- service method interceptor (used to lock down the service methods.)-->
-  [#if !authManagerAliased!false]
-  <authentication-manager alias="authenticationManager"/>
-  [/#if]
   <beans:bean id="enunciate-security-interceptor" [#if spring3!false]class="org.springframework.security.access.intercept.aopalliance.MethodSecurityInterceptor"[#else]class="org.springframework.security.intercept.method.aopalliance.MethodSecurityInterceptor"[/#if]>
     <beans:property name="authenticationManager" ref="authenticationManager"/>
     <beans:property name="accessDecisionManager">

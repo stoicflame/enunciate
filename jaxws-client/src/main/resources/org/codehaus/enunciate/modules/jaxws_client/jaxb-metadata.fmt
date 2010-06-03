@@ -5,6 +5,13 @@
   javax.xml.bind.annotation.XmlAccessOrder.${typeDef.accessorOrder}
 )
 [/#if]
+[#if typeDef.seeAlsos??]
+@javax.xml.bind.annotation.XmlSeeAlso ( {
+  [#list typeDef.seeAlsos as seeAlso]
+  ${classnameFor(seeAlso)}.class[#if seeAlso_has_next], [/#if]
+  [/#list]
+} )
+[/#if]
 @javax.xml.bind.annotation.XmlType (
   name = "${typeDef.name!""}",
   namespace = "${typeDef.namespace!""}"[#if typeDef.propertyOrder??],
@@ -23,6 +30,13 @@
 [/#if]
 [#if accessor.annotations["javax.xml.bind.annotation.XmlAttachmentRef"]??]
   @javax.xml.bind.annotation.XmlAttachmentRef
+[/#if]
+[#if accessor.seeAlsos??]
+@javax.xml.bind.annotation.XmlSeeAlso ( {
+  [#list accessor.seeAlsos as seeAlso]
+  ${classnameFor(seeAlso)}.class[#if seeAlso_has_next], [/#if]
+  [/#list]
+} )
 [/#if]
 [#if accessor.attribute]
   @javax.xml.bind.annotation.XmlAttribute (

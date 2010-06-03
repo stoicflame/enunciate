@@ -19,6 +19,8 @@ package org.codehaus.enunciate.samples.genealogy.services;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.rest.annotations.NounValue;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
+import org.codehaus.enunciate.samples.genealogy.data.RootElementMap;
+import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
 
 import javax.activation.DataHandler;
 import javax.jws.WebMethod;
@@ -69,6 +71,17 @@ public interface PersonService {
   @DELETE
   @Path("/remover/pedigree/person/{id}")
   void deletePerson(@PathParam ("id") String personId) throws ServiceException;
+
+  /**
+   * Store some generic properties.
+   *
+   * @param map The map of generic properties.
+   * @return The generic properties.
+   * @throws ServiceException Upon a problem.
+   */
+  @PUT
+  @Path("/properties/generic")
+  RootElementMapWrapper storeGenericProperties(RootElementMapWrapper map) throws ServiceException;
 
   /**
    * Uploads some files.

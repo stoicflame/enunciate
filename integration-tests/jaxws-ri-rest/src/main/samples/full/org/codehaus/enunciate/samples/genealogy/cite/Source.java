@@ -16,10 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.cite;
 
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.*;
 import java.net.URI;
 
 /**
@@ -35,6 +32,7 @@ public class Source {
   private URI link;
   private InfoSet[] infoSets;
   private Repository repository;
+  private String somethingTransient;
 
   /**
    * The id of the source.
@@ -127,5 +125,14 @@ public class Source {
    */
   public void setRepository(Repository repository) {
     this.repository = repository;
+  }
+
+  @XmlTransient
+  public String getSomethingTransient() {
+    return somethingTransient;
+  }
+
+  public void setSomethingTransient(String somethingTransient) {
+    this.somethingTransient = somethingTransient;
   }
 }

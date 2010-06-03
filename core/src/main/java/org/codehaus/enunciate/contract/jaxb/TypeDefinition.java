@@ -19,6 +19,9 @@ package org.codehaus.enunciate.contract.jaxb;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.MirroredTypesException;
+import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.util.Declarations;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
@@ -474,6 +477,29 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
 
     return order;
+  }
+
+  /**
+   * @return The list of class names that this type definition wants you to "see also".
+   */
+  public Collection<TypeMirror> getSeeAlsos() {
+    Collection<TypeMirror> seeAlsos = null;
+    XmlSeeAlso seeAlsoInfo = getAnnotation(XmlSeeAlso.class);
+    if (seeAlsoInfo != null) {
+      seeAlsos = new ArrayList<TypeMirror>();
+      try {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        for (Class clazz : seeAlsoInfo.value()) {
+          TypeDeclaration typeDeclaration = env.getTypeDeclaration(clazz.getName());
+          DeclaredType undecorated = env.getTypeUtils().getDeclaredType(typeDeclaration);
+          seeAlsos.add(undecorated);
+        }
+      }
+      catch (MirroredTypesException e) {
+        seeAlsos.addAll(e.getTypeMirrors());
+      }
+    }
+    return seeAlsos;
   }
 
   /**

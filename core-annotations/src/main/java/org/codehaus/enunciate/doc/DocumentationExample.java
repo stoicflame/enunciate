@@ -27,4 +27,11 @@ public @interface DocumentationExample {
    * @return The value of this documentation example. Applicable to JAXB fields and properties.
    */
   String value() default "##default";
+
+  /**
+   * Valid types for documentation examples. E.g. use to declare that a certain type is only valid in its JSON form.
+   *
+   * @return The valid types for the documentation example.
+   */
+  ExampleType[] validTypes() default { ExampleType.XML, ExampleType.JSON };
 }
