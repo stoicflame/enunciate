@@ -32,46 +32,13 @@
 
     <div class="content">
 
-      <h1>Creating a New Project</h1>
-
-      <h2>enunciate-simple-archetype</h2>
-
-      <p>Enunciate provides a Maven archetype to seed a simple web service project. The project uses the basic modules and includes working sample service 
-      and model code. In fact that code is the example starting below. The archetype is invoked just like any other Maven archetype:</p>
-
-      <code>
-mvn archetype:generate \
-    -DarchetypeGroupId=org.codehaus.enunciate.archetypes \
-    -DarchetypeArtifactId=enunciate-simple-archetype \
-    -DarchetypeVersion=1.19 \
-    -DgroupId=org.codehaus.enunciate \
-    -DartifactId=wannabecool \
-    -DarchetypeRepository=http://snapshots.repository.codehaus.org/
-      </code>
-
-      <h1>Introduction to Example</h1>
-
-      <p>One of the most irritating things about Web service development demos is that they attempt to wow you with the simplicity and interoperability
-      of their development tool by exposing one of three things: a "Hello, World!" app, an echo example, or a stock quote service.  The data structures are
-      no more complex than flat strings, the method signatures are single-arg, single return value with no faults, and they leave out the huge mess
-      of deployment descriptors, dependencies, configuration, packaging, and deployment that makes up a significant part of Web service development.</p>
+      <h1>Introduction</h1>
 
       <p>This getting started guide will attempt to walk through a real-world (okay, mock-real-world) example of Web service development, without trying
-      to hide the <a href="http://en.wikipedia.org/wiki/The_Wizard_of_Oz_(1939_film)">man behind the curtain</a>.  Of course, some attempt to be concise
+      to hide the complexities of deployment descriptors, dependencies, configuration, and packaging.  Of course, some attempt to be concise
       needs to be made, but at least you'll get the idea of the full development effort.  And you'll see more than just "Hello, World".</p>
 
-      <p>We'll be writing a social networking app.  For this tutorial, the name of our social networking app is <u>IfYouWannaBeCool.com</u>.</p>
-
-      <p>Note that the source code for this getting started guide is included in the distribution bundle along with a sample
-      Ant build file, a sample Maven 2 POM, and an example of how to invoke Enunciate via the command line (see the README).</p>
-
-      <p>But this is just one of the many samples that have been written that will help you get started.  The others can be found in the Enunciate
-        distribution bundle and you can also <a href="http://svn.codehaus.org/enunciate/trunk/enunciate/src/samples/">check them out of SVN</a>. Enunciate
-        also has <a href="http://svn.codehaus.org/enunciate/trunk/enunciate/integration-tests/">example applications</a> with tests that are run before
-        every release.  You may also want to check out <a href="http://docs.codehaus.org/display/ENUNCIATE/A+Rich+Web+service+API+for+your+favorite+framework">
-        the tutorials for integrating Enunciate with your favorite application platform</a> and you may find interesting
-        <a href="http://weblogs.java.net/blog/stoicflame/archive/2008/01/web_service_pro_1.html">this two-part tutorial for developing a RIA using
-        Enunciate</a>.</p>
+      <p>We'll be writing a mock social networking app.  For this tutorial, the name of our social networking app is <u>IfYouWannaBeCool.com</u>.</p>
 
       <ul>
         <li><a href="getting_started_step1.html">Step 1: Write the Code</a></li>
@@ -80,6 +47,26 @@ mvn archetype:generate \
         <li><a href="getting_started_step4.html">Step 4 (Optional): Iterate</a></li>
         <li><a href="getting_started_step5.html">Step 5 (Optional): Behold the Glory</a></li>
       </ul>
+
+      <p>The source code for this application can be obtained in one of two ways:</p>
+
+      <h2>Option 1: enunciate-simple-archetype</h2>
+
+      <p>Enunciate provides a Maven archetype to seed a simple web service project. The project uses the basic modules and includes working sample service
+      and model code. Here's how to invoke it:</p>
+
+      <code>
+mvn archetype:generate \
+    -DarchetypeGroupId=org.codehaus.enunciate.archetypes \
+    -DarchetypeArtifactId=enunciate-simple-archetype \
+    -DarchetypeVersion=1.20 \
+    -DgroupId=org.codehaus.enunciate \
+    -DartifactId=wannabecool
+      </code>
+
+      <h2>Option 2: Distribution Bundle</h2>
+
+      <p>The wannabecool sample is bundled with the distribution bundle that can be downloaded from the <a href="downloads.html">downloads page</a>.</p>
 
       <div align="right"><p><a href="getting_started_step1.html">Step 1: Write the Code >></a></p></div>
 
@@ -93,10 +80,14 @@ mvn archetype:generate \
 
   </div>
 
-  <div class="footer">&copy; 2006-2009 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
+  <div class="footer">&copy; 2006-2010 <a href="http://www.webcohesion.com/">Web Cohesion</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a
     href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a>
   </div>
 
+</div>
+
+<div class="donations">
+@DONATIONS@
 </div>
 
 <script type="text/javascript">

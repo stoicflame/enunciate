@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.20-RC2</version>
+    <version>1.20</version>
   </parent>
 
   <artifactId>enunciate-spring3-app-rt</artifactId>
@@ -14,6 +14,7 @@
   <properties>
     <spring.version>3.0.2.RELEASE</spring.version>
     <spring.security.version>3.0.2.RELEASE</spring.security.version>
+    <spring.security.oauth.version>3.16.SS3</spring.security.oauth.version>
   </properties>
 
   <dependencies>
@@ -29,6 +30,15 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-spring-jaxws-rt</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <!--the (optional) spring security dependencies-->
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-spring3-security-rt</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -79,41 +89,6 @@
       <artifactId>spring-webmvc</artifactId>
     </dependency>
 
-    <!-- ============================================= -->
-    <!--Spring Security Dependencies (all are optional)-->
-    <!-- ============================================= -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-tx</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-core</artifactId>
-      <version>${spring.security.version}</version>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <!-- declaring this dep to override spring-security-openid's dep -->
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-openid</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.spring-security-oauth</groupId>
-      <artifactId>spring-security-oauth</artifactId>
-      <optional>true</optional>
-      <version>3.16.SS3</version>
-    </dependency>
 
   </dependencies>
 

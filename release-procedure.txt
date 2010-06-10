@@ -22,10 +22,9 @@
     9b. put target/enunciate-VERSION.tar.gz
 10. sitecopy --update enunciate
 11. Make your announcements.
-    11a. Codehaus news
-    11b. Java.net
-    11c. Webcohesion?
-    11d. Mailing lists.
-    11e. Serverside.com?
-    11f. Javalobby?
+    11a. Mailing lists
+    11b. Webcohesion blog
+    11c. Java.net?
+    11d. Serverside.com?
+    11e. Javalobby?
 12. Update the WIKI, close all JIRA issues for last version.  Announce version release in JIRA.

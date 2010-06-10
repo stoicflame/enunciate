@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.20</version>
+  </parent>
+
+  <artifactId>enunciate-spring-security-rt</artifactId>
+  <packaging>pom</packaging>
+  <name>Enunciate - Spring Security Runtime</name>
+  <description>A pom for bundling all the (optional) dependencies needed to apply spring security.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-core-tiger</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- declaring this dep to override spring-security-openid's dep -->
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-openid</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.spring-security-oauth</groupId>
+      <artifactId>spring-security-oauth</artifactId>
+    </dependency>
+
+  </dependencies>
+
+</project>

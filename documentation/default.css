@@ -128,15 +128,31 @@ blockquote {
 	margin-right: 12px;
 	line-height: 44px;
 }
+.navigation a img {
+  vertical-align: middle;
+}
 .navigation a:hover {
 	background: #CEBDA1;
 	color: #420;
+}
+.navigation input {
+	padding: 0 4px;
+	line-height: 44px;
+  vertical-align: middle;
 }
 
 /* main */
 .main {
 	clear: both;
 	padding: 0 10px 12px 28px;
+}
+
+/* donation prompts */
+.donations {
+  position:fixed;
+  bottom:2%;
+  right:2%;
+  text-align:right;
 }
 
 /* little news insert */
@@ -254,4 +270,11 @@ blockquote {
 .footer a:hover {
 	color: #FFF;
 	text-decoration: underline;
+}
+
+/*info popup*/
+#dek {
+  position:absolute;
+  visibility:hidden;
+  z-index:200;
 }

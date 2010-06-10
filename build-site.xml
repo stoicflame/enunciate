@@ -38,10 +38,18 @@
       </condition>
     </fail>
 
-    <artifact:dependencies filesetId="core.libs.fileset" pomRefId="top.pom"/>
+    <artifact:dependencies sourcesFilesetId="core.sources.fileset" pathId="core.libs.path" filesetId="core.libs.fileset" pomRefId="top.pom"/>
 
     <artifact:dependencies filesetId="spring.libs.fileset" pathId="spring.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app" version="${top.pom.version}"/>
+    </artifact:dependencies>
+
+    <artifact:dependencies filesetId="spring2.libs.fileset" pathId="spring2.libs.path">
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app-rt" version="${top.pom.version}"/>
+    </artifact:dependencies>
+    
+    <artifact:dependencies filesetId="spring3.libs.fileset" pathId="spring3.libs.path">
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring3-app-rt" version="${top.pom.version}"/>
     </artifact:dependencies>
 
     <artifact:dependencies filesetId="xfire.libs.fileset" pathId="xfire.libs.path">
@@ -65,29 +73,22 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-amf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies sourcesFilesetId="dist.sources.fileset" pathId="dist.libs.path" pomRefId="top.pom"/>
-    <artifact:dependencies pathId="optional.jars.path" filesetId="optional.jars.fileset">
+    <artifact:dependencies pathId="optional.libs.path" filesetId="optional.libs.fileset">
       <dependency groupId="commons-fileupload" artifactId="commons-fileupload" version="1.2.1"/>
       <dependency groupId="commons-io" artifactId="commons-io" version="1.3.2"/>
-      <dependency groupId="org.springframework" artifactId="spring-tx" version="2.5.4"/>
-      <dependency groupId="org.springframework.security" artifactId="spring-security-core-tiger" version="2.0.3"/>
-      <dependency groupId="org.springframework.security" artifactId="spring-security-openid" version="2.0.3"/>
-      <dependency groupId="org.codehaus.spring-security-oauth" artifactId="spring-security-oauth" version="2.6"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-security-rt" version="${top.pom.version}" type="pom"/>
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring3-security-rt" version="${top.pom.version}" type="pom"/>
     </artifact:dependencies>
-    <patternset id="optional.jars.dependencies.patternset">
-      <exclude name="**/commons-fileupload*"/>
-      <exclude name="**/commons-io*"/>
-      <exclude name="**/spring-tx*"/>
-      <exclude name="**/spring-security-*"/>
-    </patternset>
-
+    
     <!--filters for docs-->
     <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
     <loadfile srcfile="${static.docs.dir}/sidenav.include.html" property="sidenav"/>
+    <loadfile srcfile="${static.docs.dir}/donations.include.html" property="donations"/>
 
     <filterset id="nav.filterset">
       <filter token="TOPNAV" value="${topnav}"/>
       <filter token="SIDENAV" value="${sidenav}"/>
+      <filter token="DONATIONS" value="${donations}"/>
     </filterset>
   </target>
 
@@ -110,14 +111,14 @@
     <dirname property="apt.output.dir" file="target/module-docs/any.txt"/>
 
     <path id="module.docs.classpath">
-      <path refid="dist.libs.path"/>
+      <path refid="core.libs.path"/>
       <path refid="spring.libs.path"/>
       <path refid="rest.libs.path"/>
       <path refid="xfire.libs.path"/>
       <path refid="cxf.libs.path"/>
       <path refid="gwt.libs.path"/>
       <path refid="amf.libs.path"/>
-      <path refid="optional.jars.path"/>
+      <path refid="optional.libs.path"/>
       <path location="${java.home}/../lib/tools.jar"/>
       <fileset dir="${ant.home}/lib">
         <include name="*.jar"/>
@@ -200,14 +201,14 @@
 
   <target name="getting-started-examples" depends="copy-getting-started-source" description="Generated the getting started examples.">
     <taskdef name="enunciate" classname="org.codehaus.enunciate.main.EnunciateTask">
-      <classpath refid="dist.libs.path"/>
+      <classpath refid="core.libs.path"/>
     </taskdef>
 
     <mkdir dir="${getting.started.example.dir}/step1"/>
     <echo message="Generating the step1 examples...."/>
     <enunciate target="build" basedir="src/samples/wannabecool/step1">
       <include name="**/*.java"/>
-      <classpath refid="dist.libs.path"/>
+      <classpath refid="core.libs.path"/>
       <export artifactId="docs" destination="${getting.started.example.dir}/step1"/>
     </enunciate>
 
@@ -216,7 +217,7 @@
     <copy file="src/samples/wannabecool/step4/LICENSE.txt" todir="${user.dir}" overwrite="true"/>
     <enunciate target="build" basedir="src/samples/wannabecool/step4" configFile="src/samples/wannabecool/step4/enunciate.xml">
       <include name="**/*.java"/>
-      <classpath refid="dist.libs.path"/>
+      <classpath refid="core.libs.path"/>
       <export artifactId="docs" destination="${getting.started.example.dir}/step4"/>
     </enunciate>
     <delete file="${user.dir}/LICENSE.txt" failonerror="false"/>
@@ -227,7 +228,7 @@
     <echo>Building the Javadocs to ${javadoc.dir}...</echo>
     <property name="title" value="enunciate-docs"/>
 
-    <javadoc doctitle="enunciate" windowtitle="enunciate" destdir="${javadoc.dir}" author="true" version="true" packagenames="*">
+    <javadoc doctitle="enunciate" windowtitle="enunciate" destdir="${javadoc.dir}" author="true" version="true" packagenames="*" verbose="false">
       <fileset dir="${basedir}">
         <include name="**/src/main/java/**/*.java"/>
         <exclude name="**/samples/**"/>
@@ -249,8 +250,10 @@
       </sourcepath>
 
       <classpath>
-        <path refid="dist.libs.path"/>
+        <path refid="core.libs.path"/>
         <path refid="spring.libs.path"/>
+        <path refid="spring2.libs.path"/>
+        <path refid="spring3.libs.path"/>
         <path refid="rest.libs.path"/>
         <path refid="xfire.libs.path"/>
         <path refid="cxf.libs.path"/>
@@ -259,12 +262,6 @@
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <path path="${java.class.path}"/>
       </classpath>
-
-      <link href="http://java.sun.com/j2se/1.5.0/docs/api" offline="true" packagelistloc="${basedir}/src/javadoc/sdk"/>
-      <link href="http://apt-jelly.sourceforge.net/api" offline="true" packagelistloc="${basedir}/src/javadoc/apt-jelly"/>
-      <link href="http://jakarta.apache.org/commons/digester/commons-digester-1.7/docs/api" offline="true" packagelistloc="${basedir}/src/javadoc/commons-digester"/>
-      <link href="http://static.springframework.org/spring/docs/2.5.x/api" offline="true" packagelistloc="${basedir}/src/javadoc/spring"/>
-      <link href="http://envoisolutions.com/xfire/api" offline="true" packagelistloc="${basedir}/src/javadoc/xfire"/>
     </javadoc>
   </target>
 
@@ -274,7 +271,7 @@
     <mkdir dir="target/full-sources"/>
 
     <unzip dest="target/full-sources">
-      <fileset refid="dist.sources.fileset"/>
+      <fileset refid="core.sources.fileset"/>
       <patternset>
         <include name="**/org/codehaus/enunciate/**"/>
       </patternset>
@@ -295,6 +292,7 @@
     <mkdir dir="target/lib/modules/spring"/>
     <copy todir="target/lib/modules/spring">
       <fileset refid="spring.libs.fileset"/>
+      <fileset refid="spring2.libs.fileset"/>
       <mapper type="flatten"/>
     </copy>
     <delete>
@@ -363,20 +361,6 @@
       </fileset>
     </delete>
 
-    <!--set up the optional third-party libs-->
-    <mkdir dir="target/lib/optional"/>
-    <copy todir="target/lib/optional">
-      <fileset refid="optional.jars.fileset"/>
-      <mapper type="flatten"/>
-    </copy>
-    <delete>
-      <fileset dir="target/lib/optional">
-        <patternset refid="optional.jars.dependencies.patternset"/>
-      </fileset>
-    </delete>
-    <echo file="target/lib/optional/README.txt">
-This directory contains jars that are optional for Enunciate because they support optional features such as security and REST file uploads.
-    </echo>
   </target>
 
   <target name="scripts" depends="copy-dist-libs" description="Generates the executable scripts.">

@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.20-RC2</version>
+  <version>1.20</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -34,6 +34,8 @@
     <module>top-rt</module>
     <module>top</module>
 
+    <module>spring-security-rt</module>
+    <module>spring3-security-rt</module>
     <module>spring-jaxws-rt</module>
     <module>spring-app-rt</module>
     <module>spring3-app-rt</module>
@@ -243,8 +245,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>2.5.4</spring.version>
     <spring.security.version>2.0.3</spring.security.version>
+    <spring.security.oauth.version>3.16</spring.security.oauth.version>
     <jersey.version>1.2</jersey.version>
     <cxf.version>2.2.3</cxf.version>
+    <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
 
   <dependencyManagement>
@@ -874,14 +878,7 @@
         <!--depending modules: spring-app-rt-->
         <groupId>org.codehaus.spring-security-oauth</groupId>
         <artifactId>spring-security-oauth</artifactId>
-        <version>3.7</version>
-        <exclusions>
-          <!--we'll depend on enunciate's version of these artifacts.-->
-          <exclusion>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core-tiger</artifactId>
-          </exclusion>
-        </exclusions>
+        <version>${spring.security.oauth.version}</version>
       </dependency>
 
       <dependency>
