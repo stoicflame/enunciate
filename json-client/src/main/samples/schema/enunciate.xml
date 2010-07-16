@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<enunciate label="shapes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
+  <deployment context="net.java.ws.addressbook_addressbook_war_1.0-SNAPSHOT"/>
+  <modules>
+    <jackson-client disabled="false">
+      <package-conversions>
+        <convert from="org.codehaus.enunciate.examples.jackson_client.schema" to="shapes"/>
+      </package-conversions>
+    </jackson-client>
+  </modules>
+</enunciate>

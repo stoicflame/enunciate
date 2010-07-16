@@ -4,11 +4,10 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.20</version>
+  <version>1.21-SNAPSHOT</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>
-    <module>xfire-rest</module>
     <module>cxf-rest</module>
     <module>jaxws-ri-rest</module>
     <module>jaxws-ri-rest-spring</module>
@@ -16,6 +15,18 @@
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.cargo</groupId>
+          <artifactId>cargo-maven2-plugin</artifactId>
+          <version>1.0.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
   <distributionManagement>
 

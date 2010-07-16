@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-cxf-rest</artifactId>
-  <version>1.20</version>
+  <version>1.21-SNAPSHOT</version>
   <name>Enunciate - CXF/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
   <packaging>war</packaging>
@@ -59,28 +59,17 @@
               <goal>assemble</goal>
             </goals>
             <configuration>
-              <addXFireClientSourcesToTestClasspath>true</addXFireClientSourcesToTestClasspath>
               <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
             </configuration>
           </execution>
         </executions>
         <dependencies>
           <!--There's a weird bug in Maven that I haven't been able to track down
-          in that if I don't add the XFire module here, then the next project
-          will fail because it won't find the XFire module.-->
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-xfire</artifactId>
-            <version>${project.version}</version>
-          </dependency>
+          in that if I don't add the rest module here, then the next project
+          will fail because it won't find the rest module.-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rest</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-xfire-client</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -109,7 +98,6 @@
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
-        <version>1.0-beta-2</version>
         <executions>
           <execution>
             <id>start-container</id>
@@ -218,14 +206,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-xfire-client-rt</artifactId>
-      <version>${project.version}</version>
-
-      <!--used to compile the tests.-->
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <distributionManagement>

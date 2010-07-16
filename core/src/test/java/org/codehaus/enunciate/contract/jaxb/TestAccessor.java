@@ -128,6 +128,11 @@ public class TestAccessor extends InAPTTestCase {
     public String getNamespace() {
       return null;
     }
+
+    @Override
+    public String getJsonMemberName() {
+      return null;
+    }
   }
 
   public static Test suite() {

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jersey-storage-spring</artifactId>
-  <version>1.20</version>
+  <version>1.21-SNAPSHOT</version>
   <name>Enunciate - Jersey/Spring Integration Tests</name>
   <description>Integration tests for Enunciate, testing the Jersey deployment with Spring enabled.</description>
   <packaging>war</packaging>
@@ -34,20 +34,12 @@
             <goals>
               <goal>assemble</goal>
             </goals>
-            <configuration>
-              <addXFireClientSourcesToTestClasspath>true</addXFireClientSourcesToTestClasspath>
-            </configuration>
           </execution>
         </executions>
         <dependencies>
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-xfire-client</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -75,7 +67,6 @@
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
-        <version>1.0-beta-2</version>
         <executions>
           <execution>
             <id>start-container</id>

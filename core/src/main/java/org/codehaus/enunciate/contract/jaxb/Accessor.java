@@ -425,4 +425,11 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
     }
     return referenceFrom;
   }
+
+  /**
+   * Get the name for the JSON member to which this element will be serialized.
+   *
+   * @return The JSON member name.
+   */
+  public abstract String getJsonMemberName();
 }

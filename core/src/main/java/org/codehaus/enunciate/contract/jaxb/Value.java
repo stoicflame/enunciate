@@ -69,4 +69,9 @@ public class Value extends Accessor {
       jsonNode.put("value", valueNode);
     }
   }
+
+  @Override
+  public String getJsonMemberName() {
+    return "value";
+  }
 }

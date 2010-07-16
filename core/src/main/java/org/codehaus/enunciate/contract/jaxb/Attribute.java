@@ -161,4 +161,9 @@ public class Attribute extends Accessor {
       jsonNode.put(getName(), valueNode);
     }
   }
+
+  @Override
+  public String getJsonMemberName() {
+    return getName();
+  }
 }

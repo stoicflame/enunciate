@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.20</version>
+  <version>1.21-SNAPSHOT</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -19,13 +19,12 @@
     <module>jersey-rt</module>
     <module>jersey</module>
     <module>jaxws-client</module>
+    <module>json-client</module>
     <module>c</module>
     <module>obj-c</module>
     <module>csharp</module>
     <module>ruby</module>
     <module>docs</module>
-    <module>xfire-client-rt</module>
-    <module>xfire-client</module>
     <module>amf-rt</module>
     <module>amf</module>
     <module>gwt-rt</module>
@@ -43,9 +42,6 @@
 
     <module>rest-rt</module>
     <module>rest</module>
-
-    <module>xfire-rt</module>
-    <module>xfire</module>
 
     <module>cxf-rt</module>
     <module>cxf</module>

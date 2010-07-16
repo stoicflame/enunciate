@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jaxws-ri-rest</artifactId>
-  <version>1.20</version>
+  <version>1.21-SNAPSHOT</version>
   <name>Enunciate - JAXWS-RI/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the JAXWS-RI + REST combo.</description>
   <packaging>war</packaging>
@@ -104,7 +104,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               <goal>assemble</goal>
             </goals>
             <configuration>
-              <addXFireClientSourcesToTestClasspath>true</addXFireClientSourcesToTestClasspath>
               <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
               <exports>
                 <csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>
@@ -127,11 +126,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-xfire-client</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
@@ -228,7 +222,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
-        <version>1.0-beta-2</version>
         <executions>
           <execution>
             <id>start-container</id>
@@ -319,15 +312,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-xfire-client-rt</artifactId>
-      <version>${project.version}</version>
-
-      <!--used to compile the tests.-->
-      <scope>test</scope>
     </dependency>
 
     <dependency>

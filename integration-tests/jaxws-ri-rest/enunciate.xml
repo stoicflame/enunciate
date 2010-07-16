@@ -14,11 +14,6 @@
     </soap>
   </services>
   <modules>
-    <xfire-client uuid="full.example" disable15Client="false">
-      <package-conversions>
-        <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.client"/>
-      </package-conversions>
-    </xfire-client>
     <jaxws-client>
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>

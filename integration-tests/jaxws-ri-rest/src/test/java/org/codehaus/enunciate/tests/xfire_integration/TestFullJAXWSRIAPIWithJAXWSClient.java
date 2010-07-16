@@ -33,8 +33,6 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Same as {@link org.codehaus.enunciate.tests.xfire_integration.TestFullJAXWSRIAPI}, but using the JAX-RS client.
- *
  * @author Ryan Heaton
  */
 public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {

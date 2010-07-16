@@ -547,7 +547,7 @@ public class Element extends Accessor {
   public void generateExampleJson(ObjectNode jsonNode) {
     DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
-      String name = getJsonElementName();
+      String name = getJsonMemberName();
       JsonNode elementNode;
       if (!isCollectionType()) {
         String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
@@ -585,12 +585,8 @@ public class Element extends Accessor {
     }
   }
 
-  /**
-   * Get the element name for the JSON attribute for this element.
-   *
-   * @return The element.
-   */
-  public String getJsonElementName() {
+  @Override
+  public String getJsonMemberName() {
     return isWrapped() ? getWrapperName() : getName();
   }
 }

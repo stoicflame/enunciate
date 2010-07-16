@@ -52,11 +52,6 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring3-app-rt" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="xfire.libs.fileset" pathId="xfire.libs.path">
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xfire" version="${top.pom.version}"/>
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-xfire-client" version="${top.pom.version}"/>
-    </artifact:dependencies>
-
     <artifact:dependencies filesetId="cxf.libs.fileset" pathId="cxf.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
     </artifact:dependencies>
@@ -114,7 +109,6 @@
       <path refid="core.libs.path"/>
       <path refid="spring.libs.path"/>
       <path refid="rest.libs.path"/>
-      <path refid="xfire.libs.path"/>
       <path refid="cxf.libs.path"/>
       <path refid="gwt.libs.path"/>
       <path refid="amf.libs.path"/>
@@ -255,7 +249,6 @@
         <path refid="spring2.libs.path"/>
         <path refid="spring3.libs.path"/>
         <path refid="rest.libs.path"/>
-        <path refid="xfire.libs.path"/>
         <path refid="cxf.libs.path"/>
         <path refid="gwt.libs.path"/>
         <path refid="amf.libs.path"/>
@@ -297,18 +290,6 @@
     </copy>
     <delete>
       <fileset dir="target/lib/modules/spring">
-        <present targetdir="target/lib"/>
-      </fileset>
-    </delete>
-
-    <!--copy the xfire module plus deps-->
-    <mkdir dir="target/lib/modules/xfire"/>
-    <copy todir="target/lib/modules/xfire">
-      <fileset refid="xfire.libs.fileset"/>
-      <mapper type="flatten"/>
-    </copy>
-    <delete>
-      <fileset dir="target/lib/modules/xfire">
         <present targetdir="target/lib"/>
       </fileset>
     </delete>
