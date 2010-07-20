@@ -23,7 +23,7 @@
 </h1>
 
 <code>
-#include &lt;${label}.h&gt;
+#import &lt;${label}.h&gt;
 //...
 
 [#if input_element_name??]

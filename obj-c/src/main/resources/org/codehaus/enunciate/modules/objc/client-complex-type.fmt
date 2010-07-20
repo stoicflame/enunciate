@@ -417,7 +417,6 @@
   }
   NS_HANDLER
   {
-    [_${typeName?uncap_first} dealloc];
     _${typeName?uncap_first} = nil;
     [localException raise];
   }
@@ -578,7 +577,6 @@
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(attribute)}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to read the attribute value for some reason.
-      [self dealloc];
       [NSException raise: @"XMLReadError"
                    format: @"Error reading attribute {${attribute.namespace!""}}${attribute.name}."];
     }
@@ -617,7 +615,6 @@
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(type.value)?cap_first}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to return the value for some reason.
-      [self dealloc];
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
@@ -677,7 +674,6 @@
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(element)?cap_first}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to return the value for some reason.
-      [self dealloc];
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
@@ -703,7 +699,6 @@
       while (xmlTextReaderDepth(reader) > depth) {
         if (status < 1) {
           //panic: XML read error.
-          [self dealloc];
           [NSException raise: @"XMLReadError"
                        format: @"Failure to advance to next wrapped child element."];
         }
@@ -743,7 +738,6 @@
     _child_accessor = xmlTextReaderRead${functionIdentifierFor(choice.collectionItemType)?cap_first}Type(reader);
     if (_child_accessor == NULL) {
       //panic: unable to return the value for some reason.
-      [self dealloc];
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
@@ -792,7 +786,6 @@
 
       if (status < 1) {
         //panic: XML read error.
-        [self dealloc];
         [NSException raise: @"XMLReadError"
                      format: @"Failure to advance to end wrapper element."];
       }

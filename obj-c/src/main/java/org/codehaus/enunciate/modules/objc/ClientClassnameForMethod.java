@@ -31,7 +31,7 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * Conversion from java types to Ruby types.
+ * Conversion from java types to Objective-C types.
  *
  * @author Ryan Heaton
  */

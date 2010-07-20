@@ -1,6 +1,6 @@
 #define DEBUG_ENUNCIATE 0 //set to '1' or '2' for output debugging.
-#include <enunciate.m>
-#include <stdio.h>
+#import <enunciate.m>
+#import <stdio.h>
 
 int main ( int argc, char *argv[] ) {
   NSData *in;
@@ -26,7 +26,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [circle dealloc];
+    [circle release];
     [in release];
     [out release];
   }
@@ -36,7 +36,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [triangle dealloc]; //free the triangle.
+    [triangle release]; //free the triangle.
     [in release];
     [out release];
   }
@@ -46,7 +46,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [rectangle dealloc]; //free the rectangle.
+    [rectangle release]; //free the rectangle.
     [in release];
     [out release];
   }
@@ -56,7 +56,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [cat dealloc]; //free the cat.
+    [cat release]; //free the cat.
     [in release];
     [out release];
   }
@@ -66,7 +66,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [canvas dealloc]; //free the canvas.
+    [canvas release]; //free the canvas.
     [in release];
     [out release];
   }
@@ -76,7 +76,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [house dealloc]; //free the house.
+    [house release]; //free the house.
     [in release];
     [out release];
   }
@@ -86,7 +86,7 @@ int main ( int argc, char *argv[] ) {
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
 
-    [bus dealloc]; //free the bus.
+    [bus release]; //free the bus.
     [in release];
     [out release];
   }

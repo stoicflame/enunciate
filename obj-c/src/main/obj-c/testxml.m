@@ -1,4 +1,4 @@
-#include <testxml.h>
+#import <testxml.h>
 
 #ifndef ENUNCIATE_C_UTILITIES
 #define ENUNCIATE_C_UTILITIES
@@ -706,7 +706,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
   }
   NS_HANDLER
   {
-    [node dealloc];
+    [node release];
     node = nil;
     [localException raise];
   }
@@ -1196,8 +1196,8 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 + (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
 {
   xmlChar *timevalue = xmlTextReaderReadEntireNodeValue(reader);
-  NSInteger year = 0;
-  NSUInteger month = 1, day = 1, hour = 0, minute = 0, second = 0;
+  int year = 0;
+  unsigned int month = 1, day = 1, hour = 0, minute = 0, second = 0;
   BOOL skip_time = NO;
   int index = 0, token_index = 0, len = xmlStrlen(timevalue), offset_hour = 0, offset_minute = 0;
   char token[len];
@@ -1287,7 +1287,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
       [NSException raise: @"XMLReadError"
                    format: @"Unable to read dateTime %s; invalid seconds: %s", timevalue, token];
     }
-    second = (NSUInteger) atof(token);
+    second = (unsigned int) atof(token);
     if (timevalue[index] != '-') {
       index++;
     }
@@ -1707,7 +1707,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   }
   NS_HANDLER
   {
-    [_person dealloc];
+    [_person release];
     _person = nil;
     [localException raise];
   }
@@ -2075,7 +2075,7 @@ enum gender xmlTextReaderReadGender(const xmlChar *enumValue) {
   }
   NS_HANDLER
   {
-     [_event dealloc];
+     [_event release];
      _event = nil;
      [localException raise];
   }

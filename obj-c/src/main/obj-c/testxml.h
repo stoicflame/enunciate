@@ -1,8 +1,8 @@
 #define NO_GNUSTEP
 
-#include <libxml/xmlwriter.h>
-#include <libxml/xmlreader.h>
-#include <Foundation/Foundation.h>
+#import <libxml/xmlwriter.h>
+#import <libxml/xmlreader.h>
+#import <Foundation/Foundation.h>
 
 #ifndef ENUNCIATE_OBJC_TYPES
 #define ENUNCIATE_OBJC_TYPES
