@@ -601,7 +601,8 @@ public class ConfigMojo extends AbstractMojo {
 
           org.codehaus.enunciate.main.Artifact artifact = null;
           for (org.codehaus.enunciate.main.Artifact enunciateArtifact : getArtifacts()) {
-            if (projectArtifact.getEnunciateArtifactId().equals(enunciateArtifact.getId())) {
+            if (projectArtifact.getEnunciateArtifactId().equals(enunciateArtifact.getId())
+              || enunciateArtifact.getAliases().contains(projectArtifact.getEnunciateArtifactId())) {
               artifact = enunciateArtifact;
               break;
             }

@@ -19,6 +19,7 @@ package org.codehaus.enunciate.main;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An artifact that can be exported by Enunciate.
@@ -70,5 +71,12 @@ public interface Artifact extends Comparable<Artifact> {
    * @return The list of dependencies for this artifact.
    */
   List<ArtifactDependency> getDependencies();
+
+  /**
+   * A list of aliases for this artifact.
+   *
+   * @return The set of aliases for this artifact.
+   */
+  Set<String> getAliases();
 
 }

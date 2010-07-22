@@ -20,6 +20,7 @@
     <module>jersey</module>
     <module>jaxws-client</module>
     <module>json-client</module>
+    <module>java-client</module>
     <module>c</module>
     <module>obj-c</module>
     <module>csharp</module>

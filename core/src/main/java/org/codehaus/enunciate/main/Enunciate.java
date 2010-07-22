@@ -187,11 +187,18 @@ public class Enunciate {
     HashSet<String> exportedArtifacts = new HashSet<String>();
     for (Artifact artifact : artifacts) {
       String artifactId = artifact.getId();
-      if (this.exports.containsKey(artifactId)) {
-        File dest = this.exports.get(artifactId);
-        debug("Exporting artifact %s to %s.", artifactId, dest);
+      Map.Entry<String, File> export = null;
+      for (Map.Entry<String, File> entry : this.exports.entrySet()) {
+        if (artifactId.equals(entry.getKey()) || artifact.getAliases().contains(entry.getKey())) {
+          export = entry;
+        }
+      }
+
+      if (export != null) {
+        File dest = export.getValue();
+        debug("Exporting artifact %s to %s.", export.getKey(), dest);
         artifact.exportTo(dest, this);
-        exportedArtifacts.add(artifactId);
+        exportedArtifacts.add(export.getKey());
       }
     }
 
@@ -358,7 +365,7 @@ public class Enunciate {
   }
 
   /**
-   * Scans the Enunciate classpath, handling each entry according too each {@link ClasspathHandler}.
+   * Scans the Enunciate classpath, handling each entry according to each {@link ClasspathHandler}.
    */
   protected void scanClasspath(final Collection<ClasspathHandler> classpathHandlers) throws IOException {
     LinkedList<String> classpathToScan = new LinkedList<String>(Arrays.asList(getEnunciateRuntimeClasspath().split(File.pathSeparator)));
@@ -1475,7 +1482,7 @@ public class Enunciate {
   public Artifact findArtifact(String artifactId) {
     if (artifactId != null) {
       for (Artifact artifact : artifacts) {
-        if (artifactId.equals(artifact.getId())) {
+        if (artifactId.equals(artifact.getId()) || artifact.getAliases().contains(artifactId)) {
           return artifact;
         }
       }

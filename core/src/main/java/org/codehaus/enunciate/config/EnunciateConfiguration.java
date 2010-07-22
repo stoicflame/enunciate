@@ -728,6 +728,13 @@ public class EnunciateConfiguration implements ErrorHandler {
       String pattern = String.format("enunciate/modules/%s", module.getName());
       digester.addRule(pattern, new PushModuleRule(module));
       digester.addSetProperties(pattern);
+      if (module.getAliases() != null) {
+        for (String alias : module.getAliases()) {
+          pattern = String.format("enunciate/modules/%s", alias);
+          digester.addRule(pattern, new PushModuleRule(module));
+          digester.addSetProperties(pattern);
+        }
+      }
       RuleSet configRules = module.getConfigurationRules();
       if (configRules != null) {
         digester.addRuleSet(configRules);

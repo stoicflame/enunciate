@@ -16,8 +16,7 @@
 
 package org.codehaus.enunciate.main;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Base implementation for an artifact.
@@ -29,6 +28,7 @@ public abstract class BaseArtifact implements Artifact {
   private final String module;
   private final String id;
   private final List<ArtifactDependency> dependencies = new ArrayList<ArtifactDependency>();
+  private final Set<String> aliases = new TreeSet<String>();
 
   /**
    * @param module The name of the module.
@@ -108,5 +108,23 @@ public abstract class BaseArtifact implements Artifact {
   public void setDependencies(List<ArtifactDependency> dependencies) {
     this.dependencies.clear();
     this.dependencies.addAll(dependencies);
+  }
+
+  /**
+   * The aliases for this artifact.
+   *
+   * @return The aliases for this artifact.
+   */
+  public Set<String> getAliases() {
+    return Collections.unmodifiableSet(this.aliases);
+  }
+
+  /**
+   * Add an alias to this artifact.
+   *
+   * @param alias An alias for this artifact.
+   */
+  public void addAlias(String alias) {
+    this.aliases.add(alias);
   }
 }

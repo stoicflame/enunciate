@@ -23,6 +23,8 @@ import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Basic stub for a deployment module.  Provides methods for each step.
@@ -37,12 +39,22 @@ public class BasicDeploymentModule implements DeploymentModule {
   private File specifiedCompileDir = null;
   private File specifiedBuildDir = null;
   private File specifiedPackageDir = null;
+  private final Set<String> aliases = new TreeSet<String>();
 
   /**
    * @return "basic"
    */
   public String getName() {
     return getClass().getSimpleName();
+  }
+
+  /**
+   * The aliases (modifiable).
+   *
+   * @return The aliases (modifiable).
+   */
+  public Set<String> getAliases() {
+    return this.aliases;
   }
 
   /**

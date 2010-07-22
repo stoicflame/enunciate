@@ -22,6 +22,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.apache.commons.digester.RuleSet;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Interface for a deployment module.  A deployment module for a specific platform implements logic for each
@@ -37,6 +38,13 @@ public interface DeploymentModule {
    * @return The name of the deployment module.
    */
   String getName();
+
+  /**
+   * Any aliases for this deployment module.
+   *
+   * @return Any aliases for this deployment module.
+   */
+  Set<String> getAliases();
 
   /**
    * Get the validator for this module, or null if none.
