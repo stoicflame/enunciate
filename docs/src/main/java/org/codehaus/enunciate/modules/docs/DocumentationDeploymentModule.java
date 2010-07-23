@@ -689,7 +689,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
       for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
         String wsdlLocation = (String) wsdlInfo.getProperty("redirectLocation");
-        wsdls.add(wsdlLocation);
+        if (wsdlLocation != null) {
+          wsdls.add(wsdlLocation);
+        }
       }
       wsdlFilter.setUrlMappings(wsdls);
       filters.add(wsdlFilter);
