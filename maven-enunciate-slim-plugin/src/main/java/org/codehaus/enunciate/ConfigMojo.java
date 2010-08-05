@@ -150,9 +150,9 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * Whether to add the JAXWS client sources to the project test sources.
    *
-   * @parameter
+   * @parameter alias="addJAXWSClientSourcesToTestClasspath"
    */
-  private boolean addJAXWSClientSourcesToTestClasspath = false;
+  private boolean addJavaClientSourcesToTestClasspath = false;
 
   /**
    * List of modules that are to be excluded as extensions to this project.
@@ -461,8 +461,8 @@ public class ConfigMojo extends AbstractMojo {
       excluded.add("gwt");
     }
 
-    if (!addJAXWSClientSourcesToTestClasspath) {
-      excluded.add("jaxws-client");
+    if (!addJavaClientSourcesToTestClasspath) {
+      excluded.add("java-client");
     }
 
     if (!addXFireClientSourcesToTestClasspath) {

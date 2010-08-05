@@ -112,6 +112,11 @@ import java.util.*;
  * that matches the "from" attribute will be converted.</li>
  * </ul>
  *
+ * <h3>The "json-package-conversions" element</h3>
+ *
+ * <p>The "json-package-conversions" element has the same purpose and syntax as the "package-conversions" element above, but is instead applied
+ * to the JSON java client. By default, ths JSON conversions will be the same as the "package-conversions" with the "json" subpackage appended.</p>
+ *
  * <h3>The "server-side-type" element</h3>
  *
  * <p>An arbitrary number of "server-side-type" elements are allowed as child elements of the "java-client" element.  The "server-side-type" element
@@ -143,6 +148,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   private String jarName = null;
   private String jsonJarName = null;
   private final Map<String, String> clientPackageConversions;
+  private final Map<String, String> jsonClientPackageConversions;
   private final JavaClientRuleSet configurationRules;
   private final Set<String> serverSideTypesToUse;
   private String label = null;
@@ -152,7 +158,8 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   private boolean jacksonXcAvailable = false;
 
   public JavaClientDeploymentModule() {
-    this.clientPackageConversions = new HashMap<String, String>();
+    this.clientPackageConversions = new LinkedHashMap<String, String>();
+    this.jsonClientPackageConversions = new LinkedHashMap<String, String>();
     this.configurationRules = new JavaClientRuleSet();
     this.serverSideTypesToUse = new TreeSet<String>();
     getAliases().add("jaxws-client");
@@ -295,6 +302,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         }
       }
 
+      final Set<String> uniquePackages = new TreeSet<String>();
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (useServerSide(typeDefinition, matcher)) {
@@ -307,6 +315,10 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
             URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
             processTemplate(template, model);
           }
+
+          if (typeDefinition.getPackage() != null) {
+            uniquePackages.add(typeDefinition.getPackage().getQualifiedName());
+          }
         }
         for (Registry registry : schemaInfo.getRegistries()) {
           model.put("registry", registry);
@@ -317,7 +329,16 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       boolean generateJsonJar = isGenerateJsonJar();
       model.put("generateJson", generateJsonJar);
       if (generateJsonJar) {
+        //first set up the json client package conversions.
+        Map<String, String> jsonConversions = getJsonPackageConversions(uniquePackages);
         model.setFileOutputDirectory(getJsonClientGenerateDir());
+        ClientClassnameForMethod jsonClassnameFor = new ClientClassnameForMethod(jsonConversions);
+        classnameFor.setJdk15(true);
+        model.put("packageFor", new ClientPackageForMethod(jsonConversions));
+        model.put("classnameFor", jsonClassnameFor);
+        model.put("simpleNameFor", new SimpleNameWithParamsMethod(jsonClassnameFor));
+
+        debug("Generating the Java JSON client classes...");
         for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
           for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
             model.put("type", typeDefinition);
@@ -330,6 +351,55 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     else {
       info("Skipping generation of Java client sources as everything appears up-to-date...");
     }
+  }
+
+  /**
+   * Get the list of json package conversions given the specified list of unique packages.
+   *
+   * @param uniquePackages The unique packages.
+   * @return The package conversions.
+   */
+  protected Map<String, String> getJsonPackageConversions(Set<String> uniquePackages) {
+    HashMap<String, String> conversions = new HashMap<String, String>();
+    for (String serverSidePackage : uniquePackages) {
+      boolean conversionFound = false;
+      if (getJsonClientPackageConversions().containsKey(serverSidePackage)) {
+        conversions.put(serverSidePackage, getJsonClientPackageConversions().get(serverSidePackage));
+        conversionFound = true;
+      }
+      else {
+        for (String pkg : getJsonClientPackageConversions().keySet()) {
+          if (serverSidePackage.startsWith(pkg)) {
+            String conversion = getJsonClientPackageConversions().get(pkg);
+            conversions.put(serverSidePackage, conversion + serverSidePackage.substring(pkg.length()));
+            conversionFound = true;
+            break;
+          }
+        }
+      }
+
+      if (!conversionFound) {
+        if (getClientPackageConversions().containsKey(serverSidePackage)) {
+          conversions.put(serverSidePackage, getClientPackageConversions().get(serverSidePackage));
+          conversionFound = true;
+        }
+        else {
+          for (String pkg : getClientPackageConversions().keySet()) {
+            if (serverSidePackage.startsWith(pkg)) {
+              String conversion = getClientPackageConversions().get(pkg) + ".json";
+              conversions.put(serverSidePackage, conversion + serverSidePackage.substring(pkg.length()));
+              conversionFound = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!conversionFound) {
+        conversions.put(serverSidePackage, serverSidePackage + ".json");
+      }
+    }
+    return conversions;
   }
 
   /**
@@ -674,6 +744,35 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     }
 
     this.clientPackageConversions.put(from, to);
+  }
+
+  /**
+   * The json client package conversions.
+   *
+   * @return The json client package conversions.
+   */
+  public Map<String, String> getJsonClientPackageConversions() {
+    return jsonClientPackageConversions;
+  }
+
+  /**
+   * Add a client package conversion.
+   *
+   * @param conversion The conversion to add.
+   */
+  public void addJsonClientPackageConversion(ClientPackageConversion conversion) {
+    String from = conversion.getFrom();
+    String to = conversion.getTo();
+
+    if (from == null) {
+      throw new IllegalArgumentException("A 'from' attribute must be specified on a clientPackageConversion element.");
+    }
+
+    if (to == null) {
+      throw new IllegalArgumentException("A 'to' attribute must be specified on a clientPackageConversion element.");
+    }
+
+    this.jsonClientPackageConversions.put(from, to);
   }
 
   /**

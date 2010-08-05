@@ -3,10 +3,10 @@
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
   <deployment context="net.java.ws.addressbook_addressbook_war_1.0-SNAPSHOT"/>
   <modules>
-    <jaxws-client disabled="false">
+    <java-client disabled="false">
       <package-conversions>
         <convert from="org.codehaus.enunciate.examples.jaxws_client.schema" to="shapes"/>
       </package-conversions>
-    </jaxws-client>
+    </java-client>
   </modules>
 </enunciate>

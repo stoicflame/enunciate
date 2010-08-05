@@ -32,6 +32,10 @@ public class JavaClientRuleSet extends RuleSetBase {
     digester.addSetProperties("enunciate/modules/java-client/package-conversions/convert");
     digester.addSetNext("enunciate/modules/java-client/package-conversions/convert", "addClientPackageConversion");
 
+    digester.addObjectCreate("enunciate/modules/java-client/json-package-conversions/convert", ClientPackageConversion.class);
+    digester.addSetProperties("enunciate/modules/java-client/json-package-conversions/convert");
+    digester.addSetNext("enunciate/modules/java-client/json-package-conversions/convert", "addJsonClientPackageConversion");
+
     digester.addCallMethod("enunciate/modules/java-client/server-side-type", "addServerSideTypeToUse", 1);
     digester.addCallParam("enunciate/modules/java-client/server-side-type", 0, "pattern");
 

@@ -50,7 +50,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>enunciate-jaxws-client</artifactId>
+      <artifactId>enunciate-java-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 

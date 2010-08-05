@@ -103,7 +103,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               <goal>assemble</goal>
             </goals>
             <configuration>
-              <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
+              <addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>
               <exports>
                 <csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>
               </exports>

@@ -59,7 +59,7 @@
               <goal>assemble</goal>
             </goals>
             <configuration>
-              <addJAXWSClientSourcesToTestClasspath>true</addJAXWSClientSourcesToTestClasspath>
+              <addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>
             </configuration>
           </execution>
         </executions>

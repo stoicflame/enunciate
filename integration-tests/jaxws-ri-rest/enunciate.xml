@@ -14,11 +14,11 @@
     </soap>
   </services>
   <modules>
-    <jaxws-client>
+    <java-client>
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
       </package-conversions>
-    </jaxws-client>
+    </java-client>
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
       <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>
     </docs>

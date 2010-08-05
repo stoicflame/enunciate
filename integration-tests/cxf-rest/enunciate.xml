@@ -18,11 +18,11 @@
     <csharp disabled="true"/>
     <cxf disabled="false"/>
     <jaxws-ri disabled="true"/>
-    <jaxws-client>
+    <java-client>
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
       </package-conversions>
-    </jaxws-client>
+    </java-client>
     <jersey disabled="true"/>
     <spring-app>
       <springImport file="src/conf/custom_spring.xml"/>

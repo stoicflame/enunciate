@@ -6,11 +6,11 @@
     <amf disabled="true"/>
     <c forceEnable="true"/>
     <obj-c forceEnable="true"/>
-    <jaxws-client>
+    <java-client>
       <package-conversions>
         <convert from="epcglobal" to="epcglobal.client"/>
         <convert from="org.unece" to="org.unece.client"/>
       </package-conversions>
-    </jaxws-client>
+    </java-client>
   </modules>
 </enunciate>

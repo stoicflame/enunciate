@@ -11,7 +11,7 @@
     <c disabled="true"/>
     <obj-c disabled="true"/>
     <csharp disabled="true"/>
-    <jaxws-client disabled="true"/>
+    <java-client disabled="true"/>
     <gwt rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic">
       <app srcDir="src/main/gwt-apps" javascriptStyle="PRETTY">
         <module name="org.codehaus.enunciate.samples.petclinic.app.PetClinicApp" outputPath="petclinic"/>
