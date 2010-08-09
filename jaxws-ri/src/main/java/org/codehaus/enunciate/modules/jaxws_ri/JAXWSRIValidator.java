@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Validator for the xfire server.
+ * Validator for the jaxws-ri module.
  *
  * @author Ryan Heaton
  */

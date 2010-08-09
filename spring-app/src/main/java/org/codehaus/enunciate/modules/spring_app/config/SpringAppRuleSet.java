@@ -21,7 +21,7 @@ import org.apache.commons.digester.RuleSetBase;
 import org.codehaus.enunciate.modules.spring_app.config.security.*;
 
 /**
- * Rules for the configuration of the XFire client module.
+ * Rules for the configuration of the spring app module.
  *
  * @author Ryan Heaton
  */

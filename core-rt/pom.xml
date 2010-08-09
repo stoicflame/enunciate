@@ -49,6 +49,7 @@
 
   <profiles>
     <profile>
+      <id>jdk15</id>
       <!-- Starting with JDK 1.6, JAXB, activation, stax,
            and JAX-WS - along with their default implementations -
           are packaged in the JDK (for better for for worse).-->
@@ -57,34 +58,32 @@
       </activation>
       <dependencies>
         <dependency>
+          <!--depending modules: core-rt-->
           <groupId>javax.xml.bind</groupId>
           <artifactId>jaxb-api</artifactId>
         </dependency>
+
         <dependency>
-          <groupId>javax.activation</groupId>
-          <artifactId>activation</artifactId>
+          <!--depending modules: core-rt-->
+          <groupId>javax.jws</groupId>
+          <artifactId>jsr181-api</artifactId>
         </dependency>
+
         <dependency>
-          <groupId>stax</groupId>
-          <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
+          <!--depending modules: core-rt-->
           <groupId>javax.xml.ws</groupId>
           <artifactId>jaxws-api</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>xfire</groupId>
-          <artifactId>xfire-jsr181-api</artifactId>
         </dependency>
 
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>
         </dependency>
+
         <dependency>
-          <!--if we need a stax implementation, we'll use woodstox-->
+          <!--since we need a stax implementation for jdk 5, we'll use woodstox-->
           <groupId>org.codehaus.woodstox</groupId>
-          <artifactId>wstx-asl</artifactId>
+          <artifactId>woodstox-core-asl</artifactId>
         </dependency>
       </dependencies>
     </profile>

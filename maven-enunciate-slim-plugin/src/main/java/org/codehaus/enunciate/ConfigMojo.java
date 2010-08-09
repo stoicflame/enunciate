@@ -232,6 +232,11 @@ public class ConfigMojo extends AbstractMojo {
   private MavenFileFilter configFilter;
 
   /**
+   * @parameter expression="${enunciate.javac.check}" default-value="false"
+   */
+  private boolean javacCheck = false;
+
+  /**
    * List of source directories that are enunciate-added.
    */
   private static final TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
@@ -250,6 +255,7 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     MavenSpecificEnunciate enunciate = loadMavenSpecificEnunciate(sourceDirs);
+    enunciate.setJavacCheck(this.javacCheck);
     EnunciateConfiguration config = createEnunciateConfiguration();
     config.setLabel(project.getArtifactId());
     if (this.configFile != null) {

@@ -27,7 +27,7 @@ import org.codehaus.enunciate.contract.validation.ValidationResult;
 import java.util.HashMap;
 
 /**
- * Validator for the xfire server.
+ * Validator for the cxf module.
  *
  * @author Ryan Heaton
  */

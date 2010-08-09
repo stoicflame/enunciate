@@ -14,10 +14,5 @@
       <schema namespace="http://org.codehaus.enunciate/samples/petclinic/vets" file="vets.xsd"/>
       <wsdl namespace="http://org.codehaus.enunciate/samples/petclinic" file="petclinic.wsdl"/>
     </xml>
-    <xfire-client uuid="basic.example">
-      <package-conversions>
-        <convert from="org.codehaus.enunciate.samples.petclinic" to="org.codehaus.enunciate.samples.petclinic.client"/>
-      </package-conversions>
-    </xfire-client>
   </modules>
 </enunciate>

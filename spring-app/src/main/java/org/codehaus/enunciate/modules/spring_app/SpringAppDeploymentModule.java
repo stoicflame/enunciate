@@ -152,10 +152,8 @@ import java.util.*;
  * to specify an import file on the classpath, e.g. "classpath:com/myco/spring/config.xml".</li>
  * </ul>
  *
- * <p>One use of specifying spring a import file is to wrap your endpoints with spring interceptors and/or XFire in/out/fault handlers.  This can be done
- * by simply declaring a bean that is an instance of your endpoint class.  This bean can be advised as needed, and if it implements
- * org.codehaus.xfire.handler.HandlerSupport (perhaps <a href="http://static.springframework.org/spring/docs/2.5.x/reference/aop.html#d0e4128">through the use
- * of a mixin</a>?), the in/out/fault handlers will be used for the XFire invocation of that endpoint.</p>
+ * <p>One use of specifying spring a import file is to wrap your endpoints with spring interceptors.  This can be done
+ * by simply declaring a bean that is an instance of your endpoint class, which can be advised as needed.</p>
  *
  * <p>It's important to note that the type on which the bean context will be searched is the type of the endpoint <i>interface</i>, and then only if it exists.
  * If there are more than one beans that are assignable to the endpoint interface, the bean that is named the name of the service will be used.  Otherwise,

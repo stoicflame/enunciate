@@ -178,13 +178,6 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
     </dependency>
 
     <dependency>
-      <groupId>stax</groupId>
-      <artifactId>stax-api</artifactId>
-
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
 

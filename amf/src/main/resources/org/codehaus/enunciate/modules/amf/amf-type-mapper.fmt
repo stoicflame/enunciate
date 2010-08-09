@@ -1,5 +1,5 @@
 [#ftl]
-[#--template for the xfire simple type.--]
+[#--template for the amf type.--]
 [@file name=(type.simpleName + "AMFMapper.java")  package=type.package.qualifiedName + ".amf" charset="utf-8"]
 [#assign baseobject=type.baseObject/]
 [#assign classname=classnameFor(type)/]

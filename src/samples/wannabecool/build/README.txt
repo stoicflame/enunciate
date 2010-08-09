@@ -32,7 +32,7 @@ Invocation via the command line
 Make sure your path points to the "bin" directory of the dist, then:
 
 enunciate -f src/main/java/enunciate.xml\
- -Exfire.war target/wannabecool.war\
+ -Ewar.file target/wannabecool.war\
  -Eclient.jdk14.library.binaries target/wannabecool-client.jar\
  src/main/java/com/ifyouwannabecool/api/package-info.java\
  src/main/java/com/ifyouwannabecool/api/ExclusiveGroupException.java\

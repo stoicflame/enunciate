@@ -36,7 +36,7 @@ import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
- * The validator for the xfire-client module.
+ * The validator for the amf module.
  *
  * @author Ryan Heaton
  */

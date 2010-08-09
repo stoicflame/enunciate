@@ -11,7 +11,9 @@
     <module>core-annotations</module>
     <module>core-rt</module>
     <module>core</module>
+
     <module>maven-enunciate-slim-plugin</module>
+
     <module>xml</module>
     <module>jaxws-support</module>
     <module>jaxws-ri-rt</module>
@@ -112,64 +114,45 @@
           <tagBase>https://svn.codehaus.org/enunciate/tags/</tagBase>
         </configuration>
       </plugin>
-      <!--<plugin>-->
-        <!--<groupId>org.codehaus.mojo</groupId>-->
-        <!--<artifactId>animal-sniffer-maven-plugin</artifactId>-->
-        <!--<version>1.5</version>-->
-        <!--<configuration>-->
-          <!--<signature>-->
-            <!--<groupId>org.codehaus.mojo.signature</groupId>-->
-            <!--<artifactId>java15</artifactId>-->
-            <!--<version>1.0</version>-->
-          <!--</signature>-->
-        <!--</configuration>-->
-        <!--<executions>-->
-          <!--<execution>-->
-            <!--<id>enforce-java-5</id>-->
-            <!--<phase>test</phase>-->
-            <!--<goals>-->
-              <!--<goal>check</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-              <!--<ignores>-->
-                <!--&lt;!&ndash;allow references to JAXB, JAX-WS since they can be referenced as external dependencies for Java 5&ndash;&gt;-->
-                <!--<ignore>javax.xml.bind.*</ignore>-->
-                <!--<ignore>javax.xml.ws.*</ignore>-->
-                <!--<ignore>javax.xml.stream.*</ignore>-->
-                <!--<ignore>javax.jws.*</ignore>-->
-                <!--<ignore>javax.activation.*</ignore>-->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>animal-sniffer-maven-plugin</artifactId>
+        <version>1.6</version>
+        <configuration>
+          <signature>
+            <groupId>org.codehaus.mojo.signature</groupId>
+            <artifactId>java15</artifactId>
+            <version>1.0</version>
+          </signature>
+        </configuration>
+        <executions>
+          <execution>
+            <id>enforce-java-5</id>
+            <phase>test</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <ignores>
+                <!--allow references to JAXB, JAX-WS, etc. since they can be referenced as external dependencies for Java 5-->
+                <ignore>javax.xml.bind.*</ignore>
+                <ignore>javax.xml.ws.*</ignore>
+                <ignore>javax.xml.stream.*</ignore>
+                <ignore>javax.jws.*</ignore>
+                <ignore>javax.activation.*</ignore>
 
-                <!--&lt;!&ndash;allow dependencies on internal Sun APIs for now. Someday fix these: http://jira.codehaus.org/browse/ENUNCIATE-437. &ndash;&gt;-->
-                <!--<ignore>sun.misc.*</ignore>-->
-                <!--<ignore>com.sun.org.apache.xalan.internal.xsltc.trax.*</ignore>-->
-              <!--</ignores>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        <!--</executions>-->
-      <!--</plugin>-->
+                <!--allow dependencies on internal Sun APIs for now. Someday fix these: http://jira.codehaus.org/browse/ENUNCIATE-437. -->
+                <ignore>sun.misc.*</ignore>
+                <ignore>com.sun.org.apache.xalan.internal.xsltc.trax.*</ignore>
+              </ignores>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
-          <execution>
-            <id>enforce-java-5</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>(,1.6)</version>
-                  <message>
-                    Although Enunciate is fully compatible with Java 1.6 and above,
-                    we want to make sure Enunciate is built with compatibility for
-                    Java 5. Please use Java 5 to build Enunciate.
-                  </message>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
           <execution>
             <id>require.mono.for.deploy</id>
             <phase>deploy</phase>
@@ -242,7 +225,7 @@
     <spring.security.version>2.0.3</spring.security.version>
     <spring.security.oauth.version>3.16</spring.security.oauth.version>
     <jersey.version>1.2</jersey.version>
-    <cxf.version>2.2.3</cxf.version>
+    <cxf.version>2.2.9</cxf.version>
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
 
@@ -305,16 +288,6 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: core-->
-        <groupId>com.sun</groupId>
-        <artifactId>tools</artifactId>
-        <version>1.5.0</version>
-
-        <scope>system</scope>
-        <systemPath>${java.home}/../lib/tools.jar</systemPath>
-      </dependency>
-
-      <dependency>
         <groupId>com.sun.xml.ws</groupId>
         <artifactId>jaxws-rt</artifactId>
         <version>2.1.7</version>
@@ -352,6 +325,12 @@
             <!--we'll use enunciate's version of streambuffer-->
             <groupId>com.sun.xml.stream.buffer</groupId>
             <artifactId>streambuffer</artifactId>
+          </exclusion>
+
+          <exclusion>
+            <!--we'll use enunciate's version of woodstox-->
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-asl</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -494,8 +473,9 @@
         <!--depending modules: core-rt-->
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
-        <version>2.1.11</version>
+        <version>2.1.13</version>
         <exclusions>
+          <!--exclude jaxb-api because it ships with the jdk-->
           <exclusion>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -540,13 +520,6 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: xfire-client-rt-->
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>1.3</version>
-      </dependency>
-
-      <dependency>
         <!--depending modules: core-->
         <groupId>commons-digester</groupId>
         <artifactId>commons-digester</artifactId>
@@ -572,24 +545,10 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: xfire-client-rt-->
-        <groupId>commons-httpclient</groupId>
-        <artifactId>commons-httpclient</artifactId>
-        <version>3.1</version>
-      </dependency>
-
-      <dependency>
         <!--depending modules: core-->
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
         <version>1.0.4</version>
-      </dependency>
-
-      <dependency>
-        <!--depending modules: core-rt-->
-        <groupId>javax.activation</groupId>
-        <artifactId>activation</artifactId>
-        <version>1.1</version>
       </dependency>
 
       <dependency>
@@ -632,30 +591,20 @@
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
         <version>2.1</version>
-        <exclusions>
-          <exclusion>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
         <!--depending modules: core-rt-->
+        <groupId>javax.jws</groupId>
+        <artifactId>jsr181-api</artifactId>
+        <version>1.0-MR1</version>
+      </dependency>
+
+      <dependency>
         <groupId>javax.xml.ws</groupId>
         <artifactId>jaxws-api</artifactId>
         <version>2.1-1</version>
         <exclusions>
-          <exclusion>
-            <!--we're going to explicitly depend on jaxb elsewhere.-->
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-          </exclusion>
-
           <exclusion>
             <!--We'll depend on SAAJ as needed (this really should be optional).-->
             <groupId>javax.xml.soap</groupId>
@@ -671,7 +620,6 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: xfire-rt, amf, etc. -->
         <groupId>org.jdom</groupId>
         <artifactId>jdom</artifactId>
         <version>1.1</version>
@@ -877,92 +825,6 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: xfire-rt-->
-        <groupId>org.codehaus.xfire</groupId>
-        <artifactId>xfire-all</artifactId>
-        <version>1.2.2</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-aegis</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-plexus</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-ws-security</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-picocontainer</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-core</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-xmpp</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-jaxb2</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-jms</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-java5</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-generator</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-xmlbeans</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-castor</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-annotations</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-jaxb</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-jaxws</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-loom</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-spring</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.codehaus.xfire</groupId>
-            <artifactId>xfire-jibx</artifactId>
-          </exclusion>
-          <exclusion>
-            <!--We'll depend on enunciate's version of activation. Not XFire's.-->
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-
-      <dependency>
         <!--depending modules: spring-app-rt-->
         <groupId>org.springframework</groupId>
         <artifactId>spring-aop</artifactId>
@@ -1061,30 +923,12 @@
       </dependency>
 
       <dependency>
-        <!--depending modules: core-rt-->
-        <groupId>stax</groupId>
-        <artifactId>stax-api</artifactId>
-        <version>1.0.1</version>
-      </dependency>
-
-      <dependency>
-        <!--depending modules: core-rt-->
-        <!--this dependency doesn't have anything to do with xfire.
-            It's just xfire's build of the jsr181 annotations.-->
-        <groupId>xfire</groupId>
-        <artifactId>xfire-jsr181-api</artifactId>
-        <version>1.0-M1</version>
-      </dependency>
-
-      <dependency>
-        <!--depending modules: core-rt-->
         <groupId>org.codehaus.woodstox</groupId>
-        <artifactId>wstx-asl</artifactId>
-        <version>3.2.7</version>
+        <artifactId>woodstox-core-asl</artifactId>
+        <version>4.0.8</version>
       </dependency>
 
       <dependency>
-        <!--depending modules: xml (test-only)-->
         <groupId>wsdl4j</groupId>
         <artifactId>wsdl4j</artifactId>
         <version>1.6.2</version>

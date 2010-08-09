@@ -9,11 +9,6 @@
     <namespace id="persona" uri="http://api.ifyouwannabecool.com/persona"/>
   </namespaces>
   <modules>
-    <xfire-client>
-      <package-conversions>
-        <convert from="com.ifyouwannabecool" to="com.ifyouwannabecool.client"/>
-      </package-conversions>
-    </xfire-client>
     <docs splashPackage="com.ifyouwannabecool.api" title="If You Wanna Be Cool API" copyright="IfYouWannaBeCool.com">
       <download name="License" file="LICENSE.txt" description="The license file governing the use of this API."/>
     </docs>

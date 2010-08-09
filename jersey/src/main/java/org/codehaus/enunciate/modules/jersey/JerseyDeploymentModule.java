@@ -58,7 +58,7 @@ import java.util.*;
  *
  * <h3>REST subcontext</h3>
  *
- * <p>Because the Jersey application is presumably deployed along with other Enunciate-supported applications (XFire for SOAP, API documentation, etc.),
+ * <p>Because the Jersey application is presumably deployed along with other Enunciate-supported applications (JAX-WS for SOAP, API documentation, etc.),
  * it will, by default, be mounted at a specific subcontext as defined in the Enunciate configuration (attribute "defaultRestSubcontext" of the
  * "enunciate/services/rest" element). This means that a JAX-RS resource applied at path "mypath" will actually be mounted at "rest/mypath", assuming
  * that "rest" is the subcontext (which it is by default).</p>

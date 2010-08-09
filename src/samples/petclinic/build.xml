@@ -9,7 +9,7 @@
   <target name="enunciate">
     <fail unless="gwt.home" message="A 'gwt.home' property must be set.  Try 'ant -Dgwt.home=/path/to/gwt/home'."/>
 
-    <!--The enunciate classpath points to all the jars in the "lib" directory, and selects the xfire module for managing the soap endpoints.-->
+    <!--The enunciate classpath points to all the jars in the "lib" directory.-->
     <!--the GWT and AMF modules are also included-->
     <path id="enunciate.classpath">
       <fileset dir="${enunciate.home}/lib">

@@ -192,25 +192,12 @@
           <p>Enables the API to run in the <a href="http://www.springframework.org/">Spring</a> container so as to be able to take advantage of
             things like dependency injection, AOP, and Spring security.</p>
         </li>
-        <li>
-          <h3><a href="module_xfire.html">xfire</a>**</h3>
-          <p>Support for using <a href="http://xfire.codehaus.org/">XFire</a> as the SOAP engine.</p>
-        </li>
-        <li>
-          <h3><a href="module_xfire_client.html">xfire-client</a></h3>
-          <p>Builds the Java client libraries used to access the API using <a href="http://xfire.codehaus.org/">XFire</a>. This can be used
-          to generate a Java 1.4-compatible client library.</p>
-        </li>
       </ul>
 
       <p>*Since the default SOAP engine is JAX-WS RI and the default JAX-RS engine is Jersey, you will need to disable the jaxws-ri
         and jersey modules in order to use the CXF module. You will also need to enable the spring-app module since CXF depends on Spring.
         <a href="http://docs.codehaus.org/display/ENUNCIATE/Using+CXF+or+XFire">See these instructions</a> for more information.</p>
 
-      <p>**Since the default SOAP engine is JAX-WS RI, you will need to disable the jaxws-ri module in order to use the XFire module.
-        You will also need to enable the spring-app module since XFire depends on Spring.
-        <a href="http://docs.codehaus.org/display/ENUNCIATE/Using+CXF+or+XFire">See these instructions</a> for more information.</p>
-      
       <p>For more information about modules (including how to write your own), see the <a href="http://docs.codehaus.org/display/ENUNCIATE/Architecture+Guide">architecture guide</a>.</p>
 
 
