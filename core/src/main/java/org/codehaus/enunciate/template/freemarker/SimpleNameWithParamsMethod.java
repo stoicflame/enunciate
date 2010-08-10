@@ -58,9 +58,10 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("A type declaration must be provided.");
     }
 
+    boolean noParams = list.size() > 1 && Boolean.FALSE.equals(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(1)));
     TypeDeclaration declaration = (TypeDeclaration) unwrapped;
     String simpleNameWithParams = this.typeConversion.isUseClientNameConversions() && declaration.getAnnotation(ClientName.class) != null ? declaration.getAnnotation(ClientName.class).value() : declaration.getSimpleName();
-    if (this.typeConversion.isJdk15() && declaration.getFormalTypeParameters() != null && !declaration.getFormalTypeParameters().isEmpty()) {
+    if (!noParams && this.typeConversion.isJdk15() && declaration.getFormalTypeParameters() != null && !declaration.getFormalTypeParameters().isEmpty()) {
       simpleNameWithParams += "<";
       Iterator<TypeParameterDeclaration> paramIt = declaration.getFormalTypeParameters().iterator();
       while (paramIt.hasNext()) {
