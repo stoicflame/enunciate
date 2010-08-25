@@ -129,6 +129,29 @@
     </dependency>
 
     <dependency>
+      <!--depending modules: jersey-rt-->
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <!--depending modules: jersey-rt-->
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>javax.mail</groupId>
       <artifactId>mail</artifactId>
 

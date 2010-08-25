@@ -55,14 +55,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
    * Internal (native) getter for the enum property ${property.simpleName}.
    */
   private final native String get${property.simpleName?cap_first}Internal() /*-{
-    return this.${property.simpleName};
+    return this.${property.jsonMemberName};
   }-*/;
 
   /**
    * Internal (native) setter for the enum property ${property.simpleName}.
    */
   private final native void set${property.simpleName?cap_first}Internal(String ${property.simpleName}) /*-{
-    this.${property.simpleName} = ${property.simpleName};
+    this.${property.jsonMemberName} = ${property.simpleName};
   }-*/;
     [#else]
 
@@ -70,14 +70,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
    * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final native ${overlayClassnameFor(property)} get${property.simpleName?cap_first}() /*-{
-    return this.${property.simpleName};
+    return this.${property.jsonMemberName};
   }-*/;
 
   /**
    * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final native void set${property.simpleName?cap_first}(${overlayClassnameFor(property)} ${property.simpleName}) /*-{
-    this.${property.simpleName} = ${property.simpleName};
+    this.${property.jsonMemberName} = ${property.simpleName};
   }-*/;
     [/#if]
   [/#if]

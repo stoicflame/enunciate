@@ -12,34 +12,36 @@ import org.codehaus.jackson.annotate.*;
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${simpleNameFor(type)} [#if !type.baseObject]extends ${classnameFor(type.superclass, true)} [#else]implements java.io.Serializable [/#if]{
 
   [#list type.attributes as attribute]
+  @JsonIgnore
   private ${classnameFor(attribute)} _${attribute.simpleName};
   [/#list]
   [#if type.value?exists]
+  @JsonIgnore
   private ${classnameFor(type.value)} _${type.value.simpleName};
   [#else]
     [#list type.elements as element]
-  private ${classnameFor(element)} _${element.simpleName};
+  @JsonIgnore
+  private [#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] _${element.simpleName};
     [/#list]
   [/#if]
-  [#if type.anyElement?exists]
-  private java.util.List<Object> _${type.anyElement.simpleName};
-  [/#if]
-  [#if type.hasAnyAttribute]
-  private java.util.Map<String, String> otherAttributes;
+  [#if type.hasAnyAttribute || type.anyElement?exists]
+  @JsonIgnore
+  private java.util.Map<String, Object> otherAttributes;
   [/#if]
   [#list type.attributes as attribute]
 
   /**
-  * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
+   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
   @JsonProperty("${attribute.jsonMemberName}")
   public ${classnameFor(attribute)} get${attribute.simpleName?cap_first}() {
     return this._${attribute.simpleName};
   }
 
   /**
-  * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
+   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  @JsonProperty("${attribute.jsonMemberName}")
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
     this._${attribute.simpleName} = _${attribute.simpleName};
   }
@@ -47,16 +49,17 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#if type.value?exists]
 
   /**
-  * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
+   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
   @JsonProperty("${type.value.jsonMemberName}")
   public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
     return this._${type.value.simpleName};
   }
 
   /**
-  * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
+   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  @JsonProperty("${type.value.jsonMemberName}")
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }
@@ -64,56 +67,47 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     [#list type.elements as element]
 
   /**
-  * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
+   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
   @JsonProperty("${element.jsonMemberName}")
-  public ${classnameFor(element)} get${element.simpleName?cap_first}() {
+  public [#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] get${element.simpleName?cap_first}() {
     return this._${element.simpleName};
   }
 
   /**
-  * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
-  public void set${element.simpleName?cap_first}(${classnameFor(element)} _${element.simpleName}) {
+   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  @JsonProperty("${element.jsonMemberName}")
+  public void set${element.simpleName?cap_first}([#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] _${element.simpleName}) {
     this._${element.simpleName} = _${element.simpleName};
   }
     [/#list]
   [/#if]
-  [#if type.anyElement?exists]
+  [#if type.hasAnyAttribute || type.anyElement?exists]
 
   /**
-  * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
-  public java.util.List<Object> get${type.anyElement.simpleName?cap_first}() {
-    return this._${type.anyElement.simpleName};
+   * The other attributes.
+   *
+   * @return The other attributes.
+   */
+  @JsonIgnore
+  public java.util.Map<String, Object> getOtherAttributes() {
+    return this.otherAttributes;
   }
 
-  /**
-  * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
-  */
-  public void set${type.anyElement.simpleName?cap_first}(java.util.List<Object> _${type.anyElement.simpleName}) {
-    this._${type.anyElement.simpleName} = _${type.anyElement.simpleName};
+   /**
+    * Add an "other" attribute.
+    *
+    * @param key The key.
+    * @param value The value.
+    */
+  @JsonAnySetter
+  public void addOtherAttribute(String key, Object value) {
+    if (this.otherAttributes == null) {
+      this.otherAttributes = new java.util.TreeMap<String, Object>();
+    }
+    this.otherAttributes.put(key, value);
   }
   [/#if]
-    [#if type.hasAnyAttribute]
-
-        /**
-        * The other attributes.
-        *
-        * @return The other attributes.
-        */
-        public java.util.Map<String, String> getOtherAttributes() {
-        return this.otherAttributes;
-        }
-
-        /**
-        * The other attributes.
-        *
-        * @param otherAttributes The other attributes.
-        */
-        public void setOtherAttributes(java.util.Map<String, String> otherAttributes) {
-        this.otherAttributes = otherAttributes;
-        }
-    [/#if]
 }
 [/@file]

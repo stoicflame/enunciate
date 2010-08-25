@@ -11,7 +11,7 @@ import org.codehaus.jackson.annotate.*;
  */
 public final class ${type.simpleName} implements java.io.Serializable {
 
-  @JsonProperty
+  @JsonIgnore
   private ${classnameFor(type.value)} _${type.value.simpleName};
 
   public ${type.simpleName}() {
@@ -20,6 +20,7 @@ public final class ${type.simpleName} implements java.io.Serializable {
   /**
    * ${type.value.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
+  @JsonProperty("${type.value.jsonMemberName}")
   public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
     return this._${type.value.simpleName};
   }

@@ -333,7 +333,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
         Map<String, String> jsonConversions = getJsonPackageConversions(uniquePackages);
         model.setFileOutputDirectory(getJsonClientGenerateDir());
         ClientClassnameForMethod jsonClassnameFor = new ClientClassnameForMethod(jsonConversions);
-        classnameFor.setJdk15(true);
+        jsonClassnameFor.setJdk15(true);
         model.put("packageFor", new ClientPackageForMethod(jsonConversions));
         model.put("classnameFor", jsonClassnameFor);
         model.put("simpleNameFor", new SimpleNameWithParamsMethod(jsonClassnameFor));
@@ -380,7 +380,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
 
       if (!conversionFound) {
         if (getClientPackageConversions().containsKey(serverSidePackage)) {
-          conversions.put(serverSidePackage, getClientPackageConversions().get(serverSidePackage));
+          conversions.put(serverSidePackage, getClientPackageConversions().get(serverSidePackage) + ".json");
           conversionFound = true;
         }
         else {
@@ -879,7 +879,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   }
 
   public List<File> getProjectTestSources() {
-    return Arrays.asList(getGenerateDir());
+    return Arrays.asList(getJsonClientGenerateDir(), getClientGenerateDir());
   }
 
   public List<File> getProjectResourceDirectories() {
