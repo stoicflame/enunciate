@@ -245,7 +245,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 	 	  featuresAnnotation = resource.getAnnotation(org.apache.cxf.feature.Features.class);
 	 	  if (featuresAnnotation != null) {
 	 		  for (String feature : featuresAnnotation.features()) {
-	 			  if (feature.compareTo("org.apache.cxf.feature.LoggingFeature") != 0) {
+	 			  if (feature.equals("org.apache.cxf.feature.LoggingFeature")) {
 	 				  return true;
 	 			  }
 	 		  }
