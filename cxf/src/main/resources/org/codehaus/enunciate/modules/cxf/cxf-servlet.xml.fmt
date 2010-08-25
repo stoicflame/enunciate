@@ -40,11 +40,22 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+    [#if loggingFeatureEnabled!false]
+       xmlns:cxf="http://cxf.apache.org/core"
+    [/#if]
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    [#if loggingFeatureEnabled!false]
+                           http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+    [/#if]
                            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
     [#if rootResources?? && rootResources?size > 0]
 
   <jaxrs:server id="jaxrs" address="${restSubcontext!"/rest"}">
+    [#if loggingFeatureEnabled!false ]
+    <jaxrs:features>
+    	<cxf:logging/>
+    </jaxrs:features>
+    [/#if]
     <jaxrs:serviceBeans>
       [#list rootResources as rootResource]
       <bean class="org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean">

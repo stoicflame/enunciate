@@ -225,11 +225,34 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
       model.put("restSubcontext", this.useSubcontext ? getRestSubcontext() : "/");
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
+      model.put("loggingFeatureEnabled", (enableJaxrs && isLoggingFeatureEnabled()));
       processTemplate(getCXFServletTemplateURL(), model);
     }
     else {
       info("Skipping generation of CXF config as everything appears up-to-date....");
     }
+  }
+
+  /**
+   * Whether the logging features is enabled via annotations.
+   *
+   * @return Whether the logging features is enabled via annotations.
+   */
+  protected boolean isLoggingFeatureEnabled() {
+	  org.apache.cxf.feature.Features featuresAnnotation;
+	  
+	  for (RootResource resource : getModel().getRootResources()) {
+	 	  featuresAnnotation = resource.getAnnotation(org.apache.cxf.feature.Features.class);
+	 	  if (featuresAnnotation != null) {
+	 		  for (String feature : featuresAnnotation.features()) {
+	 			  if (feature.compareTo("org.apache.cxf.feature.LoggingFeature") != 0) {
+	 				  return true;
+	 			  }
+	 		  }
+	 	  }
+	  }
+
+    return false;
   }
 
   @Override

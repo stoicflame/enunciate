@@ -20,7 +20,7 @@ import java.io.StringWriter;
 /**
  * @author Ryan Heaton
  */
-public class TestTestInfiniteJsonLoop extends TestCase {
+public class TestInfiniteJsonLoop extends TestCase {
 
   /**
    * tests serializing query results as json
