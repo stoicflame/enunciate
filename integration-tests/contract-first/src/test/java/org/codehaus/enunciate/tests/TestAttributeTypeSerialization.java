@@ -43,7 +43,7 @@ public class TestAttributeTypeSerialization extends TestCase {
     el.setTextContent("howdy");
     document.appendChild(el);
     elementType.getAttribute().add(at);
-    elementListType.getVocabularyElement().add(elementType);
+    elementListType.getVocabularyElement().add(document.getDocumentElement());
     vt.setVocabularyElementList(elementListType);
     vl.getVocabulary().add(vt);
     body.setVocabularyList(vl);
@@ -51,6 +51,7 @@ public class TestAttributeTypeSerialization extends TestCase {
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     JAXBContext.newInstance(QueryResults.class).createMarshaller().marshal(new JAXBElement(new QName("urn:hi", "hi"), QueryResults.class, results), out);
+//    System.out.println(new String(out.toByteArray()));
   }
 
 }

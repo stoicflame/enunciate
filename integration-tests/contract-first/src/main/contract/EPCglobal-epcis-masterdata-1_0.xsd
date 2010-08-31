@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:epcismd="urn:epcglobal:epcis-masterdata:xsd:1" xmlns:sbdh="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:epcglobal="urn:epcglobal:xsd:1" xmlns:epcis="urn:epcglobal:epcis:xsd:1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:epcglobal:epcis-masterdata:xsd:1" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="1.0">
+<xsd:schema xmlns:epcismd="urn:epcglobal:epcis-masterdata:xsd:1" xmlns:sbdh="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:epcglobal="urn:epcglobal:xsd:1" xmlns:epcis="urn:epcglobal:epcis:xsd:1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:epcglobal:epcis-masterdata:xsd:1" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="1.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0">
 	<xsd:annotation>
 		<xsd:documentation xml:lang="en">
 			<epcglobal:copyright>Copyright (C) 2006, 2005, 2004 EPCglobal Inc., All Rights Reserved.</epcglobal:copyright>
@@ -67,6 +67,12 @@
        in the same way as if the <children> element were omitted altogether.
   -->
 	<xsd:complexType name="VocabularyElementType">
+    <xsd:annotation>
+      <xsd:appinfo>
+        <jaxb:dom/>
+
+      </xsd:appinfo>
+    </xsd:annotation>
 		<xsd:sequence>
 			<xsd:element name="attribute" type="epcismd:AttributeType" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="children" type="epcismd:IDListType" minOccurs="0"/>

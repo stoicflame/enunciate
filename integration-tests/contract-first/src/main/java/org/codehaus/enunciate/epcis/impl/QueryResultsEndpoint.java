@@ -50,7 +50,7 @@ public class QueryResultsEndpoint {
     el.setTextContent("howdy");
     document.appendChild(el);
     elementType.getAttribute().add(at);
-    elementListType.getVocabularyElement().add(elementType);
+    elementListType.getVocabularyElement().add(document.getDocumentElement());
     vt.setVocabularyElementList(elementListType);
     vl.getVocabulary().add(vt);
     body.setVocabularyList(vl);
