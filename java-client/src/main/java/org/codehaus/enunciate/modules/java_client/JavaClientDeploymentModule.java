@@ -490,7 +490,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       if (isGenerateJsonJar()) {
         Collection<String> jsonSourceFiles = enunciate.getJavaFiles(getJsonClientGenerateDir());
         clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
-        enunciate.invokeJavac(clientClasspath, "1.5", getClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
+        enunciate.invokeJavac(clientClasspath, "1.5", getJsonClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
       }
     }
     else {
@@ -578,7 +578,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     if (isGenerateJsonJar()) {
       File jsonClientJarFile = new File(getBuildDir(), jsonJarName);
       if (!enunciate.isUpToDate(getJsonClientCompileDir(), jsonClientJarFile)) {
-        enunciate.zip(jsonClientJarFile, getClientCompileDir());
+        enunciate.zip(jsonClientJarFile, getJsonClientCompileDir());
       }
       else {
         info("Skipping creation of Java JSON client jar as everything appears up-to-date...");
