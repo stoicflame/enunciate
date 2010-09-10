@@ -108,7 +108,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
               <exports>
                 <csharp.assembly>${project.build.directory}/cstests/full.dll</csharp.assembly>
               </exports>
-              <springEnabled>true</springEnabled>
             </configuration>
           </execution>
           <execution>

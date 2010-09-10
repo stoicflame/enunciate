@@ -28,6 +28,11 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
   public void handleResource(ClasspathResource resource) {
     String path = resource.getPath();
 
+    if (path.startsWith("com/sun/tools")) {
+      //we're assuming gwt doesn't have any enunciate-model-relevant annotations...
+      return;
+    }
+
     if (path.startsWith("com/google/gwt")) {
       //we're assuming gwt doesn't have any enunciate-model-relevant annotations... 
       return;

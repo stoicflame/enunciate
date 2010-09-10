@@ -1,7 +1,9 @@
 package org.codehaus.enunciate;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -24,6 +26,8 @@ import org.codehaus.enunciate.main.Enunciate;
  * @author Ryan Heaton
  */
 public class AssembleMojo extends ConfigMojo {
+
+  public static final String SOURCE_JAR_MAP_PROPERTY = "urn:" + AssembleMojo.class.getName() + "#source_jars";
 
   /**
    * Used to look up Artifacts in the remote repository.
@@ -137,8 +141,23 @@ public class AssembleMojo extends ConfigMojo {
 
   @Override
   protected String lookupSourceJar(File pathEntry) {
-    for (Artifact projectDependency : ((Set<Artifact>)this.project.getArtifacts())) {
+    Map<File, String> sourceJars = (Map<File, String>) getPluginContext().get(SOURCE_JAR_MAP_PROPERTY);
+    if (sourceJars == null) {
+      sourceJars = new TreeMap<File, String>();
+      getPluginContext().put(SOURCE_JAR_MAP_PROPERTY, sourceJars);
+    }
+
+    if (sourceJars.containsKey(pathEntry)) {
+      return sourceJars.get(pathEntry);
+    }
+
+    String sourceJar = null;
+    for (Artifact projectDependency : ((Set<Artifact>) this.project.getArtifacts())) {
       if (pathEntry.equals(projectDependency.getFile())) {
+        if (skipSourceJarLookup(projectDependency)) {
+          getLog().debug("Skipping the source lookup for " + projectDependency.toString() + "...");
+        }
+
         getLog().debug("Attemping to lookup source artifact for " + projectDependency.toString() + "...");
         try {
           Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(projectDependency.getGroupId(), projectDependency.getArtifactId(),
@@ -146,15 +165,31 @@ public class AssembleMojo extends ConfigMojo {
           this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
           String path = sourceArtifact.getFile().getAbsolutePath();
           getLog().debug("Source artifact found at " + path + ".");
-          return path;
+          sourceJar = path;
+          break;
         }
         catch (Exception e) {
           getLog().debug("Unable to lookup source artifact for path entry " + pathEntry, e);
-          return null;
+          break;
         }
       }
     }
 
-    return null;
+    sourceJars.put(pathEntry, sourceJar);
+
+    return sourceJar;
+  }
+
+  /**
+   * Whether to skip the source-jar lookup for the given dependency.
+   *
+   * @param projectDependency The dependency.
+   * @return Whether to skip the source-jar lookup for the given dependency.
+   */
+  protected boolean skipSourceJarLookup(Artifact projectDependency) {
+    String groupId = String.valueOf(projectDependency.getGroupId());
+    return groupId.startsWith("com.sun.") //skip com.sun.*
+      || "com.sun".equals(groupId) //skip com.sun
+      || groupId.startsWith("javax."); //skip "javax.*"
   }
 }
