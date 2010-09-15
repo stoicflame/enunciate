@@ -15,7 +15,11 @@
   /// </summary>
   [System.SerializableAttribute()]
   [System.Xml.Serialization.XmlTypeAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",TypeName="${param.elementName}")]
-  [System.Xml.Serialization.SoapTypeAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",TypeName="${param.elementName}")]
+[#if endpointInterface.targetNamespace??]
+  [System.Xml.Serialization.SoapTypeAttribute(Namespace="${endpointInterface.targetNamespace}",TypeName="${param.elementName}")]  
+[#else]
+  [System.Xml.Serialization.SoapTypeAttribute(TypeName="${param.elementName}")]
+[/#if]
   [System.Xml.Serialization.XmlRootAttribute(Namespace="${endpointInterface.targetNamespace?default("")}",ElementName="${param.elementName}")]
   public class ${param.elementName?cap_first}AsSoapHeaderFor${endpointInterface.clientSimpleName?cap_first} : System.Web.Services.Protocols.SoapHeader {
 

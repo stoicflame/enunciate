@@ -61,6 +61,7 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
 
                 <mkdir dir="${project.build.directory}/enunciate/gen" />
                 <mkdir dir="${project.build.directory}/enunciate/compile" />
+                <mkdir dir="${project.build.directory}/enunciate/compile/csharp" />
                 <mkdir dir="${project.build.directory}/xmltests"/>
 
                 <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"

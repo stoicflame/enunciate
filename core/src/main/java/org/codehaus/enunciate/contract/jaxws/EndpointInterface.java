@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.ClassType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
+import org.codehaus.enunciate.soap.annotations.SoapBindingName;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.ClientName;
 import net.sf.jelly.apt.Context;
@@ -280,6 +281,21 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
     }
 
     return style;
+  }
+
+  /**
+   * The name of the soap binding. This is just used in the WSDL, so it's not really necessary-- it's more for aesthetic purposes.
+   *
+   * @return The name of the soap binding.
+   * @see org.codehaus.enunciate.soap.annotations.SoapBindingName
+   */
+  public String getSoapBindingName() {
+    String name = getSimpleName() + "PortBinding";
+    SoapBindingName bindingNameInfo = getAnnotation(SoapBindingName.class);
+    if (bindingNameInfo != null) {
+      name = bindingNameInfo.value();
+    }
+    return name;
   }
 
   /**
