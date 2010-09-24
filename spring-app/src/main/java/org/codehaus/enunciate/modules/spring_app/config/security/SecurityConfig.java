@@ -180,7 +180,7 @@ import java.util.*;
  * <h3>onAuthenticationFailed</h3>
  *
  * <p>The "onAuthenticationFailed" child element is used to specify the action to take if authentication fails. This element supports a "redirectTo" attribute
- * that will specify that the request is to be redirected to the given URL. The "onAuthenticationFailed" element also supports a child element, "useEntryPoint",
+ * that will specify that the request is to be redirected to the given URL. The "onAuthenticationFailed" element also supports a child element, "entryPoint",
  * that supports one of two attributes: "beanName" and "className".  The "beanName" attribute specifies the name of a spring bean to use as the
  * authentication entry point.  The "className" attribute is used to specify the fully-qualified class name of the authentication entry point to use. The
  * authentcation entry point must implement <a href="http://static.springframework.org/spring-security/site/apidocs/org/springframework/security/ui/AuthenticationEntryPoint.html">org.springframework.security.ui.AuthenticationEntryPoint</a>.</p>

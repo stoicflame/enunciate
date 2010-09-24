@@ -104,7 +104,7 @@ public class SpringAppRuleSet extends RuleSetBase {
 
     digester.addObjectCreate("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint", BeanReference.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint");
-    digester.addSetNext("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint", "setEntryPoint");
+    digester.addSetNext("enunciate/modules/spring-app/security/onAuthenticationFailed/entryPoint", "setUseEntryPoint");
 
     digester.addObjectCreate("enunciate/modules/spring-app/security/onAccessDenied", EntryPointConfig.class);
     digester.addSetProperties("enunciate/modules/spring-app/security/onAccessDenied");
