@@ -29,6 +29,16 @@
     </plugins>
   </build>
 
+  <contributors>
+    <contributor>
+      <name>Marvin Froeder</name>
+      <email>velo.br@gmail.com</email>
+      <roles>
+        <role>ENUNCIATE-460</role>
+      </roles>
+    </contributor>
+  </contributors>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.enforcer</groupId>

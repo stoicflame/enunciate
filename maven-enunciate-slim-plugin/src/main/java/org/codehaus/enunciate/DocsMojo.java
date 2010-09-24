@@ -74,6 +74,12 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
 
   @Override
   public void execute() throws MojoExecutionException {
+      if ( skipEnunciate )
+      {
+          getLog().info( "Skipping enunciate per configuration." );
+          return;
+      }
+
     super.execute();
 
     Enunciate.Stepper stepper = (Enunciate.Stepper) getPluginContext().get(ConfigMojo.ENUNCIATE_STEPPER_PROPERTY);

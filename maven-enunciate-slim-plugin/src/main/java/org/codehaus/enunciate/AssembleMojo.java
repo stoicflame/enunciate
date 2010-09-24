@@ -90,6 +90,12 @@ public class AssembleMojo extends ConfigMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
+      if ( skipEnunciate )
+      {
+          getLog().info( "Skipping enunciate per configuration." );
+          return;
+      }
+
     if (forceWarPackaging && !"war".equalsIgnoreCase(this.project.getPackaging())) {
       throw new MojoExecutionException("The 'assemble' goal requires 'war' packaging.");
     }

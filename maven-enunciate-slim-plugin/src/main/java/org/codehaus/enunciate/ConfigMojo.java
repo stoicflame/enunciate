@@ -241,7 +241,21 @@ public class ConfigMojo extends AbstractMojo {
    */
   private static final TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
 
+    /**
+     * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally
+     * adjust the build.
+     * 
+     * @parameter expression="${enunciate.skip}" default-value="false"
+     */
+    protected boolean skipEnunciate;
+
   public void execute() throws MojoExecutionException {
+        if ( skipEnunciate )
+        {
+            getLog().info( "Skipping enunciate per configuration." );
+            return;
+        }
+
     Set<File> sourceDirs = new HashSet<File>();
     Collection<String> sourcePaths = (Collection<String>) project.getCompileSourceRoots();
     for (String sourcePath : sourcePaths) {
