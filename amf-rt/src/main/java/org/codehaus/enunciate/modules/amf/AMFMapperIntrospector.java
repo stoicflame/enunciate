@@ -216,6 +216,13 @@ public class AMFMapperIntrospector {
   }
 
   private static Class<? extends AMFMapper> loadCustomMapperClass(Class jaxbClass) throws ClassNotFoundException {
+    if (String.valueOf(jaxbClass.getPackage()).startsWith("java.")) {
+      throw new ClassNotFoundException();
+    }
+    if (String.valueOf(jaxbClass.getPackage()).startsWith("javax.")) {
+      throw new ClassNotFoundException();
+    }
+
     return (Class<? extends AMFMapper>) Class.forName(jaxbClass.getPackage().getName() + ".amf." + jaxbClass.getSimpleName() + "AMFMapper");
   }
 

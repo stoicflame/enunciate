@@ -258,6 +258,12 @@ public class GWTMapperIntrospector {
   }
 
   private static Class<? extends GWTMapper> loadCustomMapperClass(Class jaxbClass) throws ClassNotFoundException {
+    if (String.valueOf(jaxbClass.getPackage()).startsWith("java.")) {
+      throw new ClassNotFoundException();
+    }
+    if (String.valueOf(jaxbClass.getPackage()).startsWith("javax.")) {
+      throw new ClassNotFoundException();
+    }
     return (Class<? extends GWTMapper>) Class.forName(jaxbClass.getPackage().getName() + ".gwt." + jaxbClass.getSimpleName() + "GWTMapper");
   }
 
