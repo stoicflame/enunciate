@@ -475,6 +475,7 @@
         <xs:attribute name="DLLFileName" type="xs:string"/>
         <xs:attribute name="docXmlFileName" type="xs:string"/>
         <xs:attribute name="sourceFileName" type="xs:string"/>
+        <xs:attribute name="singleFilePerClass" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

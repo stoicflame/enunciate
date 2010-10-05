@@ -70,6 +70,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
  * <li>The "compileCommand" is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax">Java format string</a> that represents the
  * full command that is used to invoke the C# compiler. The string will be formatted with the following arguments: compile executable, assembly path,
  * doc xml path, source doc path. The default value is "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s"</li>
+ * <li>The "singleFilePerClass" allows you to specify that Enunciate should generate a file for each C# class. By default (<tt>false</tt>), Enunciate
+ * puts all C# classes into a single file.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -102,6 +104,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   private String DLLFileName = null;
   private String docXmlFileName = null;
   private String sourceFileName = null;
+  private boolean singleFilePerClass = false;
 
   public CSharpDeploymentModule() {
   }
@@ -268,7 +271,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 
       debug("Generating the C# client classes...");
-      URL apiTemplate = getTemplateURL("api.fmt");
+      URL apiTemplate = isSingleFilePerClass() ? getTemplateURL("api-multiple-files.fmt") : getTemplateURL("api.fmt");
       processTemplate(apiTemplate, model);
     }
     else {
@@ -346,7 +349,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
       File compileDir = getCompileDir();
       compileDir.mkdirs(); //might not exist if we couldn't actually compile.
       //we want to zip up the source file, too, so we'll just copy it to the compile dir.
-      enunciate.copyFile(new File(getGenerateDir(), getSourceFileName()), new File(compileDir, getSourceFileName()));
+      enunciate.copyDir(getGenerateDir(), compileDir);
 
       buildDir.mkdirs();
       File bundle = new File(buildDir, getBundleFileName());
@@ -640,6 +643,24 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setDisableCompile(boolean disableCompile) {
     this.disableCompile = disableCompile;
+  }
+
+  /**
+   * Whether there should be a single file per class. Default: false (all classes are contained in a single file).
+   *
+   * @return Whether there should be a single file per class.
+   */
+  public boolean isSingleFilePerClass() {
+    return singleFilePerClass;
+  }
+
+  /**
+   * Whether there should be a single file per class.
+   *
+   * @param singleFilePerClass Whether there should be a single file per class.
+   */
+  public void setSingleFilePerClass(boolean singleFilePerClass) {
+    this.singleFilePerClass = singleFilePerClass;
   }
 
   /**
