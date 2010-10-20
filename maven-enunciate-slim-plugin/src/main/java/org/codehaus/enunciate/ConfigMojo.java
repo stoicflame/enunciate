@@ -98,6 +98,13 @@ public class ConfigMojo extends AbstractMojo {
   private File compileDir = null;
 
   /**
+   * The -encoding argument for the Java compiler.
+   *
+   * @parameter expression="${compilationEncoding}" default-value="${project.build.sourceEncoding}"
+   */
+  private String compilationEncoding = null;
+
+  /**
    * The output directory for the "build" step.
    *
    * @parameter expression="${project.build.directory}/enunciate/build"
@@ -515,6 +522,7 @@ public class ConfigMojo extends AbstractMojo {
       }
 
       setSourceFiles(sources.toArray(new String[sources.size()]));
+      setEncoding(compilationEncoding);
     }
 
     public void loadMavenConfiguration() throws IOException {

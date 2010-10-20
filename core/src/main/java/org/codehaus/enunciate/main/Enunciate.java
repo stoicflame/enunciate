@@ -78,6 +78,7 @@ public class Enunciate {
   private boolean debug = false;
   private boolean javacCheck = false;
   private boolean compileDebugInfo = true;
+  private String encoding;
 
   private File configFile;
   private File generateDir;
@@ -838,6 +839,10 @@ public class Enunciate {
       args.add("-verbose");
     }
 
+    if (getEncoding() != null) {
+    	args.add("-encoding " + getEncoding());
+    }
+    
     args.add("-d");
     args.add(compileDir.getAbsolutePath());
     args.addAll(additionalArgs);
@@ -1208,7 +1213,21 @@ public class Enunciate {
     return verbose || isDebug();
   }
 
-  /**
+	/**
+	 * @return the encoding for the javac compiler
+	 */
+	public String getEncoding() {
+		return encoding;
+	}
+
+	/**
+	 * @param encoding the encoding for the javac compiler
+	 */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+/**
    * Whether to be verbose.
    *
    * @param verbose Whether to be verbose.
@@ -1256,6 +1275,8 @@ public class Enunciate {
     return version;
   }
 
+  
+  
   /**
    * Whether to do a javac check before invoking the Enunciate mechanism.
    *
@@ -1364,6 +1385,8 @@ public class Enunciate {
     this.packageDir = packageDir;
   }
 
+  
+  
   /**
    * A scratch directory for Enunciate to use.
    *
