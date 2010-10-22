@@ -17,16 +17,22 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * An event assertion.
  *
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class Event extends OccurringAssertion {
 
   private EventType type;
   private String description;
+  private final List<String> tags = new ArrayList<String>();
 
   /**
    * The type of this event.
@@ -64,4 +70,14 @@ public class Event extends OccurringAssertion {
   public void setDescription(String description) {
     this.description = description;
   }
+
+  public String[] getTags() {
+    return tags.toArray(new String[tags.size()]);
+  }
+
+  public void setTags(String tags[]) {
+    this.tags.clear();
+    this.tags.addAll(Arrays.asList(tags));
+  }
+
 }

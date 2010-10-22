@@ -17,6 +17,8 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
 
 /**
  * A generic fact assertion.
@@ -28,6 +30,7 @@ public class Fact extends OccurringAssertion {
   private FactType type;
   private String value;
   private String description;
+  private String[] tags;
 
   /**
    * The fact type.
@@ -82,5 +85,14 @@ public class Fact extends OccurringAssertion {
    */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  @XmlElements ({@XmlElement (name="Tag", type=String.class)})
+  public String[] getTags() {
+    return tags;
+  }
+
+  public void setTags(String[] tags) {
+    this.tags = tags;
   }
 }

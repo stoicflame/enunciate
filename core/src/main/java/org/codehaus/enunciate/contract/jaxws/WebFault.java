@@ -453,6 +453,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
     return true;
   }
 
+  public WebMethod getWebMethod() {
+    throw new UnsupportedOperationException("Web faults aren't associated with a specific web method.");
+  }
+
   public static class FaultBeanChildElement implements Adaptable, ImplicitChildElement {
 
     private final PropertyDeclaration property;

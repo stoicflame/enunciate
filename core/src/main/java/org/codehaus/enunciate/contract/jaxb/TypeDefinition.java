@@ -30,6 +30,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
+import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
@@ -670,6 +671,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       parent.addContent(new org.jdom.Comment("(content not shown)"));
     }
     else {
+      TypeDefinition parentType = null;
       TYPE_DEF_STACK.get().push(getQualifiedName());
       for (Attribute attribute : getAttributes()) {
         attribute.generateExampleXml(parent);
@@ -684,6 +686,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       }
       TYPE_DEF_STACK.get().pop();
     }
+
+    XmlType baseType = getBaseType();
+    if (baseType instanceof XmlClassType) {
+      TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
+      if (typeDef != null) {
+        typeDef.generateExampleXml(parent);
+      }
+    }
   }
 
   public ObjectNode generateExampleJson() {
@@ -692,6 +702,11 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     }
 
     ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
+    generateExampleJson(jsonNode);
+    return jsonNode;
+  }
+
+  protected void generateExampleJson(ObjectNode jsonNode) {
     if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
       jsonNode.put("...", WhateverNode.instance);
     }
@@ -711,6 +726,13 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       TYPE_DEF_STACK.get().pop();
     }
 
-    return jsonNode;
+
+    XmlType baseType = getBaseType();
+    if (baseType instanceof XmlClassType) {
+      TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
+      if (typeDef != null) {
+        typeDef.generateExampleJson(jsonNode);
+      }
+    }
   }
 }

@@ -24,6 +24,7 @@ import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
@@ -34,16 +35,17 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.util.WhateverNode;
-import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ObjectNode;
 import org.jdom.Comment;
 import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * An accessor that is marshalled in xml to an xml element.
@@ -228,7 +230,11 @@ public class Element extends Accessor {
             specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
           }
           else {
-            specifiedType = types.getDeclaredType(((DeclaredType) specifiedType).getDeclaration());
+            TypeDeclaration decl = ((DeclaredType) specifiedType).getDeclaration();
+            while (decl instanceof DecoratedTypeDeclaration) {
+              decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
+            }
+            specifiedType = types.getDeclaredType(decl);
           }
           specifiedType = TypeMirrorDecorator.decorate(types.getArrayType(specifiedType));
         }

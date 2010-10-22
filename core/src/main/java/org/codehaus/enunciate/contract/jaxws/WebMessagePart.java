@@ -65,4 +65,11 @@ public interface WebMessagePart {
    */
   boolean isImplicitSchemaElement();
 
+  /**
+   * The web method associated with this part.
+   *
+   * @return The web method associated with this part.
+   */
+  public WebMethod getWebMethod();
+
 }
