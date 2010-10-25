@@ -16,11 +16,11 @@
 
           [#--todo: what about eis with the same name, different namespace?--]
   <jaxws:endpoint id="cxf-${endpointInterface.serviceName}" implementor="#${impl.serviceEndpointId}" address="${endpointInterface.metaData.soapPath}" implementorClass="${endpointInterface.qualifiedName}">
-    [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
     <jaxws:properties>
+    [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
       <entry key="mtom-enabled" value="true"/>
-    </jaxws:properties>
     [/#if]
+    </jaxws:properties>
     [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.Addressing"]??))]
     <jaxws:features>
       <wsa:addressing xmlns:wsa="http://cxf.apache.org/ws/addressing"/>

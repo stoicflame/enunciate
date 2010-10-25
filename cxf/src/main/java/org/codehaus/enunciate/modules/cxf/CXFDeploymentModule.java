@@ -87,6 +87,9 @@ import java.util.*;
  *     handles the requests to ?wsdl</li>
  * </ul>
  *
+ * <p>The CXF module also supports a list of <tt>jaxws-property</tt> child elements that each support a 'name' and 'value' attribute. This can be used to configure the CXF
+ * JAX-WS mechanism, and the properties will be passed along to the cxf configuration.</p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <p>The CXF deployment module exports no artifacts.</p>
@@ -103,6 +106,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean jacksonAvailable = false;
   private boolean filterFound = false;
   private boolean useWsdlRedirectFilter = true;
+  private final Map<String, String> jaxwsProperties = new TreeMap<String, String>();
 
   /**
    * @return "cxf"
@@ -418,6 +422,10 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
     String restSubcontext = getEnunciate().getConfig().getDefaultRestSubcontext();
     //todo: override default rest subcontext?
     return restSubcontext;
+  }
+
+  public void addJaxwsProperty(String name, String value) {
+    this.jaxwsProperties.put(name, value);
   }
 
   // Inherited.
