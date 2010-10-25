@@ -20,6 +20,11 @@
     [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.MTOM"]??))]
       <entry key="mtom-enabled" value="true"/>
     [/#if]
+    [#if jaxwsProperties??]
+      [#list jaxwsProperties?keys as prop]
+      <entry key="${prop}" value="${jaxwsProperties[prop]}"/>
+      [/#list]
+    [/#if]
     </jaxws:properties>
     [#if ((impl??) && (impl.annotations["javax.xml.ws.soap.Addressing"]??))]
     <jaxws:features>

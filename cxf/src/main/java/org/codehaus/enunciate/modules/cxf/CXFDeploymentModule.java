@@ -223,6 +223,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   public void doFreemarkerGenerate() throws IOException, TemplateException {
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
+      model.put("jaxwsProperties", this.jaxwsProperties);
       model.put("provideJaxws", enableJaxws);
       model.put("provideJaxrs", enableJaxrs);
       model.put("jacksonAvailable", jacksonAvailable);
