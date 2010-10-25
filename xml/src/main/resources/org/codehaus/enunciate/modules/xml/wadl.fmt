@@ -32,6 +32,15 @@ Template library for WADL.
     [@forEachRESTResourceListByPath]
 
     <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).path?starts_with("/")]/[/#if]${(resources?first).path}">
+      [#list (resources?first).resourceParameters as parameter]
+        [#if parameter.resourceParameterType?string = "PATH"]
+      <${wadl}:param name="${parameter.resourceParameterName}" style="${parameter.resourceParameterType?lower_case}">
+          [#if parameter.docValue??]
+        <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
+          [/#if]
+      </${wadl}:param>
+        [/#if]
+      [/#list]
       [#list resources as resource]
         [@handleResourceMethod resource=resource contentTypes=uniqueContentTypes(resource)/]
       [/#list]
@@ -42,6 +51,15 @@ Template library for WADL.
             [#list contentType.subcontexts as subcontext]
 
     <${wadl}:resource path="${subcontext}${resource.path}">
+              [#list resource.resourceParameters as parameter]
+                [#if parameter.resourceParameterType?string = "PATH"]
+      <${wadl}:param name="${parameter.resourceParameterName}" style="${parameter.resourceParameterType?lower_case}">
+                  [#if parameter.docValue??]
+        <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
+                  [/#if]
+      </${wadl}:param>
+                [/#if]
+              [/#list]
       [@handleResourceMethod resource=resource contentTypes=[contentType]/]
     </${wadl}:resource>
             [/#list]

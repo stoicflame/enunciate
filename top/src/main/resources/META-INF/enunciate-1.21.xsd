@@ -556,6 +556,14 @@
   <xs:complexType name="module-cxf">
     <xs:complexContent>
       <xs:extension base="module-base">
+        <xs:sequence>
+          <xs:element name="jaxws-property" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="name" type="xs:string" use="required"/>
+              <xs:attribute name="value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
         <xs:attribute name="validate" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
