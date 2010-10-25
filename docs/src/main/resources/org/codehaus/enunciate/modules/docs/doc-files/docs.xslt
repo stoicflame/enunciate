@@ -1103,7 +1103,7 @@
                                 <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>
                               </xsl:choose>
                             </td>
-                            <td><xsl:value-of select="@documentation"/></td>
+                            <td><xsl:value-of select="@documentation" disable-output-escaping="yes"/></td>
                           </tr>
                         </xsl:for-each>
                       </table>
