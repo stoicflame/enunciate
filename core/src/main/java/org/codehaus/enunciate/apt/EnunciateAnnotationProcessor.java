@@ -186,6 +186,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     }
 
     debug("Reading classes to enunciate...");
+    final List<EndpointInterface> eis = new ArrayList<EndpointInterface>();
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
       final boolean isRESTEndpoint = isRESTEndpoint(declaration);
@@ -199,7 +200,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
           for (EndpointImplementation implementation : endpointInterface.getEndpointImplementations()) {
             debug("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());
           }
-          model.add(endpointInterface);
+          eis.add(endpointInterface);
         }
 
         if (isRESTEndpoint) {
@@ -255,6 +256,11 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
       for (EnunciateTypeDeclarationListener declarationListener : typeDeclarationListeners) {
         declarationListener.onTypeDeclarationInspected(declaration);
       }
+    }
+
+    for (EndpointInterface ei : eis) {
+      //endpoint interfaces have to be added to the model last because they have implicit schema elements.
+      model.add(ei);
     }
 
     validate(model);

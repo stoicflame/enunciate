@@ -8,10 +8,10 @@ int main ( int argc, char *argv[] ) {
   ENUNCIATENS0Circle *circle;
   ENUNCIATENS0Triangle *triangle;
   ENUNCIATENS0Rectangle *rectangle;
-  ENUNCIATENS2Cat *cat;
-  ENUNCIATENS3Canvas *canvas;
-  ENUNCIATENS4House *house;
-  ENUNCIATENS5Bus *bus;
+  ENUNCIATEANIMALSCat *cat;
+  ENUNCIATEDRAWCanvas *canvas;
+  ENUNCIATESTRUCTURESHouse *house;
+  ENUNCIATEVEHICLESBus *bus;
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
   if (argc != 4) {
     printf("Usage: %s [cat|canvas|house|bus|circle|triangle|rectangle] [infile] [outfile]", argv[0]);
@@ -51,7 +51,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("cat", argv[1]) == 0) {
-    cat = (ENUNCIATENS2Cat *) [ENUNCIATENS2Cat readFromXML: in];
+    cat = (ENUNCIATEANIMALSCat *) [ENUNCIATEANIMALSCat readFromXML: in];
     out = [cat writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -61,7 +61,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("canvas", argv[1]) == 0) {
-    canvas = (ENUNCIATENS3Canvas *) [ENUNCIATENS3Canvas readFromXML: in];
+    canvas = (ENUNCIATEDRAWCanvas *) [ENUNCIATEDRAWCanvas readFromXML: in];
     out = [canvas writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -71,7 +71,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("house", argv[1]) == 0) {
-    house = (ENUNCIATENS4House *) [ENUNCIATENS4House readFromXML: in];
+    house = (ENUNCIATESTRUCTURESHouse *) [ENUNCIATESTRUCTURESHouse readFromXML: in];
     out = [house writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];
@@ -81,7 +81,7 @@ int main ( int argc, char *argv[] ) {
     [out release];
   }
   else if (strcmp("bus", argv[1]) == 0) {
-    bus = (ENUNCIATENS5Bus *) [ENUNCIATENS5Bus readFromXML: in];
+    bus = (ENUNCIATEVEHICLESBus *) [ENUNCIATEVEHICLESBus readFromXML: in];
     out = [bus writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];

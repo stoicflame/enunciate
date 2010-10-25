@@ -144,8 +144,8 @@ public class JAXWSSupportValidator extends BaseValidator {
           "to customize the fault bean name.");
       }
       else if (ape.getTypeDeclaration(faultBeanFQN) != null) {
-        result.addError(webFault, faultBeanFQN + " is an existing class.  Either move it, or customize the fault bean name with the " +
-          "@WebFault annotation.");
+        result.addError(webFault, faultBeanFQN + " is an existing class.  Either move it, annotate it with @XmlRootElement, " +
+          "or customize the fault bean name with the @WebFault annotation.");
       }
     }
 

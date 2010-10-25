@@ -2,6 +2,12 @@
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
+  <namespaces>
+    <namespace id="animals" uri="http://c.enunciate.codehaus.org/animals"/>
+    <namespace id="draw" uri="http://c.enunciate.codehaus.org/draw"/>
+    <namespace id="structures" uri="http://c.enunciate.codehaus.org/structures"/>
+    <namespace id="vehicles" uri="http://c.enunciate.codehaus.org/vehicles"/>
+  </namespaces>
   <modules>
     <obj-c forceEnable="true"/>
   </modules>

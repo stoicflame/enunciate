@@ -328,7 +328,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
    * @return Whether this web fault defines an implicit schema element.
    */
   public boolean isImplicitSchemaElement() {
-    return (this.explicitFaultBeanType == null);
+    return (findExplicitFaultBean() == null);
   }
 
   /**

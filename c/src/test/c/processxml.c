@@ -9,10 +9,10 @@ int main ( int argc, char *argv[] ) {
   struct enunciate_ns0_circle *circle;
   struct enunciate_ns0_triangle *triangle;
   struct enunciate_ns0_rectangle *rectangle;
-  struct enunciate_ns2_cat *cat;
-  struct enunciate_ns3_canvas *canvas;
-  struct enunciate_ns4_house *house;
-  struct enunciate_ns5_bus *bus;
+  struct enunciate_animals_cat *cat;
+  struct enunciate_draw_canvas *canvas;
+  struct enunciate_structures_house *house;
+  struct enunciate_vehicles_bus *bus;
   if (argc != 4) {
     printf("Usage: %s [cat|canvas|house|bus|circle|triangle|rectangle] [infile] [outfile]", argv[0]);
     return 1;
@@ -60,54 +60,54 @@ int main ( int argc, char *argv[] ) {
     xmlFreeTextReader(reader); //free the reader
   }
   else if (strcmp("cat", argv[1]) == 0) {
-    cat = xml_read_enunciate_ns2_cat(reader);
-    status = xml_write_enunciate_ns2_cat(writer, cat);
+    cat = xml_read_enunciate_animals_cat(reader);
+    status = xml_write_enunciate_animals_cat(writer, cat);
     if (status < 0) {
       //panic
       printf("Problem writing cat.");
       return 1;
     }
 
-    free_enunciate_ns2_cat(cat); //free the cat.
+    free_enunciate_animals_cat(cat); //free the cat.
     xmlFreeTextWriter(writer); //free the writer
     xmlFreeTextReader(reader); //free the reader
   }
   else if (strcmp("canvas", argv[1]) == 0) {
-    canvas = xml_read_enunciate_ns3_canvas(reader);
-    status = xml_write_enunciate_ns3_canvas(writer, canvas);
+    canvas = xml_read_enunciate_draw_canvas(reader);
+    status = xml_write_enunciate_draw_canvas(writer, canvas);
     if (status < 0) {
       //panic
       printf("Problem writing canvas.");
       return 1;
     }
 
-    free_enunciate_ns3_canvas(canvas); //free the canvas.
+    free_enunciate_draw_canvas(canvas); //free the canvas.
     xmlFreeTextWriter(writer); //free the writer
     xmlFreeTextReader(reader); //free the reader
   }
   else if (strcmp("house", argv[1]) == 0) {
-    house = xml_read_enunciate_ns4_house(reader);
-    status = xml_write_enunciate_ns4_house(writer, house);
+    house = xml_read_enunciate_structures_house(reader);
+    status = xml_write_enunciate_structures_house(writer, house);
     if (status < 0) {
       //panic
       printf("Problem writing house.");
       return 1;
     }
 
-    free_enunciate_ns4_house(house); //free the house.
+    free_enunciate_structures_house(house); //free the house.
     xmlFreeTextWriter(writer); //free the writer
     xmlFreeTextReader(reader); //free the reader
   }
   else if (strcmp("bus", argv[1]) == 0) {
-    bus = xml_read_enunciate_ns5_bus(reader);
-    status = xml_write_enunciate_ns5_bus(writer, bus);
+    bus = xml_read_enunciate_vehicles_bus(reader);
+    status = xml_write_enunciate_vehicles_bus(writer, bus);
     if (status < 0) {
       //panic
       printf("Problem writing bus.");
       return 1;
     }
 
-    free_enunciate_ns5_bus(bus); //free the bus.
+    free_enunciate_vehicles_bus(bus); //free the bus.
     xmlFreeTextWriter(writer); //free the writer
     xmlFreeTextReader(reader); //free the reader
   }

@@ -128,6 +128,7 @@ import java.util.regex.Pattern;
  * disables the compile-time validation check.</i></li>
  * <li>The "useWrappedServices" attribute specifies whether to use wrapped GWT client services. This is an artifact from when GWT 1.4 was supported
  * and the generic types were unavailable. Default: false</li>
+ * <li>The "disableCompile" attribute prevents Enunciate from compiling its generated client source files.</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -270,6 +271,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
   private String label = null;
   private int[] gwtVersion = null;
   private GWTModuleClasspathHandler gwtClasspathHandler;
+  private boolean disableCompile = false;
 
   /**
    * @return "gwt"
@@ -879,7 +881,12 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       debug("Compiling the GWT client-side files...");
       Collection<String> clientSideFiles = enunciate.getJavaFiles(getClientSideGenerateDir());
       String clientClasspath = enunciate.getRuntimeClasspath();
-      enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      if (!isDisableCompile()) {
+        enunciate.invokeJavac(clientClasspath, "1.5", getClientSideCompileDir(), new ArrayList<String>(), clientSideFiles.toArray(new String[clientSideFiles.size()]));
+      }
+      else {
+        info("Compilation of GWT Java sources has been disabled.");
+      }
     }
     else {
       info("Skipping compile of GWT client-side files because everything appears up-to-date...");
@@ -1577,5 +1584,23 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
 
   public List<File> getProjectTestResourceDirectories() {
     return Collections.emptyList();
+  }
+
+  /**
+   * Whether to disable the compilation of the java sources (default: false).
+   *
+   * @return Whether to disable the compilation of the java sources (default: false).
+   */
+  public boolean isDisableCompile() {
+    return disableCompile;
+  }
+
+  /**
+   * Whether to disable the compilation of the java sources (default: false).
+   *
+   * @param disableCompile Whether to disable the compilation of the java sources (default: false).
+   */
+  public void setDisableCompile(boolean disableCompile) {
+    this.disableCompile = disableCompile;
   }
 }

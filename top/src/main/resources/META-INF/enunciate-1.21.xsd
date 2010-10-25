@@ -447,6 +447,7 @@
         <xs:attribute name="jsonJarName" type="xs:string"/>
         <xs:attribute name="label" type="xs:string"/>
         <xs:attribute name="generateJsonJar" type="xs:boolean"/>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1008,6 +1009,7 @@
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="disableCompile" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

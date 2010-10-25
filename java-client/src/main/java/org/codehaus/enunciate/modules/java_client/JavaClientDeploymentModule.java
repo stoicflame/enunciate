@@ -95,6 +95,7 @@ import java.util.*;
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
  * <li>The "jsonJarName" attribute specifies the name of the jar file(s) that are to be created for the JSON client.  If no jar name is specified,
  * the name will be calculated from the enunciate label, or a default will be supplied.</li>
+ * <li>The "disableCompile" attribute prevents Enunciate from compiling its generated client source files.</li>
  * </ul>
  *
  * <h3>The "package-conversions" element</h3>
@@ -152,6 +153,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   private final JavaClientRuleSet configurationRules;
   private final Set<String> serverSideTypesToUse;
   private String label = null;
+  private boolean disableCompile = false;
 
   private boolean forceGenerateJsonJar = false;
   private boolean disableJsonJar = false;
@@ -478,7 +480,12 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     if (!enunciate.isUpToDateWithSources(getCompileDir())) {
       Collection<String> javaSourceFiles = enunciate.getJavaFiles(getClientGenerateDir());
       String clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
-      enunciate.invokeJavac(clientClasspath, "1.5", getClientCompileDir(), new ArrayList<String>(), javaSourceFiles.toArray(new String[javaSourceFiles.size()]));
+      if (!isDisableCompile()) {
+        enunciate.invokeJavac(clientClasspath, "1.5", getClientCompileDir(), new ArrayList<String>(), javaSourceFiles.toArray(new String[javaSourceFiles.size()]));
+      }
+      else {
+        info("Compilation of the java sources has been disabled.");
+      }
 
       for (DeploymentModule module : enunciate.getConfig().getEnabledModules()) {
         if (module instanceof XMLDeploymentModule) {
@@ -490,7 +497,12 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       if (isGenerateJsonJar()) {
         Collection<String> jsonSourceFiles = enunciate.getJavaFiles(getJsonClientGenerateDir());
         clientClasspath = enunciate.getEnunciateBuildClasspath(); //we use the build classpath for client-side jars so you don't have to include client-side dependencies on the server-side.
-        enunciate.invokeJavac(clientClasspath, "1.5", getJsonClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
+        if (!isDisableCompile()) {
+          enunciate.invokeJavac(clientClasspath, "1.5", getJsonClientCompileDir(), new ArrayList<String>(), jsonSourceFiles.toArray(new String[jsonSourceFiles.size()]));
+        }
+        else {
+          info("Compilation of the java json sources has been disabled.");          
+        }
       }
     }
     else {
@@ -538,12 +550,15 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       jsonJarName = label + "-json-client.jar";
     }
 
-    File clientJarFile = new File(getBuildDir(), jarName);
-    if (!enunciate.isUpToDate(getClientCompileDir(), clientJarFile)) {
-      enunciate.zip(clientJarFile, getClientCompileDir());
-    }
-    else {
-      info("Skipping creation of Java client jar as everything appears up-to-date...");
+    File clientJarFile = null;
+    if (!isDisableCompile()) {
+      clientJarFile = new File(getBuildDir(), jarName);
+      if (!enunciate.isUpToDate(getClientCompileDir(), clientJarFile)) {
+        enunciate.zip(clientJarFile, getClientCompileDir());
+      }
+      else {
+        info("Skipping creation of Java client jar as everything appears up-to-date...");
+      }
     }
 
     File clientSourcesJarFile = new File(getBuildDir(), jarName.replaceFirst("\\.jar", "-sources.jar"));
@@ -559,19 +574,22 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     artifactBundle.addAlias("jaxws.client.library");
     //read in the description from file:
     artifactBundle.setDescription(readResource("library_description.fmt"));
-    NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.client.library.binaries", clientJarFile);
-    binariesJar.addAlias("jaxws.client.library.binaries");
-    binariesJar.setDescription("The binaries for the Java client library.");
-    binariesJar.setPublic(false);
-    binariesJar.setArtifactType(ArtifactType.binaries);
-    artifactBundle.addArtifact(binariesJar);
+    if (clientJarFile != null) {
+      NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.client.library.binaries", clientJarFile);
+      binariesJar.addAlias("jaxws.client.library.binaries");
+      binariesJar.setDescription("The binaries for the Java client library.");
+      binariesJar.setPublic(false);
+      binariesJar.setArtifactType(ArtifactType.binaries);
+      artifactBundle.addArtifact(binariesJar);
+      enunciate.addArtifact(binariesJar);
+    }
+
     NamedFileArtifact sourcesJar = new NamedFileArtifact(getName(), "java.client.library.sources", clientSourcesJarFile);
     sourcesJar.addAlias("jaxws.client.library.sources");
     sourcesJar.setDescription("The sources for the Java client library.");
     sourcesJar.setPublic(false);
     sourcesJar.setArtifactType(ArtifactType.sources);
     artifactBundle.addArtifact(sourcesJar);
-    enunciate.addArtifact(binariesJar);
     enunciate.addArtifact(sourcesJar);
     enunciate.addArtifact(artifactBundle);
 
@@ -596,17 +614,19 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       artifactBundle.setPlatform("Java (Version 5+)");
       //read in the description from file:
       artifactBundle.setDescription(readResource("json_library_description.fmt"));
-      binariesJar = new NamedFileArtifact(getName(), "java.json.client.library.binaries", clientJarFile);
-      binariesJar.setDescription("The binaries for the Java JSON client library.");
-      binariesJar.setPublic(false);
-      binariesJar.setArtifactType(ArtifactType.binaries);
-      artifactBundle.addArtifact(binariesJar);
+      if (!isDisableCompile()) {
+        NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.json.client.library.binaries", clientJarFile);
+        binariesJar.setDescription("The binaries for the Java JSON client library.");
+        binariesJar.setPublic(false);
+        binariesJar.setArtifactType(ArtifactType.binaries);
+        artifactBundle.addArtifact(binariesJar);
+        enunciate.addArtifact(binariesJar);
+      }
       sourcesJar = new NamedFileArtifact(getName(), "java.json.client.library.sources", clientSourcesJarFile);
       sourcesJar.setDescription("The sources for the Java JSON client library.");
       sourcesJar.setPublic(false);
       sourcesJar.setArtifactType(ArtifactType.sources);
       artifactBundle.addArtifact(sourcesJar);
-      enunciate.addArtifact(binariesJar);
       enunciate.addArtifact(sourcesJar);
       enunciate.addArtifact(artifactBundle);
     }
@@ -897,5 +917,23 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     }
 
     return testResources;
+  }
+
+  /**
+   * Whether to disable the compilation of the java sources (default: false).
+   *
+   * @return Whether to disable the compilation of the java sources (default: false).
+   */
+  public boolean isDisableCompile() {
+    return disableCompile;
+  }
+
+  /**
+   * Whether to disable the compilation of the java sources (default: false).
+   *
+   * @param disableCompile Whether to disable the compilation of the java sources (default: false).
+   */
+  public void setDisableCompile(boolean disableCompile) {
+    this.disableCompile = disableCompile;
   }
 }
