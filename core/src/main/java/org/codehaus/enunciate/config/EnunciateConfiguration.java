@@ -721,7 +721,7 @@ public class EnunciateConfiguration implements ErrorHandler {
 
     digester.addCallMethod("enunciate/webapp/globalServletFilter/init-param", "addInitParam", 2);
     digester.addCallParam("enunciate/webapp/globalServletFilter/init-param", 0, "name");
-    digester.addCallParam("enunciate/webapp/globalServletFiltery/init-param", 1, "value");
+    digester.addCallParam("enunciate/webapp/globalServletFilter/init-param", 1, "value");
 
     //set up the module configuration.
     for (DeploymentModule module : getAllModules()) {

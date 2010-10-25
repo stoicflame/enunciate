@@ -3,6 +3,11 @@
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
   <disable-rule id="as3.conflicting.names"/>
+  <webapp>
+    <globalServletFilter name="noop" classname="org.codehaus.enunciate.samples.genealogy.services.NoOpFilter">
+      <init-param name="name" value="value"/>
+    </globalServletFilter>
+  </webapp>
   <namespaces>
     <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
     <namespace id="cite" uri="http://enunciate.codehaus.org/samples/genealogy/cite"/>
