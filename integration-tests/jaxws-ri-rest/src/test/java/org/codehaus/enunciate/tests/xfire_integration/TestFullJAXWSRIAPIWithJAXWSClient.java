@@ -21,9 +21,11 @@ import org.codehaus.enunciate.samples.genealogy.jaxws_client.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.data.*;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.*;
+import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.AssertionServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.PersonServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.RelationshipServiceImpl;
 import org.codehaus.enunciate.samples.genealogy.jaxws_client.services.impl.SourceServiceImpl;
+
 
 import javax.activation.DataHandler;
 import javax.mail.util.ByteArrayDataSource;
@@ -194,6 +196,14 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
 
     relationshipService.touch();
 
+    AssertionService assertionService = new AssertionServiceImpl("http://localhost:" + port + "/" + context + "/soap-services/AssertionServiceService");
+    List<Assertion> assertions = assertionService.readAssertions();
+    Assertion gender = assertions.get(0);
+    assertEquals("gender", gender.getId());
+    assertTrue(gender instanceof Gender);
+    Assertion name = assertions.get(1);
+    assertEquals("name", name.getId());
+    assertTrue(name instanceof Name);
   }
 
 }

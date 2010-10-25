@@ -21,12 +21,14 @@ import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  * An assertion of a piece of information, usually associated with a source.
  *
  * @author Ryan Heaton
  */
+@XmlSeeAlso({Gender.class,Name.class})
 public abstract class Assertion {
 
   private String id;

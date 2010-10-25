@@ -15,8 +15,12 @@
  */
 
 @XmlSchema (
-  namespace = "http://c.enunciate.codehaus.org/animals"
+  namespace = "http://c.enunciate.codehaus.org/animals",
+  xmlns = {
+    @XmlNs(prefix="animals", namespaceURI = "http://c.enunciate.codehaus.org/animals")
+  }
 )
 package org.codehaus.enunciate.examples.c.schema.animals;
 
 import javax.xml.bind.annotation.XmlSchema;
+import javax.xml.bind.annotation.XmlNs;

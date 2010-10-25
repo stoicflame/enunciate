@@ -104,6 +104,15 @@ namespace Jaxws.Ri.Rest {
       }
 
       relationshipService.Touch();
+      AssertionService assertionService = new AssertionService();
+      assertionService.Url = "http://localhost:8080/full/soap-services/AssertionServiceService";
+      Assertion[] assertions = assertionService.ReadAssertions();
+      Assertion gender = assertions[0];
+      Assert.AreEqual("gender",gender.Id);
+      Assert.IsTrue(gender is Gender);
+      Assertion name = assertions[1];
+      Assert.AreEqual("name",name.Id);
+      Assert.IsTrue(name is Name);      	
     }
   }
 

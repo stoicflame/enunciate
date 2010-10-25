@@ -24,6 +24,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
+import org.codehaus.enunciate.contract.validation.ValidationException;
 
 import javax.xml.namespace.QName;
 import java.util.Arrays;
@@ -179,9 +180,13 @@ public class TestWebFault extends InAPTTestCase {
    */
   public void testAlmostExplicitWebFault2() throws Exception {
     FreemarkerModel.set(new EnunciateFreemarkerModel());
-    WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanTwo"));
-    assertNull("A web fault without both constructors shouldn't have an explicit fault bean.",
-               webFault.getExplicitFaultBeanType());
+    try {
+      new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanTwo"));
+      fail("A web fault without both constructors shouldn't have an explicit fault bean.");
+    }
+    catch (ValidationException e) {
+      //fall through...
+    }
   }
 
   /**
@@ -189,9 +194,13 @@ public class TestWebFault extends InAPTTestCase {
    */
   public void testAlmostExplicitWebFault3() throws Exception {
     FreemarkerModel.set(new EnunciateFreemarkerModel());
-    WebFault webFault = new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanThree"));
-    assertNull("A web fault without both PUBLIC constructors shouldn't have an explicit fault bean.",
-               webFault.getExplicitFaultBeanType());
+    try {
+      new WebFault((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.services.AlmostExplicitFaultBeanThree"));
+      fail("A web fault without both PUBLIC constructors shouldn't have an explicit fault bean.");
+    }
+    catch (ValidationException e) {
+      //fall through...
+    }
   }
 
   public static Test suite() {

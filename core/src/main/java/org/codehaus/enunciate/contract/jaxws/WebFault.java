@@ -106,6 +106,12 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
       }
     }
 
+    if (faultInfoProperty != null && explicitFaultBeanType == null) {
+      throw new ValidationException(faultInfoProperty.getPosition(), "The 'getFaultInfo' method is only allowed on a web fault if you're " +
+        "declaring an explicit fault bean, and you don't have the right constructor signatures set up in order for '" +
+        faultInfoProperty.getPropertyType() + "' to be an explicit fault bean.");
+    }
+
     this.explicitFaultBeanType = explicitFaultBeanType;
   }
 
