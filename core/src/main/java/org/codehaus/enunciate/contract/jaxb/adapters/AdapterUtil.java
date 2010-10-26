@@ -21,10 +21,7 @@ import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import static org.codehaus.enunciate.contract.jaxb.util.JAXBUtil.unwrapComponentType;
@@ -83,13 +80,13 @@ public class AdapterUtil {
   /**
    * Finds the adapter type of the specified type, given the referer and the package of the referer.
    *
-   * @param adaptedType The type for which to find the adapter.
+   * @param unwrappedAdaptedType The type for which to find the adapter.
    * @param referer The referer.
    * @param pckg The package of the referer.
    * @return The adapter type, or null if none was found.
    */
-  private static AdapterType findAdapterType(TypeMirror adaptedType, Declaration referer, PackageDeclaration pckg) {
-    adaptedType = unwrapComponentType(adaptedType);
+  private static AdapterType findAdapterType(TypeMirror unwrappedAdaptedType, Declaration referer, PackageDeclaration pckg) {
+    TypeMirror adaptedType = unwrapComponentType(unwrappedAdaptedType);
     XmlJavaTypeAdapter typeAdapterInfo = referer != null ? referer.getAnnotation(XmlJavaTypeAdapter.class) : null;
     if (adaptedType instanceof DeclaredType) {
       if (typeAdapterInfo == null) {
@@ -107,28 +104,36 @@ public class AdapterUtil {
         }
         typeAdapterInfo = getAdaptersOfPackage(pckg).get(typeDeclaration.getQualifiedName());
       }
-
-      if (typeAdapterInfo != null) {
-        ClassType adapterTypeMirror;
-
-        try {
-          Class adaptedClass = typeAdapterInfo.value();
-          AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
-          adapterTypeMirror = (ClassType) ape.getTypeUtils().getDeclaredType(ape.getTypeDeclaration(adaptedClass.getName()));
-        }
-        catch (MirroredTypeException e) {
-          adapterTypeMirror = (ClassType) e.getTypeMirror();
-        }
-
-        AdapterType adapterType = new AdapterType(adapterTypeMirror);
-        if (!adapterType.canAdapt((DeclaredType) adaptedType)) {
-          throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
-        }
-        return adapterType;
-      }
     }
-    else if (typeAdapterInfo != null) {
-      throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": an XML adapter can only adapt a declared type (" + adaptedType + " cannot be adapted).");
+
+    if (typeAdapterInfo != null) {
+      ClassType adapterTypeMirror;
+
+      try {
+        Class adaptedClass = typeAdapterInfo.value();
+        AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        adapterTypeMirror = (ClassType) ape.getTypeUtils().getDeclaredType(ape.getTypeDeclaration(adaptedClass.getName()));
+      }
+      catch (MirroredTypeException e) {
+        adapterTypeMirror = (ClassType) e.getTypeMirror();
+      }
+
+      AdapterType adapterType = new AdapterType(adapterTypeMirror);
+      ReferenceType actualTypeBeingAdapted;
+      if (adaptedType instanceof DeclaredType) {
+        actualTypeBeingAdapted = (DeclaredType) adaptedType;
+      }
+      else if (unwrappedAdaptedType instanceof ReferenceType) {
+        actualTypeBeingAdapted = (ReferenceType) unwrappedAdaptedType;
+      }
+      else {
+        throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": an XML adapter can only adapt a reference type (" + unwrappedAdaptedType + " cannot be adapted).");        
+      }
+
+      if (!adapterType.canAdapt(actualTypeBeingAdapted)) {
+        throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
+      }
+      return adapterType;
     }
 
     return null;

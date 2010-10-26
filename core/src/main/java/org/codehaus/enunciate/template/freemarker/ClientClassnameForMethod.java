@@ -56,6 +56,9 @@ public class ClientClassnameForMethod extends ClassnameForMethod {
       if (isArray) {
         //the adapting type adapts the component, so we need to convert it back to an array type.
         AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        while (elementType instanceof DecoratedTypeMirror) {
+          elementType = ((DecoratedTypeMirror) elementType).getDelegate();
+        }
         elementType = ape.getTypeUtils().getArrayType(elementType);
       }
     }
@@ -74,6 +77,9 @@ public class ClientClassnameForMethod extends ClassnameForMethod {
       if (isArray) {
         //the adapting type will adapt the component, so we need to convert it back to an array type.
         AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+        while (accessorType instanceof DecoratedTypeMirror) {
+          accessorType = ((DecoratedTypeMirror) accessorType).getDelegate();
+        }
         accessorType = ape.getTypeUtils().getArrayType(accessorType);
       }
     }

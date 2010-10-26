@@ -22,6 +22,7 @@ import javax.activation.DataHandler;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Collection;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class Person {
   private Map<EventType, String> eventDescriptions;
 
   private DataHandler picture;
+  private byte[] recording;
 
   /**
    * The person id.
@@ -179,5 +181,14 @@ public class Person {
 
   public void setEventDescriptions(Map<EventType, String> eventDescriptions) {
     this.eventDescriptions = eventDescriptions;
+  }
+
+  @XmlJavaTypeAdapter( HexBinaryAdapter.class )
+  public byte[] getRecording() {
+    return recording;
+  }
+
+  public void setRecording(byte[] recording) {
+    this.recording = recording;
   }
 }

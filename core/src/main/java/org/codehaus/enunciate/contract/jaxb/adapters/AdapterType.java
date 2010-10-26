@@ -17,9 +17,9 @@
 package org.codehaus.enunciate.contract.jaxb.adapters;
 
 import com.sun.mirror.declaration.ClassDeclaration;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
+import com.sun.mirror.util.Types;
+import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
@@ -37,7 +37,7 @@ import org.codehaus.enunciate.contract.validation.ValidationException;
  */
 public class AdapterType extends DecoratedClassType {
 
-  private final DeclaredType adaptedType;
+  private final ReferenceType adaptedType;
   private final TypeMirror adaptingType;
 
   public AdapterType(ClassType adapterType) {
@@ -59,11 +59,11 @@ public class AdapterType extends DecoratedClassType {
     Iterator<TypeMirror> formalTypeIt = adaptorTypeArgs.iterator();
     this.adaptingType = TypeMirrorDecorator.decorate(formalTypeIt.next());
     TypeMirror boundTypeMirror = formalTypeIt.next();
-    if (!(boundTypeMirror instanceof DeclaredType)) {
-      throw new ValidationException(adapterDeclaration.getPosition(), adapterDeclaration.getQualifiedName() + ": illegal XML adapter: not adapting a declared type (" + boundTypeMirror + ").");
+    if (!(boundTypeMirror instanceof ReferenceType)) {
+      throw new ValidationException(adapterDeclaration.getPosition(), adapterDeclaration.getQualifiedName() + ": illegal XML adapter: not adapting a reference type (" + boundTypeMirror + ").");
     }
 
-    this.adaptedType = TypeMirrorDecorator.decorate((DeclaredType) boundTypeMirror);
+    this.adaptedType = TypeMirrorDecorator.decorate((ReferenceType) boundTypeMirror);
   }
 
   /**
@@ -91,9 +91,28 @@ public class AdapterType extends DecoratedClassType {
    * @param type The type.
    * @return Whether this adapter can adapt the specified type.
    */
-  public boolean canAdapt(DeclaredType type) {
+  public boolean canAdapt(ReferenceType type) {
     DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(type);
-    return getAdaptedType().getDeclaration() != null && decorated.isInstanceOf(getAdaptedType().getDeclaration().getQualifiedName());
+    ReferenceType adaptedType = getAdaptedType();
+    if (adaptedType instanceof DeclaredType) {
+      return ((DeclaredType)adaptedType).getDeclaration() != null && decorated.isInstanceOf(((DeclaredType)adaptedType).getDeclaration().getQualifiedName());
+    }
+    else if (adaptedType instanceof ArrayType) {
+      if (decorated instanceof ArrayType) {
+        TypeMirror adaptedComponentType = ((ArrayType) adaptedType).getComponentType();
+        while (adaptedComponentType instanceof DecoratedTypeMirror) {
+          adaptedComponentType = ((DecoratedTypeMirror) adaptedComponentType).getDelegate();
+        }
+        TypeMirror componentType = ((ArrayType) decorated).getComponentType();
+        while (componentType instanceof DecoratedTypeMirror) {
+          componentType = ((DecoratedTypeMirror) componentType).getDelegate();
+        }
+        Types typeUtils = Context.getCurrentEnvironment().getTypeUtils();
+        return typeUtils.isAssignable(componentType, adaptedComponentType);
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -101,7 +120,7 @@ public class AdapterType extends DecoratedClassType {
    *
    * @return The type that is being adapted by this adapter.
    */
-  public DeclaredType getAdaptedType() {
+  public ReferenceType getAdaptedType() {
     return adaptedType;
   }
 
