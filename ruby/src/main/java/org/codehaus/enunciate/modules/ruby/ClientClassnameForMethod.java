@@ -86,6 +86,9 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     else if (isCollection(declaration)) {
       return "Array";
     }
+    else if (isMap(declaration)) {
+      return "Hash";
+    }
 
     return super.convert(declaration);
   }
@@ -123,6 +126,30 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       }
     }
     
+    return false;
+  }
+
+  protected boolean isMap(TypeDeclaration declaration) {
+    String fqn = declaration.getQualifiedName();
+    if (Map.class.getName().equals(fqn)) {
+      return true;
+    }
+    else {
+      if (declaration instanceof ClassDeclaration) {
+        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(((ClassDeclaration)declaration).getSuperclass());
+        if (decorated.isInstanceOf(Map.class.getName())) {
+          return true;
+        }
+      }
+
+      for (InterfaceType interfaceType : declaration.getSuperinterfaces()) {
+        DecoratedTypeMirror decorated = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(interfaceType);
+        if (decorated.isInstanceOf(Map.class.getName())) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 

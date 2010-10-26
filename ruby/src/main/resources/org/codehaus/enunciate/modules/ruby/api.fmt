@@ -58,6 +58,14 @@ class Array
   end
 end
 
+class Hash
+  def to_jaxb_json_hash
+    h = Hash.new
+    each { | _key, _value | h[_key.to_jaxb_json_hash] = _value.to_jaxb_json_hash }
+    return h
+  end
+end
+
   [#list schemaTypes as typeDefinition]
     [#if typeDefinition.enum]
       [@libEnumType.writeEnumType type=typeDefinition/]

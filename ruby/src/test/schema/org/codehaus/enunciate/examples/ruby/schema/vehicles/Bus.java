@@ -22,6 +22,7 @@ import org.codehaus.enunciate.examples.ruby.schema.Circle;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.lang.String;
 import java.util.Collection;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class Bus extends Figure {
   private Circle[] wheels;
   private Collection<Rectangle> windows;
   private Rectangle door;
+  private Map<String, Circle> persons;
 
   public Rectangle getFrame() {
     return frame;
@@ -71,4 +73,11 @@ public class Bus extends Figure {
     this.door = door;
   }
 
+  public Map<String, Circle> getPersons() {
+    return persons;
+  }
+
+  public void setPersons(Map<String, Circle> persons) {
+    this.persons = persons;
+  }
 }
