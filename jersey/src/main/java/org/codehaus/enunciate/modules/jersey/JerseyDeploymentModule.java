@@ -29,6 +29,7 @@ import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jersey.config.JerseyRuleSet;
+import org.codehaus.enunciate.template.freemarker.ClassForNameMethod;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -230,6 +231,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   public void doFreemarkerGenerate() throws EnunciateException, IOException, TemplateException {
     if (!isUpToDate()) {
       EnunciateFreemarkerModel model = getModel();
+      model.put("forName", new ClassForNameMethod());
       processTemplate(getRootResourceListTemplateURL(), model);
       processTemplate(getProvidersListTemplateURL(), model);
       processTemplate(getJaxbTypesTemplateURL(), model);

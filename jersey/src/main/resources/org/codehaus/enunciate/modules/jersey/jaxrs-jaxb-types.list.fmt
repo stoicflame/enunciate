@@ -2,10 +2,10 @@
 [@file name="jaxrs-jaxb-types.list" charset="utf-8"]
   [#list ns2schema?values as schema]
     [#list schema.typeDefinitions as typeDef]
-${typeDef.qualifiedName}
+${forName(typeDef)}
     [/#list]
     [#list schema.globalElements as element]
-${element.qualifiedName}
+${forName(element)}
     [/#list]
   [/#list]
   [@forEachWsdl]
