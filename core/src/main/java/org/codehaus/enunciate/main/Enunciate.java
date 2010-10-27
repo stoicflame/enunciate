@@ -356,7 +356,7 @@ public class Enunciate {
       //no source files (all imports are on the classpath).  Since APT requires at least one, we'll write it out ourselves....
       File tempSource = createTempFile("EnunciateMockClass", ".java");
       FileWriter writer = new FileWriter(tempSource);
-      writer.write(String.format("@org.codehaus.enunciate.XmlTransient public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
+      writer.write(String.format("public class %s {}", tempSource.getName().substring(0, tempSource.getName().length() - 5)));
       writer.flush();
       writer.close();
       sourceFiles.add(tempSource.getAbsolutePath());
