@@ -56,7 +56,7 @@
             [/#list]
           [/#list]
           [#list element.choices as choice]
-              <choice name="${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
+              <choice name="[#if element.wrapped]${element.wrapperName}/[/#if]${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
           [/#list]
             </element>
         [/#list]
