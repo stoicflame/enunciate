@@ -1364,8 +1364,8 @@
                         <li>
                           Type:
                           <xsl:choose>
-                            <xsl:when test="@typeSchemaId"><a href="data_{@typeSchemaId}.html#{@typeName}"><xsl:value-of select="@typeName"/></a></xsl:when>
-                            <xsl:otherwise><xsl:value-of select="@typeName"/></xsl:otherwise>
+                            <xsl:when test="value/@typeSchemaId"><a href="data_{value/@typeSchemaId}.html#{value/@typeName}"><xsl:value-of select="value/@typeName"/></a></xsl:when>
+                            <xsl:otherwise><xsl:value-of select="value/@typeName"/></xsl:otherwise>
                           </xsl:choose>
                         </li>
                       </ul>
