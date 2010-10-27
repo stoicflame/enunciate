@@ -13,6 +13,7 @@ import org.codehaus.enunciate.modules.gwt.*;
  *
  * @author Ryan Heaton
  */
+java.lang.SuppressWarnings( {"ALL"} )
 public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${type.simpleName}GWTMapper [#if baseobject]extends BaseGWTMapper [#else]extends ${type.superclass.declaration.package.qualifiedName + ".gwt." + type.superclass.declaration.simpleName}GWTMapper [/#if]implements GWTMapper {
 
   public ${type.simpleName}GWTMapper() {

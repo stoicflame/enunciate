@@ -248,20 +248,19 @@ public class ConfigMojo extends AbstractMojo {
    */
   private static final TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
 
-    /**
-     * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally
-     * adjust the build.
-     * 
-     * @parameter expression="${enunciate.skip}" default-value="false"
-     */
-    protected boolean skipEnunciate;
+  /**
+   * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally
+   * adjust the build.
+   *
+   * @parameter expression="${enunciate.skip}" default-value="false"
+   */
+  protected boolean skipEnunciate;
 
   public void execute() throws MojoExecutionException {
-        if ( skipEnunciate )
-        {
-            getLog().info( "Skipping enunciate per configuration." );
-            return;
-        }
+    if (skipEnunciate) {
+      getLog().info("Skipping enunciate per configuration.");
+      return;
+    }
 
     Set<File> sourceDirs = new HashSet<File>();
     Collection<String> sourcePaths = (Collection<String>) project.getCompileSourceRoots();
@@ -305,7 +304,7 @@ public class ConfigMojo extends AbstractMojo {
     postProcessConfig(config);
     enunciate.setConfig(config);
     Set<org.apache.maven.artifact.Artifact> classpathEntries = new LinkedHashSet<org.apache.maven.artifact.Artifact>();
-    classpathEntries.addAll(((Set<org.apache.maven.artifact.Artifact>)this.project.getArtifacts()));
+    classpathEntries.addAll(((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts()));
     Iterator<org.apache.maven.artifact.Artifact> it = classpathEntries.iterator();
     while (it.hasNext()) {
       org.apache.maven.artifact.Artifact artifact = it.next();
@@ -560,8 +559,9 @@ public class ConfigMojo extends AbstractMojo {
     protected void doGenerate() throws IOException, EnunciateException {
       super.doGenerate();
 
+      Set<String> excludedExtensions = getExcludedProjectExtensions();
       for (DeploymentModule module : getConfig().getAllModules()) {
-        if (!module.isDisabled() && (module instanceof ProjectExtensionModule) && !getExcludedProjectExtensions().contains(module.getName())) {
+        if (!module.isDisabled() && (module instanceof ProjectExtensionModule) && !excludedExtensions.contains(module.getName())) {
           ProjectExtensionModule extensions = (ProjectExtensionModule) module;
           for (File projectSource : extensions.getProjectSources()) {
             addSourceDirToProject(projectSource);
