@@ -1296,6 +1296,13 @@
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="mergeServicesConfigXML" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              specifies the services-config.xml file that is to be merged into the Enunciate-generated services-config.xml file. No file will be merged if none is specified.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

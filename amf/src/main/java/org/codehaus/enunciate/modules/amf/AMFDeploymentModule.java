@@ -19,6 +19,7 @@ package org.codehaus.enunciate.modules.amf;
 import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import flex.messaging.MessageBrokerServlet;
+import freemarker.ext.dom.NodeModel;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
@@ -28,12 +29,14 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.modules.BasicAppModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.FlexHomeAwareModule;
@@ -45,10 +48,13 @@ import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod
 import org.codehaus.enunciate.template.freemarker.ClientPackageForMethod;
 import org.codehaus.enunciate.template.freemarker.ComponentTypeForMethod;
 import org.codehaus.enunciate.template.freemarker.SimpleNameWithParamsMethod;
+import org.w3c.dom.Document;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * <h1>AMF Module</h1>
@@ -109,6 +115,8 @@ import java.util.*;
  * generated web application.  Default: "false".</li>
  * <li>The "asSourcesDownloadable" attribute specifies whether the generated ActionScript source files are downloadable from
  * generated web application.  Default: "false".</li>
+ * <li>The "mergeServicesConfigXML" attribute specifies the services-config.xml file that is to be merged into the Enunciate-generated 
+ * services-config.xml file. No file will be merged if none is specified.</li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -222,6 +230,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean asSourcesDownloadable = false;
   private boolean amfRtFound = false;
   private boolean springDIFound = false;
+  private String mergeServicesConfigXML;
 
   /**
    * @return "amf"
@@ -391,11 +400,35 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
         }
       }
 
+      File servicesConfigXML = new File(xmlGenerateDir, "services-config.xml");
       URL servicesConfigTemplate = getTemplateURL("services-config-xml.fmt");
 
       model.setFileOutputDirectory(xmlGenerateDir);
       debug("Generating the configuration files.");
       processTemplate(servicesConfigTemplate, model);
+
+      File mergeTarget = new File(xmlGenerateDir, "merged-services-config.xml");
+      if (this.mergeServicesConfigXML != null) {
+        URL servicesConfigXmlToMerge = enunciate.resolvePath(this.mergeServicesConfigXML).toURL();
+
+        try {
+          model.put("source1", loadMergeXmlModel(servicesConfigXmlToMerge.openStream()));
+          model.put("source2", loadMergeXmlModel(new FileInputStream(servicesConfigXML)));
+          processTemplate(getMergeServicesConfigXmlTemplateURL(), model);
+        }
+        catch (TemplateException e) {
+          throw new EnunciateException("Error while merging services-config xml files.", e);
+        }
+
+        debug("Merged %s and %s into %s...", servicesConfigXmlToMerge, servicesConfigXML, mergeTarget);
+      }
+      else {
+        enunciate.copyFile(servicesConfigXML, mergeTarget);
+      }
+      
+      if (!mergeTarget.exists()) {
+          throw new EnunciateException("Error: " + mergeTarget + " doesn't exist.");
+        }
     }
     else {
       info("Skipping generation of AMF support as everything appears up-to-date...");
@@ -405,6 +438,25 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
     this.enunciate.addArtifact(new FileArtifact(getName(), "amf.server.src.dir", serverGenerateDir));
 
     this.enunciate.addAdditionalSourceRoot(serverGenerateDir);
+  }
+  
+  /**
+   * Loads the node model for merging xml.
+   *
+   * @param inputStream The input stream of the xml.
+   * @return The node model.
+   */
+  protected NodeModel loadMergeXmlModel(InputStream inputStream) throws EnunciateException {
+    try {
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(false); //no namespace for the merging...
+      Document doc = builderFactory.newDocumentBuilder().parse(inputStream);
+      NodeModel.simplify(doc);
+      return NodeModel.wrap(doc.getDocumentElement());
+    }
+    catch (Exception e) {
+      throw new EnunciateException("Error parsing web.xml file for merging", e);
+    }
   }
 
   /**
@@ -552,7 +604,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
 
       commandLine.add(argIndex++, "-compiler.services");
       File xmlGenerateDir = getXMLGenerateDir();
-      commandLine.add(argIndex++, new File(xmlGenerateDir, "services-config.xml").getAbsolutePath());
+      commandLine.add(argIndex++, new File(xmlGenerateDir, "merged-services-config.xml").getAbsolutePath());
 
       commandLine.add(argIndex, "-include-sources");
       File clientSideGenerateDir = getClientSideGenerateDir();
@@ -787,7 +839,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
     //base webapp dir...
     File webappDir = new File(getBuildDir(), "webapp");
     webappDir.mkdirs();
-    File servicesConfigFile = new File(getXMLGenerateDir(), "services-config.xml");
+    File servicesConfigFile = new File(getXMLGenerateDir(), "merged-services-config.xml");
     if (servicesConfigFile.exists()) {
       getEnunciate().copyFile(servicesConfigFile, new File(new File(new File(webappDir, "WEB-INF"), "flex"), "services-config.xml"));
     }
@@ -1016,6 +1068,13 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   public void setCompilerConfig(FlexCompilerConfig compilerConfig) {
     this.compilerConfig = compilerConfig;
   }
+  
+  /**
+   * @return The URL to "web.xml.fmt"
+   */
+  protected URL getMergeServicesConfigXmlTemplateURL() {
+    return this.getClass().getResource("merge-services-config-xml.fmt");
+  }
 
   /**
    * The name of the swc file.
@@ -1069,6 +1128,28 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   public void setAsSourcesDownloadable(boolean asSourcesDownloadable) {
     this.asSourcesDownloadable = asSourcesDownloadable;
+  }
+  
+  /**
+   * The services-config.xml file that is to be merged into the Enunciate-generated 
+   * services-config.xml file.
+   *
+   * @return the services-config.xml file that is to be merged into the Enunciate-generated 
+   * services-config.xml file.
+   */
+  public String getMergeServicesConfigXML() {
+      return this.mergeServicesConfigXML;
+  }
+  
+  /**
+   * Specifies the services-config.xml file that is to be merged into the Enunciate-generated 
+   * services-config.xml file.
+   *
+   * @param mergeServicesConfigXML the services-config.xml file that is to be merged into the 
+   * Enunciate-generated services-config.xml file.
+   */
+  public void setMergeServicesConfigXML(String mergeServicesConfigXML) {
+      this.mergeServicesConfigXML = mergeServicesConfigXML;
   }
 
   /**
