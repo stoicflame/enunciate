@@ -85,6 +85,7 @@ import java.util.regex.Pattern;
  * creating a unique package identifier for a given package. The arguments passed to the format string will be each subpackage. So, for package "org.codehaus.enunciate.samples.c",
  * The arguments are (1) org (2) codehaus (3) enunciate (4) samples (5) c. The default package identifier is the package name. The package identifier
  * is in turn passed as an argument to the "enumConstantNamePattern" and to the "typeDefinitionNamePattern".</li>
+ * <li>The 'translateIdTo' attribute specifies what to use as the name of an accessor when in Java it's named 'id' (which is a keyword in Objective C).</li>
  * </ul>
  *
  * <p>In addition to the attributes specified above, the Objective C module configuration supports an arbitrary number of "package" child elements, used to
@@ -106,6 +107,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   private String typeDefinitionNamePattern = "%1$S%2$S%4$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
   private final Map<String, String> packageIdentifiers = new HashMap<String, String>();
+  private String translateIdTo = "identifier";
 
   /**
    * @return "obj-c"
@@ -151,6 +153,9 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     String label = getLabel() == null ? getEnunciate().getConfig() == null ? "enunciate" : getEnunciate().getConfig().getLabel() : getLabel();
     if (!enunciate.isUpToDateWithSources(genDir)) {
       EnunciateFreemarkerModel model = getModel();
+      TreeMap<String, String> translations = new TreeMap<String, String>();
+      translations.put("id", this.translateIdTo);
+      model.put("clientSimpleName", new ClientSimpleNameMethod(translations));
 
       List<TypeDefinition> schemaTypes = new ArrayList<TypeDefinition>();
       ExtensionDepthComparator comparator = new ExtensionDepthComparator();
@@ -415,6 +420,24 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     this.forceEnable = forceEnable;
   }
 
+  /**
+   * What to translate 'id' to when writing out objective-c code.
+   *
+   * @return What to translate 'id' to when writing out objective-c code.
+   */
+  public String getTranslateIdTo() {
+    return translateIdTo;
+  }
+
+  /**
+   * What to translate 'id' to when writing out objective-c code.
+   *
+   * @param translateIdTo What to translate 'id' to when writing out objective-c code.
+   */
+  public void setTranslateIdTo(String translateIdTo) {
+    this.translateIdTo = translateIdTo;
+  }
+
   @Override
   public RuleSet getConfigurationRules() {
     return new ObjCRuleSet();
@@ -422,7 +445,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
 
   @Override
   public Validator getValidator() {
-    return new ObjCValidator();
+    return new ObjCValidator(this.translateIdTo);
   }
 
   // Inherited.

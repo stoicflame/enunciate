@@ -531,6 +531,7 @@
         <xs:attribute name="typeDefinitionNamePattern" type="xs:string"/>
         <xs:attribute name="enumConstantNamePattern" type="xs:string"/>
         <xs:attribute name="forceEnable" type="xs:boolean"/>
+        <xs:attribute name="translateIdTo" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

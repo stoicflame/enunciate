@@ -14,22 +14,22 @@
   @private
   [#list type.attributes as attribute]
     [#if !accessorOverridesAnother(attribute)]
-    ${classnameFor(attribute)} [#if !attribute.accessorType.primitive]*[/#if]_${attribute.clientSimpleName};
+    ${classnameFor(attribute)} [#if !attribute.accessorType.primitive]*[/#if]_${clientSimpleName(attribute)};
     [/#if]
   [/#list]
   [#if type.value??]
     [#if !accessorOverridesAnother(type.value)]
-    ${classnameFor(type.value)} [#if !type.value.accessorType.primitive]*[/#if]_${type.value.clientSimpleName};
+    ${classnameFor(type.value)} [#if !type.value.accessorType.primitive]*[/#if]_${clientSimpleName(type.value)};
     [/#if]
   [#else]
     [#list type.elements as element]
       [#if !accessorOverridesAnother(element)]
-    ${classnameFor(element)} [#if !element.accessorType.primitive]*[/#if]_${element.clientSimpleName};
+    ${classnameFor(element)} [#if !element.accessorType.primitive]*[/#if]_${clientSimpleName(element)};
       [/#if]
     [/#list]
   [/#if]
   [#if type.anyElement??]
-    NSArray *_${type.anyElement.clientSimpleName};
+    NSArray *_${clientSimpleName(type.anyElement)};
   [/#if]
   [#if type.hasAnyAttribute]
     NSArray *_otherAttributes;
@@ -41,12 +41,12 @@
 /**
  * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${attribute.clientSimpleName};
+- (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${clientSimpleName(attribute)};
 
 /**
  * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${attribute.clientSimpleName?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${attribute.clientSimpleName?cap_first};
+- (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first};
   [/#if]
 [/#list]
 [#if type.value??]
@@ -55,12 +55,12 @@
 /**
  * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${type.value.clientSimpleName};
+- (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${clientSimpleName(type.value)};
 
 /**
  * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${type.value.clientSimpleName?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${type.value.clientSimpleName?cap_first};
+- (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first};
   [/#if]
 [#else]
   [#list type.elements as element]
@@ -69,12 +69,12 @@
 /**
  * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${element.clientSimpleName};
+- (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${clientSimpleName(element)};
 
 /**
  * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${element.clientSimpleName?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${element.clientSimpleName?cap_first};
+- (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first};
     [/#if]
   [/#list]
 [/#if]
@@ -85,14 +85,14 @@
  *
  * Contains instances of JAXBBasicXMLNode.
  */
-- (NSArray *) ${type.anyElement.clientSimpleName};
+- (NSArray *) ${clientSimpleName(type.anyElement)};
 
 /**
  * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  *
  * Contains instances of JAXBBasicXMLNode.
  */
-- (void) set${type.anyElement.clientSimpleName?cap_first}: (NSArray *) new${type.anyElement.clientSimpleName?cap_first};
+- (void) set${clientSimpleName(type.anyElement)?cap_first}: (NSArray *) new${clientSimpleName(type.anyElement)?cap_first};
 [/#if]
 [#if type.hasAnyAttribute]
 
@@ -132,27 +132,27 @@
 /**
  * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${attribute.clientSimpleName}
+- (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${clientSimpleName(attribute)}
 {
-  return _${attribute.clientSimpleName};
+  return _${clientSimpleName(attribute)};
 }
 
 /**
  * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${attribute.clientSimpleName?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${attribute.clientSimpleName?cap_first}
+- (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first}
 {
   [#if !attribute.accessorType.primitive]
     [#if functionIdentifierFor(attribute)??]
-  if (_${attribute.clientSimpleName} != NULL) {
-    free(_${attribute.clientSimpleName});
+  if (_${clientSimpleName(attribute)} != NULL) {
+    free(_${clientSimpleName(attribute)});
   }
     [#else]
-  [new${attribute.clientSimpleName?cap_first} retain];
-  [_${attribute.clientSimpleName} release];
+  [new${clientSimpleName(attribute)?cap_first} retain];
+  [_${clientSimpleName(attribute)} release];
     [/#if]
   [/#if]
-  _${attribute.clientSimpleName} = new${attribute.clientSimpleName?cap_first};
+  _${clientSimpleName(attribute)} = new${clientSimpleName(attribute)?cap_first};
 }
   [/#if]
 [/#list]
@@ -162,27 +162,27 @@
 /**
  * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${type.value.clientSimpleName}
+- (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${clientSimpleName(type.value)}
 {
-  return _${type.value.clientSimpleName};
+  return _${clientSimpleName(type.value)};
 }
 
 /**
  * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${type.value.clientSimpleName?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${type.value.clientSimpleName?cap_first}
+- (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first}
 {
   [#if !type.value.accessorType.primitive]
     [#if functionIdentifierFor(type.value)??]
-  if (_${type.value.clientSimpleName} != NULL) {
-    free(_${type.value.clientSimpleName});
+  if (_${clientSimpleName(type.value)} != NULL) {
+    free(_${clientSimpleName(type.value)});
   }
     [#else]
-  [new${type.value.clientSimpleName?cap_first} retain];
-  [_${type.value.clientSimpleName} release];
+  [new${clientSimpleName(type.value)?cap_first} retain];
+  [_${clientSimpleName(type.value)} release];
     [/#if]
   [/#if]
-  _${type.value.clientSimpleName} = new${type.value.clientSimpleName?cap_first};
+  _${clientSimpleName(type.value)} = new${clientSimpleName(type.value)?cap_first};
 }
   [/#if]
 [#else]
@@ -192,27 +192,27 @@
 /**
  * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${element.clientSimpleName}
+- (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${clientSimpleName(element)}
 {
-  return _${element.clientSimpleName};
+  return _${clientSimpleName(element)};
 }
 
 /**
  * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-- (void) set${element.clientSimpleName?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${element.clientSimpleName?cap_first}
+- (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first}
 {
   [#if !element.accessorType.primitive]
     [#if functionIdentifierFor(element)??]
-  if (_${element.clientSimpleName} != NULL) {
-    free(_${element.clientSimpleName});
+  if (_${clientSimpleName(element)} != NULL) {
+    free(_${clientSimpleName(element)});
   }
     [#else]
-  [new${element.clientSimpleName?cap_first} retain];
-  [_${element.clientSimpleName} release];
+  [new${clientSimpleName(element)?cap_first} retain];
+  [_${clientSimpleName(element)} release];
     [/#if]
   [/#if]
-  _${element.clientSimpleName} = new${element.clientSimpleName?cap_first};
+  _${clientSimpleName(element)} = new${clientSimpleName(element)?cap_first};
 }
     [/#if]
   [/#list]
@@ -224,9 +224,9 @@
  *
  * Contains instances of JAXBBasicXMLNode.
  */
-- (NSArray *) ${type.anyElement.clientSimpleName}
+- (NSArray *) ${clientSimpleName(type.anyElement)}
 {
-  return _${type.anyElement.clientSimpleName};
+  return _${clientSimpleName(type.anyElement)};
 }
 
 /**
@@ -234,11 +234,11 @@
  *
  * Contains instances of JAXBBasicXMLNode.
  */
-- (void) set${type.anyElement.clientSimpleName?cap_first}: (NSArray *) new${type.anyElement.clientSimpleName?cap_first}
+- (void) set${clientSimpleName(type.anyElement)?cap_first}: (NSArray *) new${clientSimpleName(type.anyElement)?cap_first}
 {
-  [new${type.anyElement.clientSimpleName?cap_first} retain];
-  [_${type.anyElement.clientSimpleName} release];
-  _${type.anyElement.clientSimpleName} = new${type.anyElement.clientSimpleName?cap_first};
+  [new${clientSimpleName(type.anyElement)?cap_first} retain];
+  [_${clientSimpleName(type.anyElement)} release];
+  _${clientSimpleName(type.anyElement)} = new${clientSimpleName(type.anyElement)?cap_first};
 }
 [/#if]
 [#if type.hasAnyAttribute]
@@ -272,9 +272,9 @@
   [#if !accessorOverridesAnother(attribute)]
     [#if !attribute.accessorType.primitive]
       [#if functionIdentifierFor(attribute)??]
-  [self set${attribute.clientSimpleName?cap_first}: NULL];
+  [self set${clientSimpleName(attribute)?cap_first}: NULL];
       [#else]
-  [self set${attribute.clientSimpleName?cap_first}: nil];
+  [self set${clientSimpleName(attribute)?cap_first}: nil];
       [/#if]
     [/#if]
   [/#if]
@@ -283,9 +283,9 @@
   [#if !accessorOverridesAnother(type.value)]
     [#if !type.value.accessorType.primitive]
       [#if functionIdentifierFor(type.value)??]
-  [self set${type.value.clientSimpleName?cap_first}: NULL];
+  [self set${clientSimpleName(type.value)?cap_first}: NULL];
       [#else]
-  [self set${type.value.clientSimpleName?cap_first}: nil];
+  [self set${clientSimpleName(type.value)?cap_first}: nil];
       [/#if]
     [/#if]
   [/#if]
@@ -294,16 +294,16 @@
     [#if !accessorOverridesAnother(element)]
       [#if !element.accessorType.primitive]
         [#if functionIdentifierFor(element)??]
-  [self set${element.clientSimpleName?cap_first}: NULL];
+  [self set${clientSimpleName(element)?cap_first}: NULL];
         [#else]
-  [self set${element.clientSimpleName?cap_first}: nil];
+  [self set${clientSimpleName(element)?cap_first}: nil];
         [/#if]
       [/#if]
     [/#if]
   [/#list]
 [/#if]
 [#if type.anyElement??]
-  [self set${type.anyElement.clientSimpleName?cap_first}: nil];
+  [self set${clientSimpleName(type.anyElement)?cap_first}: nil];
 [/#if]
 [#if type.hasAnyAttribute]
   [self setOtherAttributes: nil];
@@ -580,12 +580,12 @@
       [NSException raise: @"XMLReadError"
                    format: @"Error reading attribute {${attribute.namespace!""}}${attribute.name}."];
     }
-    [self set${attribute.clientSimpleName?cap_first}: [#if attribute.accessorType.primitive]*[/#if]((${classnameFor(attribute)}*) _child_accessor)];
+    [self set${clientSimpleName(attribute)?cap_first}: [#if attribute.accessorType.primitive]*[/#if]((${classnameFor(attribute)}*) _child_accessor)];
       [#if attribute.accessorType.primitive]
     free(_child_accessor);
       [/#if]
     [#else]
-    [self set${attribute.clientSimpleName?cap_first}: (${classnameFor(attribute)}*) [${classnameFor(attribute)} readXMLType: reader]];
+    [self set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}*) [${classnameFor(attribute)} readXMLType: reader]];
     [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully read attribute {${attribute.namespace!""}}${attribute.name}...");
@@ -618,18 +618,18 @@
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
-    [self set${type.value.clientSimpleName?cap_first}: [#if type.value.accessorType.primitive]*[/#if]((${classnameFor(type.value)}*) _child_accessor)];
+    [self set${clientSimpleName(type.value)?cap_first}: [#if type.value.accessorType.primitive]*[/#if]((${classnameFor(type.value)}*) _child_accessor)];
       [#if type.value.accessorType.primitive]
     free(_child_accessor);
       [/#if]
     [#else]
-    [self set${type.value.clientSimpleName?cap_first}: (${classnameFor(type.value)} *) [${classnameFor(type.value)} readXMLType: reader]];
+    [self set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)} *) [${classnameFor(type.value)} readXMLType: reader]];
     [/#if]
   }
     [#if type.value.accessorType.isInstanceOf("java.lang.String")]
   [#--special case for string accessors (empty string)--]
   else {
-    [self set${type.value.clientSimpleName?cap_first}: @""];
+    [self set${clientSimpleName(type.value)?cap_first}: @""];
   }
     [/#if]
 #if DEBUG_ENUNCIATE > 1
@@ -677,7 +677,7 @@
       [NSException raise: @"XMLReadError"
                    format: @"Error reading element value."];
     }
-    [self set${element.clientSimpleName?cap_first}: [#if element.accessorType.primitive]*[/#if]((${classnameFor(element)}*) _child_accessor)];
+    [self set${clientSimpleName(element)?cap_first}: [#if element.accessorType.primitive]*[/#if]((${classnameFor(element)}*) _child_accessor)];
         [#if element.accessorType.primitive]
     free(_child_accessor);
         [/#if]
@@ -760,14 +760,14 @@
           [/#if]
 
           [#if element.collectionType]
-    if ([self ${element.clientSimpleName}]) {
-      [self set${element.clientSimpleName?cap_first}: [[self ${element.clientSimpleName}] arrayByAddingObject: __child]];
+    if ([self ${clientSimpleName(element)}]) {
+      [self set${clientSimpleName(element)?cap_first}: [[self ${clientSimpleName(element)}] arrayByAddingObject: __child]];
     }
     else {
-      [self set${element.clientSimpleName?cap_first}: [NSArray arrayWithObject: __child]];
+      [self set${clientSimpleName(element)?cap_first}: [NSArray arrayWithObject: __child]];
     }
           [#else]
-    [self set${element.clientSimpleName?cap_first}: __child];
+    [self set${clientSimpleName(element)?cap_first}: __child];
           [/#if]
           [#if element.wrapped]
     continue; //continue "while in wrapper element" loop
@@ -815,7 +815,7 @@
           [#else]
       __child = [NSArray array];
           [/#if]
-      [self set${element.clientSimpleName?cap_first}: (NSArray*) __child];
+      [self set${clientSimpleName(element)?cap_first}: (NSArray*) __child];
     }
 
     return YES;
@@ -834,11 +834,11 @@
 - (int) readUnknownJAXBChildElement: (xmlTextReaderPtr) reader
 {
   JAXBBasicXMLNode *node = (JAXBBasicXMLNode *) [JAXBBasicXMLNode readXMLType: reader];
-  if ([self ${type.anyElement.clientSimpleName}]) {
-    [self set${type.anyElement.clientSimpleName?cap_first}: [[self ${type.anyElement.clientSimpleName}] arrayByAddingObject: node]];
+  if ([self ${clientSimpleName(type.anyElement)}]) {
+    [self set${clientSimpleName(type.anyElement)?cap_first}: [[self ${clientSimpleName(type.anyElement)}] arrayByAddingObject: node]];
   }
   else {
-    [self set${type.anyElement.clientSimpleName?cap_first}: [NSArray arrayWithObject: node]];
+    [self set${clientSimpleName(type.anyElement)?cap_first}: [NSArray arrayWithObject: node]];
   }
   return 1;
 }
@@ -888,9 +888,9 @@
     [#if attribute.accessorType.primitive]
   if (YES) { //always write the primitive attributes...
     [#elseif functionIdentifierFor(attribute)??]
-  if ([self ${attribute.clientSimpleName}] != NULL) {
+  if ([self ${clientSimpleName(attribute)}] != NULL) {
     [#else]
-  if ([self ${attribute.clientSimpleName}]) {
+  if ([self ${clientSimpleName(attribute)}]) {
     [/#if]
 
     status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]BAD_CAST "${prefix(attribute.namespace)}"[#else]NULL[/#if], BAD_CAST "${attribute.name}", NULL);
@@ -903,13 +903,13 @@
     NSLog(@"writing attribute {${attribute.namespace!""}}${attribute.name}...");
 #endif
   [#if functionIdentifierFor(attribute)??]
-    status = xmlTextWriterWrite${functionIdentifierFor(attribute)?cap_first}Type(writer, [#if attribute.accessorType.primitive]&_${attribute.clientSimpleName}[#else][self ${attribute.clientSimpleName}][/#if]);
+    status = xmlTextWriterWrite${functionIdentifierFor(attribute)?cap_first}Type(writer, [#if attribute.accessorType.primitive]&_${clientSimpleName(attribute)}[#else][self ${clientSimpleName(attribute)}][/#if]);
     if (status < 0) {
       [NSException raise: @"XMLWriteError"
                    format: @"Error writing attribute {${attribute.namespace!""}}${attribute.name}."];
     }
   [#else]
-    [[self ${attribute.clientSimpleName}] writeXMLType: writer];
+    [[self ${clientSimpleName(attribute)}] writeXMLType: writer];
   [/#if]
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote attribute {${attribute.namespace!""}}${attribute.name}...");
@@ -947,12 +947,12 @@
   NSLog(@"writing element value...");
 #endif
   [#if functionIdentifierFor(type.value)??]
-  if (xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${type.value.clientSimpleName}[#else][self ${type.value.clientSimpleName}][/#if]) < 0) {
+  if (xmlTextWriterWrite${functionIdentifierFor(type.value)?cap_first}Type(writer, [#if type.value.accessorType.primitive]&_${clientSimpleName(type.value)}[#else][self ${clientSimpleName(type.value)}][/#if]) < 0) {
     [NSException raise: @"XMLWriteError"
                  format: @"Error writing element value."];
   }
   [#else]
-  [[self ${type.value.clientSimpleName}] writeXMLType: writer];
+  [[self ${clientSimpleName(type.value)}] writeXMLType: writer];
   [/#if]
 #if DEBUG_ENUNCIATE > 1
   NSLog(@"successfully wrote element value...");
@@ -994,7 +994,7 @@
         [#if element.accessorType.primitive]
   if (YES) { //always write the primitive element...
         [#else]
-  if ([self ${element.clientSimpleName}] != NULL) {
+  if ([self ${clientSimpleName(element)}] != NULL) {
         [/#if]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.namespace??) && (element.namespace != ""))]BAD_CAST "${prefix(element.namespace)}"[#else]NULL[/#if], BAD_CAST "${element.name}", NULL);
     if (status < 0) {
@@ -1005,7 +1005,7 @@
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
-    status = xmlTextWriterWrite${functionIdentifierFor(element)?cap_first}Type(writer, [#if element.accessorType.primitive]&_${element.clientSimpleName}[#else][self ${element.clientSimpleName}][/#if]);
+    status = xmlTextWriterWrite${functionIdentifierFor(element)?cap_first}Type(writer, [#if element.accessorType.primitive]&_${clientSimpleName(element)}[#else][self ${clientSimpleName(element)}][/#if]);
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
 #endif
@@ -1021,7 +1021,7 @@
     }
   }
       [#else]
-  if ([self ${element.clientSimpleName}]) {
+  if ([self ${clientSimpleName(element)}]) {
         [#if element.wrapped]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.wrapperNamespace??) && (element.wrapperNamespace != ""))]BAD_CAST "${prefix(element.wrapperNamespace)}"[#else]NULL[/#if], BAD_CAST "${element.wrapperName}", NULL);
     if (status < 0) {
@@ -1030,7 +1030,7 @@
     }
         [/#if]
         [#if element.collectionType]
-    __enumerator = [[self ${element.clientSimpleName}] objectEnumerator];
+    __enumerator = [[self ${clientSimpleName(element)}] objectEnumerator];
 
     while ( (__item = [__enumerator nextObject]) ) {
           [#if element.elementRefs!false]
@@ -1099,7 +1099,7 @@
           [/#if]
     } //end item iterator.
         [#elseif element.ref??]
-    [[self ${element.clientSimpleName}] writeXMLElement: writer writeNamespaces: NO];
+    [[self ${clientSimpleName(element)}] writeXMLElement: writer writeNamespaces: NO];
         [#else]
     status = xmlTextWriterStartElementNS(writer, [#if ((element.namespace??) && (element.namespace != ""))]BAD_CAST "${prefix(element.namespace)}"[#else]NULL[/#if], BAD_CAST "${element.name}", NULL);
     if (status < 0) {
@@ -1110,7 +1110,7 @@
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
-    [[self ${element.clientSimpleName}] writeXMLType: writer];
+    [[self ${clientSimpleName(element)}] writeXMLType: writer];
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");
 #endif
@@ -1133,8 +1133,8 @@
       [/#if]
       [#if type.anyElement??]
 
-  if ([self ${type.anyElement.clientSimpleName}]) {
-    __enumerator = [[self ${type.anyElement.clientSimpleName}] objectEnumerator];
+  if ([self ${clientSimpleName(type.anyElement)}]) {
+    __enumerator = [[self ${clientSimpleName(type.anyElement)}] objectEnumerator];
 
     while ( (__item = [__enumerator nextObject]) ) {
       [__item writeXMLElement: writer writeNamespaces: NO];

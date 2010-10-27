@@ -5,7 +5,7 @@
   <modules>
     <amf disabled="true"/>
     <c forceEnable="true"/>
-    <obj-c forceEnable="true"/>
+    <obj-c forceEnable="true" translateIdTo="howdy"/>
     <java-client>
       <package-conversions>
         <convert from="epcglobal" to="epcglobal.client"/>

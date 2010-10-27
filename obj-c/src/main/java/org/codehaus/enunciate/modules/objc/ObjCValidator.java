@@ -19,7 +19,6 @@ package org.codehaus.enunciate.modules.objc;
 import org.codehaus.enunciate.contract.jaxb.Attribute;
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.Element;
-import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.util.MapType;
@@ -30,6 +29,12 @@ import org.codehaus.enunciate.util.MapType;
  * @author Ryan Heaton
  */
 public class ObjCValidator extends BaseValidator {
+
+  private final String translateIdTo;
+
+  public ObjCValidator(String translateIdTo) {
+    this.translateIdTo = translateIdTo;
+  }
 
   @Override
   public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
@@ -42,6 +47,10 @@ public class ObjCValidator extends BaseValidator {
       if (attribute.isCollectionType() && attribute.isBinaryData()) {
         result.addError(attribute, "The Objective-C client code doesn't support a collection of items that are binary data. You'll have to define separate accessors for each item or disable the Objective-C module.");
       }
+
+      if (this.translateIdTo.equals(attribute.getClientSimpleName())) {
+        result.addError(attribute, "In Objective-C, 'id' is a keyword, so we have to translate 'id' to '" + this.translateIdTo + "'. So you either need to rename this accessor or specify something else to translate 'id' to in the configuration using the 'translateIdTo' attribute.");
+      }
     }
 
     if (complexType.getValue() != null) {
@@ -51,6 +60,10 @@ public class ObjCValidator extends BaseValidator {
 
       if (complexType.getValue().isCollectionType() && complexType.getValue().isBinaryData()) {
         result.addError(complexType.getValue(), "The Objective-C client code doesn't support a collection of items that are binary data. You'll have to define separate accessors for each item or disable the Objective-C module.");
+      }
+
+      if (this.translateIdTo.equals(complexType.getValue().getClientSimpleName())) {
+        result.addError(complexType.getValue(), "In Objective-C, 'id' is a keyword, so we have to translate 'id' to '" + this.translateIdTo + "'. So you either need to rename this accessor or specify something else to translate 'id' to in the configuration using the 'translateIdTo' attribute.");
       }
     }
 
@@ -62,6 +75,10 @@ public class ObjCValidator extends BaseValidator {
       if (element.getAccessorType() instanceof MapType && !element.isAdapted()) {
         result.addError(element, "The Objective-C client doesn't have a built-in way of serializing a Map. So you're going to have to use @XmlJavaTypeAdapter to supply " +
           "your own adapter for the Map, or disable the Objective-C module.");
+      }
+
+      if (this.translateIdTo.equals(element.getClientSimpleName())) {
+        result.addError(element, "In Objective-C, 'id' is a keyword, so we have to translate 'id' to '" + this.translateIdTo + "'. So you either need to rename this accessor or specify something else to translate 'id' to in the configuration using the 'translateIdTo' attribute.");
       }
     }
 
