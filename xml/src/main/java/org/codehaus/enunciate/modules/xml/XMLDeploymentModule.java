@@ -19,8 +19,12 @@ package org.codehaus.enunciate.modules.xml;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.xml.config.SchemaConfig;
@@ -39,8 +43,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <h1>XML Module</h1>
@@ -254,6 +257,37 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
           }
 
           wsdlInfo.setProperty("inlineSchema", customConfig.isInlineSchema());
+        }
+      }
+
+      EnunciateConfiguration config = model.getEnunciateConfig();
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          if (!ei.getMetaData().containsKey("soapPath")) {
+            //if we don't have the soap path set by some other jax-ws implementation provider module
+            //then we need to set it ourselves.
+
+            String path = "/soap/" + ei.getServiceName();
+            if (config != null) {
+              path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+              if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+                path = config.getSoapServices2Paths().get(ei.getServiceName());
+              }
+            }
+
+            ei.putMetaData("soapPath", path);
+          }
+        }
+      }
+
+      for (RootResource resource : model.getRootResources()) {
+        for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+          if (!resourceMethod.getMetaData().containsKey("defaultSubcontext")) {
+            //if we don't have the defaultSubcontext set by some other jax-rs implementation provider module
+            //then we need to set it ourselves.
+
+            resourceMethod.putMetaData("defaultSubcontext", config == null ? "/rest" : config.getDefaultRestSubcontext());
+          }
         }
       }
     }

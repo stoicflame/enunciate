@@ -1,0 +1,70 @@
+[#ftl]
+[@file name="merged-services-config.xml" charset="utf-8"]
+<?xml version="1.0" encoding="UTF-8"?>
+<services-config>
+  
+  [#if source1["services"]?size > 0 || source2["services"]?size > 0]
+  <services>
+    
+    [#list source1["services"]["service"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+    [#list source2["services"]["service"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+    [#list source1["services"]["service-include"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+    [#list source2["services"]["service-include"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+  </services>
+  [/#if]  
+  
+  [#if source1["channels"]?size > 0 || source2["channels"]?size > 0]
+  <channels>
+    
+    [#list source1["channels"]["channel-definition"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+    [#list source2["channels"]["channel-definition"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+  </channels>
+  [/#if]
+  
+  [#if source1["factories"]?size > 0 || source2["factories"]?size > 0]
+  <factories>
+    
+    [#list source1["factories"]["factory"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+    [#list source2["factories"]["factory"] as el]
+    ${el.@@markup}
+    
+    [/#list]
+  </factories>
+  [/#if]
+  [#if source1["logging"]?size > 0]
+
+  ${source1["logging"].@@markup}
+  [#elseif source2["logging"]?size > 0]
+
+  ${source2["logging"].@@markup}
+  [/#if]
+  [#if source1["system"]?size > 0]
+
+  ${source1["system"].@@markup}
+  [#elseif source2["system"]?size > 0]
+
+  ${source2["system"].@@markup}
+  [/#if]
+</services-config>
+[/@file]
