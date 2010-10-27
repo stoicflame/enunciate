@@ -9,7 +9,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-[#if spring3!false]3.0[#else]2.5[/#if].xsd
               http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-[#if spring3!false]3.0[#else]2.0[/#if].xsd
-              http://spring-security-oauth.codehaus.org/[#if spring3!false]3.0[#else]2.0[/#if] http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-[#if spring3!false]3.0[#else]2.5[/#if].xsd
+              http://spring-security-oauth.codehaus.org/[#if spring3!false]3.0[#else]2.0[/#if] http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-[#if spring3!false]3.0[#else]2.0[/#if].xsd
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-[#if spring3!false]3.0[#else]2.5[/#if].xsd">
 
   <context:annotation-config/>
