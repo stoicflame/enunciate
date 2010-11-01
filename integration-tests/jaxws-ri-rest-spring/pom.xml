@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jaxws-ri-rest-spring</artifactId>
-  <version>1.21-RC1</version>
+  <version>1.21-RC2-SNAPSHOT</version>
   <name>Enunciate - JAXWS-RI/REST Integration Tests + Spring</name>
   <description>Integration tests for Enunciate, testing the JAXWS-RI + REST combo, with Spring backing.</description>
   <packaging>war</packaging>

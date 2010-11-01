@@ -1,6 +1,6 @@
 package org.codehaus.enunciate.main;
 
-import org.codehaus.enunciate.util.PackageInfoWriter;
+import org.codehaus.enunciate.util.JaxbPackageInfoWriter;
 
 import java.io.*;
 import java.util.HashMap;
@@ -44,14 +44,15 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
       if (path.endsWith("package-info.class")) {
         //APT has a bug where it won't find the package-info file unless it's on the source path. So we have to generate
         //the source from bytecode.
-        File sourceFile = new File(tempSourcesDir, path.substring(0, path.length() - 6) + ".java");
         if (!packageInfoSources.containsKey(path)) {
+          File sourceFile = new File(tempSourcesDir, path.substring(0, path.length() - 6) + ".java");
           enunciate.debug("Generating package source file %s...", sourceFile);
           try {
             InputStream resourceStream = resource.read();
-            writePackageSourceFile(resourceStream, sourceFile);
+            if (writePackageSourceFile(resourceStream, sourceFile)) {
+              packageInfoSources.put(path, sourceFile);
+            }
             resourceStream.close();
-            packageInfoSources.put(path, sourceFile);
           }
           catch (IOException e) {
             enunciate.warn("Unable to generate package source file %s (%s).", sourceFile, e.getMessage());
@@ -91,12 +92,21 @@ public class PackageInfoClasspathHandler implements ClasspathHandler {
    *
    * @param bytecode          The bytecode for the package-info.class
    * @param packageSourceFile The source file.
+   * @return Whether the file was actually written.
    */
-  protected void writePackageSourceFile(InputStream bytecode, File packageSourceFile) throws IOException {
-    packageSourceFile.getParentFile().mkdirs();
-    PackageInfoWriter writer = new PackageInfoWriter(new FileWriter(packageSourceFile));
-    writer.write(bytecode);
-    writer.close();
+  protected boolean writePackageSourceFile(InputStream bytecode, File packageSourceFile) throws IOException {
+    JaxbPackageInfoWriter writer = new JaxbPackageInfoWriter();
+    String info = writer.write(bytecode);
+    if (info != null) {
+      packageSourceFile.getParentFile().mkdirs();
+      FileWriter out = new FileWriter(packageSourceFile);
+      out.write(info);
+      out.flush();
+      out.close();
+      return true;
+    }
+
+    return false;
   }
 
   public Set<File> getPackageInfoSources() {

@@ -1,50 +1,65 @@
 package org.codehaus.enunciate.util;
 
 import org.codehaus.enunciate.asm.Type;
+import org.codehaus.enunciate.asm.tree.AnnotationNode;
 import org.codehaus.enunciate.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Writes a package-info.java file for some bytecode.
+ * Writes a package-info.java file that has jaxb annotations for some bytecode.
  *
  * @author Ryan Heaton
  */
-public class PackageInfoWriter {
+public class JaxbPackageInfoWriter {
 
-  private final Writer writer;
-
-  public PackageInfoWriter(Writer writer) {
-    this.writer = writer;
-  }
-
-  public void write(InputStream bytecode) throws IOException {
+  /**
+   * Write the package-info for some bytecode.
+   *
+   * @param bytecode The bytecode.
+   * @return The package-info file.
+   */
+  public String write(InputStream bytecode) throws IOException {
     org.codehaus.enunciate.asm.ClassReader cr = new org.codehaus.enunciate.asm.ClassReader(bytecode);
     ClassNode cn = new org.codehaus.enunciate.asm.tree.ClassNode();
     cr.accept(cn, 0);
-    if (cn.visibleAnnotations != null) {
+    if (cn.visibleAnnotations != null && !cn.visibleAnnotations.isEmpty()) {
+      StringWriter writer = new StringWriter();
+      boolean jaxbFound = false;
       for (Object visibleAnnotation : cn.visibleAnnotations) {
         org.codehaus.enunciate.asm.tree.AnnotationNode annotation = (org.codehaus.enunciate.asm.tree.AnnotationNode) visibleAnnotation;
-        writeAnnotationNode(annotation);
-        writer.write('\n');
+        if (Type.getType(annotation.desc).getClassName().startsWith("javax.xml.bind")) {
+          writeAnnotationNode(annotation, writer);
+          writer.write('\n');
+          jaxbFound = true;
+        }
+      }
+
+      if (jaxbFound) {
+        writer.write("package ");
+        String classname = Type.getObjectType(cn.name).getClassName();
+        writer.write(classname.substring(0, classname.length() - ".package-info".length()));
+        writer.write(';');
+        writer.flush();
+        return writer.toString();
       }
     }
-    writer.write("package ");
-    String classname = org.codehaus.enunciate.asm.Type.getObjectType(cn.name).getClassName();
-    writer.write(classname.substring(0, classname.length() - ".package-info".length()));
-    writer.write(';');
+
+    return null;
   }
 
   /**
    * Write an annotation node.
    *
    * @param annotation The annotation.
+   * @param writer The writer.
    */
-  protected void writeAnnotationNode(org.codehaus.enunciate.asm.tree.AnnotationNode annotation) throws IOException {
+  protected void writeAnnotationNode(AnnotationNode annotation, Writer writer) throws IOException {
     writer.write('@');
     writer.write(Type.getType(annotation.desc).getClassName());
     writer.write('(');
@@ -59,7 +74,7 @@ public class PackageInfoWriter {
         writer.write((String) valuesIt.next());
         Object value = valuesIt.next();
         writer.write('=');
-        writeAnnotationValue(value);
+        writeAnnotationValue(value, writer);
         first = false;
       }
     }
@@ -70,8 +85,9 @@ public class PackageInfoWriter {
    * Write an annotation value.
    *
    * @param value The annotation value.
+   * @param writer The writer.
    */
-  protected void writeAnnotationValue(Object value) throws IOException {
+  protected void writeAnnotationValue(Object value, Writer writer) throws IOException {
     if (value instanceof Character) {
       writer.write('\'');
       writer.write(value.toString());
@@ -94,7 +110,7 @@ public class PackageInfoWriter {
       writer.write(enumValue[1]);
     }
     else if (value instanceof org.codehaus.enunciate.asm.tree.AnnotationNode) {
-      writeAnnotationNode((org.codehaus.enunciate.asm.tree.AnnotationNode) value);
+      writeAnnotationNode((org.codehaus.enunciate.asm.tree.AnnotationNode) value, writer);
     }
     else if (value instanceof List) {
       List valueList = (List) value;
@@ -104,7 +120,7 @@ public class PackageInfoWriter {
         if (!first) {
           writer.write(',');
         }
-        writeAnnotationValue(valueItem);
+        writeAnnotationValue(valueItem, writer);
         first = false;
       }
 
@@ -113,10 +129,5 @@ public class PackageInfoWriter {
     else {
       writer.write(value.toString());
     }
-  }
-
-  public void close() throws IOException {
-    writer.flush();
-    writer.close();
   }
 }
