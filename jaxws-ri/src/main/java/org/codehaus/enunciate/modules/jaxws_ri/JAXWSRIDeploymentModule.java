@@ -173,8 +173,14 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
       model.put("docsDir", enunciate.getProperty("docs.webapp.dir"));
       URL configTemplate = isSpringEnabled() ? getJAXWSSpringTemplateURL() : getSunJAXWSTemplateURL();
+      File configDir = getConfigGenerateDir();
+      configDir.mkdirs();
+      model.setFileOutputDirectory(configDir);
       processTemplate(configTemplate, model);
 
+      File javaSourcesDir = new File(getGenerateDir(), "java");
+      javaSourcesDir.mkdirs();
+      model.setFileOutputDirectory(javaSourcesDir);
       URL eiTemplate = getInstrumentedEndpointTemplateURL();
       for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
         for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
@@ -183,12 +189,16 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
         }
       }
 
-      getEnunciate().addAdditionalSourceRoot(getGenerateDir());
+      getEnunciate().addAdditionalSourceRoot(javaSourcesDir);
     }
     else {
       info("Skipping generation of JAX-WS RI support as everything appears up-to-date....");
     }
 
+  }
+
+  protected File getConfigGenerateDir() {
+    return new File(getGenerateDir(), "config");
   }
 
   @Override
@@ -200,7 +210,7 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
     File webappDir = getBuildDir();
     webappDir.mkdirs();
     File webinf = new File(webappDir, "WEB-INF");
-    getEnunciate().copyDir(getGenerateDir(), webinf);
+    getEnunciate().copyDir(getConfigGenerateDir(), webinf);
 
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);

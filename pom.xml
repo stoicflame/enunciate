@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.21-RC2-SNAPSHOT</version>
+  <version>1.21-RC2</version>
   <name>Enunciate - Parent</name>
 
   <modules>
@@ -367,7 +367,7 @@
           <exclusion>
             <!--we'll use enunciate's version of jsr181-->
             <groupId>javax.jws</groupId>
-            <artifactId>jsr181-api</artifactId>
+            <artifactId>jsr181</artifactId>
           </exclusion>
 
           <exclusion>

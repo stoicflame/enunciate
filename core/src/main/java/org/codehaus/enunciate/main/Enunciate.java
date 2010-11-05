@@ -840,7 +840,8 @@ public class Enunciate {
     }
 
     if (getEncoding() != null) {
-    	args.add("-encoding " + getEncoding());
+    	args.add("-encoding");
+      args.add(getEncoding());
     }
     
     args.add("-d");
