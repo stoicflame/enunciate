@@ -7,6 +7,6 @@
   <inherits name='net.java.ws.addressbook.AddressBookGWT'/>
 
   <!--define the entry point for the address book app.-->
-  <entry-point class='net.java.apps.addressbook.client.AddressBookApp'/>
+  <entry-point class='net.java.ws.addressbook.apps.addressbook.client.AddressBookApp'/>
 
 </module>

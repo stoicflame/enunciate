@@ -1,4 +1,4 @@
-package net.java.apps.addressbook.client;
+package net.java.ws.addressbook.apps.addressbook.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -171,8 +171,8 @@ public class AddressBookApp implements EntryPoint {
 
     //create some HTML that will embed our flash component.
     HTML flashHTML = new HTML("<object width=\"550\" height=\"400\">\n" +
-              "<param name=\"movie\" value=\"bytype.swf\">\n" +
-              "<embed src=\"bytype.swf\" width=\"550\" height=\"400\">\n" +
+              "<param name=\"movie\" value=\"../bytype.swf\">\n" +
+              "<embed src=\"../bytype.swf\" width=\"550\" height=\"400\">\n" +
               "</embed>\n" +
               "</object>");
 
