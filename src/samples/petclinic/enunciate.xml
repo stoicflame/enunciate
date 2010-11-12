@@ -12,15 +12,7 @@
     <obj-c disabled="true"/>
     <csharp disabled="true"/>
     <java-client disabled="true"/>
-    <gwt rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic" generateJsonOverlays="true">
-      <app srcDir="src/main/gwt-apps" javascriptStyle="PRETTY">
-        <module name="org.codehaus.enunciate.samples.petclinic.app.PetClinicApp" outputPath="petclinic"/>
-      </app>
-    </gwt>
-    <amf disabled="true">
-      <app srcDir="src/main/flex-apps" name="vets" mainMxmlFile="src/main/flex-apps/org/codehaus/enunciate/samples/petclinic/flex/vets.mxml"/>
-      <war flexAppDir="petclinic"/>
-    </amf>
+    <gwt rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic" generateJsonOverlays="true"/>
     <spring-app enableSecurity="true">
       <springImport file="other-beans.xml"/>
       <security>
