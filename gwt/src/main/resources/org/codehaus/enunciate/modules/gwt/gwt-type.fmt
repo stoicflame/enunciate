@@ -40,14 +40,14 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#if !property.annotations["org.codehaus.enunciate.modules.gwt.GWTTransient"]?exists]
 
   /**
-   * ${property.javaDoc.return?default(property.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(property)} get${property.simpleName?cap_first}() {
     return this.${property.simpleName};
   }
 
   /**
-   * ${property.javaDoc.return?default(property.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${property.simpleName?cap_first}(${classnameFor(property)} ${property.simpleName}) {
     this.${property.simpleName} = ${property.simpleName};

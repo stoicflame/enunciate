@@ -104,14 +104,14 @@ package ${packageFor(type)} {
     [#assign accessorOverrides=accessorOverridesAnother(property)/]
 
     /**
-     * ${property.javaDoc.return?default(property.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n     * ")}
+     * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
      */
     public [#if accessorOverrides]override [/#if]function get ${property.simpleName}():${classnameFor(property)} {
       return _${property.simpleName};
     }
 
     /**
-     * ${property.javaDoc.return?default(property.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n     * ")}
+     * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n     * ")}
      */
     public [#if accessorOverrides]override [/#if]function set ${property.simpleName}(${property.simpleName}:${classnameFor(property)}):void {
       _${property.simpleName} = ${property.simpleName};

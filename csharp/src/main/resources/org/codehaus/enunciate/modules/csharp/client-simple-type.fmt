@@ -5,10 +5,10 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
   /// <summary>
-  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [@libCSharpMetadata.writeTypeMetadata typeDef=type /]
   public sealed class ${type.clientSimpleName} {
@@ -22,7 +22,7 @@ namespace ${namespaceFor(type)} {
   [#assign cs_classname=classnameFor(accessor)/]
   [#if cs_classname?ends_with("?")]
     /// <summary>
-    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
     public ${cs_classname?substring(0, cs_classname?length  - 1)} ${accessor.clientSimpleName?cap_first} {
@@ -52,7 +52,7 @@ namespace ${namespaceFor(type)} {
 
   [#else]
     /// <summary>
-    ///  ${accessor.javaDoc.return?default(accessor.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=accessor /]
     public ${cs_classname} ${accessor.clientSimpleName?cap_first} {

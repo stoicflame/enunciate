@@ -36,7 +36,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#list type.attributes as attribute]
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=attribute /]
   public ${classnameFor(attribute)} get${attribute.simpleName?cap_first}() {
@@ -44,7 +44,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
     this._${attribute.simpleName} = _${attribute.simpleName};
@@ -53,7 +53,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#if type.value?exists]
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=type.value /]
   public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
@@ -61,7 +61,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
@@ -70,7 +70,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     [#list type.elements as element]
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   [@libJaxbMetadata.writeAccessorMetadata accessor=element /]
   public ${classnameFor(element)} get${element.simpleName?cap_first}() {
@@ -78,7 +78,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${element.simpleName?cap_first}(${classnameFor(element)} _${element.simpleName}) {
     this._${element.simpleName} = _${element.simpleName};
@@ -88,7 +88,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#if type.anyElement?exists]
 
   /**
-   * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @javax.xml.bind.annotation.XmlAnyElement[#if type.anyElement.lax?exists && type.anyElement.lax]( lax = true )[/#if]
   public java.util.List<Object> get${type.anyElement.simpleName?cap_first}() {
@@ -96,7 +96,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${type.anyElement.javaDoc.return?default(type.anyElement.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${type.anyElement.simpleName?cap_first}(java.util.List<Object> _${type.anyElement.simpleName}) {
     this._${type.anyElement.simpleName} = _${type.anyElement.simpleName};

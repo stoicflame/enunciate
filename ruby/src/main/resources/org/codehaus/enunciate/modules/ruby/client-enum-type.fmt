@@ -6,7 +6,7 @@
 module ${submodule}
   [/#list]
 
-  # ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  # ")}
+  # ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  # ")}
   class ${simpleNameFor(type)}
   [#assign enumValueMap=type.enumValues/]
   [#list type.enumConstants as constant]

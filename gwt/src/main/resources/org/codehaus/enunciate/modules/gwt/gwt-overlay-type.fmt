@@ -38,14 +38,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
     [#if property.accessorType.enum!false]
 
   /**
-   * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final ${overlayClassnameFor(property)} get${property.simpleName?cap_first}() {
     return ${overlayClassnameFor(property)}.fromString(get${property.simpleName?cap_first}Internal());
   }
 
   /**
-   * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final void set${property.simpleName?cap_first}(${overlayClassnameFor(property)} ${property.simpleName}) {
     set${property.simpleName?cap_first}Internal(${property.simpleName} == null ? null : ${property.simpleName}.toString());
@@ -67,14 +67,14 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
     [#else]
 
   /**
-   * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final native ${overlayClassnameFor(property)} get${property.simpleName?cap_first}() /*-{
     return this.${property.jsonMemberName};
   }-*/;
 
   /**
-   * ${property.javaDoc.return!property.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final native void set${property.simpleName?cap_first}(${overlayClassnameFor(property)} ${property.simpleName}) /*-{
     this.${property.jsonMemberName} = ${property.simpleName};

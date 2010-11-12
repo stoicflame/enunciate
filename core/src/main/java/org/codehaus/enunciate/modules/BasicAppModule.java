@@ -35,8 +35,12 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import sun.misc.Service;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -398,7 +402,15 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
     try {
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setNamespaceAware(false); //no namespace for the merging...
-      Document doc = builderFactory.newDocumentBuilder().parse(inputStream);
+      builderFactory.setValidating(false);
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
+      builder.setEntityResolver(new EntityResolver() {
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+          //we don't want to validate or parse external dtds...
+          return new InputSource(new StringReader(""));
+        }
+      });
+      Document doc = builder.parse(inputStream);
       NodeModel.simplify(doc);
       return NodeModel.wrap(doc.getDocumentElement());
     }

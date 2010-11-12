@@ -15,7 +15,7 @@ struct ${typeName} {
     [#if ((!accessor.elementRefs!false) && (!accessor.ref??) && (accessor.binaryData))]
 
   /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${classnameFor(accessor)} *${accessor.clientSimpleName};
 
@@ -27,7 +27,7 @@ struct ${typeName} {
       [#list accessor.choices as choice]
 
   /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    *
    * (Partial list.)
    */
@@ -41,7 +41,7 @@ struct ${typeName} {
     [#elseif accessor.collectionType]
 
   /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${classnameFor(accessor)} *${accessor.clientSimpleName};
 
@@ -52,7 +52,7 @@ struct ${typeName} {
     [#else]
 
   /**
-   * ${accessor.javaDoc.return!accessor.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(accessor.javaDoc.return!accessor.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${classnameFor(accessor)} [#if !accessor.accessorType.primitive]*[/#if]${accessor.clientSimpleName};
     [/#if]
@@ -67,7 +67,7 @@ struct ${typeName} {
   [#if type.anyElement??]
 
   /**
-   * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"additional elements"?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"additional elements")?chop_linebreak?replace("\n", "\n   * ")}
    */
   struct xmlBasicNode *${type.anyElement.clientSimpleName};
   [/#if]

@@ -31,7 +31,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#list type.attributes as attribute]
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${attribute.jsonMemberName}")
   public ${classnameFor(attribute)} get${attribute.simpleName?cap_first}() {
@@ -39,7 +39,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${attribute.jsonMemberName}")
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
@@ -49,7 +49,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   [#if type.value?exists]
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${type.value.jsonMemberName}")
   public ${classnameFor(type.value)} get${type.value.simpleName?cap_first}() {
@@ -57,7 +57,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${type.value.jsonMemberName}")
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
@@ -67,7 +67,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     [#list type.elements as element]
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${element.jsonMemberName}")
   public [#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] get${element.simpleName?cap_first}() {
@@ -75,7 +75,7 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   }
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   @JsonProperty("${element.jsonMemberName}")
   public void set${element.simpleName?cap_first}([#if element.choices?size > 1]java.util.Collection<org.codehaus.jackson.node.ObjectNode>[#else]${classnameFor(element)}[/#if] _${element.simpleName}) {

@@ -20,6 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlID;
 
 /**
+ * Here is a comment
+ * that spans multiple lines
+ * let's try it out.
+ * 
  * @author Ryan Heaton
  */
 @XmlRootElement

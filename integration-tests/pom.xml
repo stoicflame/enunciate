@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.21-RC2</version>
+  <version>1.21-RC3</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>
@@ -14,6 +14,8 @@
     <module>contract-first</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
+    <module>addressbook</module>
+    <module>petclinic</module>
   </modules>
 
   <build>

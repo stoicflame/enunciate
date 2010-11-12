@@ -6,12 +6,17 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +35,14 @@ public class GWTModuleClasspathHandler implements ClasspathHandler {
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setValidating(false);
       builderFactory.setIgnoringElementContentWhitespace(true);
-      documentBuilder = builderFactory.newDocumentBuilder();
+      DocumentBuilder b = builderFactory.newDocumentBuilder();
+      b.setEntityResolver(new EntityResolver() {
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+          //don't care about external dtds...
+          return new InputSource(new StringReader(""));
+        }
+      });
+      documentBuilder = b;
     }
     catch (ParserConfigurationException e) {
       throw new IllegalStateException(e);
@@ -81,7 +93,7 @@ public class GWTModuleClasspathHandler implements ClasspathHandler {
         }
       }
       catch (Exception e) {
-        enunciate.warn("Unable to read GWT module XML (%s). Skipping...", e.getMessage());
+        enunciate.warn("Unable to read GWT module XML %s (%s). Skipping...", path, e.getMessage());
       }
     }
   }

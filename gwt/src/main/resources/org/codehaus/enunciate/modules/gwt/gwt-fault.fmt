@@ -40,14 +40,14 @@ public class ${fault.simpleName} extends com.google.gwt.user.client.rpc.Serializ
   private ${classnameFor(childElement)} ${element.simpleName};
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public ${classnameFor(childElement)} get${element.simpleName?cap_first}() {
     return this.${element.simpleName};
   }
 
   /**
-   * ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?replace("\n", "\n   * ")}
+   * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   public void set${element.simpleName?cap_first}(${classnameFor(childElement)} ${element.simpleName}) {
     this.${element.simpleName} = ${element.simpleName};

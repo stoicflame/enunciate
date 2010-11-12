@@ -393,11 +393,6 @@
       <zipfileset dir="target/lib" prefix="${dist.name}/lib"/>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <zipfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
-      <zipfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
-      <zipfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
-      <zipfileset dir="src/samples/petclinic" prefix="${dist.name}/samples/petclinic"/>
-      <zipfileset dir="src/samples/addressbook" prefix="${dist.name}/samples/addressbook"/>
-      <zipfileset dir="src/samples/sparklr" prefix="${dist.name}/samples/sparklr"/>
     </zip>
 
     <!--create the tar.gz dist.-->
@@ -408,11 +403,6 @@
       <tarfileset dir="target/lib" prefix="${dist.name}/lib"/>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <tarfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
-      <tarfileset dir="src/samples/wannabecool/step4" prefix="${dist.name}/samples/wannabecool/src/main/java"/>
-      <tarfileset dir="src/samples/wannabecool/build" prefix="${dist.name}/samples/wannabecool"/>
-      <tarfileset dir="src/samples/petclinic" prefix="${dist.name}/samples/petclinic"/>
-      <tarfileset dir="src/samples/addressbook" prefix="${dist.name}/samples/addressbook"/>
-      <tarfileset dir="src/samples/sparklr" prefix="${dist.name}/samples/sparklr"/>
     </tar>
   </target>
 

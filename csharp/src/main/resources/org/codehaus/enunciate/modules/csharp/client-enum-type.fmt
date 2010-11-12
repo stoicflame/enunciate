@@ -4,10 +4,10 @@
 namespace ${namespaceFor(type)} {
 
   /// <remarks>
-  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
   /// <summary>
-  ///  ${type.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(type.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [#if findRootElement(type)?exists]
   [System.Xml.Serialization.XmlRootAttribute(Namespace="${findRootElement(type).namespace?default("")}", ElementName="${findRootElement(type).name}")]

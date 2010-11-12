@@ -16,10 +16,10 @@ namespace ${namespaceFor(endpointInterface)} {
   [/@forEachWebMethod]
 
   /// <remarks>
-  ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(endpointInterface.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </remarks>
   /// <summary>
-  ///  ${endpointInterface.javaDoc?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
+  ///  ${(endpointInterface.javaDoc!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n  ///  ")}
   /// </summary>
   [System.Web.Services.WebServiceBindingAttribute(Name="${endpointInterface.portTypeName}",Namespace="${endpointInterface.targetNamespace?default("")}")]
   public partial class ${endpointInterface.clientSimpleName} : System.Web.Services.Protocols.SoapHttpClientProtocol {

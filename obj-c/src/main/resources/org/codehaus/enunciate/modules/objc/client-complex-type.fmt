@@ -39,12 +39,12 @@
   [#if !accessorOverridesAnother(attribute)]
 
 /**
- * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${clientSimpleName(attribute)};
 
 /**
- * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first};
   [/#if]
@@ -53,12 +53,12 @@
   [#if !accessorOverridesAnother(type.value)]
 
 /**
- * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${clientSimpleName(type.value)};
 
 /**
- * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first};
   [/#if]
@@ -67,12 +67,12 @@
     [#if !accessorOverridesAnother(element)]
 
 /**
- * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${clientSimpleName(element)};
 
 /**
- * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first};
     [/#if]
@@ -81,14 +81,14 @@
 [#if type.anyElement??]
 
 /**
- * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  *
  * Contains instances of JAXBBasicXMLNode.
  */
 - (NSArray *) ${clientSimpleName(type.anyElement)};
 
 /**
- * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  *
  * Contains instances of JAXBBasicXMLNode.
  */
@@ -130,7 +130,7 @@
   [#if !accessorOverridesAnother(attribute)]
 
 /**
- * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) ${clientSimpleName(attribute)}
 {
@@ -138,7 +138,7 @@
 }
 
 /**
- * ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first}
 {
@@ -160,7 +160,7 @@
   [#if !accessorOverridesAnother(type.value)]
 
 /**
- * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) ${clientSimpleName(type.value)}
 {
@@ -168,7 +168,7 @@
 }
 
 /**
- * ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first}
 {
@@ -190,7 +190,7 @@
     [#if !accessorOverridesAnother(element)]
 
 /**
- * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) ${clientSimpleName(element)}
 {
@@ -198,7 +198,7 @@
 }
 
 /**
- * ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first}
 {
@@ -220,7 +220,7 @@
 [#if type.anyElement??]
 
 /**
- * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  *
  * Contains instances of JAXBBasicXMLNode.
  */
@@ -230,7 +230,7 @@
 }
 
 /**
- * ${type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ * ${(type.anyElement.javaDoc.return!type.anyElement.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  *
  * Contains instances of JAXBBasicXMLNode.
  */

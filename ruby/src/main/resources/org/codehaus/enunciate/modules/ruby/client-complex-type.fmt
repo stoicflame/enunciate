@@ -6,19 +6,19 @@
 module ${submodule}
   [/#list]
 
-  # ${type.javaDoc!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n  # ")}
+  # ${(type.javaDoc!"(no documentation provided)")?replace("\n", "\n  # ")}
   class ${simpleNameFor(type)} [#if !type.baseObject]< ${classnameFor(type.superclass)} [/#if]
 
   [#list type.attributes as attribute]
-    # ${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
+    # ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${attribute.clientSimpleName}
   [/#list]
   [#if type.value??]
-    # ${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
+    # ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${type.value.clientSimpleName}
   [#else]
     [#list type.elements as element]
-    # ${element.javaDoc.return!element.docValue!"(no documentation provided)"?chop_linebreak?html?replace("\n", "\n    # ")}
+    # ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
     attr_accessor :${element.clientSimpleName}
     [/#list]
   [/#if]

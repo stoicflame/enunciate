@@ -45,7 +45,7 @@
       [#if !accessorOverridesAnother(attribute)]
 
     /// <summary>
-    ///  ${attribute.javaDoc.return?default(attribute.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=attribute /]
     public [#if accessorOverridesAnother(attribute)]override [/#if]${classnameFor(attribute)} ${attribute.clientSimpleName?cap_first} {
@@ -62,7 +62,7 @@
       [#if !accessorOverridesAnother(type.value)]
 
     /// <summary>
-    ///  ${type.value.javaDoc.return?default(type.value.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=type.value /]
     public [#if accessorOverridesAnother(type.value)]override [/#if]${classnameFor(type.value)} ${type.value.clientSimpleName?cap_first} {
@@ -79,7 +79,7 @@
         [#if !accessorOverridesAnother(element)]
 
     /// <summary>
-    ///  ${element.javaDoc.return?default(element.docValue?default("(no documentation provided)"))?chop_linebreak?html?replace("\n", "\n    ///  ")}
+    ///  ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
     [@libCSharpMetadata.writeAccessorMetadata accessor=element /]
     public ${classnameFor(element)} ${element.clientSimpleName?cap_first} {
