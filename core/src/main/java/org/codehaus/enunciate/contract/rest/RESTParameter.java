@@ -46,6 +46,7 @@ import java.util.Collection;
  * </ul>
  * 
  * @author Ryan Heaton
+ * @deprecated The Enunciate-proprietary REST model has been deprecated in favor of JAX-RS.
  */
 public class RESTParameter extends DecoratedParameterDeclaration implements RESTResourceParameter, RESTResourcePayload {
 

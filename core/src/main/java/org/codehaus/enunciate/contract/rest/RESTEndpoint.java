@@ -31,6 +31,7 @@ import java.util.*;
  * A class declaration decorated as a REST endpoint.
  *
  * @author Ryan Heaton
+ * @deprecated The Enunciate-proprietary REST model has been deprecated in favor of JAX-RS.
  */
 public class RESTEndpoint extends DecoratedClassDeclaration {
 

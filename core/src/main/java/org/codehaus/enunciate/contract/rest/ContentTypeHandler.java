@@ -27,6 +27,7 @@ import java.util.Arrays;
  * A content type handler.
  *
  * @author Ryan Heaton
+ * @deprecated The Enunciate-proprietary REST model has been deprecated in favor of JAX-RS.
  */
 public class ContentTypeHandler extends DecoratedClassDeclaration {
 

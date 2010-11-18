@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.21.xsd">
   <disable-rule id="as3.conflicting.names"/>
   <namespaces>
     <namespace id="data" uri="http://enunciate.codehaus.org/samples/genealogy/data"/>
@@ -9,11 +9,12 @@
     <namespace id="full" uri="http://enunciate.codehaus.org/samples/full"/>
   </namespaces>
   <services>
-    <soap defaultSubcontext="/soap-services/">
+    <soap defaultSoapSubcontext="/soap-services/">
       <service name="source-service" relativePath="/soap-services/sources/source"/>
     </soap>
   </services>
   <modules>
+    <gwt disabled="true"/>
     <java-client>
       <package-conversions>
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
@@ -21,13 +22,7 @@
     </java-client>
     <spring-app>
       <springImport file="src/conf/custom_spring.xml"/>
-      <copyResources dir="${basedir}/src/main/samples/full" pattern="**/*.txt"/>
       <globalServiceInterceptor beanName="globalServiceAdvice"/>
-      <war>
-        <manifest>
-          <attribute name="Class-Path" value="whatever.jar"/>
-        </manifest>
-      </war>
     </spring-app>
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
       <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>

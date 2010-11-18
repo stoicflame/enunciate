@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.21-RC3</version>
+  <version>1.21</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>
@@ -24,7 +24,7 @@
         <plugin>
           <groupId>org.codehaus.cargo</groupId>
           <artifactId>cargo-maven2-plugin</artifactId>
-          <version>1.0.2</version>
+          <version>1.0.3</version>
         </plugin>
       </plugins>
     </pluginManagement>

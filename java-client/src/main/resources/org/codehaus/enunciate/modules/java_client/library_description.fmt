@@ -5,12 +5,14 @@
   Introduction
 </h1>
 
+<p>
+  The Java client-side library is used to access the Web service API for this application.
+</p>
+
 [#if sample_service_method??]
 <p>
-  The JAX-WS client-side library may be used to access the SOAP API for this application via
-  the Java runtime, using <a href="https://jax-ws.dev.java.net/">JAX-WS</a>. This is a slim, light,
-  client library with minimal dependency bloat (as of Java 6, JAX-WS ships with the JDK), but
-  it requires Java 5+.
+  The Java client-side uses <a href="https://jax-ws.dev.java.net/">JAX-WS</a> to access the SOAP API
+  for this application.
 </p>
 
 <h1>

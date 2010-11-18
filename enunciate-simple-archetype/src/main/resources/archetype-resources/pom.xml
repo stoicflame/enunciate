@@ -13,7 +13,7 @@
          <plugin>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>maven-enunciate-plugin</artifactId>
-            <version>1.21-RC3</version>
+            <version>1.21</version>
             <configuration>
                <configFile>src/enunciate/enunciate.xml</configFile>
             </configuration>
@@ -37,7 +37,7 @@
          <plugin>
             <groupId>org.codehaus.cargo</groupId>
             <artifactId>cargo-maven2-plugin</artifactId>
-            <version>1.0</version>
+            <version>1.0.3</version>
          </plugin>
       </plugins>
    </build>
@@ -46,7 +46,7 @@
       <dependency>
          <groupId>org.codehaus.enunciate</groupId>
          <artifactId>enunciate-rt</artifactId>
-         <version>1.21-RC3</version>
+         <version>1.21</version>
          <scope>runtime</scope>
       </dependency>
       <dependency>

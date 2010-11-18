@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <!-- Enunciate configuration for the integration tests. -->
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.20.xsd">
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.21.xsd">
   <modules>
     <amf disabled="true"/>
     <c forceEnable="true"/>
+    <gwt disabled="true"/>
     <obj-c forceEnable="true" translateIdTo="handle"/>
     <java-client>
       <package-conversions>
@@ -12,5 +13,6 @@
         <convert from="org.unece" to="org.unece.client"/>
       </package-conversions>
     </java-client>
+    <spring-app disabled="true"/>
   </modules>
 </enunciate>

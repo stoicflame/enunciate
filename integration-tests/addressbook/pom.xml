@@ -4,7 +4,7 @@
   <groupId>net.java.ws.addressbook</groupId>
   <artifactId>addressbook</artifactId>
   <packaging>war</packaging>
-  <version>1.21-RC3</version>
+  <version>1.21</version>
   <name>Enunciate - Address Book Example</name>
 
   <properties>
@@ -33,6 +33,11 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
+            <version>${enunciate.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
             <version>${enunciate.version}</version>
           </dependency>
         </dependencies>
@@ -80,8 +85,9 @@
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
-        <version>1.0-beta-2</version>
+        <version>1.0.3</version>
         <configuration>
+          <skip>${skipTests}</skip>
           <container>
             <containerId>tomcat6x</containerId>
             <zipUrlInstaller>

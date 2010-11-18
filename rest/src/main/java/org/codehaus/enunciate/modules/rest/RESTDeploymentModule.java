@@ -390,6 +390,8 @@ public class RESTDeploymentModule extends FreemarkerDeploymentModule implements 
   public void initModel(EnunciateFreemarkerModel model) {
     super.initModel(model);
 
+    warn("The Enunciate REST module has been deprecated in favor of JAX-RS, and will soon be removed from the core Enunciate build. It would be wise for you to move to the JAX-RS model.");
+    
     if (!isDisabled()) {
       Map<RESTNoun, Set<String>> nouns2contentTypes = model.getNounsToContentTypes();
       Map<String, String> contentTypes2Ids = model.getContentTypesToIds();

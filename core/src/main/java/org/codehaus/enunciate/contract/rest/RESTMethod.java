@@ -40,6 +40,7 @@ import java.util.*;
  * A REST method.
  *
  * @author Ryan Heaton
+ * @deprecated The Enunciate-proprietary REST model has been deprecated in favor of JAX-RS.
  */
 public class RESTMethod extends DecoratedMethodDeclaration implements ServiceEndpoint, RESTResource {
 

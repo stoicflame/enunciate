@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-contract-first</artifactId>
-  <version>1.21-RC3</version>
+  <version>1.21</version>
   <name>Enunciate - Contract-First Example (EPCIS)</name>
   <description>An example of how to use Enunciate for contract-first development.</description>
   <packaging>war</packaging>
@@ -171,6 +171,16 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <artifactId>enunciate-amf</artifactId>
             <version>${project.version}</version>
           </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-gwt</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
+            <version>${project.version}</version>
+          </dependency>
         </dependencies>
       </plugin>
       <!-- skip unit test run, tests to be executed during integration-test -->
@@ -216,6 +226,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
           </execution>
         </executions>
         <configuration>
+          <skip>${skipTests}</skip>
           <container>
             <containerId>tomcat5x</containerId>
             <zipUrlInstaller>

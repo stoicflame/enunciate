@@ -24,6 +24,7 @@ import org.codehaus.enunciate.contract.common.rest.RESTResourceError;
  * An error that can be thrown as a result of a REST method invocation.
  * 
  * @author Ryan Heaton
+ * @deprecated The Enunciate-proprietary REST model has been deprecated in favor of JAX-RS.
  */
 public class RESTError extends DecoratedClassDeclaration implements RESTResourceError {
 
