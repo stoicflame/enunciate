@@ -21,7 +21,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.21-SNAPSHOT</version>
+        <version>1.22-SNAPSHOT-SNAPSHOT</version>
         <executions>
           <execution>
             <goals>
@@ -130,7 +130,7 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app-rt</artifactId>
-      <version>1.21-SNAPSHOT</version>
+      <version>1.22-SNAPSHOT-SNAPSHOT</version>
     </dependency>
 
     <!--Testing dependencies -->

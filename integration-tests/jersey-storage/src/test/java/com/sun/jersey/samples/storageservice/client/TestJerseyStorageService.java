@@ -23,7 +23,6 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.samples.storageservice.Container;
 import com.sun.jersey.samples.storageservice.Containers;
-import com.sun.jersey.samples.storageservice.Item;
 import junit.framework.TestCase;
 
 /**
@@ -37,10 +36,13 @@ public class TestJerseyStorageService extends TestCase {
   public void testContainers() throws Exception {
     WebResource resource = getStorageResource();
 
-    ClientResponse response = resource.path("containers").get(ClientResponse.class);
+    ClientResponse response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
     assertEquals(200, response.getStatus());
     Containers containers = response.getEntity(Containers.class);
     assertTrue(containers.getContainer() == null || containers.getContainer().isEmpty());
+
+    response = resource.path("containers").accept("text/html").get(ClientResponse.class);
+    assertEquals(200, response.getStatus());
 
     response = resource.path("containers/one").get(ClientResponse.class);
     assertEquals(404, response.getStatus());
@@ -49,7 +51,7 @@ public class TestJerseyStorageService extends TestCase {
     response = resource.path("containers/one").put(ClientResponse.class, containerOne);
     assertEquals(201, response.getStatus());
 
-    response = resource.path("containers").get(ClientResponse.class);
+    response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
     assertEquals(200, response.getStatus());
     containers = response.getEntity(Containers.class);
     assertEquals(1, containers.getContainer().size());
@@ -104,7 +106,7 @@ public class TestJerseyStorageService extends TestCase {
     super.tearDown();
 
     WebResource resource = getStorageResource();
-    ClientResponse response = resource.path("containers").get(ClientResponse.class);
+    ClientResponse response = resource.path("containers").accept("application/xml").get(ClientResponse.class);
     if (200 == response.getStatus()) {
       Containers containers = response.getEntity(Containers.class);
       if (containers.getContainer() != null) {

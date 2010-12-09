@@ -11,11 +11,11 @@ import java.io.IOException;
 /**
  * @author Ryan Heaton
  */
-public class JerseyAdapterHttpServletResponse extends HttpServletResponseWrapper {
+public class JerseyAdaptedHttpServletResponse extends HttpServletResponseWrapper {
 
   private final WebApplication wa;
 
-  public JerseyAdapterHttpServletResponse(HttpServletResponse response, WebApplication wa) {
+  public JerseyAdaptedHttpServletResponse(HttpServletResponse response, WebApplication wa) {
     super(response);
     this.wa = wa;
   }

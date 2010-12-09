@@ -16,12 +16,9 @@
 
 package org.codehaus.enunciate.modules.jersey;
 
-import com.sun.jersey.api.core.ResourceConfig;
-
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 import java.util.*;
 
 /**
@@ -33,74 +30,17 @@ public class JerseyAdaptedHttpServletRequest extends HttpServletRequestWrapper {
   public static final String PROPERTY_RESOURCE_PROVIDER_FACTORY = "org.codehaus.enunciate.modules.jersey.config.ResourceProviderFactory";
   public static final String FEATURE_PATH_BASED_CONNEG = "org.codehaus.enunciate.modules.jersey.config.PathBasedConneg";
 
-  private final String rawpath;
-  private final String servletPath;
-  private final String mediaKey;
   private final MediaType mediaType;
 
   /**
    * Create a request adapted for Jersey.
    *
    * @param request The request.
-   * @param resourceConfig The jersey resource configuration.
+   * @param mediaType The specific media type requested.
    */
-  public JerseyAdaptedHttpServletRequest(HttpServletRequest request, ResourceConfig resourceConfig) {
+  public JerseyAdaptedHttpServletRequest(HttpServletRequest request, MediaType mediaType) {
     super(request);
-
-    String mediaKey = null;
-    MediaType mediaType = null;
-    this.rawpath = request.getRequestURI();
-    if (resourceConfig != null && resourceConfig.getFeature(FEATURE_PATH_BASED_CONNEG)) {
-      String path = rawpath;
-      //if we're doing path-based conneg, we're going to look for the media-type mapping key on the URL after the context path.
-      if (path.startsWith(request.getContextPath())) {
-        path = path.substring(request.getContextPath().length());
-      }
-
-      if (path.startsWith("/")) {
-        path = path.substring(1);
-      }
-
-      for (Map.Entry<String, MediaType> mediaMapping : resourceConfig.getMediaTypeMappings().entrySet()) {
-        if (path.startsWith(mediaMapping.getKey())) {
-          mediaKey = mediaMapping.getKey();
-          mediaType = mediaMapping.getValue();
-          break;
-        }
-      }
-    }
-
-    String servletPath = null;
-    if (resourceConfig != null && resourceConfig.getProperty(PROPERTY_SERVLET_PATH) != null) {
-      servletPath = (String) resourceConfig.getProperty(PROPERTY_SERVLET_PATH);
-    }
-
-    this.servletPath = servletPath;
-    this.mediaKey = mediaKey;
     this.mediaType = mediaType;
-  }
-
-  @Override
-  public String getPathInfo() {
-    return this.rawpath.substring(getContextPath().length() + getServletPath().length());
-  }
-
-  /**
-   * The servlet path is based on the media key if we're doing path-based conneg.
-   * 
-   * @return The servlet path is the media key, or null.
-   */
-  @Override
-  public String getServletPath() {
-    if (mediaKey != null && !"".equals(mediaKey)) {
-      return ('/' + mediaKey);
-    }
-    else if (servletPath != null) {
-      return servletPath;
-    }
-    else {
-      return "";
-    }
   }
 
   /**

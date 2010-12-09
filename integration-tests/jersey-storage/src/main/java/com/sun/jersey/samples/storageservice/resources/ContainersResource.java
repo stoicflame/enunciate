@@ -37,6 +37,7 @@
 
 package com.sun.jersey.samples.storageservice.resources;
 
+import com.sun.jersey.api.view.Viewable;
 import com.sun.jersey.samples.storageservice.Containers;
 import com.sun.jersey.samples.storageservice.MemoryStore;
 import javax.ws.rs.GET;
@@ -67,5 +68,11 @@ public class ContainersResource {
         System.out.println("GET CONTAINERS");
         
         return MemoryStore.MS.getContainers();
-    }    
+    }
+
+    @GET
+    @Produces("text/html")
+    public Viewable getHtmlContainers() {
+      return new Viewable("/containers.jsp", getContainers());
+    }
 }

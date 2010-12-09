@@ -1,6 +1,8 @@
 package org.codehaus.enunciate.modules.jersey;
 
+import com.sun.jersey.api.container.ContainerException;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
@@ -13,10 +15,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.Map;
 import java.util.Properties;
 
@@ -39,6 +43,8 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
   private ResourceConfig resourceConfig;
   private String resourceProviderFactory = "org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory";
   private WebApplication wa;
+  private String servletPath;
+  private boolean doPathBasedConneg;
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
@@ -99,11 +105,6 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
       this.resourceProviderFactory = resourceProvider;
     }
 
-    String servletPath = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH);
-    if (servletPath != null) {
-      rc.getProperties().put(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH, servletPath);
-    }
-
     stream = loadResource("/media-type-mappings.properties");
     if (stream != null) {
       try {
@@ -117,6 +118,10 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
         //fall through...
       }
     }
+
+    String servletPath = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH);
+    this.servletPath = servletPath == null ? "" : servletPath;
+    this.doPathBasedConneg = rc.getFeature(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);
 
     super.configure(sc, rc, wa);
   }
@@ -153,9 +158,85 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
 
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    request = new JerseyAdaptedHttpServletRequest(request, this.resourceConfig);
-    response = new JerseyAdapterHttpServletResponse(response, this.wa);
-    super.service(request, response);
+
+    //to service the request, we have to calculate a "base" uri and a "request" uri.
+    //Jersey determines which resource is being invoked by the difference between
+    //the "base" uri and the "request" uri. Unfortunately, the default implementation
+    //does an bogus job of calculating the "base" uri because it bases it off
+    //the value of request.getServletPath(), which is the path defined in the
+    //web.xml that matched the call to this servlet. So if we defined in web.xml
+    //the exact path to the servlet, then the calculated request url will be the
+    //same as the calculated base url. So we have to compensate for that here.
+    //see http://jersey.576304.n2.nabble.com/ServletContainer-and-relative-path-resolution-td674105.html
+
+    //first get what the request url is, from which we can base our calculations.
+    UriBuilder requestUrl = UriBuilder.fromUri(String.valueOf(request.getRequestURL()));
+
+    //now calculate the path of the base uri, always starting with the context path.
+    StringBuilder baseUriPathBuilder = new StringBuilder();
+
+    //the next part is specific to Enunciate because Enunciate allows users to configure a "rest subcontext"
+    //so users can put their rest endpoints under, for example, "/rest" and their soap endpoints under, say "/soap".
+    //furthermore, for rest endpoints, Enunciate provides for the ability to do path-based content negotiation
+    //so the default resource will be at, for example, "/rest/resource", but the xml representation will be
+    //at "/xml/resource" and the json at "/json/resource".
+    String requestPath = request.getRequestURI(); //start with what was actually requested.
+
+    final String contextPath = request.getContextPath();
+    MediaType mediaType = null;
+    if (!"".equals(contextPath) && requestPath.startsWith(contextPath)) {
+      //the context path is part of the base uri.
+      baseUriPathBuilder.append(contextPath);
+      requestPath = requestPath.substring(contextPath.length());
+    }
+    if (!"".equals(this.servletPath) && requestPath.startsWith(this.servletPath)) {
+      //the enunciate-configured servlet path ("rest subcontext") is part of the base uri
+      baseUriPathBuilder.append(this.servletPath);
+      requestPath = requestPath.substring(this.servletPath.length());
+    }
+    else {
+      //the enunciate-configured servlet path ("rest subcontext") is NOT part of the request. Iterate through
+      //each media type mapping and see if it's part of the path.
+      if (requestPath.startsWith("/")) {
+        requestPath = requestPath.substring(1);
+      }
+
+      for (Map.Entry<String, MediaType> mediaMapping : this.resourceConfig.getMediaTypeMappings().entrySet()) {
+        if (requestPath.startsWith(mediaMapping.getKey())) {
+          //found a match to a specific media type, so we need to append the media type's 'key' to the base uri.
+          String mediaKey = mediaMapping.getKey();
+          baseUriPathBuilder.append('/').append(mediaKey);
+          requestPath = requestPath.substring(mediaKey.length());
+          mediaType = mediaMapping.getValue();
+          break;
+        }
+      }
+    }
+
+
+    final String baseUriPath = baseUriPathBuilder.append('/').toString();
+
+    //this check is in the super class, so I thought I'd keep it here for grins.
+    if (!baseUriPath.equals(UriComponent.encode(baseUriPath, UriComponent.Type.PATH))) {
+        throw new ContainerException("The servlet context path and/or the servlet path contain characters that are percent enocded");
+    }
+
+    final URI baseUri = requestUrl.replacePath(baseUriPath).build();
+
+    String queryParameters = request.getQueryString();
+    if (queryParameters == null) {
+      queryParameters = "";
+    }
+
+    final URI requestUri = requestUrl
+      .path(requestPath)
+      .replaceQuery(queryParameters)
+      .build();
+
+    request = new JerseyAdaptedHttpServletRequest(request, mediaType);
+    response = new JerseyAdaptedHttpServletResponse(response, this.wa);
+
+    service(baseUri, requestUri, request, response);
   }
 
   /**
