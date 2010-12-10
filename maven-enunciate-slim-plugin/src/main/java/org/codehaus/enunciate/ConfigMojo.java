@@ -155,7 +155,7 @@ public class ConfigMojo extends AbstractMojo {
   private boolean addXFireClientSourcesToTestClasspath = false;
 
   /**
-   * Whether to add the JAXWS client sources to the project test sources.
+   * Whether to add the Java client sources to the project test sources.
    *
    * @parameter alias="addJAXWSClientSourcesToTestClasspath"
    */

@@ -59,7 +59,7 @@ public class AMFMapperIntrospector {
   }
 
   public static AMFMapper getAMFMapper(Class realType, Type jaxbType, XmlJavaTypeAdapter adapterInfo, XmlElement elementInfo) {
-    if ((realType != null) && (!realType.isArray()) && (!realType.isPrimitive()) && (realType.getPackage() != null)) {
+    if (adapterInfo == null && (realType != null) && (!realType.isArray()) && (!realType.isPrimitive()) && (realType.getPackage() != null)) {
       //first check the real type.  if a mapper exists, use it, otherwise use the type defined in the signature.
       if (MAPPERS.containsKey(realType)) {
         return MAPPERS.get(realType);
@@ -73,6 +73,10 @@ public class AMFMapperIntrospector {
         //fall through.
       }
     }
+    
+    if (adapterInfo != null) {
+      jaxbType = findAdaptingType(adapterInfo.value());
+    }
 
     if (jaxbType == null) {
       jaxbType = Object.class;
@@ -80,7 +84,7 @@ public class AMFMapperIntrospector {
 
     Class specifiedType = ((elementInfo != null) && (elementInfo.type() != null) && (elementInfo.type() != XmlElement.DEFAULT.class)) ? elementInfo.type() : null;
     AMFMapper mapper;
-    if (MAPPERS.containsKey(jaxbType)) {
+    if (adapterInfo == null && MAPPERS.containsKey(jaxbType)) {
       mapper = MAPPERS.get(jaxbType);
     }
     else {
