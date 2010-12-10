@@ -31,6 +31,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.json.JsonName;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
@@ -370,7 +371,8 @@ public class ElementRef extends Element {
 
   @Override
   public String getJsonMemberName() {
-    return isElementRefs() ? getSimpleName() : getName();
+    JsonName jsonName = getAnnotation(JsonName.class);
+    return jsonName == null ? (isElementRefs() ? getSimpleName() : getName()) : jsonName.value();
   }
 
   /**

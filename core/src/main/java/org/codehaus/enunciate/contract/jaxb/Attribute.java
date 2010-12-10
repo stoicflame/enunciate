@@ -21,6 +21,7 @@ import com.sun.mirror.type.PrimitiveType;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.doc.DocumentationExample;
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.jackson.node.ObjectNode;
 import org.codehaus.jackson.JsonNode;
 import org.jdom.Namespace;
@@ -164,6 +165,7 @@ public class Attribute extends Accessor {
 
   @Override
   public String getJsonMemberName() {
-    return getName();
+    JsonName jsonName = getAnnotation(JsonName.class);
+    return jsonName == null ? getName() : jsonName.value();
   }
 }

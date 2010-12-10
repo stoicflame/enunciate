@@ -34,6 +34,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.doc.DocumentationExample;
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
@@ -593,6 +594,7 @@ public class Element extends Accessor {
 
   @Override
   public String getJsonMemberName() {
-    return isWrapped() ? getWrapperName() : getName();
+    JsonName jsonName = getAnnotation(JsonName.class);
+    return jsonName == null ? (isWrapped() ? getWrapperName() : getName()) : jsonName.value();
   }
 }

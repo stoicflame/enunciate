@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.MemberDeclaration;
+import org.codehaus.enunciate.json.JsonName;
 import org.codehaus.jackson.node.ObjectNode;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.enunciate.doc.DocumentationExample;
@@ -72,6 +73,7 @@ public class Value extends Accessor {
 
   @Override
   public String getJsonMemberName() {
-    return "value";
+    JsonName jsonName = getAnnotation(JsonName.class);
+    return jsonName == null ? "value" : jsonName.value();
   }
 }
