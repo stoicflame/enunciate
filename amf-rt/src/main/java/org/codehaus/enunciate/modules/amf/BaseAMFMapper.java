@@ -243,6 +243,7 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
       throw new AMFMappingException("Unable to instantiate an instance JAXB class " + jaxbClass.getName() + ".", e);
     }
 
+    context.objectMapped(amfObject, jaxbObject);
     for (PropertyDescriptor[] pds : this.jaxbProperties2amfProperties) {
       PropertyDescriptor jaxbProperty = pds[0];
       PropertyDescriptor amfProperty = pds[1];
@@ -280,8 +281,6 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
         throw new AMFMappingException("Unable to set property " + jaxbProperty.getName() + " for the amf bean " + amfClass.getName(), e);
       }
     }
-
-    context.objectMapped(amfObject, jaxbObject);
 
     return jaxbObject;
   }

@@ -250,6 +250,7 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
       throw new GWTMappingException("Unable to instantiate an instance JAXB class " + jaxbClass.getName() + ".", e);
     }
 
+    context.objectMapped(gwtObject, jaxbObject);
     for (PropertyDescriptor[] pds : this.jaxbProperties2gwtProperties) {
       PropertyDescriptor jaxbProperty = pds[0];
       PropertyDescriptor gwtProperty = pds[1];
@@ -284,8 +285,6 @@ public abstract class BaseGWTMapper<J, G> implements CustomGWTMapper<J, G> {
         throw new GWTMappingException("Unable to set property " + jaxbProperty.getName() + " for the gwt bean " + gwtClass.getName(), e);
       }
     }
-
-    context.objectMapped(gwtObject, jaxbObject);
 
     return jaxbObject;
   }
