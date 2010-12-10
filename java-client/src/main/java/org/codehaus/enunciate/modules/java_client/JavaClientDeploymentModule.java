@@ -615,14 +615,14 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       //read in the description from file:
       artifactBundle.setDescription(readResource("json_library_description.fmt"));
       if (!isDisableCompile()) {
-        NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.json.client.library.binaries", clientJarFile);
+        NamedFileArtifact binariesJar = new NamedFileArtifact(getName(), "java.json.client.library.binaries", jsonClientJarFile);
         binariesJar.setDescription("The binaries for the Java JSON client library.");
         binariesJar.setPublic(false);
         binariesJar.setArtifactType(ArtifactType.binaries);
         artifactBundle.addArtifact(binariesJar);
         enunciate.addArtifact(binariesJar);
       }
-      sourcesJar = new NamedFileArtifact(getName(), "java.json.client.library.sources", clientSourcesJarFile);
+      sourcesJar = new NamedFileArtifact(getName(), "java.json.client.library.sources", jsonClientSourcesJarFile);
       sourcesJar.setDescription("The sources for the Java JSON client library.");
       sourcesJar.setPublic(false);
       sourcesJar.setArtifactType(ArtifactType.sources);
