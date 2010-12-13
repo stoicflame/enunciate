@@ -231,6 +231,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   private SecurityConfig securityConfig = new SecurityConfig();
   private boolean factoryBeanFound = false;
   private boolean spring3 = false;
+  private boolean springSecurity3 = false;
 
   /**
    * @return "spring-app"
@@ -265,6 +266,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     factoryBeanFound |= classes.contains("org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean");
     //we'll key off the Converter class since that's new in Spring 3.
     spring3 |= classes.contains("org.springframework.core.convert.converter.Converter");
+    springSecurity3 |= classes.contains("org.springframework.security.core.Authentication");
   }
 
   @Override
@@ -306,6 +308,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       model.put("springImports", getSpringImportURIs());
       model.put("applicationContextFilename", getApplicationContextFilename());
       model.put("spring3", this.spring3);
+      model.put("springSecurity3", this.springSecurity3);
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {
         docsDir = "";

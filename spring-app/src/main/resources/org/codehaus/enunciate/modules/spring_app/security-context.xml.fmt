@@ -1,5 +1,6 @@
 [#ftl]
 [@file name="security-context.xml" charset="utf-8"]
+  [#assign custom_filters = []/]
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans:beans xmlns="http://www.springframework.org/schema/security"
@@ -8,7 +9,7 @@
   xmlns:oauth="http://spring-security-oauth.codehaus.org/[#if spring3!false]3.0[#else]2.0[/#if]"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-[#if spring3!false]3.0[#else]2.5[/#if].xsd
-              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-[#if spring3!false]3.0[#else]2.0[/#if].xsd
+              http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-[#if springSecurity3!false]3.0[#else]2.0[/#if].xsd
               http://spring-security-oauth.codehaus.org/[#if spring3!false]3.0[#else]2.0[/#if] http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-[#if spring3!false]3.0[#else]2.0[/#if].xsd
               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-[#if spring3!false]3.0[#else]2.5[/#if].xsd">
 
@@ -61,6 +62,25 @@
   </beans:bean>
   [/#if]
 
+  [#if securityConfig.additionalAuthenticationFilters?exists]
+    [#list securityConfig.additionalAuthenticationFilters as filter]
+      [#if springSecurity3!false]
+        [#assign custom_filters = custom_filters + [ "enunciate-custom-filter-${filter_index}" ]/]
+      [/#if]
+      [#if filter.beanName?exists]
+
+  <beans:bean parent="${filter.beanName}" id="enunciate-custom-filter-${filter_index}">
+      [#elseif filter.className?exists]
+
+  <beans:bean class="${filter.className}" id="enunciate-custom-filter-${filter_index}">
+      [/#if]
+      [#if !springSecurity3!false]
+    <custom-filter before="PRE_AUTH_FILTER"/>
+      [/#if]
+  </beans:bean>
+    [/#list]
+  [/#if]
+
   <http auto-config="false"[#if !securityConfig.initJ2EESecurityContext] servlet-api-provision="false"[/#if][#if securityConfig.onAccessDenied?exists && securityConfig.onAccessDenied.redirectTo?exists] access-denied-page="${securityConfig.onAccessDenied.redirectTo}"[/#if][#if entryPointDefined?exists && entryPointDefined] entry-point-ref="enunciate-entry-point"[/#if][#if securityConfig.realmName?exists] realm="${securityConfig.realmName}"[/#if]>
   [#list securityConfig.secureUrls?keys as pattern]
     [#if securityConfig.secureUrls[pattern]?exists]
@@ -97,24 +117,22 @@
   [#if securityConfig.loadAnonymousIdentity]
     <anonymous key="${securityConfig.anonymousConfig.key?default(securityConfig.key)}" username="${securityConfig.anonymousConfig.userId?default("anonymous")}" granted-authority="${securityConfig.anonymousConfig.roles?default("ROLE_ANONYMOUS")}"/>
   [/#if]
-  </http>
-  [#if securityConfig.additionalAuthenticationFilters?exists]
-    [#list securityConfig.additionalAuthenticationFilters as filter]
-      [#if filter.beanName?exists]
-
-  <beans:bean parent="${filter.beanName}">
-      [#elseif filter.className?exists]
-
-  <beans:bean class="${filter.className}">
-      [/#if]
-    <custom-filter before="PRE_AUTH_FILTER"/>
-  </beans:bean>
-    [/#list]
+  [#list custom_filters as custom_filter]
+    <custom-filter ref="${custom_filter}" before="PRE_AUTH_FILTER"/>
+  [/#list]
+  [#if (springSecurity3!false) && securityConfig.enableDigestHTTPAuth]
+    <custom-filter ref="enunciate-digest-processing-filter" position="BASIC_PROCESSING_FILTER"/>
   [/#if]
+  [#if (springSecurity3!false) && securityConfig.enableOAuth]
+    <custom-filter ref="oauthConfirmAccessFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+  [/#if]
+  </http>
   [#if securityConfig.enableDigestHTTPAuth]
 
-  <beans:bean [#if spring3!false]class="org.codehaus.enunciate.modules.spring_app.EnunciateDigestAuthenticationFilter"[#else]class="org.codehaus.enunciate.modules.spring_app.EnunciateDigestProcessingFilter"[/#if]>
+  <beans:bean [#if spring3!false]class="org.codehaus.enunciate.modules.spring_app.EnunciateDigestAuthenticationFilter"[#else]class="org.codehaus.enunciate.modules.spring_app.EnunciateDigestProcessingFilter"[/#if] id="enunciate-digest-processing-filter">
+    [#if !springSecurity3!false]
     <custom-filter position="BASIC_PROCESSING_FILTER"/>
+    [/#if]
   </beans:bean>
   [/#if]
   [#if securityConfig.enableOAuth]
@@ -136,7 +154,9 @@
 
   <!--The filter that ensures that the user is authenticated before allowing the confirm access page.-->
   <beans:bean id="oauthConfirmAccessFilter" class="org.codehaus.enunciate.modules.spring_app.OAuthConfirmAccessFilter">
+    [#if !springSecurity3!false]
     <custom-filter after="EXCEPTION_TRANSLATION_FILTER"/>
+    [/#if]
     <beans:property name="confirmAccessUrl" value="${securityConfig.OAuthConfig.accessConfirmationURL}"/>
     <beans:property name="accessConfirmedUrl" value="${securityConfig.OAuthConfig.accessConfirmedURL}"/>
   </beans:bean>

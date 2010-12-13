@@ -16,12 +16,12 @@
 
 package org.codehaus.enunciate.modules.spring_app;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.Authentication;
 
 /**
  * Helper utility for logging in, logging out.
- * 
+ *
  * @author Ryan Heaton
  */
 public interface LoginLogoutHelper {
@@ -32,7 +32,7 @@ public interface LoginLogoutHelper {
    *
    * @param username The username.
    * @param password The password.
-   * @throws AuthenticationException If login fails.
+   * @throws org.springframework.security.core.AuthenticationException If login fails.
    */
   void loginWithUsernameAndPassword(String username, String password) throws AuthenticationException;
 
@@ -41,7 +41,7 @@ public interface LoginLogoutHelper {
    * security mechanisms to authenticate and establish the identity.
    *
    * @param authToken The auth token.
-   * @throws AuthenticationException If login fails.
+   * @throws org.springframework.security.core.AuthenticationException If login fails.
    */
   void login(Authentication authToken) throws AuthenticationException;
 

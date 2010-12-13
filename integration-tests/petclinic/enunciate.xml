@@ -17,6 +17,7 @@
       <springImport file="other-beans.xml"/>
       <security>
         <userDetailsService beanName="userDetailsService"/>
+        <filter beanName="supportFilter"/>
       </security>
     </spring-app>
   </modules>

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <bean id="userDetailsService" class="org.springframework.security.userdetails.memory.InMemoryDaoImpl">
+  <context:annotation-config/>
+
+  <bean id="userDetailsService" class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
     <property name="userMap">
       <value>
         marissa=koala,USER,ADMIN
@@ -12,5 +16,7 @@
       </value>
     </property>
   </bean>
+
+  <bean id="supportFilter" class="org.codehaus.enunciate.samples.petclinic.services.impl.MyFilter"/>
 
 </beans>
