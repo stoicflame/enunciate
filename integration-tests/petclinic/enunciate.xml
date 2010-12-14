@@ -18,6 +18,9 @@
       <security>
         <userDetailsService beanName="userDetailsService"/>
         <filter beanName="supportFilter"/>
+        <onAuthenticationFailed>
+          <entryPoint beanName="my-entry-point"/>
+        </onAuthenticationFailed>
       </security>
     </spring-app>
   </modules>

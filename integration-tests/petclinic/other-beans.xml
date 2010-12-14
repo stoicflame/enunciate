@@ -6,7 +6,7 @@
 
   <context:annotation-config/>
 
-  <bean id="userDetailsService" class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
+  <bean id="userDetailsService" class="org.springframework.security.userdetails.memory.InMemoryDaoImpl">
     <property name="userMap">
       <value>
         marissa=koala,USER,ADMIN
@@ -18,5 +18,7 @@
   </bean>
 
   <bean id="supportFilter" class="org.codehaus.enunciate.samples.petclinic.services.impl.MyFilter"/>
+
+  <bean id="my-entry-point" class="org.codehaus.enunciate.samples.petclinic.services.impl.MyEntryPoint"/>
 
 </beans>
