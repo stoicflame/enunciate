@@ -41,7 +41,7 @@ public class XMLValidator extends BaseValidator {
           if (!(webMessagePart instanceof WebFault) && (webMessagePart.isImplicitSchemaElement())) {
             ImplicitSchemaElement el = ((ImplicitSchemaElement) webMessagePart);
             WebMessagePart otherPart = implicitElementNames.put(el.getElementName(), webMessagePart);
-            if (otherPart != null && !((ImplicitSchemaElement)otherPart).getTypeQName().equals(el.getTypeQName())) {
+            if (otherPart != null && ((ImplicitSchemaElement)otherPart).getTypeQName() != null && !((ImplicitSchemaElement)otherPart).getTypeQName().equals(el.getTypeQName())) {
               result.addError(webMethod, "Web method defines a message part named '" + el.getElementName() +
                 "' that is identical to the name of a web message part defined in " + otherPart.getWebMethod().getPosition() + ".  Please use annotations to disambiguate.");
             }
