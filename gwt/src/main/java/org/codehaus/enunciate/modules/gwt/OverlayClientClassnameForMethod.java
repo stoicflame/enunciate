@@ -121,7 +121,7 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
         return "com.google.gwt.core.client.JsArrayString";
       }
       else {
-        return "com.google.gwt.core.client.JsArray<" + super.convert(componentType) + ">";
+        return "com.google.gwt.core.client.JsArray<" + convert(componentType) + ">";
       }
     }
     else if (decorated.isCollection()) {
@@ -145,7 +145,7 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
           return "com.google.gwt.core.client.JsArrayNumber";
         }
         else {
-          return "com.google.gwt.core.client.JsArray<" + super.convert(componentType) + ">";
+          return "com.google.gwt.core.client.JsArray<" + convert(componentType) + ">";
         }
       }
       return "com.google.gwt.core.client.JsArray";
