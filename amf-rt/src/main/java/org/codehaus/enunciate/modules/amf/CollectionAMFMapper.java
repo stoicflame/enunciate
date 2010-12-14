@@ -46,8 +46,8 @@ public class CollectionAMFMapper implements AMFMapper<Collection, Collection> {
 
     Collection collection = CollectionAMFMapper.newCollectionInstance(collectionType);
     for (Object item : jaxbObject) {
-      AMFMapper itemMapper = AMFMapperIntrospector.getAMFMapper(item == null ? null : item.getClass(), this.defaultItemType, this.adapterInfo, this.elementInfo);
-      collection.add(itemMapper.toAMF(item, context));
+      Object toItem  = item != null ? AMFMapperIntrospector.getAMFMapper(item.getClass(), this.defaultItemType, this.adapterInfo, this.elementInfo).toAMF(item, context) : null;
+      collection.add(toItem);
     }
     return collection;
   }

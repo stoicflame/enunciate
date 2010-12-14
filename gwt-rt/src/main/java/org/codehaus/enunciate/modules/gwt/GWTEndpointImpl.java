@@ -109,7 +109,7 @@ public abstract class GWTEndpointImpl extends RemoteServiceServlet {
     }
 
     if (method.getReturnType() != Void.TYPE) {
-      returnValue = GWTMapperIntrospector.getGWTMapper(returnValue == null ? null : returnValue.getClass(), method.getGenericReturnType(), null, null).toGWT(returnValue, mappingContext);
+      returnValue = returnValue != null ? GWTMapperIntrospector.getGWTMapper(returnValue.getClass(), method.getGenericReturnType(), null, null).toGWT(returnValue, mappingContext) : null;
     }
     
     return returnValue;

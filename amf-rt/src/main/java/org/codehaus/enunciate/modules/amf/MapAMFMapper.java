@@ -48,8 +48,8 @@ public class MapAMFMapper implements AMFMapper<Map, Map> {
     for (Object entry : jaxbObject.entrySet()) {
       Object jaxbKey = ((Map.Entry) entry).getKey();
       Object jaxbValue = ((Map.Entry) entry).getValue();
-      Object amfKey = AMFMapperIntrospector.getAMFMapper(jaxbKey == null ? null : jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toAMF(jaxbKey, context);
-      Object amfValue = AMFMapperIntrospector.getAMFMapper(jaxbValue == null ? null : jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toAMF(jaxbValue, context);
+      Object amfKey = jaxbKey != null ? AMFMapperIntrospector.getAMFMapper(jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toAMF(jaxbKey, context) : null;
+      Object amfValue = jaxbValue != null ? AMFMapperIntrospector.getAMFMapper(jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toAMF(jaxbValue, context) : null;
       map.put(amfKey, amfValue);
     }
     return map;

@@ -48,8 +48,8 @@ public class MapGWTMapper implements GWTMapper<Map, Map> {
     for (Object entry : jaxbObject.entrySet()) {
       Object jaxbKey = ((Map.Entry) entry).getKey();
       Object jaxbValue = ((Map.Entry) entry).getValue();
-      Object gwtKey = GWTMapperIntrospector.getGWTMapper(jaxbKey == null ? null : jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toGWT(jaxbKey, context);
-      Object gwtValue = GWTMapperIntrospector.getGWTMapper(jaxbValue == null ? null : jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toGWT(jaxbValue, context);
+      Object gwtKey = jaxbKey != null ? GWTMapperIntrospector.getGWTMapper(jaxbKey.getClass(), this.keyType, this.adapterInfo, null).toGWT(jaxbKey, context) : null;
+      Object gwtValue = jaxbValue != null ? GWTMapperIntrospector.getGWTMapper(jaxbValue.getClass(), this.valueType, this.adapterInfo, null).toGWT(jaxbValue, context) : null;
       map.put(gwtKey, gwtValue);
     }
     return map;

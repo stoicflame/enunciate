@@ -120,7 +120,7 @@ public abstract class AMFEndpointImpl {
     }
 
     if (method.getReturnType() != Void.TYPE) {
-      returnValue = AMFMapperIntrospector.getAMFMapper(returnValue != null ? returnValue.getClass() : null, method.getGenericReturnType()).toAMF(returnValue, mappingContext);
+      returnValue = returnValue != null ? AMFMapperIntrospector.getAMFMapper(returnValue.getClass(), method.getGenericReturnType()).toAMF(returnValue, mappingContext) : null;
     }
 
     return returnValue;

@@ -59,11 +59,15 @@ public class CollectionGWTMapper implements GWTMapper<Collection, Collection> {
 
     Collection collection = CollectionGWTMapper.newCollectionInstance(collectionType);
     for (Object item : gwtObject) {
-      GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(item);
-      if (itemMapper == null) {
-        itemMapper = GWTMapperIntrospector.getGWTMapper(this.defaultItemType, this.adapterInfo, this.elementInfo);
+      Object toItem = null;
+      if (item != null) {
+        GWTMapper itemMapper = GWTMapperIntrospector.getGWTMapperForGWTObject(item);
+        if (itemMapper == null) {
+          itemMapper = GWTMapperIntrospector.getGWTMapper(this.defaultItemType, this.adapterInfo, this.elementInfo);
+        }
+        toItem = itemMapper.toJAXB(item, context);
       }
-      collection.add(itemMapper.toJAXB(item, context));
+      collection.add(toItem);
     }
     return collection;
   }
