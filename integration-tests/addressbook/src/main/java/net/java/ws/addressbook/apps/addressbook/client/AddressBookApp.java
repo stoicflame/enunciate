@@ -146,7 +146,7 @@ public class AddressBookApp implements EntryPoint {
             public void onResponseReceived(Request request, Response response) {
               if (200 == response.getStatusCode()) {
                 net.java.ws.addressbook.client.json.domain.Contact contact = net.java.ws.addressbook.client.json.domain.Contact.fromJson(response.getText());
-                byIdPanel.add(new Label("Found " + contact.getContactType().toString() + ": " + contact.getName()));
+                byIdPanel.add(new Label("Found " + contact.getContactType().toString() + ": " + contact.getName() + ", updated: " + new java.util.Date(contact.getUpdated()) + " (" + contact.getUpdated() + ")."));
               }
               else {
                 byIdPanel.add(new Label("ERROR: " + response.getStatusText() + ": REQUEST URL: " + restRequestBuilder.getUrl()));

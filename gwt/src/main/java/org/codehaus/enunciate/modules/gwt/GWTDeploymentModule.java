@@ -479,6 +479,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       overlayClassnameFor.setJdk15(true);
       model.put("packageFor", new ClientPackageForMethod(conversions));
       model.put("overlayPackageFor", new ClientPackageForMethod(overlayConversions));
+      model.put("isAccessorOfTypeLong", new IsAccessorOfTypeLongMethod());
       model.put("classnameFor", classnameFor);
       model.put("overlayClassnameFor", overlayClassnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));

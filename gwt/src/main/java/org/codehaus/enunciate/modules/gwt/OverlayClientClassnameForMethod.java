@@ -45,8 +45,8 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     super(conversions);
     classConversions.put(BigDecimal.class.getName(), String.class.getName());
     classConversions.put(BigInteger.class.getName(), String.class.getName());
-    classConversions.put(Date.class.getName(), "double");
-    classConversions.put(Calendar.class.getName(), "double");
+    classConversions.put(Date.class.getName(), Long.class.getName());
+    classConversions.put(Calendar.class.getName(), Long.class.getName());
     classConversions.put(DataHandler.class.getName(), String.class.getName());
     classConversions.put(QName.class.getName(), String.class.getName());
     classConversions.put(URI.class.getName(), String.class.getName());

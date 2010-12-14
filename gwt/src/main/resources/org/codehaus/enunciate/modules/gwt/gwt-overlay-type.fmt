@@ -64,6 +64,21 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
   private final native void set${property.simpleName?cap_first}Internal(String ${property.simpleName}) /*-{
     this.${property.jsonMemberName} = ${property.simpleName};
   }-*/;
+    [#elseif isAccessorOfTypeLong(property)]
+
+  /**
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public final native Long get${property.simpleName?cap_first}() /*-{
+    return (this.${property.jsonMemberName} == null ? null : @java.lang.Long::valueOf(Ljava/lang/String;)(this.${property.jsonMemberName} + ''));
+  }-*/;
+
+  /**
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public final native void set${property.simpleName?cap_first}(${overlayClassnameFor(property)} ${property.simpleName}) /*-{
+    this.${property.jsonMemberName} = (${property.simpleName} == null ? null : (+(@java.lang.String::valueOf(Ljava/lang/Object;)(${property.simpleName}))));
+  }-*/;
     [#else]
 
   /**

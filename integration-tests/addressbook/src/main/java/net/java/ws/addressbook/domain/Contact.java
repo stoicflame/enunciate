@@ -1,6 +1,7 @@
 package net.java.ws.addressbook.domain;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Date;
 
 /**
  * A contact in the address book.
@@ -17,6 +18,7 @@ public class Contact {
   private String address2;
   private String city;
   private ContactType contactType;
+  private Date updated = new Date();
 
   /**
    * The id of the contact.
@@ -142,5 +144,23 @@ public class Contact {
    */
   public void setContactType(ContactType contactType) {
     this.contactType = contactType;
+  }
+
+  /**
+   * The updated date.
+   *
+   * @return The updated date.
+   */
+  public Date getUpdated() {
+    return updated;
+  }
+
+  /**
+   * The updated date.
+   *
+   * @param updated The updated date.
+   */
+  public void setUpdated(Date updated) {
+    this.updated = updated;
   }
 }
