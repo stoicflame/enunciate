@@ -4,7 +4,7 @@
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-tests</artifactId>
   <packaging>pom</packaging>
-  <version>1.21.1</version>
+  <version>1.22-SNAPSHOT</version>
   <name>Enunciate - Integration Tests</name>
 
   <modules>
