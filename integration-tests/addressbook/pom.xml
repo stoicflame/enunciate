@@ -4,7 +4,7 @@
   <groupId>net.java.ws.addressbook</groupId>
   <artifactId>addressbook</artifactId>
   <packaging>war</packaging>
-  <version>1.22-SNAPSHOT</version>
+  <version>1.21.1</version>
   <name>Enunciate - Address Book Example</name>
 
   <properties>
