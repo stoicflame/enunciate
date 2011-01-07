@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.java_client;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
+import com.sun.mirror.util.SourcePosition;
 import freemarker.template.*;
 import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
@@ -287,7 +288,11 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       matcher.setPathSeparator(".");
       for (WebFault webFault : allFaults.values()) {
         if (useServerSide(webFault, matcher)) {
-          File sourceFile = webFault.getPosition().file();
+          SourcePosition position = webFault.getPosition();
+          if (position == null || position.file() == null) {
+            throw new IllegalStateException("Unable to find source file for " + webFault.getQualifiedName());
+          }
+          File sourceFile = position.file();
           getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, webFault));
         }
         else {
@@ -308,7 +313,11 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       for (SchemaInfo schemaInfo : model.getNamespacesToSchemas().values()) {
         for (TypeDefinition typeDefinition : schemaInfo.getTypeDefinitions()) {
           if (useServerSide(typeDefinition, matcher)) {
-            File sourceFile = typeDefinition.getPosition().file();
+            SourcePosition position = typeDefinition.getPosition();
+            if (position == null || position.file() == null) {
+              throw new IllegalStateException("Unable to find source file for " + typeDefinition.getQualifiedName());
+            }
+            File sourceFile = position.file();
             getEnunciate().copyFile(sourceFile, getServerSideDestFile(sourceFile, typeDefinition));
           }
           else {
