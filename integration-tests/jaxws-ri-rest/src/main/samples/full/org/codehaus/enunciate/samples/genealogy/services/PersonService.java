@@ -21,6 +21,7 @@ import org.codehaus.enunciate.rest.annotations.NounValue;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMap;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
+import org.codehaus.enunciate.samples.genealogy.exceptions.EisAccountException;
 
 import javax.activation.DataHandler;
 import javax.jws.WebMethod;
@@ -60,7 +61,7 @@ public interface PersonService {
    * @return The persons that were read.
    * @throws ServiceException If the read of one or more of the people failed.
    */
-  Collection<Person> readPersons(Collection<String> personIds) throws ServiceException;
+  Collection<Person> readPersons(Collection<String> personIds) throws ServiceException, EisAccountException;
 
   /**
    * Deletes a person from the database.  Not a one-way method, but still void.
