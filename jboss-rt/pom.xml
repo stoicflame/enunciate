@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.codehaus.enunciate</groupId>
+    <artifactId>enunciate-parent</artifactId>
+    <version>1.22-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>enunciate-jboss-rt</artifactId>
+  <name>Enunciate - JBoss Runtime</name>
+
+  <repositories>
+    <!--this has to be here to make sure the central m2-->
+    <!--repo gets consulted FIRST because if not, the-->
+    <!--crazy m2 server at java.net will return bogus artifacts-->
+    <!--when its really not supposed to return anything -->
+    <repository>
+      <id>m2.central</id>
+      <url>http://repo1.maven.org/maven2/</url>
+    </repository>
+    <repository>
+      <id>java.net.1</id>
+      <url>http://download.java.net/maven/1</url>
+      <layout>legacy</layout>
+    </repository>
+    <repository>
+      <id>jboss</id>
+      <name>jboss repo</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-core-rt</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-rt</artifactId>
+      <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <!--jboss comes with its own packaging of jaxb-->
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <!--disable the jersey dependencies, since those are the default-->
+          <groupId>${project.groupId}</groupId>
+          <artifactId>enunciate-jersey-rt</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>enunciate-jaxws-ri-rt</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxrs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxb-provider</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jackson-provider</artifactId>
+    </dependency>
+
+  </dependencies>
+
+</project>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- Enunciate configuration for the integration tests. -->
+<enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.21.xsd">
+  <webapp mergeWebXML="web.xml"/>
+  <modules>
+    <gwt disabled="true"/>
+    <spring-app disabled="true"/>
+    <jersey disabled="true"/>
+  </modules>
+</enunciate>

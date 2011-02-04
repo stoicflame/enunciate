@@ -47,12 +47,13 @@
     <module>cxf-rt</module>
     <module>cxf</module>
 
-    <module>resteasy-rt</module>
-    <module>resteasy</module>
+    <module>jboss-rt</module>
+    <module>jboss</module>
 
     <module>maven-enunciate-plugin</module>
     <module>maven-enunciate-spring-plugin</module>
     <module>maven-enunciate-cxf-plugin</module>
+    <module>maven-enunciate-jboss-plugin</module>
 
     <module>enunciate-simple-archetype</module>
     <module>integration-tests</module>
@@ -830,6 +831,28 @@
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
+        <version>2.0.0.GA</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jaxb-provider</artifactId>
+        <version>2.0.0.GA</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.sun.xml.stream</groupId>
+            <artifactId>sjsxp</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jackson-provider</artifactId>
         <version>2.0.0.GA</version>
       </dependency>
 

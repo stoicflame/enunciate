@@ -1,26 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-integration-cxf-rest</artifactId>
+  <artifactId>enunciate-integration-jboss</artifactId>
   <version>1.22-SNAPSHOT</version>
-  <name>Enunciate - CXF/REST Integration Tests</name>
-  <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
+  <name>Enunciate - JBoss Integration Tests</name>
+  <description>Integration tests for Enunciate, testing the JBoss deployment.</description>
   <packaging>war</packaging>
 
   <build>
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/src/main/samples/full</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -31,45 +19,20 @@
         </configuration>
       </plugin>
       <plugin>
-        <!--now we need to add the generated sources we're testing to the test classpath-->
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/src/main/samples/full</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-cxf-plugin</artifactId>
+        <artifactId>maven-enunciate-jboss-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
           <execution>
             <goals>
               <goal>assemble</goal>
             </goals>
-            <configuration>
-              <addJavaClientSourcesToTestClasspath>true</addJavaClientSourcesToTestClasspath>
-            </configuration>
           </execution>
         </executions>
         <dependencies>
-          <!--There's a weird bug in Maven that I haven't been able to track down
-          in that if I don't add the rest module here, then the next project
-          will fail because it won't find the rest module.-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
+            <artifactId>enunciate-amf</artifactId>
             <version>${project.version}</version>
           </dependency>
           <dependency>
@@ -77,9 +40,13 @@
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
+          <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rest</artifactId>
+            <version>${project.version}</version>
+          </dependency>
         </dependencies>
       </plugin>
-
       <!-- skip unit test run, tests to be executed during integration-test -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -125,22 +92,22 @@
         <configuration>
           <skip>${skipTests}</skip>
           <container>
-            <containerId>tomcat5x</containerId>
+            <containerId>jboss6x</containerId>
             <zipUrlInstaller>
-              <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
+              <url>http://sourceforge.net/projects/jboss/files/JBoss/JBoss-6.0.0.Final/jboss-as-distribution-6.0.0.Final.zip</url>
               <installDir>${basedir}/cargo-installs</installDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
           <configuration>
             <properties>
-              <!-- <cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs> -->
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
-            <home>${project.build.directory}/tomcat5x</home>
+            <home>${project.build.directory}/jboss6x</home>
             <deployables>
               <deployable>
                 <properties>
-                  <context>full</context>
+                  <context>storage</context>
                 </properties>
               </deployable>
             </deployables>
@@ -159,15 +126,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-cxf-rt</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-jboss-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib-nodep</artifactId>
-      <version>2.1_3</version>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>enunciate-amf-rt</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -185,21 +152,9 @@
     </dependency>
 
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>1.3.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-fileupload</groupId>
-      <artifactId>commons-fileupload</artifactId>
-      <version>1.2.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>httpunit</groupId>
-      <artifactId>httpunit</artifactId>
-      <version>1.6.2</version>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>1.2</version>
 
       <scope>test</scope>
     </dependency>
@@ -211,7 +166,6 @@
 
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <distributionManagement>
