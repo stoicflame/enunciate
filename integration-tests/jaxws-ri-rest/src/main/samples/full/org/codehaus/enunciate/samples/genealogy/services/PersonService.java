@@ -19,7 +19,6 @@ package org.codehaus.enunciate.samples.genealogy.services;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.rest.annotations.NounValue;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
-import org.codehaus.enunciate.samples.genealogy.data.RootElementMap;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
 import org.codehaus.enunciate.samples.genealogy.exceptions.EisAccountException;
 
@@ -28,7 +27,6 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.ws.rs.*;
-import javax.xml.ws.soap.MTOM;
 import java.util.Collection;
 
 /**

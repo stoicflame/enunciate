@@ -73,9 +73,6 @@ public class TestJerseyStorageService extends TestCase {
     response = resource.path("containers/one/string").get(ClientResponse.class);
     assertEquals(200, response.getStatus());
     assertEquals(stringItem, response.getEntity(String.class));
-
-    resource = getStorageResource("xml");
-    assertEquals(200, resource.path("containers").get(ClientResponse.class).getStatus());
   }
 
   protected WebResource getStorageResource() {
