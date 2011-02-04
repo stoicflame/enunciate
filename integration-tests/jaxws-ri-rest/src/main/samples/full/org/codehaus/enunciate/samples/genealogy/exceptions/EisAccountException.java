@@ -1,30 +1,28 @@
 package org.codehaus.enunciate.samples.genealogy.exceptions;
 
-import org.codehaus.enunciate.samples.genealogy.data.Person;
-
 import javax.xml.ws.WebFault;
 
-@WebFault ( faultBean = "org.codehaus.enunciate.samples.genealogy.data.Person" )
+@WebFault ( faultBean = "org.codehaus.enunciate.samples.genealogy.exceptions.EisFault" )
 public class EisAccountException extends EisExceptionBase {
 
   private static final long serialVersionUID = 6609084036637969280L;
-  private Person customer;
+  private EisFault faultInfo;
 
 
-  public EisAccountException(String message, Person customer, Throwable cause) {
+  public EisAccountException(String message, EisFault faultInfo, Throwable cause) {
     super(message, cause);
-    this.customer = customer;
+    this.faultInfo = faultInfo;
   }
 
 
-  public EisAccountException(String message, Person customer) {
+  public EisAccountException(String message, EisFault faultInfo) {
     super(message);
-    this.customer = customer;
+    this.faultInfo = faultInfo;
   }
 
 
-  public Person getFaultInfo() {
-    return customer;
+  public EisFault getFaultInfo() {
+    return faultInfo;
   }
 
 }
