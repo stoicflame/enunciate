@@ -8,16 +8,18 @@
   <name>Enunciate - Integration Tests</name>
 
   <modules>
+
     <module>cxf-rest</module>
-    <module>jboss</module>
-    
     <module>jaxws-ri-rest</module>
     <module>jaxws-ri-rest-spring</module>
+    <module>jboss-ws-rest</module>
     <module>contract-first</module>
     <module>jersey-storage</module>
     <module>jersey-storage-spring</module>
+    <module>jboss-storage</module>
     <module>addressbook</module>
     <module>petclinic</module>
+
   </modules>
 
   <build>

@@ -3,10 +3,10 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
-  <artifactId>enunciate-integration-cxf-rest</artifactId>
+  <artifactId>enunciate-integration-jboss-rest</artifactId>
   <version>1.22-SNAPSHOT</version>
-  <name>Enunciate - CXF/REST Integration Tests</name>
-  <description>Integration tests for Enunciate, testing the CXF + REST combo.</description>
+  <name>Enunciate - JBoss-WS/REST Integration Tests</name>
+  <description>Integration tests for Enunciate, testing the JBoss WS + REST combo.</description>
   <packaging>war</packaging>
 
   <build>
@@ -51,7 +51,7 @@
       </plugin>
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-cxf-plugin</artifactId>
+        <artifactId>maven-enunciate-jboss-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
           <execution>
@@ -130,18 +130,18 @@
         <configuration>
           <skip>${skipTests}</skip>
           <container>
-            <containerId>tomcat5x</containerId>
+            <containerId>jboss6x</containerId>
             <zipUrlInstaller>
-              <url>http://archive.apache.org/dist/tomcat/tomcat-5/v5.5.26/bin/apache-tomcat-5.5.26.zip</url>
+              <url>http://sourceforge.net/projects/jboss/files/JBoss/JBoss-6.0.0.Final/jboss-as-distribution-6.0.0.Final.zip</url>
               <installDir>${basedir}/cargo-installs</installDir>
             </zipUrlInstaller>
             <append>false</append>
           </container>
           <configuration>
             <properties>
-              <!-- <cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs> -->
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
-            <home>${project.build.directory}/tomcat5x</home>
+            <home>${project.build.directory}/jboss6x</home>
             <deployables>
               <deployable>
                 <properties>
@@ -165,7 +165,7 @@
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-cxf-rt</artifactId>
+      <artifactId>enunciate-jboss-rt</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -199,6 +199,14 @@
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <version>1.2.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.3</version>
+
+      <scope>test</scope>
     </dependency>
 
     <dependency>

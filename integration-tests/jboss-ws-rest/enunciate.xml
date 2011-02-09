@@ -26,18 +26,7 @@
       </package-conversions>
     </java-client>
     <jersey disabled="true"/>
-    <spring-app>
-      <springImport file="src/conf/custom_spring.xml"/>
-      <copyResources dir="${basedir}/src/main/samples/full" pattern="**/*.txt"/>
-      <globalServiceInterceptor beanName="globalServiceAdvice"/>
-      <war>
-        <manifest>
-          <attribute name="Class-Path" value="whatever.jar"/>
-        </manifest>
-      </war>
-    </spring-app>
-    <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
-      <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>
-    </docs>
+    <spring-app disabled="true"/>
+    <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site"/>
   </modules>
 </enunciate>
