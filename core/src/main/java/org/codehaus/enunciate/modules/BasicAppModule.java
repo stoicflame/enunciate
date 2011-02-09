@@ -35,6 +35,8 @@ import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -338,6 +340,9 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
       model.put("envEntries", envEntries);
       model.put("resourceEnvRefs", resourceEnvRefs);
       model.put("resourceRefs", resourceRefs);
+      if (webAppConfig != null) {
+        model.put("webappAttributes", webAppConfig.getWebXmlAttributes());
+      }
       processTemplate(getWebXmlTemplateURL(), model);
     }
     catch (TemplateException e) {
@@ -353,8 +358,24 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
       }
 
       try {
-        model.put("source1", loadMergeXmlModel(webXmlToMerge.openStream()));
-        model.put("source2", loadMergeXmlModel(new FileInputStream(webXML)));
+        Document source1Doc = loadMergeXml(webXmlToMerge.openStream());
+        NodeModel.simplify(source1Doc);
+        Document source2Doc = loadMergeXml(new FileInputStream(webXML));
+        NodeModel.simplify(source2Doc);
+
+        Map<String, String> mergedAttributes = new HashMap<String, String>();
+        NamedNodeMap source2Attributes = source2Doc.getDocumentElement().getAttributes();
+        for (int i = 0; i < source2Attributes.getLength(); i++) {
+          mergedAttributes.put(source2Attributes.item(i).getNodeName(), source2Attributes.item(i).getNodeValue());
+        }
+        NamedNodeMap source1Attributes = source1Doc.getDocumentElement().getAttributes();
+        for (int i = 0; i < source1Attributes.getLength(); i++) {
+          mergedAttributes.put(source1Attributes.item(i).getNodeName(), source1Attributes.item(i).getNodeValue());
+        }
+
+        model.put("source1", NodeModel.wrap(source1Doc.getDocumentElement()));
+        model.put("source2", NodeModel.wrap(source2Doc.getDocumentElement()));
+        model.put("mergedAttributes", mergedAttributes);
         processTemplate(getMergeWebXmlTemplateURL(), model);
       }
       catch (TemplateException e) {
@@ -398,7 +419,8 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
    * @param inputStream The input stream of the xml.
    * @return The node model.
    */
-  protected NodeModel loadMergeXmlModel(InputStream inputStream) throws EnunciateException {
+  protected Document loadMergeXml(InputStream inputStream) throws EnunciateException {
+    Document doc;
     try {
       DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
       builderFactory.setNamespaceAware(false); //no namespace for the merging...
@@ -410,13 +432,12 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
           return new InputSource(new StringReader(""));
         }
       });
-      Document doc = builder.parse(inputStream);
-      NodeModel.simplify(doc);
-      return NodeModel.wrap(doc.getDocumentElement());
+      doc = builder.parse(inputStream);
     }
     catch (Exception e) {
       throw new EnunciateException("Error parsing web.xml file for merging", e);
     }
+    return doc;
   }
 
   /**

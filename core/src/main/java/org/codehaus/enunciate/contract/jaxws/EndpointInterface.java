@@ -142,6 +142,13 @@ public class EndpointInterface extends DecoratedTypeDeclaration {
       serviceName = annotation.serviceName();
     }
 
+    if (((serviceName == null) || ("".equals(serviceName))) && getEndpointImplementations().size() == 1) {
+      WebService implAnnotation = getEndpointImplementations().iterator().next().getAnnotation(WebService.class);
+      if (implAnnotation != null) {
+        serviceName = implAnnotation.serviceName();
+      }
+    }
+
     if ((serviceName == null) || ("".equals(serviceName))) {
       serviceName = getSimpleName() + "Service";
     }

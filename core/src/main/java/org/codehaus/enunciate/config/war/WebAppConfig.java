@@ -19,7 +19,9 @@ package org.codehaus.enunciate.config.war;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
 import java.net.URL;
@@ -49,6 +51,7 @@ public class WebAppConfig {
   private boolean doCompile = true;
   private boolean doLibCopy = true;
   private boolean doPackage = true;
+  private final Map<String, String> webXmlAttributes = new HashMap<String, String>();
 
   private final List<WebAppComponent> globalServletFilters = new ArrayList<WebAppComponent>();
   private final List<CopyResources> copyResources = new ArrayList<CopyResources>();
@@ -492,6 +495,14 @@ public class WebAppConfig {
     }
 
     this.resourceEnvRefs.add(resource);
+  }
+
+  public Map<String, String> getWebXmlAttributes() {
+    return webXmlAttributes;
+  }
+
+  public void addWebXmlAttribute(String name, String value) {
+    this.webXmlAttributes.put(name, value);
   }
 
 }

@@ -55,10 +55,10 @@ public class TestMergeWebXml extends TestCase {
       }
     };
     model.put("file", transform);
-    model.put("source1", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.2.xml")));
+    model.put("source1", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.2.xml")));
     module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
-    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.3.xml")));
+    model.put("source2", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.3.xml")));
     module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?
@@ -91,8 +91,8 @@ public class TestMergeWebXml extends TestCase {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     builderFactory.setNamespaceAware(false);
     NodeModel.setDocumentBuilderFactory(builderFactory);
-    model.put("source1", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
-    model.put("source2", new BasicAppModule().loadMergeXmlModel(TestMergeWebXml.class.getResourceAsStream("petclinic.web.xml")));
+    model.put("source1", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("web.1.xml")));
+    model.put("source2", new BasicAppModule().loadMergeXml(TestMergeWebXml.class.getResourceAsStream("petclinic.web.xml")));
     module.processTemplate(BasicAppModule.class.getResource("merge-web-xml.fmt"), model);
 
     //todo: better tests?

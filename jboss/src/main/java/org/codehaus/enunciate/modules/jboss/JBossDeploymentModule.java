@@ -22,11 +22,18 @@ import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
+import org.codehaus.enunciate.modules.BasicAppModule;
+import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jboss.config.JBossRuleSet;
@@ -57,7 +64,7 @@ import java.util.*;
  * <p>The JBoss module supports the following configuration attributes:</p>
  *
  * <ul>
- * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ *   <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  * </ul>
  *
  * <p>The JBoss module also supports a list of <tt>option</tt> child elements that each support a 'name' and 'value' attribute. This can be used to configure the RESTEasy
@@ -110,6 +117,20 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
         }
       }
 
+      EnunciateConfiguration config = model.getEnunciateConfig();
+      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          String path = "/soap/" + ei.getServiceName();
+          if (config != null) {
+            path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+            if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+              path = config.getSoapServices2Paths().get(ei.getServiceName());
+            }
+          }
+
+          ei.putMetaData("soapPath", path);
+        }
+      }
       if (!servletFound) {
         warn("The JBoss runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
       }
@@ -117,8 +138,22 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   }
 
   @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+    enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+  }
+
+  @Override
   public void doFreemarkerGenerate() throws IOException, TemplateException {
-    //no-op; nothing to generate.
+    WebAppConfig webAppConfig = enunciate.getConfig().getWebAppConfig();
+    if (webAppConfig == null) {
+      webAppConfig = new WebAppConfig();
+      enunciate.getConfig().setWebAppConfig(webAppConfig);
+    }
+    webAppConfig.addWebXmlAttribute("version", "3.0");
+    webAppConfig.addWebXmlAttribute("xmlns", "http://java.sun.com/xml/ns/javaee");
+    webAppConfig.addWebXmlAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    webAppConfig.addWebXmlAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd");
   }
 
   @Override
@@ -133,8 +168,19 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
 
-    Set<String> urlMappings = new TreeSet<String>();
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
+
+    for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
+      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+        String path = (String) ei.getMetaData().get("soapPath");
+        WebAppComponent wsComponent = new WebAppComponent();
+        wsComponent.setName(ei.getServiceName());
+        wsComponent.setClassname(ei.getEndpointImplementations().iterator().next().getQualifiedName());
+        wsComponent.setUrlMappings(new TreeSet<String>(Arrays.asList(path)));
+        servlets.add(wsComponent);
+      }
+    }
+
 
     WebAppComponent jaxrsServletComponent = new WebAppComponent();
     jaxrsServletComponent.setName("resteasy-jaxrs");
@@ -202,7 +248,6 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
     }
     jaxrsServletComponent.addInitParam("resteasy.scan", "false"); //turn off scanning because we've already done it.
     servlets.add(jaxrsServletComponent);
-    urlMappings.addAll(jaxrsUrlMappings);
     webappFragment.setServlets(servlets);
 
     if (!this.options.isEmpty()) {
@@ -212,9 +257,14 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
     enunciate.addWebAppFragment(webappFragment);
   }
 
+  @Override
+  public Validator getValidator() {
+    return new JBossValidator();
+  }
+
   // Inherited.
   public boolean isJaxwsProvider() {
-    return false;
+    return true;
   }
 
   // Inherited.

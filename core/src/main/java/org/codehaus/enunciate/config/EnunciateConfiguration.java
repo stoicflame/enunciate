@@ -694,6 +694,11 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addSetProperties("enunciate/webapp/env");
     digester.addSetNext("enunciate/webapp/env", "addEnvEntry");
 
+    //allow jboss options to be added.
+    digester.addCallMethod("enunciate/webapp/attribute", "addWebXmlAttribute", 2);
+    digester.addCallParam("enunciate/webapp/attribute", 0, "name");
+    digester.addCallParam("enunciate/webapp/attribute", 1, "value");
+
     digester.addObjectCreate("enunciate/webapp/excludeJar", IncludeExcludeLibs.class);
     digester.addSetProperties("enunciate/webapp/excludeJar");
     digester.addSetNext("enunciate/webapp/excludeJar", "addExcludeLibs");

@@ -1,7 +1,7 @@
 [#ftl]
 [@file name="merged-web.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app[#list source1.@@ as attr] ${attr?node_name}="${attr}"[/#list]>
+<web-app[#if mergedAttributes??][#list mergedAttributes?keys as attr] ${attr}="${mergedAttributes[attr]}"[/#list][/#if]>
 
   [#if source1["icon"]?size > 0]
   <icon>${source1["icon"]}</icon>

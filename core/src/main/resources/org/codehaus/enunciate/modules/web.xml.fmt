@@ -1,7 +1,7 @@
 [#ftl]
 [@file name="web.xml" charset="utf-8"]
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app>
+<web-app[#if webappAttributes??][#list webappAttributes?keys as attr] ${attr}="${webappAttributes[attr]}"[/#list][/#if]>
 
   <display-name>${displayName!"enunciate-app"}</display-name>
   [#list webAppFragments as fragment]
