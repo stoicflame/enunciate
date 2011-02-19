@@ -32,8 +32,6 @@ import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.modules.BasicAppModule;
-import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jboss.config.JBossRuleSet;
@@ -65,6 +63,8 @@ import java.util.*;
  *
  * <ul>
  *   <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ *   <li>The "enableJaxws" attribute (boolean) can be used to disable the JAX-WS support, leaving the JAX-WS support to another module if necessary. Default: true</li>
+ *   <li>The "enableJaxrs" attribute (boolean) can be used to disable the JAX-RS (RESTEasy) support, leaving the JAX-RS support to another module if necessary. Default: true</li>
  * </ul>
  *
  * <p>The JBoss module also supports a list of <tt>option</tt> child elements that each support a 'name' and 'value' attribute. This can be used to configure the RESTEasy
@@ -80,9 +80,10 @@ import java.util.*;
  */
 public class JBossDeploymentModule extends FreemarkerDeploymentModule implements EnunciateClasspathListener, SpecProviderModule {
 
+  private boolean enableJaxrs = true;
+  private boolean enableJaxws = true;
   private boolean useSubcontext = true;
   private boolean jacksonAvailable = false;
-  private boolean servletFound = false;
   private final Map<String, String> options = new TreeMap<String, String>();
 
   /**
@@ -96,7 +97,6 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   // Inherited.
   public void onClassesFound(Set<String> classes) {
     jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
-    servletFound |= classes.contains(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class.getName());
   }
 
   // Inherited.
@@ -105,34 +105,35 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
     super.initModel(model);
 
     if (!isDisabled()) {
-      for (RootResource resource : model.getRootResources()) {
-        for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
-          Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
-          String subcontext = this.useSubcontext ? getRestSubcontext() : "";
-          debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
-                resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
-          subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
-          resourceMethod.putMetaData("defaultSubcontext", subcontext);
-          resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
-        }
-      }
-
-      EnunciateConfiguration config = model.getEnunciateConfig();
-      for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
-        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-          String path = "/soap/" + ei.getServiceName();
-          if (config != null) {
-            path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
-            if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
-              path = config.getSoapServices2Paths().get(ei.getServiceName());
-            }
+      if (enableJaxrs) {
+        for (RootResource resource : model.getRootResources()) {
+          for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
+            Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
+            String subcontext = this.useSubcontext ? getRestSubcontext() : "";
+            debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\".",
+                  resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
+            subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
+            resourceMethod.putMetaData("defaultSubcontext", subcontext);
+            resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
           }
-
-          ei.putMetaData("soapPath", path);
         }
       }
-      if (!servletFound) {
-        warn("The JBoss runtime wasn't found on the Enunciate classpath. This could be fatal to the runtime application.");
+
+      if (enableJaxws) {
+        EnunciateConfiguration config = model.getEnunciateConfig();
+        for (WsdlInfo wsdlInfo : model.getNamespacesToWSDLs().values()) {
+          for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+            String path = "/soap/" + ei.getServiceName();
+            if (config != null) {
+              path = config.getDefaultSoapSubcontext() + '/' + ei.getServiceName();
+              if (config.getSoapServices2Paths().containsKey(ei.getServiceName())) {
+                path = config.getSoapServices2Paths().get(ei.getServiceName());
+              }
+            }
+
+            ei.putMetaData("soapPath", path);
+          }
+        }
       }
     }
   }
@@ -140,7 +141,9 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
-    enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+    if (this.enableJaxws) {
+      enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
+    }
   }
 
   @Override
@@ -160,116 +163,118 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   protected void doBuild() throws EnunciateException, IOException {
     super.doBuild();
 
-    Enunciate enunciate = getEnunciate();
-
-    File webappDir = getBuildDir();
-    webappDir.mkdirs();
-
-    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
-    webappFragment.setBaseDir(webappDir);
-
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
-
-    for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
-      for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
-        String path = (String) ei.getMetaData().get("soapPath");
-        WebAppComponent wsComponent = new WebAppComponent();
-        wsComponent.setName(ei.getServiceName());
-        wsComponent.setClassname(ei.getEndpointImplementations().iterator().next().getQualifiedName());
-        wsComponent.setUrlMappings(new TreeSet<String>(Arrays.asList(path)));
-        servlets.add(wsComponent);
-      }
-    }
-
-
-    WebAppComponent jaxrsServletComponent = new WebAppComponent();
-    jaxrsServletComponent.setName("resteasy-jaxrs");
-    jaxrsServletComponent.setClassname(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class.getName());
-    TreeSet<String> jaxrsUrlMappings = new TreeSet<String>();
-    StringBuilder resources = new StringBuilder();
-    for (RootResource rootResource : getModel().getRootResources()) {
-      if (resources.length() > 0) {
-        resources.append(',');
-      }
-      resources.append(rootResource.getQualifiedName());
-
-      for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-        String resourceMethodPattern = resourceMethod.getServletPattern();
-        for (Set<String> subcontextList : ((Map<String, Set<String>>) resourceMethod.getMetaData().get("subcontexts")).values()) {
-          for (String subcontext : subcontextList) {
-            String servletPattern;
-            if ("".equals(subcontext)) {
-              servletPattern = resourceMethodPattern;
-            }
-            else {
-              servletPattern = subcontext + resourceMethodPattern;
-            }
-
-            if (jaxrsUrlMappings.add(servletPattern)) {
-              debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
-                    resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
-            }
-          }
+    if (this.enableJaxws) {
+      for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
+        for (EndpointInterface ei : wsdlInfo.getEndpointInterfaces()) {
+          String path = (String) ei.getMetaData().get("soapPath");
+          WebAppComponent wsComponent = new WebAppComponent();
+          wsComponent.setName(ei.getServiceName());
+          wsComponent.setClassname(ei.getEndpointImplementations().iterator().next().getQualifiedName());
+          wsComponent.setUrlMappings(new TreeSet<String>(Arrays.asList(path)));
+          servlets.add(wsComponent);
         }
       }
     }
 
-    StringBuilder providers = new StringBuilder();
-    for (TypeDeclaration provider : getModel().getJAXRSProviders()) {
-      if (providers.length() > 0) {
-        providers.append(',');
+    if (this.enableJaxrs) {
+      WebAppComponent jaxrsServletComponent = new WebAppComponent();
+      jaxrsServletComponent.setName("resteasy-jaxrs");
+      jaxrsServletComponent.setClassname(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class.getName());
+      TreeSet<String> jaxrsUrlMappings = new TreeSet<String>();
+      StringBuilder resources = new StringBuilder();
+      for (RootResource rootResource : getModel().getRootResources()) {
+        if (resources.length() > 0) {
+          resources.append(',');
+        }
+        resources.append(rootResource.getQualifiedName());
+
+        for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
+          String resourceMethodPattern = resourceMethod.getServletPattern();
+          for (Set<String> subcontextList : ((Map<String, Set<String>>) resourceMethod.getMetaData().get("subcontexts")).values()) {
+            for (String subcontext : subcontextList) {
+              String servletPattern;
+              if ("".equals(subcontext)) {
+                servletPattern = resourceMethodPattern;
+              }
+              else {
+                servletPattern = subcontext + resourceMethodPattern;
+              }
+
+              if (jaxrsUrlMappings.add(servletPattern)) {
+                debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
+                      resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+              }
+            }
+          }
+        }
       }
 
-      providers.append(provider.getQualifiedName());
-    }
+      StringBuilder providers = new StringBuilder();
+      for (TypeDeclaration provider : getModel().getJAXRSProviders()) {
+        if (providers.length() > 0) {
+          providers.append(',');
+        }
 
-    if (jacksonAvailable) {
-      if (providers.length() > 0) {
-        providers.append(',');
+        providers.append(provider.getQualifiedName());
       }
 
-      providers.append("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
-    }
+      if (jacksonAvailable) {
+        if (providers.length() > 0) {
+          providers.append(',');
+        }
 
-    if (getEnunciate().isModuleEnabled("amf")) {
-      if (providers.length() > 0) {
-        providers.append(',');
+        providers.append("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
       }
 
-      providers.append("org.codehaus.enunciate.modules.amf.JAXRSProvider");
+      if (getEnunciate().isModuleEnabled("amf")) {
+        if (providers.length() > 0) {
+          providers.append(',');
+        }
+
+        providers.append("org.codehaus.enunciate.modules.amf.JAXRSProvider");
+      }
+
+      jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
+      jaxrsServletComponent.addInitParam("resteasy.resources", resources.toString());
+      jaxrsServletComponent.addInitParam("resteasy.providers", providers.toString());
+      String mappingPrefix = this.useSubcontext ? getRestSubcontext() : "";
+      if (!"".equals(mappingPrefix)) {
+        jaxrsServletComponent.addInitParam("resteasy.servlet.mapping.prefix", mappingPrefix);
+      }
+      jaxrsServletComponent.addInitParam("resteasy.scan", "false"); //turn off scanning because we've already done it.
+      servlets.add(jaxrsServletComponent);
     }
 
-    jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
-    jaxrsServletComponent.addInitParam("resteasy.resources", resources.toString());
-    jaxrsServletComponent.addInitParam("resteasy.providers", providers.toString());
-    String mappingPrefix = this.useSubcontext ? getRestSubcontext() : "";
-    if (!"".equals(mappingPrefix)) {
-      jaxrsServletComponent.addInitParam("resteasy.servlet.mapping.prefix", mappingPrefix);
-    }
-    jaxrsServletComponent.addInitParam("resteasy.scan", "false"); //turn off scanning because we've already done it.
-    servlets.add(jaxrsServletComponent);
+    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setServlets(servlets);
-
     if (!this.options.isEmpty()) {
       webappFragment.setContextParameters(this.options);
     }
-
-    enunciate.addWebAppFragment(webappFragment);
+    getEnunciate().addWebAppFragment(webappFragment);
   }
 
   @Override
   public Validator getValidator() {
-    return new JBossValidator();
+    return this.enableJaxws ? new JBossValidator() : super.getValidator();
   }
 
   // Inherited.
   public boolean isJaxwsProvider() {
-    return true;
+    return this.enableJaxws;
   }
 
   // Inherited.
   public boolean isJaxrsProvider() {
-    return true;
+    return this.enableJaxrs;
+  }
+
+  public void setEnableJaxrs(boolean enableJaxrs) {
+    this.enableJaxrs = enableJaxrs;
+  }
+
+  public void setEnableJaxws(boolean enableJaxws) {
+    this.enableJaxws = enableJaxws;
   }
 
   /**

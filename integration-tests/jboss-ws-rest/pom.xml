@@ -63,26 +63,6 @@
             </configuration>
           </execution>
         </executions>
-        <dependencies>
-          <!--There's a weird bug in Maven that I haven't been able to track down
-          in that if I don't add the rest module here, then the next project
-          will fail because it won't find the rest module.-->
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-amf</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-gwt</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${project.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <!-- skip unit test run, tests to be executed during integration-test -->
