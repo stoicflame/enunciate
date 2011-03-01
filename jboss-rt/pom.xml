@@ -37,6 +37,13 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>enunciate-core-rt</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <!--we're going to exclude jsr311-api because resteasy has its own dep on it-->
+          <groupId>javax.ws.rs</groupId>
+          <artifactId>jsr311-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
