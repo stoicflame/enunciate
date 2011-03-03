@@ -96,7 +96,7 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
 
   // Inherited.
   public void onClassesFound(Set<String> classes) {
-    jacksonAvailable |= classes.contains("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
+    jacksonAvailable |= classes.contains("org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider");
   }
 
   // Inherited.
@@ -224,7 +224,7 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
           providers.append(',');
         }
 
-        providers.append("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider");
+        providers.append("org.codehaus.enunciate.jboss.ResteasyJacksonJaxbProvider");
       }
 
       if (getEnunciate().isModuleEnabled("amf")) {
