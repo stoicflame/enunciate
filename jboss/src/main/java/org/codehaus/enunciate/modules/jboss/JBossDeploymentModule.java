@@ -29,6 +29,7 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.jboss.EnunciateJBossHttpServletDispatcher;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -36,7 +37,7 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jboss.config.JBossRuleSet;
 
-import java.io.File;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.*;
 
@@ -59,10 +60,22 @@ import java.util.*;
  *
  * <h1><a name="config">Configuration</a></h1>
  *
+ * <h3>Content Negotiation</h3>
+ *
+ * <p>Enuncite provides content type negotiation (conneg) to Jersey that conforms to the <a href="module_rest.html#contentTypes">content type negotiation of
+ * the Enunciate REST module</a>.  This means that each resource is mounted from the REST subcontext (see above) but ALSO from a subcontext that conforms to the
+ * id of each content type that the resource supports.  So, if the content type id of the "application/xml" content type is "xml" then the resource at path
+ * "mypath" will be mounted at both "/rest/mypath" and "/xml/mypath".</p>
+ *
+ * <p>The content types for each JAX-RS resource are declared by the @Produces annotation. The content type ids are customized with the
+ * "enunciate/services/rest/content-types" element in the Enunciate configuration. Enunciate supplies providers for the "application/xml" and "application/json"
+ * content types by default.</p>
+ *
  * <p>The JBoss module supports the following configuration attributes:</p>
  *
  * <ul>
  *   <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
+ *   <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "false".</a></li>
  *   <li>The "enableJaxws" attribute (boolean) can be used to disable the JAX-WS support, leaving the JAX-WS support to another module if necessary. Default: true</li>
  *   <li>The "enableJaxrs" attribute (boolean) can be used to disable the JAX-RS (RESTEasy) support, leaving the JAX-RS support to another module if necessary. Default: true</li>
  * </ul>
@@ -84,6 +97,7 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   private boolean enableJaxws = true;
   private boolean useSubcontext = true;
   private boolean jacksonAvailable = false;
+  private boolean usePathBasedConneg = false;
   private final Map<String, String> options = new TreeMap<String, String>();
 
   /**
@@ -106,6 +120,8 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
 
     if (!isDisabled()) {
       if (enableJaxrs) {
+        Map<String, String> contentTypes2Ids = model.getContentTypesToIds();
+
         for (RootResource resource : model.getRootResources()) {
           for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
             Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
@@ -114,6 +130,29 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
                   resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), subcontext);
             subcontextsByContentType.put(null, new TreeSet<String>(Arrays.asList(subcontext)));
             resourceMethod.putMetaData("defaultSubcontext", subcontext);
+
+            if (isUsePathBasedConneg()) {
+              for (String producesMime : resourceMethod.getProducesMime()) {
+                MediaType producesType = MediaType.valueOf(producesMime);
+
+                for (Map.Entry<String, String> contentTypeToId : contentTypes2Ids.entrySet()) {
+                  MediaType type = MediaType.valueOf(contentTypeToId.getKey());
+                  if (producesType.isCompatible(type)) {
+                    String id = '/' + contentTypeToId.getValue();
+                    debug("Resource method %s of resource %s to be made accessible at subcontext \"%s\" because it produces %s/%s.",
+                          resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), id, producesType.getType(), producesType.getSubtype());
+                    String contentTypeValue = String.format("%s/%s", type.getType(), type.getSubtype());
+                    Set<String> subcontextList = subcontextsByContentType.get(contentTypeValue);
+                    if (subcontextList == null) {
+                      subcontextList = new TreeSet<String>();
+                      subcontextsByContentType.put(contentTypeValue, subcontextList);
+                    }
+                    subcontextList.add(id);
+                  }
+                }
+              }
+            }
+
             resourceMethod.putMetaData("subcontexts", subcontextsByContentType);
           }
         }
@@ -180,7 +219,7 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
     if (this.enableJaxrs) {
       WebAppComponent jaxrsServletComponent = new WebAppComponent();
       jaxrsServletComponent.setName("resteasy-jaxrs");
-      jaxrsServletComponent.setClassname(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class.getName());
+      jaxrsServletComponent.setClassname(EnunciateJBossHttpServletDispatcher.class.getName());
       TreeSet<String> jaxrsUrlMappings = new TreeSet<String>();
       StringBuilder resources = new StringBuilder();
       for (RootResource rootResource : getModel().getRootResources()) {
@@ -242,6 +281,21 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
       if (!"".equals(mappingPrefix)) {
         jaxrsServletComponent.addInitParam("resteasy.servlet.mapping.prefix", mappingPrefix);
       }
+      if (isUsePathBasedConneg()) {
+        Map<String, String> contentTypesToIds = getModelInternal().getContentTypesToIds();
+        if (contentTypesToIds != null && contentTypesToIds.size() > 0) {
+          StringBuilder builder = new StringBuilder();
+          Iterator<Map.Entry<String, String>> contentTypeIt = contentTypesToIds.entrySet().iterator();
+          while (contentTypeIt.hasNext()) {
+            Map.Entry<String, String> contentTypeEntry = contentTypeIt.next();
+            builder.append(contentTypeEntry.getValue()).append(" : ").append(contentTypeEntry.getKey());
+            if (contentTypeIt.hasNext()) {
+              builder.append(", ");
+            }
+          }
+          jaxrsServletComponent.addInitParam("resteasy.media.type.mappings", builder.toString());
+        }
+      }
       jaxrsServletComponent.addInitParam("resteasy.scan", "false"); //turn off scanning because we've already done it.
       servlets.add(jaxrsServletComponent);
     }
@@ -275,6 +329,24 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
 
   public void setEnableJaxws(boolean enableJaxws) {
     this.enableJaxws = enableJaxws;
+  }
+
+  /**
+   * Whether to use path-based conneg.
+   *
+   * @return Whether to use path-based conneg.
+   */
+  public boolean isUsePathBasedConneg() {
+    return usePathBasedConneg;
+  }
+
+  /**
+   * Whether to use path-based conneg.
+   *
+   * @param usePathBasedConneg Whether to use path-based conneg.
+   */
+  public void setUsePathBasedConneg(boolean usePathBasedConneg) {
+    this.usePathBasedConneg = usePathBasedConneg;
   }
 
   /**
