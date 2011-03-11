@@ -29,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -57,6 +58,7 @@ public class SourceServiceImpl implements SourceService {
 
   @GET
   @Path ("{id}")
+  @Produces ({"application/json", "application/xml"})
   public Source getSource(@PathParam ("id") String id) throws ServiceException, UnknownSourceException {
     if ("valid".equals(id)) {
       Source source = new Source();

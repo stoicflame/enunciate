@@ -25,6 +25,7 @@
         <convert from="org.codehaus.enunciate.samples.genealogy" to="org.codehaus.enunciate.samples.genealogy.jaxws_client"/>
       </package-conversions>
     </java-client>
+    <jboss usePathBasedConneg="true"/>
     <jersey disabled="true"/>
     <spring-app disabled="true"/>
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site"/>
