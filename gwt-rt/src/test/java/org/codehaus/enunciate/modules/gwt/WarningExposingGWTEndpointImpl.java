@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Ryan Heaton
  */
-@SuppressWarnings ( {"ALL"} )
+@SuppressWarnings ( {"all"} )
 public class WarningExposingGWTEndpointImpl extends GWTEndpointImpl {
 
   public WarningExposingGWTEndpointImpl(Object serviceBean) {

@@ -8,7 +8,7 @@ package ${endpointInterface.package.qualifiedName}.gwt;
 /**
  * ${endpointInterface.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
-@java.lang.SuppressWarnings( {"ALL"} )
+@java.lang.SuppressWarnings( {"all"} )
 [#if useWrappedServices!false]
 public class GWT${endpointInterface.simpleName}Impl extends org.codehaus.enunciate.modules.gwt.GWTEndpointImpl implements ${packageFor(endpointInterface)}.GWT${endpointInterface.simpleName} {
 [#else]

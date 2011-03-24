@@ -10,7 +10,7 @@ import org.codehaus.enunciate.modules.gwt.*;
  *
  * @author Ryan Heaton
  */
-@java.lang.SuppressWarnings( {"ALL"} )
+@java.lang.SuppressWarnings( {"all"} )
 public class ${fault.simpleName}GWTMapper extends BaseGWTMapper {
 
   public ${fault.simpleName}GWTMapper() {
