@@ -275,6 +275,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
 
     if (!isDisabled()) {
       if (isEnableSecurity()) {
+        warn("Enunciate-specific spring security configuration has been DEPRECATED and will be removed in a future release. Please see http://goo.gl/1S94J for more information.");
         if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
           throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
         }

@@ -21,6 +21,8 @@ import java.util.*;
 /**
  * <h1><a name="security">Spring Application Security</a></h1>
  *
+ * <p>This configuration has been deprecated and will be removed from Enunciate in a later build. Please see <a href="http://docs.codehaus.org/display/ENUNCIATE/Securing+Web+Services">Securing Web Services</a> for more information.</p>
+ *
  * <p>Enunciate provides a mechanism for securing your Web service API by leveraging the capabilities of <a href="http://static.springframework.org/spring-security/site/">Spring Security</a>
  * (soon to be known as Spring Security).</p>
  *
