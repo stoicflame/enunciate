@@ -30,42 +30,31 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
+import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
-import org.codehaus.enunciate.contract.json.JsonAnyTypeDefinition;
-import org.codehaus.enunciate.contract.json.JsonObjectTypeDefinition;
-import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
-import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
-import org.codehaus.enunciate.contract.json.JsonSimpleTypeDefinition;
-import org.codehaus.enunciate.contract.json.JsonType;
-import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
-import org.codehaus.enunciate.contract.rest.*;
+import org.codehaus.enunciate.contract.json.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.contract.common.rest.RESTResource;
-import org.codehaus.enunciate.rest.MimeType;
-import org.codehaus.enunciate.template.freemarker.ObjectReferenceMap;
-import org.codehaus.enunciate.util.MapType;
-import org.codehaus.enunciate.util.MapTypeUtil;
-import org.codehaus.enunciate.util.TypeDeclarationComparator;
 import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonTypeMapping;
 import org.codehaus.enunciate.json.JsonTypeMappings;
+import org.codehaus.enunciate.rest.MimeType;
+import org.codehaus.enunciate.util.MapType;
+import org.codehaus.enunciate.util.MapTypeUtil;
+import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
-import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.*;
+import javax.ws.rs.Produces;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.util.*;
@@ -91,13 +80,9 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   final Map<String, WsdlInfo> namespacesToWsdls;
   final Map<String, XmlType> knownTypes;
   final Map<String, JsonType> knownJsonTypes;
-  final Map<RESTNoun, List<RESTMethod>> nounsToRESTMethods;
-  final Map<RESTNoun, Set<String>> nounsToContentTypes;
-  final List<ContentTypeHandler> contentTypeHandlers;
   final List<TypeDefinition> typeDefinitions = new ArrayList<TypeDefinition>();
   final List<RootElementDeclaration> rootElements = new ArrayList<RootElementDeclaration>();
   final List<EndpointInterface> endpointInterfaces = new ArrayList<EndpointInterface>();
-  final List<RESTEndpoint> restEndpoints = new ArrayList<RESTEndpoint>();
   final List<RootResource> rootResources = new ArrayList<RootResource>();
   final List<TypeDeclaration> jaxrsProviders = new ArrayList<TypeDeclaration>();
   private File fileOutputDirectory = null;
@@ -113,9 +98,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     this.knownJsonTypes = loadKnownJsonTypes();
     this.namespacesToSchemas = new HashMap<String, SchemaInfo>();
     this.namespacesToWsdls = new HashMap<String, WsdlInfo>();
-    this.nounsToRESTMethods = new HashMap<RESTNoun, List<RESTMethod>>();
-    this.nounsToContentTypes = new HashMap<RESTNoun, Set<String>>();
-    this.contentTypeHandlers = new ArrayList<ContentTypeHandler>();
     this.idsToJsonSchemas = new HashMap<String, JsonSchemaInfo>();
 
     setVariable("knownNamespaces", new ArrayList<String>(this.namespacesToPrefixes.keySet()));
@@ -124,9 +106,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
     setVariable("ns2wsdl", this.namespacesToWsdls);
     setVariable("id2JsonSchema", this.idsToJsonSchemas);
     setVariable("contentTypes2Ids", this.contentTypesToIds);
-    setVariable("nouns2methods", new ObjectReferenceMap(this.nounsToRESTMethods));
-    setVariable("nouns2ContentTypes", new ObjectReferenceMap(this.nounsToContentTypes));
-    setVariable("restEndpoints", this.restEndpoints);
     setVariable("rootResources", this.rootResources);
     setVariable("jaxrsProviders", this.jaxrsProviders);
     setVariable("baseDeploymentAddress", "");
@@ -289,42 +268,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   public Map<String, JsonSchemaInfo> getIdsToJsonSchemas() {
     return idsToJsonSchemas;
-  }
-
-  /**
-   * The map of nouns to REST endpoints.
-   *
-   * @return The map of nouns to REST endpoints.
-   */
-  public Map<RESTNoun, List<RESTMethod>> getNounsToRESTMethods() {
-    return nounsToRESTMethods;
-  }
-
-  /**
-   * The map of nouns to associated content types.
-   *
-   * @return The map of nouns to associated content types.
-   */
-  public Map<RESTNoun, Set<String>> getNounsToContentTypes() {
-    return nounsToContentTypes;
-  }
-
-  /**
-   * The set of data format handlers.
-   *
-   * @return The set of data format handlers.
-   */
-  public List<ContentTypeHandler> getContentTypeHandlers() {
-    return contentTypeHandlers;
-  }
-
-  /**
-   * The list of REST endpoints in the model.
-   *
-   * @return The list of REST endpoints in the model.
-   */
-  public List<RESTEndpoint> getRESTEndpoints() {
-    return restEndpoints;
   }
 
   /**
@@ -640,114 +583,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
-   * Adds a REST endpoint to the model.
-   *
-   * @param endpoint The REST endpoint to add.
-   */
-  public void add(RESTEndpoint endpoint) {
-    if (includeReferencedClasses()) {
-      REFERENCE_STACK.get().addFirst("\"see also\" annotation of REST endpoint " + endpoint.getQualifiedName());
-      addSeeAlsoTypeDefinitions(endpoint);
-      REFERENCE_STACK.get().removeFirst();
-    }
-
-    for (RESTMethod restMethod : endpoint.getRESTMethods()) {
-      RESTNoun noun = restMethod.getNoun();
-      List<RESTMethod> restMethods = this.nounsToRESTMethods.get(noun);
-      if (restMethods == null) {
-        restMethods = new ArrayList<RESTMethod>();
-        this.nounsToRESTMethods.put(noun, restMethods);
-      }
-      restMethods.add(restMethod);
-
-      Set<String> contentTypes = this.nounsToContentTypes.get(noun);
-      if (contentTypes == null) {
-        contentTypes = new TreeSet<String>();
-        this.nounsToContentTypes.put(noun, contentTypes);
-      }
-      for (String contentType : restMethod.getContentTypes()) {
-        contentTypes.add(contentType);
-        addContentType(contentType);
-      }
-
-      if (includeReferencedClasses()) {
-        REFERENCE_STACK.get().addFirst("method " + restMethod.getSimpleName() + " of REST endpoint " + endpoint.getQualifiedName());
-        addReferencedTypeDefinitions(restMethod);
-        REFERENCE_STACK.get().removeFirst();
-      }
-    }
-
-    this.restEndpoints.add(endpoint);
-  }
-
-  private static boolean contentTypeIncluded(final Collection<String> contentTypes, final String targetContentType) {
-    assert contentTypes != null : "contentTypes must not be null";
-    assert targetContentType != null : "targetContentType must not be null";
-
-    if (contentTypes.isEmpty()) {
-      return false;
-    }
-
-    if (contentTypes.contains(MediaType.WILDCARD) || contentTypes.contains(targetContentType)) {
-      return true;
-    }
-
-    if (targetContentType.contains("/")) {
-      // NOTE Looking for, e.g., application/*+json
-      final String[] contentTypeParts = targetContentType.split("\\/", 2);
-      for (final String contentType : contentTypes) {
-        if (contentType.startsWith(contentTypeParts[0]) && contentType.endsWith(contentTypeParts[1])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Add all the type definitions referenced by the specified REST method.
-   *
-   * @param restMethod The REST method.
-   */
-  protected void addReferencedTypeDefinitions(RESTMethod restMethod) {
-    addSeeAlsoTypeDefinitions(restMethod);
-    RESTParameter nounValue = restMethod.getNounValue();
-    if (nounValue != null) {
-      TypeMirror nounValueType = nounValue.getType();
-      if (nounValueType instanceof ClassType) {
-        ClassDeclaration classDeclaration = ((ClassType) nounValueType).getDeclaration();
-        if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
-          //only add referenced type definitions for root elements.
-          final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
-          add(rootElement);
-
-          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
-//          if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
-//            addJsonRootElement(rootElement);
-//          }
-        }
-      }
-    }
-
-    TypeMirror returnType = restMethod.getReturnType();
-    if (returnType instanceof ClassType) {
-      ClassDeclaration classDeclaration = ((ClassType) returnType).getDeclaration();
-      if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
-        //only add referenced type definitions for root elements.
-        final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
-        add(rootElement);
-
-        // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
-//        if (jacksonAvailable() && contentTypeIncluded(restMethod.getContentTypes(), MediaType.APPLICATION_JSON)) {
-//          addJsonRootElement(rootElement);
-//        }
-      }
-    }
-
-    //todo: include referenced type definitions from the errors?
-  }
-
-  /**
    * Add a root resource to the model.
    *
    * @param rootResource The root resource to add to the model.
@@ -866,15 +701,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         }
       }
     }
-  }
-
-  /**
-   * Add a content type handler to the model.
-   *
-   * @param declaration The definition of the content type handler.
-   */
-  public void addContentTypeHandler(ClassDeclaration declaration) {
-    this.contentTypeHandlers.add(new ContentTypeHandler(declaration));
   }
 
   /**
@@ -1658,25 +1484,6 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           if (method.getInputPayload() != null && method.getInputPayload().getXmlElement() != null) {
             //we'll prefer one with both an output AND an input.
             return method;
-          }
-          else {
-            //we'll prefer the first one we find with an output.
-            example = example == null ? method : example;
-          }
-        }
-      }
-    }
-
-    List<RESTEndpoint> endpoints = getRESTEndpoints();
-    for (RESTEndpoint endpoint : endpoints) {
-      for (RESTMethod method : endpoint.getRESTMethods()) {
-        if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
-          return method;
-        }
-        else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
-          if (method.getInputPayload() != null && method.getInputPayload().getXmlElement() != null && (example == null || example.getInputPayload() == null)) {
-            //we'll prefer one with both an output AND an input.
-            example = method;
           }
           else {
             //we'll prefer the first one we find with an output.

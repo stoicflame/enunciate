@@ -176,11 +176,6 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${project.version}</version>
-          </dependency>
         </dependencies>
       </plugin>
       <!-- skip unit test run, tests to be executed during integration-test -->

@@ -35,11 +35,6 @@
             <artifactId>enunciate-gwt</artifactId>
             <version>${enunciate.version}</version>
           </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${enunciate.version}</version>
-          </dependency>
         </dependencies>
       </plugin>
 

@@ -25,14 +25,7 @@
           </execution>
         </executions>
         <dependencies>
-          <!--we're using proprietary REST annotations here,-->
-          <!--so we need to include this module-->
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${enunciate.version}</version>
-          </dependency>
-          <!--...and amf...-->
+          <!--include amf...-->
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
@@ -136,15 +129,6 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-spring-app-rt</artifactId>
-      <version>${enunciate.version}</version>
-    </dependency>
-
-    <!--this project uses the Enunciate-propriety
-    REST annotations as an example. But it's
-    recommended that you use JAX-RS-->
-    <dependency>
-      <groupId>org.codehaus.enunciate</groupId>
-      <artifactId>enunciate-rest-rt</artifactId>
       <version>${enunciate.version}</version>
     </dependency>
 

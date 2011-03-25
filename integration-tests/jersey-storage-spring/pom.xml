@@ -47,11 +47,6 @@
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${project.version}</version>
-          </dependency>
         </dependencies>
       </plugin>
       <!-- skip unit test run, tests to be executed during integration-test -->
@@ -167,7 +162,7 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>1.2</version>
+      <version>1.5</version>
 
       <scope>test</scope>
     </dependency>

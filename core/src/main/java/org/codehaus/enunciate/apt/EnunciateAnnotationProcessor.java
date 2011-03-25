@@ -40,13 +40,11 @@ import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.json.JsonRootElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.contract.validation.*;
 import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonType;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.DeploymentModule;
-import org.codehaus.enunciate.rest.annotations.ContentTypeHandler;
 import org.codehaus.enunciate.template.freemarker.*;
 import org.codehaus.enunciate.util.AntPatternMatcher;
 
@@ -189,11 +187,9 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     final List<EndpointInterface> eis = new ArrayList<EndpointInterface>();
     for (TypeDeclaration declaration : typeDeclarations) {
       final boolean isEndpointInterface = isEndpointInterface(declaration);
-      final boolean isRESTEndpoint = isRESTEndpoint(declaration);
-      final boolean isContentTypeHandler = isRESTContentTypeHandler(declaration);
       final boolean isJAXRSRootResource = isJAXRSRootResource(declaration);
       final boolean isJAXRSSupport = isJAXRSSupport(declaration);
-      if (isEndpointInterface || isRESTEndpoint || isContentTypeHandler || isJAXRSRootResource || isJAXRSSupport) {
+      if (isEndpointInterface || isJAXRSRootResource || isJAXRSSupport) {
         if (isEndpointInterface) {
           EndpointInterface endpointInterface = new EndpointInterface(declaration, additionalApiDefinitions);
           debug("%s to be considered as an endpoint interface.", declaration.getQualifiedName());
@@ -201,17 +197,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
             debug("%s is the implementation of endpoint interface %s.", implementation.getQualifiedName(), endpointInterface.getQualifiedName());
           }
           eis.add(endpointInterface);
-        }
-
-        if (isRESTEndpoint) {
-          RESTEndpoint restEndpoint = new RESTEndpoint((ClassDeclaration) declaration);
-          debug("%s to be considered as a REST endpoint.", declaration.getQualifiedName());
-          model.add(restEndpoint);
-        }
-
-        if (isContentTypeHandler) {
-          debug("%s to be considered a content type handler.", declaration.getQualifiedName());
-          model.addContentTypeHandler((ClassDeclaration) declaration);
         }
 
         if (isJAXRSRootResource) {
@@ -600,27 +585,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
   }
 
   /**
-   * Whether the specified declaration is a REST endpoint.
-   *
-   * @param declaration The declaration.
-   * @return Whether the declaration is a REST endpoint.
-   */
-  public boolean isRESTEndpoint(TypeDeclaration declaration) {
-    return ((declaration.getAnnotation(XmlTransient.class) == null)
-      && (declaration instanceof ClassDeclaration) && (declaration.getAnnotation(org.codehaus.enunciate.rest.annotations.RESTEndpoint.class) != null));
-  }
-
-  /**
-   * Whether the specified declaration is a data format handler.
-   *
-   * @param declaration The declaration.
-   * @return Whether the specified declaration is a data format handler.
-   */
-  public boolean isRESTContentTypeHandler(TypeDeclaration declaration) {
-    return (declaration instanceof ClassDeclaration) && (declaration.getAnnotation(ContentTypeHandler.class) != null);
-  }
-
-  /**
    * A quick check to see if a declaration is an endpoint interface.
    */
   public boolean isEndpointInterface(TypeDeclaration declaration) {
@@ -726,8 +690,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
 
     //rest transforms.
     transforms.add(new ForEachRESTResourceListByPathTransform(namespace));
-    transforms.add(new ForEachRESTEndpointTransform(namespace));
-    transforms.add(new ForEachRESTNounTransform(namespace));
 
     //set up the enunciate file transform.
     EnunciateFileTransform fileTransform = new EnunciateFileTransform(namespace);
@@ -763,8 +725,6 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     // TODO Validate JSON root elements
 
     debug("Validating the REST API...");
-    validationResult.aggregate(validator.validateRESTAPI(model.getNounsToRESTMethods()));
-    validationResult.aggregate(validator.validateContentTypeHandlers(model.getContentTypeHandlers()));
     validationResult.aggregate(validator.validateRootResources(model.getRootResources()));
 
     //validate unique content type ids.

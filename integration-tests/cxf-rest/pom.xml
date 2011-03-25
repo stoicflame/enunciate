@@ -77,11 +77,6 @@
             <artifactId>enunciate-gwt</artifactId>
             <version>${project.version}</version>
           </dependency>
-          <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rest</artifactId>
-            <version>${project.version}</version>
-          </dependency>
         </dependencies>
       </plugin>
 

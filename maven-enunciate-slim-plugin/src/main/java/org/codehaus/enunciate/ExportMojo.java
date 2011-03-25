@@ -23,8 +23,6 @@ import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.modules.BasicDeploymentModule;
 import org.codehaus.enunciate.modules.DeploymentModule;
@@ -123,14 +121,6 @@ public class ExportMojo extends ConfigMojo {
             exportedClasses.add(implementation.getQualifiedName());
           }
         }
-      }
-
-      for (RESTEndpoint endpoint : model.getRESTEndpoints()) {
-        exportedClasses.add(endpoint.getQualifiedName());
-      }
-
-      for (ContentTypeHandler contentTypeHandler : model.getContentTypeHandlers()) {
-        exportedClasses.add(contentTypeHandler.getQualifiedName());
       }
 
       for (RootResource rootResource : model.getRootResources()) {

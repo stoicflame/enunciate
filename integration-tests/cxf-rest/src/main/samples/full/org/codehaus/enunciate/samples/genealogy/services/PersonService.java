@@ -62,21 +62,4 @@ public interface PersonService {
    */
   void deletePerson(String personId) throws ServiceException;
 
-  /**
-   * Uploads some files.
-   *
-   * @param files The files
-   * @param length The length(s) of the files.
-   */
-  @WebMethod ( exclude = true )
-  void uploadFiles(DataHandler[] files, String length) throws ServiceException;
-// todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
-//  /**
-//   * Reads the family of a given person.  Tests out maps.
-//   *
-//   * @param personId The id of the person for which to read the family.
-//   * @return The persons in the family by relationship type.
-//   * @throws ServiceException If some problem occurred.
-//   */
-//  Map<RelationshipType, Person> readFamily(String personId) throws ServiceException;
 }

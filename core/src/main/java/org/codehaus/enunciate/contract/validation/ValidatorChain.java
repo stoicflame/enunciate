@@ -21,9 +21,6 @@ import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
-import org.codehaus.enunciate.contract.rest.RESTNoun;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.util.*;
@@ -81,32 +78,11 @@ public class ValidatorChain implements Validator {
   }
 
   // Inherited.
-  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRESTAPI(restAPI));
-    }
-
-    return result;
-  }
-
-  // Inherited.
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
     ValidationResult result = new ValidationResult();
 
     for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
       result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRootResources(rootResources));
-    }
-
-    return result;
-  }
-
-  public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateContentTypeHandlers(contentTypeHandlers));
     }
 
     return result;

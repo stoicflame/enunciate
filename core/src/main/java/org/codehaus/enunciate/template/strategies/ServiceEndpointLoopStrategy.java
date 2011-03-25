@@ -22,8 +22,6 @@ import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.ServiceEndpoint;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
 
 import java.util.*;
 
@@ -42,12 +40,6 @@ public class ServiceEndpointLoopStrategy extends EnunciateTemplateLoopStrategy<S
         return e1.getServiceEndpointId().compareTo(e2.getServiceEndpointId());
       }
     });
-
-    for (RESTEndpoint restEndpoint : getRESTEndpoints()) {
-      for (RESTMethod restMethod : restEndpoint.getRESTMethods()) {
-        interfaces.add(restMethod);
-      }
-    }
 
     Collection<WsdlInfo> wsdls = getNamespacesToWSDLs().values();
     for (WsdlInfo wsdl : wsdls) {

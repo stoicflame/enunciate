@@ -1,13 +1,13 @@
 package org.codehaus.enunciate.samples.petclinic.services;
 
 import org.codehaus.enunciate.samples.petclinic.schema.*;
-import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.modules.gwt.GWTTransient;
 
 import javax.jws.WebService;
 import javax.activation.DataHandler;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.*;
 import java.util.Collection;
 
 /**
@@ -23,7 +23,6 @@ import java.util.Collection;
   targetNamespace = "http://enunciate.codehaus.org/services",
   serviceName = "clinic"
 )
-@RESTEndpoint
 @PermitAll
 public interface Clinic {
 
@@ -33,11 +32,11 @@ public interface Clinic {
    * @param id The vet id.
    * @return The photo (raw data) of the vet.
    */
-  @Noun ( "vetpix" )
-  @Verb ( VerbType.read )
+  @Path("/vetpix/{id}")
+  @GET
   @GWTTransient
   @RolesAllowed( "ADMIN" )
-  DataHandler getVetPhoto(@ProperNoun Integer id) throws PetClinicException, PictureException;
+  DataHandler getVetPhoto(@PathParam ("id") Integer id) throws PetClinicException, PictureException;
 
   /**
    * Sets a specific vet photo.
@@ -45,41 +44,10 @@ public interface Clinic {
    * @param dataHandler The data handler for the photo.
    * @param id The id of the vet for which to store a picture.
    */
-  @Noun ( "vetpix" )
-  @Verb ( VerbType.create )
+  @Path("/vetpix/{id}")
+  @PUT
   @GWTTransient
-  void storeVetPhoto(@NounValue DataHandler dataHandler, @ProperNoun( optional = false ) Integer id) throws PetClinicException, PictureException;
-
-  /**
-   * Get the brochure for the clinic in the specified format.
-   *
-   * @param format The format.
-   * @return The brochure.
-   */
-  @Noun ( "brochure" )
-  @Verb ( VerbType.read )
-  @RolesAllowed("USER")
-  @ContentType (
-    value = {"text/html", "text/plain", "application/pdf"}
-  )
-  ClinicBrochure getClinicBrochure(@ContentTypeParameter String format) throws PetClinicException;
-
-  /**
-   * Get the brochure for the specified animal in the specified format.
-   *
-   * @param animalType The animal type.
-   * @param contentType The content type (MIME type)
-   * @return The brochure.
-   */
-  @Noun (
-    value = "brochure",
-    context = "{animalType}"
-  )
-  @Verb ( VerbType.read )
-  @ContentType (
-    value = {"text/html", "text/plain", "application/pdf"}
-  )
-  AnimalBrochure getAnimalBrochure(@ContextParameter ( "animalType" ) String animalType, @ContentTypeParameter String contentType) throws PetClinicException;
+  void storeVetPhoto(DataHandler dataHandler, @PathParam("id") Integer id) throws PetClinicException, PictureException;
 
   /**
    * Retrieve all <code>Vet</code>s from the datastore.
@@ -111,9 +79,9 @@ public interface Clinic {
    * @param id the id to search for
    * @return the <code>Owner</code> if found
    */
-  @Noun ("owner")
-  @Verb ( VerbType.read )
-  Owner loadOwner(@ProperNoun (optional=false) int id) throws PetClinicException;
+  @Path ("/owner/{id}")
+  @GET
+  Owner loadOwner(@PathParam ("id") int id) throws PetClinicException;
 
   /**
    * Retrieve a <code>Pet</code> from the datastore by id.

@@ -21,8 +21,6 @@ import net.sf.jelly.apt.TemplateModel;
 import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import org.codehaus.enunciate.util.RESTResourcePathComparator;
 
@@ -39,18 +37,6 @@ public class RESTResourcesByPathLoopStrategy extends EnunciateTemplateLoopStrate
 
   protected Iterator<List<RESTResource>> getLoop(TemplateModel model) throws TemplateException {
     TreeMap<String, List<RESTResource>> resourcesByPath = new TreeMap<String, List<RESTResource>>(new RESTResourcePathComparator());
-    for (RESTEndpoint endpoint : getRESTEndpoints()) {
-      for (RESTMethod resource : endpoint.getRESTMethods()) {
-        String path = resource.getPath();
-        List<RESTResource> resourceList = resourcesByPath.get(path);
-        if (resourceList == null) {
-          resourceList = new ArrayList<RESTResource>();
-          resourcesByPath.put(path, resourceList);
-        }
-
-        resourceList.add(resource);
-      }
-    }
 
     for (RootResource rootResource : getModel().getRootResources()) {
       for (ResourceMethod resource : rootResource.getResourceMethods(true)) {

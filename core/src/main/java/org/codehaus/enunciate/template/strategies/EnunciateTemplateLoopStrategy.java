@@ -21,7 +21,6 @@ import org.codehaus.enunciate.apt.EnunciateAnnotationProcessorFactory;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
-import org.codehaus.enunciate.contract.rest.RESTEndpoint;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import net.sf.jelly.apt.freemarker.FreemarkerTemplateBlock;
 import net.sf.jelly.apt.strategies.TemplateLoopStrategy;
@@ -102,15 +101,6 @@ public abstract class EnunciateTemplateLoopStrategy<L> extends TemplateLoopStrat
    */
   protected Map<String, WsdlInfo> getNamespacesToWSDLs() {
     return getModel().getNamespacesToWSDLs();
-  }
-
-  /**
-   * The REST endpoints in the model.
-   *
-   * @return The REST endpoints in the model.
-   */
-  protected Collection<RESTEndpoint> getRESTEndpoints() {
-    return getModel().getRESTEndpoints();
   }
 
   /**

@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.samples.genealogy.services;
 
-import org.codehaus.enunciate.rest.annotations.*;
 import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 import org.codehaus.enunciate.samples.genealogy.cite.Source;
 import org.codehaus.enunciate.samples.genealogy.data.Event;

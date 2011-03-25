@@ -1,8 +1,6 @@
 package org.codehaus.enunciate.samples.petclinic.services.impl;
 
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
 import org.codehaus.enunciate.samples.petclinic.schema.*;
-import org.codehaus.enunciate.samples.petclinic.services.BrochureFormat;
 import org.codehaus.enunciate.samples.petclinic.services.Clinic;
 import org.codehaus.enunciate.samples.petclinic.services.PetClinicException;
 import org.codehaus.enunciate.samples.petclinic.services.PictureException;
@@ -10,6 +8,7 @@ import org.codehaus.enunciate.samples.petclinic.services.PictureException;
 import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.mail.util.ByteArrayDataSource;
+import javax.ws.rs.Path;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +20,7 @@ import java.util.*;
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.petclinic.services.Clinic"
 )
-@RESTEndpoint
+@Path ("/")
 public class ClinicImpl implements Clinic {
 
   private final HashMap<Integer, byte[]> vetPhotos;

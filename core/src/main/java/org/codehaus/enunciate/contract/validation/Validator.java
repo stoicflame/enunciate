@@ -21,9 +21,6 @@ import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
 import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
-import org.codehaus.enunciate.contract.rest.RESTNoun;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 
 import java.util.Map;
@@ -47,28 +44,12 @@ public interface Validator {
   ValidationResult validateEndpointInterface(EndpointInterface ei);
 
   /**
-   * Validates the REST API.
-   *
-   * @param restAPI The map of nouns to their accessor methods.
-   * @return The result of the validation.
-   */
-  ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI);
-
-  /**
    * Validate the JAX-RS root resources.
    *
    * @param rootResources The root resources to validate.
    * @return The result of the validation.
    */
   ValidationResult validateRootResources(List<RootResource> rootResources);
-
-  /**
-   * Validate the content type handlers.
-   *
-   * @param contentTypeHandlers The content type handlers.
-   * @return The validation result.
-   */
-  ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers);
 
   /**
    * Validate a complex type definition.

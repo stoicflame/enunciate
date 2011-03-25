@@ -462,7 +462,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
       debug("Objective C module is disabled because there are no schema types.");
       return true;
     }
-    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty() && getModelInternal().getRESTEndpoints().isEmpty()) {
+    else if (getModelInternal() != null && getModelInternal().getRootResources().isEmpty()) {
       debug("Objective C module is disabled because there are no REST resources.");
       return true;
     }

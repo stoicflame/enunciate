@@ -8,8 +8,6 @@ import net.java.ws.addressbook.domain.ContactType;
 
 import java.util.*;
 
-import org.codehaus.enunciate.rest.annotations.RESTEndpoint;
-
 import javax.jws.WebService;
 import javax.ws.rs.Path;
 

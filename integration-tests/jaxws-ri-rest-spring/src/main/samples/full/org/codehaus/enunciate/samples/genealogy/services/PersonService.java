@@ -16,7 +16,6 @@
 
 package org.codehaus.enunciate.samples.genealogy.services;
 
-import org.codehaus.enunciate.rest.annotations.NounValue;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 
 import javax.activation.DataHandler;
@@ -51,7 +50,7 @@ public interface PersonService {
   )
   @PUT
   @Path ("/pedigree/person")
-  Person storePerson(@NounValue Person person);
+  Person storePerson(Person person);
 
   /**
    * Reads a set of persons from the database.  Intended as an example of

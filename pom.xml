@@ -41,9 +41,6 @@
     <module>spring3-app-rt</module>
     <module>spring-app</module>
 
-    <module>rest-rt</module>
-    <module>rest</module>
-
     <module>cxf-rt</module>
     <module>cxf</module>
 
@@ -228,8 +225,9 @@
     <spring.version>2.5.4</spring.version>
     <spring.security.version>2.0.3</spring.security.version>
     <spring.security.oauth.version>3.16</spring.security.oauth.version>
-    <jersey.version>1.2</jersey.version>
-    <cxf.version>2.2.9</cxf.version>
+    <jersey.version>1.5</jersey.version>
+    <jackson.version>1.7.4</jackson.version>
+    <cxf.version>2.3.3</cxf.version>
     <donations.url>https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=HXSXBXUT63RCG</donations.url>
   </properties>
 
@@ -783,28 +781,28 @@
         <!--depending modules: core-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
-        <version>1.5.2</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <!--depending modules: core-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.5.2</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-jaxrs</artifactId>
-        <version>1.5.2</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
         <!--depending modules: jersey-rt-->
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-xc</artifactId>
-        <version>1.5.2</version>
+        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>

@@ -658,20 +658,23 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     Collection<ObjectNode> clientShapes = clientCanvas.getShapes();
     assertEquals(3, clientShapes.size());
     for (ObjectNode shape : clientShapes) {
-      if (shape.get("radius") != null) {
+      assertEquals(1, shape.size());
+      String shapeKey = shape.getFields().next().getKey();
+      shape = (ObjectNode) shape.get(shapeKey);
+      if ("circle".equals(shapeKey)) {
         assertEquals("circleId", shape.get("id").getTextValue());
         assertEquals(10, shape.get("radius").getIntValue());
       }
-      else if (shape.get("base") != null) {
+      else if ("triangle".equals(shapeKey)) {
         assertEquals("triId", shape.get("id").getTextValue());
         assertEquals(80, shape.get("base").getIntValue());
       }
-      else if (shape.get("height") != null) {
+      else if ("rectangle".equals(shapeKey)) {
         assertEquals("rectId", shape.get("id").getTextValue());
         assertEquals(50, shape.get("height").getIntValue());
       }
       else {
-        fail("Unknown shape: " + shape);
+        fail("Unknown shape: " + shapeKey);
       }
     }
 

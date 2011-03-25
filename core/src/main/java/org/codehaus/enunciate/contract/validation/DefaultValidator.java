@@ -32,12 +32,8 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
-import org.codehaus.enunciate.contract.jaxrs.ResourceParameter;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
-import org.codehaus.enunciate.contract.rest.ContentTypeHandler;
-import org.codehaus.enunciate.contract.rest.RESTMethod;
-import org.codehaus.enunciate.contract.rest.RESTNoun;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
@@ -166,36 +162,6 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     }
 
     return false;
-  }
-
-  /**
-   * Does the default validation for a REST endpoint.
-   *
-   * @param restAPI The REST API
-   * @return The result of the validation.
-   */
-  public ValidationResult validateRESTAPI(Map<RESTNoun, List<RESTMethod>> restAPI) {
-    ValidationResult result = new ValidationResult();
-    if (restAPI != null && !restAPI.isEmpty()) {
-      if (!disabledRules.contains("disabled.rest.module")) {
-        for (List<RESTMethod> restMethods : restAPI.values()) {
-          for (RESTMethod restMethod : restMethods) {
-            result.addError(restMethod, "The Enunciate REST module is missing or disabled. Please ensure that this module is on the classpath and is enabled. For more information, see http://docs.codehaus.org/display/ENUNCIATE/Enabling+Enunciate+REST+Model .");
-          }
-        }
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Leave validation of data format handlers to the associated modules.
-   *
-   * @param contentTypeHandlers The content type handlers.
-   * @return The validation result.
-   */
-  public ValidationResult validateContentTypeHandlers(List<ContentTypeHandler> contentTypeHandlers) {
-    return new ValidationResult();
   }
 
   public ValidationResult validateRootResources(List<RootResource> rootResources) {
