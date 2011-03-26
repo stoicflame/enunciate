@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
@@ -63,9 +64,10 @@
                 <requireProperty>
                   <property>gmcs.executable</property>
                   <message>In order to run the jaxws-ri integration tests, you must have Mono installed.
-First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
-Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
-If you just want to run the Java tests without running the C# tests, set the value of the property 'gmcs.executable' to be 'true'.</message>
+                    First install Mono for your platform. (See http://mono-project.com/Start and note there's a Windows version of Mono, too.)
+                    Then, define a profile in your settings.xml file that defines the path to your 'gmcs' executable in the property 'gmcs.executable'.
+                    If you just want to run the Java tests without running the C# tests, set the value of the property 'gmcs.executable' to be 'true'.
+                  </message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -81,12 +83,14 @@ If you just want to run the Java tests without running the C# tests, set the val
                 <requireProperty>
                   <property>gcc.executable</property>
                   <message>In order to run the jaxws-ri integration testse, you must have gcc installed along with libxml and gnustep.
-Define a profile in your settings.xml file that defines the path to your 'gcc'
-executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
-specifies the executable that exposes your libxml compiler flags and library includes.
-Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library includes.
-If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
-(And don't ask any questions about why that works. Maven mess.)</message>
+                    Define a profile in your settings.xml file that defines the path to your 'gcc'
+                    executable in the property 'gcc.executable'. Also set a property named 'libxml.config.executable' that
+                    specifies the executable that exposes your libxml compiler flags and library includes.
+                    Also set a property named 'gnustep.config.executable' that specifies the executable that exposes your gnustep compiler flags and library
+                    includes.
+                    If you just want to skip the Objective C tests, set the value of the property 'gcc.executable' to be 'true'.
+                    (And don't ask any questions about why that works. Maven mess.)
+                  </message>
                 </requireProperty>
               </rules>
             </configuration>
@@ -133,6 +137,15 @@ If you just want to skip the Objective C tests, set the value of the property 'g
             <version>${project.version}</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <!--for testing out the release plugin-->
+          <tagBase>https://svn.codehaus.org/enunciate/tags/</tagBase>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -257,7 +270,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
           </container>
           <configuration>
             <properties>
-               <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
+              <!--<cargo.jvmargs>-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</cargo.jvmargs>-->
             </properties>
             <home>${project.build.directory}/tomcat5x</home>
             <deployables>
@@ -272,6 +285,11 @@ If you just want to skip the Objective C tests, set the value of the property 'g
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.codehaus.org/enunciate/trunk/enunciate/integration-tests/jaxws-ri-rest</connection>
+    <developerConnection>scm:svn:http://svn.codehaus.org/enunciate/trunk/enunciate/integration-tests/jaxws-ri-rest</developerConnection>
+  </scm>
 
   <dependencies>
     <dependency>
