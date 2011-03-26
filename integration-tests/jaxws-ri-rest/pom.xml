@@ -9,6 +9,10 @@
   <description>Integration tests for Enunciate, testing the JAXWS-RI + REST combo.</description>
   <packaging>war</packaging>
 
+  <properties>
+    <enunciate.version>1.21.1</enunciate.version>
+  </properties>
+
   <build>
     <resources>
       <resource>
@@ -100,7 +104,7 @@
       <plugin>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>maven-enunciate-plugin</artifactId>
-        <version>${project.version}</version>
+        <version>${enunciate.version}</version>
         <executions>
           <execution>
             <id>assemble</id>
@@ -129,12 +133,12 @@
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-amf</artifactId>
-            <version>${project.version}</version>
+            <version>${enunciate.version}</version>
           </dependency>
           <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-gwt</artifactId>
-            <version>${project.version}</version>
+            <version>${enunciate.version}</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -295,20 +299,20 @@
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-rt</artifactId>
-      <version>${project.version}</version>
+      <version>${enunciate.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-core</artifactId>
-      <version>${project.version}</version>
+      <version>${enunciate.version}</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
-      <version>${project.version}</version>
+      <version>${enunciate.version}</version>
     </dependency>
 
     <dependency>
