@@ -10,7 +10,7 @@
   <packaging>war</packaging>
 
   <properties>
-    <enunciate.version>1.21.1</enunciate.version>
+    <enunciate.version>${project.version}</enunciate.version>
   </properties>
 
   <build>
