@@ -64,6 +64,44 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
   private final native void set${property.simpleName?cap_first}Internal(String ${property.simpleName}) /*-{
     this.${property.jsonMemberName} = ${property.simpleName};
   }-*/;
+    [#elseif property.bareAccessorType.enum!false]
+
+  /**
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public final ${overlayClassnameFor(property.bareAccessorType)}[] get${property.simpleName?cap_first}() {
+    com.google.gwt.core.client.JsArrayString _rawItems = get${property.simpleName?cap_first}Internal();
+    ${overlayClassnameFor(property.bareAccessorType)}[] _items = new ${overlayClassnameFor(property.bareAccessorType)}[_rawItems.length()];
+    for (int i = 0; i < _rawItems.length(); i++) {
+      _items[i] = ${overlayClassnameFor(property.bareAccessorType)}.fromString(_rawItems.get(i));
+    }
+    return _items;
+  }
+
+  /**
+   * ${(property.javaDoc.return!property.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  public final void set${property.simpleName?cap_first}(${overlayClassnameFor(property.bareAccessorType)}[] ${property.simpleName}) {
+    com.google.gwt.core.client.JsArrayString _rawItems = (com.google.gwt.core.client.JsArrayString) com.google.gwt.core.client.JavaScriptObject.createArray();
+    for (int i = 0; i < ${property.simpleName}.length; i++) {
+      _rawItems.set(i, ${property.simpleName}[i] == null ? null : ${property.simpleName}[i].toString());
+    }
+    set${property.simpleName?cap_first}Internal(_rawItems);
+  }
+
+  /**
+   * Internal (native) getter for the enum property ${property.simpleName}.
+   */
+  private final native com.google.gwt.core.client.JsArrayString get${property.simpleName?cap_first}Internal() /*-{
+    return this.${property.jsonMemberName};
+  }-*/;
+
+  /**
+   * Internal (native) setter for the enum property ${property.simpleName}.
+   */
+  private final native void set${property.simpleName?cap_first}Internal(com.google.gwt.core.client.JsArrayString ${property.simpleName}) /*-{
+    this.${property.jsonMemberName} = ${property.simpleName};
+  }-*/;
     [#elseif isAccessorOfTypeLong(property)]
 
   /**
