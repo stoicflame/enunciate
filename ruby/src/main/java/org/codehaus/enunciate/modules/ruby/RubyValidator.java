@@ -39,10 +39,10 @@ public class RubyValidator extends BaseValidator {
     }
     for (Element element : complexType.getElements()) {
       if (element instanceof ElementRef && ((ElementRef) element).isElementRefs()) {
-        result.addWarning(complexType, "The Ruby client library doesn't fully support the @XmlElementRefs annotation. The items in the collection will be read-only and will only be available to Ruby clients in the form of a Hash. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-300 for more information.");
+        result.addWarning(complexType, "The Ruby client library doesn't fully support the @XmlElementRefs annotation. The items in the collection will be read-only and will only be available to Ruby clients in the form of a Hash. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-542 for more information.");
       }
       else if (element.getAnnotation(XmlElements.class) != null) {
-        result.addWarning(complexType, "The Ruby client library doesn't fully support the @XmlElements annotation. The items in the collection will be read-only and will only be available to Ruby clients in the form of a Hash. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-300 for more information.");
+        result.addWarning(complexType, "The Ruby client library doesn't fully support the @XmlElements annotation. The items in the collection will be read-only and will only be available to Ruby clients in the form of a Hash. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-542 for more information.");
       }
     }
     return result;

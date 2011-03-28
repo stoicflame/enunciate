@@ -23,8 +23,12 @@ import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
+import org.codehaus.enunciate.contract.jaxb.Accessor;
+import org.codehaus.enunciate.contract.jaxb.Element;
+import org.codehaus.enunciate.contract.jaxb.ElementRef;
 
 import javax.activation.DataHandler;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import java.math.BigDecimal;
@@ -92,6 +96,21 @@ public class OverlayClientClassnameForMethod extends org.codehaus.enunciate.temp
     }
 
     return false;
+  }
+
+  @Override
+  public String convert(Accessor accessor) throws TemplateModelException {
+    if (accessor.isCollectionType() && accessor instanceof Element) {
+      Element element = (Element) accessor;
+      //@XmlElementRefs and @XmlElements can't
+      if (element instanceof ElementRef && ((ElementRef) element).isElementRefs()) {
+        return "com.google.gwt.core.client.JsArray";
+      }
+      else if (element.getAnnotation(XmlElements.class) != null) {
+        return "com.google.gwt.core.client.JsArray";
+      }
+    }
+    return super.convert(accessor);
   }
 
   @Override

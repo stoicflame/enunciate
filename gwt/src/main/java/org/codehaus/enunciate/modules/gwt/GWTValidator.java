@@ -28,6 +28,7 @@ import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.util.TypeDeclarationComparator;
 
+import javax.xml.bind.annotation.XmlElements;
 import java.util.*;
 
 /**
@@ -42,10 +43,12 @@ public class GWTValidator extends BaseValidator {
   private final String gwtModuleNamespace;
   private final Set<String> knownGwtPackages;
   private final Set<String> unsupportedTypes = new HashSet<String>();
+  private final boolean generateJsonOverlays;
 
-  public GWTValidator(String gwtModuleNamespace, Set<String> knownGwtPackages, boolean enforceNamespaceConformance, boolean enforceNoFieldAccessors) {
+  public GWTValidator(String gwtModuleNamespace, Set<String> knownGwtPackages, boolean enforceNamespaceConformance, boolean enforceNoFieldAccessors, boolean generateJsonOverlays) {
     this.gwtModuleNamespace = gwtModuleNamespace;
     this.knownGwtPackages = knownGwtPackages;
+    this.generateJsonOverlays = generateJsonOverlays;
     unsupportedTypes.add(javax.xml.datatype.Duration.class.getName());
     unsupportedTypes.add(java.awt.Image.class.getName());
     unsupportedTypes.add(javax.xml.transform.Source.class.getName());
@@ -147,6 +150,15 @@ public class GWTValidator extends BaseValidator {
 
           if (!isSupported(element.getAccessorType())) {
             result.addError(element, "GWT doesn't support the '" + element.getAccessorType() + "' type.");
+          }
+
+          if (this.generateJsonOverlays) {
+            if (element instanceof ElementRef && ((ElementRef) element).isElementRefs()) {
+              result.addWarning(complexType, "GWT overlay types don't fully support the @XmlElementRefs annotation. The items in the collection will only be available to the client-side in the form of a raw, untyped JsArray. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-543 for more information, and feel free to contribute your ideas on how to solve this problem.");
+            }
+            else if (element.getAnnotation(XmlElements.class) != null) {
+              result.addWarning(complexType, "GWT overlay types don't fully support the @XmlElements annotation. The items in the collection will only be available to the client-side in the form of a raw, untyped JsArray. Consider redesigning using a collection of a single type. See http://jira.codehaus.org/browse/ENUNCIATE-543 for more information, and feel free to contribute your ideas on how to solve this issue.");
+            }
           }
         }
       }
