@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.modules.cxf;
 
+import com.sun.mirror.declaration.MethodDeclaration;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
@@ -24,6 +25,7 @@ import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
+import javax.jws.WebService;
 import java.util.HashMap;
 
 /**
@@ -52,6 +54,22 @@ public class CXFValidator extends BaseValidator {
         if (visited.getTargetNamespace().equals(ei.getTargetNamespace())) {
           result.addError(ei, "Ummm... you already have a service named " + ei.getServiceName() + " at " +
             visited.getPosition() + ".  You need to disambiguate.");
+        }
+      }
+
+      if (ei.isInterface()) {
+        WebService eiAnnotation = ei.getAnnotation(WebService.class);
+        if (!"".equals(eiAnnotation.serviceName())) {
+          result.addError(ei, "CXF fails if you specify 'serviceName' on an endpoint interface.");
+        }
+        if (!"".equals(eiAnnotation.portName())) {
+          result.addError(ei, "CXF fails if you specify 'portName' on an endpoint interface.");
+        }
+        for (MethodDeclaration m : ei.getMethods()) {
+          javax.jws.WebMethod wm = m.getAnnotation(javax.jws.WebMethod.class);
+          if (wm.exclude()) {
+            result.addError(m, "CXF fails if you specify 'exclude=true' on an endpoint interface.");
+          }
         }
       }
 

@@ -1,5 +1,6 @@
 package org.codehaus.enunciate.modules.jboss;
 
+import com.sun.mirror.declaration.MethodDeclaration;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
@@ -21,11 +22,19 @@ public class JBossValidator extends BaseValidator {
     ValidationResult result = super.validateEndpointInterface(ei);
 
     WebService eiAnnotation = ei.getAnnotation(WebService.class);
-    if (!"".equals(eiAnnotation.serviceName()) && ei.isInterface()) {
-      result.addError(ei, "JBoss fails if you specify 'serviceName' on an endpoint interface.");
-    }
-    if (!"".equals(eiAnnotation.portName()) && ei.isInterface()) {
-      result.addError(ei, "JBoss fails if you specify 'portName' on an endpoint interface.");
+    if (ei.isInterface()) {
+      if (!"".equals(eiAnnotation.serviceName())) {
+        result.addError(ei, "JBoss fails if you specify 'serviceName' on an endpoint interface.");
+      }
+      if (!"".equals(eiAnnotation.portName())) {
+        result.addError(ei, "JBoss fails if you specify 'portName' on an endpoint interface.");
+      }
+      for (MethodDeclaration m : ei.getMethods()) {
+        javax.jws.WebMethod wm = m.getAnnotation(javax.jws.WebMethod.class);
+        if (wm.exclude()) {
+          result.addError(m, "JBoss fails if you specify 'exclude=true' on an endpoint interface.");
+        }
+      }
     }
 
     if (ei.getEndpointImplementations().size() > 1) {
