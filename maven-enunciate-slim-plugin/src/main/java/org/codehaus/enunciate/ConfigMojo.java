@@ -16,6 +16,9 @@ package org.codehaus.enunciate;
  * limitations under the License.
  */
 
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -44,6 +47,7 @@ public class ConfigMojo extends AbstractMojo {
 
   public static final String ENUNCIATE_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#enunciate";
   public static final String ENUNCIATE_STEPPER_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#stepper";
+  public static final String SOURCE_JAR_MAP_PROPERTY = "urn:" + ConfigMojo.class.getName() + "#source_jars";
 
   /**
    * The Maven project reference.
@@ -255,6 +259,30 @@ public class ConfigMojo extends AbstractMojo {
    * @parameter expression="${enunciate.skip}" default-value="false"
    */
   protected boolean skipEnunciate;
+  /**
+   * Used to look up Artifacts in the remote repository.
+   *
+   * @parameter expression= "${component.org.apache.maven.artifact.factory.ArtifactFactory}"
+   * @required
+   * @readonly
+   */
+  private ArtifactFactory artifactFactory;
+  /**
+   * Used to look up Artifacts in the remote repository.
+   *
+   * @parameter expression="${component.org.apache.maven.artifact.resolver.ArtifactResolver}"
+   * @required
+   * @readonly
+   */
+  private ArtifactResolver artifactResolver;
+  /**
+   * Location of the local repository.
+   *
+   * @parameter expression="${localRepository}"
+   * @readonly
+   * @required
+   */
+  private ArtifactRepository localRepository;
 
   public void execute() throws MojoExecutionException {
     if (skipEnunciate) {
@@ -498,14 +526,57 @@ public class ConfigMojo extends AbstractMojo {
     return excluded;
   }
 
-  /**
-   * Looks up the source jar for the path entry.
-   *
-   * @param pathEntry The path entry.
-   * @return The source jar.
-   */
   protected String lookupSourceJar(File pathEntry) {
-    return null;
+    Map<File, String> sourceJars = (Map<File, String>) getPluginContext().get(SOURCE_JAR_MAP_PROPERTY);
+    if (sourceJars == null) {
+      sourceJars = new TreeMap<File, String>();
+      getPluginContext().put(SOURCE_JAR_MAP_PROPERTY, sourceJars);
+    }
+
+    if (sourceJars.containsKey(pathEntry)) {
+      return sourceJars.get(pathEntry);
+    }
+
+    String sourceJar = null;
+    for (org.apache.maven.artifact.Artifact projectDependency : ((Set<org.apache.maven.artifact.Artifact>) this.project.getArtifacts())) {
+      if (pathEntry.equals(projectDependency.getFile())) {
+        if (skipSourceJarLookup(projectDependency)) {
+          getLog().debug("Skipping the source lookup for " + projectDependency.toString() + "...");
+        }
+
+        getLog().debug("Attemping to lookup source artifact for " + projectDependency.toString() + "...");
+        try {
+          org.apache.maven.artifact.Artifact sourceArtifact = this.artifactFactory.createArtifactWithClassifier(projectDependency.getGroupId(), projectDependency.getArtifactId(),
+                                                                                      projectDependency.getVersion(), projectDependency.getType(), "sources");
+          this.artifactResolver.resolve(sourceArtifact, this.project.getRemoteArtifactRepositories(), this.localRepository);
+          String path = sourceArtifact.getFile().getAbsolutePath();
+          getLog().debug("Source artifact found at " + path + ".");
+          sourceJar = path;
+          break;
+        }
+        catch (Exception e) {
+          getLog().debug("Unable to lookup source artifact for path entry " + pathEntry, e);
+          break;
+        }
+      }
+    }
+
+    sourceJars.put(pathEntry, sourceJar);
+
+    return sourceJar;
+  }
+
+  /**
+   * Whether to skip the source-jar lookup for the given dependency.
+   *
+   * @param projectDependency The dependency.
+   * @return Whether to skip the source-jar lookup for the given dependency.
+   */
+  protected boolean skipSourceJarLookup(org.apache.maven.artifact.Artifact projectDependency) {
+    String groupId = String.valueOf(projectDependency.getGroupId());
+    return groupId.startsWith("com.sun.") //skip com.sun.*
+      || "com.sun".equals(groupId) //skip com.sun
+      || groupId.startsWith("javax."); //skip "javax.*"
   }
 
   /**

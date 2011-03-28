@@ -81,6 +81,11 @@ public class ExportMojo extends ConfigMojo {
     return configuration;
   }
 
+  @Override
+  protected String lookupSourceJar(File pathEntry) {
+    return null;
+  }
+
   protected class ExportListDeploymentModule extends BasicDeploymentModule {
 
     @Override
