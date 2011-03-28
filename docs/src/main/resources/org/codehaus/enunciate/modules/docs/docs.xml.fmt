@@ -22,7 +22,7 @@
       <types>
     [#list schema.typeDefinitions as type]
       [#if !isExcludeFromDocs(type)]
-        <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
+        <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if] groups="[#list getGroups(type) as group]${group}[#if group_has_next],[/#if][/#list]">
         [#if type.docValue??]
           <documentation>
             <![CDATA[${type.docValue}]]>
@@ -45,7 +45,7 @@
         [#if type.elements?size > 0]
           <elements>
           [#list type.elements as element]
-            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}" groups="[#list getGroups(element) as group]${group}[#if group_has_next],[/#if][/#list]">
             [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
@@ -137,6 +137,11 @@
       [/#if]
     [/#list]
       </elements>
+      <groups>
+    [#list getGroups(schema) as group]
+        <group>${group}</group>
+    [/#list]
+      </groups>
     </schema>
   [/#if]
 [/@forEachSchema]
@@ -147,7 +152,7 @@
       <documentation>${schema.documentation}</documentation>
     [/#if]
     [#list schema.types as type]
-      <type name="${type.typeName}">
+      <type name="${type.typeName}" groups="[#list getGroups(type) as group]${group}[#if group_has_next],[/#if][/#list]">
       [#if type.docValue??]
         <documentation><![CDATA[${type.docValue}]]></documentation>
       [/#if]
@@ -179,6 +184,11 @@
       [/#if]
       </type>
     [/#list]
+      <groups>
+    [#list getGroups(schema) as group]
+        <group>${group}</group>
+    [/#list]
+      </groups>
     </jsonSchema>
   [/#if]
 [/@forEachJsonSchema]
@@ -188,7 +198,7 @@
 [@forEachWsdl]
       <wsdl namespace="${wsdl.targetNamespace!""}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename??] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface wsdl=wsdl]
-        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if]>
+        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if] groups="[#list getGroups(endpointInterface) as group]${group}[#if group_has_next],[/#if][/#list]">
     [#if endpointInterface.docValue??]
           <documentation>
             <![CDATA[${endpointInterface.docValue}]]>
@@ -232,6 +242,11 @@
     [/#list]
         </endpointInterface>
   [/@forEachEndpointInterface]
+        <groups>
+  [#list getGroups(wsdl) as group]
+          <group>${group}</group>
+  [/#list]
+        </groups>
       </wsdl>
 [/@forEachWsdl]
     </wsdls>
@@ -239,7 +254,7 @@
   <rest baseAddress="${baseDeploymentAddress}"[#if wadlFilename??] wadl="${wadlFilename}"[/#if]>
     <resources>
 [@forEachRESTResourceListByPath]
-      <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
+      <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}" groups="[#list getGroups(resources) as group]${group}[#if group_has_next],[/#if][/#list]">
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
       [#--[#if !isExcludeFromDocs(resource.supportedOperations?first)]--]
@@ -301,6 +316,11 @@
       </resource>
 [/@forEachRESTResourceListByPath]
     </resources>
+    <groups>
+  [#list getGroups("rest") as group]
+      <group>${group}</group>
+  [/#list]
+    </groups>
   </rest>
   <packages>
 [@forAllPackages var="package"]

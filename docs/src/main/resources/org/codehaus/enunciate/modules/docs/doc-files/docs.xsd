@@ -53,6 +53,13 @@
     <xs:sequence>
       <xs:element name="types" type="types" minOccurs="0" maxOccurs="1"/>
       <xs:element name="elements" type="globalElements" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
 
     <xs:attribute name="namespace" type="xs:string"/>
@@ -123,6 +130,7 @@
         <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="package" type="xs:string"/>
         <xs:attribute name="extendsType" type="xs:string"/>
+        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
 
@@ -291,6 +299,7 @@
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
         <xs:attribute name="typeSchemaId" type="xs:string"/>
+        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -305,6 +314,13 @@
     <xs:sequence>
       <xs:element name="documentation" type="xs:string" minOccurs="0" />
       <xs:element name="type" type="jsonType" maxOccurs="unbounded" />
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="schemaId" type="xs:string" use="required" />
     <xs:attribute name="file" type="xs:string" use="optional" />
@@ -323,6 +339,7 @@
       <xs:element name="enumValue" type="jsonEnumValue" minOccurs="0" maxOccurs="unbounded" />
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="groups" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="jsonProperty">
@@ -389,11 +406,17 @@
 
     <xs:sequence>
       <xs:element name="endpointInterface" type="endpointInterface" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="namespace" type="xs:string"/>
     <xs:attribute name="namespaceId" type="xs:string"/>
     <xs:attribute name="file" type="xs:string"/>
-
   </xs:complexType>
 
   <xs:complexType name="endpointInterface">
@@ -413,6 +436,7 @@
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="package" type="xs:string"/>
         <xs:attribute name="path" type="xs:string" use="optional"/>
+        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -479,6 +503,13 @@
 
     <xs:sequence>
       <xs:element name="resources" type="resources" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="baseAddress" type="xs:string"/>
     <xs:attribute name="wadl" type="xs:string" use="optional"/>
@@ -509,6 +540,7 @@
 
     <xs:attribute name="name" type="xs:string"/>
     <xs:attribute name="subcontext" type="xs:string"/>
+    <xs:attribute name="groups" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="contentType">

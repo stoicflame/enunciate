@@ -26,6 +26,7 @@ import net.sf.jelly.apt.util.JavaDocTagHandler;
 import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
+import org.codehaus.enunciate.template.freemarker.GetGroupsMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
 import org.codehaus.enunciate.template.freemarker.IsExcludeFromDocsMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
@@ -649,6 +650,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.setVariable(JsonTypeNameForQualifiedName.NAME, new JsonTypeNameForQualifiedName(model));
       model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
       model.put("isExcludeFromDocs", new IsExcludeFromDocsMethod());
+      model.put("getGroups", new GetGroupsMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
       processTemplate(getDocsTemplateURL(), model);
