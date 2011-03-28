@@ -58,12 +58,14 @@
   [#assign tns=""]
 [/#if]
   [#list schema.globalElements as globalElement]
-    [#if globalElement.typeDefinition.anonymous]
+    [#if !isExcludeFromIDL(globalElement)]
+      [#if globalElement.typeDefinition.anonymous]
   <${xs}:element name="${globalElement.name}">
     [@processTypeDef typeDef=globalElement.typeDefinition/]
   </${xs}:element>
-    [#else]
+      [#else]
   <${xs}:element name="${globalElement.name}" type="${globalElement.typeDefinition.qname}"/>
+      [/#if]
     [/#if]
   [/#list]
   [#list schema.localElementDeclarations as localElement]
@@ -81,7 +83,7 @@
   [/#list]
 [#t]
   [#list schema.typeDefinitions as typeDefinition]
-    [#if !typeDefinition.anonymous]
+    [#if !typeDefinition.anonymous && !isExcludeFromIDL(typeDefinition)]
       [@processTypeDef typeDef=typeDefinition/]
     [/#if]
   [/#list]

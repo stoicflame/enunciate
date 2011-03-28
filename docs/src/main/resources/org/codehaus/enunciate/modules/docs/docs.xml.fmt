@@ -21,93 +21,97 @@
     <schema namespace="${schema.namespace!""}" namespaceId="${schema.id}"[#if schema.properties.filename??] file="${schema.properties.filename}"[/#if]>
       <types>
     [#list schema.typeDefinitions as type]
+      [#if !isExcludeFromDocs(type)]
         <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
-      [#if type.docValue??]
+        [#if type.docValue??]
           <documentation>
             <![CDATA[${type.docValue}]]>
           </documentation>
-      [/#if]
-      [#list type.javaDoc?keys as tag]
-        [#list type.javaDoc[tag] as tagValue]
+        [/#if]
+        [#list type.javaDoc?keys as tag]
+          [#list type.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          [/#list]
         [/#list]
-      [/#list]
-      [#if type.attributes?size > 0]
+        [#if type.attributes?size > 0]
           <attributes>
-        [#list type.attributes as attribute]
+          [#list type.attributes as attribute]
             <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
               <![CDATA[${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"}]]>
             </attribute>
-        [/#list]
+          [/#list]
           </attributes>
-      [/#if]
-      [#if type.elements?size > 0]
+        [/#if]
+        [#if type.elements?size > 0]
           <elements>
-        [#list type.elements as element]
+          [#list type.elements as element]
             <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
-          [#if element.docValue??]
+            [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
               </documentation>
-          [/#if]
-          [#list element.javaDoc?keys as tag]
-            [#list element.javaDoc[tag] as tagValue]
+            [/#if]
+            [#list element.javaDoc?keys as tag]
+              [#list element.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+              [/#list]
             [/#list]
-          [/#list]
-          [#list element.choices as choice]
+            [#list element.choices as choice]
               <choice name="[#if element.wrapped]${element.wrapperName}/[/#if]${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
-          [/#list]
+            [/#list]
             </element>
-        [/#list]
+          [/#list]
           </elements>
-      [/#if]
-      [#if type.value??]
+        [/#if]
+        [#if type.value??]
           <value typeNamespace="${type.value.baseType.namespace!""}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)??] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
             <![CDATA[${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"}]]>
           </value>
-      [/#if]
-      [#if type.enum]
+        [/#if]
+        [#if type.enum]
           <values>
-        [#list type.delegate.enumConstants as item]
+          [#list type.delegate.enumConstants as item]
             <item value="${type.enumValues[item.simpleName]}">
-          [#if item.docValue??]
+            [#if item.docValue??]
               <documentation>
                  <![CDATA[${item.docValue}]]>
               </documentation>
-          [/#if]
-          [#list item.javaDoc?keys as tag]
-            [#list item.javaDoc[tag] as tagValue]
+            [/#if]
+            [#list item.javaDoc?keys as tag]
+              [#list item.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+              [/#list]
             [/#list]
-          [/#list]
             </item>
-        [/#list]
+          [/#list]
           </values>
-      [/#if]
+        [/#if]
         </type>
+      [/#if]
     [/#list]
       </types>
       <elements>
     [#list schema.globalElements as element]
+      [#if !isExcludeFromDocs(element)]
         <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
-      [#if element.docValue??]
+        [#if element.docValue??]
           <documentation>
             <![CDATA[${element.docValue}]]>
           </documentation>
-      [/#if]
-      [#list element.javaDoc?keys as tag]
-        [#list element.javaDoc[tag] as tagValue]
+        [/#if]
+        [#list element.javaDoc?keys as tag]
+          [#list element.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+          [/#list]
         [/#list]
-      [/#list]
-      [#if includeExampleXml!false]
+        [#if includeExampleXml!false]
           <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
-      [/#if]
-      [#if includeExampleJson!false]
+        [/#if]
+        [#if includeExampleJson!false]
           <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
-      [/#if]
+        [/#if]
         </element>
+      [/#if]
     [/#list]
     [#list schema.localElementDeclarations as element]
       [#if !isDefinedGlobally(element)]
@@ -238,58 +242,60 @@
       <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
+      [#if !isExcludeFromDocs(resource.supportedOperations?first)]
         <operation name="${resource.supportedOperations?first}"[#if resource.verbs??] type="${resource.verbs?first}"[/#if]>
-      [#if resource.docValue??]
+        [#if resource.docValue??]
           <documentation>
             <![CDATA[${resource.docValue}]]>
           </documentation>
-      [/#if]
-      [#list resource.javaDoc?keys as tag]
-        [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
-          [#list resource.javaDoc[tag] as tagValue]
+        [/#if]
+        [#list resource.javaDoc?keys as tag]
+          [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+            [#list resource.javaDoc[tag] as tagValue]
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
-          [/#list]
-        [/#if]
-      [/#list]
-      [#if resource.supportedOperations?size > 1]
-        [#list resource.supportedOperations[1..] as alias]
-          <alias>${alias}</alias>
+            [/#list]
+          [/#if]
         [/#list]
-      [/#if]
-      [#list uniqueContentTypes(resource) as contentType]
-        [#if contentType.produceable && contentType.subcontexts??]
-          [#list contentType.subcontexts as subcontext]
-          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.path}"/>
+        [#if resource.supportedOperations?size > 1]
+          [#list resource.supportedOperations[1..] as alias]
+          <alias>${alias}</alias>
           [/#list]
-        [#else]
-          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
         [/#if]
-      [/#list]
-      [#list resource.resourceParameters as parameter]
+        [#list uniqueContentTypes(resource) as contentType]
+          [#if contentType.produceable && contentType.subcontexts??]
+            [#list contentType.subcontexts as subcontext]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}" subcontext="${subcontext}" path="${subcontext}${resources?first.path}"/>
+            [/#list]
+          [#else]
+          <contentType type="${contentType.type}" consumable="${contentType.consumable?string}" produceable="${contentType.produceable?string}"/>
+          [/#if]
+        [/#list]
+        [#list resource.resourceParameters as parameter]
           <parameter name="${parameter.resourceParameterName}" type="${parameter.resourceParameterType?lower_case}"[#if parameter.defaultValue??] defaultValue="${parameter.defaultValue}"[/#if]>
             <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
           </parameter>
-      [/#list]
-      [#if resource.inputPayload??]
+        [/#list]
+        [#if resource.inputPayload??]
           <inValue>
             [#if schemaForNamespace(resource.inputPayload)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.inputPayload).id}" elementNamespace="${resource.inputPayload.xmlElement.namespace!""}" elementName="${resource.inputPayload.xmlElement.name}" />[/#if]
             [#if jsonSchemaForType(resource.inputPayload)??]<jsonElementRef elementName="${resource.inputPayload.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.inputPayload).schemaId}"/>[/#if]
             <documentation><![CDATA[${resource.inputPayload.docValue!"(no documentation provided)"}]]></documentation>
           </inValue>
-      [/#if]
-      [#if resource.outputPayload??]
+        [/#if]
+        [#if resource.outputPayload??]
           <outValue>
             [#if schemaForNamespace(resource.outputPayload)??]<xmlElement elementSchemaId="${schemaForNamespace(resource.outputPayload).id}" elementNamespace="${resource.outputPayload.xmlElement.namespace!""}" elementName="${resource.outputPayload.xmlElement.name}" />[/#if]
             [#if jsonSchemaForType(resource.outputPayload)??]<jsonElement elementName="${resource.outputPayload.jsonType.typeName}" elementSchemaId="${jsonSchemaForType(resource.outputPayload).schemaId}"/>[/#if]
             <documentation><![CDATA[${resource.outputPayload.docValue!"(no documentation provided)"}]]></documentation>
           </outValue>
-      [/#if]
-      [#list resource.resourceErrors as error]
+        [/#if]
+        [#list resource.resourceErrors as error]
           <error code="${error.errorCode}">
             <![CDATA[${error.docValue!""}]]>
           </error>
-      [/#list]
+        [/#list]
         </operation>
+      [/#if]
     [/#if]
   [/#list]
       </resource>

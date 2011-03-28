@@ -35,6 +35,7 @@ import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.EnunciateException;
 import org.codehaus.enunciate.template.freemarker.AccessorOverridesAnotherMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
+import org.codehaus.enunciate.template.freemarker.IsExcludeFromIDLMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 import org.apache.commons.digester.RuleSet;
 
@@ -302,6 +303,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
 
     model.put("prefix", new PrefixMethod());
     model.put("isDefinedGlobally", new IsDefinedGloballyMethod());
+    model.put("isExcludeFromIDL", new IsExcludeFromIDLMethod());
     model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
     model.put("wadlStylesheetUri", this.wadlStylesheetUri);
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());

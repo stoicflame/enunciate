@@ -73,45 +73,47 @@ Template library for WADL.
 
 [#macro handleResourceMethod resource contentTypes]
   [#list resource.supportedOperations as operation]
+    [#if !isExcludeFromIDL(operation)]
       <${wadl}:method name="${operation}">
-    [#if resource.docValue??]
+      [#if resource.docValue??]
         <${wadl}:doc><![CDATA[${resource.docValue}]]></${wadl}:doc>
-    [/#if]
-    [#if ((resource.resourceParameters?size > 0) || (resource.inputPayload??))]
+      [/#if]
+      [#if ((resource.resourceParameters?size > 0) || (resource.inputPayload??))]
         <${wadl}:request>
-      [#if resource.inputPayload??]
-        [#if resource.inputPayload.docValue??]
+        [#if resource.inputPayload??]
+          [#if resource.inputPayload.docValue??]
           <${wadl}:doc><![CDATA[${resource.inputPayload.docValue}]]></${wadl}:doc>
-        [/#if]
-        [#list contentTypes as contentType]
-          [#if contentType.consumable]
+          [/#if]
+          [#list contentTypes as contentType]
+            [#if contentType.consumable]
           <${wadl}:representation mediaType="${contentType.type}"[#if resource.inputPayload.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.inputPayload.xmlElement.namespace?? && resource.inputPayload.xmlElement.namespace != ""]${prefix(resource.inputPayload.xmlElement.namespace)}:[/#if]${resource.inputPayload.xmlElement.name}"[#if resource.inputPayload.xmlElement.namespace?? && resource.inputPayload.xmlElement.namespace != ""] xmlns:${prefix(resource.inputPayload.xmlElement.namespace)}="${resource.inputPayload.xmlElement.namespace}"[/#if][/#if]/>
+            [/#if]
+          [/#list]
+        [/#if]
+        [#list resource.resourceParameters as parameter]
+          [#if parameter.resourceParameterType?string = "QUERY" || parameter.resourceParameterType?string = "HEADER"]
+          <${wadl}:param name="${parameter.resourceParameterName}" style="${parameter.resourceParameterType?lower_case}">
+            [#if parameter.docValue??]
+            <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
+            [/#if]
+          </${wadl}:param>
           [/#if]
         [/#list]
-      [/#if]
-      [#list resource.resourceParameters as parameter]
-        [#if parameter.resourceParameterType?string = "QUERY" || parameter.resourceParameterType?string = "HEADER"]
-          <${wadl}:param name="${parameter.resourceParameterName}" style="${parameter.resourceParameterType?lower_case}">
-          [#if parameter.docValue??]
-            <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
-          [/#if]
-          </${wadl}:param>
-        [/#if]
-      [/#list]
         </${wadl}:request>
-    [/#if]
-    [#if resource.outputPayload??]
-        <${wadl}:response>
-      [#if resource.outputPayload.docValue??]
-          <${wadl}:doc><![CDATA[${resource.outputPayload.docValue}]]></${wadl}:doc>
       [/#if]
-      [#list contentTypes as contentType]
-        [#if contentType.produceable]
-          <${wadl}:representation mediaType="${contentType.type}"[#if resource.outputPayload.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""]${prefix(resource.outputPayload.xmlElement.namespace)}:[/#if]${resource.outputPayload.xmlElement.name}"[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""] xmlns:${prefix(resource.outputPayload.xmlElement.namespace)}="${resource.outputPayload.xmlElement.namespace}"[/#if][/#if]/>
+      [#if resource.outputPayload??]
+        <${wadl}:response>
+        [#if resource.outputPayload.docValue??]
+          <${wadl}:doc><![CDATA[${resource.outputPayload.docValue}]]></${wadl}:doc>
         [/#if]
-      [/#list]
+        [#list contentTypes as contentType]
+          [#if contentType.produceable]
+          <${wadl}:representation mediaType="${contentType.type}"[#if resource.outputPayload.xmlElement?? && (contentType.type = "*/*" || contentType.type?ends_with("xml"))] element="[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""]${prefix(resource.outputPayload.xmlElement.namespace)}:[/#if]${resource.outputPayload.xmlElement.name}"[#if resource.outputPayload.xmlElement.namespace?? && resource.outputPayload.xmlElement.namespace != ""] xmlns:${prefix(resource.outputPayload.xmlElement.namespace)}="${resource.outputPayload.xmlElement.namespace}"[/#if][/#if]/>
+          [/#if]
+        [/#list]
         </${wadl}:response>
-    [/#if]
+      [/#if]
       </${wadl}:method>
+    [/#if]
   [/#list]
 [/#macro]
