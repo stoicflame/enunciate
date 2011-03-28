@@ -68,4 +68,8 @@ public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
     }
     return null;
   }
+
+  public TypeMirror getDelegate() {
+    return delegate;
+  }
 }

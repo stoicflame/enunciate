@@ -470,7 +470,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   }
 
   // Inherited.
-  public RESTResourcePayload getOutputPayload() {
+  public ResourcePayloadTypeAdapter getOutputPayload() {
     return this.outputPayload;
   }
 
