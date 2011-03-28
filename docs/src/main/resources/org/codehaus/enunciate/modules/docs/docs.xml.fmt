@@ -242,7 +242,7 @@
       <resource name="${(resources?first).path}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
   [#list resources as resource]
     [#if resource.supportedOperations?size > 0]
-      [#if !isExcludeFromDocs(resource.supportedOperations?first)]
+      [#--[#if !isExcludeFromDocs(resource.supportedOperations?first)]--]
         <operation name="${resource.supportedOperations?first}"[#if resource.verbs??] type="${resource.verbs?first}"[/#if]>
         [#if resource.docValue??]
           <documentation>
@@ -295,7 +295,7 @@
           </error>
         [/#list]
         </operation>
-      [/#if]
+      [#--[/#if]--]
     [/#if]
   [/#list]
       </resource>

@@ -73,7 +73,7 @@ Template library for WADL.
 
 [#macro handleResourceMethod resource contentTypes]
   [#list resource.supportedOperations as operation]
-    [#if !isExcludeFromIDL(operation)]
+    [#--[#if !isExcludeFromIDL(operation)]--]
       <${wadl}:method name="${operation}">
       [#if resource.docValue??]
         <${wadl}:doc><![CDATA[${resource.docValue}]]></${wadl}:doc>
@@ -114,6 +114,6 @@ Template library for WADL.
         </${wadl}:response>
       [/#if]
       </${wadl}:method>
-    [/#if]
+    [#--[/#if]--]
   [/#list]
 [/#macro]

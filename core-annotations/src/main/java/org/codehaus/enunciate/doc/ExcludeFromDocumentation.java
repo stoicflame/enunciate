@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker interface for excluding a method, field, type, etc. from the documentation. As of March 2011, this annotation is only honored on JAXB root elements,
- * JAXB type definitions, and JAX-RS resource methods.
+ * Marker interface for excluding a method, field, type, etc. from the documentation. As of March 2011, this annotation is only honored on JAXB root elements and
+ * JAXB type definitions.
  *
  * @author Ryan Heaton
  */
