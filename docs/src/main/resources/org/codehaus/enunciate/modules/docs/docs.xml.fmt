@@ -45,7 +45,7 @@
         [#if type.elements?size > 0]
           <elements>
           [#list type.elements as element]
-            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}" groups="[#list getGroups(element) as group]${group}[#if group_has_next],[/#if][/#list]">
+            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
             [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
@@ -93,7 +93,7 @@
       <elements>
     [#list schema.globalElements as element]
       [#if !isExcludeFromDocs(element)]
-        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if] groups="[#list getGroups(element) as group]${group}[#if group_has_next],[/#if][/#list]">
         [#if element.docValue??]
           <documentation>
             <![CDATA[${element.docValue}]]>

@@ -1196,7 +1196,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
     return new GWTValidator(this.rpcModuleNamespace,
                             this.gwtClasspathHandler != null ? this.gwtClasspathHandler.getSourcePackagesToModules().keySet() : Collections.<String>emptySet(),
                             this.enforceNamespaceConformance,
-                            this.enforceNoFieldAccessors, isGenerateJsonOverlays());
+                            this.enforceNoFieldAccessors, forceGenerateJsonOverlays);
   }
 
   @Override

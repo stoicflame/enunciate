@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jboss-rest</artifactId>
-  <version>1.22-SNAPSHOT</version>
+  <version>1.22-RC2</version>
   <name>Enunciate - JBoss-WS/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the JBoss WS + REST combo.</description>
   <packaging>war</packaging>

@@ -67,7 +67,7 @@ public class CXFValidator extends BaseValidator {
         }
         for (MethodDeclaration m : ei.getMethods()) {
           javax.jws.WebMethod wm = m.getAnnotation(javax.jws.WebMethod.class);
-          if (wm.exclude()) {
+          if (wm != null && wm.exclude()) {
             result.addError(m, "CXF fails if you specify 'exclude=true' on an endpoint interface.");
           }
         }

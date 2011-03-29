@@ -56,10 +56,6 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
-    <artifact:dependencies filesetId="rest.libs.fileset" pathId="rest.libs.path">
-      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-rest" version="${top.pom.version}"/>
-    </artifact:dependencies>
-
     <artifact:dependencies filesetId="gwt.libs.fileset" pathId="gwt.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-gwt" version="${top.pom.version}"/>
     </artifact:dependencies>
@@ -108,7 +104,6 @@
     <path id="module.docs.classpath">
       <path refid="core.libs.path"/>
       <path refid="spring.libs.path"/>
-      <path refid="rest.libs.path"/>
       <path refid="cxf.libs.path"/>
       <path refid="gwt.libs.path"/>
       <path refid="amf.libs.path"/>
@@ -248,7 +243,6 @@
         <path refid="spring.libs.path"/>
         <path refid="spring2.libs.path"/>
         <path refid="spring3.libs.path"/>
-        <path refid="rest.libs.path"/>
         <path refid="cxf.libs.path"/>
         <path refid="gwt.libs.path"/>
         <path refid="amf.libs.path"/>
@@ -302,18 +296,6 @@
     </copy>
     <delete>
       <fileset dir="target/lib/modules/cxf">
-        <present targetdir="target/lib"/>
-      </fileset>
-    </delete>
-
-    <!--copy the rest module plus deps-->
-    <mkdir dir="target/lib/modules/rest"/>
-    <copy todir="target/lib/modules/rest">
-      <fileset refid="rest.libs.fileset"/>
-      <mapper type="flatten"/>
-    </copy>
-    <delete>
-      <fileset dir="target/lib/modules/rest">
         <present targetdir="target/lib"/>
       </fileset>
     </delete>

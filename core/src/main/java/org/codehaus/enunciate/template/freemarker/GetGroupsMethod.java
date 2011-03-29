@@ -32,6 +32,8 @@ import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
+import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.doc.DocumentationGroup;
 
 import java.util.*;
@@ -64,6 +66,12 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
       }
       for (RootElementDeclaration element : info.getGlobalElements()) {
         gatherGroups(element, groups);
+      }
+    }
+    else if (JsonSchemaInfo.class.isInstance(unwrapped)) {
+      JsonSchemaInfo schema = (JsonSchemaInfo) unwrapped;
+      for (JsonTypeDefinition jsonTypeDefinition : schema.getTypes()) {
+        gatherGroups(jsonTypeDefinition, groups);
       }
     }
     else if (WsdlInfo.class.isInstance(unwrapped)) {

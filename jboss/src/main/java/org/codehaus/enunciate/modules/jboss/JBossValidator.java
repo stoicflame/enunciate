@@ -31,7 +31,7 @@ public class JBossValidator extends BaseValidator {
       }
       for (MethodDeclaration m : ei.getMethods()) {
         javax.jws.WebMethod wm = m.getAnnotation(javax.jws.WebMethod.class);
-        if (wm.exclude()) {
+        if (wm != null && wm.exclude()) {
           result.addError(m, "JBoss fails if you specify 'exclude=true' on an endpoint interface.");
         }
       }
