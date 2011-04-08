@@ -1,5 +1,9 @@
 package org.codehaus.enunciate.samples.petclinic.schema;
 
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+
+import javax.xml.namespace.QName;
+
 /**
  * Simple JavaBean domain object representing an person.
  *
@@ -12,6 +16,9 @@ public class Person extends Entity {
   private String address;
   private String city;
   private String telephone;
+  private QName favoriteFood;
+  private QName favoriteColor;
+  private QName education;
 
   public String getFirstName() {
     return this.firstName;
@@ -53,4 +60,30 @@ public class Person extends Entity {
     this.telephone = telephone;
   }
 
+  @XmlQNameEnumRef(FavoriteFood.class)
+  public QName getFavoriteFood() {
+    return favoriteFood;
+  }
+
+  public void setFavoriteFood(QName favoriteFood) {
+    this.favoriteFood = favoriteFood;
+  }
+
+  @XmlQNameEnumRef(FavoriteColor.class)
+  public QName getFavoriteColor() {
+    return favoriteColor;
+  }
+
+  public void setFavoriteColor(QName favoriteColor) {
+    this.favoriteColor = favoriteColor;
+  }
+
+  @XmlQNameEnumRef(Education.class)
+  public QName getEducation() {
+    return education;
+  }
+
+  public void setEducation(QName education) {
+    this.education = education;
+  }
 }

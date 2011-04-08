@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-contract-first</artifactId>
-  <version>1.22-RC2</version>
+  <version>1.22-RC3</version>
   <name>Enunciate - Contract-First Example (EPCIS)</name>
   <description>An example of how to use Enunciate for contract-first development.</description>
   <packaging>war</packaging>
@@ -136,7 +136,7 @@ If you just want to skip the Objective C tests, set the value of the property 'g
         <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
+        <version>1.5</version>
         <executions>
           <execution>
             <phase>validate</phase>

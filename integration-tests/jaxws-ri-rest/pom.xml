@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.codehaus.enunciate</groupId>
   <artifactId>enunciate-integration-jaxws-ri-rest</artifactId>
-  <version>1.22-RC2</version>
+  <version>1.22-RC3</version>
   <name>Enunciate - JAXWS-RI/REST Integration Tests</name>
   <description>Integration tests for Enunciate, testing the JAXWS-RI + REST combo.</description>
   <packaging>war</packaging>
@@ -38,7 +38,7 @@
         <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
+        <version>1.5</version>
         <executions>
           <execution>
             <phase>validate</phase>
