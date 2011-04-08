@@ -64,8 +64,8 @@ public class PersonServiceImpl implements PersonService {
     return persons;
   }
 
-  public void deletePerson(String personId) throws ServiceException {
-    if (personId == null) {
+  public void deletePerson(String PErsonId) throws ServiceException {
+    if (PErsonId == null) {
       throw new ServiceException("a person id must be supplied", "no person id.");
     }
   }

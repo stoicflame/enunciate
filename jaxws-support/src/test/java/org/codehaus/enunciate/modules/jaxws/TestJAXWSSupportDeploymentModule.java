@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.modules.jaxws;
 
 import com.sun.mirror.declaration.ClassDeclaration;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateException;
 import junit.framework.Test;
 import org.codehaus.enunciate.EnunciateException;
@@ -262,6 +263,7 @@ public class TestJAXWSSupportDeploymentModule extends InAPTTestCase {
     EnunciateFreemarkerModel model = module.getModel();
     model.put("file", new SpecifiedOutputDirectoryFileTransform(genDir));
     model.put("message", message);
+    model.put("Introspector", BeansWrapper.getDefaultInstance().getStaticModels().get("java.beans.Introspector"));
     module.processTemplate(templateURL, model);
 
     Collection<String> srcFiles = enunciate.getJavaFiles(genDir);

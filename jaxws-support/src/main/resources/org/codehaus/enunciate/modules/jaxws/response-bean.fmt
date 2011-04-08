@@ -17,7 +17,7 @@ package ${beanPackage};
 @javax.xml.bind.annotation.XmlType (
   name = "${message.elementName}",
   namespace = "${message.elementNamespace}",
-  propOrder = { [#list message.childElements as childElement]"${childElement.elementName?uncap_first}"[#if childElement_has_next], [/#if][/#list] }
+  propOrder = { [#list message.childElements as childElement]"${Introspector.decapitalize(childElement.elementName)}"[#if childElement_has_next], [/#if][/#list] }
 )
 public class ${simpleBeanName} {
 

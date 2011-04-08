@@ -63,12 +63,12 @@ public interface PersonService {
   /**
    * Deletes a person from the database.  Not a one-way method, but still void.
    *
-   * @param personId The id of the person.
+   * @param PErsonId The id of the person.
    * @throws ServiceException If some problem occurred when deleting the person.
    */
   @DELETE
   @Path("/remover/pedigree/person/{id}")
-  void deletePerson(@PathParam ("id") String personId) throws ServiceException;
+  void deletePerson(@PathParam ("id") String PErsonId) throws ServiceException;
 
   /**
    * Store some generic properties.

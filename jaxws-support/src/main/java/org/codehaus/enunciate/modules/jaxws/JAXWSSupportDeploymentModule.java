@@ -20,6 +20,7 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.ReferenceType;
+import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateException;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.WsdlInfo;
@@ -85,6 +86,7 @@ public class JAXWSSupportDeploymentModule extends FreemarkerDeploymentModule {
     File genDir = getGenerateDir();
     if (!isUpToDate(genDir)) {
       EnunciateFreemarkerModel model = getModel();
+      model.put("Introspector", BeansWrapper.getDefaultInstance().getStaticModels().get("java.beans.Introspector"));
       Map<String, WsdlInfo> ns2wsdl = model.getNamespacesToWSDLs();
 
       URL requestBeanTemplate = JAXWSSupportDeploymentModule.class.getResource("request-bean.fmt");
