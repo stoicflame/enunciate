@@ -70,19 +70,22 @@
         [/#if]
         [#if type.enum]
           <values>
-          [#list type.delegate.enumConstants as item]
-            <item value="${type.enumValues[item.simpleName]}">
-            [#if item.docValue??]
+          [#assign enumValueMap=type.enumValues/]
+          [#list type.enumConstants as constant]
+            [#if enumValueMap[constant.simpleName]??]
+            <item value="${enumValueMap[constant.simpleName]?string}">
+              [#if constant.docValue??]
               <documentation>
-                 <![CDATA[${item.docValue}]]>
+                 <![CDATA[${constant.docValue}]]>
               </documentation>
-            [/#if]
-            [#list item.javaDoc?keys as tag]
-              [#list item.javaDoc[tag] as tagValue]
+              [/#if]
+              [#list constant.javaDoc?keys as tag]
+                [#list constant.javaDoc[tag] as tagValue]
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+                [/#list]
               [/#list]
-            [/#list]
             </item>
+            [/#if]
           [/#list]
           </values>
         [/#if]

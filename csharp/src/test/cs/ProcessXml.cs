@@ -16,6 +16,10 @@ namespace Org.Codehaus.Enunciate.CSharp.Test {
       XmlSerializer serializer = new XmlSerializer(type);
       TextReader tr = new StreamReader(args[1]);
       object o = serializer.Deserialize(tr);
+      if (o is Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House) {
+        ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownType = ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownType;
+        ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownStyle = ((Org.Codehaus.Enunciate.Examples.Csharp.Schema.Structures.House)o).KnownStyle;
+      }
       tr.Close();
 
       TextWriter tw = new StreamWriter(args[2]);

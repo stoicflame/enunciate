@@ -18,7 +18,7 @@ enum ${typeName}
   ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
 [/#list]
 };
-
+  [#if !(type.QNameEnum!false)]
 /**
  * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
  *
@@ -51,13 +51,30 @@ static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientS
  * @return The string value or NULL on error.
  */
 static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first});
+  [#else]
+/**
+ * Gets the known ${type.clientSimpleName} for a QName.
+ *
+ * @param qname The QName
+ * @return The ${type.clientSimpleName}, or -1 if unable to be read.
+ */
+static enum ${typeName} getKnown${typeName}(QName *qname);
 
+/**
+ * Convert a known ${type.clientSimpleName} to a QName.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The known ${type.clientSimpleName}.
+ * @return The QName, or nil if an unknown enum constant.
+ */
+static QName *convertKnown${typeName}(enum ${typeName} _${type.clientSimpleName?uncap_first});
+  [/#if]
 #endif /* DEF_${typeName}_H */
 [/#macro]
 [#macro writeEnumTypeImpl type]
   [#assign typeName=nameForTypeDefinition(type)/]
 #ifndef DEF_${typeName}_M
 #define DEF_${typeName}_M
+  [#if !(type.QNameEnum!false)]
 
 /**
  * Reads a ${type.clientSimpleName} from XML. The reader is assumed to be at the start element.
@@ -70,14 +87,14 @@ static enum ${typeName} *xmlTextReaderRead${typeName}Type(xmlTextReaderPtr reade
   xmlChar *enumValue = xmlTextReaderReadEntireNodeValue(reader);
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   if (enumValue != NULL) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
     if (xmlStrcmp(enumValue, BAD_CAST "${enumValueMap[constant.simpleName]}") == 0) {
       *value = ${nameForEnumConstant(type, constant)};
       free(enumValue);
       return value;
     }
-  [/#list]
+    [/#list]
 #if DEBUG_ENUNCIATE
     NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", enumValue);
 #endif
@@ -101,14 +118,14 @@ static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientS
 {
   enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
   value = NULL;
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
   if (${"[@"}"${enumValueMap[constant.simpleName]}" isEqualToString:_${type.clientSimpleName?uncap_first}]) {
     *value = ${nameForEnumConstant(type, constant)};
   }
-  [/#list]
+    [/#list]
 #if DEBUG_ENUNCIATE
-  NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", enumValue);
+  NSLog(@"Attempt to read enum value failed: %s doesn't match an enum value.", _${type.clientSimpleName?uncap_first});
 #endif
 
   return value;
@@ -124,11 +141,11 @@ static enum ${typeName} *formatStringTo${typeName}Type(NSString *_${type.clientS
 static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typeName} *_${type.clientSimpleName?uncap_first})
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
     case ${nameForEnumConstant(type, constant)}:
       return xmlTextWriterWriteString(writer, BAD_CAST "${enumValueMap[constant.simpleName]}");
-  [/#list]
+    [/#list]
   }
 
 #if DEBUG_ENUNCIATE
@@ -146,17 +163,95 @@ static int xmlTextWriterWrite${typeName}Type(xmlTextWriterPtr writer, enum ${typ
 static NSString *format${typeName}TypeToString(enum ${typeName} *_${type.clientSimpleName?uncap_first})
 {
   switch (*_${type.clientSimpleName?uncap_first}) {
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.enumConstants as constant]
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
     case ${nameForEnumConstant(type, constant)}:
       return @"${enumValueMap[constant.simpleName]}";
-  [/#list]
+    [/#list]
     default:
       return NULL;
   }
 
   return NULL;
 }
+  [#else]
+/**
+ * Gets the known ${type.clientSimpleName} for a QName.
+ *
+ * @param qname The QName
+ * @return The ${type.clientSimpleName}, or -1 if unable to be read.
+ */
+static enum ${typeName} getKnown${typeName}(QName *qname)
+{
+  if (qname) {
+    [#assign enumValueMap=type.enumValues/]
+    [#assign unknownQNameEnum=""/]
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+    if (([#if enumValueMap[constant.simpleName].namespaceURI == ""][[qname namespaceURI] length] == 0[#else]${"[@"}"${enumValueMap[constant.simpleName].namespaceURI}" isEqualToString:[qname namespaceURI] ][/#if])
+        && (${"[@"}"${enumValueMap[constant.simpleName].localPart}" isEqualToString:[qname localPart] ])) {
+      return ${nameForEnumConstant(type, constant)};
+    }
+      [#else]
+        [#assign unknownQNameEnum=nameForEnumConstant(type, constant)/]
+      [/#if]
+    [/#list]
+    [#if unknownQNameEnum = ""]
+#if DEBUG_ENUNCIATE
+    NSLog(@"Attempt to read known qname value failed: qname {%@}%@ doesn't match an enum value: returning null.", [qname namespaceURI], [qname localPart]);
+#endif
+    return -1;
+    [#else]
+#if DEBUG_ENUNCIATE
+    NSLog(@"Attempt to read known qname value failed: qname {%@}%@ doesn't match an enum value: returning ${unknownQNameEnum}.", [qname namespaceURI], [qname localPart]);
+#endif
+    return ${unknownQNameEnum};
+    [/#if]
+  }
+  else {
+#if DEBUG_ENUNCIATE
+    NSLog(@"Attempt to read known qname value failed: nil value.");
+#endif
+    return -1;
+  }
+}
 
+/**
+ * Convert a known ${type.clientSimpleName} to a QName.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The known ${type.clientSimpleName}.
+ * @return The QName, or nil if an unknown enum constant.
+ */
+static QName *convertKnown${typeName}(enum ${typeName} _${type.clientSimpleName?uncap_first})
+{
+  QName *qname = [[QName alloc] init];
+  switch (_${type.clientSimpleName?uncap_first}) {
+    [#assign enumValueMap=type.enumValues/]
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+    case ${nameForEnumConstant(type, constant)}:
+      [qname setNamespaceURI: @"${enumValueMap[constant.simpleName].namespaceURI}"];
+      [qname setLocalPart: @"${enumValueMap[constant.simpleName].localPart}"];
+      [qname setPrefix: @"${prefix(enumValueMap[constant.simpleName].namespaceURI)}"];
+      [qname autorelease];
+      return qname;
+      [#else]
+    case ${nameForEnumConstant(type, constant)}:
+#if DEBUG_ENUNCIATE
+      NSLog(@"Unable to convert enum value ${nameForEnumConstant(type, constant)}.");
+#endif
+      [qname release];
+      return nil;
+      [/#if]
+    [/#list]
+  }
+
+#if DEBUG_ENUNCIATE
+  NSLog(@"Unable to write enum value (no valid value found).");
+#endif
+  [qname release];
+  return nil;
+}
+  [/#if]
 #endif /* DEF_${typeName}_M */
 [/#macro]

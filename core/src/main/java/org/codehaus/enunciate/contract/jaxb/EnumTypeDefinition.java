@@ -16,13 +16,15 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
 import com.sun.mirror.type.PrimitiveType;
-import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.type.TypeMirror;
+import net.sf.jelly.apt.Context;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
@@ -30,19 +32,12 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.jdom.*;
 import org.jdom.Element;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import net.sf.jelly.apt.Context;
-import net.sf.jelly.apt.decorations.DeclarationDecorator;
+import java.util.*;
 
 /**
  * An enum type definition.
@@ -52,13 +47,16 @@ import net.sf.jelly.apt.decorations.DeclarationDecorator;
 public class EnumTypeDefinition extends SimpleTypeDefinition {
 
   private final XmlEnum xmlEnum;
-  private final Map<String, String> enumValues;
+  private final Map<String, Object> enumValues;
 
   public EnumTypeDefinition(EnumDeclaration delegate) {
     super(delegate);
-
     this.xmlEnum = getAnnotation(XmlEnum.class);
-    enumValues = new LinkedHashMap<String, String>();
+    this.enumValues = loadEnumValues();
+  }
+
+  protected Map<String, Object> loadEnumValues() {
+    Map<String, Object> enumValueMap = new LinkedHashMap<String, Object>();
     Collection<EnumConstantDeclaration> enumConstants = ((EnumDeclaration) getDelegate()).getEnumConstants();
     HashSet<String> enumValues = new HashSet<String>(enumConstants.size());
     for (EnumConstantDeclaration enumConstant : enumConstants) {
@@ -72,13 +70,20 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
         throw new ValidationException(enumConstant.getPosition(), getQualifiedName() + ": duplicate enum value: " + value);
       }
 
-      this.enumValues.put(enumConstant.getSimpleName(), value);
+      enumValueMap.put(enumConstant.getSimpleName(), value);
     }
-
+    return enumValueMap;
   }
 
   public Collection<EnumConstantDeclaration> getEnumConstants() {
-    return DeclarationDecorator.decorate(((EnumDeclaration)delegate).getEnumConstants());
+    Collection<EnumConstantDeclaration> realConstants = DeclarationDecorator.decorate(((EnumDeclaration) delegate).getEnumConstants());
+    Collection<EnumConstantDeclaration> filteredConstants = new ArrayList<EnumConstantDeclaration>();
+    for (EnumConstantDeclaration realConstant : realConstants) {
+      if (this.enumValues.containsKey(realConstant.getSimpleName())) {
+        filteredConstants.add(realConstant);
+      }
+    }
+    return filteredConstants;
   }
 
   // Inherited.
@@ -169,7 +174,7 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
    *
    * @return The map of constant declarations to their enum constant values.
    */
-  public Map<String, String> getEnumValues() {
+  public Map<String, Object> getEnumValues() {
     return this.enumValues;
   }
 

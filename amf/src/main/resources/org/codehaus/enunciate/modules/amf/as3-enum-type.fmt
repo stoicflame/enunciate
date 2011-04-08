@@ -12,12 +12,15 @@ package ${packageFor(type)} {
    * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   public final class ${simpleNameFor(type)} {
+    [#assign enumValueMap=type.enumValues/]
     [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
 
     /**
      * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n     * ")}
      */
-    public static var [#if constant.annotations["org.codehaus.enunciate.ClientName"]??]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]:String = "[#if constant.annotations["org.codehaus.enunciate.ClientName"]??]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]";
+    public static var [#if constant.annotations["org.codehaus.enunciate.ClientName"]??]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]:String = "[#if type.QNameEnum!false]${enumValueMap[constant.simpleName]?string}[#elseif constant.annotations["org.codehaus.enunciate.ClientName"]??]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]";
+      [/#if]
     [/#list]
 
   }

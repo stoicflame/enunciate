@@ -132,8 +132,14 @@
   </${xs}:annotation>
     [/#if]
   <${xs}:restriction base="${typeDef.baseType.qname}">
-    [#list typeDef.enumValues?values as enumValue]
-    <${xs}:enumeration value="${enumValue}"/> [#--todo: add the java doc comments for these enum values.--]
+    [#list typeDef.enumValues?keys as enumKey] [#--todo: add the java doc comments for these enum values.--]
+      [#if typeDef.enumValues[enumKey]??]
+        [#if typeDef.QNameEnum!false]
+    <${xs}:enumeration value="[#if typeDef.enumValues[enumKey].namespaceURI != ""]${prefix(typeDef.enumValues[enumKey].namespaceURI)}:[/#if]${typeDef.enumValues[enumKey].localPart}"/>
+        [#else]
+    <${xs}:enumeration value="${typeDef.enumValues[enumKey]}"/>
+        [/#if]
+      [/#if]
     [/#list]
   </${xs}:restriction>
 </${xs}:simpleType>

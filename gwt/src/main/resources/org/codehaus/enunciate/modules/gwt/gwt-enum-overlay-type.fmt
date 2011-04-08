@@ -9,37 +9,86 @@ package ${overlayPackageFor(type)};
  */
 public enum ${type.simpleName} {
   [#assign enumValueMap=type.enumValues/]
-  [#list type.delegate.enumConstants as constant]
+  [#assign unknownQNameEnum=""/]
+  [#list type.enumConstants as constant]
+    [#if !(enumValueMap[constant.simpleName]??)]
+      [#assign unknownQNameEnum = constant.simpleName/]
+    [/#if]
 
   /**
    * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${constant.simpleName}[#if constant_has_next],[#else];[/#if]
   [/#list]
+  [#if type.QNameEnum!false]
+
+  /**
+   * Convert a QName to a ${type.simpleName}. The QName is expected to be in the form '{namespaceURI}localPart'.
+   * If the QName is not a known QName, [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] will be returned.
+   */
+  public static ${type.simpleName} convertFromKnownQName(String qnameValue) {
+    if (qnameValue == null) {
+      return null;
+    }
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+    if ("{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}".equals(qnameValue)) {
+      return ${constant.simpleName};
+    }
+      [/#if]
+    [/#list]
+    return [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if];
+  }
+
+  /**
+   * Convert a ${type.simpleName} to a QName. The QName will be in the form '{namespaceURI}localPart'.
+   *
+   * @throws IllegalArgumentException If [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] is passed.
+   */
+  public static String convertToKnownQName(${type.simpleName} value) {
+    if (value == null) {
+      return null;
+    }
+    switch (value) {
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+      case ${constant.simpleName}:
+        return "{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}";
+      [/#if]
+    [/#list]
+      default:
+        throw new IllegalArgumentException("No known QName for: " + value);
+    }
+  }
+  [#else]
 
   public static ${type.simpleName} fromString(String value) {
     if (value == null) {
       return null;
     }
-  [#assign enumValueMap=type.enumValues/]
-  [#list type.delegate.enumConstants as constant]
-    if ("${enumValueMap[constant.simpleName]}".equals(value)) {
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+    if ("${enumValueMap[constant.simpleName]?string}".equals(value)) {
       return ${type.simpleName}.${constant.simpleName};
     }
-  [/#list]
+      [/#if]
+    [/#list]
 
     throw new IllegalArgumentException("Illegal enum value: " + value);
   }
 
   public String toString() {
     switch(this) {
-      [#list type.delegate.enumConstants as constant]
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
       case ${constant.simpleName}:
-        return "${enumValueMap[constant.simpleName]}";
-      [/#list]
+        return "${enumValueMap[constant.simpleName]?string}";
+      [/#if]
+    [/#list]
       default:
         throw new IllegalStateException();
     }
   }
+  [/#if]
 }
 [/@file]

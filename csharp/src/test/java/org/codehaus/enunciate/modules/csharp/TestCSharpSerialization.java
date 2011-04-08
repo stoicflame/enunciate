@@ -1,11 +1,15 @@
 package org.codehaus.enunciate.modules.csharp;
 
 import junit.framework.TestCase;
+import org.codehaus.enunciate.XmlQNameEnumUtil;
 import org.codehaus.enunciate.examples.csharp.schema.*;
 import org.codehaus.enunciate.examples.csharp.schema.animals.Cat;
 import org.codehaus.enunciate.examples.csharp.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.csharp.schema.structures.House;
+import org.codehaus.enunciate.examples.csharp.schema.structures.HouseStyle;
+import org.codehaus.enunciate.examples.csharp.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.csharp.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.csharp.schema.vehicles.BusType;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -180,6 +184,8 @@ public class TestCSharpSerialization extends TestCase {
     window3.setHeight(2);
     window3.setLineStyle(LineStyle.solid);
     bus.setWindows(Arrays.asList(window1, window2, window3));
+    bus.setType(XmlQNameEnumUtil.toQName(BusType.charter));
+
     bus = processThroughXml(bus);
     assertEquals("bus id", bus.getId());
     door = bus.getDoor();
@@ -213,6 +219,7 @@ public class TestCSharpSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
+    assertEquals(BusType.charter, XmlQNameEnumUtil.fromQName(bus.getType(), BusType.class));
   }
 
   /**
@@ -264,6 +271,8 @@ public class TestCSharpSerialization extends TestCase {
     house.setWindows(Arrays.asList(window));
     Date date = new Date();
 //    house.setConstructedDate(new DateTime(date, DateTimeZone.UTC));
+    house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
+    house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
 
     house = processThroughXml(house);
 
@@ -304,6 +313,8 @@ public class TestCSharpSerialization extends TestCase {
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
     assertNull("constructed date should be null (C# value type should not be serialized)", house.getConstructedDate());
+    assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
+    assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
     //todo: figure out the timezone particulars.
     //assertEquals(new DateTime(date, DateTimeZone.UTC), house.getConstructedDate());
 

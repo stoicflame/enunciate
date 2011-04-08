@@ -17,12 +17,16 @@
 package org.codehaus.enunciate.modules.jaxws_client;
 
 import junit.framework.TestCase;
+import org.codehaus.enunciate.XmlQNameEnumUtil;
 import org.codehaus.enunciate.examples.jaxws_client.schema.*;
 import org.codehaus.enunciate.examples.jaxws_client.schema.animals.Cat;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.CanvasAttachment;
 import org.codehaus.enunciate.examples.jaxws_client.schema.structures.House;
+import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseStyle;
+import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 
 import javax.activation.DataHandler;
@@ -214,6 +218,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     Circle rider4 = new Circle();
     rider4.setRadius(4);
     riders.put(4, rider4);
+    bus.setType(XmlQNameEnumUtil.toQName(BusType.charter));
 
     JAXBContext context = JAXBContext.newInstance(Bus.class);
     Marshaller marshaller = context.createMarshaller();
@@ -298,6 +303,7 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
+    assertEquals(BusType.charter, XmlQNameEnumUtil.fromQName(bus.getType(), BusType.class));
 
     //todo: test an element wrapper around elementRefs
   }
@@ -345,6 +351,8 @@ public class TestGeneratedTypeSerialization extends TestCase {
     window.setLineStyle(LineStyle.solid);
     house.setWindows(Arrays.asList(window));
     house.setConstructedDate(new DateTime(3L));
+    house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
+    house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
 
     JAXBContext context = JAXBContext.newInstance(House.class);
     JAXBContext clientContext = JAXBContext.newInstance(shapes.structures.House.class);
@@ -435,6 +443,8 @@ public class TestGeneratedTypeSerialization extends TestCase {
     assertEquals(10, window.getWidth());
     assertNull(window.getId());
     assertEquals(new DateTime(3L), house.getConstructedDate());
+    assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
+    assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
 
     //now let's check the nillable and required stuff:
 

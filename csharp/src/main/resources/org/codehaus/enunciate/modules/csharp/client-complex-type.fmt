@@ -138,6 +138,21 @@ namespace ${namespaceFor(type)} {
         this._${accessor.clientSimpleName} = value;
       }
     }
+    [#if accessor.referencesQNameEnum!false]
+
+    /// <summary>
+    ///  Convenience property for treating ${accessor.clientSimpleName?cap_first} as an enum. See ${classnameFor(accessor.QNameEnumRef)}QNameUtil for details on getter/setter functionality.
+    /// </summary>
+    [System.Xml.Serialization.XmlIgnoreAttribute]
+    public ${classnameFor(accessor.QNameEnumRef)} Known${accessor.clientSimpleName?cap_first} {
+      get {
+        return ${classnameFor(accessor.QNameEnumRef)}QNameUtil.ConvertFromKnownQName(this._${accessor.clientSimpleName});
+      }
+      set {
+        this._${accessor.clientSimpleName} = ${classnameFor(accessor.QNameEnumRef)}QNameUtil.ConvertToKnownQName(value);
+      }
+    }
+    [/#if]
     [#if accessor.accessorType.enum]
 
     /// <summary>

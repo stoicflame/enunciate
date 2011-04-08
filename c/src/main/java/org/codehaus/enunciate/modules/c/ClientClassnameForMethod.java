@@ -58,7 +58,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(DataHandler.class.getName(), "unsigned char");
     classConversions.put(java.awt.Image.class.getName(), "unsigned char");
     classConversions.put(javax.xml.transform.Source.class.getName(), "unsigned char");
-    classConversions.put(QName.class.getName(), "xmlChar");
+    classConversions.put(QName.class.getName(), "struct QName");
     classConversions.put(URI.class.getName(), "xmlChar");
     classConversions.put(UUID.class.getName(), "xmlChar");
     classConversions.put(XMLGregorianCalendar.class.getName(), "struct tm");

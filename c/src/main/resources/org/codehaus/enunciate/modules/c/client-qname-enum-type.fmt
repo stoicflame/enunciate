@@ -1,0 +1,134 @@
+[#ftl]
+[#--template for the client-side enum type.--]
+[#macro writeEnumTypeHeader type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_H
+#define DEF_${typeName}_H
+
+/**
+ * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
+ */
+enum ${typeName} {
+[#list type.enumConstants as constant]
+
+  /**
+   * ${constant.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n   * ")}
+   */
+  ${nameForEnumConstant(type, constant)}[#if constant_has_next],[/#if]
+[/#list]
+};
+
+/**
+ * Analyzes a QName to determine if it's a known QName enumeration.
+ *
+ * @param qname The QName to analyze.
+ * @return The ${type.clientSimpleName}, or NULL if the qname is not a known QName enumeration.
+ */
+static enum ${typeName} *xml_get_known_${typeName}(struct QName *qname);
+
+/**
+ * Get the known QName for a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to convert .
+ * @return The QName, or NULL if error.
+ */
+static struct QName *xml_convert_known_${typeName}(enum ${typeName} *_${type.clientSimpleName?uncap_first});
+
+#endif
+[/#macro]
+[#macro writeEnumTypeImpl type]
+  [#assign typeName=nameForTypeDefinition(type)/]
+#ifndef DEF_${typeName}_M
+#define DEF_${typeName}_M
+
+/**
+ * Analyzes a QName to determine if it's a known QName enumeration.
+ *
+ * @param qname The QName to analyze.
+ * @return The ${type.clientSimpleName}, or NULL if the qname is not a known QName enumeration.
+ */
+static enum ${typeName} *xml_get_known_${typeName}(struct QName *qname) {
+  enum ${typeName} *value = calloc(1, sizeof(enum ${typeName}));
+
+  if (qname != NULL) {
+    if (qname->namespaceURI == NULL) {
+      qname->namespaceURI = xmlStrdup(BAD_CAST "");
+    }
+  [#assign enumValueMap=type.enumValues/]
+  [#assign unknownQNameEnum=""/]
+  [#list type.enumConstants as constant]
+    [#if enumValueMap[constant.simpleName]??]
+    if ((xmlStrcmp(qname->namespaceURI, BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}") == 0)
+        && (xmlStrcmp(qname->localPart, BAD_CAST "${enumValueMap[constant.simpleName].localPart}") == 0)) {
+      *value = ${nameForEnumConstant(type, constant)};
+      return value;
+    }
+    [#else]
+      [#assign unknownQNameEnum=nameForEnumConstant(type, constant)/]
+    [/#if]
+  [/#list]
+  [#if unknownQNameEnum = ""]
+#if DEBUG_ENUNCIATE
+    printf("Attempt to read known qname value failed: qname {%s}%s doesn't match an enum value: returning null.\n", qname->namespaceURI, qname->localPart);
+#endif
+    free(value);
+    return NULL;
+  [#else]
+#if DEBUG_ENUNCIATE
+    printf("Attempt to read known qname value failed: qname {%s}%s doesn't match an enum value: returning ${unknownQNameEnum}.\n", qname->namespaceURI, qname->localPart);
+#endif
+    *value = ${unknownQNameEnum};
+    return value;
+  [/#if]
+  }
+  else {
+#if DEBUG_ENUNCIATE
+    printf("Attempt to read known qname value failed: NULL value.\n");
+#endif
+    free(value);
+    return NULL;
+  }
+}
+
+/**
+ * Get the known QName for a ${type.clientSimpleName}.
+ *
+ * @param _${type.clientSimpleName?uncap_first} The ${type.clientSimpleName} to convert .
+ * @return The QName, or NULL if error.
+ */
+static struct QName *xml_convert_known_${typeName}(enum ${typeName} *_${type.clientSimpleName?uncap_first}) {
+  struct QName * qname = calloc(1, sizeof(struct QName));
+  if (_${type.clientSimpleName?uncap_first} == NULL) {
+    free(qname);
+    return NULL;
+  }
+
+  switch (*_${type.clientSimpleName?uncap_first}) {
+  [#assign enumValueMap=type.enumValues/]
+  [#list type.enumConstants as constant]
+    [#if enumValueMap[constant.simpleName]??]
+    case ${nameForEnumConstant(type, constant)}:
+      qname->namespaceURI = xmlStrdup(BAD_CAST "${enumValueMap[constant.simpleName].namespaceURI}");
+      qname->localPart = xmlStrdup(BAD_CAST "${enumValueMap[constant.simpleName].localPart}");
+      qname->prefix = xmlStrdup(BAD_CAST "${prefix(enumValueMap[constant.simpleName].namespaceURI)}");
+      return qname;
+    [#else]
+    case ${nameForEnumConstant(type, constant)}:
+#if DEBUG_ENUNCIATE
+      printf("Unable to write enum value ${nameForEnumConstant(type, constant)}.\n");
+#endif
+      free(qname);
+      return NULL;
+    [/#if]
+  [/#list]
+  }
+
+#if DEBUG_ENUNCIATE
+  printf("Unable to write enum value (no valid value found).\n");
+#endif
+  free(qname);
+  return NULL;
+}
+
+#endif /* DEF_${typeName}_M */
+[/#macro]

@@ -58,7 +58,7 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     classConversions.put(DataHandler.class.getName(), "NSData");
     classConversions.put(java.awt.Image.class.getName(), "NSData");
     classConversions.put(javax.xml.transform.Source.class.getName(), "NSData");
-    classConversions.put(QName.class.getName(), "NSString");
+    classConversions.put(QName.class.getName(), "QName");
     classConversions.put(URI.class.getName(), "NSURL");
     classConversions.put(UUID.class.getName(), "NSString");
     classConversions.put(XMLGregorianCalendar.class.getName(), "NSCalendarDate");

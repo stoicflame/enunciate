@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.22-RC2</version>
+    <version>1.22-RC3</version>
   </parent>
 
   <artifactId>enunciate-core</artifactId>
@@ -42,7 +42,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
         <executions>
           <execution>
             <id>add-contract-samples</id>

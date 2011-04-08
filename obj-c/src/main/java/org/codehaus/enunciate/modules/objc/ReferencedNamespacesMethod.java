@@ -94,6 +94,15 @@ public class ReferencedNamespacesMethod implements TemplateMethodModelEx {
       addReferencedNamespaces(value.getBaseType(), referencedNamespaces);
     }
 
+    if (typeDefinition instanceof QNameEnumTypeDefinition) {
+      for (Object qnameValue : ((QNameEnumTypeDefinition) typeDefinition).getEnumValues().values()) {
+        QName qname = (QName) qnameValue;
+        if (qname != null) {
+          referencedNamespaces.add(qname.getNamespaceURI());
+        }
+      }
+    }
+
     addReferencedNamespaces(typeDefinition.getBaseType(), referencedNamespaces);
   }
 

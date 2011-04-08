@@ -20,16 +20,72 @@ namespace ${namespaceFor(type)} {
     [System.Xml.Serialization.XmlEnumAttribute(Name="__NULL__")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="__NULL__")]
     NULL[#if (type.enumConstants?size > 0)],[/#if]
-    [#assign enumValueMap=type.enumValues/]
-    [#list type.enumConstants as constant]
+  [#assign enumValueMap=type.enumValues/]
+  [#assign unknownQNameEnum=""/]
+  [#list type.enumConstants as constant]
 
     /// <summary>
     ///  ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    ///  ")}
     /// </summary>
+    [#if !(type.QNameEnum!false)]
     [System.Xml.Serialization.XmlEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
     [System.Xml.Serialization.SoapEnumAttribute(Name="${enumValueMap[constant.simpleName]}")]
+    [#elseif !(enumValueMap[constant.simpleName]??)]
+      [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]
+        [#assign unknownQNameEnum = constant.annotations["org.codehaus.enunciate.ClientName"].value/]
+      [#else]
+        [#assign unknownQNameEnum = constant.simpleName/]
+      [/#if]
+    [/#if]
     [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if][#if constant_has_next],[/#if]
-    [/#list]
+  [/#list]
   }
+
+  [#if type.QNameEnum!false]
+  /// <remarks>
+  /// Utility class for converting to/from the QNames associated with ${type.clientSimpleName}.
+  /// </remarks>
+  /// <summary>
+  /// Utility class for converting to/from the QNames associated with ${type.clientSimpleName}.
+  /// </summary>
+  public static class ${type.clientSimpleName}QNameUtil {
+
+    /// <summary>
+    /// Get the known ${type.clientSimpleName} for a given QName. If the QName isn't a known QName, [#if unknownQNameEnum != ""]${type.clientSimpleName}.${unknownQNameEnum}[#else]${type.clientSimpleName}.NULL[/#if] will be returned.
+    /// </summary>
+    public static ${type.clientSimpleName} ConvertFromKnownQName(System.Xml.XmlQualifiedName qname) {
+      if (qname != null) {
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+        if ("${enumValueMap[constant.simpleName].localPart}".Equals(qname.Name) && [#if enumValueMap[constant.simpleName].namespaceURI == ""]string.IsNullOrEmpty(qname.Namespace)[#else]"${enumValueMap[constant.simpleName].namespaceURI}".Equals(qname.Namespace)[/#if]) {
+          return ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if];
+        }
+      [/#if]
+    [/#list]
+      }
+    [#if unknownQNameEnum != ""]
+      return ${type.clientSimpleName}.${unknownQNameEnum};
+    [#else]
+      return ${type.clientSimpleName}.NULL;
+    [/#if]
+    }
+
+    /// <summary>
+    /// Convert the known ${type.clientSimpleName} to a QName. If [#if unknownQNameEnum != ""]${type.clientSimpleName}.${unknownQNameEnum}[#else]${type.clientSimpleName}.NULL[/#if], an ArgumentException will be thrown.
+    /// </summary>
+    public static System.Xml.XmlQualifiedName ConvertToKnownQName(${type.clientSimpleName} known) {
+      switch (known) {
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+        case ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]:
+          return new System.Xml.XmlQualifiedName("${enumValueMap[constant.simpleName].localPart}", "${enumValueMap[constant.simpleName].namespaceURI}");
+      [/#if]
+    [/#list]
+        default:
+          throw new System.ArgumentException("No known QName for: " + known, "known");
+      }
+    }
+  }
+  [/#if]
 }
 [/#macro]

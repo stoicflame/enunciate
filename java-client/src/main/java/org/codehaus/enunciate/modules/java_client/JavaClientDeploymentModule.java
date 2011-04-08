@@ -28,6 +28,7 @@ import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
+import org.codehaus.enunciate.contract.jaxb.QNameEnumTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.Registry;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
@@ -213,6 +214,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
       URL simpleTypeTemplate = getTemplateURL("client-simple-type.fmt");
       URL complexTypeTemplate = getTemplateURL("client-complex-type.fmt");
       URL enumTypeTemplate = getTemplateURL("client-enum-type.fmt");
+      URL qnameEnumTypeTemplate = getTemplateURL("client-qname-enum-type.fmt");
       URL registryTemplate = getTemplateURL("client-registry.fmt");
 
       URL jsonComplexTypeTemplate = getTemplateURL("json-complex-type.fmt");
@@ -323,7 +325,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
           else {
             model.put("rootEl", model.findRootElementDeclaration(typeDefinition));
             model.put("type", typeDefinition);
-            URL template = typeDefinition.isEnum() ? enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
+            URL template = typeDefinition.isEnum() ? typeDefinition instanceof QNameEnumTypeDefinition ? qnameEnumTypeTemplate : enumTypeTemplate : typeDefinition.isSimple() ? simpleTypeTemplate : complexTypeTemplate;
             processTemplate(template, model);
           }
 

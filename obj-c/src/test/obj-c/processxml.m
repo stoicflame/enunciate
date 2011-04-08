@@ -1,4 +1,4 @@
-#define DEBUG_ENUNCIATE 0 //set to '1' or '2' for output debugging.
+#define DEBUG_ENUNCIATE 2 //set to '1' or '2' for output debugging.
 #import <enunciate.m>
 #import <stdio.h>
 
@@ -72,6 +72,8 @@ int main ( int argc, char *argv[] ) {
   }
   else if (strcmp("house", argv[1]) == 0) {
     house = (ENUNCIATESTRUCTURESHouse *) [ENUNCIATESTRUCTURESHouse readFromXML: in];
+    [house setKnownStyle: [house knownStyle]];
+    [house setKnownType: [house knownType]];
     out = [house writeToXML];
     [out retain];
     [out writeToFile: [NSString stringWithCString: argv[3] encoding: NSUTF8StringEncoding] atomically: NO];

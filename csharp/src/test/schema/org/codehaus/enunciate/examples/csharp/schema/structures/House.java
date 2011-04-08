@@ -20,12 +20,15 @@ import org.codehaus.enunciate.examples.csharp.schema.Rectangle;
 import org.codehaus.enunciate.examples.csharp.schema.Triangle;
 import org.codehaus.enunciate.examples.csharp.schema.Circle;
 import org.codehaus.enunciate.examples.csharp.schema.Figure;
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.joda.time.DateTime;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.namespace.QName;
 import java.util.List;
 
 /**
@@ -40,6 +43,8 @@ public class House extends Figure {
   private Circle doorKnob;
   private List<Rectangle> windows;
   private DateTime constructedDate;
+  private QName type;
+  private QName style;
 
   @XmlElement (
     required = true
@@ -98,5 +103,24 @@ public class House extends Figure {
 
   public void setConstructedDate(DateTime constructedDate) {
     this.constructedDate = constructedDate;
+  }
+
+  @XmlAttribute
+  @XmlQNameEnumRef (HouseType.class)
+  public QName getType() {
+    return type;
+  }
+
+  public void setType(QName type) {
+    this.type = type;
+  }
+
+  @XmlQNameEnumRef(HouseStyle.class)
+  public QName getStyle() {
+    return style;
+  }
+
+  public void setStyle(QName style) {
+    this.style = style;
   }
 }

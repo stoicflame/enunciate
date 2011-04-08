@@ -648,6 +648,26 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     [#else]
   if (1) { //always write the primitive attribute
     [/#if]
+    [#if attribute.QNameType!false]
+    if (((_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName})->prefix == NULL) &&
+       ((_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName})->namespaceURI != NULL) &&
+       (xmlStrlen((_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName})->namespaceURI) > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${attribute.name}NS", (_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName})->namespaceURI);
+      if (status < 0) {
+#if DEBUG_ENUNCIATE
+        printf("unable to write namespace attribute xmlns:${attribute.name}NS. status: %i\n", status);
+#endif
+        return status;
+      }
+      (_${type.clientSimpleName?uncap_first}->${attribute.clientSimpleName})->prefix = xmlStrdup(BAD_CAST "${attribute.name}NS");
+      totalBytes += status;
+    }
+#if DEBUG_ENUNCIATE
+    else {
+      printf("No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.\n");
+    }
+#endif
+    [/#if]
     status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]BAD_CAST "${prefix(attribute.namespace)}"[#else]NULL[/#if], BAD_CAST "${attribute.name}", NULL);
     if (status < 0) {
 #if DEBUG_ENUNCIATE
@@ -713,7 +733,26 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
   }
   [/#if]
   [@forAllAccessors typeDefinition=type attributes=false elements=false value=true var="typeValue"]
-
+    [#if typeValue.QNameType!false]
+    if (((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->prefix == NULL) &&
+       ((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->namespaceURI != NULL) &&
+       (xmlStrlen((_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->namespaceURI) > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:valueNS", (_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->namespaceURI);
+      if (status < 0) {
+#if DEBUG_ENUNCIATE
+        printf("unable to write namespace attribute xmlns:valueNS. status: %i\n", status);
+#endif
+        return status;
+      }
+      (_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName})->prefix = xmlStrdup(BAD_CAST "valueNS");
+      totalBytes += status;
+    }
+#if DEBUG_ENUNCIATE
+    else {
+      printf("No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.\n");
+    }
+#endif
+    [/#if]
     [#if !typeValue.accessorType.primitive]
   if (_${type.clientSimpleName?uncap_first}->${typeValue.clientSimpleName} != NULL) {
     [#else]
@@ -787,7 +826,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
       [/#if]
       [#if choice.ref??]
 #if DEBUG_ENUNCIATE > 1
-    printf("writing element {${choice.ref.namespaceURI}}${choice.ref.localPart}...\n", status);
+    printf("writing element {${choice.ref.namespaceURI}}${choice.ref.localPart}...\n");
 #endif
     status = xmlTextWriterWrite${xmlFunctionIdentifier(choice)?cap_first}ElementNS(writer, [#if element.choices?size > 1]&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i])[#elseif element.collectionType]&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i])[#else]_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[/#if], 0);
     if (status < 0) {
@@ -809,7 +848,7 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
         [#if choice.binaryData]
 
 #if DEBUG_ENUNCIATE > 1
-    printf("writing binary data for element {${choice.namespace!""}}${choice.name}...\n", status);
+    printf("writing binary data for element {${choice.namespace!""}}${choice.name}...\n");
 #endif
     binaryData = _encode_base64(_${type.clientSimpleName?uncap_first}->${choice.clientSimpleName}, _${type.clientSimpleName?uncap_first}->_sizeof_${choice.clientSimpleName});
     status = xmlTextWriterWriteString(writer, binaryData);
@@ -831,9 +870,42 @@ static int xmlTextWriterWrite${xmlFunctionIdentifier(type)?cap_first}Type(xmlTex
     }
     totalBytes += status;
         [#else]
-
+          [#if choice.QNameType!false]
+            [#if element.choices?size > 1]
+    if (((_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i]).prefix == NULL) &&
+        ((_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i]).namespaceURI != NULL) &&
+        (xmlStrlen((_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i]).namespaceURI) > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${choice.name}NS", (_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i]).namespaceURI);
+      (_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i]).prefix = xmlStrdup(BAD_CAST "${choice.name}NS");
+            [#elseif element.collectionType]
+    if (((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i]).prefix == NULL) &&
+        ((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i]).namespaceURI != NULL) &&
+        (xmlStrlen((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i]).namespaceURI) > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${choice.name}NS", (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i]).namespaceURI);
+      (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i]).prefix = xmlStrdup(BAD_CAST "${choice.name}NS");
+            [#else]
+    if (((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})->prefix == NULL) &&
+        ((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})->namespaceURI != NULL) &&
+        (xmlStrlen((_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})->namespaceURI) > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${choice.name}NS", (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})->namespaceURI);
+      (_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})->prefix = xmlStrdup(BAD_CAST "${choice.name}NS");
+            [/#if]
+      if (status < 0) {
+#if DEBUG_ENUNCIATE
+        printf("unable to write namespace attribute xmlns:${attribute.name}NS. status: %i\n", status);
+#endif
+        return status;
+      }
+      totalBytes += status;
+    }
+#if DEBUG_ENUNCIATE
+    else {
+      printf("No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.\n");
+    }
+#endif
+          [/#if]
 #if DEBUG_ENUNCIATE > 1
-    printf("writing type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart} for element {${choice.namespace!""}}${choice.name}...\n", status);
+    printf("writing type {${choice.baseType.qname.namespaceURI}}${choice.baseType.qname.localPart} for element {${choice.namespace!""}}${choice.name}...\n");
 #endif
     status = xmlTextWriterWrite${xmlFunctionIdentifier(choice)?cap_first}Type(writer, [#if element.choices?size > 1]&(_${type.clientSimpleName?uncap_first}->${choice.name?replace("-", "_")}_${element.clientSimpleName}[i])[#elseif element.collectionType]&(_${type.clientSimpleName?uncap_first}->${element.clientSimpleName}[i])[#else][#if element.accessorType.primitive]&[/#if](_${type.clientSimpleName?uncap_first}->${element.clientSimpleName})[/#if]);
     if (status < 0) {

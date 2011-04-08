@@ -9,12 +9,59 @@ package ${packageFor(type)};
  */
 public enum ${type.simpleName} {
   [#assign enumValueMap=type.enumValues/]
-  [#list type.delegate.enumConstants as constant]
+  [#assign unknownQNameEnum = ""/]
+  [#list type.enumConstants as constant]
+    [#if !(enumValueMap[constant.simpleName]??)]
+      [#assign unknownQNameEnum = constant.simpleName/]
+    [/#if]
 
   /**
    * ${constant.docComment?default("(no documentation provided)")?chop_linebreak?replace("\n", "\n   * ")}
    */
   ${constant.simpleName}[#if constant_has_next],[#else];[/#if]
   [/#list]
+  [#if type.QNameEnum!false]
+
+  /**
+   * Convert a QName to a ${type.simpleName}. If the QName is not a known QName, [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] will be returned.
+   */
+  public static ${type.simpleName} convertFromKnownQName(javax.xml.namespace.QName qname) {
+    if (qname == null) {
+      return null;
+    }
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+    if ("${enumValueMap[constant.simpleName].namespaceURI}".equals(qname.getNamespaceURI())
+        && "${enumValueMap[constant.simpleName].localPart}".equals(qname.getLocalPart())) {
+      return ${type.simpleName}.${constant.simpleName};
+    }
+      [/#if]
+    [/#list]
+    return [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if];
+  }
+
+  /**
+   * Convert a ${type.simpleName} to a QName.
+   *
+    [#if unknownQNameEnum != ""]
+   * @throws IllegalArgumentException If ${type.simpleName}.${unknownQNameEnum} is passed.
+    [/#if]
+   */
+  public static javax.xml.namespace.QName convertToKnownQName(${type.simpleName} value) {
+    if (value == null) {
+      return null;
+    }
+    switch (value) {
+    [#list type.enumConstants as constant]
+      [#if enumValueMap[constant.simpleName]??]
+      case ${constant.simpleName}:
+        return new javax.xml.namespace.QName("${enumValueMap[constant.simpleName].namespaceURI}", "${enumValueMap[constant.simpleName].localPart}");
+      [/#if]
+    [/#list]
+      default:
+        throw new IllegalArgumentException("No known QName for: " + value);
+    }
+  }
+  [/#if]
 }
 [/@file]

@@ -19,9 +19,11 @@ package org.codehaus.enunciate.examples.jaxws_client.schema.vehicles;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Figure;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Rectangle;
 import org.codehaus.enunciate.examples.jaxws_client.schema.Circle;
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import java.util.Collection;
 
 /**
@@ -34,6 +36,7 @@ public class Bus extends Figure {
   private Circle[] wheels;
   private Collection<Rectangle> windows;
   private Rectangle door;
+  private QName type;
 
   public Rectangle getFrame() {
     return frame;
@@ -70,4 +73,12 @@ public class Bus extends Figure {
     this.door = door;
   }
 
+  @XmlQNameEnumRef (BusType.class)
+  public QName getType() {
+    return type;
+  }
+
+  public void setType(QName type) {
+    this.type = type;
+  }
 }

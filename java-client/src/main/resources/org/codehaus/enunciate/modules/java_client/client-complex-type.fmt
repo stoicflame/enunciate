@@ -49,6 +49,27 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${attribute.simpleName?cap_first}(${classnameFor(attribute)} _${attribute.simpleName}) {
     this._${attribute.simpleName} = _${attribute.simpleName};
   }
+    [#if attribute.referencesQNameEnum!false]
+
+  /**
+   * Convenience accessor for the known value of a ${attribute.simpleName} property.
+   *
+   * @see ${classnameFor(attribute.QNameEnumRef)}#convertFromKnownQName
+   */
+  @javax.xml.bind.annotation.XmlTransient
+  public ${classnameFor(attribute.QNameEnumRef)} getKnown${attribute.simpleName?cap_first}() {
+    return ${classnameFor(attribute.QNameEnumRef)}.convertFromKnownQName(get${attribute.simpleName?cap_first}());
+  }
+
+  /**
+   * Convenience accessor for the known value of a ${attribute.simpleName} property.
+   *
+   * @see ${classnameFor(attribute.QNameEnumRef)}#convertToKnownQName
+   */
+  public void setKnown${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)} _${attribute.simpleName}) {
+    set${attribute.simpleName?cap_first}(${classnameFor(attribute.QNameEnumRef)}.convertToKnownQName(_${attribute.simpleName}));
+  }
+    [/#if]
   [/#list]
   [#if type.value?exists]
 
@@ -66,6 +87,27 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${type.value.simpleName?cap_first}(${classnameFor(type.value)} _${type.value.simpleName}) {
     this._${type.value.simpleName} = _${type.value.simpleName};
   }
+    [#if type.value.referencesQNameEnum!false]
+
+  /**
+   * Convenience accessor for the known value of a ${type.value.simpleName} property.
+   *
+   * @see ${classnameFor(type.value.QNameEnumRef)}#convertFromKnownQName
+   */
+  @javax.xml.bind.annotation.XmlTransient
+  public ${classnameFor(type.value.QNameEnumRef)} getKnown${type.value.simpleName?cap_first}() {
+    return ${classnameFor(type.value.QNameEnumRef)}.convertFromKnownQName(get${type.value.simpleName?cap_first}());
+  }
+
+  /**
+   * Convenience accessor for the known value of a ${type.value.simpleName} property.
+   *
+   * @see ${classnameFor(type.value.QNameEnumRef)}#convertToKnownQName
+   */
+  public void setKnown${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)} _${type.value.simpleName}) {
+    set${type.value.simpleName?cap_first}(${classnameFor(type.value.QNameEnumRef)}.convertToKnownQName(_${type.value.simpleName}));
+  }
+    [/#if]
   [#else]
     [#list type.elements as element]
 
@@ -83,6 +125,27 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void set${element.simpleName?cap_first}(${classnameFor(element)} _${element.simpleName}) {
     this._${element.simpleName} = _${element.simpleName};
   }
+      [#if element.referencesQNameEnum!false]
+
+  /**
+   * Convenience accessor for the known value of a ${element.simpleName} property.
+   *
+   * @see ${classnameFor(element.QNameEnumRef)}#convertFromKnownQName
+   */
+  @javax.xml.bind.annotation.XmlTransient
+  public ${classnameFor(element.QNameEnumRef)} getKnown${element.simpleName?cap_first}() {
+    return ${classnameFor(element.QNameEnumRef)}.convertFromKnownQName(get${element.simpleName?cap_first}());
+  }
+
+  /**
+   * Convenience accessor for the known value of a ${element.simpleName} property.
+   *
+   * @see ${classnameFor(element.QNameEnumRef)}#convertToKnownQName
+   */
+  public void setKnown${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)} _${element.simpleName}) {
+    set${element.simpleName?cap_first}(${classnameFor(element.QNameEnumRef)}.convertToKnownQName(_${element.simpleName}));
+  }
+      [/#if]
     [/#list]
   [/#if]
   [#if type.anyElement?exists]

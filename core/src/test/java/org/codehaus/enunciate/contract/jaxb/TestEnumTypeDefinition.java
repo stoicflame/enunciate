@@ -56,7 +56,7 @@ public class TestEnumTypeDefinition extends InAPTTestCase {
     bean1Values.put("VALUE2", "blobby1");
     bean1Values.put("VALUE3", "justice");
     bean1Values.put("VALUE4", "peace");
-    Map<String, String> values = bean1.getEnumValues();
+    Map<String, Object> values = bean1.getEnumValues();
     for (String value : values.keySet()) {
       assertEquals(bean1Values.remove(value), values.get(value));
     }

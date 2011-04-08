@@ -19,9 +19,11 @@ package org.codehaus.enunciate.examples.ruby.schema.vehicles;
 import org.codehaus.enunciate.examples.ruby.schema.Figure;
 import org.codehaus.enunciate.examples.ruby.schema.Rectangle;
 import org.codehaus.enunciate.examples.ruby.schema.Circle;
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.namespace.QName;
 import java.lang.String;
 import java.util.Collection;
 import java.util.Map;
@@ -37,6 +39,7 @@ public class Bus extends Figure {
   private Collection<Rectangle> windows;
   private Rectangle door;
   private Map<String, Circle> persons;
+  private QName type;
 
   public Rectangle getFrame() {
     return frame;
@@ -79,5 +82,14 @@ public class Bus extends Figure {
 
   public void setPersons(Map<String, Circle> persons) {
     this.persons = persons;
+  }
+
+  @XmlQNameEnumRef (BusType.class)
+  public QName getType() {
+    return type;
+  }
+
+  public void setType(QName type) {
+    this.type = type;
   }
 }

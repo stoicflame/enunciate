@@ -1,17 +1,22 @@
 package org.codehaus.enunciate.modules.c;
 
 import junit.framework.TestCase;
+import org.codehaus.enunciate.XmlQNameEnumUtil;
 import org.codehaus.enunciate.examples.c.schema.*;
 import org.codehaus.enunciate.examples.c.schema.animals.Cat;
 import org.codehaus.enunciate.examples.c.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.c.schema.structures.House;
+import org.codehaus.enunciate.examples.c.schema.structures.HouseStyle;
+import org.codehaus.enunciate.examples.c.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.c.schema.vehicles.Bus;
+import org.codehaus.enunciate.examples.c.schema.vehicles.BusType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -165,6 +170,7 @@ public class TestCSerialization extends TestCase {
     window3.setHeight(2);
     window3.setLineStyle(LineStyle.solid);
     bus.setWindows(Arrays.asList(window1, window2, window3));
+    bus.setType(XmlQNameEnumUtil.toQName(BusType.charter));
     bus = processThroughXml(bus);
     assertEquals("bus id", bus.getId());
     door = bus.getDoor();
@@ -198,6 +204,7 @@ public class TestCSerialization extends TestCase {
     assertEquals(2, windows[2].getHeight());
     assertEquals(Color.BLUE, windows[2].getColor());
     assertEquals(LineStyle.solid, windows[2].getLineStyle());
+    assertEquals(BusType.charter, XmlQNameEnumUtil.fromQName(bus.getType(), BusType.class));
   }
 
   /**
@@ -249,6 +256,8 @@ public class TestCSerialization extends TestCase {
     house.setWindows(Arrays.asList(window));
     Date date = new Date();
     house.setConstructedDate(new DateTime(date, DateTimeZone.UTC));
+    house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
+    house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
 
     house = processThroughXml(house);
 
@@ -290,7 +299,8 @@ public class TestCSerialization extends TestCase {
     assertNull(window.getId());
     assertNotNull(house.getConstructedDate());
     assertEquals(date.getTime() - (date.getTime() % 1000), house.getConstructedDate().getMillis());
-
+    assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
+    assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
   }
 
   /**

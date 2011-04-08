@@ -23,6 +23,7 @@ import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
 import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
@@ -34,6 +35,7 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
+import org.codehaus.enunciate.qname.XmlQNameEnum;
 
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
@@ -782,6 +784,18 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       }
       else {
         result.addWarning(accessor, "An XML IDREF must have a base type that references another type that has an XML ID.");
+      }
+    }
+
+    if (accessor.isReferencesQNameEnum()) {
+      TypeMirror accessorType = accessor.getAccessorType();
+      if (!(accessorType instanceof DecoratedDeclaredType) || !((DecoratedDeclaredType) accessorType).isInstanceOf(QName.class.getName())) {
+        result.addError(accessor, "An accessor that references a QName enumeration must return QName.");
+      }
+
+      TypeMirror enumRef = accessor.getQNameEnumRef();
+      if (!(enumRef instanceof EnumType) || ((EnumType) enumRef).getDeclaration() == null || ((DeclaredType) enumRef).getDeclaration().getAnnotation(XmlQNameEnum.class) == null) {
+        result.addError(accessor, "A QName enum reference must reference an enum type annotated with @org.codehaus.enunciate.qname.XmlQNameEnum.");
       }
     }
 

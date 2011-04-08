@@ -47,6 +47,22 @@
  * ${(attribute.javaDoc.return!attribute.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute)}[#if !attribute.accessorType.primitive] *[/#if]) new${clientSimpleName(attribute)?cap_first};
+    [#if attribute.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(attribute)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(attribute.QNameEnumRef)}) known${clientSimpleName(attribute)?cap_first};
+
+/**
+ * Set the value of ${clientSimpleName(attribute)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(attribute)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute.QNameEnumRef)}) new${clientSimpleName(attribute)?cap_first};
+    [/#if]
   [/#if]
 [/#list]
 [#if type.value??]
@@ -61,6 +77,22 @@
  * ${(type.value.javaDoc.return!type.value.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value)}[#if !type.value.accessorType.primitive] *[/#if]) new${clientSimpleName(type.value)?cap_first};
+    [#if type.value.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(type.value)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(type.value.QNameEnumRef)}) known${clientSimpleName(type.value)?cap_first};
+
+/**
+ * Set the value of ${clientSimpleName(type.value)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(type.value)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value.QNameEnumRef)}) new${clientSimpleName(type.value)?cap_first};
+    [/#if]
   [/#if]
 [#else]
   [#list type.elements as element]
@@ -75,6 +107,22 @@
  * ${(element.javaDoc.return!element.docValue!"(no documentation provided)")?chop_linebreak?replace("\n", "\n * ")}
  */
 - (void) set${clientSimpleName(element)?cap_first}: (${classnameFor(element)}[#if !element.accessorType.primitive] *[/#if]) new${clientSimpleName(element)?cap_first};
+      [#if element.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(element)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(element.QNameEnumRef)}) known${clientSimpleName(element)?cap_first};
+
+/**
+ * Set the value of ${clientSimpleName(element)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(element)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(element)?cap_first}: (${classnameFor(element.QNameEnumRef)}) new${clientSimpleName(element)?cap_first};
+      [/#if]
     [/#if]
   [/#list]
 [/#if]
@@ -154,6 +202,35 @@
   [/#if]
   _${clientSimpleName(attribute)} = new${clientSimpleName(attribute)?cap_first};
 }
+    [#if attribute.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(attribute)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(attribute.QNameEnumRef)}) known${clientSimpleName(attribute)?cap_first}
+{
+  return getKnown${functionIdentifierFor(attribute.QNameEnumRef)}([self ${clientSimpleName(attribute)}]);
+}
+
+/**
+ * Set the value of ${clientSimpleName(attribute)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(attribute)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute.QNameEnumRef)}) new${clientSimpleName(attribute)?cap_first}
+{
+  QName *qname = convertKnown${functionIdentifierFor(attribute.QNameEnumRef)}(new${clientSimpleName(attribute)?cap_first});
+  if (qname) {
+    [self set${clientSimpleName(attribute)?cap_first}: qname];
+  }
+  else {
+    [NSException raise: @"UnknownQNameEnum"
+                 format: @"Not a known QName enum."];
+  }
+}
+    [/#if]
   [/#if]
 [/#list]
 [#if type.value??]
@@ -184,6 +261,35 @@
   [/#if]
   _${clientSimpleName(type.value)} = new${clientSimpleName(type.value)?cap_first};
 }
+    [#if type.value.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(type.value)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(type.value.QNameEnumRef)}) known${clientSimpleName(type.value)?cap_first}
+{
+  return getKnown${functionIdentifierFor(type.value.QNameEnumRef)}([self ${clientSimpleName(type.value)}]);
+}
+
+/**
+ * Set the value of ${clientSimpleName(type.value)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(type.value)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value.QNameEnumRef)}) new${clientSimpleName(type.value)?cap_first}
+{
+  QName *qname = convertKnown${functionIdentifierFor(type.value.QNameEnumRef)}(new${clientSimpleName(type.value)?cap_first});
+  if (qname) {
+    [self set${clientSimpleName(type.value)?cap_first}: qname];
+  }
+  else {
+    [NSException raise: @"UnknownQNameEnum"
+                 format: @"Not a known QName enum."];
+  }
+}
+    [/#if]
   [/#if]
 [#else]
   [#list type.elements as element]
@@ -214,6 +320,35 @@
   [/#if]
   _${clientSimpleName(element)} = new${clientSimpleName(element)?cap_first};
 }
+      [#if element.referencesQNameEnum!false]
+
+/**
+ * Get the associated enum for ${clientSimpleName(element)}, if it's a known type.
+ *
+ * @return The known enum, or -1 if not known.
+ */
+- (${classnameFor(element.QNameEnumRef)}) known${clientSimpleName(element)?cap_first}
+{
+  return getKnown${functionIdentifierFor(element.QNameEnumRef)}([self ${clientSimpleName(element)}]);
+}
+
+/**
+ * Set the value of ${clientSimpleName(element)} using a known enumeration.
+ *
+ * @param new${clientSimpleName(element)?cap_first} The new value.
+ */
+- (void) setKnown${clientSimpleName(element)?cap_first}: (${classnameFor(element.QNameEnumRef)}) new${clientSimpleName(element)?cap_first}
+{
+  QName *qname = convertKnown${functionIdentifierFor(element.QNameEnumRef)}(new${clientSimpleName(element)?cap_first});
+  if (qname) {
+    [self set${clientSimpleName(element)?cap_first}: qname];
+  }
+  else {
+    [NSException raise: @"UnknownQNameEnum"
+                 format: @"Not a known QName enum."];
+  }
+}
+      [/#if]
     [/#if]
   [/#list]
 [/#if]
@@ -892,6 +1027,23 @@
     [#else]
   if ([self ${clientSimpleName(attribute)}]) {
     [/#if]
+    [#if attribute.QNameType!false]
+    if (([[[self ${clientSimpleName(attribute)}] prefix] length] == 0) &&
+       ([[[self ${clientSimpleName(attribute)}] namespaceURI] length] > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${attribute.name}NS", BAD_CAST [[[self ${clientSimpleName(attribute)}] namespaceURI] UTF8String]);
+      if (status < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing namespace attribute xmlns:${attribute.name}NS."];
+      }
+
+      [[self ${clientSimpleName(attribute)}] setPrefix: @"${attribute.name}NS"];
+    }
+#if DEBUG_ENUNCIATE > 1
+    else {
+      NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
+    }
+#endif
+    [/#if]
 
     status = xmlTextWriterStartAttributeNS(writer, [#if ((attribute.namespace??) && (attribute.namespace != ""))]BAD_CAST "${prefix(attribute.namespace)}"[#else]NULL[/#if], BAD_CAST "${attribute.name}", NULL);
     if (status < 0) {
@@ -952,6 +1104,23 @@
                  format: @"Error writing element value."];
   }
   [#else]
+    [#if type.value.QNameType!false]
+    if (([[[self ${clientSimpleName(type.value)}] prefix] length] == 0) &&
+       ([[[self ${clientSimpleName(type.value)}] namespaceURI] length] > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:valueNS", BAD_CAST [[[self ${clientSimpleName(type.value)}] namespaceURI] UTF8String]);
+      if (status < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing namespace attribute xmlns:valueNS."];
+      }
+
+      [[self ${clientSimpleName(attribute)}] setPrefix: @"valueNS"];
+    }
+#if DEBUG_ENUNCIATE > 1
+    else {
+      NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
+    }
+#endif
+    [/#if]
   [[self ${clientSimpleName(type.value)}] writeXMLType: writer];
   [/#if]
 #if DEBUG_ENUNCIATE > 1
@@ -1054,6 +1223,23 @@
                        format: @"Error writing child element {${choice.namespace!""}}${choice.name}."];
         }
               [#else]
+                [#if choice.QNameType!false]
+        if (([[__item prefix] length] == 0) &&
+           ([[__item namespaceURI] length] > 0)) {
+          status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${choice.name}NS", BAD_CAST [[__item namespaceURI] UTF8String]);
+          if (status < 0) {
+            [NSException raise: @"XMLWriteError"
+                         format: @"Error writing namespace attribute xmlns:${choice.name}NS."];
+          }
+
+          [__item setPrefix: @"${choice.name}NS"];
+        }
+#if DEBUG_ENUNCIATE > 1
+        else {
+          NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
+        }
+#endif
+                [/#if]
         [__item writeXMLType: writer];
               [/#if]
 #if DEBUG_ENUNCIATE > 1
@@ -1085,6 +1271,23 @@
                      format: @"Error writing child element {${element.namespace!""}}${element.name}."];
       }
             [#else]
+              [#if element.QNameType!false]
+      if (([[__item prefix] length] == 0) &&
+         ([[__item namespaceURI] length] > 0)) {
+        status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${element.name}NS", BAD_CAST [[__item namespaceURI] UTF8String]);
+        if (status < 0) {
+          [NSException raise: @"XMLWriteError"
+                       format: @"Error writing namespace attribute xmlns:${element.name}NS."];
+        }
+
+        [__item setPrefix: @"${element.name}NS"];
+      }
+#if DEBUG_ENUNCIATE > 1
+      else {
+        NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
+      }
+#endif
+              [/#if]
       [__item writeXMLType: writer];
             [/#if]
 #if DEBUG_ENUNCIATE > 1
@@ -1110,6 +1313,23 @@
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"writing element {${element.namespace!""}}${element.name}...");
 #endif
+          [#if element.QNameType!false]
+    if (([[[self ${clientSimpleName(element)}] prefix] length] == 0) &&
+       ([[[self ${clientSimpleName(element)}] namespaceURI] length] > 0)) {
+      status = xmlTextWriterWriteAttribute(writer, BAD_CAST "xmlns:${element.name}NS", BAD_CAST [[[self ${clientSimpleName(element)}] namespaceURI] UTF8String]);
+      if (status < 0) {
+        [NSException raise: @"XMLWriteError"
+                     format: @"Error writing namespace attribute xmlns:${element.name}NS."];
+      }
+
+      [[self ${clientSimpleName(element)}] setPrefix: @"${element.name}NS"];
+    }
+#if DEBUG_ENUNCIATE > 1
+    else {
+      NSLog(@"No attempt will be made to write xmlns attribute for QName because either it's the empty namespace, or the prefix is already defined, implying that the xmlns attribute is already written.");
+    }
+#endif
+          [/#if]
     [[self ${clientSimpleName(element)}] writeXMLType: writer];
 #if DEBUG_ENUNCIATE > 1
     NSLog(@"successfully wrote element {${element.namespace!""}}${element.name}...");

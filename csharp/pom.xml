@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.codehaus.enunciate</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.22-RC2</version>
+    <version>1.22-RC3</version>
   </parent>
 
   <artifactId>enunciate-csharp</artifactId>
@@ -64,7 +64,7 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
                 <mkdir dir="${project.build.directory}/enunciate/compile/csharp" />
                 <mkdir dir="${project.build.directory}/xmltests"/>
 
-                <enunciate verbose="true" debug="true" target="compile" basedir="${basedir}/src/test/schema"
+                <enunciate target="compile" basedir="${basedir}/src/test/schema"
                            generateDir="${project.build.directory}/enunciate/gen"
                            compileDir="${project.build.directory}/enunciate/compile">
                   <include name="**/*.java" />
@@ -128,7 +128,6 @@ If you just want to skip the C# tests, set the value of the property 'gmcs.execu
         <!--now we need to add the generated sources we're testing to the test classpath-->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.1</version>
         <executions>
           <execution>
             <id>add-test-source</id>

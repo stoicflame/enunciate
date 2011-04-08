@@ -48,6 +48,7 @@ import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonRootType;
 import org.codehaus.enunciate.json.JsonTypeMapping;
 import org.codehaus.enunciate.json.JsonTypeMappings;
+import org.codehaus.enunciate.qname.XmlQNameEnum;
 import org.codehaus.enunciate.rest.MimeType;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.util.MapTypeUtil;
@@ -502,13 +503,21 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       || ((DecoratedTypeMirror) typeDef.getSuperclass()).isInstanceOf(JAXBElement.class.getName());
   }
 
+  protected void addReferencedTypeDefinitions(Accessor accessor) {
+    addSeeAlsoTypeDefinitions(accessor);
+    TypeMirror enumRef = accessor.getQNameEnumRef();
+    if (enumRef != null) {
+      addReferencedTypeDefinitions(enumRef);
+    }
+  }
+
   /**
    * Add the type definition(s) referenced by the given attribute.
    *
    * @param attribute The attribute.
    */
   protected void addReferencedTypeDefinitions(Attribute attribute) {
-    addSeeAlsoTypeDefinitions(attribute);
+    addReferencedTypeDefinitions((Accessor) attribute);
     addReferencedTypeDefinitions(attribute.isAdapted() ? attribute.getAdapterType() : attribute.getAccessorType());
   }
 
@@ -518,7 +527,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param value The value.
    */
   protected void addReferencedTypeDefinitions(Value value) {
-    addSeeAlsoTypeDefinitions(value);
+    addReferencedTypeDefinitions((Accessor) value);
     addReferencedTypeDefinitions(value.isAdapted() ? value.getAdapterType() : value.getAccessorType());
   }
 
@@ -528,7 +537,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    * @param element The element.
    */
   protected void addReferencedTypeDefinitions(Element element) {
-    addSeeAlsoTypeDefinitions(element);
+    addReferencedTypeDefinitions((Accessor) element);
     if (element instanceof ElementRef && element.isCollectionType()) {
       //special case for collections of element refs because the collection is lazy-loaded.
       addReferencedTypeDefinitions(element.getAccessorType());
@@ -1036,7 +1045,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   protected TypeDefinition createTypeDefinition(ClassDeclaration declaration) {
     declaration = narrowToAdaptingType(declaration);
     if (isEnumType(declaration)) {
-      return new EnumTypeDefinition((EnumDeclaration) declaration);
+      if (declaration.getAnnotation(XmlQNameEnum.class) != null) {
+        return new QNameEnumTypeDefinition((EnumDeclaration) declaration);
+      }
+      else {
+        return new EnumTypeDefinition((EnumDeclaration) declaration);
+      }
     }
     else if (isSimpleType(declaration)) {
       return new SimpleTypeDefinition(declaration);

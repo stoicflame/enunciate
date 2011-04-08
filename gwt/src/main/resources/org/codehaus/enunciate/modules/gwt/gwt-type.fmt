@@ -65,6 +65,26 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
     this.${property.simpleName}.put(key, value);
   }
     [/#if]
+    [#if property.referencesQNameEnum!false]
+
+  /**
+   * Convenience accessor for the known value of a ${property.simpleName} property.
+   *
+   * @see ${classnameFor(property.QNameEnumRef)}#convertFromKnownQName
+   */
+  public ${classnameFor(property.QNameEnumRef)} getKnown${property.simpleName?cap_first}() {
+    return ${classnameFor(property.QNameEnumRef)}.convertFromKnownQName(get${property.simpleName?cap_first}());
+  }
+
+  /**
+   * Convenience accessor for the known value of a ${property.simpleName} property.
+   *
+   * @see ${classnameFor(property.QNameEnumRef)}#convertToKnownQName
+   */
+  public void setKnown${property.simpleName?cap_first}(${classnameFor(property.QNameEnumRef)} ${property.simpleName}) {
+    set${property.simpleName?cap_first}(${classnameFor(property.QNameEnumRef)}.convertToKnownQName(${property.simpleName}));
+  }
+    [/#if]
   [/#if]
 [/#macro]
 [#macro propertyField property]

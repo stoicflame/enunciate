@@ -28,11 +28,10 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.ConfigurableRules;
+import org.codehaus.enunciate.contract.validation.ValidationResult;
 
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.namespace.QName;
 import java.util.*;
 
 /**
@@ -46,7 +45,6 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
   private Set<String> disabledRules = new TreeSet<String>();
 
   public AMFValidator() {
-    unsupportedTypes.add(QName.class.getName());
     unsupportedTypes.add(XMLGregorianCalendar.class.getName());
     unsupportedTypes.add(javax.xml.datatype.Duration.class.getName());
     unsupportedTypes.add(java.awt.Image.class.getName());

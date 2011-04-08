@@ -35,6 +35,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.util.MapTypeUtil;
 import org.codehaus.enunciate.util.MapType;
 import org.codehaus.enunciate.ClientName;
@@ -211,6 +212,15 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    */
   public boolean isBinaryData() {
     return isSwaRef() || KnownXmlType.BASE64_BINARY.getQname().equals(getBaseType().getQname());
+  }
+
+  /**
+   * Whether this access is a QName type.
+   *
+   * @return Whether this access is a QName type.
+   */
+  public boolean isQNameType() {
+    return getBaseType() == KnownXmlType.QNAME;
   }
 
   /**
@@ -411,6 +421,36 @@ public abstract class Accessor extends DecoratedMemberDeclaration implements Ada
    */
   public boolean isElementRef() {
     return false;
+  }
+
+  /**
+   * Whether this QName accessor references a QName enum type.
+   *
+   * @return Whether this QName accessor references a QName enum type.
+   */
+  public boolean isReferencesQNameEnum() {
+    return getAnnotation(XmlQNameEnumRef.class) != null;
+  }
+
+  /**
+   * The enum type containing the known qnames for this qname enum accessor, or null is this accessor doesn't reference a known qname type.
+   *
+   * @return The enum type containing the known qnames for this qname enum accessor.
+   */
+  public TypeMirror getQNameEnumRef() {
+    XmlQNameEnumRef enumRef = getAnnotation(XmlQNameEnumRef.class);
+    TypeMirror qnameEnumType = null;
+    if (enumRef != null) {
+      AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+      try {
+        TypeDeclaration decl = env.getTypeDeclaration(enumRef.value().getName());
+        qnameEnumType = env.getTypeUtils().getDeclaredType(decl);
+      }
+      catch (MirroredTypeException e) {
+        qnameEnumType = e.getTypeMirror();
+      }
+    }
+    return qnameEnumType;
   }
 
   /**

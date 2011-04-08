@@ -10,10 +10,12 @@ module ${submodule}
   class ${simpleNameFor(type)}
   [#assign enumValueMap=type.enumValues/]
   [#list type.enumConstants as constant]
-    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists][#assign enumValue = constant.annotations["org.codehaus.enunciate.ClientName"].value /][#else][#assign enumValue = constant.simpleName /][/#if]
+    [#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists][#assign constantName = constant.annotations["org.codehaus.enunciate.ClientName"].value /][#else][#assign constantName = constant.simpleName /][/#if]
+      [#if enumValueMap[constant]??]
 
     # ${constant.docComment?default("(no documentation provided)")?chop_linebreak?html?replace("\n", "\n    # ")}
-    ${enumValue?cap_first} = "${enumValue}"
+    ${constantName?cap_first} = "${enumValueMap[constant]?string}"
+      [/#if]
   [/#list]
   end
   [#list moduleFor(type)?split("::") as submodule]

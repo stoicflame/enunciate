@@ -144,6 +144,62 @@
 - (void) setAttributes: (NSArray *) newAttributes;
 @end /*interface JAXBBasicXMLNode*/
 
+/**
+ * A basic XML node. Can be an element or an attribute. Used
+ * instead of NSXMLElement because it's not supported on all
+ * platforms yet.
+ */
+@interface QName : NSObject
+{
+  @private
+    NSString *_localPart;
+    NSString *_namespaceURI;
+    NSString *_prefix;
+}
+
+/**
+ * Accessor for the local part of the QName.
+ *
+ * @return The local part of the QName.
+ */
+- (NSString *) localPart;
+
+/**
+ * Accessor for the local part of the QName.
+ *
+ * @param newLocalPart The new local part of the QName.
+ */
+- (void) setLocalPart: (NSString *) newLocalPart;
+
+/**
+ * Accessor for the namespace URI of the QName.
+ *
+ * @return The namespace URI of the QName.
+ */
+- (NSString *) namespaceURI;
+
+/**
+ * Accessor for the namespace URI of the QName.
+ *
+ * @param newNamespaceURI The new namespace URI of the QName.
+ */
+- (void) setNamespaceURI: (NSString *) newNamespaceURI;
+
+/**
+ * Accessor for the namespace prefix of the QName.
+ *
+ * @return The namespace prefix of the QName.
+ */
+- (NSString *) prefix;
+
+/**
+ * Accessor for the namespace prefix of the QName.
+ *
+ * @param newPrefix The namespace prefix of the QName.
+ */
+- (void) setPrefix: (NSString *) newPrefix;
+@end /*interface QName*/
+
 #endif /* ENUNCIATE_OBJC_TYPES */
 
 [#list schemaTypes as typeDefinition]
@@ -1096,6 +1152,196 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 }
 
 @end /* implementation JAXBBasicXMLNode (JAXB) */
+
+/**
+ * Implementation of the QName
+ */
+@implementation QName
+
+/**
+ * Accessor for the local part of the QName.
+ *
+ * @return The local part of the QName.
+ */
+- (NSString *) localPart
+{
+  return _localPart;
+}
+
+/**
+ * Accessor for the local part of the QName.
+ *
+ * @param newLocalPart The local part of the QName.
+ */
+- (void) setLocalPart: (NSString *) newLocalPart
+{
+  [newLocalPart retain];
+  [_localPart release];
+  _localPart = newLocalPart;
+}
+
+/**
+ * Accessor for the namespace URI of the QName.
+ *
+ * @return The namespace URI of the QName.
+ */
+- (NSString *) namespaceURI
+{
+  return _namespaceURI;
+}
+
+/**
+ * Accessor for the namespace URI of the QName.
+ *
+ * @param newNamespaceURI The namespace URI of the QName.
+ */
+- (void) setNamespaceURI: (NSString *) newNamespaceURI
+{
+  [newNamespaceURI retain];
+  [_namespaceURI release];
+  _namespaceURI = newNamespaceURI;
+}
+
+/**
+ * Accessor for the namespace prefix of the QName.
+ *
+ * @return The namespace prefix of the QName.
+ */
+- (NSString *) prefix
+{
+  return _prefix;
+}
+
+/**
+ * Accessor for the namespace prefix of the QName.
+ *
+ * @param newPrefix The namespace prefix of the QName.
+ */
+- (void) setPrefix: (NSString *) newPrefix
+{
+  [newPrefix retain];
+  [_prefix release];
+  _prefix = newPrefix;
+}
+
+- (void) dealloc {
+  [#--[_localPart release];--]
+  [#--[_namespaceURI release];--]
+  [#--[_prefix release];--]
+  [super dealloc];
+}
+@end /*implementation QName*/
+
+/**
+ * Declaration of the JAXB type for a QName.
+ */
+@interface QName (JAXBType) <JAXBType>
+@end
+
+/**
+ * Implementation of the JAXB type for a QName.
+ */
+@implementation QName (JAXBType)
+
+/**
+ * Read the XML type from the reader.
+ *
+ * @param reader The reader.
+ * @return The QName that was read from the reader.
+ */
++ (id<JAXBType>) readXMLType: (xmlTextReaderPtr) reader
+{
+  QName *qname = [[QName alloc] init];
+  NS_DURING
+  {
+    [qname initWithReader: reader];
+  }
+  NS_HANDLER
+  {
+    qname = nil;
+    [localException raise];
+  }
+  NS_ENDHANDLER
+
+  [qname autorelease];
+  return qname;
+}
+
+/**
+ * Read an XML type from an XML reader into an existing instance.
+ *
+ * @param reader The reader.
+ * @param existing The existing instance into which to read values.
+ */
+- (id) initWithReader: (xmlTextReaderPtr) reader
+{
+  xmlChar *value = xmlTextReaderReadEntireNodeValue(reader);
+  int len = 0;
+  xmlChar *prefix;
+  if ((self = [self init])) {
+#if DEBUG_ENUNCIATE > 1
+    NSLog(@"Reading QName value %s...\n", value);
+#endif
+    if (value[len] == 0) {
+      [NSException raise: @"XMLReadError"
+                   format: @"Empty QName value"];
+    }
+    else if (value[0] == ':') {
+#if DEBUG_ENUNCIATE > 1
+      NSLog(@"QName value that starts with ':'. Weird.\n");
+#endif
+      /* nasty but valid */
+      [self setLocalPart: [NSString stringWithUTF8String: (const char *) xmlStrsub(value, 1, xmlStrlen(value) - 1)]];
+      [self setNamespaceURI: @""];
+    }
+    else {
+      /*
+       * look for the ':'
+       */
+      while ((value[len] != 0) && (value[len] != ':')) {
+        len++;
+      }
+
+#if DEBUG_ENUNCIATE > 1
+      NSLog(@"QName ':' character found at %i.\n", len);
+#endif
+
+      if (value[len] == 0) {
+        [self setLocalPart: [NSString stringWithUTF8String: (const char *) xmlStrdup(value)]];
+        [self setNamespaceURI: @""];
+      }
+      else {
+        prefix = xmlStrsub(value, 0, len);
+        [self setLocalPart: [NSString stringWithUTF8String: (const char *) xmlStrsub(value, len + 1, xmlStrlen(value) - len - 1)]];
+        [self setNamespaceURI: [NSString stringWithUTF8String: (const char *) xmlTextReaderLookupNamespace(reader, prefix)]];
+        free(prefix);
+      }
+    }
+  }
+  free(value);
+  return self;
+}
+
+/**
+ * Write the NSString to the writer.
+ *
+ * @param writer The writer.
+ */
+- (void) writeXMLType: (xmlTextWriterPtr) writer
+{
+  if ([[self localPart] length] == 0) {
+    [NSException raise: @"XMLWriteError"
+                 format: @"Attempt to write a QName with an empty local part."];
+  }
+  if (([[self namespaceURI] length] == 0) || ([[self prefix] length] == 0)) {
+    xmlTextWriterWriteString(writer, BAD_CAST [[self localPart] UTF8String]);
+  }
+  else {
+    xmlTextWriterWriteFormatString(writer, "%s:%s", BAD_CAST [[self prefix] UTF8String], BAD_CAST [[self localPart] UTF8String]);
+  }
+}
+
+@end /*QName (JAXBType)*/
 
 /**
  * Declaration of the JAXB type for a string.
