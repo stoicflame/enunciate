@@ -56,6 +56,21 @@ public class TestCSerialization extends TestCase {
   }
 
   /**
+   * tests for http://jira.codehaus.org/browse/ENUNCIATE-547
+   */
+  public void testEmptyElements() throws Exception {
+    if (this.skipCTests) {
+      System.out.println("C tests have been disabled.");
+      return;
+    }
+
+    Circle circle = new Circle();
+    circle.setDots(Arrays.asList(new Dot())); //empty wrapped element.
+    circle = processThroughXml(circle);
+    assertNull(circle.getColor());
+  }
+
+  /**
    * tests serialization.
    */
   public void testSerializeDeserialize() throws Exception {
@@ -514,8 +529,8 @@ public class TestCSerialization extends TestCase {
   protected <T> T processThroughXml(T object) throws Exception {
     JAXBContext context = JAXBContext.newInstance(object.getClass());
     Marshaller marshaller = context.createMarshaller();
-    File in = File.createTempFile(object.getClass().getName(), ".xml", this.tempDir);
-    File out = File.createTempFile(object.getClass().getName(), ".xml", this.tempDir);
+    File in = File.createTempFile(getName(), ".in.xml", this.tempDir);
+    File out = File.createTempFile(getName(), ".in.xml", this.tempDir);
     marshaller.marshal(object, in);
 //    System.out.printf("%s %s %s %s\n", this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath());
     Process process = new ProcessBuilder(this.exe.getAbsolutePath(), object.getClass().getSimpleName().toLowerCase(), in.getAbsolutePath(), out.getAbsolutePath())

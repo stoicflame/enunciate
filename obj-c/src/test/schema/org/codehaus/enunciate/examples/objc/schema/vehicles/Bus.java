@@ -82,4 +82,6 @@ public class Bus extends Figure {
   public void setType(QName type) {
     this.type = type;
   }
+
+
 }

@@ -16,7 +16,10 @@
 
 package org.codehaus.enunciate.examples.c.schema;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -25,6 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Circle extends Shape {
 
   private int radius;
+  private List<Dot> dots;
 
   public int getRadius() {
     return radius;
@@ -32,5 +36,15 @@ public class Circle extends Shape {
 
   public void setRadius(int radius) {
     this.radius = radius;
+  }
+
+  @XmlElementWrapper (name="dots")
+  @XmlElement (name="dot")
+  public List<Dot> getDots() {
+    return dots;
+  }
+
+  public void setDots(List<Dot> dots) {
+    this.dots = dots;
   }
 }

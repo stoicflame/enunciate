@@ -627,6 +627,14 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
           }
         }
       }
+      else {
+        status = xmlTextReaderAdvanceToNextStartOrEndElement(reader);
+        if (status < 1) {
+          //panic: XML read error.
+          [NSException raise: @"XMLReadError"
+                       format: @"Error advancing past an empty child element."];
+        }
+      }
     }
   }
   return self;
