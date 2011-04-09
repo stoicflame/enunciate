@@ -86,6 +86,8 @@ import java.util.regex.Pattern;
  * The arguments are (1) org (2) codehaus (3) enunciate (4) samples (5) c. The default package identifier is the package name. The package identifier
  * is in turn passed as an argument to the "enumConstantNamePattern" and to the "typeDefinitionNamePattern".</li>
  * <li>The 'translateIdTo' attribute specifies what to use as the name of an accessor when in Java it's named 'id' (which is a keyword in Objective C).</li>
+ * <li>The 'separateCommonCode' attribute tells Enunciate to keep the code that is common to all Enunciate-generated projects separate from the code that is
+ * generated specifically for this project. Default: true.</li>
  * </ul>
  *
  * <p>In addition to the attributes specified above, the Objective C module configuration supports an arbitrary number of "package" child elements, used to
@@ -108,6 +110,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
   private final Map<String, String> packageIdentifiers = new HashMap<String, String>();
   private String translateIdTo = "identifier";
+  private boolean separateCommonCode = true;
 
   /**
    * @return "obj-c"
@@ -188,6 +191,7 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
       model.put("classnameFor", classnameFor);
       model.put("functionIdentifierFor", new FunctionIdentifierForMethod(nameForTypeDefinition));
       model.put("objcBaseName", label);
+      model.put("separateCommonCode", isSeparateCommonCode());
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
       model.put("prefix", new PrefixMethod());
@@ -212,6 +216,18 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
     artifactBundle.setDescription(description);
     artifactBundle.addArtifact(sourceHeader);
     artifactBundle.addArtifact(sourceImpl);
+    if (isSeparateCommonCode()) {
+      NamedFileArtifact commonSourceHeader = new NamedFileArtifact(getName(), "objc.common.client.h", new File(getGenerateDir(), "enunciate-common.h"));
+      commonSourceHeader.setPublic(false);
+      commonSourceHeader.setArtifactType(ArtifactType.sources);
+      commonSourceHeader.setDescription("Common header needed for all projects.");
+      NamedFileArtifact commonSourceImpl = new NamedFileArtifact(getName(), "objc.common.client.m", new File(getGenerateDir(), "enunciate-common.m"));
+      commonSourceImpl.setPublic(false);
+      commonSourceImpl.setArtifactType(ArtifactType.sources);
+      commonSourceImpl.setDescription("Common implementation code needed for all projects.");
+      artifactBundle.addArtifact(commonSourceHeader);
+      artifactBundle.addArtifact(commonSourceImpl);
+    }
     getEnunciate().addArtifact(artifactBundle);
   }
 
@@ -436,6 +452,24 @@ public class ObjCDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setTranslateIdTo(String translateIdTo) {
     this.translateIdTo = translateIdTo;
+  }
+
+  /**
+   * Whether to separate the common code from the project-specific code.
+   *
+   * @return Whether to separate the common code from the project-specific code.
+   */
+  public boolean isSeparateCommonCode() {
+    return separateCommonCode;
+  }
+
+  /**
+   * Whether to separate the common code from the project-specific code.
+   *
+   * @param separateCommonCode Whether to separate the common code from the project-specific code.
+   */
+  public void setSeparateCommonCode(boolean separateCommonCode) {
+    this.separateCommonCode = separateCommonCode;
   }
 
   @Override

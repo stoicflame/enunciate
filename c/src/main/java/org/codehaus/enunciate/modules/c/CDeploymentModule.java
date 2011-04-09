@@ -80,6 +80,8 @@ import com.sun.mirror.declaration.ClassDeclaration;
  * (5) the decapitalized annotation-specified client name of the type declaration (6) the NOT-decapitalized simple name of the type declaration
  * (7) the decapitalized simple name of the type declaration (8) the package name. All tokens will be "scrubbed" by replacing any non-word character with the "_" character. The default value for this
  * pattern is "%1$s_%2$s_%3$s".</li> 
+ * <li>The 'separateCommonCode' attribute tells Enunciate to keep the code that is common to all Enunciate-generated projects separate from the code that is
+ * generated specifically for this project. Default: true.</li>
  * </ul>
  *
  * @author Ryan Heaton
@@ -96,6 +98,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
   private String label = null;
   private String typeDefinitionNamePattern = "%1$s_%2$s_%3$s";
   private String enumConstantNamePattern = "%1$S_%2$S_%3$S_%9$S";
+  private boolean separateCommonCode = true;
 
   /**
    * @return "c"
@@ -139,6 +142,7 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
       ClientClassnameForMethod classnameFor = new ClientClassnameForMethod(conversions);
       model.put("classnameFor", classnameFor);
       model.put("cFileName", getSourceFileName());
+      model.put("separateCommonCode", isSeparateCommonCode());
       model.put("forAllAccessors", new ForAllAccessorsTransform(null));
       model.put("findRootElement", new FindRootElementMethod());
       model.put("referencedNamespaces", new ReferencedNamespacesMethod());
@@ -161,6 +165,13 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
     String description = readResource("library_description.fmt"); //read in the description from file
     artifactBundle.setDescription(description);
     artifactBundle.addArtifact(sourceScript);
+    if (isSeparateCommonCode()) {
+      NamedFileArtifact commonSourceHeader = new NamedFileArtifact(getName(), "c.common.client", new File(getGenerateDir(), "enunciate-common.c"));
+      commonSourceHeader.setPublic(false);
+      commonSourceHeader.setArtifactType(ArtifactType.sources);
+      commonSourceHeader.setDescription("Common code needed for all projects.");
+      artifactBundle.addArtifact(commonSourceHeader);
+    }
     getEnunciate().addArtifact(artifactBundle);
   }
 
@@ -330,6 +341,25 @@ public class CDeploymentModule extends FreemarkerDeploymentModule {
    */
   public void setForceEnable(boolean forceEnable) {
     this.forceEnable = forceEnable;
+  }
+
+
+  /**
+   * Whether to separate the common code from the project-specific code.
+   *
+   * @return Whether to separate the common code from the project-specific code.
+   */
+  public boolean isSeparateCommonCode() {
+    return separateCommonCode;
+  }
+
+  /**
+   * Whether to separate the common code from the project-specific code.
+   *
+   * @param separateCommonCode Whether to separate the common code from the project-specific code.
+   */
+  public void setSeparateCommonCode(boolean separateCommonCode) {
+    this.separateCommonCode = separateCommonCode;
   }
 
   @Override
