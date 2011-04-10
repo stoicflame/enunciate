@@ -13,7 +13,7 @@
   </target>
 
   <target name="get-mac-flags" if="isMac" unless="skip.gcc">
-    <property name="mac.config.flags" value="-L /System/Library/Frameworks/Foundation.framework/Foundation"/>
+    <property name="mac.config.flags" value="-framework Foundation"/>
   </target>
 
   <target name="get-gnustep-flags" if="gnustep.config.executable" unless="skip.gcc">
