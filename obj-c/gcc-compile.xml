@@ -72,6 +72,8 @@
       <arg line="-o ${project.build.directory}/enunciate/gen/obj-c/processxml"/>
       <!--compile this file-->
       <arg value="${project.build.directory}/enunciate/gen/obj-c/processxml.m"/>
+      <arg value="${project.build.directory}/enunciate/gen/obj-c/enunciate.m"/>
+      <arg value="${project.build.directory}/enunciate/gen/obj-c/enunciate-common.m"/>
     </exec>
   </target>
 

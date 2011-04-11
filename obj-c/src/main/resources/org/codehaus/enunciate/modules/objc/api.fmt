@@ -7,14 +7,14 @@
     [@libCommon.writeCommonHeader /]
   [/@file]
   [@file name=("enunciate-common.m") charset="utf-8"]
-#import <enunciate-common.h>
+#import "enunciate-common.h"
     [@libCommon.writeCommonImpl /]
   [/@file]
 [/#if]
 
 [@file name=(objcBaseName + ".h") charset="utf-8"]
   [#if separateCommonCode!false]
-#import <enunciate-common.h>
+#import "enunciate-common.h"
   [#else]
     [@libCommon.writeCommonHeader /]
   [/#if]
@@ -38,9 +38,8 @@
 [/@file]
 
 [@file name=(objcBaseName + ".m") charset="utf-8"]
-#import <${objcBaseName}.h>
+#import "${objcBaseName}.h"
   [#if separateCommonCode!false]
-#import <enunciate-common.m>
   [#else]
     [@libCommon.writeCommonImpl /]
   [/#if]

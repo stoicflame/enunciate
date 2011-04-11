@@ -13,6 +13,13 @@
 #define DEBUG_ENUNCIATE 0
 #endif
 
+/*******************xml utilities************************************/
+
+int xmlTextReaderAdvanceToNextStartOrEndElement(xmlTextReaderPtr reader);
+int xmlTextReaderSkipElement(xmlTextReaderPtr reader);
+xmlChar *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader);
+
+
 /**
  * Enunciate-specific interfaces and protocols.
  */
@@ -199,199 +206,6 @@
 @end /*interface QName*/
 
 #endif /* ENUNCIATE_OBJC_TYPES */
-[/#macro]
-
-[#macro writeCommonImpl]
-/**
- * Enunciate-specific C functions.
- */
-#ifndef ENUNCIATE_C_UTILITIES
-#define ENUNCIATE_C_UTILITIES
-
-/*******************xml utilities************************************/
-
-static int xmlTextReaderAdvanceToNextStartOrEndElement(xmlTextReaderPtr reader) {
-  int status = xmlTextReaderRead(reader);
-  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
-    status = xmlTextReaderRead(reader);
-  }
-  return status;
-}
-
-static int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
-  int status = xmlTextReaderNext(reader);
-  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
-    status = xmlTextReaderRead(reader);
-  }
-  return status;
-}
-
-static xmlChar *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
-  xmlChar *buffer = calloc(1, sizeof(xmlChar));
-  const xmlChar *snippet;
-  int status;
-  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ATTRIBUTE) {
-    return xmlTextReaderValue(reader);
-  }
-  else if (xmlTextReaderIsEmptyElement(reader) == 0) {
-    status = xmlTextReaderRead(reader);
-    while (status && (xmlTextReaderNodeType(reader) == XML_READER_TYPE_TEXT || xmlTextReaderNodeType(reader) == XML_READER_TYPE_CDATA || xmlTextReaderNodeType(reader) == XML_READER_TYPE_ENTITY_REFERENCE)) {
-      snippet = xmlTextReaderConstValue(reader);
-      buffer = realloc(buffer, (xmlStrlen(buffer) + xmlStrlen(snippet) + 1) * sizeof(xmlChar));
-      xmlStrcat(buffer, snippet);
-      status = xmlTextReaderRead(reader);
-    }
-  }
-  return buffer;
-}
-
-/*******************base 64 utilities************************************/
-
-/*
- * Base64 Translation Table as described in RFC1113.
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- */
-static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-/*
- * Base64 Translation Table to decode (created by author)
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- */
-static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
-
-/*
- * encode 3 8-bit binary bytes as 4 '6-bit' characters
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- *
- * @param in the block to encode
- * @param out the block to encode to
- * @param len the length of the 'in' block.
- */
-static void _encode_base64_block(unsigned char in[3], unsigned char out[4], int len) {
-  out[0] = cb64[ in[0] >> 2 ];
-  out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
-  out[2] = (unsigned char) (len > 1 ? cb64[ ((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6) ] : '=');
-  out[3] = (unsigned char) (len > 2 ? cb64[ in[2] & 0x3f ] : '=');
-}
-
-/*
- * decode 4 '6-bit' characters into 3 8-bit binary bytes
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- */
-static void _decode_base64_block( unsigned char in[4], unsigned char out[3] )
-{
-    out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
-    out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
-    out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
-}
-
-/*
- * base64 encode a stream adding padding and line breaks as per spec.
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- *
- * @param instream The stream to encode.
- * @param insize The size of the stream to encode.
- * @return The encoded string.
- */
-xmlChar *_encode_base64(unsigned char *instream, int insize) {
-  unsigned char in[3];
-  unsigned char out[4];
-  xmlChar *encoded;
-  int i, in_index = 0, out_index = 0, blocklen;
-
-  if (insize == 0) {
-    return BAD_CAST "\0";
-  }
-
-  encoded = calloc(((insize / 3) * 4) + 10, sizeof(xmlChar));
-  while (in_index <= insize) {
-    blocklen = 0;
-    for (i = 0; i < 3; i++) {
-      in[i] = instream[in_index++];
-      if (in_index <= insize) {
-        blocklen++;
-      }
-      else {
-        in[i] = 0;
-      }
-    }
-    if (blocklen) {
-      _encode_base64_block(in, out, blocklen);
-      for( i = 0; i < 4; i++ ) {
-        encoded[out_index++] = out[i];
-      }
-    }
-  }
-
-  return encoded;
-}
-
-/*
- * Decode a base64 encoded stream discarding padding, line breaks and noise
- *
- * This code was graciously ripped from http://base64.sourceforge.net
- *
- * @param invalue The string to decode.
- * @param outsize Holder for the length of the returned data.
- * @return The decoded data.
- */
-unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
-  xmlChar in[4];
-  unsigned char out[3], v;
-  int i, in_index = 0, out_index = 0, blocklen;
-  unsigned char *outstream;
-
-  if (invalue == NULL) {
-    return NULL;
-  }
-
-  outstream = calloc(((xmlStrlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
-  while (invalue[in_index] != '\0') {
-    for (blocklen = 0, i = 0; i < 4 && invalue[in_index]; i++) {
-      v = 0;
-      while (invalue[in_index] != '\0' && v == 0) {
-        v = (unsigned char) invalue[in_index++];
-        v = (unsigned char) ((v < 43 || v > 122) ? 0 : cd64[ v - 43 ]);
-        if (v) {
-          v = (unsigned char) ((v == '$') ? 0 : v - 61);
-        }
-      }
-
-      if (invalue[in_index] != '\0') {
-        blocklen++;
-        if (v) {
-          in[i] = (unsigned char) (v - 1);
-        }
-      }
-      else {
-        in[i] = 0;
-      }
-    }
-
-    if (blocklen) {
-      _decode_base64_block( in, out );
-      for( i = 0; i < blocklen - 1; i++ ) {
-        outstream[out_index++] = out[i];
-      }
-    }
-  }
-
-  if (outsize != NULL) {
-    *outsize = out_index;
-  }
-
-  return outstream;
-}
-
-#endif /* ENUNCIATE_C_UTILITIES */
-
-#ifndef ENUNCIATE_OBJC_CLASSES
-#define ENUNCIATE_OBJC_CLASSES
 
 /**
  * Protocol defining a JAXB (see https://jaxb.dev.java.net/) type.
@@ -544,6 +358,354 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 @interface NSObject (JAXB) <JAXBType, JAXBElement, JAXBReading, JAXBWriting>
 
 @end
+
+/*******************boolean************************************/
+
+/**
+ * Read a boolean value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return YES if "true" was read. NO otherwise.
+ */
+BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader);
+
+/**
+ * Write a boolean value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value);
+
+/*******************byte************************************/
+
+/**
+ * Read a byte value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the byte.
+ */
+unsigned char *xmlTextReaderReadByteType(xmlTextReaderPtr reader);
+
+/**
+ * Write a byte value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteByteType(xmlTextWriterPtr writer, unsigned char *value);
+
+/*******************double************************************/
+
+/**
+ * Read a double value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the double.
+ */
+double *xmlTextReaderReadDoubleType(xmlTextReaderPtr reader);
+
+/**
+ * Write a double value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteDoubleType(xmlTextWriterPtr writer, double *value);
+
+/*******************float************************************/
+
+/**
+ * Read a float value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the float.
+ */
+float *xmlTextReaderReadFloatType(xmlTextReaderPtr reader);
+
+/**
+ * Write a float value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteFloatType(xmlTextWriterPtr writer, float *value);
+
+/*******************int************************************/
+
+/**
+ * Read a int value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @param value The value to be written.
+ * @return the int.
+ */
+int *xmlTextReaderReadIntType(xmlTextReaderPtr reader);
+
+/**
+ * Write a int value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value);
+
+/*******************long************************************/
+
+/**
+ * Read a long value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the long.
+ */
+long *xmlTextReaderReadLongType(xmlTextReaderPtr reader);
+
+/**
+ * Write a long value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value);
+
+/*******************short************************************/
+
+/**
+ * Read a short value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the short.
+ */
+short *xmlTextReaderReadShortType(xmlTextReaderPtr reader);
+
+/**
+ * Write a short value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value);
+
+/*******************char************************************/
+
+/**
+ * Read a character value from the reader.
+ *
+ * @param reader The reader (pointing at a node with a value).
+ * @return the character.
+ */
+xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader);
+
+/**
+ * Write a character value to the writer.
+ *
+ * @param writer The writer.
+ * @param value The value to be written.
+ * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
+ */
+int xmlTextWriterWriteCharacterType(xmlTextWriterPtr writer, xmlChar *value);
+
+[/#macro]
+
+[#macro writeCommonImpl]
+/**
+ * Enunciate-specific C functions.
+ */
+#ifndef ENUNCIATE_C_UTILITIES
+#define ENUNCIATE_C_UTILITIES
+
+/*******************xml utilities************************************/
+
+int xmlTextReaderAdvanceToNextStartOrEndElement(xmlTextReaderPtr reader) {
+  int status = xmlTextReaderRead(reader);
+  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+    status = xmlTextReaderRead(reader);
+  }
+  return status;
+}
+
+int xmlTextReaderSkipElement(xmlTextReaderPtr reader) {
+  int status = xmlTextReaderNext(reader);
+  while (status && xmlTextReaderNodeType(reader) != XML_READER_TYPE_ELEMENT && xmlTextReaderNodeType(reader) != XML_READER_TYPE_END_ELEMENT) {
+    status = xmlTextReaderRead(reader);
+  }
+  return status;
+}
+
+xmlChar *xmlTextReaderReadEntireNodeValue(xmlTextReaderPtr reader) {
+  xmlChar *buffer = calloc(1, sizeof(xmlChar));
+  const xmlChar *snippet;
+  int status;
+  if (xmlTextReaderNodeType(reader) == XML_READER_TYPE_ATTRIBUTE) {
+    return xmlTextReaderValue(reader);
+  }
+  else if (xmlTextReaderIsEmptyElement(reader) == 0) {
+    status = xmlTextReaderRead(reader);
+    while (status && (xmlTextReaderNodeType(reader) == XML_READER_TYPE_TEXT || xmlTextReaderNodeType(reader) == XML_READER_TYPE_CDATA || xmlTextReaderNodeType(reader) == XML_READER_TYPE_ENTITY_REFERENCE)) {
+      snippet = xmlTextReaderConstValue(reader);
+      buffer = realloc(buffer, (xmlStrlen(buffer) + xmlStrlen(snippet) + 1) * sizeof(xmlChar));
+      xmlStrcat(buffer, snippet);
+      status = xmlTextReaderRead(reader);
+    }
+  }
+  return buffer;
+}
+
+/*******************base 64 utilities************************************/
+
+/*
+ * Base64 Translation Table as described in RFC1113.
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ */
+const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/*
+ * Base64 Translation Table to decode (created by author)
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ */
+const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
+
+/*
+ * encode 3 8-bit binary bytes as 4 '6-bit' characters
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ *
+ * @param in the block to encode
+ * @param out the block to encode to
+ * @param len the length of the 'in' block.
+ */
+void _encode_base64_block(unsigned char in[3], unsigned char out[4], int len) {
+  out[0] = cb64[ in[0] >> 2 ];
+  out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
+  out[2] = (unsigned char) (len > 1 ? cb64[ ((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6) ] : '=');
+  out[3] = (unsigned char) (len > 2 ? cb64[ in[2] & 0x3f ] : '=');
+}
+
+/*
+ * decode 4 '6-bit' characters into 3 8-bit binary bytes
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ */
+void _decode_base64_block( unsigned char in[4], unsigned char out[3] )
+{
+    out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
+    out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
+    out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
+}
+
+/*
+ * base64 encode a stream adding padding and line breaks as per spec.
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ *
+ * @param instream The stream to encode.
+ * @param insize The size of the stream to encode.
+ * @return The encoded string.
+ */
+xmlChar *_encode_base64(unsigned char *instream, int insize) {
+  unsigned char in[3];
+  unsigned char out[4];
+  xmlChar *encoded;
+  int i, in_index = 0, out_index = 0, blocklen;
+
+  if (insize == 0) {
+    return BAD_CAST "\0";
+  }
+
+  encoded = calloc(((insize / 3) * 4) + 10, sizeof(xmlChar));
+  while (in_index <= insize) {
+    blocklen = 0;
+    for (i = 0; i < 3; i++) {
+      in[i] = instream[in_index++];
+      if (in_index <= insize) {
+        blocklen++;
+      }
+      else {
+        in[i] = 0;
+      }
+    }
+    if (blocklen) {
+      _encode_base64_block(in, out, blocklen);
+      for( i = 0; i < 4; i++ ) {
+        encoded[out_index++] = out[i];
+      }
+    }
+  }
+
+  return encoded;
+}
+
+/*
+ * Decode a base64 encoded stream discarding padding, line breaks and noise
+ *
+ * This code was graciously ripped from http://base64.sourceforge.net
+ *
+ * @param invalue The string to decode.
+ * @param outsize Holder for the length of the returned data.
+ * @return The decoded data.
+ */
+unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
+  xmlChar in[4];
+  unsigned char out[3], v;
+  int i, in_index = 0, out_index = 0, blocklen;
+  unsigned char *outstream;
+
+  if (invalue == NULL) {
+    return NULL;
+  }
+
+  outstream = calloc(((xmlStrlen(invalue) / 4) * 3) + 1, sizeof(unsigned char));
+  while (invalue[in_index] != '\0') {
+    for (blocklen = 0, i = 0; i < 4 && invalue[in_index]; i++) {
+      v = 0;
+      while (invalue[in_index] != '\0' && v == 0) {
+        v = (unsigned char) invalue[in_index++];
+        v = (unsigned char) ((v < 43 || v > 122) ? 0 : cd64[ v - 43 ]);
+        if (v) {
+          v = (unsigned char) ((v == '$') ? 0 : v - 61);
+        }
+      }
+
+      if (invalue[in_index] != '\0') {
+        blocklen++;
+        if (v) {
+          in[i] = (unsigned char) (v - 1);
+        }
+      }
+      else {
+        in[i] = 0;
+      }
+    }
+
+    if (blocklen) {
+      _decode_base64_block( in, out );
+      for( i = 0; i < blocklen - 1; i++ ) {
+        outstream[out_index++] = out[i];
+      }
+    }
+  }
+
+  if (outsize != NULL) {
+    *outsize = out_index;
+  }
+
+  return outstream;
+}
+
+#endif /* ENUNCIATE_C_UTILITIES */
+
+#ifndef ENUNCIATE_OBJC_CLASSES
+#define ENUNCIATE_OBJC_CLASSES
+
 
 /**
  * Implementation of the JAXB type, element, events for a base object.
@@ -1764,7 +1926,7 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  * @param reader The reader (pointing at a node with a value).
  * @return YES if "true" was read. NO otherwise.
  */
-static BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader) {
+BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   BOOL *value = malloc(sizeof(BOOL));
   *value = (xmlStrcmp(BAD_CAST "true", nodeValue) == 0) ? YES : NO;
@@ -1779,7 +1941,7 @@ static BOOL *xmlTextReaderReadBooleanType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value) {
+int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value) {
   if (*value) {
     return xmlTextWriterWriteString(writer, BAD_CAST "false");
   }
@@ -1796,7 +1958,7 @@ static int xmlTextWriterWriteBooleanType(xmlTextWriterPtr writer, BOOL *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return the byte.
  */
-static unsigned char *xmlTextReaderReadByteType(xmlTextReaderPtr reader) {
+unsigned char *xmlTextReaderReadByteType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   unsigned char *value = malloc(sizeof(unsigned char));
   *value = (unsigned char) atoi((char *) nodeValue);
@@ -1811,7 +1973,7 @@ static unsigned char *xmlTextReaderReadByteType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteByteType(xmlTextWriterPtr writer, unsigned char *value) {
+int xmlTextWriterWriteByteType(xmlTextWriterPtr writer, unsigned char *value) {
   return xmlTextWriterWriteFormatString(writer, "%i", *value);
 }
 
@@ -1823,7 +1985,7 @@ static int xmlTextWriterWriteByteType(xmlTextWriterPtr writer, unsigned char *va
  * @param reader The reader (pointing at a node with a value).
  * @return the double.
  */
-static double *xmlTextReaderReadDoubleType(xmlTextReaderPtr reader) {
+double *xmlTextReaderReadDoubleType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   double *value = malloc(sizeof(double));
   *value = atof((char *) nodeValue);
@@ -1838,7 +2000,7 @@ static double *xmlTextReaderReadDoubleType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteDoubleType(xmlTextWriterPtr writer, double *value) {
+int xmlTextWriterWriteDoubleType(xmlTextWriterPtr writer, double *value) {
   return xmlTextWriterWriteFormatString(writer, "%f", *value);
 }
 
@@ -1850,7 +2012,7 @@ static int xmlTextWriterWriteDoubleType(xmlTextWriterPtr writer, double *value) 
  * @param reader The reader (pointing at a node with a value).
  * @return the float.
  */
-static float *xmlTextReaderReadFloatType(xmlTextReaderPtr reader) {
+float *xmlTextReaderReadFloatType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   float *value = malloc(sizeof(float));
   *value = atof((char *)nodeValue);
@@ -1865,7 +2027,7 @@ static float *xmlTextReaderReadFloatType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteFloatType(xmlTextWriterPtr writer, float *value) {
+int xmlTextWriterWriteFloatType(xmlTextWriterPtr writer, float *value) {
   return xmlTextWriterWriteFormatString(writer, "%f", *value);
 }
 
@@ -1878,7 +2040,7 @@ static int xmlTextWriterWriteFloatType(xmlTextWriterPtr writer, float *value) {
  * @param value The value to be written.
  * @return the int.
  */
-static int *xmlTextReaderReadIntType(xmlTextReaderPtr reader) {
+int *xmlTextReaderReadIntType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   int *value = malloc(sizeof(int));
   *value = atoi((char *)nodeValue);
@@ -1893,7 +2055,7 @@ static int *xmlTextReaderReadIntType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value) {
+int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value) {
   return xmlTextWriterWriteFormatString(writer, "%i", *value);
 }
 
@@ -1905,7 +2067,7 @@ static int xmlTextWriterWriteIntType(xmlTextWriterPtr writer, int *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return the long.
  */
-static long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
+long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   long *value = malloc(sizeof(long));
   *value = atol((char *)nodeValue);
@@ -1920,7 +2082,7 @@ static long *xmlTextReaderReadLongType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value) {
+int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value) {
   return xmlTextWriterWriteFormatString(writer, "%ld", *value);
 }
 
@@ -1932,7 +2094,7 @@ static int xmlTextWriterWriteLongType(xmlTextWriterPtr writer, long *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return the short.
  */
-static short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
+short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
   xmlChar *nodeValue = xmlTextReaderReadEntireNodeValue(reader);
   short *value = malloc(sizeof(short));
   *value = atoi((char *)nodeValue);
@@ -1947,7 +2109,7 @@ static short *xmlTextReaderReadShortType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
+int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
   return xmlTextWriterWriteFormatString(writer, "%hi", *value);
 }
 
@@ -1959,7 +2121,7 @@ static int xmlTextWriterWriteShortType(xmlTextWriterPtr writer, short *value) {
  * @param reader The reader (pointing at a node with a value).
  * @return the character.
  */
-static xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader) {
+xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader) {
   return xmlTextReaderReadEntireNodeValue(reader);
 }
 
@@ -1970,7 +2132,7 @@ static xmlChar *xmlTextReaderReadCharacterType(xmlTextReaderPtr reader) {
  * @param value The value to be written.
  * @return the bytes written (may be 0 because of buffering) or -1 in case of error.
  */
-static int xmlTextWriterWriteCharacterType(xmlTextWriterPtr writer, xmlChar *value) {
+int xmlTextWriterWriteCharacterType(xmlTextWriterPtr writer, xmlChar *value) {
   return xmlTextWriterWriteString(writer, value);
 }
 
