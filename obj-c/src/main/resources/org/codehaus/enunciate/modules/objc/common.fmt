@@ -1920,12 +1920,12 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
-  NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
 #ifdef GNUSTEP
    /* GNUstep code goes here ... */
-  [formatter setDateFormat:@"%Y-%m-%dT%H:%M:%S %z"];
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
 #else
    /* Cocoa/Cocoa Touch native code goes here ... */
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
   [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss ZZ"];
 #endif
   xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
