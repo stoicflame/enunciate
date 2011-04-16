@@ -66,6 +66,7 @@
       <arg value="-Wno-unused-function"/>
       <!--count all warnings as errors -->
       <arg value="-Werror"/>
+      <arg value="-D DEBUG_ENUNCIATE=2"/>
       <!--include the source directory-->
       <arg value="-I${project.build.directory}/enunciate/gen/obj-c"/>
       <!--output to the file-->

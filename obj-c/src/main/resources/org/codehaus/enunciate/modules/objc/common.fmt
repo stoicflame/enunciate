@@ -1879,7 +1879,25 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
 
   //YYYY-MM-DD HH:MM:SS -HHHMM
   free(timevalue);
-  return [NSDate dateWithString: [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", year, month, day, hour, minute, second, offset_hour, offset_minute]];
+  NSString *dateString = [NSString stringWithFormat: @"%04i-%02i-%02i %02i:%02i:%02i %+03i%02i", year, month, day, hour, minute, second, offset_hour, offset_minute];
+#ifdef GNUSTEP
+   /* GNUstep code goes here ... */
+  return [NSDate dateWithString: dateString];
+#else
+   /* Cocoa/Cocoa Touch native code goes here ... */
+   // Create date formatter
+   static NSDateFormatter *dateFormatter = nil;
+   if (!dateFormatter) {
+       [NSDateFormatter setDefaultFormatterBehavior:NSDateFormatterBehavior10_4];
+       NSLocale *enUSPOSIXLocale = [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease];
+       dateFormatter = [[NSDateFormatter alloc] init];
+       [dateFormatter setLocale:enUSPOSIXLocale];
+       [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss ZZ"];
+       [dateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+       [enUSPOSIXLocale release];
+   }
+   return [dateFormatter dateFromString: dateString];
+#endif
 }
 
 /**
@@ -1902,7 +1920,14 @@ unsigned char *_decode_base64( const xmlChar *invalue, int *outsize ) {
  */
 - (void) writeXMLType: (xmlTextWriterPtr) writer
 {
-  NSDateFormatter *formatter = [[NSDateFormatter alloc] initWithDateFormat: @"%Y-%m-%dT%H:%M:%S %z" allowNaturalLanguage: NO];
+  NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+#ifdef GNUSTEP
+   /* GNUstep code goes here ... */
+  [formatter setDateFormat:@"%Y-%m-%dT%H:%M:%S %z"];
+#else
+   /* Cocoa/Cocoa Touch native code goes here ... */
+  [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss ZZ"];
+#endif
   xmlChar *timevalue = BAD_CAST [[formatter stringForObjectValue: self] UTF8String];
   timevalue[19] = timevalue[20];
   timevalue[20] = timevalue[21];

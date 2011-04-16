@@ -1,4 +1,4 @@
-#define DEBUG_ENUNCIATE 2 //set to '1' or '2' for output debugging.
+//#define DEBUG_ENUNCIATE 2 //set to '1' or '2' for output debugging in gcc-compile.xml
 #import <stdio.h>
 #import "enunciate.h"
 
