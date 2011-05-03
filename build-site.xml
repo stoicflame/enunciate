@@ -56,6 +56,10 @@
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
     </artifact:dependencies>
 
+    <artifact:dependencies filesetId="jboss.libs.fileset" pathId="jboss.libs.path">
+      <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jboss" version="${top.pom.version}"/>
+    </artifact:dependencies>
+
     <artifact:dependencies filesetId="gwt.libs.fileset" pathId="gwt.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-gwt" version="${top.pom.version}"/>
     </artifact:dependencies>
@@ -105,6 +109,7 @@
       <path refid="core.libs.path"/>
       <path refid="spring.libs.path"/>
       <path refid="cxf.libs.path"/>
+      <path refid="jboss.libs.path"/>
       <path refid="gwt.libs.path"/>
       <path refid="amf.libs.path"/>
       <path refid="optional.libs.path"/>
@@ -244,6 +249,7 @@
         <path refid="spring2.libs.path"/>
         <path refid="spring3.libs.path"/>
         <path refid="cxf.libs.path"/>
+        <path refid="jboss.libs.path"/>
         <path refid="gwt.libs.path"/>
         <path refid="amf.libs.path"/>
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -296,6 +302,18 @@
     </copy>
     <delete>
       <fileset dir="target/lib/modules/cxf">
+        <present targetdir="target/lib"/>
+      </fileset>
+    </delete>
+
+    <!--copy the jboss module plus deps-->
+    <mkdir dir="target/lib/modules/jboss"/>
+    <copy todir="target/lib/modules/jboss">
+      <fileset refid="jboss.libs.fileset"/>
+      <mapper type="flatten"/>
+    </copy>
+    <delete>
+      <fileset dir="target/lib/modules/jboss">
         <present targetdir="target/lib"/>
       </fileset>
     </delete>
