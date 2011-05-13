@@ -13,8 +13,8 @@
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 <${xs}:schema version="1.0"[#if schema.namespace?exists && schema.namespace?length > 0] targetNamespace="${schema.namespace?default("")}"[/#if]
-  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}"[/#if][#t]
-  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}"[/#if][#t]
+  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}" [/#if][#t]
+  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}" [/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
     [#if referencedNamespace?exists && referencedNamespace?length > 0 && !("http://www.w3.org/2001/XMLSchema" = referencedNamespace)]
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
