@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.modules.spring_app;
+package org.codehaus.enunciate.samples.petclinic.services;
 
-import org.springframework.security.access.SecurityConfig;
-
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.DenyAll;
+import org.codehaus.enunciate.service.SecurityExceptionChecker;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 
 /**
- * Security config applicable as a JSR 250 annotation attribute.
+ * Security checker for Spring Security.
  *
  * @author Ryan Heaton
  */
-public class JSR250SecurityConfig extends SecurityConfig {
+public class SpringSecurityExceptionChecker implements SecurityExceptionChecker {
 
-  public static final JSR250SecurityConfig PERMIT_ALL_ATTRIBUTE = new JSR250SecurityConfig(PermitAll.class.getName());
-  public static final JSR250SecurityConfig DENY_ALL_ATTRIBUTE = new JSR250SecurityConfig(DenyAll.class.getName());
-
-  public JSR250SecurityConfig(String role) {
-    super(role);
+  public boolean isAuthenticationFailed(Throwable throwable) {
+    return throwable instanceof AuthenticationException;
   }
 
+  public boolean isAccessDenied(Throwable throwable) {
+    return throwable instanceof AccessDeniedException;
+  }
 }

@@ -7,21 +7,19 @@
       </content-types>
     </rest>
   </services>
+
+  <webapp>
+    <globalServletFilter name="securityFilter" classname="org.springframework.web.filter.DelegatingFilterProxy"/>
+  </webapp>
+
   <modules>
     <c disabled="true"/>
     <obj-c disabled="true"/>
     <csharp disabled="true"/>
     <java-client disabled="true"/>
     <gwt rpcModuleName="org.codehaus.enunciate.samples.petclinic.PetClinic" generateJsonOverlays="true"/>
-    <spring-app enableSecurity="true">
-      <springImport file="other-beans.xml"/>
-      <security>
-        <userDetailsService beanName="userDetailsService"/>
-        <filter beanName="supportFilter"/>
-        <onAuthenticationFailed>
-          <entryPoint beanName="my-entry-point"/>
-        </onAuthenticationFailed>
-      </security>
+    <spring-app>
+      <springImport file="security-context.xml"/>
     </spring-app>
   </modules>
 </enunciate>

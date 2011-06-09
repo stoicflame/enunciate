@@ -19,22 +19,16 @@ package org.codehaus.enunciate.modules.spring_app;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
-import org.codehaus.enunciate.config.EnunciateConfiguration;
-import org.codehaus.enunciate.config.war.WebAppConfig;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
-import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.GlobalServiceInterceptor;
 import org.codehaus.enunciate.modules.spring_app.config.HandlerInterceptor;
 import org.codehaus.enunciate.modules.spring_app.config.SpringAppRuleSet;
 import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
-import org.codehaus.enunciate.modules.spring_app.config.security.FormBasedLoginConfig;
-import org.codehaus.enunciate.modules.spring_app.config.security.OAuthConfig;
-import org.codehaus.enunciate.modules.spring_app.config.security.SecurityConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,13 +39,11 @@ import java.util.*;
  * <h1>Spring App Module</h1>
  *
  * <p>The spring app deployment module produces the configuration files and application extensions needed to apply
- * the <a href="http://www.springframework.org/">Spring</a> container to the Web service application. This allows users
- * to take advantage of dependency injection, AOP, and security.</p>
+ * the <a href="http://www.springframework.org/">Spring</a> container to the Web service application.</p>
  *
  * <ul>
  * <li><a href="#steps">steps</a></li>
  * <li><a href="#config">application configuration</a></li>
- * <li><a href="module_spring_app_security.html">security configuration</a></li>
  * <li><a href="#artifacts">artifacts</a></li>
  * </ul>
  *
@@ -78,14 +70,6 @@ import java.util.*;
  * <li><a href="#config_handlerMapping">The "handlerMapping" element</a></li>
  * </ul>
  * </li>
- * <li><a href="module_spring_app_security.html">Spring Application Security</a><br/>
- * <ul>
- * <li><a href="module_spring_app_security.html#security_annotations">Security Annotations</a></li>
- * <li><a href="module_spring_app_security.html#security_user_details">User Details Service</a></li>
- * <li><a href="module_spring_app_security.html#security_config">The "security" configuration element</a></li>
- * <li><a href="module_spring_app_security.html#security_login_logout">Login and Logout API Methods</a></li>
- * </ul>
- * </li>
  * </ul>
  *
  * <p>The configuration for the Spring App deployment module is specified by the "spring-app" child element under the "modules" element
@@ -94,13 +78,12 @@ import java.util.*;
  * <h3><a name="config_structure">Structure</a></h3>
  *
  * <p>The following example shows the structure of the configuration elements for this module.  Note that this shows only the structure.
- * Some configuration elements don't make sense when used together. For more information about the security configuration, see
- * <a href="module_spring_app_security.html">Spring Application Security</a>.</p>
+ * Some configuration elements don't make sense when used together.</p>
  *
  * <code class="console">
  * &lt;enunciate&gt;
  * &nbsp;&nbsp;&lt;modules&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app enableSecurity="..." contextLoaderListenerClass="..."
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;spring-app contextLoaderListenerClass="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;applicationContextFilename="..." contextConfigLocation="..."
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;springVersion="..."&gt;
  *
@@ -120,10 +103,6 @@ import java.util.*;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;handlerMapping pattern="..." beanName="..."/&gt;
  * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
  *
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;security ...&gt;
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/security&gt;
- *
  * &nbsp;&nbsp;&nbsp;&nbsp;&lt;/spring-app&gt;
  * &nbsp;&nbsp;&lt;/modules&gt;
  * &lt;/enunciate&gt;
@@ -132,7 +111,6 @@ import java.util.*;
  * <h3><a name="config_attributes">attributes</a></h3>
  *
  * <ul>
- * <li>The "<b>enableSecurity</b>" attribute specifies that <a href="module_spring_app_security.html">security</a> should be enabled.  The default is "false."</li>
  * <li>The "<b>contextLoaderListenerClass</b>" attribute specifies that FQN of the class to use as the Spring context loader listener.  The default is "org.springframework.web.context.ContextLoaderListener".</li>
  * <li>The "<b>applicationContextFilename</b>" attribute specifies the name of the Enunciate-generated application context file.  The default is "applicationContext.xml".</li>
  * <li>The "<b>contextConfigLocation</b>" attribute specifies the value of the contextConfigLocation init parameter supplied to the Spring
@@ -228,10 +206,8 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   private String contextConfigLocation = null;
   private String contextLoaderListenerClass = "org.springframework.web.context.ContextLoaderListener";
   private boolean enableSecurity = false;
-  private SecurityConfig securityConfig = new SecurityConfig();
   private boolean factoryBeanFound = false;
   private boolean spring3 = false;
-  private boolean springSecurity3 = false;
 
   /**
    * @return "spring-app"
@@ -242,50 +218,24 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
   }
 
   /**
-   * @return The URL to "security-servlet.xml.fmt"
-   */
-  protected URL getSecurityServletTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("security-servlet.xml.fmt");
-  }
-
-  /**
    * @return The URL to "spring-servlet.fmt"
    */
   protected URL getApplicationContextTemplateURL() {
     return SpringAppDeploymentModule.class.getResource("applicationContext.xml.fmt");
   }
 
-  /**
-   * @return The URL to "security-context.xml.fmt"
-   */
-  protected URL getSecurityContextTemplateURL() {
-    return SpringAppDeploymentModule.class.getResource("security-context.xml.fmt");
-  }
-
   public void onClassesFound(Set<String> classes) {
     factoryBeanFound |= classes.contains("org.codehaus.enunciate.modules.spring_app.ServiceEndpointFactoryBean");
     //we'll key off the Converter class since that's new in Spring 3.
     spring3 |= classes.contains("org.springframework.core.convert.converter.Converter");
-    springSecurity3 |= classes.contains("org.springframework.security.core.Authentication");
   }
 
   @Override
   public void init(Enunciate enunciate) throws EnunciateException {
     super.init(enunciate);
 
-    if (!isDisabled()) {
-      if (isEnableSecurity()) {
-        warn("Enunciate-specific spring security configuration has been DEPRECATED and will be removed in a future release. Please see http://goo.gl/1S94J for more information.");
-        if (getSecurityConfig().isEnableBasicHTTPAuth() && getSecurityConfig().isEnableDigestHTTPAuth()) {
-          throw new EnunciateException("If you want to enable HTTP Digest Auth, you have to disable HTTP Basic Auth.");
-        }
-
-        if (getSecurityConfig().getFormBasedLoginConfig() != null && getSecurityConfig().getFormBasedLoginConfig().isEnableOpenId()) {
-          if (getSecurityConfig().getUserDetailsService() == null || (getSecurityConfig().getUserDetailsService().getBeanName() == null && getSecurityConfig().getUserDetailsService().getClassName() == null)) {
-            throw new EnunciateException("Enabling OpenID requires you to specify a 'userDetailsService' bean.");
-          }
-        }
-      }
+    if (!isDisabled() && isEnableSecurity()) {
+      throw new EnunciateException("As of 1.23, enunciate-specific spring security configuration has been DEPRECATED and will be removed in a future release. Please see http://goo.gl/1S94J for more information.");
     }
   }
 
@@ -309,7 +259,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
       model.put("springImports", getSpringImportURIs());
       model.put("applicationContextFilename", getApplicationContextFilename());
       model.put("spring3", this.spring3);
-      model.put("springSecurity3", this.springSecurity3);
       Object docsDir = enunciate.getProperty("docs.webapp.dir");
       if (docsDir == null) {
         docsDir = "";
@@ -332,32 +281,11 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
         model.put("handlerInterceptors", this.handlerInterceptors);
       }
 
-      //spring security configuration:
-      model.put("securityEnabled", isEnableSecurity());
-      model.put("servletPatternToAntPattern", new ServletPatternToAntPattern());
-      SecurityConfig securityConfig = getSecurityConfig();
-      if (securityConfig.getRealmName() == null) {
-        EnunciateConfiguration enunciateConfig = enunciate.getConfig();
-        if (enunciateConfig.getDescription() != null) {
-          securityConfig.setRealmName(enunciateConfig.getDescription());
-        }
-      }
-
-      if (securityConfig.getKey() == null) {
-        securityConfig.setKey(String.valueOf(System.currentTimeMillis()));
-      }
-      model.put("securityConfig", securityConfig);
-
       model.setFileOutputDirectory(getWebInfDir());
       processTemplate(getApplicationContextTemplateURL(), model);
 
       copySpringConfig();
 
-      if (isEnableSecurity()) {
-        processTemplate(getSecurityServletTemplateURL(), model);
-        processTemplate(getSecurityContextTemplateURL(), model);
-        createSecurityUI();
-      }
     }
     else {
       info("Skipping generation of spring config files as everything appears up-to-date...");
@@ -378,134 +306,7 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
     }
     contextParams.put("contextConfigLocation", contextConfigLocation);
     webAppFragment.setContextParameters(contextParams);
-
-    if (isEnableSecurity()) {
-      WebAppComponent securityFilter = new WebAppComponent();
-      securityFilter.setName("springSecurityFilterChain");
-      securityFilter.setClassname("org.springframework.web.filter.DelegatingFilterProxy");
-      EnunciateConfiguration config = enunciate.getConfig();
-      WebAppConfig appConfig = config.getWebAppConfig();
-      if (appConfig == null) {
-        appConfig = new WebAppConfig();
-        config.setWebAppConfig(appConfig);
-      }
-      appConfig.addGlobalServletFilter(securityFilter);
-
-      WebAppComponent securityServlet = new WebAppComponent();
-      securityServlet.setName("security");
-      securityServlet.setClassname("org.springframework.web.servlet.DispatcherServlet");
-
-      if (getSecurityConfig().isEnableFormBasedLogin()) {
-        securityFilter.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getUrl());
-        securityServlet.addUrlMapping(getSecurityConfig().getFormBasedLoginConfig().getLoginPageURL());
-      }
-
-      if (getSecurityConfig().isEnableFormBasedLogout()) {
-        securityFilter.addUrlMapping(getSecurityConfig().getFormBasedLogoutConfig().getUrl());
-      }
-
-      if (getSecurityConfig().isEnableOAuth()) {
-        OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
-        securityFilter.addUrlMapping(oauthConfig.getRequestTokenURL());
-        securityFilter.addUrlMapping(oauthConfig.getAccessTokenURL());
-        securityFilter.addUrlMapping(oauthConfig.getGrantAccessURL());
-
-        securityServlet.addUrlMapping(oauthConfig.getInfoURL());
-        securityServlet.addUrlMapping(oauthConfig.getAccessConfirmationURL());
-        securityServlet.addUrlMapping(oauthConfig.getAccessConfirmedURL());
-      }
-
-      if (getSecurityConfig().getSecureUrls() != null) {
-        for (Map.Entry<String, String> secureUrl : getSecurityConfig().getSecureUrls().entrySet()) {
-          securityFilter.addUrlMapping(secureUrl.getKey());
-        }
-      }
-
-      List<WebAppComponent> servlets = webAppFragment.getServlets();
-      if (servlets == null) {
-        servlets = new ArrayList<WebAppComponent>();
-        webAppFragment.setServlets(servlets);
-      }
-
-      servlets.add(securityServlet);
-    }
-
     getEnunciate().addWebAppFragment(webAppFragment);
-  }
-
-  /**
-   * Create the UI pages for security as needed (e.g. login page).
-   */
-  protected void createSecurityUI() throws IOException {
-    Enunciate enunciate = getEnunciate();
-    File jspDir = new File(getWebInfDir(), "jsp");
-    jspDir.mkdirs();
-    if (getSecurityConfig().isEnableFormBasedLogin()) {
-      //form-based login is enabled; we'll use the login page.
-      File loginPageFile = null;
-      FormBasedLoginConfig formBasedLoginConfig = getSecurityConfig().getFormBasedLoginConfig();
-      if (formBasedLoginConfig != null) {
-        if (formBasedLoginConfig.getLoginPageFile() != null) {
-          loginPageFile = enunciate.resolvePath(formBasedLoginConfig.getLoginPageFile());
-        }
-      }
-
-      if (loginPageFile != null) {
-        enunciate.copyFile(loginPageFile, new File(jspDir, "login.jsp"));
-      }
-      else {
-        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/login.jsp", new File(jspDir, "login.jsp"));
-      }
-    }
-
-    if (getSecurityConfig().isEnableOAuth()) {
-      OAuthConfig oauthConfig = getSecurityConfig().getOAuthConfig();
-
-      //copy the OAuth information page.
-      File infoPageFile = null;
-      if (oauthConfig != null) {
-        if (oauthConfig.getInfoPageFile() != null) {
-          infoPageFile = enunciate.resolvePath(oauthConfig.getInfoPageFile());
-        }
-      }
-
-      if (infoPageFile != null) {
-        enunciate.copyFile(infoPageFile, new File(jspDir, "oauth_info.jsp"));
-      }
-      else {
-        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/oauth.jsp", new File(jspDir, "oauth_info.jsp"));
-      }
-
-      //copy the OAuth access confirmation page.
-      File confirmAccessPageFile = null;
-      if (oauthConfig != null) {
-        if (oauthConfig.getConfirmAccessPageFile() != null) {
-          confirmAccessPageFile = enunciate.resolvePath(oauthConfig.getConfirmAccessPageFile());
-        }
-      }
-
-      if (confirmAccessPageFile != null) {
-        enunciate.copyFile(confirmAccessPageFile, new File(jspDir, "confirm_access.jsp"));
-      }
-      else {
-        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/confirm_access.jsp", new File(jspDir, "confirm_access.jsp"));
-      }
-
-      //copy the OAuth access confirmed page.
-      File accessConfirmedPageFile = null;
-      if (oauthConfig != null) {
-        if (oauthConfig.getAccessConfirmedPageFile() != null) {
-          accessConfirmedPageFile = enunciate.resolvePath(oauthConfig.getAccessConfirmedPageFile());
-        }
-      }
-
-      if (accessConfirmedPageFile != null) {
-        enunciate.copyFile(accessConfirmedPageFile, new File(jspDir, "access_confirmed.jsp"));
-      }
-      else {
-        enunciate.copyResource("/org/codehaus/enunciate/modules/spring_app/jsp/access_confirmed.jsp", new File(jspDir, "access_confirmed.jsp"));
-      }
-    }
   }
 
   /**
@@ -674,24 +475,6 @@ public class SpringAppDeploymentModule extends FreemarkerDeploymentModule implem
    */
   public void setEnableSecurity(boolean enableSecurity) {
     this.enableSecurity = enableSecurity;
-  }
-
-  /**
-   * The spring security configuration.
-   *
-   * @return The spring security configuration.
-   */
-  public SecurityConfig getSecurityConfig() {
-    return securityConfig;
-  }
-
-  /**
-   * The spring security configuration.
-   *
-   * @param securityConfig The spring security configuration.
-   */
-  public void setSecurityConfig(SecurityConfig securityConfig) {
-    this.securityConfig = securityConfig;
   }
 
   /**

@@ -11,9 +11,6 @@
 
   <context:annotation-config/>
 
-  [#if securityEnabled]
-  <import resource="security-context.xml"/>
-  [/#if]
   [#if springImports?exists]
   [#list springImports as springImport]
   <import resource="${springImport}"/>
@@ -46,9 +43,6 @@
             [/#if]
           [/#list]
         [/#if]
-        [#if securityEnabled]
-        <ref bean="enunciate-security-interceptor"/>
-        [/#if]
       </list>
     </constructor-arg>
   </bean>
@@ -63,10 +57,8 @@
     <property name="interceptors" ref="service-bean-interceptors"/>
   </bean>
   [/@forEachServiceEndpoint]
-  [#if !securityEnabled]
 
   <!-- default, no-op, security checker --> 
   <bean class="org.codehaus.enunciate.service.DefaultSecurityExceptionChecker"/>
-  [/#if]
 </beans>
 [/@file]

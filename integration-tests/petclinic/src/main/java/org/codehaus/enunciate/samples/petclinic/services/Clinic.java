@@ -35,7 +35,7 @@ public interface Clinic {
   @Path("/vetpix/{id}")
   @GET
   @GWTTransient
-  @RolesAllowed( "ADMIN" )
+  @RolesAllowed( "ROLE_ADMIN" )
   DataHandler getVetPhoto(@PathParam ("id") Integer id) throws PetClinicException, PictureException;
 
   /**
