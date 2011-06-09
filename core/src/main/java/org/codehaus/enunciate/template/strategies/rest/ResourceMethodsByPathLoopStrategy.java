@@ -18,32 +18,31 @@ package org.codehaus.enunciate.template.strategies.rest;
 
 import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
-import org.codehaus.enunciate.contract.common.rest.RESTResource;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
-import org.codehaus.enunciate.util.RESTResourcePathComparator;
+import org.codehaus.enunciate.util.ResourceMethodPathComparator;
 
 import java.util.*;
 
 /**
- * Strategy for looping through each REST resource.
+ * Strategy for looping through all sets of resource methods, grouped by path.
  *
  * @author Ryan Heaton
  */
-public class RESTResourcesByPathLoopStrategy extends EnunciateTemplateLoopStrategy<List<RESTResource>> {
+public class ResourceMethodsByPathLoopStrategy extends EnunciateTemplateLoopStrategy<List<ResourceMethod>> {
 
   private String var = "resources";
 
-  protected Iterator<List<RESTResource>> getLoop(TemplateModel model) throws TemplateException {
-    TreeMap<String, List<RESTResource>> resourcesByPath = new TreeMap<String, List<RESTResource>>(new RESTResourcePathComparator());
+  protected Iterator<List<ResourceMethod>> getLoop(TemplateModel model) throws TemplateException {
+    TreeMap<String, List<ResourceMethod>> resourcesByPath = new TreeMap<String, List<ResourceMethod>>(new ResourceMethodPathComparator());
 
     for (RootResource rootResource : getModel().getRootResources()) {
       for (ResourceMethod resource : rootResource.getResourceMethods(true)) {
-        String path = resource.getPath();
-        List<RESTResource> resourceList = resourcesByPath.get(path);
+        String path = resource.getFullpath();
+        List<ResourceMethod> resourceList = resourcesByPath.get(path);
         if (resourceList == null) {
-          resourceList = new ArrayList<RESTResource>();
+          resourceList = new ArrayList<ResourceMethod>();
           resourcesByPath.put(path, resourceList);
         }
 
@@ -55,7 +54,7 @@ public class RESTResourcesByPathLoopStrategy extends EnunciateTemplateLoopStrate
   }
 
   @Override
-  protected void setupModelForLoop(TemplateModel model, List<RESTResource> resources, int index) throws TemplateException {
+  protected void setupModelForLoop(TemplateModel model, List<ResourceMethod> resources, int index) throws TemplateException {
     super.setupModelForLoop(model, resources, index);
 
     if (this.var != null) {

@@ -30,9 +30,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.contract.common.rest.RESTResource;
-import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
-import org.codehaus.enunciate.contract.common.rest.ResourcePayloadTypeAdapter;
+import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
@@ -646,7 +644,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       REFERENCE_STACK.get().removeFirst();
     }
 
-    ResourcePayloadTypeAdapter outputPayload = resourceMethod.getOutputPayload();
+    ResourceRepresentationMetadata outputPayload = resourceMethod.getRepresentationMetadata();
     if (outputPayload != null) {
       TypeMirror returnType = outputPayload.getDelegate();
       if (returnType instanceof ClassType) {
@@ -1489,9 +1487,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    *
    * @return An example resource method, or if no good examples were found.
    */
-  public RESTResource findExampleResource() {
-
-    RESTResource example = null;
+  public ResourceMethod findExampleResourceMethod() {
+    ResourceMethod example = null;
     List<RootResource> resources = getRootResources();
     for (RootResource root : resources) {
       List<ResourceMethod> methods = root.getResourceMethods(true);
@@ -1499,8 +1496,8 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
         if (method.getAnnotation(DocumentationExample.class) != null && !method.getAnnotation(DocumentationExample.class).exclude()) {
           return method;
         }
-        else if (method.getOutputPayload() != null && method.getOutputPayload().getXmlElement() != null) {
-          if (method.getInputPayload() != null && method.getInputPayload().getXmlElement() != null) {
+        else if (method.getRepresentationMetadata() != null && method.getRepresentationMetadata().getXmlElement() != null) {
+          if (method.getEntityParameter() != null && method.getEntityParameter().getXmlElement() != null) {
             //we'll prefer one with both an output AND an input.
             return method;
           }

@@ -26,7 +26,6 @@ import javax.ws.rs.*;
 import java.util.List;
 import java.util.ArrayList;
 
-import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import com.sun.mirror.declaration.*;
 
 /**
@@ -114,7 +113,7 @@ public class JerseyValidator extends BaseValidator {
         }
 
         for (String method : resourceMethod.getHttpMethods()) {
-          if ("GET".equalsIgnoreCase(method) && (resourceMethod.getOutputPayload() == null)) {
+          if ("GET".equalsIgnoreCase(method) && (resourceMethod.getRepresentationMetadata() == null)) {
             result.addError(resourceMethod, "A resource method that is mapped to HTTP GET must have an output payload. (Does it return void?)");
           }
 

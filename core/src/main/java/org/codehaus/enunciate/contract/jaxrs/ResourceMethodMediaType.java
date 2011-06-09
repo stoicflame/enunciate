@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.common.rest;
+package org.codehaus.enunciate.contract.jaxrs;
+
+import java.util.Set;
 
 /**
- * A supported content type (specific to a REST resource).
+ * A media type for a resource method.
  *
  * @author Ryan Heaton
  */
-public class SupportedContentType {
+public class ResourceMethodMediaType {
 
   private String type;
   private boolean consumable;
   private boolean produceable;
+  private Set<String> subcontexts;
 
   /**
    * The content type.
@@ -80,4 +83,23 @@ public class SupportedContentType {
   public void setProduceable(boolean produceable) {
     this.produceable = produceable;
   }
+
+  /**
+   * Any additional subcontexts where requests for this specific type might be mounted.
+   *
+   * @return Any additional subcontexts where requests for this specific type might be mounted.
+   */
+  public Set<String> getSubcontexts() {
+    return subcontexts;
+  }
+
+  /**
+   * Any additional subcontexts where requests for this specific type might be mounted.
+   *
+   * @param subcontexts Any additional subcontexts where requests for this specific type might be mounted.
+   */
+  public void setSubcontexts(Set<String> subcontexts) {
+    this.subcontexts = subcontexts;
+  }
+
 }

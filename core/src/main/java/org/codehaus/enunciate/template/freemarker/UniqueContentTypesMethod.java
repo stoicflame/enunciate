@@ -20,10 +20,9 @@ import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import org.codehaus.enunciate.contract.common.rest.RESTResource;
-import org.codehaus.enunciate.contract.common.rest.SupportedContentType;
-import org.codehaus.enunciate.contract.common.rest.SupportedContentTypeAtSubcontext;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethodMediaType;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.rest.MimeType;
 
 import java.util.*;
@@ -31,7 +30,7 @@ import java.util.*;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 
 /**
- * Rest resource path of the given REST noun.
+ * Get the set of all content types applicable to a set of resource methods.
  *
  * @author Ryan Heaton
  */
@@ -43,36 +42,38 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
     }
 
     Object object = BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(0));
-    Collection<RESTResource> resourceList;
+    Collection<ResourceMethod> resourceList;
     if (object instanceof Collection) {
-      resourceList = (Collection<RESTResource>) object;
+      resourceList = (Collection<ResourceMethod>) object;
     }
-    else if (object instanceof RESTResource) {
-      resourceList = Arrays.asList((RESTResource) object);
+    else if (object instanceof ResourceMethod) {
+      resourceList = Arrays.asList((ResourceMethod) object);
     }
     else {
       throw new TemplateModelException("The uniqueContentTypes method take a list of REST resources.  Not " + object.getClass().getName());
     }
 
-    LinkedHashMap<String, SupportedContentTypeAtSubcontext> supported = new LinkedHashMap<String, SupportedContentTypeAtSubcontext>();
-    for (RESTResource resource : resourceList) {
-      for (SupportedContentType contentType : resource.getSupportedContentTypes()) {
-        List<String> supportedTypeSet = findAllSupportedTypes(contentType);
-        for (String supportedType : supportedTypeSet) {
-          SupportedContentTypeAtSubcontext type = supported.get(supportedType);
+    LinkedHashMap<String, ResourceMethodMediaType> supported = new LinkedHashMap<String, ResourceMethodMediaType>();
+    for (ResourceMethod resource : resourceList) {
+      for (ResourceMethodMediaType mediaType : resource.getApplicableMediaTypes()) {
+        for (String applicableType : findAllKnownTypesAcceptableTo(mediaType)) {
+          ResourceMethodMediaType type = supported.get(applicableType);
           if (type == null) {
-            type = new SupportedContentTypeAtSubcontext();
-            type.setType(supportedType);
-            supported.put(supportedType, type);
+            type = new ResourceMethodMediaType();
+            type.setType(applicableType);
+            supported.put(applicableType, type);
           }
 
-          type.setProduceable(type.isProduceable() || contentType.isProduceable());
-          type.setConsumable(type.isConsumable() || contentType.isConsumable());
+          type.setProduceable(type.isProduceable() || mediaType.isProduceable());
+          type.setConsumable(type.isConsumable() || mediaType.isConsumable());
 
-          if (contentType.isProduceable()) {
+          if (mediaType.isProduceable()) {
+            //if the media type is produceable, we want to add any subcontexts
+            //where the type might be mounted. This will only happen for
+            //the media types that have ids.
             Map<String, Set<String>> subcontextMap = (Map<String, Set<String>>) resource.getMetaData().get("subcontexts");
             if (subcontextMap != null) {
-              type.setSubcontexts(subcontextMap.get(supportedType));
+              type.setSubcontexts(subcontextMap.get(applicableType));
             }
           }
         }
@@ -83,14 +84,14 @@ public class UniqueContentTypesMethod implements TemplateMethodModelEx {
   }
 
   /**
-   * Finds all the supported types for the specified content type.
+   * Find all types that the models knows about that are acceptable to the specified media type.
    *
-   * @param contentType The content type.
+   * @param mediaType The content type.
    * @return The supported types.
    */
-  protected List<String> findAllSupportedTypes(SupportedContentType contentType) {
+  protected List<String> findAllKnownTypesAcceptableTo(ResourceMethodMediaType mediaType) {
     Set<String> allKnownContentTypes = ((EnunciateFreemarkerModel)FreemarkerModel.get()).getContentTypesToIds().keySet();
-    String typeValue = contentType.getType();
+    String typeValue = mediaType.getType();
     List<String> typeSet = new ArrayList<String>();
     typeSet.add(typeValue);
     try {

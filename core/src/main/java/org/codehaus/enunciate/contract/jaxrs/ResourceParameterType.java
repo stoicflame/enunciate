@@ -14,33 +14,25 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.common.rest;
+package org.codehaus.enunciate.contract.jaxrs;
 
 /**
- * A parameter on a rest resource.
- *
+ * The REST resource parameter type.
+ * 
  * @author Ryan Heaton
  */
-public interface RESTResourceParameter {
+public enum ResourceParameterType {
 
-  /**
-   * The documentation value for the parameter.
-   *
-   * @return The documentation value for the parameter.
-   */
-  String getDocValue();
+  MATRIX,
 
-  /**
-   * The name of the parameter.
-   *
-   * @return The name of the parameter.
-   */
-  String getResourceParameterName();
+  QUERY,
 
-  /**
-   * The type of the parameter.
-   *
-   * @return The type of the parameter.
-   */
-  RESTResourceParameterType getResourceParameterType();
+  PATH,
+
+  COOKIE,
+
+  HEADER,
+
+  FORM
+  
 }

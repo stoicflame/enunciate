@@ -689,7 +689,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
     transforms.add(new ForEachJsonSchemaTransform(namespace));
 
     //rest transforms.
-    transforms.add(new ForEachRESTResourceListByPathTransform(namespace));
+    transforms.add(new ForEachResourceMethodListByPathTransform(namespace));
 
     //set up the enunciate file transform.
     EnunciateFileTransform fileTransform = new EnunciateFileTransform(namespace);

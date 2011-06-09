@@ -1,5 +1,5 @@
 [#ftl]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
 [#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
 <h1>
   Introduction
@@ -37,26 +37,26 @@ result = service.${sample_service_method.simpleName}([#list sample_service_metho
   REST endpoints that are published by this application.
 </p>
 
-[#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+[#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
 <h1>
   REST Example (Raw JAXB)
 </h1>
 
 <code>
-java.net.URL url = new java.net.URL(baseURL + "${sample_resource.path}");
-JAXBContext context = JAXBContext.newInstance( ${sample_resource.outputPayload.xmlElement.simpleName}.class[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??], ${sample_resource.inputPayload.xmlElement.simpleName}.class[/#if] );
+java.net.URL url = new java.net.URL(baseURL + "${sample_resource.fullpath}");
+JAXBContext context = JAXBContext.newInstance( ${sample_resource.representationMetadata.xmlElement.simpleName}.class[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??], ${sample_resource.entityParameter.xmlElement.simpleName}.class[/#if] );
 java.net.URLConnection connection = url.openConnection();
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??]
 connection.setDoOutput(true);
 [/#if]
 connection.connect();
 
 Unmarshaller unmarshaller = context.createUnmarshaller();
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??]
 Marshaller marshaller = context.createMarshaller();
-marshaller.marshal(${sample_resource.inputPayload.xmlElement.simpleName?uncap_first}, connection.getOutputStream());
+marshaller.marshal(${sample_resource.entityParameter.xmlElement.simpleName?uncap_first}, connection.getOutputStream());
 [/#if]
-${sample_resource.outputPayload.xmlElement.simpleName} result = (${sample_resource.outputPayload.xmlElement.simpleName}) unmarshaller.unmarshal( connection.getInputStream() );
+${sample_resource.representationMetadata.xmlElement.simpleName} result = (${sample_resource.representationMetadata.xmlElement.simpleName}) unmarshaller.unmarshal( connection.getInputStream() );
 //handle the result as needed...
 </code>
 
@@ -67,9 +67,9 @@ ${sample_resource.outputPayload.xmlElement.simpleName} result = (${sample_resour
 <code>
 com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
-${sample_resource.outputPayload.xmlElement.simpleName} result = client.resource(baseUrl + "${sample_resource.path}")
-  [#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??].entity(${sample_resource.inputPayload.xmlElement.simpleName?uncap_first})[/#if]
-  .${sample_resource.supportedOperations?first?lower_case}(${sample_resource.outputPayload.xmlElement.simpleName}.class);
+${sample_resource.representationMetadata.xmlElement.simpleName} result = client.resource(baseUrl + "${sample_resource.fullpath}")
+  [#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??].entity(${sample_resource.entityParameter.xmlElement.simpleName?uncap_first})[/#if]
+  .${sample_resource.httpMethods?first?lower_case}(${sample_resource.representationMetadata.xmlElement.simpleName}.class);
 
 //handle the result as needed...
 </code>

@@ -17,23 +17,23 @@
 package org.codehaus.enunciate.template.freemarker;
 
 import net.sf.jelly.apt.freemarker.FreemarkerTransform;
-import org.codehaus.enunciate.template.strategies.rest.RESTResourcesByPathLoopStrategy;
+import org.codehaus.enunciate.template.strategies.rest.ResourceMethodsByPathLoopStrategy;
 
 /**
  * @author Ryan Heaton
  */
-public class ForEachRESTResourceListByPathTransform extends FreemarkerTransform<RESTResourcesByPathLoopStrategy> {
+public class ForEachResourceMethodListByPathTransform extends FreemarkerTransform<ResourceMethodsByPathLoopStrategy> {
 
   /**
    * Construct a new transform under the specified namespace.  <code>null</code> or <code>""</code> means the root namespace.
    *
    * @param namespace The namespace.
    */
-  public ForEachRESTResourceListByPathTransform(String namespace) {
+  public ForEachResourceMethodListByPathTransform(String namespace) {
     super(namespace);
   }
 
-  public RESTResourcesByPathLoopStrategy newStrategy() {
-    return new RESTResourcesByPathLoopStrategy();
+  public ResourceMethodsByPathLoopStrategy newStrategy() {
+    return new ResourceMethodsByPathLoopStrategy();
   }
 }

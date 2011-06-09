@@ -13,6 +13,8 @@
 5. mvn clean install (to run all the tests)
 6. Make sure the samples are working.
 7. mvn clean deploy
+    7a. cd enunciate-simple-archetype
+    7b. mvn clean deploy
 
 (Your new version should now be deployed.)
 

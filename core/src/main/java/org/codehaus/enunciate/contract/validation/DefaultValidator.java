@@ -25,15 +25,11 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
-import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
+import org.codehaus.enunciate.contract.jaxrs.*;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
-import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
-import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.qname.XmlQNameEnum;
 
@@ -187,8 +183,8 @@ public class DefaultValidator implements Validator, ConfigurableRules {
         }
 
         int formParamCount = 0;
-        for (RESTResourceParameter resourceParameter : resourceMethod.getResourceParameters()) {
-          if (resourceParameter.getResourceParameterType() == RESTResourceParameterType.FORM) {
+        for (ResourceParameter resourceParameter : resourceMethod.getResourceParameters()) {
+          if (resourceParameter.getResourceParameterType() == ResourceParameterType.FORM) {
             formParamCount++;
           }
         }

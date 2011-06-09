@@ -652,7 +652,7 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
   protected String readResource(String resource) throws IOException, EnunciateException {
     HashMap<String, Object> model = new HashMap<String, Object>();
     model.put("sample_service_method", getModelInternal().findExampleWebMethod());
-    model.put("sample_resource", getModelInternal().findExampleResource());
+    model.put("sample_resource", getModelInternal().findExampleResourceMethod());
 
     URL res = JavaClientDeploymentModule.class.getResource(resource);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();

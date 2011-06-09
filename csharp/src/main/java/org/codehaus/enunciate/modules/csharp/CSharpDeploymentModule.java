@@ -390,7 +390,7 @@ public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
   protected String readResource(String resource, String contains) throws IOException, EnunciateException {
     HashMap<String, Object> model = new HashMap<String, Object>();
     model.put("sample_service_method", getModelInternal().findExampleWebMethod());
-    model.put("sample_resource", getModelInternal().findExampleResource());
+    model.put("sample_resource", getModelInternal().findExampleResourceMethod());
     model.put("bundle_contains", contains);
 
     URL res = CSharpDeploymentModule.class.getResource(resource);

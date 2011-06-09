@@ -29,14 +29,12 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
-import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.*;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.modules.BasicAppModule;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.ProjectExtensionModule;
 import org.codehaus.enunciate.modules.FlexHomeAwareModule;
@@ -890,7 +888,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   protected String readResource(String resource) throws IOException, EnunciateException {
     HashMap<String, Object> model = new HashMap<String, Object>();
     model.put("sample_service_method", getModelInternal().findExampleWebMethod());
-    model.put("sample_resource", getModelInternal().findExampleResource());
+    model.put("sample_resource", getModelInternal().findExampleResourceMethod());
 
     URL res = AMFDeploymentModule.class.getResource(resource);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();

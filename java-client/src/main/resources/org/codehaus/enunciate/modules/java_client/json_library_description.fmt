@@ -1,5 +1,5 @@
 [#ftl]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
 <h1>
   Introduction
 </h1>
@@ -11,24 +11,24 @@
 </p>
 
 [#if sample_resource??]
-[#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
+[#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
 <h1>
   REST Example (Raw Jackson)
 </h1>
 
 <code>
-java.net.URL url = new java.net.URL(baseURL + "${sample_resource.path}");
+java.net.URL url = new java.net.URL(baseURL + "${sample_resource.fullpath}");
 ObjectMapper mapper = new ObjectMapper();
 java.net.URLConnection connection = url.openConnection();
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??]
 connection.setDoOutput(true);
 [/#if]
 connection.connect();
 
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
-mapper.writeValue(connection.getOutputStream(), ${sample_resource.inputPayload.xmlElement.simpleName?uncap_first});
+[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??]
+mapper.writeValue(connection.getOutputStream(), ${sample_resource.entityParameter.xmlElement.simpleName?uncap_first});
 [/#if]
-${sample_resource.outputPayload.xmlElement.simpleName} result = (${sample_resource.outputPayload.xmlElement.simpleName}) mapper.readValue( connection.getInputStream(), ${sample_resource.outputPayload.xmlElement.simpleName}.class );
+${sample_resource.representationMetadata.xmlElement.simpleName} result = (${sample_resource.representationMetadata.xmlElement.simpleName}) mapper.readValue( connection.getInputStream(), ${sample_resource.representationMetadata.xmlElement.simpleName}.class );
 //handle the result as needed...
 </code>
 

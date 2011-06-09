@@ -1,5 +1,5 @@
 [#ftl]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
 [#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
   <h1>
     Introduction
@@ -69,9 +69,9 @@ request.sendRequest(null, new RequestCallback() {
   public void onResponseReceived(Request request, Response response) {
     if (200 == response.getStatusCode()) {
       //handle the successful data...
-  [#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
-    ${sample_resource.outputPayload.xmlElement.simpleName} data = ${sample_resource.outputPayload.xmlElement.simpleName}.fromJson(response.getText());
-    //handle the ${sample_resource.outputPayload.xmlElement.simpleName}...
+  [#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
+    ${sample_resource.representationMetadata.xmlElement.simpleName} data = ${sample_resource.representationMetadata.xmlElement.simpleName}.fromJson(response.getText());
+    //handle the ${sample_resource.representationMetadata.xmlElement.simpleName}...
   [/#if]
     }
     else {

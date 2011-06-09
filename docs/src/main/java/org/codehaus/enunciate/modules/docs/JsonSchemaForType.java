@@ -3,7 +3,7 @@ package org.codehaus.enunciate.modules.docs;
 import java.util.List;
 
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
+import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
@@ -63,8 +63,8 @@ public class JsonSchemaForType implements TemplateMethodModelEx {
       return jsonSchemaForType(jsonType);
     }
 
-    if (object instanceof RESTResourcePayload) {
-      final RESTResourcePayload restResourcePayload = (RESTResourcePayload) object;
+    if (object instanceof ResourceEntityParameter) {
+      final ResourceEntityParameter restResourcePayload = (ResourceEntityParameter) object;
       final JsonType jsonType = restResourcePayload.getJsonType();
       return jsonSchemaForType(jsonType);
     }

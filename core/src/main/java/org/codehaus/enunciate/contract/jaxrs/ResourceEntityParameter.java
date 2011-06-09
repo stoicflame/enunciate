@@ -11,7 +11,6 @@ import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.contract.common.rest.RESTResourcePayload;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonType;
 import org.codehaus.enunciate.jaxrs.TypeHint;
@@ -21,7 +20,7 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
  *
  * @author Ryan Heaton
  */
-public class ResourceEntityParameter extends DecoratedDeclaration implements RESTResourcePayload {
+public class ResourceEntityParameter extends DecoratedDeclaration {
 
   private final TypeMirror type;
 
@@ -52,7 +51,11 @@ public class ResourceEntityParameter extends DecoratedDeclaration implements RES
     this.type = type;
   }
 
-  // Inherited.
+  /**
+   * The XML element associated with the entity parameter, or null if none (or unknown).
+   *
+   * @return The XML element associated with the entity parameter, or null if none (or unknown).
+   */
   public ElementDeclaration getXmlElement() {
     if (this.type instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) this.type).getDeclaration();
@@ -63,6 +66,11 @@ public class ResourceEntityParameter extends DecoratedDeclaration implements RES
     return null;
   }
 
+  /**
+   * The JSON element associated with the entity parameter, or null if none (or unknown).
+   *
+   * @return The JSON element associated with the entity parameter, or null if none (or unknown).
+   */
   public JsonType getJsonType() {
     if (this.type instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) this.type).getDeclaration();
@@ -76,4 +84,5 @@ public class ResourceEntityParameter extends DecoratedDeclaration implements RES
   public TypeMirror getType() {
     return type;
   }
+
 }

@@ -1,34 +1,70 @@
 package org.codehaus.enunciate.contract.jaxrs;
 
-import org.codehaus.enunciate.contract.common.rest.RESTResourceParameter;
-import org.codehaus.enunciate.contract.common.rest.RESTResourceParameterType;
 
 /**
  * A resource parameter with explicit values.
  * 
  * @author Ryan Heaton
  */
-public class ExplicitResourceParameter implements RESTResourceParameter {
+public class ExplicitResourceParameter extends ResourceParameter {
 
   private final String docValue;
-  private final String resourceParameterName;
-  private final RESTResourceParameterType resourceParameterType;
+  private final String paramName;
+  private final ResourceParameterType type;
 
-  public ExplicitResourceParameter(String docValue, String resourceParameterName, RESTResourceParameterType resourceParameterType) {
+  public ExplicitResourceParameter(ResourceMethod method, String docValue, String paramName, ResourceParameterType type) {
+    super(method);
     this.docValue = docValue;
-    this.resourceParameterName = resourceParameterName;
-    this.resourceParameterType = resourceParameterType;
+    this.paramName = paramName;
+    this.type = type;
   }
 
   public String getDocValue() {
     return docValue;
   }
 
-  public String getResourceParameterName() {
-    return resourceParameterName;
+  @Override
+  public String getParameterName() {
+    return paramName;
   }
 
-  public RESTResourceParameterType getResourceParameterType() {
-    return resourceParameterType;
+  @Override
+  public String getDefaultValue() {
+    return null;
+  }
+
+  @Override
+  public boolean isMatrixParam() {
+    return this.type == ResourceParameterType.MATRIX;
+  }
+
+  @Override
+  public boolean isQueryParam() {
+    return this.type == ResourceParameterType.QUERY;
+  }
+
+  @Override
+  public boolean isPathParam() {
+    return this.type == ResourceParameterType.PATH;
+  }
+
+  @Override
+  public boolean isCookieParam() {
+    return this.type == ResourceParameterType.COOKIE;
+  }
+
+  @Override
+  public boolean isHeaderParam() {
+    return this.type == ResourceParameterType.HEADER;
+  }
+
+  @Override
+  public boolean isFormParam() {
+    return this.type == ResourceParameterType.FORM;
+  }
+
+  @Override
+  public ResourceParameterType getResourceParameterType() {
+    return this.type;
   }
 }

@@ -20,12 +20,9 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.VoidType;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import org.codehaus.enunciate.contract.common.rest.*;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.codehaus.enunciate.rest.MimeType;
@@ -41,7 +38,7 @@ import java.util.regex.Pattern;
  *
  * @author Ryan Heaton
  */
-public class ResourceMethod extends DecoratedMethodDeclaration implements RESTResource {
+public class ResourceMethod extends DecoratedMethodDeclaration {
 
   private static final Pattern CONTEXT_PARAM_PATTERN = Pattern.compile("\\{([^\\}]+)\\}");
 
@@ -50,12 +47,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
   private final Set<String> consumesMime;
   private final Set<String> producesMime;
   private final Resource parent;
-  private final List<RESTResourceParameter> resourceParameters;
+  private final List<ResourceParameter> resourceParameters;
   private final ResourceEntityParameter entityParameter;
   private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
-  private final List<? extends RESTResourceError> errors;
-  private final ResourcePayloadTypeAdapter outputPayload;
+  private final List<? extends ResponseCode> errors;
+  private final ResourceRepresentationMetadata representationMetadata;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
     super(delegate);
@@ -105,12 +102,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
 
     ResourceEntityParameter entityParameter;
     List<ResourceEntityParameter> declaredEntityParameters = new ArrayList<ResourceEntityParameter>();
-    List<RESTResourceParameter> resourceParameters;
-    ResourcePayloadTypeAdapter outputPayload;
+    List<ResourceParameter> resourceParameters;
+    ResourceRepresentationMetadata outputPayload;
     ResourceMethodSignature signatureOverride = delegate.getAnnotation(ResourceMethodSignature.class);
     if (signatureOverride == null) {
       entityParameter = null;
-      resourceParameters = new ArrayList<RESTResourceParameter>();
+      resourceParameters = new ArrayList<ResourceParameter>();
       //if we're not overriding the signature, assume we use the real method signature.
       for (ParameterDeclaration parameterDeclaration : getParameters()) {
         if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
@@ -140,7 +137,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         returnTypeMirror = (DecoratedTypeMirror) getReturnType();
       }
 
-      outputPayload = returnTypeMirror.isVoid() ? null : new ResourcePayloadTypeAdapter(returnTypeMirror);
+      outputPayload = returnTypeMirror.isVoid() ? null : new ResourceRepresentationMetadata(returnTypeMirror);
     }
     else {
       entityParameter = loadEntityParameter(signatureOverride);
@@ -153,8 +150,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
-    this.errors = new ArrayList<RESTResourceError>();
-    this.outputPayload = outputPayload;
+    this.errors = new ArrayList<ResponseCode>();
+    this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
   }
 
@@ -164,7 +161,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    * @param signatureOverride The method signature override.
    * @return The output payload (explicit in the signature override.
    */
-  protected ResourcePayloadTypeAdapter loadOutputPayload(ResourceMethodSignature signatureOverride) {
+  protected ResourceRepresentationMetadata loadOutputPayload(ResourceMethodSignature signatureOverride) {
     DecoratedTypeMirror returnType = (DecoratedTypeMirror) getReturnType();
 
     try {
@@ -172,7 +169,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
       if (outputType != ResourceMethodSignature.NONE.class) {
         AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
         TypeDeclaration type = env.getTypeDeclaration(outputType.getName());
-        return new ResourcePayloadTypeAdapter(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
+        return new ResourceRepresentationMetadata(env.getTypeUtils().getDeclaredType(type), returnType.getDocValue());
       }
     }
     catch (MirroredTypeException e) {
@@ -181,7 +178,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         if (typeMirror.isInstanceOf(ResourceMethodSignature.class.getName() + ".NONE")) {
           return null;
         }
-        return new ResourcePayloadTypeAdapter(typeMirror, returnType.getDocValue());
+        return new ResourceRepresentationMetadata(typeMirror, returnType.getDocValue());
       }
       else {
         throw new ValidationException(getPosition(), "Illegal output type (must be a declared type): " + typeMirror);
@@ -197,27 +194,27 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    * @param signatureOverride The signature override.
    * @return The explicit resource parameters.
    */
-  protected List<RESTResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
+  protected List<ResourceParameter> loadResourceParameters(ResourceMethodSignature signatureOverride) {
     HashMap<String, String> paramComments = parseParamComments(getJavaDoc());
     
-    ArrayList<RESTResourceParameter> params = new ArrayList<RESTResourceParameter>();
+    ArrayList<ResourceParameter> params = new ArrayList<ResourceParameter>();
     for (CookieParam cookieParam : signatureOverride.cookieParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(cookieParam.value()), cookieParam.value(), RESTResourceParameterType.COOKIE));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(cookieParam.value()), cookieParam.value(), ResourceParameterType.COOKIE));
     }
     for (MatrixParam matrixParam : signatureOverride.matrixParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(matrixParam.value()), matrixParam.value(), RESTResourceParameterType.MATRIX));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(matrixParam.value()), matrixParam.value(), ResourceParameterType.MATRIX));
     }
     for (QueryParam queryParam : signatureOverride.queryParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(queryParam.value()), queryParam.value(), RESTResourceParameterType.QUERY));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(queryParam.value()), queryParam.value(), ResourceParameterType.QUERY));
     }
     for (PathParam pathParam : signatureOverride.pathParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(pathParam.value()), pathParam.value(), RESTResourceParameterType.PATH));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(pathParam.value()), pathParam.value(), ResourceParameterType.PATH));
     }
     for (HeaderParam headerParam : signatureOverride.headerParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(headerParam.value()), headerParam.value(), RESTResourceParameterType.HEADER));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(headerParam.value()), headerParam.value(), ResourceParameterType.HEADER));
     }
     for (FormParam formParam : signatureOverride.formParams()) {
-      params.add(new ExplicitResourceParameter(paramComments.get(formParam.value()), formParam.value(), RESTResourceParameterType.FORM));
+      params.add(new ExplicitResourceParameter(this, paramComments.get(formParam.value()), formParam.value(), ResourceParameterType.FORM));
     }
     
     return params;
@@ -389,8 +386,8 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
    *
    * @return The list of resource parameters that this method requires to be invoked.
    */
-  public List<RESTResourceParameter> getResourceParameters() {
-    ArrayList<RESTResourceParameter> resourceParams = new ArrayList<RESTResourceParameter>(this.resourceParameters);
+  public List<ResourceParameter> getResourceParameters() {
+    ArrayList<ResourceParameter> resourceParams = new ArrayList<ResourceParameter>(this.resourceParameters);
     resourceParams.addAll(getParent().getResourceParameters());
     return resourceParams;
   }
@@ -413,19 +410,13 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
     return declaredEntityParameters;
   }
 
-  // Inherited.
-  public String getPath() {
-    return getFullpath();
-  }
-
-  // Inherited.
-  public Set<String> getSupportedOperations() {
-    return getHttpMethods();
-  }
-
-  // Inherited.
-  public List<SupportedContentType> getSupportedContentTypes() {
-    HashMap<String, SupportedContentType> supportedTypes = new HashMap<String, SupportedContentType>();
+  /**
+   * The applicable media types for this resource.
+   *
+   * @return The applicable media types for this resource.
+   */
+  public List<ResourceMethodMediaType> getApplicableMediaTypes() {
+    HashMap<String, ResourceMethodMediaType> applicableTypes = new HashMap<String, ResourceMethodMediaType>();
     for (String consumesMime : getConsumesMime()) {
       String type;
       try {
@@ -435,11 +426,11 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         type = consumesMime;
       }
 
-      SupportedContentType supportedType = supportedTypes.get(type);
+      ResourceMethodMediaType supportedType = applicableTypes.get(type);
       if (supportedType == null) {
-        supportedType = new SupportedContentType();
+        supportedType = new ResourceMethodMediaType();
         supportedType.setType(type);
-        supportedTypes.put(type, supportedType);
+        applicableTypes.put(type, supportedType);
       }
       supportedType.setConsumable(true);
     }
@@ -452,34 +443,41 @@ public class ResourceMethod extends DecoratedMethodDeclaration implements RESTRe
         type = producesMime;
       }
 
-      SupportedContentType supportedType = supportedTypes.get(type);
+      ResourceMethodMediaType supportedType = applicableTypes.get(type);
       if (supportedType == null) {
-        supportedType = new SupportedContentType();
+        supportedType = new ResourceMethodMediaType();
         supportedType.setType(type);
-        supportedTypes.put(type, supportedType);
+        applicableTypes.put(type, supportedType);
       }
       supportedType.setProduceable(true);
     }
 
-    return new ArrayList<SupportedContentType>(supportedTypes.values());
+    return new ArrayList<ResourceMethodMediaType>(applicableTypes.values());
   }
 
-  // Inherited.
-  public RESTResourcePayload getInputPayload() {
-    return getEntityParameter();
+  /**
+   * The output payload for this resource.
+   *
+   * @return The output payload for this resource.
+   */
+  public ResourceRepresentationMetadata getRepresentationMetadata() {
+    return this.representationMetadata;
   }
 
-  // Inherited.
-  public ResourcePayloadTypeAdapter getOutputPayload() {
-    return this.outputPayload;
-  }
-
-  // Inherited.
-  public List<? extends RESTResourceError> getResourceErrors() {
+  /**
+   * The potential errors.
+   *
+   * @return The potential errors.
+   */
+  public List<? extends ResponseCode> getResourceErrors() {
     return this.errors;
   }
 
-  // Inherited.1
+  /**
+     * The metadata associated with this resource.
+     *
+     * @return The metadata associated with this resource.
+     */
   public Map<String, Object> getMetaData() {
     return Collections.unmodifiableMap(this.metaData);
   }

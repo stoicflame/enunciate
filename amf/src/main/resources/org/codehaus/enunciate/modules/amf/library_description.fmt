@@ -1,5 +1,5 @@
 [#ftl]
-[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.common.rest.RESTResource" --]
+[#-- @ftlvariable name="sample_resource" type="org.codehaus.enunciate.contract.jaxrs.ResourceMethod" --]
 [#-- @ftlvariable name="sample_service_method" type="org.codehaus.enunciate.contract.jaxws.WebMethod" --]
   <h1>
     Introduction
@@ -71,8 +71,8 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
 [#if sample_resource??]
 
   <p>
-    For AMF REST, consider the REST resource "${sample_resource.path}" produced as
-    content type "application/x-amf", mounted at the relative URL "${sample_resource.path}":
+    For AMF REST, consider the REST resource "${sample_resource.fullpath}" produced as
+    content type "application/x-amf", mounted at the relative URL "${sample_resource.fullpath}":
   </p>
 
   <h1>
@@ -80,13 +80,13 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
   </h1>
 
 <code>
-var request:URLRequest = new URLRequest("${sample_resource.path}");
-request.method = URLRequestMethod.${sample_resource.supportedOperations?first?capitalize};
+var request:URLRequest = new URLRequest("${sample_resource.fullpath}");
+request.method = URLRequestMethod.${sample_resource.httpMethods?first?capitalize};
 URLStream resourceStream = new URLStream();
-[#if sample_resource.inputPayload?? && sample_resource.inputPayload.xmlElement??]
+[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??]
 var ba:ByteArray = new ByteArray();
-var body:${sample_resource.inputPayload.xmlElement.simpleName} = new ${sample_resource.inputPayload.xmlElement.simpleName}();
-//set up the ${sample_resource.inputPayload.xmlElement.simpleName}...
+var body:${sample_resource.entityParameter.xmlElement.simpleName} = new ${sample_resource.entityParameter.xmlElement.simpleName}();
+//set up the ${sample_resource.entityParameter.xmlElement.simpleName}...
 ba.writeObject(body);
 request.data = ba;
 request.contentType = "application/x-amf";
@@ -102,9 +102,9 @@ catch (error:Error) {
 
 private function resourceRetrieved(event:Event):void {
   var stream:URLStream = URLStream( event.target );
-[#if sample_resource.outputPayload?? && sample_resource.outputPayload.xmlElement??]
-  var resource:${sample_resource.outputPayload.xmlElement.simpleName} = ( stream.readObject() as ${sample_resource.outputPayload.xmlElement.simpleName} );
-  //...handle the ${sample_resource.outputPayload.xmlElement.simpleName}
+[#if sample_resource.representationMetadata?? && sample_resource.representationMetadata.xmlElement??]
+  var resource:${sample_resource.representationMetadata.xmlElement.simpleName} = ( stream.readObject() as ${sample_resource.representationMetadata.xmlElement.simpleName} );
+  //...handle the ${sample_resource.representationMetadata.xmlElement.simpleName}
 [#else]
   //...handle the stream (e.g. stream.readObject())
 [/#if]

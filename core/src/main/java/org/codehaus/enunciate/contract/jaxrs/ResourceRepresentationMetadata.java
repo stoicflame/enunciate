@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.common.rest;
+package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.type.ClassType;
@@ -27,28 +27,39 @@ import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
 import org.codehaus.enunciate.contract.json.JsonType;
 
 /**
+ * Metadata about the representations of a resource, as provided by a resource methods.
+ *
  * @author Ryan Heaton
  */
-public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
+public class ResourceRepresentationMetadata {
 
   private final TypeMirror delegate;
   private final String docValue;
 
-  public ResourcePayloadTypeAdapter(DecoratedTypeMirror delegate) {
+  public ResourceRepresentationMetadata(DecoratedTypeMirror delegate) {
     this.delegate = delegate;
     this.docValue = delegate.getDocValue();
   }
 
-  public ResourcePayloadTypeAdapter(TypeMirror delegate, String docValue) {
+  public ResourceRepresentationMetadata(TypeMirror delegate, String docValue) {
     this.delegate = delegate;
     this.docValue = docValue;
   }
 
+  /**
+   * The documentation.
+   *
+   * @return The documentation.
+   */
   public String getDocValue() {
     return this.docValue;
   }
 
-  // Inherited.
+  /**
+   * The element for the XML representation, if any.
+   *
+   * @return The element for the XML representation, if any.
+   */
   public ElementDeclaration getXmlElement() {
     if (delegate instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();
@@ -59,6 +70,11 @@ public class ResourcePayloadTypeAdapter implements RESTResourcePayload {
     return null;
   }
 
+  /**
+   * The type for the JSON representation, if any.
+   *
+   * @return The type for the JSON representation, if any.
+   */
   public JsonType getJsonType() {
     if (delegate instanceof ClassType) {
       ClassDeclaration declaration = ((ClassType) delegate).getDeclaration();

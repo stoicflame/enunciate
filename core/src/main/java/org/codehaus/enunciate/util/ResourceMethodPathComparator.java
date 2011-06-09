@@ -19,11 +19,11 @@ package org.codehaus.enunciate.util;
 import java.util.Comparator;
 
 /**
- * Sorts the path of {@link org.codehaus.enunciate.contract.common.rest.RESTResource}s by path, then alphabetically.
+ * Sorts the path of {@link org.codehaus.enunciate.contract.jaxrs.ResourceMethod}s by path, then alphabetically.
  *
  * @author Ryan Heaton
  */
-public class RESTResourcePathComparator implements Comparator<String> {
+public class ResourceMethodPathComparator implements Comparator<String> {
 
   public int compare(String resource1Path, String resource2Path) {
     String[] path1Segments = resource1Path.split("/");
