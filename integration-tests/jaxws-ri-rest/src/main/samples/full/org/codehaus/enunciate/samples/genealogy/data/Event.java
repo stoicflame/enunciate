@@ -33,6 +33,7 @@ public class Event extends OccurringAssertion {
   private EventType type;
   private String description;
   private final List<String> tags = new ArrayList<String>();
+  private String explanation;
 
   /**
    * The type of this event.
@@ -80,4 +81,11 @@ public class Event extends OccurringAssertion {
     this.tags.addAll(Arrays.asList(tags));
   }
 
+  public String getExplanation() {
+    return explanation;
+  }
+
+  public void setExplanation(String explanation) {
+    this.explanation = explanation;
+  }
 }

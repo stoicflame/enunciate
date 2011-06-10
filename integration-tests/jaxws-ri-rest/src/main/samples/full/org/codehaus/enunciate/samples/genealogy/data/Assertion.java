@@ -18,10 +18,8 @@ package org.codehaus.enunciate.samples.genealogy.data;
 
 import org.codehaus.enunciate.samples.genealogy.cite.InfoSet;
 
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +28,9 @@ import java.util.List;
  * @author Ryan Heaton
  */
 @XmlSeeAlso({Gender.class,Name.class})
+@XmlType(
+  propOrder = {"note", "infoSet", "contributors"}
+)
 public abstract class Assertion {
 
   private String id;

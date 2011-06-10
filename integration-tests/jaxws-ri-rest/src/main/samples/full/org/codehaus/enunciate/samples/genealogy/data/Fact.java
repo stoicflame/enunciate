@@ -31,6 +31,7 @@ public class Fact extends OccurringAssertion {
   private String value;
   private String description;
   private String[] tags;
+  private String explanation;
 
   /**
    * The fact type.
@@ -94,5 +95,13 @@ public class Fact extends OccurringAssertion {
 
   public void setTags(String[] tags) {
     this.tags = tags;
+  }
+
+  public String getExplanation() {
+    return explanation;
+  }
+
+  public void setExplanation(String explanation) {
+    this.explanation = explanation;
   }
 }

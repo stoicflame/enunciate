@@ -63,4 +63,18 @@ public abstract class OccurringAssertion extends Assertion {
   public void setPlace(String place) {
     this.place = place;
   }
+
+  /**
+   * The explanation for the assertion.
+   *
+   * @return The explanation for the assertion.
+   */
+  public abstract String getExplanation();
+
+  /**
+   * The explanation for the assertion.
+   *
+   * @param explanation The explanation for the assertion.
+   */
+  public abstract void setExplanation(String explanation);
 }
