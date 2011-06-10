@@ -367,7 +367,10 @@ public class TestDefaultValidator extends InAPTTestCase {
     assertFalse("A factory method bean should be valid", validator.validateTypeDefinition(typeDef).hasErrors());
 
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.InvalidConstructorBean"));
-    assertTrue("A public, no-arg constructor should have been required.", validator.validateTypeDefinition(typeDef).hasErrors());
+    assertTrue("A no-arg constructor should have been required.", validator.validateTypeDefinition(typeDef).hasErrors());
+
+    typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.ProtectedConstructorBean"));
+    assertFalse("A protected no-arg constructor should be valid.", validator.validateTypeDefinition(typeDef).hasErrors());
 
     resetCounters(packageCounter, attributeCounter, valueCounter, elementCounter, elementRefCounter, xmlIdCounter);
     typeDef = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.anotherschema.SimpleTypeSimpleContentBean"));

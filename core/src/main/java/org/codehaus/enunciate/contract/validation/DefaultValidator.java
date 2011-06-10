@@ -541,14 +541,14 @@ public class DefaultValidator implements Validator, ConfigurableRules {
       boolean hasNoArgConstructor = false;
       Collection<ConstructorDeclaration> constructors = typeDef.getConstructors();
       for (ConstructorDeclaration constructor : constructors) {
-        if ((constructor.getModifiers().contains(Modifier.PUBLIC)) && (constructor.getParameters().size() == 0)) {
+        if ((constructor.getParameters().size() == 0)) {
           hasNoArgConstructor = true;
           break;
         }
       }
 
       if (!hasNoArgConstructor) {
-        result.addError(typeDef, "A TypeDefinition must have a public no-arg constructor or be annotated with a factory method.");
+        result.addError(typeDef, "A TypeDefinition must have a no-arg constructor or be annotated with a factory method.");
       }
     }
 

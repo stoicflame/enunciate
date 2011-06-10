@@ -19,12 +19,15 @@ package org.codehaus.enunciate.samples.schema;
 /**
  * @author Ryan Heaton
  */
-public class InvalidConstructorBean {
+public class ProtectedConstructorBean {
 
   private boolean flag;
 
-  public InvalidConstructorBean(boolean flag) {
+  public ProtectedConstructorBean(boolean flag) {
     this.flag = flag;
+  }
+
+  protected ProtectedConstructorBean() {
   }
 
   public boolean isFlag() {
