@@ -33,12 +33,12 @@ import java.util.Map;
  * @author Ryan Heaton
  */
 @XmlRootElement
-public class Person {
+public class Person<E extends Event> {
 
   private String id;
   private Gender gender;
   private Collection<? extends Name> names;
-  private Collection<? extends Event> events;
+  private Collection<E> events;
   private Collection<? extends Fact> facts;
   private Collection<? extends Relationship> relationships;
   private Map<EventType, String> eventDescriptions;
@@ -107,7 +107,7 @@ public class Person {
    *
    * @return The events associated with a person.
    */
-  public Collection<? extends Event> getEvents() {
+  public Collection<E> getEvents() {
     return events;
   }
 
@@ -116,7 +116,7 @@ public class Person {
    *
    * @param events The events associated with a person.
    */
-  public void setEvents(Collection<? extends Event> events) {
+  public void setEvents(Collection<E> events) {
     this.events = events;
   }
 

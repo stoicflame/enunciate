@@ -4,11 +4,11 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Extensions for person.
+ * Extension for name.
  *
  * @author Ryan Heaton
  */
-public class PersonExt<E extends EventExt> extends Person<E> {
+public class EventExt extends Event {
 
   private List<URI> links;
 
@@ -19,5 +19,4 @@ public class PersonExt<E extends EventExt> extends Person<E> {
   public void setLinks(List<URI> links) {
     this.links = links;
   }
-
 }

@@ -24,6 +24,7 @@ import org.joda.time.DateTime;
 import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -43,6 +44,10 @@ public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {
     return person;
+  }
+
+  public PersonExt readExtPerson(String id) {
+    return null;
   }
 
   public Collection<Person> readPersons(Collection<String> personIds) {
