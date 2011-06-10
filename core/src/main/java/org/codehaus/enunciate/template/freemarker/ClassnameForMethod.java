@@ -21,6 +21,7 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.WildcardType;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -95,31 +96,45 @@ public class ClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public String convert(TypeMirror typeMirror) throws TemplateModelException {
-    String conversion = super.convert(typeMirror);
-    boolean isArray = typeMirror instanceof ArrayType;
+    String conversion;
 
-    //if we're using converting to a java 5+ client code, take into account the type arguments.
-    if ((isJdk15()) && (typeMirror instanceof DeclaredType)) {
-      DeclaredType declaredType = (DeclaredType) typeMirror;
-      Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
-      if (actualTypeArguments.size() > 0) {
-        StringBuilder typeArgs = new StringBuilder("<");
-        Iterator<TypeMirror> it = actualTypeArguments.iterator();
-        while (it.hasNext()) {
-          TypeMirror mirror = it.next();
-          typeArgs.append(convert(mirror));
-          if (it.hasNext()) {
-            typeArgs.append(", ");
+    if (typeMirror instanceof WildcardType) {
+      WildcardType wildCard = (WildcardType) typeMirror;
+      if (wildCard.getLowerBounds() != null && !wildCard.getLowerBounds().isEmpty()) {
+        conversion = "? super " + convert(wildCard.getLowerBounds().iterator().next());
+      }
+      else {
+        conversion = "? extends " + convert(wildCard.getUpperBounds().iterator().next());
+      }
+    }
+    else {
+      conversion = super.convert(typeMirror);
+      boolean isArray = typeMirror instanceof ArrayType;
+
+      //if we're using converting to a java 5+ client code, take into account the type arguments.
+      if ((isJdk15()) && (typeMirror instanceof DeclaredType)) {
+        DeclaredType declaredType = (DeclaredType) typeMirror;
+        Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
+        if (actualTypeArguments.size() > 0) {
+          StringBuilder typeArgs = new StringBuilder("<");
+          Iterator<TypeMirror> it = actualTypeArguments.iterator();
+          while (it.hasNext()) {
+            TypeMirror mirror = it.next();
+            typeArgs.append(convert(mirror));
+            if (it.hasNext()) {
+              typeArgs.append(", ");
+            }
           }
+          typeArgs.append(">");
+          conversion += typeArgs;
         }
-        typeArgs.append(">");
-        conversion += typeArgs;
+      }
+
+      if (isArray) {
+        conversion += "[]";
       }
     }
 
-    if (isArray) {
-      conversion += "[]";
-    }
     return conversion;
 
   }

@@ -142,7 +142,19 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
   protected String getCollectionTypeConversion(DeclaredType declaredType) throws TemplateModelException {
     Collection<TypeMirror> actualTypeArguments = declaredType.getActualTypeArguments();
     if (actualTypeArguments.size() == 1) {
-      return "System.Collections.Generic.List<" + convert(actualTypeArguments.iterator().next()) + ">";
+      TypeMirror typeArg = actualTypeArguments.iterator().next();
+      if (typeArg instanceof WildcardType) {
+        WildcardType wildcardType = (WildcardType) typeArg;
+        if (wildcardType.getUpperBounds() == null || wildcardType.getUpperBounds().isEmpty()) {
+          return "System.Collections.ArrayList";
+        }
+        else {
+          return "System.Collections.Generic.List<" + convert(wildcardType.getUpperBounds().iterator().next()) + ">";
+        }
+      }
+      else {
+        return "System.Collections.Generic.List<" + convert(typeArg) + ">";
+      }
     }
     else {
       return "System.Collections.ArrayList";

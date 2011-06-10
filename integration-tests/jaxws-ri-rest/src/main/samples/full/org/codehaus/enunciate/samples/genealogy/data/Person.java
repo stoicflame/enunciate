@@ -37,10 +37,10 @@ public class Person {
 
   private String id;
   private Gender gender;
-  private Collection<Name> names;
-  private Collection<Event> events;
-  private Collection<Fact> facts;
-  private Collection<Relationship> relationships;
+  private Collection<? extends Name> names;
+  private Collection<? extends Event> events;
+  private Collection<? extends Fact> facts;
+  private Collection<? extends Relationship> relationships;
   private Map<EventType, String> eventDescriptions;
 
   private DataHandler picture;
@@ -89,7 +89,7 @@ public class Person {
    *
    * @return The names of the person.
    */
-  public Collection<Name> getNames() {
+  public Collection<? extends Name> getNames() {
     return names;
   }
 
@@ -98,7 +98,7 @@ public class Person {
    *
    * @param names The names of the person.
    */
-  public void setNames(Collection<Name> names) {
+  public void setNames(Collection<? extends Name> names) {
     this.names = names;
   }
 
@@ -107,7 +107,7 @@ public class Person {
    *
    * @return The events associated with a person.
    */
-  public Collection<Event> getEvents() {
+  public Collection<? extends Event> getEvents() {
     return events;
   }
 
@@ -116,7 +116,7 @@ public class Person {
    *
    * @param events The events associated with a person.
    */
-  public void setEvents(Collection<Event> events) {
+  public void setEvents(Collection<? extends Event> events) {
     this.events = events;
   }
 
@@ -125,7 +125,7 @@ public class Person {
    *
    * @return The facts about a person.
    */
-  public Collection<Fact> getFacts() {
+  public Collection<? extends Fact> getFacts() {
     return facts;
   }
 
@@ -134,7 +134,7 @@ public class Person {
    *
    * @param facts The facts about a person.
    */
-  public void setFacts(Collection<Fact> facts) {
+  public void setFacts(Collection<? extends Fact> facts) {
     this.facts = facts;
   }
 
@@ -143,7 +143,7 @@ public class Person {
    *
    * @return The relationships of a person.
    */
-  public Collection<Relationship> getRelationships() {
+  public Collection<? extends Relationship> getRelationships() {
     return relationships;
   }
 
@@ -152,7 +152,7 @@ public class Person {
    *
    * @param relationships The relationships of a person.
    */
-  public void setRelationships(Collection<Relationship> relationships) {
+  public void setRelationships(Collection<? extends Relationship> relationships) {
     this.relationships = relationships;
   }
 

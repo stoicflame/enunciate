@@ -149,7 +149,15 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
       if (decorated instanceof DeclaredType) {
         Collection<TypeMirror> typeArgs = ((DeclaredType) typeMirror).getActualTypeArguments();
         if (typeArgs.size() == 1) {
-          return convert(typeArgs.iterator().next());
+          TypeMirror typeArg = typeArgs.iterator().next();
+          if (typeArg instanceof WildcardType) {
+            WildcardType wildcardType = (WildcardType) typeArg;
+            if (wildcardType.getUpperBounds() != null && !wildcardType.getUpperBounds().isEmpty()) {
+              typeArg = wildcardType.getUpperBounds().iterator().next();
+            }
+          }
+          
+          return convert(typeArg);
         }
       }
       return "xmlNode";

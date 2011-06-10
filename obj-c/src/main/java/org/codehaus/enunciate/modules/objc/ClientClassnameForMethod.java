@@ -148,6 +148,13 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
     else if (decorated.isCollection()) {
       return "NSArray";
     }
+    else if (decorated.isWildcard()) {
+      WildcardType wildcardType = (WildcardType) decorated;
+      TypeMirror bound = wildcardType.getUpperBounds() != null && !wildcardType.getUpperBounds().isEmpty() ?
+        wildcardType.getUpperBounds().iterator().next() :
+        wildcardType.getLowerBounds().iterator().next();
+      return convert(bound);
+    }
     else if (decorated.isArray()) {
       TypeMirror componentType = ((ArrayType) decorated).getComponentType();
       if (componentType instanceof PrimitiveType) {
