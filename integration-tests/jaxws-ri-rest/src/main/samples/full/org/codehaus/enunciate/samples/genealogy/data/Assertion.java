@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlIDREF;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import java.util.List;
 
 /**
  * An assertion of a piece of information, usually associated with a source.
@@ -34,6 +35,7 @@ public abstract class Assertion {
   private String id;
   private String note;
   private InfoSet infoSet;
+  private List<Contributor> contributors;
 
   /**
    * The id of the assertion.
@@ -90,5 +92,23 @@ public abstract class Assertion {
    */
   public void setInfoSet(InfoSet infoSet) {
     this.infoSet = infoSet;
+  }
+
+  /**
+   * List of contacts for this assertion.
+   *
+   * @return List of contacts for this assertion.
+   */
+  public List<Contributor> getContributors() {
+    return contributors;
+  }
+
+  /**
+   * List of contacts for this assertion.
+   *
+   * @param contributors List of contacts for this assertion.
+   */
+  public void setContributors(List<Contributor> contributors) {
+    this.contributors = contributors;
   }
 }
