@@ -64,7 +64,7 @@ public class ExplicitResourceParameter extends ResourceParameter {
   }
 
   @Override
-  public ResourceParameterType getResourceParameterType() {
-    return this.type;
+  public String getTypeName() {
+    return this.type.toString().toLowerCase();
   }
 }

@@ -20,6 +20,9 @@ import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.Declaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.freemarker.FreemarkerModel;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 
 import javax.ws.rs.*;
 
@@ -32,6 +35,7 @@ public class ResourceParameter extends DecoratedDeclaration {
 
   private final String parameterName;
   private final String defaultValue;
+  private final String typeName;
 
   private final boolean matrixParam;
   private final boolean queryParam;
@@ -44,6 +48,7 @@ public class ResourceParameter extends DecoratedDeclaration {
     super(declaration);
 
     String parameterName = null;
+    String typeName = null;
     boolean matrix = false;
     boolean query = false;
     boolean path = false;
@@ -54,37 +59,62 @@ public class ResourceParameter extends DecoratedDeclaration {
     MatrixParam matrixParam = declaration.getAnnotation(MatrixParam.class);
     if (matrixParam != null) {
       parameterName = matrixParam.value();
+      typeName = "matrix";
       matrix = true;
     }
 
     QueryParam queryParam = declaration.getAnnotation(QueryParam.class);
     if (queryParam != null) {
       parameterName = queryParam.value();
+      typeName = "query";
       query = true;
     }
 
     PathParam pathParam = declaration.getAnnotation(PathParam.class);
     if (pathParam != null) {
       parameterName = pathParam.value();
+      typeName = "path";
       path = true;
     }
 
     CookieParam cookieParam = declaration.getAnnotation(CookieParam.class);
     if (cookieParam != null) {
       parameterName = cookieParam.value();
+      typeName = "cookie";
       cookie = true;
     }
 
     HeaderParam headerParam = declaration.getAnnotation(HeaderParam.class);
     if (headerParam != null) {
       parameterName = headerParam.value();
+      typeName = "header";
       header = true;
     }
 
     FormParam formParam = declaration.getAnnotation(FormParam.class);
     if (formParam != null) {
       parameterName = formParam.value();
+      typeName = "form";
       form = true;
+    }
+
+    if (typeName == null) {
+      for (AnnotationMirror annotation : declaration.getAnnotationMirrors()) {
+        AnnotationTypeDeclaration decl = annotation.getAnnotationType().getDeclaration();
+        if (decl != null) {
+          String fqn = decl.getQualifiedName();
+          EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
+          if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
+            parameterName = declaration.getSimpleName();
+            typeName = decl.getSimpleName().toLowerCase().replaceAll("param", "");
+            break;
+          }
+        }
+      }
+    }
+
+    if (typeName == null) {
+      typeName = "custom";
     }
 
     this.parameterName = parameterName;
@@ -94,6 +124,7 @@ public class ResourceParameter extends DecoratedDeclaration {
     this.cookieParam = cookie;
     this.headerParam = header;
     this.formParam = form;
+    this.typeName = typeName;
 
     DefaultValue defaultValue = declaration.getAnnotation(DefaultValue.class);
     if (defaultValue != null) {
@@ -115,6 +146,11 @@ public class ResourceParameter extends DecoratedDeclaration {
           || CookieParam.class.getName().equals(fqn)
           || HeaderParam.class.getName().equals(fqn)
           || FormParam.class.getName().equals(fqn)) {
+          return true;
+        }
+
+        EnunciateConfiguration config = ((EnunciateFreemarkerModel) FreemarkerModel.get()).getEnunciateConfig();
+        if (config != null && config.getCustomResourceParameterAnnotations().contains(fqn)) {
           return true;
         }
       }
@@ -200,27 +236,7 @@ public class ResourceParameter extends DecoratedDeclaration {
    *
    * @return The type of the parameter.
    */
-  public ResourceParameterType getResourceParameterType() {
-    if (isPathParam()) {
-      return ResourceParameterType.PATH;
-    }
-    else if (isQueryParam()) {
-      return ResourceParameterType.QUERY;
-    }
-    else if (isHeaderParam()) {
-      return ResourceParameterType.HEADER;
-    }
-    else if (isFormParam()) {
-      return ResourceParameterType.FORM;
-    }
-    else if (isMatrixParam()) {
-      return ResourceParameterType.MATRIX;
-    }
-    else if (isCookieParam()) {
-      return ResourceParameterType.COOKIE;
-    }
-    else {
-      return null;
-    }
+  public String getTypeName() {
+    return this.typeName;
   }
 }

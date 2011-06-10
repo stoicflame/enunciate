@@ -184,7 +184,7 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
         int formParamCount = 0;
         for (ResourceParameter resourceParameter : resourceMethod.getResourceParameters()) {
-          if (resourceParameter.getResourceParameterType() == ResourceParameterType.FORM) {
+          if (resourceParameter.isFormParam()) {
             formParamCount++;
           }
         }

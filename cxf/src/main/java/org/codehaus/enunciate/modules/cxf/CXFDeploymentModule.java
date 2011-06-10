@@ -172,6 +172,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
         enunciate.getConfig().setForceJAXWSSpecCompliance(true); //make sure the WSDL and client code are JAX-WS-compliant.
       }
 
+      enunciate.getConfig().addCustomResourceParameterAnnotation("org.apache.cxf.jaxrs.ext.multipart.Multipart"); //support for multipart parameters
     }
 
   }

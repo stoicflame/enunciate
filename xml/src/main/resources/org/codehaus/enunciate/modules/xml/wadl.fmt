@@ -35,8 +35,8 @@ Template library for WADL.
 
     <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).fullpath?starts_with("/")]/[/#if]${(resources?first).fullpath}">
       [#list (resources?first).resourceParameters as parameter]
-        [#if parameter.resourceParameterType?string = "PATH"]
-      <${wadl}:param name="${parameter.parameterName}" style="${parameter.resourceParameterType?lower_case}">
+        [#if parameter.pathParam!false]
+      <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!false}">
           [#if parameter.docValue??]
         <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
           [/#if]
@@ -54,8 +54,8 @@ Template library for WADL.
 
     <${wadl}:resource path="${subcontext}${resource.fullpath}">
               [#list resource.resourceParameters as parameter]
-                [#if parameter.resourceParameterType?string = "PATH"]
-      <${wadl}:param name="${parameter.parameterName}" style="${parameter.resourceParameterType?lower_case}">
+                [#if parameter.pathParam!false]
+      <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!"custom"}">
                   [#if parameter.docValue??]
         <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
                   [/#if]
@@ -93,8 +93,8 @@ Template library for WADL.
           [/#list]
         [/#if]
         [#list resource.resourceParameters as parameter]
-          [#if parameter.resourceParameterType?string = "QUERY" || parameter.resourceParameterType?string = "HEADER"]
-          <${wadl}:param name="${parameter.parameterName}" style="${parameter.resourceParameterType?lower_case}">
+          [#if parameter.queryParam!false || parameter.headerParam!false]
+          <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!"custom"}">
             [#if parameter.docValue??]
             <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
             [/#if]

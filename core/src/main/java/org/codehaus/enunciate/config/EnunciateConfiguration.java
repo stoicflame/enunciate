@@ -61,6 +61,7 @@ public class EnunciateConfiguration implements ErrorHandler {
   private final Set<String> disabledRules = new TreeSet<String>();
   private final Set<String> apiIncludePatterns = new TreeSet<String>();
   private final Set<String> apiExcludePatterns = new TreeSet<String>();
+  private final Set<String> customResourceParameterAnnotations = new TreeSet<String>();
   private boolean forceJAXWSSpecCompliance = false;
   private boolean allowEmptyNamespace = true;
   private boolean includeReferencedClasses = true;
@@ -582,6 +583,24 @@ public class EnunciateConfiguration implements ErrorHandler {
   }
 
   /**
+   * The set of custom annotations that can be applied to indicate a resource parameter.
+   *
+   * @return The set of custom annotations that can be applied to indicate a resource parameter.
+   */
+  public Set<String> getCustomResourceParameterAnnotations() {
+    return customResourceParameterAnnotations;
+  }
+
+  /**
+   * Add a custom annotation that can be applied to indicate a resource parameter.
+   *
+   * @param annotation The FQN of the annotation.
+   */
+  public void addCustomResourceParameterAnnotation(String annotation) {
+    this.customResourceParameterAnnotations.add(annotation);
+  }
+
+  /**
    * The list of enabled modules in the configuration.
    *
    * @return The list of enabled modules in the configuration.
@@ -669,6 +688,10 @@ public class EnunciateConfiguration implements ErrorHandler {
     digester.addCallMethod("enunciate/services/rest/content-types/content-type", "putContentType", 2);
     digester.addCallParam("enunciate/services/rest/content-types/content-type", 0, "type");
     digester.addCallParam("enunciate/services/rest/content-types/content-type", 1, "id");
+
+    //allow for custom resource parameter annotations.
+    digester.addCallMethod("enunciate/services/rest/custom-resource-parameter-annotation", "addCustomResourceParameterAnnotation", 1);
+    digester.addCallParam("enunciate/services/rest/custom-resource-parameter-annotation", 0, "qualifiedName");
 
     //allow for the default soap subcontext to be set.
     digester.addSetProperties("enunciate/services/soap", "defaultSubcontext", "defaultSoapSubcontext");

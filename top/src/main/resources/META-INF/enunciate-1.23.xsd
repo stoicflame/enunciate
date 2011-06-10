@@ -247,6 +247,7 @@
 
     <xs:sequence>
       <xs:element name="content-types" type="content-types" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="custom-resource-parameter-annotation" type="custom-resource-parameter-annotation" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
 
     <xs:attribute name="defaultRestSubcontext" type="xs:string"/>
@@ -310,6 +311,16 @@
 
     <xs:attribute name="type" type="xs:string" use="required"/>
     <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="custom-resource-parameter-annotation">
+    <xs:annotation>
+      <xs:documentation>
+        An annotation that is treated as a custom resource parameter annotation.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:attribute name="qualifiedName" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="jaxb-import">

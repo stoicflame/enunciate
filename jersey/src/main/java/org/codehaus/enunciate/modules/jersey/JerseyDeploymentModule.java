@@ -24,6 +24,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
@@ -162,6 +163,15 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   @Override
   public Validator getValidator() {
     return new JerseyValidator(!isUseSubcontext() && !isDisableWildcardServletError());
+  }
+
+  @Override
+  public void init(Enunciate enunciate) throws EnunciateException {
+    super.init(enunciate);
+
+    if (!isDisabled()) {
+      enunciate.getConfig().addCustomResourceParameterAnnotation("com.sun.jersey.multipart.FormDataParam"); //support for multipart parameters
+    }
   }
 
   // Inherited.
