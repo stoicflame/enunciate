@@ -678,6 +678,11 @@ public class ConfigMojo extends AbstractMojo {
     }
 
     @Override
+    public void error(String message, Object... formatArgs) {
+      getLog().error(String.format(message, formatArgs));
+    }
+
+    @Override
     public boolean isDebug() {
       return getLog().isDebugEnabled();
     }

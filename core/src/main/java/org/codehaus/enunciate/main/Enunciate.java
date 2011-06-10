@@ -566,6 +566,16 @@ public class Enunciate {
   }
 
   /**
+   * Handle an error-level message.
+   *
+   * @param message    The error message.
+   * @param formatArgs The format args of the message.
+   */
+  public void error(String message, Object... formatArgs) {
+    System.err.println(String.format(message, formatArgs));
+  }
+
+  /**
    * Creates a temporary directory.
    *
    * @return A temporary directory.
