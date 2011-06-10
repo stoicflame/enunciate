@@ -1732,29 +1732,43 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
    */
   private class ReferencedXmlTypeDefinitionVisitor extends DefaultReferencedTypeVisitor {
 
+    private final LinkedList<String> referenceStack = new LinkedList<String>();
+
     public void visitClassType(ClassType classType) {
       if (classType instanceof AdapterType) {
         ((AdapterType) classType).getAdaptingType().accept(this);
       }
       else {
         DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
-        if (decorated.getDeclaration() != null && Object.class.getName().equals(decorated.getDeclaration().getQualifiedName())) {
+        String qualifiedName = decorated.getDeclaration().getQualifiedName();
+        if (decorated.getDeclaration() != null && Object.class.getName().equals(qualifiedName)) {
           //skip base object; not a type definition.
           return;
         }
 
-        if (!decorated.isCollection() && !decorated.isInstanceOf(JAXBElement.class.getName())) {
-          ClassDeclaration declaration = classType.getDeclaration();
-          if (declaration != null) {
-            add(createTypeDefinition(declaration));
-          }
+        if (referenceStack.contains(qualifiedName)) {
+          //we're already visiting this class...
+          return;
         }
 
-        Collection<TypeMirror> typeArgs = classType.getActualTypeArguments();
-        if (typeArgs != null) {
-          for (TypeMirror typeArg : typeArgs) {
-            typeArg.accept(this);
+        referenceStack.addFirst(qualifiedName);
+        try {
+          if (!decorated.isCollection() && !decorated.isInstanceOf(JAXBElement.class.getName())) {
+            ClassDeclaration declaration = classType.getDeclaration();
+            if (declaration != null) {
+              add(createTypeDefinition(declaration));
+            }
           }
+
+          Collection<TypeMirror> typeArgs = classType.getActualTypeArguments();
+          if (typeArgs != null) {
+            for (TypeMirror typeArg : typeArgs) {
+              typeArg.accept(this);
+            }
+          }
+        }
+        finally {
+          referenceStack.removeFirst(); //pop the stack.
         }
       }
     }
