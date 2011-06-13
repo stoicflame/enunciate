@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.services;
 
+import com.sun.jersey.multipart.FormDataParam;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.PersonExt;
@@ -27,6 +28,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.ws.rs.*;
+import java.io.InputStream;
 import java.util.Collection;
 
 /**
@@ -102,6 +104,11 @@ public interface PersonService {
     queryParams = { @QueryParam("length"), @QueryParam("somename") }
   )
   void uploadFiles(DataHandler[] files, String length) throws ServiceException;
+
+  @WebMethod (exclude = true)
+  @POST
+  @Path("/multipart")
+  void postMultipart(@FormDataParam("file1") InputStream file1, @FormDataParam("file2") InputStream file2);
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.

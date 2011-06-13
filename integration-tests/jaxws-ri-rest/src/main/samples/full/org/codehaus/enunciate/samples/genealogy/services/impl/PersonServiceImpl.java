@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
+import com.sun.jersey.multipart.FormDataParam;
 import org.codehaus.enunciate.samples.genealogy.data.*;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
@@ -118,5 +119,8 @@ public class PersonServiceImpl implements PersonService {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  public void postMultipart( InputStream file1, InputStream file2 ) {
   }
 }

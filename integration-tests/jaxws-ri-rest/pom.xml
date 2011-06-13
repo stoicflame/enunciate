@@ -13,6 +13,13 @@
     <enunciate.version>${project.version}</enunciate.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
+  </repositories>
+
   <build>
     <resources>
       <resource>
@@ -313,6 +320,12 @@
       <groupId>org.codehaus.enunciate</groupId>
       <artifactId>enunciate-amf-rt</artifactId>
       <version>${enunciate.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+      <version>1.7</version>
     </dependency>
 
     <dependency>
