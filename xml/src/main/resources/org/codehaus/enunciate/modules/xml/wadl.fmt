@@ -31,7 +31,7 @@ Template library for WADL.
   </${wadl}:grammars>
 
   <${wadl}:resources base="${baseDeploymentAddress}">
-    [@forEachResourceMethodListByPath]
+    [@forEachResourceMethodListByPath includeExcludedFromDocs="true" includeExcludedFromIDL="false"]
 
     <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).fullpath?starts_with("/")]/[/#if]${(resources?first).fullpath}">
       [#list (resources?first).resourceParameters as parameter]

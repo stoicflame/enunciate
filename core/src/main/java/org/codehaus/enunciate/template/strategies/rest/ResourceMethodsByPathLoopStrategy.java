@@ -20,6 +20,7 @@ import net.sf.jelly.apt.TemplateException;
 import net.sf.jelly.apt.TemplateModel;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.doc.ExcludeFromDocumentation;
 import org.codehaus.enunciate.template.strategies.EnunciateTemplateLoopStrategy;
 import org.codehaus.enunciate.util.ResourceMethodPathComparator;
 
@@ -33,20 +34,29 @@ import java.util.*;
 public class ResourceMethodsByPathLoopStrategy extends EnunciateTemplateLoopStrategy<List<ResourceMethod>> {
 
   private String var = "resources";
+  private boolean includeExcludedFromDocs = false;
+  private boolean includeExcludedFromIDL = false;
 
   protected Iterator<List<ResourceMethod>> getLoop(TemplateModel model) throws TemplateException {
     TreeMap<String, List<ResourceMethod>> resourcesByPath = new TreeMap<String, List<ResourceMethod>>(new ResourceMethodPathComparator());
 
     for (RootResource rootResource : getModel().getRootResources()) {
       for (ResourceMethod resource : rootResource.getResourceMethods(true)) {
-        String path = resource.getFullpath();
-        List<ResourceMethod> resourceList = resourcesByPath.get(path);
-        if (resourceList == null) {
-          resourceList = new ArrayList<ResourceMethod>();
-          resourcesByPath.put(path, resourceList);
-        }
+        ExcludeFromDocumentation excludeFromDocs = resource.getAnnotation(ExcludeFromDocumentation.class);
+        if (excludeFromDocs == null || this.includeExcludedFromDocs) {
+          if (excludeFromDocs != null && excludeFromDocs.excludeFromIDL() && !this.includeExcludedFromIDL) {
+            continue;
+          }
 
-        resourceList.add(resource);
+          String path = resource.getFullpath();
+          List<ResourceMethod> resourceList = resourcesByPath.get(path);
+          if (resourceList == null) {
+            resourceList = new ArrayList<ResourceMethod>();
+            resourcesByPath.put(path, resourceList);
+          }
+
+          resourceList.add(resource);
+        }
       }
     }
 
@@ -78,5 +88,43 @@ public class ResourceMethodsByPathLoopStrategy extends EnunciateTemplateLoopStra
    */
   public void setVar(String var) {
     this.var = var;
+  }
+
+  /**
+   * Whether to include resource methods that have been excluded from the docs.
+   *
+   * @return Whether to include resource methods that have been excluded from the docs.
+   * @see org.codehaus.enunciate.doc.ExcludeFromDocumentation
+   */
+  public boolean isIncludeExcludedFromDocs() {
+    return includeExcludedFromDocs;
+  }
+
+  /**
+   * Whether to include resource methods that have been excluded from the docs.
+   *
+   * @param includeExcludedFromDocs Whether to include resource methods that have been excluded from the docs.
+   */
+  public void setIncludeExcludedFromDocs(boolean includeExcludedFromDocs) {
+    this.includeExcludedFromDocs = includeExcludedFromDocs;
+  }
+
+  /**
+   * Whether to include resource methods that have been excluded from the IDL.
+   *
+   * @return Whether to include resource methods that have been excluded from the IDL.
+   * @see org.codehaus.enunciate.doc.ExcludeFromDocumentation#excludeFromIDL() 
+   */
+  public boolean isIncludeExcludedFromIDL() {
+    return includeExcludedFromIDL;
+  }
+
+  /**
+   * Whether to include resource methods that have been excluded from the IDL.
+   *
+   * @param includeExcludedFromIDL Whether to include resource methods that have been excluded from the IDL.
+   */
+  public void setIncludeExcludedFromIDL(boolean includeExcludedFromIDL) {
+    this.includeExcludedFromIDL = includeExcludedFromIDL;
   }
 }
