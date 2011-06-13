@@ -241,6 +241,18 @@ public class TestDefaultValidator extends InAPTTestCase {
   }
 
   /**
+   * tests validating wrapped lists of element refs.
+   */
+  public void testValidateWrappedElementRefs() throws Exception {
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
+    ComplexTypeDefinition complexType = new ComplexTypeDefinition((ClassDeclaration) getDeclaration("org.codehaus.enunciate.samples.schema.WrappedElementRefBean"));
+    model.add(complexType);
+    DefaultValidator validator = new DefaultValidator();
+    assertFalse("Shouldn't be errors on wrapped list of element refs.", validator.validateComplexType(complexType).hasErrors());
+  }
+
+  /**
    * test validating a simple type.
    */
   public void testValidateSimpleType() throws Exception {
