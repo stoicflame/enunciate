@@ -85,6 +85,13 @@
       <bean class="${provider.qualifiedName}"/>
       [/#list]
     </jaxrs:providers>
+    [#if useExtensionMappings!false ]
+    <jaxrs:extensionMappings>
+      [#list contentTypes2Ids?keys as contentType]
+        <entry key="${contentTypes2Ids[contentType]}" value="${contentType}"/>
+      [/#list]
+    </jaxrs:extensionMappings>
+    [/#if]
   </jaxrs:server>
     [/#if]
 </beans>

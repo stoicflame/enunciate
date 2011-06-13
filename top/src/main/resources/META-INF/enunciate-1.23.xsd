@@ -582,6 +582,7 @@
         <xs:attribute name="enableJaxws" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="enableJaxrs" type="xs:boolean" default="true" use="optional"/>
         <xs:attribute name="useWsdlRedirectFilter" type="xs:boolean" default="true" use="optional"/>
+        <xs:attribute name="useExtensionMappings" type="xs:boolean" default="false" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -85,6 +85,7 @@ import java.util.*;
  * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  * <li>The "useWsdlRedirectFilter" attribute is used to disable the use of the Enunciate-provided wsdl redirect filter that
  *     handles the requests to ?wsdl</li>
+ * <li>The "useExtensionMappings" is used to specify whether CXF extension mappings should be used. See <a href="http://cxf.apache.org/docs/jax-rs.html">http://cxf.apache.org/docs/jax-rs.html</a></li>
  * </ul>
  *
  * <p>The CXF module also supports a list of <tt>jaxws-property</tt> child elements that each support a 'name' and 'value' attribute. This can be used to configure the CXF
@@ -106,6 +107,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean jacksonAvailable = false;
   private boolean filterFound = false;
   private boolean useWsdlRedirectFilter = true;
+  private boolean useExtensionMappings = true;
   private final Map<String, String> jaxwsProperties = new TreeMap<String, String>();
 
   /**
@@ -227,6 +229,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       model.put("jaxwsProperties", this.jaxwsProperties);
       model.put("provideJaxws", enableJaxws);
       model.put("provideJaxrs", enableJaxrs);
+      model.put("useExtensionMappings", useExtensionMappings);
       model.put("jacksonAvailable", jacksonAvailable);
       model.put("amfEnabled", getEnunciate().isModuleEnabled("amf"));
       model.put("restSubcontext", this.useSubcontext ? getRestSubcontext() : "/");
@@ -328,6 +331,17 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
               if (jaxrsUrlMappings.add(servletPattern)) {
                 debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
                       resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
+
+                if (!servletPattern.endsWith("*") && isUseExtensionMappings()) {
+                  Map<String, String> contentTypesToIds = getModel().getContentTypesToIds();
+                  for (Map.Entry<String, String> entry : contentTypesToIds.entrySet()) {
+                    String servletPatternExt = servletPattern + "." + entry.getValue();
+                    if (jaxrsUrlMappings.add(servletPatternExt)) {
+                      debug("Content type %s of resource method %s of resource %s to be made accessible by servlet pattern %s.",
+                            entry.getKey(), resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPatternExt);
+                    }
+                  }
+                }
               }
             }
           }
@@ -413,6 +427,14 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 
   public void setUseWsdlRedirectFilter(boolean useWsdlRedirectFilter) {
     this.useWsdlRedirectFilter = useWsdlRedirectFilter;
+  }
+
+  public boolean isUseExtensionMappings() {
+    return useExtensionMappings;
+  }
+
+  public void setUseExtensionMappings(boolean useExtensionMappings) {
+    this.useExtensionMappings = useExtensionMappings;
   }
 
   @Override
