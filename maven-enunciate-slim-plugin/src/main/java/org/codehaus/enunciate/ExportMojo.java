@@ -32,12 +32,12 @@ import com.sun.mirror.declaration.TypeDeclaration;
 /**
  * "Exports" the JAXB/JAX-WS classes in the current project. For use with the "jar" packaging.
  *
+ * @author Ryan Heaton
  * @goal export
  * @phase process-sources
  * @requiresDependencyResolution test
-
- * @author Ryan Heaton
  * @link http://docs.codehaus.org/display/ENUNCIATE/Working+With+Precompiled+Classes
+ * @deprecated
  */
 public class ExportMojo extends ConfigMojo {
 
@@ -52,11 +52,12 @@ public class ExportMojo extends ConfigMojo {
 
   @Override
   public void execute() throws MojoExecutionException {
-      if ( skipEnunciate )
-      {
-          getLog().info( "Skipping enunciate per configuration." );
-          return;
-      }
+    getLog().warn("The 'export' goal is deprecated and may be removed in a future release. Please use configuration to specify imports for classes not in the top-level project. See http://goo.gl/KPXH4 for details.");
+
+    if (skipEnunciate) {
+      getLog().info("Skipping enunciate per configuration.");
+      return;
+    }
 
     super.execute();
 

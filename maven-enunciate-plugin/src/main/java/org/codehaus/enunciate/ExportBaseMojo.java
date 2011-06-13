@@ -10,6 +10,7 @@ package org.codehaus.enunciate;
  *
  * @author Ryan Heaton
  * @link http://docs.codehaus.org/display/ENUNCIATE/Working+With+Precompiled+Classes
+ * @deprecated
  */
 public class ExportBaseMojo extends ExportMojo {
 
