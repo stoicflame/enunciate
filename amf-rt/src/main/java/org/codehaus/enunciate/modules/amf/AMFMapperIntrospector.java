@@ -73,9 +73,21 @@ public class AMFMapperIntrospector {
         //fall through.
       }
     }
+
+    if (adapterInfo == null && jaxbType instanceof Class) {
+      adapterInfo = (XmlJavaTypeAdapter) ((Class)jaxbType).getAnnotation(XmlJavaTypeAdapter.class);
+    }
     
     if (adapterInfo != null) {
-      jaxbType = findAdaptingType(adapterInfo.value());
+      Type adaptingType = findAdaptingType(adapterInfo.value());
+      AMFMapper adaptingMapper = getAMFMapper(adaptingType);
+      try {
+        //if it's adapted, don't cache it (return it directly).
+        return new AdaptingAMFMapper(adapterInfo.value().newInstance(), adaptingMapper, narrowType(jaxbType), narrowType(adaptingType));
+      }
+      catch (Exception e) {
+        throw new AMFMappingException(e);
+      }
     }
 
     if (jaxbType == null) {
@@ -147,42 +159,27 @@ public class AMFMapperIntrospector {
         else if (Map.class.isAssignableFrom(jaxbClass)) {
           mapper = new MapAMFMapper((Class<Map>) jaxbClass, Object.class, Object.class, null);
         }
+        else if (specifiedType != null) {
+          mapper = getAMFMapper(specifiedType);
+        }
+        else if (Enum.class.isAssignableFrom(jaxbClass)) {
+          mapper = new EnumAMFMapper(jaxbClass);
+        }
+        else if (jaxbClass.isPrimitive()) {
+          mapper = DefaultAMFMapper.INSTANCE;
+        }
         else {
-          adapterInfo = adapterInfo == null ? (XmlJavaTypeAdapter) jaxbClass.getAnnotation(XmlJavaTypeAdapter.class) : adapterInfo;
-
-          if (adapterInfo != null) {
-            Type adaptingType = findAdaptingType(adapterInfo.value());
-            AMFMapper adaptingMapper = getAMFMapper(adaptingType);
-            try {
-              //if it's adapted, don't cache it (return it directly).
-              return new AdaptingAMFMapper(adapterInfo.value().newInstance(), adaptingMapper, jaxbClass, narrowType(adaptingType));
-            }
-            catch (Exception e) {
-              throw new AMFMappingException(e);
-            }
+          try {
+            mapper = loadCustomMapperClass(jaxbClass).newInstance();
           }
-          else if (specifiedType != null) {
-            mapper = getAMFMapper(specifiedType);
-          }
-          else if (Enum.class.isAssignableFrom(jaxbClass)) {
-            mapper = new EnumAMFMapper(jaxbClass);
-          }
-          else if (jaxbClass.isPrimitive()) {
+          catch (ClassNotFoundException e) {
             mapper = DefaultAMFMapper.INSTANCE;
           }
-          else {
-            try {
-              mapper = loadCustomMapperClass(jaxbClass).newInstance();
-            }
-            catch (ClassNotFoundException e) {
-              mapper = DefaultAMFMapper.INSTANCE;
-            }
-            catch (NoClassDefFoundError e) {
-              mapper = DefaultAMFMapper.INSTANCE;
-            }
-            catch (Throwable e) {
-              throw new AMFMappingException("Unable to instantiate class '" + jaxbClass.getPackage().getName() + ".amf." + jaxbClass.getSimpleName() + "AMFMapper'.", e);
-            }
+          catch (NoClassDefFoundError e) {
+            mapper = DefaultAMFMapper.INSTANCE;
+          }
+          catch (Throwable e) {
+            throw new AMFMappingException("Unable to instantiate class '" + jaxbClass.getPackage().getName() + ".amf." + jaxbClass.getSimpleName() + "AMFMapper'.", e);
           }
         }
       }

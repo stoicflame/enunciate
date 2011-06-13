@@ -119,8 +119,20 @@ public class GWTMapperIntrospector {
       }
     }
 
+    if (adapterInfo == null && jaxbType instanceof Class) {
+      adapterInfo = (XmlJavaTypeAdapter) ((Class)jaxbType).getAnnotation(XmlJavaTypeAdapter.class);
+    }
+
     if (adapterInfo != null) {
-      jaxbType = findAdaptingType(adapterInfo.value());
+      Type adaptingType = findAdaptingType(adapterInfo.value());
+      GWTMapper adaptingMapper = getGWTMapper(adaptingType);
+      try {
+        //if it's adapted, don't cache it (return it directly).
+        return new AdaptingGWTMapper(adapterInfo.value().newInstance(), adaptingMapper, narrowType(jaxbType), narrowType(adaptingType));
+      }
+      catch (Exception e) {
+        throw new GWTMappingException(e);
+      }
     }
 
     if (jaxbType == null) {
@@ -192,39 +204,24 @@ public class GWTMapperIntrospector {
         else if (Map.class.isAssignableFrom(jaxbClass)) {
           mapper = new MapGWTMapper((Class<Map>) jaxbClass, Object.class, Object.class, null);
         }
+        else if (specifiedType != null) {
+          mapper = getGWTMapper(specifiedType);
+        }
+        else if (jaxbClass.isPrimitive()) {
+          mapper = DefaultGWTMapper.INSTANCE;
+        }
         else {
-          adapterInfo = adapterInfo == null ? (XmlJavaTypeAdapter) jaxbClass.getAnnotation(XmlJavaTypeAdapter.class) : adapterInfo;
-
-          if (adapterInfo != null) {
-            Type adaptingType = findAdaptingType(adapterInfo.value());
-            GWTMapper adaptingMapper = getGWTMapper(adaptingType);
-            try {
-              //if it's adapted, don't cache it (return it directly).
-              return new AdaptingGWTMapper(adapterInfo.value().newInstance(), adaptingMapper, jaxbClass, narrowType(adaptingType));
-            }
-            catch (Exception e) {
-              throw new GWTMappingException(e);
-            }
+          try {
+            mapper = loadCustomMapperClass(jaxbClass).newInstance();
           }
-          else if (specifiedType != null) {
-            mapper = getGWTMapper(specifiedType);
+          catch (ClassNotFoundException e) {
+            mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
           }
-          else if (jaxbClass.isPrimitive()) {
-            mapper = DefaultGWTMapper.INSTANCE;
+          catch (NoClassDefFoundError e) {
+            mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
           }
-          else {
-            try {
-              mapper = loadCustomMapperClass(jaxbClass).newInstance();
-            }
-            catch (ClassNotFoundException e) {
-              mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
-            }
-            catch (NoClassDefFoundError e) {
-              mapper = Enum.class.isAssignableFrom(jaxbClass) ? new EnumGWTMapper(jaxbClass) : DefaultGWTMapper.INSTANCE;
-            }
-            catch (Throwable e) {
-              throw new GWTMappingException("Unable to instantiate class '" + jaxbClass.getPackage().getName() + ".gwt." + jaxbClass.getSimpleName() + "GWTMapper'.", e);
-            }
+          catch (Throwable e) {
+            throw new GWTMappingException("Unable to instantiate class '" + jaxbClass.getPackage().getName() + ".gwt." + jaxbClass.getSimpleName() + "GWTMapper'.", e);
           }
         }
       }
