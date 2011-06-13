@@ -95,7 +95,7 @@ import net.sf.jelly.apt.freemarker.FreemarkerJavaDoc;
 public class CSharpDeploymentModule extends FreemarkerDeploymentModule {
 
   private boolean require = false;
-  private boolean disableCompile = false;
+  private boolean disableCompile = true;
   private String label = null;
   private String compileExecutable = null;
   private String compileCommand = "%s /target:library /out:%s /r:System.Web.Services /doc:%s %s";

@@ -5,6 +5,7 @@
   <modules>
     <amf disabled="true"/>
     <c forceEnable="true"/>
+    <csharp disableCompile="false"/>
     <gwt disabled="true"/>
     <obj-c forceEnable="true" translateIdTo="handle"/>
     <java-client>

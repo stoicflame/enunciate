@@ -3,6 +3,7 @@
 <enunciate label="full" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.22.xsd">
   <modules>
+    <csharp disableCompile="false"/>
     <gwt disabled="true"/>
     <spring-app disabled="true"/>
   </modules>

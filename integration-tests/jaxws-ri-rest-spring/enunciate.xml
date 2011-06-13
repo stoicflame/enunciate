@@ -14,6 +14,7 @@
     </soap>
   </services>
   <modules>
+    <csharp disableCompile="false"/>
     <gwt disabled="true"/>
     <java-client>
       <package-conversions>

@@ -3,7 +3,8 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.22.xsd">
   <modules>
-    <gwt disabled="true"/>    
+    <csharp disableCompile="false"/>
+    <gwt disabled="true"/>
     <spring-app>
       <springImport file="custom-spring.xml"/>
     </spring-app>
