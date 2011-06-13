@@ -32,6 +32,7 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.json.JsonName;
+import org.codehaus.jackson.node.ObjectNode;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;

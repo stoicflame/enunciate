@@ -475,6 +475,15 @@ public class Element extends Accessor {
     return nillable;
   }
 
+  /**
+   * Whether this is a choice of multiple element refs.
+   *
+   * @return Whether this is a choice of multiple element refs.
+   */
+  public boolean isElementRefs() {
+    return false;
+  }
+
   public void generateExampleXml(org.jdom.Element parent) {
     DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
@@ -558,7 +567,7 @@ public class Element extends Accessor {
       JsonNode elementNode;
       if (!isCollectionType()) {
         String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
-        if (getRef() == null) {
+        if (!isElementRefs() && getRef() == null) {
           elementNode = getBaseType().generateExampleJson(exampleValue);
         }
         else {
