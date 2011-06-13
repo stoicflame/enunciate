@@ -8,7 +8,7 @@ package ${overlayPackageFor(type)};
 /**
  * ${type.docComment!"(no documentation provided)"?chop_linebreak?replace("\n", "\n * ")}
  */
-public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameFor(type.superclass, true)} [#else]extends com.google.gwt.core.client.JavaScriptObject [/#if]{
+public class ${overlaySimpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameFor(type.superclass, true)} [#else]extends com.google.gwt.core.client.JavaScriptObject [/#if]{
 
   protected ${type.simpleName}() {
   }
@@ -25,9 +25,9 @@ public class ${simpleNameFor(type)} [#if !baseobject]extends ${overlayClassnameF
   [#if !(type.abstract!false)]
 
   /**
-   * Create an instance of ${simpleNameFor(type,false)} from JSON text.
+   * Create an instance of ${overlaySimpleNameFor(type,false)} from JSON text.
    */
-  public static native ${simpleNameFor(type,false)} fromJson(String json) /*-{
+  public static native ${overlaySimpleNameFor(type,false)} fromJson(String json) /*-{
     return eval('(' + json + ')');
   }-*/;
   [/#if]

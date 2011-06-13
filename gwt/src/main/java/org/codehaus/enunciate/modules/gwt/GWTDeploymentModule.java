@@ -483,6 +483,7 @@ public class GWTDeploymentModule extends FreemarkerDeploymentModule implements P
       model.put("classnameFor", classnameFor);
       model.put("overlayClassnameFor", overlayClassnameFor);
       model.put("simpleNameFor", new SimpleNameWithParamsMethod(classnameFor));
+      model.put("overlaySimpleNameFor", new SimpleNameWithParamsMethod(overlayClassnameFor));
       model.put("gwtSubcontext", getGwtSubcontext());
       model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
 

@@ -17,6 +17,7 @@ package org.codehaus.enunciate.samples.petclinic.app.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import org.codehaus.enunciate.samples.petclinic.app.client.ClinicComponent.ClinicComponentInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
@@ -70,6 +71,8 @@ public class PetClinicApp implements EntryPoint, HistoryListener {
     } else {
       showInfo();
     }
+
+    org.codehaus.enunciate.samples.petclinic.client.json.schema.Vet vet = (org.codehaus.enunciate.samples.petclinic.client.json.schema.Vet) JavaScriptObject.createObject();
   }
 
   public void show(ClinicComponentInfo info, boolean affectHistory) {
