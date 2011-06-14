@@ -19,7 +19,7 @@
 (Your new version should now be deployed.)
 
 8. Build the distribution from the LAST RELEASE TAG (e.g. "ant -f build-site.xml dist")
-9. cadaver https://dav.codehaus.org/dist/enunciate/
+9. cadaver https://dav.codehaus.org/dist/enunciate/ (https://dav.codehaus.org/snapshots.dist/enunciate/ for snapshot dist)
     9a. put target/enunciate-VERSION.zip
     9b. put target/enunciate-VERSION.tar.gz
 10. sitecopy --update enunciate
