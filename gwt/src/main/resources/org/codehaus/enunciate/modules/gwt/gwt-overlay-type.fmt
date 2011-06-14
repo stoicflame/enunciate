@@ -132,7 +132,7 @@ public class ${overlaySimpleNameFor(type)} [#if !baseobject]extends ${overlayCla
   public final native void set${property.simpleName?cap_first}(${overlayClassnameFor(property)} ${property.simpleName}) /*-{
     this.${property.jsonMemberName} = ${property.simpleName};
   }-*/;
-    [#if property.referencesQNameEnum!false]
+      [#if property.referencesQNameEnum!false]
 
   /**
    * Convenience accessor for the known value of a ${property.simpleName} property.
@@ -151,7 +151,7 @@ public class ${overlaySimpleNameFor(type)} [#if !baseobject]extends ${overlayCla
   public final void setKnown${property.simpleName?cap_first}(${overlayClassnameFor(property.QNameEnumRef)} ${property.simpleName}) {
     set${property.simpleName?cap_first}(${overlayClassnameFor(property.QNameEnumRef)}.convertToKnownQName(${property.simpleName}));
   }
-    [/#if]
+      [/#if]
     [/#if]
   [/#if]
 [/#macro]

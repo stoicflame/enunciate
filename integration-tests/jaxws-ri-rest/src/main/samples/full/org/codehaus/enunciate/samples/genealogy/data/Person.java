@@ -16,14 +16,17 @@
 
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 import org.codehaus.enunciate.samples.genealogy.services.impl.EventDescriptionAdapter;
 
 import javax.activation.DataHandler;
+import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Map;
 
@@ -45,6 +48,7 @@ public class Person<E extends Event> {
 
   private DataHandler picture;
   private byte[] recording;
+  private Map<QName, String> otherAttributes;
 
   /**
    * The person id.
@@ -190,5 +194,15 @@ public class Person<E extends Event> {
 
   public void setRecording(byte[] recording) {
     this.recording = recording;
+  }
+
+  @XmlAnyAttribute
+  @XmlQNameEnumRef(FavoriteFood.class)
+  public Map<QName, String> getOtherAttributes() {
+    return otherAttributes;
+  }
+
+  public void setOtherAttributes(Map<QName, String> otherAttributes) {
+    this.otherAttributes = otherAttributes;
   }
 }

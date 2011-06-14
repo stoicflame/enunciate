@@ -307,6 +307,7 @@ public class XMLDeploymentModule extends FreemarkerDeploymentModule {
     model.setVariable("uniqueContentTypes", new UniqueContentTypesMethod());
     model.put("wadlStylesheetUri", this.wadlStylesheetUri);
     model.put("accessorOverridesAnother", new AccessorOverridesAnotherMethod());
+    model.put("qnameForType", new QNameForTypeMethod());
     File artifactDir = getGenerateDir();
     model.setFileOutputDirectory(artifactDir);
     boolean upToDate = isUpToDate(artifactDir);

@@ -12,24 +12,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
-<${xs}:schema version="1.0"[#if schema.namespace?exists && schema.namespace?length > 0] targetNamespace="${schema.namespace?default("")}"[/#if]
-  [#if schema.elementFormDefault?exists]elementFormDefault="${schema.elementFormDefault}" [/#if][#t]
-  [#if schema.attributeFormDefault?exists]attributeFormDefault="${schema.attributeFormDefault}" [/#if][#t]
+<${xs}:schema version="1.0"[#if schema.namespace?? && schema.namespace?length > 0] targetNamespace="${schema.namespace!("")}"[/#if]
+  [#if schema.elementFormDefault??]elementFormDefault="${schema.elementFormDefault}" [/#if][#t]
+  [#if schema.attributeFormDefault??]attributeFormDefault="${schema.attributeFormDefault}" [/#if][#t]
   [#list schema.referencedNamespaces as referencedNamespace]
-    [#if referencedNamespace?exists && referencedNamespace?length > 0 && !("http://www.w3.org/2001/XMLSchema" = referencedNamespace)]
+    [#if referencedNamespace?? && referencedNamespace?length > 0 && !("http://www.w3.org/2001/XMLSchema" = referencedNamespace)]
   xmlns:${prefix(referencedNamespace)}="${referencedNamespace}"
     [/#if]
   [/#list]
-  [#if schema.jaxbBindingVersion?exists]jxb:version="${schema.jaxbBindingVersion}" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"[/#if]
+  [#if schema.jaxbBindingVersion??]jxb:version="${schema.jaxbBindingVersion}" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"[/#if]
   xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
-  [#if schema.doc?exists || schema.appinfo?exists]
+  [#if schema.doc?? || schema.appinfo??]
   <${xs}:annotation>
-    [#if schema.doc?exists]
+    [#if schema.doc??]
     <${xs}:documentation>
      <![CDATA[${schema.doc?trim}]]>
     </${xs}:documentation>
     [/#if]
-    [#if schema.appinfo?exists]
+    [#if schema.appinfo??]
     <${xs}:appinfo>
       ${schema.appinfo}
     </${xs}:appinfo>
@@ -38,7 +38,7 @@
   [/#if]
 [#t]
   [#list schema.importedSchemas as importedSchema]
-  <${xs}:import[#if importedSchema.namespace?exists && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.location?exists] schemaLocation="${importedSchema.location}"[/#if]/>
+  <${xs}:import[#if importedSchema.namespace?? && importedSchema.namespace?length > 0] namespace="${importedSchema.namespace}"[/#if][#if importedSchema.location??] schemaLocation="${importedSchema.location}"[/#if]/>
   [/#list]
 
   [@processSchemaBody schema=schema/]
@@ -52,7 +52,7 @@
 --]
 [#macro processSchemaBody schema]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
-[#if schema.namespace?exists]
+[#if schema.namespace??]
   [#assign tns=prefix(schema.namespace)]
 [#else]
   [#assign tns=""]
@@ -70,14 +70,14 @@
   [/#list]
   [#list schema.localElementDeclarations as localElement]
     [#if !isDefinedGlobally(localElement)]
-      [#if localElement.substitutionGroupQName?exists]
-  <${xs}:element name="${localElement.name}" substitutionGroup="${localElement.substitutionGroupQName}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
+      [#if localElement.substitutionGroupQName??]
+  <${xs}:element name="${localElement.name}" substitutionGroup="${localElement.substitutionGroupQName}"[#if localElement.defaultValue??] default="${localElement.defaultValue}"[/#if]/>
       [#elseif localElement.elementXmlType.anonymous && localElement.elementXmlType.typeDefinition??]
   <${xs}:element name="${localElement.name}">
     [@processTypeDef typeDef=localElement.elementXmlType.typeDefinition/]
   </${xs}:element>
       [#else]
-  <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue?exists] default="${localElement.defaultValue}"[/#if]/>
+  <${xs}:element name="${localElement.name}" type="${localElement.elementXmlType.qname}"[#if localElement.defaultValue??] default="${localElement.defaultValue}"[/#if]/>
       [/#if]
     [/#if]
   [/#list]
@@ -107,11 +107,18 @@
   [#--simple type definition--]
   [#if typeDef.simple]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
-    [#if typeDef.docValue?exists]
+    [#if typeDef.docValue?? || typeDef.value.referencesQNameEnum!false]
   <${xs}:annotation>
+      [#if typeDef.docValue??]
     <${xs}:documentation>
       <![CDATA[${typeDef.docValue}]]>
     </${xs}:documentation>
+      [/#if]
+      [#if typeDef.value.referencesQNameEnum!false]
+    <${xs}:documentation>
+      See ${qnameForType(typeDef.value.QNameEnumRef)} for an enumeration of known values.
+    </${xs}:documentation>
+      [/#if]
   </${xs}:annotation>
     [/#if]
     [#if typeDef.value.xmlList]
@@ -124,7 +131,7 @@
   [#--enum type definition--]
   [#elseif typeDef.enum]
 <${xs}:simpleType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if]>
-    [#if typeDef.docValue?exists]
+    [#if typeDef.docValue??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${typeDef.docValue}]]>
@@ -147,7 +154,7 @@
   [#--complex type definition--]
   [#elseif typeDef.complex]
 <${xs}:complexType[#if !typeDef.anonymous] name="${typeDef.name}"[/#if][#if typeDef.final] final="#all"[/#if][#if typeDef.abstract] abstract="true"[/#if]>
-    [#if typeDef.docValue?exists]
+    [#if typeDef.docValue??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${typeDef.docValue}]]>
@@ -167,7 +174,7 @@
           [#if !accessorOverridesAnother(element)]
             [#if element.wrapped]
         <${xs}:element name="${element.wrapperName}" minOccurs="0">
-              [#if element.docValue?exists]
+              [#if element.docValue??]
           <${xs}:annotation>
             <${xs}:documentation>
               <![CDATA[${element.docValue}]]>
@@ -180,7 +187,7 @@
             [#if ((element.elementRefs!false) || (element.choices?size > 1))]
               <${xs}:choice minOccurs="0" maxOccurs="unbounded">
               [#list element.choices as elementChoice]
-                [#if elementChoice.ref?exists]
+                [#if elementChoice.ref??]
                 <${xs}:element ref="${elementChoice.ref}"/>
                 [#elseif elementChoice.baseType.anonymous]
                 <${xs}:element name="${elementChoice.name}">
@@ -192,35 +199,56 @@
               [/#list]
               </${xs}:choice>
             [#else]
-              [#if element.ref?exists]
+              [#if element.ref??]
               <${xs}:element ref="${element.ref}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-                [#if element.docValue?exists]
+                [#if element.docValue?? || element.referencesQNameEnum!false]
               <${xs}:annotation>
+                  [#if element.docValue??]
                 <${xs}:documentation>
                   <![CDATA[${element.docValue}]]>
                 </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
               </${xs}:annotation>
                 [/#if]
               </${xs}:element>
               [#elseif element.baseType.anonymous]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-                [#if element.docValue?exists]
-                <${xs}:annotation>
-                  <${xs}:documentation>
-                    <![CDATA[${element.docValue}]]>
-                  </${xs}:documentation>
-                </${xs}:annotation>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
                 [/#if]
                 [@processAnonymousType type=element.baseType/]
               </${xs}:element>
               [#elseif element.xmlList]
               <${xs}:element name="${element.name}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-                [#if element.docValue?exists]
-                <${xs}:annotation>
-                  <${xs}:documentation>
-                    <![CDATA[${element.docValue}]]>
-                  </${xs}:documentation>
-                </${xs}:annotation>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
                 [/#if]
                 <${xs}:simpleType>
                   <${xs}:list itemType="${element.baseType.qname}"/>
@@ -228,12 +256,19 @@
               </${xs}:element>
               [#else]
               <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
-                [#if element.docValue?exists]
-                <${xs}:annotation>
-                  <${xs}:documentation>
-                    <![CDATA[${element.docValue}]]>
-                  </${xs}:documentation>
-                </${xs}:annotation>
+                [#if element.docValue?? || element.referencesQNameEnum!false]
+              <${xs}:annotation>
+                  [#if element.docValue??]
+                <${xs}:documentation>
+                  <![CDATA[${element.docValue}]]>
+                </${xs}:documentation>
+                  [/#if]
+                  [#if element.referencesQNameEnum!false]
+                <${xs}:documentation>
+                  See ${qnameForType(element.QNameEnumRef)} for an enumeration of known values.
+                </${xs}:documentation>
+                  [/#if]
+              </${xs}:annotation>
                 [/#if]
               </${xs}:element>
               [/#if]
@@ -245,7 +280,7 @@
             [/#if]
           [/#if]
         [/#list]
-        [#if typeDef.anyElement?exists]
+        [#if typeDef.anyElement??]
           [#if typeDef.anyElement.elementRefs?size = 0]
         <${xs}:any [#if typeDef.anyElement.lax]processContents="lax" [#else]processContents="skip" [/#if]namespace="##other"[#if typeDef.anyElement.collectionType] minOccurs="0" maxOccurs="unbounded"[/#if]/>
           [#else]
@@ -269,34 +304,55 @@
     [#--list all the attributes.--]
     [#list typeDef.attributes as attribute]
       [#if !accessorOverridesAnother(attribute)]
-        [#if attribute.ref?exists]
+        [#if attribute.ref??]
       <${xs}:attribute[#if attribute.required] use="required"[/#if] ref="${attribute.ref}">
-          [#if attribute.docValue?exists]
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
         <${xs}:annotation>
+            [#if attribute.docValue??]
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
         </${xs}:annotation>
           [/#if]
       </${xs}:attribute>
         [#elseif attribute.baseType.anonymous]
       <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if]>
-          [#if attribute.docValue?exists]
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
         <${xs}:annotation>
+            [#if attribute.docValue??]
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
         </${xs}:annotation>
           [/#if]
           [@processAnonymousType type=attribute.baseType/]
       </${xs}:attribute>
         [#else]
       <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}">
-          [#if attribute.docValue?exists]
+          [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
         <${xs}:annotation>
+            [#if attribute.docValue??]
           <${xs}:documentation>
             <![CDATA[${attribute.docValue}]]>
           </${xs}:documentation>
+            [/#if]
+            [#if attribute.referencesQNameEnum!false]
+          <${xs}:documentation>
+            See ${qnameForType(attribute.QNameEnumRef)} for an enumeration of known values.
+          </${xs}:documentation>
+            [/#if]
         </${xs}:annotation>
           [/#if]
       </${xs}:attribute>
@@ -304,7 +360,13 @@
       [/#if]
     [/#list]
     [#if typeDef.hasAnyAttribute]
-      <${xs}:anyAttribute namespace="##other" processContents="skip"/>
+      <${xs}:anyAttribute namespace="##other" processContents="skip">
+        <${xs}:annotation>
+          <${xs}:documentation>
+            Any additional attributes.[#if typeDef.anyAttributeQNameEnumRef??] See ${qnameForType(typeDef.anyAttributeQNameEnumRef)} for an enumeration of known values.[/#if]
+          </${xs}:documentation>
+        </${xs}:annotation>
+      </${xs}:anyAttribute>
     [/#if]
 [#t]
     [#if typeDef.contentType.simple]
@@ -320,7 +382,7 @@
 [/#macro]
 [#t]
 [#macro processAnonymousType type]
-  [#if type.map?default(false)]
+  [#if type.map!(false)]
     [@processMapType mapType=type/]
   [#else]
     [@processTypeDef typeDef=type.typeDefinition/]
@@ -356,9 +418,9 @@
 [#t]
 [#macro processImplicitElement implicitElement]
   [#if !isDefinedGlobally(implicitElement)]
-    [#if implicitElement.typeQName?exists]
+    [#if implicitElement.typeQName??]
 <${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">
-      [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
@@ -366,9 +428,9 @@
   </${xs}:annotation>
       [/#if]
 </${xs}:element>
-    [#elseif implicitElement.anonymousTypeDefinition?exists]
+    [#elseif implicitElement.anonymousTypeDefinition??]
 <${xs}:element name="${implicitElement.elementName}">
-      [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
@@ -381,7 +443,7 @@
       [#assign childElements=implicitElement.childElements]
 <${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"/>
 <${xs}:complexType name="${implicitElement.elementName}">
-      [#if implicitElement.elementDocs?exists]
+      [#if implicitElement.elementDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitElement.elementDocs?trim}]]>
@@ -391,7 +453,7 @@
   <${xs}:sequence>
         [#list childElements as childElement]
     <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if]>
-          [#if childElement.elementDocs?exists]
+          [#if childElement.elementDocs??]
       <${xs}:annotation>
         <${xs}:documentation>
           <![CDATA[${childElement.elementDocs?trim}]]>
@@ -409,9 +471,9 @@
   [/#if]
 [/#macro]
 [#macro processImplicitAttribute implicitAttribute]
- [#if implicitAttribute.anonymousTypeDefinition?exists]
+ [#if implicitAttribute.anonymousTypeDefinition??]
 <${xs}:attribute name="${implicitAttribute.attributeName}">
-    [#if implicitAttribute.attributeDocs?exists]
+    [#if implicitAttribute.attributeDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitAttribute.attributeDocs?trim}]]>
@@ -422,7 +484,7 @@
 </${xs}:attribute>
  [#else]
 <${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}">
-    [#if implicitAttribute.attributeDocs?exists]
+    [#if implicitAttribute.attributeDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
       <![CDATA[${implicitAttribute.attributeDocs?trim}]]>

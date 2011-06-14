@@ -78,7 +78,10 @@ namespace ${namespaceFor(type)} {
   [#if type.hasAnyAttribute]
 
     /// <summary>
-    ///  The other attributes
+    ///  The other attributes.
+    [#if type.anyAttributeQNameEnumRef??]
+    ///  See ${classnameFor(type.anyAttributeQNameEnumRef)} for an enumeration of known attributes.
+    [/#if]
     /// </summary>
     [System.Xml.Serialization.XmlAnyAttributeAttribute()]
     public System.Xml.XmlAttribute[] OtherAttributes {

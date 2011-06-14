@@ -148,6 +148,10 @@
  * Other attributes applicable to ${typeName}.
  *
  * Contains instances of JAXBBasicXMLNode.
+  [#if type.anyAttributeQNameEnumRef??]
+ *
+ * See ${classnameFor(type.anyAttributeQNameEnumRef)} for an enumeration of known attributes.
+  [/#if]
  */
 - (NSArray *) otherAttributes;
 

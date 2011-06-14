@@ -452,6 +452,12 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
           }
         }
 
+        if (typeDef.getAnyAttributeQNameEnumRef() != null) {
+          REFERENCE_STACK.get().addFirst("qname enum ref on @XmlAnyAttribute of type definition " + typeDef.getQualifiedName());
+          addReferencedTypeDefinitions(typeDef.getAnyAttributeQNameEnumRef());
+          REFERENCE_STACK.get().removeFirst();
+        }
+
         if ((includeReferencedClasses())) {
           Value value = typeDef.getValue();
           if (value != null) {

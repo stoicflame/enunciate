@@ -185,6 +185,30 @@ public [#if type.abstract]abstract [/#if][#if type.final]final [/#if]class ${sim
   public void setOtherAttributes(java.util.Map<javax.xml.namespace.QName, String> otherAttributes) {
     this.otherAttributes = otherAttributes;
   }
+    [#if type.anyAttributeQNameEnumRef??]
+
+  /**
+   * Get a known attribute.
+   *
+   * @return The value of the known attribute.
+   */
+  public String getKnownAttribute(${classnameFor(type.anyAttributeQNameEnumRef)} attr) {
+    return this.otherAttributes == null ? null : this.otherAttributes.get(${classnameFor(type.anyAttributeQNameEnumRef)}.convertToKnownQName(attr));
+  }
+
+  /**
+   * Set a known attribute.
+   *
+   * @param key The key.
+   * @param value The value.
+   */
+  public void setKnownAttribute(${classnameFor(type.anyAttributeQNameEnumRef)} key, String value) {
+    if (this.otherAttributes == null) {
+      this.otherAttributes = new java.util.HashMap<javax.xml.namespace.QName, String>();
+    }
+    this.otherAttributes.put(${classnameFor(type.anyAttributeQNameEnumRef)}.convertToKnownQName(key), value);
+  }
+    [/#if]
   [/#if]
 
 }

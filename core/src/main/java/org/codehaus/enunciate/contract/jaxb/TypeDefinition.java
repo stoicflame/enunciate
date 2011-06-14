@@ -18,10 +18,7 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.*;
-import com.sun.mirror.type.ClassType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.MirroredTypesException;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
 import com.sun.mirror.util.Declarations;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.DeclarationDecorator;
@@ -31,14 +28,14 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
-import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.enunciate.qname.XmlQNameEnumRef;
+import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -59,6 +56,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   private final Value xmlValue;
   private final Accessor xmlID;
   private final boolean hasAnyAttribute;
+  private final TypeMirror anyAttributeQNameEnumRef;
   private final AnyElement anyElement;
   private final Set<String> referencedFrom = new TreeSet<String>();
 
@@ -85,6 +83,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     Accessor xmlID = null;
     AnyElement anyElement = null;
     boolean hasAnyAttribute = false;
+    TypeMirror anyAttributeQNameEnumRef = null;
     for (MemberDeclaration accessor : loadPotentialAccessors(filter)) {
       Accessor added;
       if (isAttribute(accessor)) {
@@ -111,6 +110,19 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       }
       else if (isAnyAttribute(accessor)) {
         hasAnyAttribute = true;
+
+        XmlQNameEnumRef enumRef = accessor.getAnnotation(XmlQNameEnumRef.class);
+        if (enumRef != null) {
+          AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+          try {
+            TypeDeclaration decl = env.getTypeDeclaration(enumRef.value().getName());
+            anyAttributeQNameEnumRef = env.getTypeUtils().getDeclaredType(decl);
+          }
+          catch (MirroredTypeException e) {
+            anyAttributeQNameEnumRef = e.getTypeMirror();
+          }
+        }
+
         continue;
       }
       else if (isAnyElement(accessor)) {
@@ -153,6 +165,7 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
     this.xmlValue = value;
     this.xmlID = xmlID;
     this.hasAnyAttribute = hasAnyAttribute;
+    this.anyAttributeQNameEnumRef = anyAttributeQNameEnumRef;
     this.anyElement = anyElement;
   }
 
@@ -510,6 +523,15 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public boolean isHasAnyAttribute() {
     return hasAnyAttribute;
+  }
+
+  /**
+   * The enum type containing the known qnames for attributes of the 'any' attribute definition. <code>null</code> if none.
+   *
+   * @return The enum type containing the known qnames for attributes of the 'any' attribute definition. <code>null</code> if none.
+   */
+  public TypeMirror getAnyAttributeQNameEnumRef() {
+    return anyAttributeQNameEnumRef;
   }
 
   /**
