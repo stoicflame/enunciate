@@ -23,6 +23,7 @@ import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
+import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,15 @@ public class SchemaForNamespaceMethod implements TemplateMethodModelEx {
     }
     else if (object instanceof ResourceEntityParameter) {
       ElementDeclaration element = ((ResourceEntityParameter) object).getXmlElement();
+      if (element == null) {
+        return null;
+      }
+
+      namespace = element.getNamespace();
+    }
+    else if (object instanceof ResourceRepresentationMetadata) {
+      ResourceRepresentationMetadata metadata = (ResourceRepresentationMetadata) object;
+      ElementDeclaration element = metadata.getXmlElement();
       if (element == null) {
         return null;
       }
