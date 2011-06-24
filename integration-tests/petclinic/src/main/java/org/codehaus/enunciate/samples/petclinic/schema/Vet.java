@@ -9,11 +9,10 @@ import java.util.Set;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
-public class Vet<H extends Hobby> extends Person {
+public class Vet extends Person {
 
   private Set<Specialty> specialties;
   private Collection<VetType> types;
-  private H hobby;
 
   public Set<Specialty> getSpecialties() {
     return specialties;
@@ -29,13 +28,5 @@ public class Vet<H extends Hobby> extends Person {
 
   public void setTypes(Collection<VetType> types) {
     this.types = types;
-  }
-
-  public H getHobby() {
-    return hobby;
-  }
-
-  public void setHobby(H hobby) {
-    this.hobby = hobby;
   }
 }
