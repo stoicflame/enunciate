@@ -59,8 +59,9 @@ public class TestAMFMapperIntrospector extends TestCase {
 
     assertEquals(result2.length, 1);
     assertNotNull(result2[0].getKey());
-    assertEquals(result2[0].getKey(), "value");
-
+    assertEquals(result2[0].getKey(), "key");
+    assertEquals(result2[0].getValue(), "value");
+      
     assertTrue("Wrong mapper type.", mapper instanceof AdaptingAMFMapper);
   }
 }
