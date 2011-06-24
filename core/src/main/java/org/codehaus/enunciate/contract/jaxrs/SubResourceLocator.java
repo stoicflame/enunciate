@@ -25,6 +25,7 @@ import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 
 import javax.ws.rs.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -54,7 +55,8 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
     TypeMirror returnType = delegate.getReturnType();
     if ((returnType instanceof DeclaredType) && ((DeclaredType) returnType).getDeclaration() != null) {
       TypeDeclaration declaration = ((DeclaredType) returnType).getDeclaration();
-      resource = new SubResource(declaration, getPath(), this);
+      resource = findRecursiveSubResource(declaration, getPath());
+      resource = resource == null ? new SubResource(declaration, getPath(), this) : resource;
     }
     else {
       resource = new SubResource(Context.getCurrentEnvironment().getTypeDeclaration(Object.class.getName()), getPath(), this);
@@ -74,6 +76,17 @@ public class SubResourceLocator extends DecoratedMethodDeclaration {
 
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
+  }
+
+  //fix for ENUNCIATE-574
+  private SubResource findRecursiveSubResource(TypeDeclaration declaration, String path) {
+    LinkedList<SubResource> ancestorResources = SubResource.ANCESTOR_DECLARATIONS.get();
+    for (SubResource ancestorResource : ancestorResources) {
+      if (ancestorResource.getQualifiedName().equals(declaration.getQualifiedName()) && ancestorResource.getPath().equals(path)) {
+        return ancestorResource;
+      }
+    }
+    return null;
   }
 
   /**

@@ -18,6 +18,7 @@ package org.codehaus.enunciate.contract.jaxrs;
 
 import com.sun.mirror.declaration.TypeDeclaration;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -27,6 +28,13 @@ import java.util.ArrayList;
  * @author Ryan Heaton
  */
 public class SubResource extends Resource {
+
+  static ThreadLocal<LinkedList<SubResource>> ANCESTOR_DECLARATIONS = new ThreadLocal<LinkedList<SubResource>>() {
+    @Override
+    protected LinkedList<SubResource> initialValue() {
+      return new LinkedList<SubResource>();
+    }
+  };
 
   private final String path;
   private final SubResourceLocator locator;
@@ -44,6 +52,21 @@ public class SubResource extends Resource {
     return params;
   }
 
+  @Override
+  protected List<SubResourceLocator> getSubresourceLocators(TypeDeclaration delegate) {
+    if (delegate.getQualifiedName().equals(getQualifiedName())) {
+      ANCESTOR_DECLARATIONS.get().addFirst(this);
+      try {
+        return super.getSubresourceLocators(delegate);
+      }
+      finally {
+        ANCESTOR_DECLARATIONS.get().removeFirst();
+      }
+    }
+    else {
+      return super.getSubresourceLocators(delegate);
+    }
+  }
 
   /**
    * The path to this subresource.
