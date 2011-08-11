@@ -41,6 +41,7 @@ import org.codehaus.enunciate.main.NamedArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
+import org.codehaus.enunciate.modules.ProjectTitleAware;
 import org.codehaus.enunciate.modules.DocumentationAwareModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
@@ -651,7 +652,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.put("isExcludeFromDocs", new IsExcludeFromDocsMethod());
       model.put("getGroups", new GetGroupsMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
-      model.put("generateExampleXml", new GenerateExampleXmlMethod(model));
+      model.put("generateExampleXml", new GenerateExampleXmlMethod(null, model));
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
       model.put("generateExampleJson", new GenerateExampleJsonMethod(model));
       processTemplate(getDocsTemplateURL(), model);
