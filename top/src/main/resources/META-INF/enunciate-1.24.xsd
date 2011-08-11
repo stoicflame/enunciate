@@ -913,22 +913,10 @@
               </xs:attribute>
             </xs:complexType>
           </xs:element>
-          <xs:element name="war" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>used to configure the webapp that will host the documenation.</xs:documentation>
-            </xs:annotation>
-            <xs:complexType>
-              <xs:attribute name="docsDir" type="xs:string">
-                <xs:annotation>
-                  <xs:documentation>the directory in the war to which the documentation will be put.</xs:documentation>
-                </xs:annotation>
-              </xs:attribute>
-            </xs:complexType>
-          </xs:element>
         </xs:sequence>
         <xs:attribute name="docsDir" type="xs:string">
           <xs:annotation>
-            <xs:documentation>The directory in the war to which the documentation will be put.  The default is the root of the war.</xs:documentation>
+            <xs:documentation>The directory in the war to which the documentation will be put.  The default is the root.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="splashPackage" type="xs:string">

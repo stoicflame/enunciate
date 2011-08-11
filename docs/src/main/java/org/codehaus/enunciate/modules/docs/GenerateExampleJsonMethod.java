@@ -25,8 +25,6 @@ import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.*;
 import org.codehaus.enunciate.doc.DocumentationExample;
-import org.codehaus.enunciate.util.RawValueNode;
-import org.codehaus.enunciate.util.WhateverNode;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;

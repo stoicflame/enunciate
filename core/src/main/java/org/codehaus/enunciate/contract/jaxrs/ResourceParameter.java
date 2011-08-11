@@ -19,10 +19,14 @@ package org.codehaus.enunciate.contract.jaxrs;
 import com.sun.mirror.declaration.AnnotationMirror;
 import com.sun.mirror.declaration.AnnotationTypeDeclaration;
 import com.sun.mirror.declaration.Declaration;
+import com.sun.mirror.declaration.ParameterDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
+import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 
 import javax.ws.rs.*;
 
@@ -36,6 +40,7 @@ public class ResourceParameter extends DecoratedDeclaration {
   private final String parameterName;
   private final String defaultValue;
   private final String typeName;
+  private final XmlType xmlType;
 
   private final boolean matrixParam;
   private final boolean queryParam;
@@ -117,6 +122,16 @@ public class ResourceParameter extends DecoratedDeclaration {
       typeName = "custom";
     }
 
+    XmlType xmlType = null;
+    if (declaration instanceof ParameterDeclaration) {
+      try {
+        xmlType = XmlTypeFactory.getXmlType(((ParameterDeclaration) declaration).getType());
+      }
+      catch (XmlTypeException e) {
+        xmlType = null;
+      }
+    }
+
     this.parameterName = parameterName;
     this.matrixParam = matrix;
     this.queryParam = query;
@@ -125,6 +140,7 @@ public class ResourceParameter extends DecoratedDeclaration {
     this.headerParam = header;
     this.formParam = form;
     this.typeName = typeName;
+    this.xmlType = xmlType;
 
     DefaultValue defaultValue = declaration.getAnnotation(DefaultValue.class);
     if (defaultValue != null) {
@@ -238,5 +254,14 @@ public class ResourceParameter extends DecoratedDeclaration {
    */
   public String getTypeName() {
     return this.typeName;
+  }
+
+  /**
+   * The xml type of the parameter, if applicable.
+   *
+   * @return The xml type of the parameter, if applicable.
+   */
+  public XmlType getXmlType() {
+    return xmlType;
   }
 }

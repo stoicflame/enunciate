@@ -24,6 +24,7 @@ import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
+import org.codehaus.enunciate.contract.jaxws.WebParam;
 
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,9 @@ public class SchemaForNamespaceMethod implements TemplateMethodModelEx {
       }
 
       namespace = element.getNamespace();
+    }
+    else if (object instanceof WebParam) {
+      namespace = ((WebParam) object).getXmlType().getNamespace();
     }
     else if (object instanceof ResourceRepresentationMetadata) {
       ResourceRepresentationMetadata metadata = (ResourceRepresentationMetadata) object;

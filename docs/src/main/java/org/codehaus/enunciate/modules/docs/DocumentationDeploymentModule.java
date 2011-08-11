@@ -26,12 +26,8 @@ import net.sf.jelly.apt.util.JavaDocTagHandler;
 import net.sf.jelly.apt.util.JavaDocTagHandlerFactory;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.template.freemarker.GetGroupsMethod;
-import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
-import org.codehaus.enunciate.template.freemarker.IsExcludeFromDocsMethod;
-import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.main.Artifact;
@@ -40,11 +36,14 @@ import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.NamedArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
-import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
-import org.codehaus.enunciate.modules.ProjectTitleAware;
 import org.codehaus.enunciate.modules.DocumentationAwareModule;
+import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.docs.config.DocsRuleSet;
 import org.codehaus.enunciate.modules.docs.config.DownloadConfig;
+import org.codehaus.enunciate.template.freemarker.GetGroupsMethod;
+import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
+import org.codehaus.enunciate.template.freemarker.IsExcludeFromDocsMethod;
+import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -113,6 +112,7 @@ import java.util.*;
  * <h3>attributes</h3>
  *
  * <ul>
+ *   <li>The "docsDir" attribute is the subdirectory to which the documentation will be put.  The default is the root.</li>
  *   <li>The "<b>splashPackage</b>" attribute specifies the package that contains the documentation
  *       to use as the introduction to the API documentation.  By default, no text is used for the
  * introduction.</li>
@@ -152,15 +152,6 @@ import java.util.*;
  *       ignored if the "artifact" attribute is set.</li>
  *   <li>The "description" attribute includes a description of the download.  This attribute is ignored if
  *       the "artifact" attribute is set.</li>
- * </ul>
- *
- * <h3>The "war" element</h3>
- *
- * <p>The "war" element under the "docs" element is used to configure the webapp that will host the documenation. It supports
- * the following attributes:</p>
- *
- * <ul>
- * <li>The "docsDir" attribute is the directory in the war to which the documentation will be put.  The default is the root of the war.</li>
  * </ul>
  *
  * <h1><a name="artifacts">Artifacts</a></h1>
