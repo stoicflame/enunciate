@@ -693,7 +693,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       parent.addContent(new org.jdom.Comment("(content not shown)"));
     }
     else {
-      TypeDefinition parentType = null;
+      XmlType baseType = getBaseType();
+      if (baseType instanceof XmlClassType) {
+        TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
+        if (typeDef != null) {
+          typeDef.generateExampleXml(parent);
+        }
+      }
+
       TYPE_DEF_STACK.get().push(getQualifiedName());
       for (Attribute attribute : getAttributes()) {
         attribute.generateExampleXml(parent);
@@ -707,14 +714,6 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
         }
       }
       TYPE_DEF_STACK.get().pop();
-    }
-
-    XmlType baseType = getBaseType();
-    if (baseType instanceof XmlClassType) {
-      TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
-      if (typeDef != null) {
-        typeDef.generateExampleXml(parent);
-      }
     }
   }
 
@@ -733,6 +732,14 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
       jsonNode.put("...", WhateverNode.instance);
     }
     else {
+      XmlType baseType = getBaseType();
+      if (baseType instanceof XmlClassType) {
+        TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
+        if (typeDef != null) {
+          typeDef.generateExampleJson(jsonNode);
+        }
+      }
+
       TYPE_DEF_STACK.get().push(getQualifiedName());
       for (Attribute attribute : getAttributes()) {
         attribute.generateExampleJson(jsonNode);
@@ -746,15 +753,6 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
         }
       }
       TYPE_DEF_STACK.get().pop();
-    }
-
-
-    XmlType baseType = getBaseType();
-    if (baseType instanceof XmlClassType) {
-      TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
-      if (typeDef != null) {
-        typeDef.generateExampleJson(jsonNode);
-      }
     }
   }
 }
