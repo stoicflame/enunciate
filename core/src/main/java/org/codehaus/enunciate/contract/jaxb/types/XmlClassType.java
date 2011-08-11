@@ -17,7 +17,6 @@
 package org.codehaus.enunciate.contract.jaxb.types;
 
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
-import org.codehaus.jackson.JsonNode;
 
 import javax.xml.namespace.QName;
 
@@ -96,13 +95,4 @@ public class XmlClassType implements XmlType {
     return typeDef;
   }
 
-  // Inherited.
-  public void generateExampleXml(org.jdom.Element node, String specifiedValue) {
-    this.typeDef.generateExampleXml(node);
-  }
-
-  // Inherited.
-  public JsonNode generateExampleJson(String specifiedValue) {
-    return this.typeDef.generateExampleJson();
-  }
 }

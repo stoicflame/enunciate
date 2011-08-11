@@ -32,17 +32,4 @@ public interface ElementDeclaration extends Declaration {
    */
   QName getQname();
 
-  /**
-   * Generate some example XML for this root element.
-   *
-   * @return Some example XML.
-   */
-  String generateExampleXml();
-
-  /**
-   * Generate some example JSON for this root element.
-   *
-   * @return Some example JSON for this root element.
-   */
-  String generateExampleJson();
 }

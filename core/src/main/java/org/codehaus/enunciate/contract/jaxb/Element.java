@@ -26,22 +26,12 @@ import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.enunciate.doc.DocumentationExample;
 import org.codehaus.enunciate.json.JsonName;
-import org.codehaus.enunciate.util.WhateverNode;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
-import org.jdom.Comment;
-import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -482,123 +472,6 @@ public class Element extends Accessor {
    */
   public boolean isElementRefs() {
     return false;
-  }
-
-  public void generateExampleXml(org.jdom.Element parent) {
-    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
-    if (exampleInfo == null || !exampleInfo.exclude()) {
-      if (isWrapped()) {
-        String namespace = getNamespace();
-        String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-        Namespace jdomNS;
-        if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
-          jdomNS = org.jdom.Namespace.XML_NAMESPACE;
-        }
-        else if (namespace == null || "".equals(namespace)) {
-          jdomNS = org.jdom.Namespace.NO_NAMESPACE;
-        }
-        else {
-          jdomNS = Namespace.getNamespace(prefix, namespace);
-        }
-        org.jdom.Element element = new org.jdom.Element(getWrapperName(), jdomNS);
-        parent.addContent(element);
-        parent = element;
-      }
-
-      for (Element choice : getChoices()) {
-        QName ref = choice.getRef();
-        int iterations = "1".equals(choice.getMaxOccurs()) ? 1 : 2;
-        for (int i = 0; i < iterations; i++) {
-          if (ref == null) {
-            String namespace = choice.getNamespace();
-            String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-            Namespace jdomNS;
-            if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
-              jdomNS = org.jdom.Namespace.XML_NAMESPACE;
-            }
-            else if (namespace == null || "".equals(namespace)) {
-              jdomNS = org.jdom.Namespace.NO_NAMESPACE;
-            }
-            else {
-              jdomNS = Namespace.getNamespace(prefix, namespace);
-            }
-            org.jdom.Element element = new org.jdom.Element(choice.getName(), jdomNS);
-            String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
-            XmlType xmlType = choice.getBaseType();
-            if (i == 0) {
-              element.addContent(new Comment("content of type '" + xmlType.getName() + "'"));
-              xmlType.generateExampleXml(element, exampleValue);
-            }
-            else {
-              element.addContent(new Comment("(another '" + xmlType.getName() + "' type)"));
-            }
-            parent.addContent(element);
-          }
-          else {
-            String namespace = ref.getNamespaceURI();
-            String name = ref.getLocalPart();
-            String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-            Namespace jdomNS;
-            if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
-              jdomNS = org.jdom.Namespace.XML_NAMESPACE;
-            }
-            else if (namespace == null || "".equals(namespace)) {
-              jdomNS = org.jdom.Namespace.NO_NAMESPACE;
-            }
-            else {
-              jdomNS = Namespace.getNamespace(prefix, namespace);
-            }
-            org.jdom.Element element = new org.jdom.Element(name, jdomNS);
-            element.addContent(new org.jdom.Text("..."));
-            parent.addContent(element);
-          }
-        }
-        if (iterations > 1) {
-          parent.addContent(new Comment("...more \"" + (ref == null ? choice.getName() : ref.getLocalPart()) + "\" elements..."));
-        }
-      }
-    }
-  }
-
-  public void generateExampleJson(ObjectNode jsonNode) {
-    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
-    if (exampleInfo == null || !exampleInfo.exclude()) {
-      String name = getJsonMemberName();
-      JsonNode elementNode;
-      if (!isCollectionType()) {
-        String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
-        if (!isElementRefs() && getRef() == null) {
-          elementNode = getBaseType().generateExampleJson(exampleValue);
-        }
-        else {
-          elementNode = JsonNodeFactory.instance.objectNode();
-        }
-      }
-      else {
-        ArrayNode exampleChoices = JsonNodeFactory.instance.arrayNode();
-        for (Element choice : getChoices()) {
-          QName ref = choice.getRef();
-          int iterations = "1".equals(choice.getMaxOccurs()) ? 1 : 2;
-          for (int i = 0; i < iterations; i++) {
-            if (ref == null) {
-              String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? null : exampleInfo.value();
-              XmlType xmlType = choice.getBaseType();
-              if (i == 0) {
-                exampleChoices.add(xmlType.generateExampleJson(exampleValue));
-              }
-              else {
-                exampleChoices.add(WhateverNode.instance);
-              }
-            }
-            else {
-              exampleChoices.add(JsonNodeFactory.instance.objectNode());
-            }
-          }
-        }
-        elementNode = exampleChoices;
-      }
-      jsonNode.put(name, elementNode);
-    }
   }
 
   @Override

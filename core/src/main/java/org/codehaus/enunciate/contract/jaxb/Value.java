@@ -18,9 +18,6 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.MemberDeclaration;
 import org.codehaus.enunciate.json.JsonName;
-import org.codehaus.jackson.node.ObjectNode;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.enunciate.doc.DocumentationExample;
 
 /**
  * An accessor that is marshalled in xml to an xml value.
@@ -54,21 +51,6 @@ public class Value extends Accessor {
   @Override
   public boolean isValue() {
     return true;
-  }
-
-  public void generateExampleXml(org.jdom.Element parent) {
-    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
-    if (exampleInfo == null || !exampleInfo.exclude()) {
-      parent.setContent(new org.jdom.Text(exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value()));
-    }
-  }
-
-  public void generateExampleJson(ObjectNode jsonNode) {
-    DocumentationExample exampleInfo = getAnnotation(DocumentationExample.class);
-    if (exampleInfo == null || !exampleInfo.exclude()) {
-      JsonNode valueNode = getBaseType().generateExampleJson(exampleInfo == null || "##default".equals(exampleInfo.value()) ? null : exampleInfo.value());
-      jsonNode.put("value", valueNode);
-    }
   }
 
   @Override

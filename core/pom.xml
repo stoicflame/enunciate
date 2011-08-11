@@ -98,18 +98,6 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
 
-    <!--used for generating example json for documentation-->
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-    </dependency>
-
-    <!--used for generating example xml for documentation-->
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jdom</artifactId>
-    </dependency>
-
   </dependencies>
 
   <profiles>

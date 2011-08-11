@@ -108,10 +108,10 @@
           [/#list]
         [/#list]
         [#if includeExampleXml!false]
-          <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
+          <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
         [/#if]
         [#if includeExampleJson!false]
-          <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
+          <examplejson><![CDATA[${generateExampleJson(element)?trim}]]></examplejson>
         [/#if]
         </element>
       [/#if]
@@ -131,10 +131,10 @@
             [/#list]
           [/#list]
           [#if includeExampleXml!false]
-          <examplexml><![CDATA[${element.generateExampleXml()?trim}]]></examplexml>
+          <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
           [/#if]
           [#if includeExampleJson!false]
-          <examplejson><![CDATA[${element.generateExampleJson()?trim}]]></examplejson>
+          <examplejson><![CDATA[${generateExampleJson(element)?trim}]]></examplejson>
           [/#if]
         </element>
       [/#if]

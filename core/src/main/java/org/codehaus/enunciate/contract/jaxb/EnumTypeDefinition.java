@@ -32,7 +32,6 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.jdom.Element;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -202,8 +201,4 @@ public class EnumTypeDefinition extends SimpleTypeDefinition {
     return Context.getCurrentEnvironment();
   }
 
-  @Override
-  public void generateExampleXml(Element parent) {
-    parent.addContent(new org.jdom.Text("..."));
-  }
 }

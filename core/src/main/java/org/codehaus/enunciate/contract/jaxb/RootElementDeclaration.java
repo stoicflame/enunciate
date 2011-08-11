@@ -18,23 +18,11 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
-import org.codehaus.enunciate.doc.DocumentationExample;
-import org.codehaus.enunciate.doc.ExampleType;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.node.ObjectNode;
-import org.jdom.output.XMLOutputter;
-import org.jdom.Namespace;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 import java.beans.Introspector;
-import java.io.StringWriter;
-import java.util.Arrays;
 
 /**
  * A class declaration decorated so as to be able to describe itself as an XML-Schema root element declaration.
@@ -140,68 +128,4 @@ public class RootElementDeclaration extends DecoratedClassDeclaration implements
     return getSchema();
   }
 
-  /**
-   * Generate some example XML for this root element.
-   *
-   * @return Some example XML.
-   */
-  public String generateExampleXml() {
-    DocumentationExample example = getAnnotation(DocumentationExample.class);
-    if (example != null && !Arrays.asList(example.validTypes()).contains(ExampleType.XML)) {
-      return "";
-    }
-
-    try {
-      String namespace = getNamespace();
-      String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
-      Namespace jdomNS;
-      if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
-        jdomNS = org.jdom.Namespace.XML_NAMESPACE;
-      }
-      else if (namespace == null || "".equals(namespace)) {
-        jdomNS = org.jdom.Namespace.NO_NAMESPACE;
-      }
-      else {
-        jdomNS = Namespace.getNamespace(prefix, namespace);
-      }
-      org.jdom.Element rootElement = new org.jdom.Element(getName(), jdomNS);
-      getTypeDefinition().generateExampleXml(rootElement);
-      org.jdom.Document document = new org.jdom.Document(rootElement);
-
-      XMLOutputter out = new XMLOutputter(org.jdom.output.Format.getPrettyFormat());
-      StringWriter sw = new StringWriter();
-      out.output(document, sw);
-      sw.flush();
-      return sw.toString();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Generate some example JSON for this root element.
-   *
-   * @return Some example JSON for this root element.
-   */
-  public String generateExampleJson() {
-    DocumentationExample example = getAnnotation(DocumentationExample.class);
-    if (example != null && !Arrays.asList(example.validTypes()).contains(ExampleType.JSON)) {
-      return "";
-    }
-
-    try {
-      ObjectNode node = getTypeDefinition().generateExampleJson();
-      StringWriter sw = new StringWriter();
-      JsonGenerator generator = new JsonFactory().createJsonGenerator(sw);
-      generator.useDefaultPrettyPrinter();
-      node.serialize(generator, null);
-      generator.flush();
-      sw.flush();
-      return sw.toString();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

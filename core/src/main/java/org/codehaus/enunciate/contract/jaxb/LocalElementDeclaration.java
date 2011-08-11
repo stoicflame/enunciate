@@ -1,7 +1,6 @@
 package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
-import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.ParameterDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
@@ -10,22 +9,13 @@ import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
-import net.sf.jelly.apt.freemarker.FreemarkerModel;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.ValidationException;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.node.ObjectNode;
-import org.jdom.Comment;
-import org.jdom.Namespace;
-import org.jdom.output.XMLOutputter;
 
 import javax.xml.bind.annotation.XmlElementDecl;
 import javax.xml.namespace.QName;
-import java.io.StringWriter;
 import java.util.Collection;
 
 /**
@@ -197,80 +187,4 @@ public class LocalElementDeclaration extends DecoratedMethodDeclaration implemen
     return Context.getCurrentEnvironment();
   }
 
-  /**
-   * Generate some example XML for this root element.
-   *
-   * @return Some example XML.
-   */
-  public String generateExampleXml() {
-    try {
-      String namespace = getNamespace();
-      EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-      String prefix = namespace == null ? null : model.getNamespacesToPrefixes().get(namespace);
-      Namespace jdomNS;
-      if (org.jdom.Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
-        jdomNS = org.jdom.Namespace.XML_NAMESPACE;
-      }
-      else if (namespace == null || "".equals(namespace)) {
-        jdomNS = org.jdom.Namespace.NO_NAMESPACE;
-      }
-      else {
-        jdomNS = Namespace.getNamespace(prefix, namespace);
-      }
-      org.jdom.Element rootElement = new org.jdom.Element(getName(), jdomNS);
-      TypeDeclaration elementTypeDeclaration = getElementTypeDeclaration();
-      if (elementTypeDeclaration instanceof ClassDeclaration) {
-        TypeDefinition typeDef = model.findTypeDefinition((ClassDeclaration) elementTypeDeclaration);
-        if (typeDef != null) {
-          typeDef.generateExampleXml(rootElement);
-        }
-        else {
-          rootElement.addContent(new Comment("..."));
-        }
-      }
-      else {
-        rootElement.addContent(new Comment("..."));
-      }
-      org.jdom.Document document = new org.jdom.Document(rootElement);
-
-      XMLOutputter out = new XMLOutputter(org.jdom.output.Format.getPrettyFormat());
-      StringWriter sw = new StringWriter();
-      out.output(document, sw);
-      sw.flush();
-      return sw.toString();
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Generate some example JSON for this root element.
-   *
-   * @return Some example JSON for this root element.
-   */
-  public String generateExampleJson() {
-    try {
-      TypeDeclaration elementTypeDeclaration = getElementTypeDeclaration();
-      if (elementTypeDeclaration instanceof ClassDeclaration) {
-        EnunciateFreemarkerModel model = (EnunciateFreemarkerModel) FreemarkerModel.get();
-        TypeDefinition typeDef = model.findTypeDefinition((ClassDeclaration) elementTypeDeclaration);
-        if (typeDef != null) {
-          ObjectNode node = typeDef.generateExampleJson();
-          StringWriter sw = new StringWriter();
-          JsonGenerator generator = new JsonFactory().createJsonGenerator(sw);
-          generator.useDefaultPrettyPrinter();
-          node.serialize(generator, null);
-          generator.flush();
-          sw.flush();
-          return sw.toString();
-        }
-      }
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    return "";
-  }
 }

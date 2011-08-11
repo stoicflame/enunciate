@@ -27,15 +27,11 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
-import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
-import org.codehaus.enunciate.util.WhateverNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -673,86 +669,4 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
    */
   public abstract XmlType getBaseType();
 
-  /**
-   * Stack used for maintaining the list of type definitions for which we are currently generating example xml/json. Used to
-   * prevent infinite recursion for circular references.
-   */
-  private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>();
-
-  /**
-   * Generate some example xml, appending to the specified node.
-   *
-   * @param parent The parent node.
-   */
-  public void generateExampleXml(org.jdom.Element parent) {
-    if (TYPE_DEF_STACK.get() == null) {
-      TYPE_DEF_STACK.set(new Stack<String>());
-    }
-
-    if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
-      parent.addContent(new org.jdom.Comment("(content not shown)"));
-    }
-    else {
-      XmlType baseType = getBaseType();
-      if (baseType instanceof XmlClassType) {
-        TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
-        if (typeDef != null) {
-          typeDef.generateExampleXml(parent);
-        }
-      }
-
-      TYPE_DEF_STACK.get().push(getQualifiedName());
-      for (Attribute attribute : getAttributes()) {
-        attribute.generateExampleXml(parent);
-      }
-      if (getValue() != null) {
-        getValue().generateExampleXml(parent);
-      }
-      else {
-        for (Element element : getElements()) {
-          element.generateExampleXml(parent);
-        }
-      }
-      TYPE_DEF_STACK.get().pop();
-    }
-  }
-
-  public ObjectNode generateExampleJson() {
-    if (TYPE_DEF_STACK.get() == null) {
-      TYPE_DEF_STACK.set(new Stack<String>());
-    }
-
-    ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
-    generateExampleJson(jsonNode);
-    return jsonNode;
-  }
-
-  protected void generateExampleJson(ObjectNode jsonNode) {
-    if (TYPE_DEF_STACK.get().contains(getQualifiedName())) {
-      jsonNode.put("...", WhateverNode.instance);
-    }
-    else {
-      XmlType baseType = getBaseType();
-      if (baseType instanceof XmlClassType) {
-        TypeDefinition typeDef = ((XmlClassType) baseType).getTypeDefinition();
-        if (typeDef != null) {
-          typeDef.generateExampleJson(jsonNode);
-        }
-      }
-
-      TYPE_DEF_STACK.get().push(getQualifiedName());
-      for (Attribute attribute : getAttributes()) {
-        attribute.generateExampleJson(jsonNode);
-      }
-      if (getValue() != null) {
-        getValue().generateExampleJson(jsonNode);
-      }
-      else {
-        for (Element element : getElements()) {
-          element.generateExampleJson(jsonNode);
-        }
-      }
-      TYPE_DEF_STACK.get().pop();
-    }
-  }
 }

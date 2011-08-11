@@ -652,7 +652,9 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.put("isExcludeFromDocs", new IsExcludeFromDocsMethod());
       model.put("getGroups", new GetGroupsMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
+      model.put("generateExampleXml", new GenerateExampleXmlMethod(null, model));
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
+      model.put("generateExampleJson", new GenerateExampleJsonMethod(model));
       processTemplate(getDocsTemplateURL(), model);
     }
     else {

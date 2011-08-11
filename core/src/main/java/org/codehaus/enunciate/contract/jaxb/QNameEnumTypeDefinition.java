@@ -28,8 +28,6 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.contract.validation.Validator;
-import org.jdom.Element;
-import org.jdom.Text;
 
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -162,8 +160,4 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
     return new ValidationResult();
   }
 
-  @Override
-  public void generateExampleXml(Element parent) {
-    parent.addContent(new Text("..."));
-  }
 }
