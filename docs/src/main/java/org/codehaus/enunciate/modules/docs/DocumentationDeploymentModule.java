@@ -193,6 +193,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean jacksonXcAvailable = false;
   private String indexPageName = "index.html";
   private boolean disableRestMountpoint = false;
+  private String defaultNamespace = null;
 
   /**
    * @return "docs"
@@ -560,6 +561,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
+   * The default namespace for the purposes of generating documentation.
+   *
+   * @return The default namespace for the purposes of generating documentation.
+   */
+  public String getDefaultNamespace() {
+    return defaultNamespace;
+  }
+
+  /**
+   * The default namespace for the purposes of generating documentation.
+   *
+   * @param defaultNamespace The default namespace for the purposes of generating documentation.
+   */
+  public void setDefaultNamespace(String defaultNamespace) {
+    this.defaultNamespace = defaultNamespace;
+  }
+
+  /**
    * The directory into which the documentation is put.
    *
    * @return The directory into which the documentation is put.
@@ -652,7 +671,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       model.put("isExcludeFromDocs", new IsExcludeFromDocsMethod());
       model.put("getGroups", new GetGroupsMethod());
       model.put("includeExampleXml", isIncludeExampleXml());
-      model.put("generateExampleXml", new GenerateExampleXmlMethod(null, model));
+      model.put("generateExampleXml", new GenerateExampleXmlMethod(getDefaultNamespace(), model));
       model.put("includeExampleJson", (forceExampleJson || (jacksonXcAvailable && isIncludeExampleJson())));
       model.put("generateExampleJson", new GenerateExampleJsonMethod(model));
       processTemplate(getDocsTemplateURL(), model);
