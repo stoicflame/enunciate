@@ -23,6 +23,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.MapXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlClassType;
@@ -37,6 +38,7 @@ import org.jdom.output.XMLOutputter;
 import javax.xml.namespace.QName;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -50,11 +52,9 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
    */
   private static final ThreadLocal<Stack<String>> TYPE_DEF_STACK = new ThreadLocal<Stack<String>>();
 
-  private final String defaultNamespace;
   private final EnunciateFreemarkerModel model;
 
-  public GenerateExampleXmlMethod(String defaultNamespace, EnunciateFreemarkerModel model) {
-    this.defaultNamespace = defaultNamespace;
+  public GenerateExampleXmlMethod(EnunciateFreemarkerModel model) {
     this.model = model;
   }
 
@@ -67,7 +67,7 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
     String namespace;
     String name;
     TypeDefinition type;
-    String defaultNs = this.defaultNamespace;
+    String defaultNs = findDefaultNamespace();
     int maxDepth = Integer.MAX_VALUE;
     if (object instanceof RootElementDeclaration) {
       RootElementDeclaration rootEl = (RootElementDeclaration) object;
@@ -128,6 +128,23 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String findDefaultNamespace() {
+    String defaultNs = null;
+    EnunciateConfiguration config = this.model.getEnunciateConfig();
+    if (config != null) {
+      Map<String,String> ns2prefix = config.getNamespacesToPrefixes();
+      if (ns2prefix != null) {
+        for (Map.Entry<String, String> entry : ns2prefix.entrySet()) {
+          if ("".equals(entry.getValue())) {
+            defaultNs = entry.getKey();
+            break;
+          }
+        }
+      }
+    }
+    return defaultNs;
   }
 
   protected void generateExampleXml(TypeDefinition type, org.jdom.Element parent, String defaultNs, int maxDepth) {
