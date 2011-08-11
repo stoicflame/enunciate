@@ -30,4 +30,21 @@ public @interface XmlQNameEnum {
    */
   String namespace() default "##default";
 
+  /**
+   * The base type for this QName enum.
+   *
+   * @return The base type for this QName enum.
+   */
+  BaseType base() default BaseType.QNAME;
+
+  /**
+   * Enumeration of known base types of QName enums.
+   */
+  public enum BaseType {
+
+    QNAME,
+
+    URI
+  }
+
 }

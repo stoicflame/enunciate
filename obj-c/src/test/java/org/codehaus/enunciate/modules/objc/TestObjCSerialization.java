@@ -6,6 +6,7 @@ import org.codehaus.enunciate.examples.objc.schema.*;
 import org.codehaus.enunciate.examples.objc.schema.animals.Cat;
 import org.codehaus.enunciate.examples.objc.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.objc.schema.structures.House;
+import org.codehaus.enunciate.examples.objc.schema.structures.HouseColor;
 import org.codehaus.enunciate.examples.objc.schema.structures.HouseStyle;
 import org.codehaus.enunciate.examples.objc.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.objc.schema.vehicles.Bus;
@@ -272,6 +273,7 @@ public class TestObjCSerialization extends TestCase {
     house.setConstructedDate(new DateTime(date, DateTimeZone.UTC));
     house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
     house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
+    house.setColor(XmlQNameEnumUtil.toURI(HouseColor.blue));
     house = processThroughXml(house);
 
     base = house.getBase();
@@ -314,6 +316,7 @@ public class TestObjCSerialization extends TestCase {
     assertEquals(date.getTime() - (date.getTime() % 1000), house.getConstructedDate().getMillis());
     assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
     assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(XmlQNameEnumUtil.toURI(HouseColor.blue), house.getColor());
   }
 
   /**

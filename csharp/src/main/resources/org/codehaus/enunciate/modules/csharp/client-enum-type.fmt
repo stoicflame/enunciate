@@ -53,11 +53,15 @@ namespace ${namespaceFor(type)} {
     /// <summary>
     /// Get the known ${type.clientSimpleName} for a given QName. If the QName isn't a known QName, [#if unknownQNameEnum != ""]${type.clientSimpleName}.${unknownQNameEnum}[#else]${type.clientSimpleName}.NULL[/#if] will be returned.
     /// </summary>
-    public static ${type.clientSimpleName} ConvertFromKnownQName(System.Xml.XmlQualifiedName qname) {
+    public static ${type.clientSimpleName} ConvertFromKnownQName(${classnameFor(type.enumBaseClass)} qname) {
       if (qname != null) {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
+        [#if !type.uriBaseType]
         if ("${enumValueMap[constant.simpleName].localPart}".Equals(qname.Name) && [#if enumValueMap[constant.simpleName].namespaceURI == ""]string.IsNullOrEmpty(qname.Namespace)[#else]"${enumValueMap[constant.simpleName].namespaceURI}".Equals(qname.Namespace)[/#if]) {
+        [#else]
+        if ("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}".Equals(qname)) {
+        [/#if]
           return ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if];
         }
       [/#if]
@@ -73,12 +77,16 @@ namespace ${namespaceFor(type)} {
     /// <summary>
     /// Convert the known ${type.clientSimpleName} to a QName. If [#if unknownQNameEnum != ""]${type.clientSimpleName}.${unknownQNameEnum}[#else]${type.clientSimpleName}.NULL[/#if], an ArgumentException will be thrown.
     /// </summary>
-    public static System.Xml.XmlQualifiedName ConvertToKnownQName(${type.clientSimpleName} known) {
+    public static ${classnameFor(type.enumBaseClass)} ConvertToKnownQName(${type.clientSimpleName} known) {
       switch (known) {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
         case ${type.clientSimpleName}.[#if constant.annotations["org.codehaus.enunciate.ClientName"]?exists]${constant.annotations["org.codehaus.enunciate.ClientName"].value}[#else]${constant.simpleName}[/#if]:
+        [#if !type.uriBaseType]
           return new System.Xml.XmlQualifiedName("${enumValueMap[constant.simpleName].localPart}", "${enumValueMap[constant.simpleName].namespaceURI}");
+        [#else]
+          return "${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}";
+        [/#if]
       [/#if]
     [/#list]
         default:

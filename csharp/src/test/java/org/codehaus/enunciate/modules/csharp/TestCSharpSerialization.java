@@ -6,6 +6,7 @@ import org.codehaus.enunciate.examples.csharp.schema.*;
 import org.codehaus.enunciate.examples.csharp.schema.animals.Cat;
 import org.codehaus.enunciate.examples.csharp.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.csharp.schema.structures.House;
+import org.codehaus.enunciate.examples.csharp.schema.structures.HouseColor;
 import org.codehaus.enunciate.examples.csharp.schema.structures.HouseStyle;
 import org.codehaus.enunciate.examples.csharp.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.csharp.schema.vehicles.Bus;
@@ -273,6 +274,7 @@ public class TestCSharpSerialization extends TestCase {
 //    house.setConstructedDate(new DateTime(date, DateTimeZone.UTC));
     house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
     house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
+    house.setColor(XmlQNameEnumUtil.toURI(HouseColor.blue));
 
     house = processThroughXml(house);
 
@@ -315,6 +317,7 @@ public class TestCSharpSerialization extends TestCase {
     assertNull("constructed date should be null (C# value type should not be serialized)", house.getConstructedDate());
     assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
     assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(XmlQNameEnumUtil.toURI(HouseColor.blue), house.getColor());
     //todo: figure out the timezone particulars.
     //assertEquals(new DateTime(date, DateTimeZone.UTC), house.getConstructedDate());
 

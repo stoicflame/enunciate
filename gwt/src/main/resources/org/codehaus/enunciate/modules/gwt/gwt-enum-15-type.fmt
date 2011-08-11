@@ -40,7 +40,11 @@ public enum ${type.simpleName} implements com.google.gwt.user.client.rpc.IsSeria
     }
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
+        [#if !type.uriBaseType]
     if ("{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}".equals(qnameValue)) {
+        [#else]
+    if ("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}".equals(qnameValue)) {
+        [/#if]
       return ${constant.simpleName};
     }
       [/#if]
@@ -61,7 +65,11 @@ public enum ${type.simpleName} implements com.google.gwt.user.client.rpc.IsSeria
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
       case ${constant.simpleName}:
+        [#if !type.uriBaseType]
         return "{${enumValueMap[constant.simpleName].namespaceURI}}${enumValueMap[constant.simpleName].localPart}";
+        [#else]
+        return "${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}";
+        [/#if]
       [/#if]
     [/#list]
       default:

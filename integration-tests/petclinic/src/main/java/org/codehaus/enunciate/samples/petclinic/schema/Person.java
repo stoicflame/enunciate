@@ -3,6 +3,7 @@ package org.codehaus.enunciate.samples.petclinic.schema;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 
 import javax.xml.namespace.QName;
+import java.net.URI;
 
 /**
  * Simple JavaBean domain object representing an person.
@@ -19,6 +20,7 @@ public class Person extends Entity {
   private QName favoriteFood;
   private QName favoriteColor;
   private QName education;
+  private URI defenseTraining;
 
   public String getFirstName() {
     return this.firstName;
@@ -85,5 +87,14 @@ public class Person extends Entity {
 
   public void setEducation(QName education) {
     this.education = education;
+  }
+
+  @XmlQNameEnumRef(DefenseTraining.class)
+  public URI getDefenseTraining() {
+    return defenseTraining;
+  }
+
+  public void setDefenseTraining(URI defenseTraining) {
+    this.defenseTraining = defenseTraining;
   }
 }

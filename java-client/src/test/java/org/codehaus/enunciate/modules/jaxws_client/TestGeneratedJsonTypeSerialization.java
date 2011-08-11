@@ -23,6 +23,7 @@ import org.codehaus.enunciate.examples.jaxws_client.schema.animals.Cat;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.jaxws_client.schema.draw.CanvasAttachment;
 import org.codehaus.enunciate.examples.jaxws_client.schema.structures.House;
+import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseColor;
 import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseStyle;
 import org.codehaus.enunciate.examples.jaxws_client.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.jaxws_client.schema.vehicles.Bus;
@@ -349,6 +350,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     house.setConstructedDate(new DateTime(3L));
     house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
     house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
+    house.setColor(XmlQNameEnumUtil.toURI(HouseColor.blue));
 
     JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
     ObjectMapper houseMapper = provider.locateMapper(House.class, MediaType.APPLICATION_JSON_TYPE);
@@ -438,6 +440,7 @@ public class TestGeneratedJsonTypeSerialization extends TestCase {
     assertEquals(new DateTime(3L), house.getConstructedDate());
     assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
     assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(XmlQNameEnumUtil.toURI(HouseColor.blue), house.getColor());
 
     //now let's check the nillable and required stuff:
 

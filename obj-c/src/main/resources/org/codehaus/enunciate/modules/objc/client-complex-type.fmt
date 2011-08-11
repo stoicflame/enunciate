@@ -225,7 +225,7 @@
  */
 - (void) setKnown${clientSimpleName(attribute)?cap_first}: (${classnameFor(attribute.QNameEnumRef)}) new${clientSimpleName(attribute)?cap_first}
 {
-  QName *qname = convertKnown${functionIdentifierFor(attribute.QNameEnumRef)}(new${clientSimpleName(attribute)?cap_first});
+  ${classnameFor(attribute)} *qname = convertKnown${functionIdentifierFor(attribute.QNameEnumRef)}(new${clientSimpleName(attribute)?cap_first});
   if (qname) {
     [self set${clientSimpleName(attribute)?cap_first}: qname];
   }
@@ -284,7 +284,7 @@
  */
 - (void) setKnown${clientSimpleName(type.value)?cap_first}: (${classnameFor(type.value.QNameEnumRef)}) new${clientSimpleName(type.value)?cap_first}
 {
-  QName *qname = convertKnown${functionIdentifierFor(type.value.QNameEnumRef)}(new${clientSimpleName(type.value)?cap_first});
+  ${classnameFor(type.value)} *qname = convertKnown${functionIdentifierFor(type.value.QNameEnumRef)}(new${clientSimpleName(type.value)?cap_first});
   if (qname) {
     [self set${clientSimpleName(type.value)?cap_first}: qname];
   }
@@ -343,7 +343,7 @@
  */
 - (void) setKnown${clientSimpleName(element)?cap_first}: (${classnameFor(element.QNameEnumRef)}) new${clientSimpleName(element)?cap_first}
 {
-  QName *qname = convertKnown${functionIdentifierFor(element.QNameEnumRef)}(new${clientSimpleName(element)?cap_first});
+  ${classnameFor(element)} *qname = convertKnown${functionIdentifierFor(element.QNameEnumRef)}(new${clientSimpleName(element)?cap_first});
   if (qname) {
     [self set${clientSimpleName(element)?cap_first}: qname];
   }

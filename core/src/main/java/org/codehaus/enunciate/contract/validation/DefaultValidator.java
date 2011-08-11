@@ -40,6 +40,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -785,8 +786,8 @@ public class DefaultValidator implements Validator, ConfigurableRules {
 
     if (accessor.isReferencesQNameEnum()) {
       TypeMirror accessorType = accessor.getAccessorType();
-      if (!(accessorType instanceof DecoratedDeclaredType) || !((DecoratedDeclaredType) accessorType).isInstanceOf(QName.class.getName())) {
-        result.addError(accessor, "An accessor that references a QName enumeration must return QName.");
+      if (!(accessorType instanceof DecoratedDeclaredType) || (!((DecoratedDeclaredType) accessorType).isInstanceOf(QName.class.getName()) && !((DecoratedDeclaredType) accessorType).isInstanceOf(URI.class.getName()))) {
+        result.addError(accessor, "An accessor that references a QName enumeration must return QName or URI.");
       }
 
       TypeMirror enumRef = accessor.getQNameEnumRef();

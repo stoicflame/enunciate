@@ -25,21 +25,25 @@ public enum ${type.simpleName} {
    * Convert this enum to a QName.
    *
    */
-  public javax.xml.namespace.QName toQName() {
+  public ${classnameFor(type.enumBaseClass)} toQName() {
     return convertToKnownQName(this);
   }
 
   /**
    * Convert a QName to a ${type.simpleName}. If the QName is not a known QName, [#if unknownQNameEnum != ""]${type.simpleName}.${unknownQNameEnum}[#else]null[/#if] will be returned.
    */
-  public static ${type.simpleName} convertFromKnownQName(javax.xml.namespace.QName qname) {
+  public static ${type.simpleName} convertFromKnownQName(${classnameFor(type.enumBaseClass)} qname) {
     if (qname == null) {
       return null;
     }
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
+        [#if !type.uriBaseType]
     if ("${enumValueMap[constant.simpleName].namespaceURI}".equals(qname.getNamespaceURI())
         && "${enumValueMap[constant.simpleName].localPart}".equals(qname.getLocalPart())) {
+        [#else]
+    if ("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}".equals(qname.toString())) {
+        [/#if]
       return ${type.simpleName}.${constant.simpleName};
     }
       [/#if]
@@ -54,7 +58,7 @@ public enum ${type.simpleName} {
    * @throws IllegalArgumentException If ${type.simpleName}.${unknownQNameEnum} is passed.
     [/#if]
    */
-  public static javax.xml.namespace.QName convertToKnownQName(${type.simpleName} value) {
+  public static ${classnameFor(type.enumBaseClass)} convertToKnownQName(${type.simpleName} value) {
     if (value == null) {
       return null;
     }
@@ -62,7 +66,11 @@ public enum ${type.simpleName} {
     [#list type.enumConstants as constant]
       [#if enumValueMap[constant.simpleName]??]
       case ${constant.simpleName}:
+        [#if !type.uriBaseType]
         return new javax.xml.namespace.QName("${enumValueMap[constant.simpleName].namespaceURI}", "${enumValueMap[constant.simpleName].localPart}");
+        [#else]
+        return java.net.URI.create("${enumValueMap[constant.simpleName].namespaceURI}${enumValueMap[constant.simpleName].localPart}");
+        [/#if]
       [/#if]
     [/#list]
       default:

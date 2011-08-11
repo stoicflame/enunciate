@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import javax.xml.namespace.QName;
 import java.lang.annotation.RetentionPolicy;
+import java.net.URI;
 
 /**
  * @author Ryan Heaton
@@ -53,6 +54,28 @@ public class TestXmlQNameEnumUtil extends TestCase {
     assertEquals(AnotherSpecialQNameEnum.other, XmlQNameEnumUtil.fromQName(new QName("urn:something", "specific"), AnotherSpecialQNameEnum.class));
     assertEquals(AnotherSpecialQNameEnum.other, XmlQNameEnumUtil.fromQName(new QName("urn:enunciate", "something"), AnotherSpecialQNameEnum.class));
     assertEquals(AnotherSpecialQNameEnum.other, XmlQNameEnumUtil.fromQName(new QName("urn:enunciate", "not_a_qname_enum"), AnotherSpecialQNameEnum.class));
+  }
+
+  /**
+   * tests to/from qname enum.
+   */
+  public void testToFromUri() throws Exception {
+    assertEquals(URI.create("urn:special#appropriate"), XmlQNameEnumUtil.toURI(SpecialURIEnum.appropriate));
+    assertEquals(URI.create("urn:special#best"), XmlQNameEnumUtil.toURI(SpecialURIEnum.best));
+    assertEquals(URI.create("urn:definite#unique"), XmlQNameEnumUtil.toURI(SpecialURIEnum.certain));
+    assertEquals(URI.create("urn:definite#chief"), XmlQNameEnumUtil.toURI(SpecialURIEnum.chief));
+
+    assertEquals(SpecialURIEnum.appropriate, XmlQNameEnumUtil.fromURI(URI.create("urn:special#appropriate"), SpecialURIEnum.class));
+    assertEquals(SpecialURIEnum.best, XmlQNameEnumUtil.fromURI(URI.create("urn:special#best"), SpecialURIEnum.class));
+    assertEquals(SpecialURIEnum.certain, XmlQNameEnumUtil.fromURI(URI.create("urn:definite#unique"), SpecialURIEnum.class));
+    assertEquals(SpecialURIEnum.chief, XmlQNameEnumUtil.fromURI(URI.create("urn:definite#chief"), SpecialURIEnum.class));
+    assertNull(XmlQNameEnumUtil.fromURI(URI.create("urn:something#chief"), SpecialURIEnum.class));
+    assertNull(XmlQNameEnumUtil.fromURI(URI.create("urn:definite#howdy"), SpecialURIEnum.class));
+    try {
+      XmlQNameEnumUtil.fromURI(URI.create("urn:definite#howdy"), RetentionPolicy.class);
+      fail();
+    }
+    catch (IllegalArgumentException e) {}
   }
 
 }

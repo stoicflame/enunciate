@@ -32,6 +32,7 @@ import org.jdom.Element;
 import org.jdom.Text;
 
 import javax.xml.namespace.QName;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -42,6 +43,7 @@ import java.util.*;
 public class QNameEnumTypeDefinition extends EnumTypeDefinition {
 
   private final String namespace;
+  private final XmlQNameEnum.BaseType baseType;
 
   public QNameEnumTypeDefinition(EnumDeclaration delegate) {
     super(delegate);
@@ -56,6 +58,8 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
       namespace = xmlQNameEnum.namespace();
     }
     this.namespace = namespace;
+
+    this.baseType = xmlQNameEnum.base();
   }
 
   @Override
@@ -124,12 +128,18 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   // Inherited.
   @Override
   public XmlType getBaseType() {
-    return KnownXmlType.QNAME;
+    return isUriBaseType() ? KnownXmlType.ANY_URI : KnownXmlType.QNAME;
+  }
+
+  public boolean isUriBaseType() {
+    return this.baseType == XmlQNameEnum.BaseType.URI;
   }
 
   @Override
   public TypeMirror getEnumBaseClass() {
-    TypeDeclaration decl = getEnv().getTypeDeclaration(QName.class.getName());
+    TypeDeclaration decl = isUriBaseType() ?
+      getEnv().getTypeDeclaration(URI.class.getName()) :
+      getEnv().getTypeDeclaration(QName.class.getName());
     return getEnv().getTypeUtils().getDeclaredType(decl);
   }
 

@@ -6,6 +6,7 @@ import org.codehaus.enunciate.examples.c.schema.*;
 import org.codehaus.enunciate.examples.c.schema.animals.Cat;
 import org.codehaus.enunciate.examples.c.schema.draw.Canvas;
 import org.codehaus.enunciate.examples.c.schema.structures.House;
+import org.codehaus.enunciate.examples.c.schema.structures.HouseColor;
 import org.codehaus.enunciate.examples.c.schema.structures.HouseStyle;
 import org.codehaus.enunciate.examples.c.schema.structures.HouseType;
 import org.codehaus.enunciate.examples.c.schema.vehicles.Bus;
@@ -273,6 +274,7 @@ public class TestCSerialization extends TestCase {
     house.setConstructedDate(new DateTime(date, DateTimeZone.UTC));
     house.setType(XmlQNameEnumUtil.toQName(HouseType.brick));
     house.setStyle(XmlQNameEnumUtil.toQName(HouseStyle.latin));
+    house.setColor(XmlQNameEnumUtil.toURI(HouseColor.blue));
 
     house = processThroughXml(house);
 
@@ -316,6 +318,7 @@ public class TestCSerialization extends TestCase {
     assertEquals(date.getTime() - (date.getTime() % 1000), house.getConstructedDate().getMillis());
     assertEquals(XmlQNameEnumUtil.toQName(HouseType.brick), house.getType());
     assertEquals(XmlQNameEnumUtil.toQName(HouseStyle.latin), house.getStyle());
+    assertEquals(XmlQNameEnumUtil.toURI(HouseColor.blue), house.getColor());
   }
 
   /**

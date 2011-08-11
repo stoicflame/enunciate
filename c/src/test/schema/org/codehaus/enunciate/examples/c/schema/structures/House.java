@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.namespace.QName;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -45,6 +46,7 @@ public class House extends Figure {
   private DateTime constructedDate;
   private QName type;
   private QName style;
+  private URI color;
 
   @XmlAttribute
   @XmlQNameEnumRef(HouseType.class)
@@ -122,5 +124,14 @@ public class House extends Figure {
 
   public void setStyle(QName style) {
     this.style = style;
+  }
+
+  @XmlQNameEnumRef(HouseColor.class)
+  public URI getColor() {
+    return color;
+  }
+
+  public void setColor(URI color) {
+    this.color = color;
   }
 }
