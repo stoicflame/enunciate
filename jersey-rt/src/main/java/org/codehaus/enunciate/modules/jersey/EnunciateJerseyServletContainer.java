@@ -170,7 +170,18 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
     //see http://jersey.576304.n2.nabble.com/ServletContainer-and-relative-path-resolution-td674105.html
 
     //first get what the request url is, from which we can base our calculations.
-    UriBuilder requestUrl = UriBuilder.fromUri(String.valueOf(request.getRequestURL()));
+    UriBuilder requestUrl;
+    try {
+      requestUrl = UriBuilder.fromUri(String.valueOf(request.getRequestURL()));
+    }
+    catch (IllegalArgumentException e) {
+      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+      if (message == null) {
+        message = request.getRequestURL().insert(0, "Illegal URI: ").toString();
+      }
+      response.sendError(400, message);
+      return;
+    }
 
     //now calculate the path of the base uri, always starting with the context path.
     StringBuilder baseUriPathBuilder = new StringBuilder();
