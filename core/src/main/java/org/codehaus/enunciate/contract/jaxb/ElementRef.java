@@ -20,19 +20,17 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
 import com.sun.mirror.declaration.MemberDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.MirroredTypeException;
-import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.json.JsonName;
-import org.codehaus.jackson.node.ObjectNode;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
@@ -52,6 +50,7 @@ public class ElementRef extends Element {
   private final XmlElementRef xmlElementRef;
   private final Collection<ElementRef> choices;
   private final QName ref;
+  private boolean isChoice = false;
 
   public ElementRef(MemberDeclaration delegate, TypeDefinition typedef) {
     super(delegate, typedef, null);
@@ -127,6 +126,7 @@ public class ElementRef extends Element {
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
     this.ref = loadRef();
+    this.isChoice = true;
   }
 
   /**
@@ -142,6 +142,7 @@ public class ElementRef extends Element {
     this.choices = new ArrayList<ElementRef>();
     this.choices.add(this);
     this.ref = new QName(ref.getNamespace(), ref.getName());
+    this.isChoice = true;
   }
 
   /**
@@ -272,15 +273,50 @@ public class ElementRef extends Element {
    */
   @Override
   public TypeMirror getAccessorType() {
+    TypeMirror specifiedType = null;
     try {
       if ((xmlElementRef != null) && (xmlElementRef.type() != XmlElementRef.DEFAULT.class)) {
         Class clazz = xmlElementRef.type();
-        return getAccessorType(clazz);
+        specifiedType = getAccessorType(clazz);
       }
     }
     catch (MirroredTypeException e) {
       // The mirrored type exception implies that the specified type is within the source base.
-      return TypeMirrorDecorator.decorate(e.getTypeMirror());
+      specifiedType = TypeMirrorDecorator.decorate(e.getTypeMirror());
+    }
+
+    if (specifiedType != null) {
+      if (!isChoice) {
+        DecoratedTypeMirror accessorType = (DecoratedTypeMirror) super.getAccessorType();
+
+        if (accessorType.isCollection()) {
+          AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
+          Types types = ape.getTypeUtils();
+          if (specifiedType instanceof PrimitiveType) {
+            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
+          }
+          else {
+            specifiedType = types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) specifiedType).getDeclaration().getQualifiedName()));
+          }
+          specifiedType = TypeMirrorDecorator.decorate(types.getDeclaredType(ape.getTypeDeclaration(((DeclaredType) accessorType).getDeclaration().getQualifiedName()), specifiedType));
+        }
+        else if (accessorType.isArray() && !(specifiedType instanceof ArrayType)) {
+          Types types = Context.getCurrentEnvironment().getTypeUtils();
+          if (specifiedType instanceof PrimitiveType) {
+            specifiedType = types.getPrimitiveType(((PrimitiveType) specifiedType).getKind());
+          }
+          else {
+            TypeDeclaration decl = ((DeclaredType) specifiedType).getDeclaration();
+            while (decl instanceof DecoratedTypeDeclaration) {
+              decl = (TypeDeclaration) ((DecoratedTypeDeclaration) decl).getDelegate();
+            }
+            specifiedType = types.getDeclaredType(decl);
+          }
+          specifiedType = TypeMirrorDecorator.decorate(types.getArrayType(specifiedType));
+        }
+      }
+
+      return specifiedType;
     }
 
     return super.getAccessorType();

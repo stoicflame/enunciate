@@ -1,6 +1,7 @@
 package org.codehaus.enunciate.samples.schema;
 
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElementRef;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ public class WrappedElementRefBean {
   private List<BeanThree> list2;
 
   @XmlElementWrapper(name = "list1")
+  @XmlElementRef(type=BeanThree.class)
   public List<BeanThree> getList1() {
     return list1;
   }
@@ -20,7 +22,8 @@ public class WrappedElementRefBean {
     this.list1 = list1;
   }
 
-  @XmlElementWrapper(name = "list1")
+  @XmlElementWrapper(name = "list2")
+  @XmlElementRef(type=BeanThree.class)
   public List<BeanThree> getList2() {
     return list2;
   }
