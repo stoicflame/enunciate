@@ -21,11 +21,10 @@ import java.util.Set;
  * Assembles the whole Enunciate app without compilation or packaging of the war.
  * For use with the "war" packaging.
  *
+ * @author Ryan Heaton
  * @goal docs
  * @phase process-sources
  * @requiresDependencyResolution test
- *
- * @author Ryan Heaton
  */
 public class DocsMojo extends ConfigMojo implements MavenReport {
 
@@ -74,11 +73,10 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
 
   @Override
   public void execute() throws MojoExecutionException {
-      if ( skipEnunciate )
-      {
-          getLog().info( "Skipping enunciate per configuration." );
-          return;
-      }
+    if (skipEnunciate) {
+      getLog().info("Skipping enunciate per configuration.");
+      return;
+    }
 
     super.execute();
 
@@ -195,13 +193,13 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
       super.initModules(modules);
 
       for (DeploymentModule module : modules) {
-        if ("docs".equals(module.getName())) {
+        if (module instanceof DocumentationAwareModule) {
           if (docsSubdir != null) {
-            ((DocumentationAwareModule)module).setDocsDir(docsSubdir);
+            ((DocumentationAwareModule) module).setDocsDir(docsSubdir);
           }
 
           if (indexPageName != null) {
-            ((DocumentationAwareModule)module).setIndexPageName(indexPageName);
+            ((DocumentationAwareModule) module).setIndexPageName(indexPageName);
           }
         }
       }

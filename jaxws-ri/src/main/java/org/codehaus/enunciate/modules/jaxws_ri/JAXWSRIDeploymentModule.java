@@ -298,6 +298,10 @@ public class JAXWSRIDeploymentModule extends FreemarkerDeploymentModule implemen
       debug("JAXWS-RI module is disabled because there are no endpoint interfaces.");
       return true;
     }
+    else if (getModelInternal() != null && getModelInternal().getEnunciateConfig() != null && getModelInternal().getEnunciateConfig().getWebAppConfig() != null && getModelInternal().getEnunciateConfig().getWebAppConfig().isDisabled()) {
+      debug("Module '%s' is disabled because the web application processing has been disabled.", getName());
+      return true;
+    }
 
     return false;
   }
