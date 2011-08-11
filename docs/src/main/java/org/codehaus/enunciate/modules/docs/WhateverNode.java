@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.util;
+package org.codehaus.enunciate.modules.docs;
 
 /**
  * This singleton value class is used to contain "..." as a value (for documentation purposes).

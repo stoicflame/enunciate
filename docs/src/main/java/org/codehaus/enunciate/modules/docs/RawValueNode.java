@@ -1,4 +1,4 @@
-package org.codehaus.enunciate.util;
+package org.codehaus.enunciate.modules.docs;
 
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
