@@ -33,6 +33,9 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
           [/#list]
         [/#list]
+        [#if type.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+        [/#if]
         [#if type.attributes?size > 0]
           <attributes>
           [#list type.attributes as attribute]
@@ -56,6 +59,9 @@
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
               [/#list]
             [/#list]
+            [#if element.annotations["java.lang.Deprecated"]??]
+              <tag name="deprecated"/>
+            [/#if]
             [#list element.choices as choice]
               <choice name="[#if element.wrapped]${element.wrapperName}/[/#if]${choice.name}" namespace="${choice.namespace!""}"[#if !(choice.ref?? || choice.baseType.anonymous)] typeNamespace="${choice.baseType.namespace!""}" typeName="${choice.baseType.qname.localPart}"[/#if][#if choice.ref?? && schemaForNamespace(choice)??] schemaId="${schemaForNamespace(choice).id}"[#elseif schemaForNamespace(choice)??] typeSchemaId="${schemaForNamespace(choice).id}"[/#if]/>
             [/#list]
@@ -84,6 +90,9 @@
               <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
                 [/#list]
               [/#list]
+              [#if constant.annotations["java.lang.Deprecated"]??]
+              <tag name="deprecated"/>
+              [/#if]
             </item>
             [/#if]
           [/#list]
@@ -107,6 +116,9 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
           [/#list]
         [/#list]
+        [#if element.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+        [/#if]
         [#if includeExampleXml!false]
           <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
         [/#if]
@@ -130,6 +142,9 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
             [/#list]
           [/#list]
+          [#if element.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+          [/#if]
           [#if includeExampleXml!false]
           <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
           [/#if]
@@ -212,6 +227,9 @@
           <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
       [/#list]
     [/#list]
+    [#if endpointInterface.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+    [/#if]
     [#list endpointInterface.webMethods as method]
           <method name="${method.operationName}" oneWay="${method.oneWay?string}">
       [#if method.docValue??]
@@ -226,6 +244,9 @@
           [/#list]
         [/#if]
       [/#list]
+      [#if method.annotations["java.lang.Deprecated"]??]
+            <tag name="deprecated"/>
+      [/#if]
       [#list method.webParameters as parameter]
             <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
               <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
@@ -274,6 +295,9 @@
             [/#list]
           [/#if]
         [/#list]
+        [#if resource.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+        [/#if]
         [#if resource.httpMethods?size > 1]
           [#list resource.httpMethods[1..] as alias]
           <alias>${alias}</alias>
@@ -338,6 +362,9 @@
       <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
     [/#list]
   [/#list]
+  [#if package.annotations["java.lang.Deprecated"]??]
+      <tag name="deprecated"/>
+  [/#if]
     </package>
 [/@forAllPackages]
   </packages>
