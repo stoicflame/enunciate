@@ -255,9 +255,9 @@ h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
     text-decoration: none;
 }
 
-h1 { font-size: 30px; line-height:36px; padding:0 0 18px 0; }
+h1 { font-size: 30px; line-height:36px; padding:10px 0 18px 0; }
 h2 { font-size: 20px; line-height:36px; }
-h3 { font-size: 16px; line-height:36px; }
+h3 { font-size: 14px; line-height:36px; }
 h4 { font-size: 14px; font-weight:bold; }
 h5 { font-size: 12px; font-weight:bold; }
 h6 { font-size: 12px; }
@@ -440,6 +440,7 @@ body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blo
 #main h2 {
 	font-size: 1.8em;
 	font-weight: normal;
+    border-bottom: 1px solid #c2b2d4;
 	padding-left: 0;
 	padding-right: 0;
 	margin-bottom: 6px;
@@ -468,9 +469,9 @@ body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blo
 	border-bottom: none;
 }
 #main hr {
-	color: #c4c4c4;
-	background-color: #c4c4c4;
-	border-color: #c4c4c4;
+	color: #FFDF73;
+	background-color: #FFDF73;
+	border-color: #FFDF73;
 }
 #main p {
 	text-align: left;
