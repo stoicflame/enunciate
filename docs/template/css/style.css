@@ -222,6 +222,7 @@ img{margin:0 0 18px 0}
 .push-1{margin:0 -70px 0 18px;float:right}
 .push-2{margin:0 -140px 0 18px;float:right}
 .push-3{margin:0 -210px 0 18px;float:right}
+.deprecated{text-decoration: line-through}
 
 /* @end */
 

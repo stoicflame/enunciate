@@ -22,7 +22,7 @@
       <types>
     [#list schema.typeDefinitions as type]
       [#if !isExcludeFromDocs(type)]
-        <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if] groups="[#list getGroups(type) as group]${group}[#if group_has_next],[/#if][/#list]">
+        <type name="${type.name!"(anonymous)"}" id="${type.qualifiedName}" package="${type.package.qualifiedName}"[#if !type.baseObject] extendsType="${type.superclass.declaration.qualifiedName}"[/#if]>
         [#if type.docValue??]
           <documentation>
             <![CDATA[${type.docValue}]]>
@@ -36,6 +36,11 @@
         [#if type.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
         [/#if]
+          <groups>
+        [#list getGroups(type) as group]
+            <group>${group}</group>
+        [/#list]
+          </groups>
         [#if type.attributes?size > 0]
           <attributes>
           [#list type.attributes as attribute]
@@ -105,7 +110,7 @@
       <elements>
     [#list schema.globalElements as element]
       [#if !isExcludeFromDocs(element)]
-        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if] groups="[#list getGroups(element) as group]${group}[#if group_has_next],[/#if][/#list]">
+        <element name="${element.name}" type="${element.typeDefinition.qualifiedName}"[#if element.typeDefinition??] typeName="${element.typeDefinition.name!""}" typeNamespace="${element.typeDefinition.namespace!""}"[#if schemaForNamespace(element.typeDefinition)??] typeSchemaId="${schemaForNamespace(element.typeDefinition).id}"[/#if][/#if]>
         [#if element.docValue??]
           <documentation>
             <![CDATA[${element.docValue}]]>
@@ -119,6 +124,11 @@
         [#if element.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
         [/#if]
+          <groups>
+        [#list getGroups(element) as group]
+            <group>${group}</group>
+        [/#list]
+          </groups>
         [#if includeExampleXml!false]
           <examplexml><![CDATA[${generateExampleXml(element)?trim}]]></examplexml>
         [/#if]
@@ -170,10 +180,15 @@
       <documentation>${schema.documentation}</documentation>
     [/#if]
     [#list schema.types as type]
-      <type name="${type.typeName}" groups="[#list getGroups(type) as group]${group}[#if group_has_next],[/#if][/#list]">
+      <type name="${type.typeName}">
       [#if type.docValue??]
         <documentation><![CDATA[${type.docValue}]]></documentation>
       [/#if]
+        <groups>
+      [#list getGroups(type) as group]
+          <group>${group}</group>
+      [/#list]
+        </groups>
       [#if type.jsonProperties?? && type.jsonProperties?size > 0]
       [#list type.jsonProperties as property]
         <property name="${property.propertyName}" 
@@ -216,7 +231,7 @@
 [@forEachWsdl]
       <wsdl namespace="${wsdl.targetNamespace!""}" namespaceId="${wsdl.id}"[#if wsdl.properties.filename??] file="${wsdl.properties.filename}"[/#if]>
   [@forEachEndpointInterface wsdl=wsdl]
-        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if] groups="[#list getGroups(endpointInterface) as group]${group}[#if group_has_next],[/#if][/#list]">
+        <endpointInterface name="${endpointInterface.serviceName}" id="${endpointInterface.qualifiedName}" package="${endpointInterface.package.qualifiedName}"[#if endpointInterface.metaData.soapPath??] path="${endpointInterface.metaData.soapPath}"[/#if]>
     [#if endpointInterface.docValue??]
           <documentation>
             <![CDATA[${endpointInterface.docValue}]]>
@@ -230,6 +245,11 @@
     [#if endpointInterface.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
     [/#if]
+          <groups>
+        [#list getGroups(endpointInterface) as group]
+            <group>${group}</group>
+        [/#list]
+          </groups>
     [#list endpointInterface.webMethods as method]
           <method name="${method.operationName}" oneWay="${method.oneWay?string}">
       [#if method.docValue??]
@@ -278,7 +298,12 @@
   <rest baseAddress="${baseDeploymentAddress}"[#if wadlFilename??] wadl="${wadlFilename}"[/#if]>
     <resources>
 [@forEachResourceMethodListByPath]
-      <resource name="${(resources?first).fullpath}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}" groups="[#list getGroups(resources) as group]${group}[#if group_has_next],[/#if][/#list]">
+      <resource name="${(resources?first).fullpath}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
+        <groups>
+  [#list getGroups(resources) as group]
+          <group>${group}</group>
+  [/#list]
+        </groups>
   [#list resources as resource]
     [#if resource.httpMethods?size > 0]
       [#--[#if !isExcludeFromDocs(resource.httpMethods?first)]--]

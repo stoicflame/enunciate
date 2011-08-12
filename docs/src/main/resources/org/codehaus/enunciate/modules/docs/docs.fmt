@@ -1,5 +1,11 @@
 [#ftl]
-[@file name="${indexPageName}" charset="utf-8"]
+[#assign soapAvailable=docsxml.soap.wsdls.wsdl.endpointInterface?? && docsxml.soap.wsdls.wsdl.endpointInterface?size > 0/]
+[#assign restful=docsxml.rest.resources.resource?? && docsxml.rest.resources.resource?size > 0/]
+[#assign multiple_schemas=docsxml.data.schema?? && docsxml.data.schema?size > 1/]
+[#macro scrubPathToFilename path]
+${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", "-")}
+[/#macro]
+[#macro boilerplate title=docsxml.@title!"Web API" subnav={"Home" : indexPageName} codeblocks=false]
 <!doctype html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
@@ -13,9 +19,7 @@
        Remove this if you use the .htaccess -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>Enunciate: Template</title>
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <title>${title}</title>
 
   <!-- Mobile viewport optimized: j.mp/bplateviewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,140 +38,41 @@
   <div class="container">
     <header>
       <div id="header" class="column first last span-20">
-        <div id="site-name" class="column first span-5 prepend-1 append-1"><a href="index.html">Web API</a></div>
+        <div id="site-name" class="column first span-5 prepend-1 append-1"><a href="${indexPageName}">${title}</a></div>
         <div id="primary" class="column span-13 last">
           <ul class="navigation">
-            <li id="nav-about"><a href="About.html">SOAP</a></li>
-            <li id="nav-documentation"><a href="Profiles.html">REST</a></li>
-            <li id="nav-code"><a href="Developers-Guide.html">Model</a></li>
-            <li id="nav-community"><a href="Community.html">Files and Libraries</a></li>
+            [#if soapAvailable]
+            <li id="nav-soap"><a href="soap.html">SOAP</a></li>
+            [/#if]
+            [#if restful]
+            <li id="nav-rest"><a href="rest.html">REST</a></li>
+            [/#if]
+            <li id="nav-data"><a href="model.html">Data Model</a></li>
+            [#if downloadsxml??]
+            <li id="nav-downloads"><a href="downloads.html">Files and Libraries</a></li>
+            [/#if]
           </ul>
         </div>
         <div id="secondary" class="column span-18 append-1 prepend-1 first last">
           <ul class="navigation">
-            <li><a href="#">Namespace</a> &gt;</li>
-            <li><a href="#">Elements</a> &gt;</li>
-            <li><a href="#">Element</a></li>
+          [#list subnav?keys as crumb]
+            <li><a href="${subnav[crumb]}">${crumb}</a>[#if crumb_has_next] &gt;[/#if]</li>
+          [/#list]
           </ul>
         </div>
       </div>
     </header>
     <div id="main" class="column first last span-20">
-      <h1>Element Name</h1>
-
-      <hr/>
-
-      <p>Here is the description of the Element Name type.</p>
-
-      <p><a href="#">Link to the type.</a></p>
-
-      <table>
-        <tr>
-          <td align="right">Name:</td>
-          <td>label</td>
-        </tr>
-        <tr>
-          <td align="right">Namespace:</td>
-          <td>urn:somens</td>
-        </tr>
-        <tr>
-          <td align="right">QName:</td>
-          <td>{urn:somens}label</td>
-        </tr>
-      </table>
-
-      <p>Here is the description of the Type Name type.</p>
-
-      <div id="accordion">
-        <h3><a href="#">XML</a></h3>
-        <div>
-          <b style="font-weight: bold">Properties</b>
-          <table>
-            <tr>
-              <th align="center">name</th>
-              <th align="center">type</th>
-              <th align="center">occurs</th>
-              <th align="center">description</th>
-            </tr>
-            <tr>
-              <td>somenamethatissomewhatlong</td>
-              <td>list of <a href="#">xmlns:xmltype</a></td>
-              <td>0..1 (attribute)</td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-            <tr>
-              <td>somename</td>
-              <td>list of <a href="#">xmlns:xmltype</a></td>
-              <td>0..*</td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-            <tr>
-              <td>somename</td>
-              <td>list of <a href="#">xmlns:xmltype</a></td>
-              <td>n/a (value)</td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-          </table>
-
-          <b style="font-weight: bold">Example</b>
-          <pre class="prettyprint lang-xml">
-&lt;hello&gt;
-  &lt;how are="you"&gt;
-  &lt;doing/&gt;
-  &lt;today&gt;...&lt;/today&gt;
-  &lt;what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen&gt;...&lt;/what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen&gt;
-&lt;/hello&gt;
-          </pre>
-        </div>
-
-        <h3><a href="#">JSON</a></h3>
-        <div>
-          <b style="font-weight: bold">Properties</b>
-          <table>
-            <tr>
-              <th align="center">name</th>
-              <th align="center">type</th>
-              <th align="center">description</th>
-            </tr>
-            <tr>
-              <td>somenamethatissomewhatlong</td>
-              <td>array of <a href="#">xmlns:xmltype</a></td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-            <tr>
-              <td>somename</td>
-              <td>array of <a href="#">xmlns:xmltype</a></td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-            <tr>
-              <td>somename</td>
-              <td>array of <a href="#">xmlns:xmltype</a></td>
-              <td>Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. Some descriptive text that will be long enough to figure out how to best format it in the table. </td>
-            </tr>
-          </table>
-
-          <b style="font-weight: bold">Example</b>
-          <pre class="prettyprint lang-js">
-{
-  hello : {
-    how : {
-      are : "you"
-    },
-    doing = {},
-    today : "...",
-    what_happens_if_there_is_an_element_that_wraps_off_the_edge_of_the_screen : "..."
-  }
-}
-          </pre>
-        </div>
-      </div>
-
+      [#nested/]
 
       <div class="clear" />
     </div>
     <footer>
       <div id="footer">
+        [#if docsxml.@copyright??]
         Copyright &copy; <script type="text/javascript" language="javascript">d = new Date;document.write(d.getFullYear());</script> <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Web Cohesion, LLC.</span><br/>
+        [/#if]
+        Generated by <a href="http://enunciate.codehaus.org">Enunciate</a>.
       </div>
     </footer>
   </div> <!--! end of #container -->
@@ -178,6 +83,7 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
   <script>window.jQuery || document.write("<script src='js/libs/jquery-1.5.1.min.js'>\x3C/script>")</script>
 
+  [#if codeblocks]
   <!--jquery ui-->
   <script src="js/libs/jquery-ui.js"></script>
   <script>
@@ -196,19 +102,309 @@
     });
   </script>
 
+  [/#if]
   <!--[if lt IE 7 ]>
     <script src="js/libs/dd_belatedpng.js"></script>
     <script>DD_belatedPNG.fix("img, .png_bg"); // Fix any <img> or .png_bg bg-images. Also, please read goo.gl/mZiyb </script>
   <![endif]-->
 
+[#--
+  todo: uncomment to support google analytics measurements...
   <!-- mathiasbynens.be/notes/async-analytics-snippet Change UA-XXXXX-X to be your site's ID -->
   <script>
-    var _gaq=[["_setAccount","UA-11976408-2"],["_trackPageview"]];
+    var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"]];
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
     g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
     s.parentNode.insertBefore(g,s)}(document,"script"));
   </script>
-
+--]
 </body>
 </html>
+[/#macro]
+[#function isDeprecated element]
+  [#if element.tag??]
+    [#list element.tag as tag]
+      [#if tag.@name="deprecated"]
+        [#return true/]
+      [/#if]
+    [/#list]
+  [/#if]
+  [#return false/]
+[/#function]
+[@file name=indexPageName charset="utf-8"]
+  [@boilerplate]
+    [#if docsxml.documentation?? && docsxml.documentation?size > 0]
+      <h1>Introduction</h1>
+
+      <p>${docsxml.documentation}</p>
+
+    [/#if]
+    [#if restful]
+      <hr/>
+
+      <h1>Resources</h1>
+      <ul>
+      [#if docsxml.rest.groups.group?? && docsxml.rest.groups.group?size > 0]
+        [#list docsxml.rest.groups.group?sort as group]
+          [@processResourceGroup group=group/]
+        <li><a href="resource_${group}.html">${group}</a></li>
+        [/#list]
+      [#else]
+        [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
+          [@processResource resource=resource/]
+          [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
+        <li><a href="${resource_filename}">${resource.@name}</a></li>
+        [/#list]
+      [/#if]
+      </ul>
+    [/#if]
+    [#if soapAvailable]
+      <hr/>
+
+      <h1>SOAP Endpoints</h1>
+      <ul>
+      [#list docsxml.soap.wsdls.wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+        [@processEndpointInterface endpointInterface=endpointInterface/]
+        <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
+      [/#list]
+      </ul>
+    [/#if]
+    [#if multiple_schemas]
+      <hr/>
+
+      <h1>Data Namespaces</h1>
+    [/#if]
+    [#list docsxml.data.schema as schema]
+      [@processSchema schema=schema/]
+      [#if multiple_schemas]
+
+        <h2>${schema.@namespaceId}</h2>
+      [/#if]
+      [#if schema.elements.element?? && schema.elements.element?size > 0]
+        [#if multiple_schemas]
+
+        <h3>Data Elements</h3>
+        [#else]
+        <hr/>
+
+        <h1>Data Elements</h1>
+        [/#if]
+
+        <ul>
+        [#list schema.elements.element?sort_by("@name") as element]
+          <li[#if isDeprecated(element)] class="deprecated"[/#if]><a href="el_${schema.@namespaceId}_${element.@name}.html">${element.@name}</a></li>
+        [/#list]
+        </ul>
+      [/#if]
+      [#if schema.types.type?? && schema.types.type?size > 0]
+        [#if multiple_schemas]
+
+        <h3>Data Types</h3>
+        [#else]
+        <hr/>
+
+        <h1>Data Types</h1>
+        [/#if]
+        <ul>
+        [#list schema.types.type as type]
+          <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="${schema.@namespaceId}_${type.@name}.html">${type.@name}</a></li>
+        [/#list]
+        </ul>
+      [/#if]
+    [/#list]
+    [#if docsxml.data.jsonSchema.type?? && docsxml.data.jsonSchema.type?size > 0]
+
+      <hr/>
+
+      <h1>JSON Data Types</h1>
+      <ul>
+      [#list docsxml.data.jsonSchema.type as type]
+        [@processJsonType type=type/]
+        <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="json_" + type?parent.@schemaId + "_" + type.@name + ".html">${type.@name}</a></li>
+      [/#list]
+      </ul>
+    [/#if]
+  [/@boilerplate]
 [/@file]
+[@file name="model.html" charset="utf-8"]
+  [@boilerplate]
+    [#if multiple_schemas]
+      <h1>Data Namespaces</h1>
+    [/#if]
+    [#list docsxml.data.schema as schema]
+      [@processSchema schema=schema/]
+      [#if multiple_schemas]
+
+        <h2>${schema.@namespaceId}</h2>
+      [/#if]
+      [#if schema.elements.element?? && schema.elements.element?size > 0]
+        [#if multiple_schemas]
+
+        <h3>Data Elements</h3>
+        [#else]
+        <hr/>
+
+        <h1>Data Elements</h1>
+        [/#if]
+
+        <ul>
+        [#list schema.elements.element?sort_by("@name") as element]
+          <li[#if isDeprecated(element)] class="deprecated"[/#if]><a href="el_${schema.@namespaceId}_${element.@name}.html">${element.@name}</a></li>
+        [/#list]
+        </ul>
+      [/#if]
+      [#if schema.types.type?? && schema.types.type?size > 0]
+        [#if multiple_schemas]
+
+        <h3>Data Types</h3>
+        [#else]
+        <hr/>
+
+        <h1>Data Types</h1>
+        [/#if]
+        <ul>
+        [#list schema.types.type as type]
+          <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="${schema.@namespaceId}_${type.@name}.html">${type.@name}</a></li>
+        [/#list]
+        </ul>
+      [/#if]
+    [/#list]
+  [/@boilerplate]
+[/@file]
+[#if restful]
+  [@file name="rest.html" charset="utf-8"]
+    [@boilerplate title="REST" subnav={"Home" : indexPageName, "REST" : "rest.html"}]
+  <h1>Resources</h1>
+  <ul>
+    [#if docsxml.rest.groups.group?? && docsxml.rest.groups.group?size > 0]
+      [#list docsxml.rest.groups.group?sort as group]
+    <li><a href="resource_${group}.html">${group}</a></li>
+      [/#list]
+    [#else]
+      [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
+        [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
+    <li><a href="${resource_filename}">${resource.@name}</a></li>
+      [/#list]
+    [/#if]
+  </ul>
+    [/@boilerplate]
+  [/@file]
+[/#if]
+[#if soapAvailable]
+  [@file name="soap.html" charset="utf-8"]
+    [@boilerplate title="SOAP" subnav={"Home" : indexPageName, "SOAP" : "soap.html"}]
+  <h1>SOAP Endpoints</h1>
+  <ul>
+    [#list docsxml.soap.wsdls.wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+    <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
+    [/#list]
+  </ul>
+    [/@boilerplate]
+  [/@file]
+[/#if]
+[#macro processResourceGroup group]
+  [@file name="resource_" + group + ".html" charset="utf-8"]
+    [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", group : "resource_" + group + ".html"}]
+      <h1>${group}</h1>
+
+      <ul>
+      [#list docsxml.rest.resources.resource as resource]
+        [#list resource.groups.group as g]
+          [#if g=group]
+        <li>${resource.@name}</li>
+            [#break/]
+          [/#if]
+        [/#list]
+      [/#list]
+      </ul>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processResource resource]
+  [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
+  [@file name=resource_filename charset="utf-8"]
+    [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", resource.@name : resource_filename}]
+      <h1>${resource.@name}</h1>
+
+      <ul>
+      [#list resource.operation as operation]
+        <li>${operation.@name}</li>
+      [/#list]
+      </ul>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processEndpointInterface endpointInterface]
+  [@file name="soap_" + endpointInterface.@name + ".html" charset="utf-8"]
+    [@boilerplate title=endpointInterface.@name subnav={"Home" : indexPageName, "SOAP" : "soap.html", endpointInterface.@name : "soap_" + endpointInterface.@name + ".html"}]
+      <h1>${endpointInterface.@name}</h1>
+
+      <ul>
+        [#list endpointInterface.method as method]
+        <li>${method.@name}</li>
+        [/#list]
+      </ul>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processSchema schema]
+  [@file name=schema.@namespaceId + ".html" charset="utf-8"]
+    [@boilerplate title="Namespace: " + schema.@namespaceId subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html"}]
+      <h1>Namespace ${schema.@namespaceId}</h1>
+      [#if schema.elements.element?? && schema.elements.element?size > 0]
+
+      <h2>Elements</h2>
+      
+      <ul>
+        [#list schema.elements.element as element]
+        [@processElement element=element/]
+        <li[#if isDeprecated(element)] class="deprecated"[/#if]><a href="el_${schema.@namespaceId}_${element.@name}.html">${element.@name}</a></li>
+        [/#list]
+      </ul>
+      [/#if]
+      [#if schema.types.type?? && schema.types.type?size > 0]
+
+      <h2>Types</h2>
+      
+      <ul>
+        [#list schema.types.type as type]
+        [@processType type=type/]
+        <li[#if isDeprecated(type)] class="deprecated"[/#if]><a href="${schema.@namespaceId}_${type.@name}.html">${type.@name}</a></li>
+        [/#list]
+      </ul>
+      [/#if]
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processElement element]
+  [#assign schema=element?parent?parent/]
+  [@file name="el_" + schema.@namespaceId + "_" + element.@name + ".html" charset="utf-8"]
+    [@boilerplate title=element.@name subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html", "Element " + element.@name : "el_" + schema.@namespaceId + "_" + element.@name + ".html"} codeblocks=true]
+      <h1>Element ${element.@name}</h1>
+
+      <h2>Example XML</h2>
+
+      <h2>Example JSON</h2>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processType type]
+  [#assign schema=type?parent?parent/]
+  [@file name=schema.@namespaceId + "_" + type.@name + ".html" charset="utf-8"]
+    [@boilerplate title=type.@name subnav={"Home" : indexPageName, type.@name : schema.@namespaceId + "_" + type.@name + ".html"} codeblocks=true]
+      <h1>${type.@name}</h1>
+
+      <h2>XML</h2>
+
+      <h2>JSON</h2>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
+[#macro processJsonType type]
+  [@file name="json_" + type?parent.@schemaId + "_" + type.@name + ".html" charset="utf-8"]
+    [@boilerplate title=type.@name subnav={"Home" : indexPageName, "JSON" : "#", type.@name : "json_" + type?parent.@schemaId + "_" + type.@name + ".html"} codeblocks=true]
+      <h1>${type.@name}</h1>
+
+    [/@boilerplate]
+  [/@file]
+[/#macro]
