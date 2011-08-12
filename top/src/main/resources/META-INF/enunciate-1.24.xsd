@@ -970,15 +970,29 @@
         </xs:attribute>
         <xs:attribute name="xslt" type="xs:string">
           <xs:annotation>
-            <xs:documentation>the file that is the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs. If no XSLT
-              is specified, a default one will be used.
+            <xs:documentation>the file that is the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs.
+              If no XSLT is specified, the freemarker XML processing template will be used to process the XML.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="xsltURL" type="xs:string">
           <xs:annotation>
-            <xs:documentation>the URL to the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs. If no XSLT is
-              specified, a default one will be used.
+            <xs:documentation>the URL to the XML Stylesheet Transform that will be applied to the documentation XML to generate the HTML docs.
+              If no XSLT is specified, the freemarker XML processing template will be used to process the XML.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="freemarkerXMLProcessingTemplate" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the file that is the freemarker XML processing template to use to generate the site.
+              If none is supplied, a default one will be used. See http://freemarker.sourceforge.net/docs/xgui.html.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="freemarkerXMLProcessingTemplateURL" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>the URL to the freemarker XML processing template to use to generate the site.
+              If none is supplied, a default one will be used. See http://freemarker.sourceforge.net/docs/xgui.html.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>

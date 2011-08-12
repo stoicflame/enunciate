@@ -18,6 +18,7 @@ package org.codehaus.enunciate.modules.docs;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
+import freemarker.ext.dom.NodeModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
 import net.sf.jelly.apt.Context;
@@ -44,17 +45,20 @@ import org.codehaus.enunciate.template.freemarker.GetGroupsMethod;
 import org.codehaus.enunciate.template.freemarker.IsDefinedGloballyMethod;
 import org.codehaus.enunciate.template.freemarker.IsExcludeFromDocsMethod;
 import org.codehaus.enunciate.template.freemarker.UniqueContentTypesMethod;
+import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -63,8 +67,7 @@ import java.util.*;
  * <h1>Documentation Module</h1>
  *
  * <p>The documentation deployment module is responsible for generating the documentation
- * for the API.  This includes both the HTML pages and any other static content put at the
- * root of the web application.</p>
+ * for the API.  This includes both the HTML pages and any other static content, e.g. client libraries.</p>
  *
  * <p>The order of the documentation module is 100, essentially putting it after the generation
  * of any static documents (e.g. WSDL, schemas) or static downloads (e.g. client libraries), but
@@ -83,9 +86,9 @@ import java.util.*;
  *
  * <h3>generate</h3>
  *
- * <p>During the <b>generate</b> step, the documentation deployment module generates an XML file that
- * conforms to <a href="doc-files/docs.xsd">this schema</a>, containing all the documentation for the
- * entire API in a strcutured form.</p>
+ * <p>During the <b>generate</b> step, the documentation deployment module generates an XML file that conforms to
+ * <a href="https://github.com/stoicflame/enunciate/blob/master/docs/src/main/resources/org/codehaus/enunciate/modules/docs/docs.xsd">this schema</a>
+ * containing all the documentation for the entire API in a structured form.</p>
  *
  * <h3>build</h3>
  *
@@ -94,15 +97,21 @@ import java.util.*;
  * The documentation base can be specified in the <a href="#config">configuration</a>, or you can
  * use the default base.</p>
  *
- * <p>Then, the documentation deployment module generates another XML file conforming to
- * <a href="doc-files/downloads.xsd">this schema</a> that contains the information
- * that is available for the downloads page in a structured form.  By default, all named artifacts
+ * <p>Then, the documentation module generates another XML file conforming to
+ * <a href="https://github.com/stoicflame/enunciate/blob/master/docs/src/main/resources/org/codehaus/enunciate/modules/docs/downloads.xsd">this schema</a>
+ * that contains the information for the files available for download in a structured form.  By default, all named artifacts
  * are included as a download (see the architecture guide for details).  Other downloads can also
  * be specified in the <a href="#config">configuration</a>.</p>
  *
- * <p>Finally, an <a href="http://www.w3.org/TR/xslt">XML Stylesheet Transformation</a> is applied to the
- * generated XML file in order to generate the HTML pages.  You can specify your own XSLT, or you can
- * just use <a href="doc-files/docs.xslt">the default</a>.</p>
+ * <p>Finally, the XML generated in the <tt>generate</tt> phase and the XML generated for the download files
+ * is processed together to create the static documentation elements. By default, a
+ * <a href="http://freemarker.sourceforge.net/docs/xgui.html">Freemarker Processing Template is applied</a> to
+ * process the XML. You can supply your own Freemarker processing template in the configuration, or you can supply a custom
+ * an <a href="http://www.w3.org/TR/xslt">XML Stylesheet Transformation</a> to generate your site documentation.
+ * <a href="https://github.com/stoicflame/enunciate/blob/master/docs/src/main/resources/org/codehaus/enunciate/modules/docs/docs.fmt">Click here</a> to see
+ * the default Freemarker XML Processing Template used by Enunciate, which might be helpful as a starter for you to create your own custom one.
+ * <a href="https://github.com/stoicflame/enunciate/blob/v1.23/docs/src/main/resources/org/codehaus/enunciate/modules/docs/doc-files/docs.xslt">Click here</a>
+ * for an example XSLT file.</p>
  *
  * <h1><a name="config">Configuration</a></h1>
  *
@@ -114,7 +123,7 @@ import java.util.*;
  * <ul>
  *   <li>The "docsDir" attribute is the subdirectory to which the documentation will be put.  The default is the root.</li>
  *   <li>The "<b>splashPackage</b>" attribute specifies the package that contains the documentation
- *       to use as the introduction to the API documentation.  By default, no text is used for the
+ * to use as the introduction to the API documentation.  By default, no text is used for the
  * introduction.</li>
  *   <li>The "<b>copyright</b>" attribute specifies the text for the copyright holder on the web
  * page. By default, there is no copyright information displayed on the webpage.</li>
@@ -125,19 +134,29 @@ import java.util.*;
  * be included.  The default is "true".</li>
  *   <li>The "<b>includeExampleJson</b>" is a boolean attribute specifying whether example JSON should
  * be included.  The default is "true".</li>
- *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.  If one isn't supplied, a
- *  default will be provided.</p>
+ *   <li>The "<b>css</b>" attribute is used to specify the file to be used as the cascading stylesheet for the HTML.
+ * If one isn't supplied, a default will be provided.</p>
  *   <li>The "<b>indexPageName</b>" attribute is used to specify the name of the generated index page. Default: "index.html"</li>
  *   <li>The "<b>xslt</b>" attribute specifies the file that is the XML Stylesheet Transform that will be applied to the
- * documentation XML to generate the HTML docs.  If no XSLT is specified, a default one will be used.</p>
+ * documentation XML to generate the HTML docs.  If no XSLT is specified, the freemarker XML processing template will be used
+ * to process the XML.</p>
  *   <li>The "<b>xsltURL</b>" attribute specifies the URL to the XML Stylesheet Transform that will be applied to the
- * documentation XML to generate the HTML docs.  If no XSLT is specified, a default one will be used.</p>
- *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the documentation base.  If none is supplied, a default
- * base will be provided.
- *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN of an instance of
- *       <tt>net.sf.jelly.apt.util.JavaDocTagHandler</tt></li>
- *   <li>The "<b>applyWsdlFilter</b>" attribute specifies whether to apply a filter for the WSDL files that will attempt to resolve the soap paths dynamically. Default: "true".</li>
- *   <li>The "<b>applyWadlFilter</b>" attribute specifies whether to apply a filter for the WADL files that will attempt to resolve the rest paths dynamically. Default: "true".</li>
+ * documentation XML to generate the HTML docs.  If no XSLT is specified, the freemarker XML processing template will be used
+ * to process the XML.</p>
+ *    <li>The "<b>freemarkerXMLProcessingTemplate</b>" attribute specifies the file that is the freemarker XML processing template
+ * to use to generate the site. See <a href="http://freemarker.sourceforge.net/docs/xgui.html">the Freemarker XML Processing Guide</a>.
+ * If none is supplied, a default one will be used.</li>
+ *    <li>The "<b>freemarkerXMLProcessingTemplateURL</b>" attribute specifies the URL to the freemarker XML processing template
+ * to use to generate the site. See <a href="http://freemarker.sourceforge.net/docs/xgui.html">the Freemarker XML Processing Guide</a>.
+ * If none is supplied, a default one will be used.</li>
+ *   <li>The "<b>base</b>" attribute specifies a gzipped file or a directory to use as the documentation base.  If none is supplied,
+ * a default base will be provided.
+ *   <li>The "javadocTagHandling" attribute is used to specify the handling of JavaDoc tags. It must be either "OFF" or the FQN
+ * of an instance of <tt>net.sf.jelly.apt.util.JavaDocTagHandler</tt></li>
+ *   <li>The "<b>applyWsdlFilter</b>" attribute specifies whether to apply a filter for the WSDL files that will attempt to resolve
+ * the soap paths dynamically. Default: "true".</li>
+ *   <li>The "<b>applyWadlFilter</b>" attribute specifies whether to apply a filter for the WADL files that will attempt to resolve
+ * the rest paths dynamically. Default: "true".</li>
  * </ul>
  *
  * <h3>The "download" element</h3>
@@ -174,6 +193,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeExampleJson = true;
   private boolean forceExampleJson = true;
   private URL xsltURL;
+  private URL freemarkerXMLProcessingTemplateURL;
   private String css;
   private String base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
@@ -385,7 +405,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    * @param xsltURL The stylesheet to use to generate the documentation.
    */
   public void setXslt(File xsltURL) throws MalformedURLException {
-    this.xsltURL = xsltURL.toURL();
+    this.xsltURL = xsltURL.toURI().toURL();
   }
 
   /**
@@ -404,6 +424,35 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public void setXsltURL(URL xslt) {
     this.xsltURL = xslt;
+  }
+
+  /**
+   * The Freemarker XML processing template file that will be used to transforms the docs.xml to the site documentation. For more information,
+   * see http://freemarker.sourceforge.net/docs/xgui.html.
+   *
+   * @param freemarkerProcessingTemplate The Freemarker XML processing template file that will be used to transforms the docs.xml to the site documentation.
+   */
+  public void setFreemarkerXMLProcessingTemplate(File freemarkerProcessingTemplate) throws MalformedURLException {
+    this.freemarkerXMLProcessingTemplateURL = freemarkerProcessingTemplate.toURI().toURL();
+  }
+
+  /**
+   * The url to the freemarker XML processing template that will be used to transforms the docs.xml to the site documentation. For more
+   * information, see http://freemarker.sourceforge.net/docs/xgui.html
+   *
+   * @return The url to the freemarker XML processing template.
+   */
+  public URL getFreemarkerXMLProcessingTemplateURL() {
+    return freemarkerXMLProcessingTemplateURL;
+  }
+
+  /**
+   * The url to the freemarker XML processing template that will be used to transforms the docs.xml to the site documentation.
+   *
+   * @param freemarkerXMLProcessingTemplateURL The url to the freemarker XML processing template.
+   */
+  public void setFreemarkerXMLProcessingTemplateURL(URL freemarkerXMLProcessingTemplateURL) {
+    this.freemarkerXMLProcessingTemplateURL = freemarkerXMLProcessingTemplateURL;
   }
 
   /**
@@ -677,7 +726,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     if (!getEnunciate().isUpToDateWithSources(getBuildDir())) {
       buildBase();
       generateDownloadsXML();
-      doXSLT();
+      doXmlTransform();
     }
     else {
       info("Skipping build of documentation as everything appears up-to-date...");
@@ -768,12 +817,12 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
         debug("Default base to be used for documentation base.");
         enunciate.extractBase(loadDefaultBase(), buildDir);
 
-        URL discoveredCss = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/default.css");
+        URL discoveredCss = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/css/style.css");
         if (discoveredCss != null) {
-          enunciate.copyResource(discoveredCss, new File(buildDir, "default.css"));
+          enunciate.copyResource(discoveredCss, new File(new File(buildDir, "css"), "style.css"));
         }
         else if (this.css != null) {
-          enunciate.copyFile(enunciate.resolvePath(this.css), new File(buildDir, "default.css"));
+          enunciate.copyFile(enunciate.resolvePath(this.css), new File(new File(buildDir, "css"), "style.css"));
         }
       }
       else {
@@ -869,18 +918,77 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   /**
    * Do the XSLT tranformation to generate the documentation.
    */
-  protected void doXSLT() throws IOException, EnunciateException {
-    debug("Executing documentation stylesheet transformation.");
+  protected void doXmlTransform() throws IOException, EnunciateException {
+    debug("Executing XML transformation.");
     URL xsltURL = this.xsltURL;
-
     if (xsltURL == null) {
       xsltURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.xslt");
     }
 
-    if (xsltURL == null) {
-      xsltURL = DocumentationDeploymentModule.class.getResource("doc-files/docs.xslt");
+    URL freemarkerXMLProcessingTemplateURL = this.freemarkerXMLProcessingTemplateURL;
+    if (freemarkerXMLProcessingTemplateURL == null) {
+      freemarkerXMLProcessingTemplateURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.fmt");
     }
 
+    if (xsltURL == null && freemarkerXMLProcessingTemplateURL == null) {
+      freemarkerXMLProcessingTemplateURL = DocumentationDeploymentModule.class.getResource("docs.fmt");
+    }
+
+    if (xsltURL != null) {
+      doXSLT(xsltURL);
+    }
+    else {
+      doFreemarkerXMLProcessing(freemarkerXMLProcessingTemplateURL);
+    }
+  }
+
+  protected void doFreemarkerXMLProcessing(URL freemarkerXMLProcessingTemplateURL) throws IOException, EnunciateException {
+    debug("Using freemarker XML processing template %s", freemarkerXMLProcessingTemplateURL);
+    EnunciateFreemarkerModel model = getModel();
+    File docsXml = new File(getGenerateDir(), "docs.xml");
+    model.put("docsxml", loadNodeModel(docsXml));
+    File downloadsXml = new File(getGenerateDir(), "downloads.xml");
+    if (downloadsXml.exists()) {
+      model.put("downloadsxml", loadNodeModel(downloadsXml));
+    }
+    File buildDir = getDocsBuildDir();
+    buildDir.mkdirs();
+    model.setFileOutputDirectory(buildDir);
+    model.put("apiRelativePath", getRelativePathToRootDir());
+    model.put("indexPageName", getIndexPageName());
+    model.put("disableRestMountpoint", isDisableRestMountpoint());
+    try {
+      processTemplate(freemarkerXMLProcessingTemplateURL, model);
+    }
+    catch (TemplateException e) {
+      throw new EnunciateException(e);
+    }
+  }
+
+  private NodeModel loadNodeModel(File xml) throws EnunciateException {
+    Document doc;
+    try {
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(false);
+      builderFactory.setValidating(false);
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
+      builder.setEntityResolver(new EntityResolver() {
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+          //we don't want to validate or parse external dtds...
+          return new InputSource(new StringReader(""));
+        }
+      });
+      doc = builder.parse(new FileInputStream(xml));
+    }
+    catch (Exception e) {
+      throw new EnunciateException("Error parsing " + xml, e);
+    }
+
+    NodeModel.simplify(doc);
+    return NodeModel.wrap(doc.getDocumentElement());
+  }
+
+  protected void doXSLT(URL xsltURL) throws IOException, EnunciateException {
     debug("Using stylesheet %s", xsltURL);
     StreamSource source = new StreamSource(xsltURL.openStream());
 
