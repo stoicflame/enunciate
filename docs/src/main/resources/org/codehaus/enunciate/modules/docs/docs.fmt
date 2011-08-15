@@ -840,6 +840,59 @@
     [@boilerplate title=type.@name subnav={"Home" : indexPageName, "JSON" : "#", type.@name : "json_" + type?parent.@schemaId + "_" + type.@name + ".html"} codeblocks=true]
       <h1>${type.@name}</h1>
 
+      <table>
+      [#if attributeExists(type?parent.@schemaId)]
+      <tr>
+        <td align="right">JSON Schema ID:</td>
+        <td>${type?parent.@schemaId}</td>
+      </tr>
+      [/#if]
+      [#if attributeExists(type?parent.@file)]
+      <tr>
+        <td align="right">JSON Schema File:</td>
+        <td><a href="${type?parent.@file}">${type?parent.@file}</a></td>
+      </tr>
+      [/#if]
+      </table>
+      [#list type.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
+      [#list type.properties as property]
+        [#if property_index = 0]
+      <h2>Properties</h2>
+      <table>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        [/#if]
+        <tr>
+          <td>[#if attributeExists(property.@name)]${property.@name}[/#if]</td>
+          <td>[#if property.@isList = "true"]List of [/#if][#if attributeExists(property.@typeSchemaId)]<a href="json_${property.@typeSchemaId}_${property.@typeName}.html">${property.@typeName}</a>[#else]${property.@typeName}[/#if]</td>
+          <td>[#if attributeExists(property.@documentation)]${property.@documentation}[/#if]</td>
+        </tr>
+        [#if !property_has_next]
+      </table>
+        [/#if]
+      [/#list]
+      [#list type.enumValue as enumValue]
+        [#if enumValue_index = 0]
+      <h2>Possible Values</h2>
+      <table>
+        <tr>
+          <th>value</th>
+          <th>description</th>
+        </tr>
+        [/#if]
+        <tr>
+          <td>[#list enumValue.value as value]${value} [/#list]</td>
+          <td>[#list enumValue.documentation as documentation]${documentation} [/#list]</td>
+        </tr>
+        [#if !enumValue_has_next]
+      </table>
+        [/#if]
+      [/#list]
     [/@boilerplate]
   [/@file]
 [/#macro]
