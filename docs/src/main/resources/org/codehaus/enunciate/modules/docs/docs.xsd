@@ -130,7 +130,6 @@
         <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="package" type="xs:string"/>
         <xs:attribute name="extendsType" type="xs:string"/>
-        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
 
@@ -160,6 +159,7 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="jsonName" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
         <xs:attribute name="typeSchemaId" type="xs:string"/>
@@ -194,6 +194,7 @@
         <xs:sequence>
           <xs:element name="choice" type="choice" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attribute name="jsonName" type="xs:string"/>
         <xs:attribute name="minOccurs" type="xs:string"/>
         <xs:attribute name="maxOccurs" type="xs:string"/>
       </xs:extension>
@@ -260,6 +261,7 @@
 
     <xs:simpleContent>
       <xs:extension base="xs:string">
+        <xs:attribute name="jsonName" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
         <xs:attribute name="typeSchemaId" type="xs:string"/>
@@ -293,13 +295,19 @@
         <xs:sequence>
           <xs:element name="examplexml" type="xs:string"/>
           <xs:element name="examplejson" type="xs:string"/>
+          <xs:element name="groups" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="xs:string"/>
         <xs:attribute name="typeNamespace" type="xs:string"/>
         <xs:attribute name="typeName" type="xs:string"/>
         <xs:attribute name="typeSchemaId" type="xs:string"/>
-        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -337,9 +345,15 @@
       <xs:element name="documentation" type="xs:string" minOccurs="0" />
       <xs:element name="property" type="jsonProperty" maxOccurs="unbounded" />
       <xs:element name="enumValue" type="jsonEnumValue" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required" />
-    <xs:attribute name="groups" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="jsonProperty">
@@ -431,12 +445,18 @@
       <xs:extension base="taggedDocumentation">
         <xs:sequence>
           <xs:element name="method" type="method" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="groups" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="package" type="xs:string"/>
         <xs:attribute name="path" type="xs:string" use="optional"/>
-        <xs:attribute name="groups" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -536,11 +556,17 @@
 
     <xs:sequence>
       <xs:element name="operation" type="operation" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="groups" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
 
     <xs:attribute name="name" type="xs:string"/>
     <xs:attribute name="subcontext" type="xs:string"/>
-    <xs:attribute name="groups" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="contentType">
@@ -602,6 +628,8 @@
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restParameterType"/>
         <xs:attribute name="defaultValue" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeName" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeNamespace" type="xs:string" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
