@@ -203,9 +203,9 @@
   </reporting>
 
   <scm>
-    <connection>scm:svn:http://svn.codehaus.org/enunciate/trunk/enunciate/</connection>
-    <developerConnection>scm:svn:https://svn.codehaus.org/enunciate/trunk/enunciate</developerConnection>
-    <url>http://svn.codehaus.org/enunciate/trunk/enunciate/</url>
+	  <connection>scm:git:git@github.com:stoicflame/enunciate.git</connection>
+	  <url>scm:git:git@github.com:stoicflame/enunciate.git</url>
+	  <developerConnection>scm:git:git@github.com:stoicflame/enunciate.git</developerConnection>
   </scm>
 
   <dependencies>

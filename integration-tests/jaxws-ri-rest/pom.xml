@@ -297,11 +297,6 @@
     </plugins>
   </build>
 
-  <scm>
-    <connection>scm:svn:https://svn.codehaus.org/enunciate/trunk/enunciate/integration-tests/jaxws-ri-rest</connection>
-    <developerConnection>scm:svn:http://svn.codehaus.org/enunciate/trunk/enunciate/integration-tests/jaxws-ri-rest</developerConnection>
-  </scm>
-
   <dependencies>
     <dependency>
       <groupId>org.codehaus.enunciate</groupId>
