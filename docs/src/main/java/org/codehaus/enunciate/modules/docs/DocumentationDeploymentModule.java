@@ -205,6 +205,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String indexPageName = "index.html";
   private boolean disableRestMountpoint = false;
   private String defaultNamespace = null;
+  private boolean groupRestResources = true;
 
   /**
    * @return "docs"
@@ -619,6 +620,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
+   * Whether to group the REST resources together.
+   *
+   * @return Whether to group the REST resources together.
+   */
+  public boolean isGroupRestResources() {
+    return groupRestResources;
+  }
+
+  /**
+   * Whether to group the REST resources together.
+   *
+   * @param groupRestResources Whether to group the REST resources together.
+   */
+  public void setGroupRestResources(boolean groupRestResources) {
+    this.groupRestResources = groupRestResources;
+  }
+
+  /**
    * The directory into which the documentation is put.
    *
    * @return The directory into which the documentation is put.
@@ -957,6 +976,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     model.put("apiRelativePath", getRelativePathToRootDir());
     model.put("indexPageName", getIndexPageName());
     model.put("disableRestMountpoint", isDisableRestMountpoint());
+    model.put("groupRestResources", isGroupRestResources());
     try {
       processTemplate(freemarkerXMLProcessingTemplateURL, model);
     }
@@ -1009,6 +1029,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       transformer.setParameter("api-relative-path", getRelativePathToRootDir());
       transformer.setParameter("index-page-name", getIndexPageName());
       transformer.setParameter("disable-rest-mountpoint", isDisableRestMountpoint());
+      transformer.setParameter("group-rest-resources", isGroupRestResources());
       File indexPage = new File(buildDir, getIndexPageName());
       debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));

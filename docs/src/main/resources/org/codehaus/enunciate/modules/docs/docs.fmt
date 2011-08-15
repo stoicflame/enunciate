@@ -1,9 +1,9 @@
 [#ftl]
 [#assign soapAvailable=docsxml.soap.wsdls.wsdl.endpointInterface?size > 0/]
 [#assign restAvailable=docsxml.rest.resources.resource?size > 0/]
-[#macro scrubPathToFilename path]
-${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", "-")}
-[/#macro]
+[#function scrubPathToFilename path]
+  [#return path?string?replace("/", ".")?replace(":","-")?replace("{", "-")?replace("}", "-")/]
+[/#function]
 [#function tocNeeded(nodelist)]
   [#return nodelist?size > 2/]
 [/#function]
@@ -148,7 +148,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
       </p>
       <ul>
-      [#if docsxml.rest.groups.group?size > 0]
+      [#if groupRestResources!true && docsxml.rest.groups.group?size > 0]
         [#list docsxml.rest.groups.group?sort as group]
           [@processResourceGroup group=group/]
         <li><a href="resource_${group}.html">${group}</a></li>
@@ -156,8 +156,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
       [#else]
         [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
           [@processResource resource=resource/]
-          [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
-        <li><a href="${resource_filename}">${resource.@name}</a></li>
+        <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
         [/#list]
       [/#if]
       </ul>
@@ -390,8 +389,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-        [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
-    <li><a href="${resource_filename}">${resource.@name}</a></li>
+    <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
       [/#list]
     [/#if]
   </ul>
@@ -478,32 +476,199 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", group : "resource_" + group + ".html"}]
       <h1>${group}</h1>
 
-      <ul>
+      [#assign resources=[] /]
       [#list docsxml.rest.resources.resource as resource]
-        [#list resource.groups.group as g]
-          [#if g=group]
-        <li>${resource.@name}</li>
+        [#list resource.groups.group as rg]
+          [#if rg = group]
+            [#assign resources=resources + resource /]
             [#break/]
           [/#if]
         [/#list]
       [/#list]
+      <p>The following resources are part of this group:</p>
+      <ul>
+        [#list resources as resource]
+        <li><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        [/#list]
       </ul>
+      [#list resources as resource]
+      <a name="${scrubPathToFilename(resource.@name)}"></a>
+        [@processRawResource resource=resource/]
+      [/#list]
     [/@boilerplate]
   [/@file]
 [/#macro]
 [#macro processResource resource]
-  [#assign resource_filename][@scrubPathToFilename path=resource.@name/][/#assign]
+  [#assign resource_filename=scrubPathToFilename(resource.@name)/]
   [@file name=resource_filename charset="utf-8"]
     [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", resource.@name : resource_filename}]
-      <h1>${resource.@name}</h1>
-
-      <ul>
-      [#list resource.operation as operation]
-        <li>${operation.@name}</li>
-      [/#list]
-      </ul>
+      [@processRawResource resource=resource/]
     [/@boilerplate]
   [/@file]
+[/#macro]
+[#macro processRawResource resource]
+      <h1>${resource.@name}</h1>
+  [#if attributeExists(resource.@subcontext) && !disableRestMountpoint!false]
+      <p class="note">Mount Point: <a href="${apiRelativePath}${resource.@subcontext}${resource.@name}">${resource.@subcontext}${resource.@name}</a></p>
+  [/#if]
+  [#if tocNeeded(resource.operation)]
+      <p>
+        The following operations are supported on this resource:
+      </p>
+      <ul>
+    [#list resource.operation as operation]
+        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}">${operation.@name}</a></li>
+      [#list operation.alias as alias]
+        <li[#if isDeprecated(operation)] class="deprecated"[/#if]><a href="#${operation.@name}">${alias}</a></li>
+      [/#list]
+    [/#list]
+      </ul>
+  [/#if]
+  [#list resource.operation as operation]
+      <a name="${operation.@name}"></a>
+      <h2>${operation.@name}</h2>
+    [#list operation.alias as alias]
+      <p class="note">Alias: ${alias}</p>
+    [/#list]
+    [#if isDeprecated(operation)]
+      <p class="alert">This operation has been deprecated. [#list operation.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+    [/#if]
+    [#list operation.documentation as documentation]
+      <p>${documentation}</p>
+    [/#list]
+    [#list operation.parameter as parameter]
+      [#if parameter_index = 0]
+      <h3>Parameters</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <th>description</th>
+          <th>type</th>
+          <th>default</th>
+        </tr>
+      [/#if]
+        <tr>
+          <td>[#if attributeExists(parameter.@name)]${parameter.@name}[/#if]</td>
+          <td>${parameter}</td>
+          <td>[#if attributeExists(parameter.@type)]${parameter.@type}[/#if]</td>
+          <td>[#if attributeExists(parameter.@defaultValue)]${parameter.@defaultValue}[/#if]</td>
+        </tr>
+      [#if !parameter_has_next]
+      </table>
+      [/#if]
+    [/#list]
+    [#list operation.inValue as inValue]
+      <h3>Request Body</h3>
+      <table>
+      [#assign custom=true]
+      [#list inValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+          [#assign custom=false/]
+        <tr>
+          <td align="right">element:</td>
+          [#if attributeExists(xmlElement.@elementSchemaId)]
+          <td><a href="el_${xmlElement.@elementSchemaId}_${xmlElement.@elementName}.html">${xmlElement.@elementName}</a></td>
+          [#else]
+          <td>${xmlElement.@elementName}</td>
+          [/#if]
+        </tr>
+        [/#if]
+      [/#list]
+      [#list inValue.jsonElement as jsonElement]
+        [#if attributeExists(jsonElement.@elementName)]
+          [#assign custom=false/]
+        <tr>
+          <td align="right">element:</td>
+          [#if attributeExists(jsonElement.@elementSchemaId)]
+          <td><a href="json_${jsonElement.@elementSchemaId}_${jsonElement.@elementName}.html">${jsonElement.@elementName}</a></td>
+          [#else]
+          <td>${jsonElement.@elementName}</td>
+          [/#if]
+        </tr>
+        [/#if]
+      [/#list]
+      [#if custom]
+        <tr>
+          <td align="right">element:</td>
+          <td>(custom)</td>
+        </tr>
+      [/#if]
+      [#list inValue["contentType[consumable='true']"] as contentType]
+        <tr>
+          <td align="right">consumable media type:</td>
+          <td>${contentType.@type}</td>
+        </tr>
+      [/#list]
+      </table>
+      [#list inValue.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
+    [/#list]
+    [#list operation.outValue as outValue]
+      <h3>Response Body</h3>
+      <table>
+      [#assign custom=true]
+      [#list outValue.xmlElement as xmlElement]
+        [#if attributeExists(xmlElement.@elementName)]
+          [#assign custom=false/]
+        <tr>
+          <td align="right">element:</td>
+          [#if attributeExists(xmlElement.@elementSchemaId)]
+          <td><a href="el_${xmlElement.@elementSchemaId}_${xmlElement.@elementName}.html">${xmlElement.@elementName}</a></td>
+          [#else]
+          <td>${xmlElement.@elementName}</td>
+          [/#if]
+        </tr>
+        [/#if]
+      [/#list]
+      [#list outValue.jsonElement as jsonElement]
+        [#if attributeExists(jsonElement.@elementName)]
+          [#assign custom=false/]
+        <tr>
+          <td align="right">element:</td>
+          [#if attributeExists(jsonElement.@elementSchemaId)]
+          <td><a href="json_${jsonElement.@elementSchemaId}_${jsonElement.@elementName}.html">${jsonElement.@elementName}</a></td>
+          [#else]
+          <td>${jsonElement.@elementName}</td>
+          [/#if]
+        </tr>
+        [/#if]
+      [/#list]
+      [#if custom]
+        <tr>
+          <td align="right">element:</td>
+          <td>(custom)</td>
+        </tr>
+      [/#if]
+      [#list outValue["contentType[produceable='true']"] as contentType]
+        <tr>
+          <td align="right">produceable media type:</td>
+          <td>${contentType.@type}</td>
+        </tr>
+      [/#list]
+      </table>
+      [#list outValue.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
+    [/#list]
+    [#list operation.error as error]
+      [#if error_index = 0]
+      <h3>Errors</h3>
+      <table>
+        <tr>
+          <th>code</th>
+          <th>description</th>
+        </tr>
+      [/#if]
+        <tr>
+          <td>${error.@code}</td>
+          <td>${error}</td>
+        </tr>
+      [#if !error_has_next]
+      </table>
+      [/#if]
+    [/#list]
+  [/#list]
 [/#macro]
 [#macro processEndpointInterface endpointInterface]
   [@file name="soap_" + endpointInterface?parent.@namespaceId + "_" + endpointInterface.@name + ".html" charset="utf-8"]
@@ -535,10 +700,10 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
       <p>${documentation}</p>
         [/#list]
       [/#if]
+      [#if tocNeeded(endpointInterface.method)]
       <p>
         The following methods are available on this endpoint:
       </p>
-      [#if tocNeeded(endpointInterface.method)]
       <ul>
         [#list endpointInterface.method as method]
         <li[#if isDeprecated(method)] class="deprecated"[/#if]><a href="#${method.@name}">${method.@name}</a></li>
@@ -568,7 +733,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
           <td>${parameter.@name}</td>
           <td>${parameter}</td>
         </tr>
-          [#if parameter_index = 0]
+          [#if !parameter_has_next]
       </table>
           [/#if]
         [/#list]
@@ -586,7 +751,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
           <td>${parameter.@name}</td>
           <td>${parameter}</td>
         </tr>
-          [#if parameter_index = 0]
+          [#if !parameter_has_next]
       </table>
           [/#if]
         [/#list]
@@ -609,7 +774,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
           <td>${fault.@name}</td>
           <td>${fault}</td>
         </tr>
-          [#if fault_index = 0]
+          [#if !fault_has_next]
       </table>
           [/#if]
         [/#list]

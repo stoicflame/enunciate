@@ -1011,6 +1011,9 @@
         <xs:attribute name="defaultNamespace" type="xs:string">
           <xs:annotation><xs:documentation>The default namespace for the purposes of generating documentation.</xs:documentation></xs:annotation>
         </xs:attribute>
+        <xs:attribute name="groupRestResources" type="xs:boolean">
+          <xs:annotation><xs:documentation>Whether to group the REST resources together.</xs:documentation></xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
