@@ -23,7 +23,7 @@
   REST XML Example
 </h1>
 
-<code>
+<code class="prettyprint">
 #include &lt;${filename}&gt;
 //...
 

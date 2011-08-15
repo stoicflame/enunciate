@@ -16,7 +16,7 @@
   REST Example (Raw Jackson)
 </h1>
 
-<code>
+<code class="prettyprint">
 java.net.URL url = new java.net.URL(baseURL + "${sample_resource.fullpath}");
 ObjectMapper mapper = new ObjectMapper();
 java.net.URLConnection connection = url.openConnection();

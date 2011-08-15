@@ -30,7 +30,7 @@
     GWT-RPC Example
   </h1>
 
-  <code>
+  <code class="prettyprint">
 //instantiate a new service...
 ${sample_service_method.declaringEndpointInterface.simpleName}Async service =
   ${sample_service_method.declaringEndpointInterface.simpleName}Async.Util.getInstance();
@@ -62,7 +62,7 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
     JSON-REST Example
   </h1>
 
-  <code>
+  <code class="prettyprint">
 String url = GWT.getModuleBaseURL() + ...;
 RequestBuilder request = new RequestBuilder(RequestBuilder.GET, url);
 request.sendRequest(null, new RequestCallback() {

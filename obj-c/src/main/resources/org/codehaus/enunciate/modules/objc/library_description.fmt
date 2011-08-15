@@ -22,7 +22,7 @@
   REST XML Example
 </h1>
 
-<code>
+<code class="prettyprint">
 #import &lt;${label}.h&gt;
 //...
 

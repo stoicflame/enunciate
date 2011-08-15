@@ -19,7 +19,7 @@
     JAX-WS Example
 </h1>
 
-<code>
+<code class="prettyprint">
 // instantiate a new service with an impl
 // (or through dependency injection, or whatever)...
 ${sample_service_method.declaringEndpointInterface.simpleName} service = new ${sample_service_method.declaringEndpointInterface.simpleName}();
@@ -42,7 +42,7 @@ result = service.${sample_service_method.simpleName}([#list sample_service_metho
   REST Example (Raw JAXB)
 </h1>
 
-<code>
+<code class="prettyprint">
 java.net.URL url = new java.net.URL(baseURL + "${sample_resource.fullpath}");
 JAXBContext context = JAXBContext.newInstance( ${sample_resource.representationMetadata.xmlElement.simpleName}.class[#if sample_resource.entityParameter?? && sample_resource.entityParameter.xmlElement??], ${sample_resource.entityParameter.xmlElement.simpleName}.class[/#if] );
 java.net.URLConnection connection = url.openConnection();
@@ -64,7 +64,7 @@ ${sample_resource.representationMetadata.xmlElement.simpleName} result = (${samp
   REST Example (Jersey client)
 </h1>
 
-<code>
+<code class="prettyprint">
 com.sun.jersey.api.client.Client client = com.sun.jersey.api.client.Client.create();
 
 ${sample_resource.representationMetadata.xmlElement.simpleName} result = client.resource(baseUrl + "${sample_resource.fullpath}")

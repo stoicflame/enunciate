@@ -22,7 +22,7 @@
   JSON REST Example
 </h1>
 
-<code>
+<code class="prettyprint">
 require 'net/https'
 require 'uri'
 //...

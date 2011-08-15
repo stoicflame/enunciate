@@ -16,7 +16,7 @@
     .NET Service Example
 </h1>
 
-<code>
+<code class="prettyprint">
 //instantiate a new service...
 ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = new ${sample_service_method.declaringEndpointInterface.clientSimpleName}();
 
@@ -38,7 +38,7 @@ ${sample_service_method.declaringEndpointInterface.clientSimpleName} service = n
   REST Example
 </h1>
 
-<code>
+<code class="prettyprint">
 //read a resource from a REST url
 Uri uri = new Uri(...);
 

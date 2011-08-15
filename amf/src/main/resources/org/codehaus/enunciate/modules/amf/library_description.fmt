@@ -29,7 +29,7 @@
     Services Example
   </h1>
 
-  <code>
+  <code class="prettyprint">
 //instantiate a new service...
 var service:${sample_service_method.declaringEndpointInterface.simpleName} =
   new ${sample_service_method.declaringEndpointInterface.simpleName}();
@@ -79,7 +79,7 @@ service.${sample_service_method.simpleName}([#list sample_service_method.webPara
     REST Example
   </h1>
 
-<code>
+<code class="prettyprint">
 var request:URLRequest = new URLRequest("${sample_resource.fullpath}");
 request.method = URLRequestMethod.${sample_resource.httpMethods?first?capitalize};
 URLStream resourceStream = new URLStream();

@@ -284,6 +284,18 @@ blockquote  { margin: 0 0 18px 18px; color: #666; font-style: italic; }
 strong      { font-weight: bold; }
 em          { font-style: italic; }
 pre         { margin-bottom: 18px; background: #eee; border:1px solid #ddd; padding:16px; }
+code {
+    background: #eee;
+    border: 1px solid #ddd;
+    color: #555;
+    display: block;
+    font: normal 1.1em "Lucida Sans Unicode",serif;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    white-space: pre;
+    overflow: auto;
+    max-height: 300px;
+}
 
 /* Use this to create a horizontal ruler across a column. */
 hr {
