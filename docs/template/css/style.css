@@ -257,8 +257,8 @@ h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
 
 h1 { font-size: 30px; line-height:36px; padding:10px 0 18px 0; }
 h2 { font-size: 20px; line-height:36px; }
-h3 { font-size: 14px; line-height:36px; }
-h4 { font-size: 14px; font-weight:bold; }
+h3 { font-size: 12px; line-height:24px; }
+h4 { font-size: 12px; font-weight:bold; }
 h5 { font-size: 12px; font-weight:bold; }
 h6 { font-size: 12px; }
 
@@ -332,7 +332,7 @@ p.quiet   { color: #666; }
 	margin-bottom: 1.8em;
 }
 #site-name {
-    line-height: 72px;
+    line-height: 36px;
 }
 #site-name a {
     font-variant: small-caps;
@@ -440,7 +440,8 @@ body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blo
 #main h2 {
 	font-size: 1.8em;
 	font-weight: normal;
-    border-bottom: 1px solid #c2b2d4;
+    border-bottom: 3px solid #c2b2d4;
+    padding-top: 10px;
 	padding-left: 0;
 	padding-right: 0;
 	margin-bottom: 6px;
@@ -449,7 +450,7 @@ body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blo
 	font-size: 1.4em;
 	font-weight: normal;
 	border-bottom: 4px solid #f7f7f7;
-	padding: 0 0 1px;
+	padding: 0 0 5px;
 	margin-bottom: 0.4em;
 }
 #main h3 .caps {

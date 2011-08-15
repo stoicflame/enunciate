@@ -1,10 +1,20 @@
 [#ftl]
-[#assign soapAvailable=docsxml.soap.wsdls.wsdl.endpointInterface?? && docsxml.soap.wsdls.wsdl.endpointInterface?size > 0/]
-[#assign restful=docsxml.rest.resources.resource?? && docsxml.rest.resources.resource?size > 0/]
-[#assign multiple_schemas=docsxml.data.schema?? && docsxml.data.schema?size > 1/]
+[#assign soapAvailable=docsxml.soap.wsdls.wsdl.endpointInterface?size > 0/]
+[#assign restAvailable=docsxml.rest.resources.resource?size > 0/]
 [#macro scrubPathToFilename path]
 ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", "-")}
 [/#macro]
+[#function tocNeeded(nodelist)]
+  [#return nodelist?size > 2/]
+[/#function]
+[#function attributeExists(node)]
+  [#if node?size??]
+    [#--if there is a 'size' property, then it's not an attribute--]
+    [#return node?size > 0/]
+  [#else]
+    [#return node?node_type = "attribute"/]
+  [/#if]
+[/#function]
 [#macro boilerplate title=docsxml.@title!"Web API" subnav={"Home" : indexPageName} codeblocks=false]
 <!doctype html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
@@ -38,13 +48,13 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
   <div class="container">
     <header>
       <div id="header" class="column first last span-20">
-        <div id="site-name" class="column first span-5 prepend-1 append-1"><a href="${indexPageName}">${title}</a></div>
-        <div id="primary" class="column span-13 last">
+        <div id="site-name" class="column span-18 append-1 prepend-1 first last"><a href="${indexPageName}">${title}</a></div>
+        <div id="primary" class="column span-18 append-1 prepend-1 first last">
           <ul class="navigation">
             [#if soapAvailable]
             <li id="nav-soap"><a href="soap.html">SOAP</a></li>
             [/#if]
-            [#if restful]
+            [#if restAvailable]
             <li id="nav-rest"><a href="rest.html">REST</a></li>
             [/#if]
             <li id="nav-data"><a href="model.html">Data Model</a></li>
@@ -133,13 +143,13 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
 [/#function]
 [@file name=indexPageName charset="utf-8"]
   [@boilerplate]
-    [#if docsxml.documentation?? && docsxml.documentation?size > 0]
+    [#if docsxml.documentation?size > 0]
       <h1>Introduction</h1>
 
       <p>${docsxml.documentation}</p>
 
     [/#if]
-    [#if restful]
+    [#if restAvailable]
 
       <h1>REST Resources</h1>
       <p>
@@ -147,7 +157,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
       </p>
       <ul>
-      [#if docsxml.rest.groups.group?? && docsxml.rest.groups.group?size > 0]
+      [#if docsxml.rest.groups.group?size > 0]
         [#list docsxml.rest.groups.group?sort as group]
           [@processResourceGroup group=group/]
         <li><a href="resource_${group}.html">${group}</a></li>
@@ -166,9 +176,9 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         <a href="downloads.html">files and libraries</a> page.
       </p>
       [/#if]
-      [#if docsxml.rest.@wadl?? && docsxml.rest.@wadl?size > 0]
+      [#if attributeExists(docsxml.rest.@wadl)]
       <p>
-        There is also a <a href="${docsxml.rest.@wadl[0]}">WADL document</a> describing the REST API.
+        There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
       </p>
       [/#if]
     [/#if]
@@ -179,14 +189,31 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
         -compliant SOAP v1.1 endpoints. The API supports <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Pacakging (XOP)</a>
         and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
-        for transmission of binary data. The SOAP API is fully described by the following endpoints:
+        for transmission of binary data. The SOAP API is described by the following endpoints:
       </p>
+      [#list docsxml.soap.wsdls.wsdl as wsdl]
+        [@processWsdl wsdl=wsdl/]
+      <h2>Namespace "${wsdl.@namespaceId}"</h2>
+      <table>
+        <tr>
+          <td align="right">Namespace URI:</td>
+          <td>[#if wsdl.@namespace?length > 0]${wsdl.@namespace}[#else](default namespace)[/#if]</td>
+        </tr>
+        [#if attributeExists(wsdl.@file)]
+        <tr>
+          <td align="right">WSDL:</td>
+          <td><a href="${wsdl.@file}">${wsdl.@file}</a></td>
+        </tr>
+        [/#if]
+      </table>
+      <h3>Endpoints</h3>
       <ul>
-      [#list docsxml.soap.wsdls.wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+      [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
         [@processEndpointInterface endpointInterface=endpointInterface/]
-        <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
+        <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${wsdl.@namespaceId}_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
       [/#list]
       </ul>
+      [/#list]
       [#if downloadsxml??]
       <p>
         The SOAP API is also accessible by a set of client-side libraries that can be downloaded from the <a href="downloads.html">files and libraries page</a>.
@@ -214,20 +241,20 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     [#list docsxml.data.schema as schema]
       [@processSchema schema=schema/]
 
-      <h2>${schema.@namespaceId}</h2>
+      <h2>Namespace "${schema.@namespaceId}"</h2>
       <table>
         <tr>
           <td align="right">Namespace URI:</td>
           <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
         </tr>
-      [#if schema.@file?? && schema.@file?size > 0]
+      [#if attributeExists(schema.@file)]
         <tr>
           <td align="right">XSD:</td>
           <td><a href="${schema.@file}">${schema.@file}</a></td>
         </tr>
       [/#if]
       </table>
-      [#if schema.elements.element?? && schema.elements.element?size > 0]
+      [#if schema.elements.element?size > 0]
 
         <h3>Data Elements</h3>
 
@@ -237,7 +264,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         [/#list]
         </ul>
       [/#if]
-      [#if schema.types.type?? && schema.types.type?size > 0]
+      [#if schema.types.type?size > 0]
 
         <h3>Data Types</h3>
         <ul>
@@ -247,7 +274,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         </ul>
       [/#if]
     [/#list]
-    [#if docsxml.data.jsonSchema.type?? && docsxml.data.jsonSchema.type?size > 0]
+    [#if docsxml.data.jsonSchema.type?size > 0]
 
       <h1>JSON Data Types</h1>
       <ul>
@@ -279,20 +306,20 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     </p>
     [#list docsxml.data.schema as schema]
 
-    <h2>${schema.@namespaceId}</h2>
+    <h2>Namespace "${schema.@namespaceId}"</h2>
     <table>
       <tr>
         <td align="right">Namespace URI:</td>
         <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
       </tr>
-      [#if schema.@file?? && schema.@file?size > 0]
+      [#if attributeExists(schema.@file)]
       <tr>
         <td align="right">XSD:</td>
         <td><a href="${schema.@file}">${schema.@file}</a></td>
       </tr>
       [/#if]
     </table>
-      [#if schema.elements.element?? && schema.elements.element?size > 0]
+      [#if schema.elements.element?size > 0]
 
     <h3>Data Elements</h3>
 
@@ -302,7 +329,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
       [/#list]
     </ul>
       [/#if]
-      [#if schema.types.type?? && schema.types.type?size > 0]
+      [#if schema.types.type?size > 0]
 
     <h3>Data Types</h3>
     <ul>
@@ -314,7 +341,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     [/#list]
   [/@boilerplate]
 [/@file]
-[#if restful]
+[#if restAvailable]
   [@file name="rest.html" charset="utf-8"]
     [@boilerplate title="REST" subnav={"Home" : indexPageName, "REST" : "rest.html"}]
   <h1>REST Resources</h1>
@@ -323,7 +350,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
   </p>
   <ul>
-    [#if docsxml.rest.groups.group?? && docsxml.rest.groups.group?size > 0]
+    [#if docsxml.rest.groups.group?size > 0]
       [#list docsxml.rest.groups.group?sort as group]
     <li><a href="resource_${group}.html">${group}</a></li>
       [/#list]
@@ -340,9 +367,9 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     <a href="downloads.html">files and libraries</a> page.
   </p>
       [/#if]
-      [#if docsxml.rest.@wadl?? && docsxml.rest.@wadl?size > 0]
+      [#if attributeExists(docsxml.rest.@wadl)]
   <p>
-    There is also a <a href="${docsxml.rest.@wadl[0]}">WADL document</a> describing the REST API.
+    There is also a <a href="${docsxml.rest.@wadl}">WADL document</a> describing the REST API.
   </p>
       [/#if]
     [/@boilerplate]
@@ -358,11 +385,27 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
     for transmission of binary data. The SOAP API is fully described by the following endpoints:
   </p>
+      [#list docsxml.soap.wsdls.wsdl as wsdl]
+  <h2>Namespace "${wsdl.@namespaceId}"</h2>
+  <table>
+    <tr>
+      <td align="right">Namespace URI:</td>
+      <td>[#if wsdl.@namespace?length > 0]${wsdl.@namespace}[#else](default namespace)[/#if]</td>
+    </tr>
+        [#if attributeExists(wsdl.@file)]
+    <tr>
+      <td align="right">WSDL:</td>
+      <td><a href="${wsdl.@file}">${wsdl.@file}</a></td>
+    </tr>
+        [/#if]
+  </table>
+  <h3>Endpoints</h3>
   <ul>
-    [#list docsxml.soap.wsdls.wsdl.endpointInterface?sort_by("@name") as endpointInterface]
-    <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
-    [/#list]
+      [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+    <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${wsdl.@namespaceId}_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
+      [/#list]
   </ul>
+      [/#list]
       [#if downloadsxml??]
   <p>
     The SOAP API is also accessible by a set of client-side libraries that can be downloaded from the <a href="downloads.html">files and libraries page</a>.
@@ -371,6 +414,31 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
     [/@boilerplate]
   [/@file]
 [/#if]
+[#macro processWsdl wsdl]
+  [@file name="soap_" + wsdl.@namespaceId + ".html" charset="utf-8"]
+    [@boilerplate title="SOAP: " + wsdl.@namespaceId subnav={"Home" : indexPageName, "SOAP" : "soap.html", wsdl.@namespaceId : "soap_" + wsdl.@namespaceId + ".html"}]
+  <h1>${wsdl.@namespaceId}</h1>
+  <table>
+    <tr>
+      <td align="right">Namespace URI:</td>
+      <td>[#if wsdl.@namespace?length > 0]${wsdl.@namespace}[#else](default namespace)[/#if]</td>
+    </tr>
+        [#if attributeExists(wsdl.@file)]
+    <tr>
+      <td align="right">WSDL:</td>
+      <td><a href="${wsdl.@file}">${wsdl.@file}</a></td>
+    </tr>
+        [/#if]
+  </table>
+  <h3>Endpoints</h3>
+  <ul>
+      [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+    <li[#if isDeprecated(endpointInterface)] class="deprecated"[/#if]><a href="soap_${wsdl.@namespaceId}_${endpointInterface.@name}.html">${endpointInterface.@name}</a></li>
+      [/#list]
+  </ul>
+    [/@boilerplate]
+  [/@file]
+[/#macro]
 [#macro processResourceGroup group]
   [@file name="resource_" + group + ".html" charset="utf-8"]
     [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", group : "resource_" + group + ".html"}]
@@ -404,15 +472,114 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
   [/@file]
 [/#macro]
 [#macro processEndpointInterface endpointInterface]
-  [@file name="soap_" + endpointInterface.@name + ".html" charset="utf-8"]
-    [@boilerplate title=endpointInterface.@name subnav={"Home" : indexPageName, "SOAP" : "soap.html", endpointInterface.@name : "soap_" + endpointInterface.@name + ".html"}]
+  [@file name="soap_" + endpointInterface?parent.@namespaceId + "_" + endpointInterface.@name + ".html" charset="utf-8"]
+    [@boilerplate title=endpointInterface.@name subnav={"Home" : indexPageName, "SOAP" : "soap.html", endpointInterface?parent.@namespaceId : "soap_" + endpointInterface?parent.@namespaceId + ".html", endpointInterface.@name : "soap_" + endpointInterface.@name + ".html"}]
       <h1>${endpointInterface.@name}</h1>
-
+      [#if isDeprecated(endpointInterface)]
+      <p class="alert">This endpoint has been deprecated.[#list endpointInterface.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+      [/#if]
+      <table>
+        <tr>
+          <td align="right">Namespace:</td>
+          <td>[#if (endpointInterface?parent).@namespace?length > 0]${(endpointInterface?parent).@namespace}[#else](default namespace)[/#if]</td>
+        </tr>
+        [#if attributeExists((endpointInterface?parent).@file)]
+        <tr>
+          <td align="right">WSDL:</td>
+          <td><a href="${(endpointInterface?parent).@file}">${(endpointInterface?parent).@file}</a></td>
+        </tr>
+        [/#if]
+        [#if attributeExists(endpointInterface.@path)]
+          <tr>
+            <td align="right">Path:</td>
+            <td><a href="${apiRelativePath}${endpointInterface.@path}">${endpointInterface.@path}</a></td>
+          </tr>
+        [/#if]
+      </table>
+      [#if endpointInterface.documentation?size > 0]
+        [#list endpointInterface.documentation as documentation]
+      <p>${documentation}</p>
+        [/#list]
+      [/#if]
+      <p>
+        The following methods are available on this endpoint:
+      </p>
+      [#if tocNeeded(endpointInterface.method)]
       <ul>
         [#list endpointInterface.method as method]
-        <li>${method.@name}</li>
+        <li[#if isDeprecated(method)] class="deprecated"[/#if]><a href="#${method.@name}">${method.@name}</a></li>
         [/#list]
       </ul>
+      [/#if]
+      [#list endpointInterface.method as method]
+      <a name="${method.@name}"></a>
+      <h2>${method.@name}</h2>
+        [#if isDeprecated(method)]
+      <p class="alert">This method has been deprecated.[#list method.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+        [/#if]
+        [#list method.documentation as documentation]
+      <p>${documentation}</p>
+        [/#list]
+        [#list method["parameter[@input='true']"] as parameter]
+          [#if parameter_index = 0]
+      <h3>Input Parameters</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <!--todo: add the parameter type and whether its a collection-->
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td>${parameter.@name}</td>
+          <td>${parameter}</td>
+        </tr>
+          [#if parameter_index = 0]
+      </table>
+          [/#if]
+        [/#list]
+        [#list method["parameter[@output='true']"] as parameter]
+          [#if parameter_index = 0]
+      <h3>Output Parameters</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <!--todo: add the parameter type and whether its a collection-->
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td>${parameter.@name}</td>
+          <td>${parameter}</td>
+        </tr>
+          [#if parameter_index = 0]
+      </table>
+          [/#if]
+        [/#list]
+        [#list method.result as result]
+      <h3>Return Value</h3>
+
+      <p>${result}</p>
+        [/#list]
+        [#list method.fault as fault]
+          [#if fault_index = 0]
+      <h3>Faults</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <!--todo: add the parameter type and whether its a collection-->
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td>${fault.@name}</td>
+          <td>${fault}</td>
+        </tr>
+          [#if fault_index = 0]
+      </table>
+          [/#if]
+        [/#list]
+      [/#list]
     [/@boilerplate]
   [/@file]
 [/#macro]
@@ -420,7 +587,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
   [@file name=schema.@namespaceId + ".html" charset="utf-8"]
     [@boilerplate title="Namespace: " + schema.@namespaceId subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html"}]
       <h1>Namespace ${schema.@namespaceId}</h1>
-      [#if schema.elements.element?? && schema.elements.element?size > 0]
+      [#if schema.elements.element?size > 0]
 
       <h2>Elements</h2>
       
@@ -431,7 +598,7 @@ ${path?string.replace("/", ".").replace(":","-").replace("{", "-").replace("}", 
         [/#list]
       </ul>
       [/#if]
-      [#if schema.types.type?? && schema.types.type?size > 0]
+      [#if schema.types.type?size > 0]
 
       <h2>Types</h2>
       
