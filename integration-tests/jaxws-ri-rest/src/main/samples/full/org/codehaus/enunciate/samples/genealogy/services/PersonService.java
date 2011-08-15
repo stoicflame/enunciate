@@ -21,6 +21,7 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.PersonExt;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
+import org.codehaus.enunciate.samples.genealogy.data.SiteIdentifier;
 import org.codehaus.enunciate.samples.genealogy.exceptions.EisAccountException;
 
 import javax.activation.DataHandler;
@@ -111,6 +112,12 @@ public interface PersonService {
   @Path("/multipart")
   @Consumes( MediaType.MULTIPART_FORM_DATA )
   void postMultipart(@FormDataParam("file1") InputStream file1, @FormDataParam("file2") InputStream file2);
+
+  @GET
+  @Path("/site/identifier")
+  @Produces(MediaType.APPLICATION_XML)
+  SiteIdentifier getSiteIdentifier();
+
 // todo: uncomment when wanting to spend time investigating why jaxb doesn't work with the JAX-WS types the same way it does its own.
 //  /**
 //   * Reads the family of a given person.  Tests out maps.

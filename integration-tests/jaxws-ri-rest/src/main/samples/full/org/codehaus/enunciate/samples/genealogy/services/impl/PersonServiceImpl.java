@@ -123,4 +123,8 @@ public class PersonServiceImpl implements PersonService {
 
   public void postMultipart( InputStream file1, InputStream file2 ) {
   }
+
+  public SiteIdentifier getSiteIdentifier() {
+    return new SiteIdentifier();
+  }
 }
