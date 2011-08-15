@@ -1051,7 +1051,7 @@ static void free${xmlFunctionIdentifier(type)?cap_first}Type(struct ${typeName} 
 #if DEBUG_ENUNCIATE > 1
     printf("Freeing element of accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
 #endif
-    free${xmlFunctionIdentifier(accessor)?cap_first}Element(_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
+    free${xmlFunctionIdentifier(accessor)?cap_first}[#if accessor.attribute!false]Type[#else]Element[/#if](_${type.clientSimpleName?uncap_first}->${accessor.clientSimpleName});
 #if DEBUG_ENUNCIATE > 1
     printf("Freeing accessor ${accessor.clientSimpleName} of type ${typeName}...\n");
 #endif
