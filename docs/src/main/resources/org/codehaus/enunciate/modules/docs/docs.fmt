@@ -786,6 +786,18 @@
   [@file name=schema.@namespaceId + ".html" charset="utf-8"]
     [@boilerplate title="Namespace: " + schema.@namespaceId subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html"}]
       <h1>Namespace ${schema.@namespaceId}</h1>
+      <table>
+        <tr>
+          <td align="right">Namespace:</td>
+          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
+        </tr>
+        [#if attributeExists(schema.@file)]
+        <tr>
+          <td align="right">XML Schema:</td>
+          <td><a href="${schema.@file}">${schema.@file}</a></td>
+        </tr>
+        [/#if]
+      </table>
       [#if schema.elements.element?size > 0]
 
       <h2>Elements</h2>
@@ -816,22 +828,195 @@
   [@file name="el_" + schema.@namespaceId + "_" + element.@name + ".html" charset="utf-8"]
     [@boilerplate title=element.@name subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html", "Element " + element.@name : "el_" + schema.@namespaceId + "_" + element.@name + ".html"} codeblocks=true]
       <h1>Element ${element.@name}</h1>
-
+      [#if isDeprecated(element)]
+      <p class="alert">This element has been deprecated.[#list element.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+      [/#if]
+      <table>
+      [#if attributeExists(element.@typeName) && attributeExists(element.@typeSchemaId)]
+        <tr>
+          <td align="right">Type:</td>
+          <td><a href="${element.@typeSchemaId}_${element.@typeName}.html">${element.@typeName}</a></td>
+        </tr>
+      [/#if]
+        <tr>
+          <td align="right">Namespace:</td>
+          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
+        </tr>
+        [#if attributeExists(schema.@file)]
+        <tr>
+          <td align="right">XML Schema:</td>
+          <td><a href="${schema.@file}">${schema.@file}</a></td>
+        </tr>
+        [/#if]
+      </table>
+      [#list element.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
+      [#list element.examplexml as examplexml]
       <h2>Example XML</h2>
-
+      <code class="prettyprint lang-xml">${examplexml?string?xhtml}</code>
+      [/#list]
+      [#list element.examplejson as examplejson]
       <h2>Example JSON</h2>
+      <code class="prettyprint lang-js">${examplejson?string?xhtml}</code>
+      [/#list]
     [/@boilerplate]
   [/@file]
 [/#macro]
 [#macro processType type]
   [#assign schema=type?parent?parent/]
   [@file name=schema.@namespaceId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name subnav={"Home" : indexPageName, type.@name : schema.@namespaceId + "_" + type.@name + ".html"} codeblocks=true]
+    [@boilerplate title=type.@name subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html" , type.@name : schema.@namespaceId + "_" + type.@name + ".html"} codeblocks=true]
       <h1>${type.@name}</h1>
+      [#if isDeprecated(type)]
+      <p class="alert">This type has been deprecated.[#list type.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+      [/#if]
+      <table>
+      [#if attributeExists(type.@extendsType)]
+        [#list docsxml.data.schema.types.type as candidate]
+          [#if attributeExists(candidate.@typeId) && (candidate.@typeId?string = type.@extendsType?string)]
+        <tr>
+          <td align="right">Extends:</td>
+          <td><a href="${candidate?parent?parent.@namespaceId}_${candidate.@name}.html">${candidate.@name}</a></td>
+        </tr>
+            [#break/]
+          [/#if]
+        [/#list]
+      [/#if]
+        <tr>
+          <td align="right">Namespace:</td>
+          <td>[#if schema.@namespace?length > 0]${schema.@namespace}[#else](default namespace)[/#if]</td>
+        </tr>
+        [#if attributeExists(schema.@file)]
+        <tr>
+          <td align="right">XML Schema:</td>
+          <td><a href="${schema.@file}">${schema.@file}</a></td>
+        </tr>
+        [/#if]
+      </table>
+      [#list type.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
 
+      [#if type.values.item?size > 0]
+        [#list type.values.item as value]
+          [#if value_index = 0]
+      <h2>Possible Values</h2>
+      <table>
+        <tr>
+          <th>value</th>
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td[#if isDeprecated(value)] class="deprecated"[/#if]>${value.@value}</td>
+          <td>
+          [#list value.documentation as documentation]
+            ${documentation}
+          [/#list]
+          </td>
+        </tr>
+          [#if !value_has_next]
+      </table>
+          [/#if]
+        [/#list]
+      [#else]
       <h2>XML</h2>
+        [#list type.attributes.attribute as attribute]
+          [#if attribute_index = 0]
+      <h3>Attributes</h3>
+      <table>
+        <tr>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td>[#if attributeExists(attribute.@name)]${attribute.@name}[/#if]</td>
+          <td>[#if attributeExists(attribute.@typeSchemaId)][#if attributeExists(attribute.@typeName)][#assign typename=attribute.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${attribute.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(attribute.@typeName)]${attribute.@typeName}[/#if]</td>
+          <td>${attribute}</td>
+        </tr>
+          [#if !attribute_has_next]
+      </table>
+          [/#if]
+        [/#list]
+        [#list type.elements.element as element]
+          [#if element_index = 0]
+      <h3>Elements</h3>
+      <table>
+        <tr>
+          <th>name (type)</th>
+          <th>min/max<br/>occurs</th>
+          <th>description</th>
+        </tr>
+          [/#if]
+        <tr>
+          <td>
+          [#list element.choice as choice]
+            [#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
+          [/#list]
+          </td>
+          <td>[#if attributeExists(element.@minOccurs)]${element.@minOccurs}[/#if]/[#if attributeExists(element.@maxOccurs)]${element.@maxOccurs}[/#if]</td>
+          <td>
+          [#list element.documentation as documentation]
+            ${documentation}
+          [/#list]
+          </td>
+        </tr>
+          [#if !element_has_next]
+      </table>
+          [/#if]
+        [/#list]
+        [#list type.value as value]
+      <h3>Value</h3>
+      <table>
+        <tr>
+          <td align="right">Type:</td>
+          <td>[#if attributeExists(value.@typeSchemaId)][#if attributeExists(value.@typeName)][#assign typename=value.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${value.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(value.@typeName)]${value.@typeName}[/#if]</td>
+        </tr>
+      </table>
+      <p>${value}</p>
+        [/#list]
 
       <h2>JSON</h2>
+      <table>
+        <tr>
+          <th>property</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+        [#list type.attributes.attribute as attribute]
+        <tr>
+          <td>[#if attributeExists(attribute.@jsonName)]${attribute.@jsonName}[/#if]</td>
+          <td>[#if attributeExists(attribute.@typeSchemaId)][#if attributeExists(attribute.@typeName)][#assign typename=attribute.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${attribute.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(attribute.@typeName)]${attribute.@typeName}[/#if]</td>
+          <td>${attribute}</td>
+        </tr>
+        [/#list]
+        [#list type.elements.element as element]
+        <tr>
+          <td>[#if attributeExists(element.@jsonName)]${element.@jsonName}[/#if]</td>
+          <td>
+          [#list element.choice as choice]
+            [#if element.@maxOccurs = "unbounded"]array of [/#if][#if choice_index > 0]<br/>or [/#if][#if attributeExists(choice.@schemaId)]<a href="el_${choice.@schemaId}_${choice.@name}.html">${choice.@name}</a>[#else]${choice.@name}[/#if][#if attributeExists(choice.@typeSchemaId)][#if attributeExists(choice.@typeName)][#assign typename=choice.@typeName/][#else][#assign typename="(anonymous)"/][/#if] (<a href="${choice.@typeSchemaId}_${typename}.html">${typename}</a>)[#elseif attributeExists(choice.@typeName)] (${choice.@typeName})[/#if]
+          [/#list]
+          </td>
+          <td>
+          [#list element.documentation as documentation]
+            ${documentation}
+          [/#list]
+          </td>
+        </tr>
+        [/#list]
+        [#list type.value as value]
+        <tr>
+          <td>[#if attributeExists(value.@jsonName)]${value.@jsonName}[/#if]</td>
+          <td>[#if attributeExists(value.@typeSchemaId)][#if attributeExists(value.@typeName)][#assign typename=value.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="${value.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(value.@typeName)]${value.@typeName}[/#if]</td>
+          <td>${value}</td>
+        </tr>
+        [/#list]
+      </table>
+      [/#if]
     [/@boilerplate]
   [/@file]
 [/#macro]
@@ -869,7 +1054,7 @@
         [/#if]
         <tr>
           <td>[#if attributeExists(property.@name)]${property.@name}[/#if]</td>
-          <td>[#if property.@isList = "true"]List of [/#if][#if attributeExists(property.@typeSchemaId)]<a href="json_${property.@typeSchemaId}_${property.@typeName}.html">${property.@typeName}</a>[#else]${property.@typeName}[/#if]</td>
+          <td>[#if property.@isList = "true"]List of [/#if][#if attributeExists(property.@typeSchemaId)][#if attributeExists(property.@typeName)][#assign typename=property.@typeName/][#else][#assign typename="(anonymous)"/][/#if]<a href="json_${property.@typeSchemaId}_${typename}.html">${typename}</a>[#elseif attributeExists(property.@typeName)]${property.@typeName}[/#if]</td>
           <td>[#if attributeExists(property.@documentation)]${property.@documentation}[/#if]</td>
         </tr>
         [#if !property_has_next]

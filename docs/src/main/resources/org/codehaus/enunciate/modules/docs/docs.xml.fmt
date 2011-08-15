@@ -44,7 +44,7 @@
         [#if type.attributes?size > 0]
           <attributes>
           [#list type.attributes as attribute]
-            <attribute name="${attribute.name}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
+            <attribute name="${attribute.name}" jsonName="${attribute.jsonMemberName}" typeNamespace="${attribute.baseType.namespace!""}" typeName="${attribute.baseType.qname.localPart}"[#if schemaForNamespace(attribute)??] typeSchemaId="${schemaForNamespace(attribute).id}"[/#if]>
               <![CDATA[${attribute.javaDoc.return!attribute.docValue!"(no documentation provided)"}]]>
             </attribute>
           [/#list]
@@ -53,7 +53,7 @@
         [#if type.elements?size > 0]
           <elements>
           [#list type.elements as element]
-            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}">
+            <element minOccurs="${element.minOccurs}" maxOccurs="${element.maxOccurs}" jsonName="${element.jsonMemberName}">
             [#if element.docValue??]
               <documentation>
                 <![CDATA[${element.docValue}]]>
@@ -75,7 +75,7 @@
           </elements>
         [/#if]
         [#if type.value??]
-          <value typeNamespace="${type.value.baseType.namespace!""}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)??] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
+          <value jsonName="${type.value.jsonMemberName}" typeNamespace="${type.value.baseType.namespace!""}" typeName="${type.value.baseType.qname.localPart}"[#if schemaForNamespace(type.value)??] typeSchemaId="${schemaForNamespace(type.value).id}"[/#if]>
             <![CDATA[${type.value.javaDoc.return!type.value.docValue!"(no documentation provided)"}]]>
           </value>
         [/#if]
