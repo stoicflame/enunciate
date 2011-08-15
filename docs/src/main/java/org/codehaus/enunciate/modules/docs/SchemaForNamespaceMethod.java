@@ -22,6 +22,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.*;
+import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceRepresentationMetadata;
 import org.codehaus.enunciate.contract.jaxws.WebParam;
@@ -71,6 +72,9 @@ public class SchemaForNamespaceMethod implements TemplateMethodModelEx {
     }
     else if (object instanceof WebParam) {
       namespace = ((WebParam) object).getXmlType().getNamespace();
+    }
+    else if (object instanceof XmlType) {
+      namespace = ((XmlType) object).getNamespace();
     }
     else if (object instanceof ResourceRepresentationMetadata) {
       ResourceRepresentationMetadata metadata = (ResourceRepresentationMetadata) object;
