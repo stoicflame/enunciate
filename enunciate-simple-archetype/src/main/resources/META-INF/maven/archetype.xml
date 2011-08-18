@@ -16,9 +16,6 @@
     <source>src/main/java/impl/SocialGroupServiceImpl.java</source>
   </sources>
   <resources>
-    <resource>src/main/resources/link.xsd</resource>
-    <resource>src/main/resources/persona.xsd</resource>
-    <resource>src/enunciate/enunciate.xml</resource>
-    <resource>src/enunciate/LICENSE.txt</resource>
+    <resource>enunciate.xml</resource>
   </resources>
 </archetype>
