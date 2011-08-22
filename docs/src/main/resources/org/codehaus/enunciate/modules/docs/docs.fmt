@@ -368,6 +368,7 @@
           [/#if]
     </tr>
         [/#list]
+  </table>
       [/#list]
     [/@boilerplate]
   [/@file]

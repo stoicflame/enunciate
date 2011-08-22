@@ -25,7 +25,7 @@ import ${package}.domain.link.SocialGroup;
 
 import javax.jws.WebService;
 import javax.ws.rs.Path;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Ryan Heaton
@@ -36,7 +36,7 @@ import java.util.Collection;
 @Path ("/group")
 public class SocialGroupServiceImpl implements SocialGroupService {
 
-  public SocialGroup createSocialGroup(String groupLeader, Collection<String> memberIds, boolean exclusive) {
+  public SocialGroup createSocialGroup(String groupLeader, List<String> memberIds, boolean exclusive) {
     SocialGroup socialGroup = new SocialGroup();
 
     //store the social group...

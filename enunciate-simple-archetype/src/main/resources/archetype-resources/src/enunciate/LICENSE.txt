@@ -1,5 +1,0 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-This is the license file for ${artifactId}.  You are free
-to access our API as long as you agree to give up your privacy.

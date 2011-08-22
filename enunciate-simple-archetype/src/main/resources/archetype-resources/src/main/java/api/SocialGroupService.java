@@ -23,7 +23,7 @@ import ${package}.domain.link.SocialGroup;
 
 import javax.jws.WebService;
 import javax.ws.rs.*;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * The linkage service is used to service the data for creating links between personas.  This
@@ -54,7 +54,7 @@ public interface SocialGroupService {
    */
   @POST
   SocialGroup createSocialGroup(@QueryParam("leader") String groupLeader,
-                                @QueryParam("member") Collection<String> memberIds,
+                                @QueryParam("member") List<String> memberIds,
                                 @QueryParam ("exclusive") boolean exclusive);
 
   /**

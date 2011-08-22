@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="site" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="site" basedir="." xmlns:mvn="urn:maven-artifact-ant">
 
   <!--global references to other modules-->
   <property name="lib.dir" value="${basedir}/lib"/>
@@ -24,12 +24,12 @@
       </classpath>
     </typedef>
 
-    <artifact:pom id="parent.pom" file="${basedir}/pom.xml"/>
+    <mvn:pom id="parent.pom" file="${basedir}/pom.xml"/>
     <echo message="Current version is: ${parent.pom.version}"/>
     <property name="dist.name" value="enunciate-${parent.pom.version}"/>
     <property name="full.sources.jar.name" value="enunciate-full-${parent.pom.version}-sources.jar"/>
 
-    <artifact:pom id="top.pom" file="${basedir}/top/pom.xml"/>
+    <mvn:pom id="top.pom" file="${basedir}/top/pom.xml"/>
     <fail message="Top pom version (${top.pom.version}) is not the same as the project pom version (${parent.pom.version}).">
       <condition>
         <not>
@@ -38,40 +38,40 @@
       </condition>
     </fail>
 
-    <artifact:dependencies sourcesFilesetId="core.sources.fileset" pathId="core.libs.path" filesetId="core.libs.fileset" pomRefId="top.pom"/>
+    <mvn:dependencies sourcesFilesetId="core.sources.fileset" pathId="core.libs.path" filesetId="core.libs.fileset" pomRefId="top.pom"/>
 
-    <artifact:dependencies filesetId="spring.libs.fileset" pathId="spring.libs.path">
+    <mvn:dependencies filesetId="spring.libs.fileset" pathId="spring.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies filesetId="spring2.libs.fileset" pathId="spring2.libs.path">
+    <mvn:dependencies filesetId="spring2.libs.fileset" pathId="spring2.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring-app-rt" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
     
-    <artifact:dependencies filesetId="spring3.libs.fileset" pathId="spring3.libs.path">
+    <mvn:dependencies filesetId="spring3.libs.fileset" pathId="spring3.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-spring3-app-rt" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies filesetId="cxf.libs.fileset" pathId="cxf.libs.path">
+    <mvn:dependencies filesetId="cxf.libs.fileset" pathId="cxf.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-cxf" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies filesetId="jboss.libs.fileset" pathId="jboss.libs.path">
+    <mvn:dependencies filesetId="jboss.libs.fileset" pathId="jboss.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-jboss" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies filesetId="gwt.libs.fileset" pathId="gwt.libs.path">
+    <mvn:dependencies filesetId="gwt.libs.fileset" pathId="gwt.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-gwt" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies filesetId="amf.libs.fileset" pathId="amf.libs.path">
+    <mvn:dependencies filesetId="amf.libs.fileset" pathId="amf.libs.path">
       <dependency groupId="org.codehaus.enunciate" artifactId="enunciate-amf" version="${top.pom.version}"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
 
-    <artifact:dependencies pathId="optional.libs.path" filesetId="optional.libs.fileset">
+    <mvn:dependencies pathId="optional.libs.path" filesetId="optional.libs.fileset">
       <dependency groupId="commons-fileupload" artifactId="commons-fileupload" version="1.2.1"/>
       <dependency groupId="commons-io" artifactId="commons-io" version="1.3.2"/>
-    </artifact:dependencies>
+    </mvn:dependencies>
     
     <!--filters for docs-->
     <loadfile srcfile="${static.docs.dir}/topnav.include.html" property="topnav"/>
@@ -373,6 +373,21 @@
 
   </target>
 
+  <target name="samples" depends="init" description="packages up the samples">
+    <mkdir dir="target/samples"/>
+    <exec executable="mvn" dir="target/samples">
+      <arg value="archetype:generate"/>
+      <arg value="-DarchetypeGroupId=org.codehaus.enunciate.archetypes"/>
+      <arg value="-DarchetypeArtifactId=enunciate-simple-archetype"/>
+      <arg value="-DarchetypeVersion=${parent.pom.version}"/>
+      <arg value="-DgroupId=org.codehaus.enunciate"/>
+      <arg value="-DartifactId=wannabecool"/>
+      <arg value="-DarchetypeRepository=local"/>
+      <arg value="-Dbasedir=target/samples"/>
+      <arg value="-DinteractiveMode=false"/>
+    </exec>
+  </target>
+
   <target name="schemas" depends="init">
     <mkdir dir="${docs.dir}/schemas"/>
     <copy todir="${docs.dir}/schemas">
@@ -382,13 +397,14 @@
     </copy>
   </target>
 
-  <target name="dist" depends="docs, scripts, copy-dist-libs, full-sources-jar" description="Creates the distribution bundle.">
+  <target name="dist" depends="docs, scripts, samples, copy-dist-libs, full-sources-jar" description="Creates the distribution bundle.">
     <!--create the zip dist.-->
     <zip destfile="target/${dist.name}.zip">
       <zipfileset dir="${docs.dir}" prefix="${dist.name}/docs" excludes="*.txt"/>
       <zipfileset dir="${basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <zipfileset dir="target/bin" prefix="${dist.name}/bin"/>
       <zipfileset dir="target/lib" prefix="${dist.name}/lib"/>
+      <zipfileset dir="target/samples" prefix="${dist.name}/samples"/>
       <zipfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <zipfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
     </zip>
@@ -399,6 +415,7 @@
       <tarfileset dir="${basedir}" prefix="${dist.name}/docs" includes="license.txt notice.txt"/>
       <tarfileset dir="target/bin" prefix="${dist.name}/bin" mode="766"/>
       <tarfileset dir="target/lib" prefix="${dist.name}/lib"/>
+      <tarfileset dir="target/samples" prefix="${dist.name}/samples"/>
       <tarfileset dir="." includes="license.txt notice.txt" prefix="${dist.name}"/>
       <tarfileset dir="target" prefix="${dist.name}" includes="enunciate-full*.jar"/>
     </tar>
