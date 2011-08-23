@@ -266,8 +266,13 @@ public class ElementRef extends Element {
     throw new UnsupportedOperationException("There is no base type for an element ref.");
   }
 
+  @Override
+  public boolean isQNameType() {
+    return false;
+  }
+
   /**
-   * The type of an element accessor can be specified by an annotation.
+   * The type of an element ref accessor can be specified by an annotation.
    *
    * @return The accessor type.
    */

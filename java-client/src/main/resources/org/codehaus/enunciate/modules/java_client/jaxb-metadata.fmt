@@ -8,7 +8,7 @@
 [#if typeDef.seeAlsos??]
 @javax.xml.bind.annotation.XmlSeeAlso ( {
   [#list typeDef.seeAlsos as seeAlso]
-  ${classnameFor(seeAlso)}.class[#if seeAlso_has_next], [/#if]
+  ${classnameFor(seeAlso, true)}.class[#if seeAlso_has_next], [/#if]
   [/#list]
 } )
 [/#if]
@@ -34,7 +34,7 @@
 [#if accessor.seeAlsos??]
 @javax.xml.bind.annotation.XmlSeeAlso ( {
   [#list accessor.seeAlsos as seeAlso]
-  ${classnameFor(seeAlso)}.class[#if seeAlso_has_next], [/#if]
+  ${classnameFor(seeAlso, true)}.class[#if seeAlso_has_next], [/#if]
   [/#list]
 } )
 [/#if]
@@ -52,15 +52,14 @@
     @javax.xml.bind.annotation.XmlElementRef (
       name = "${choice.ref.localPart}",
       namespace = "${choice.ref.namespaceURI}",
-      type = ${classnameFor(choice.bareAccessorType)}.class
+      type = ${classnameFor(choice.bareAccessorType, true)}.class
     )[#if choice_has_next], [/#if]
   [/#list]
   } )
 [#elseif accessor.elementRef]
   @javax.xml.bind.annotation.XmlElementRef (
     name = "${accessor.ref.localPart}",
-    namespace = "${accessor.ref.namespaceURI}",
-    type = ${classnameFor(accessor)}.class
+    namespace = "${accessor.ref.namespaceURI}"
   )
 [#elseif accessor.choices?size > 1]
   @javax.xml.bind.annotation.XmlElements ( {
@@ -68,7 +67,7 @@
     @javax.xml.bind.annotation.XmlElement (
       name = "${choice.name}",
       namespace = "${choice.namespace!""}",
-      type = ${classnameFor(choice)}.class[#if choice.nillable?? && choice.nillable],
+      type = ${classnameFor(choice, true)}.class[#if choice.nillable?? && choice.nillable],
       nillable = true[/#if][#if choice.required?? && choice.required],
       required = true[/#if]
     )[#if choice_has_next], [/#if]

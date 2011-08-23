@@ -50,7 +50,7 @@ public class ClassnameForMethod extends ClientPackageForMethod {
 
   @Override
   public Object exec(List list) throws TemplateModelException {
-    FORCE_NOT_15.set(list.size() > 1 && Boolean.TRUE.equals(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(0))));
+    FORCE_NOT_15.set(list.size() > 1 && Boolean.TRUE.equals(BeansWrapper.getDefaultInstance().unwrap((TemplateModel) list.get(1))));
     try {
       return super.exec(list);
     }
