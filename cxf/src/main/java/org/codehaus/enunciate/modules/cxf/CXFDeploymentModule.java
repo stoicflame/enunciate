@@ -203,6 +203,13 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       }
 
       if (enableJaxrs) {
+        if (jacksonAvailable) {
+          model.getContentTypesToIds().put("application/json", "json"); //if we can load jackson, we've got json.
+        }
+        else {
+          debug("Couldn't find Jackson on the classpath, so it's assumed the REST endpoints aren't available in JSON format.");
+        }
+
         for (RootResource resource : model.getRootResources()) {
           for (ResourceMethod resourceMethod : resource.getResourceMethods(true)) {
             Map<String, Set<String>> subcontextsByContentType = new HashMap<String, Set<String>>();
