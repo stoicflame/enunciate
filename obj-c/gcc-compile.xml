@@ -54,10 +54,6 @@
       <arg line="${gnustep.config.flags}"/>
       <!--include the libxml compile flags-->
       <arg line="${libxml.config.flags}"/>
-      <!--include the gnustep libraries-->
-      <arg line="${gnustep.config.libs}"/>
-      <!--include the libxml libraries-->
-      <arg line="${libxml.config.libs}"/>
       <!--report all warnings...-->
       <arg value="-Wall"/>
       <!--...except the unused variable warnings-->
@@ -75,6 +71,10 @@
       <arg value="${project.build.directory}/enunciate/gen/obj-c/processxml.m"/>
       <arg value="${project.build.directory}/enunciate/gen/obj-c/enunciate.m"/>
       <arg value="${project.build.directory}/enunciate/gen/obj-c/enunciate-common.m"/>
+      <!--include the gnustep libraries-->
+      <arg line="${gnustep.config.libs}"/>
+      <!--include the libxml libraries-->
+      <arg line="${libxml.config.libs}"/>
     </exec>
   </target>
 

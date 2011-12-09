@@ -48,6 +48,7 @@
       <arg value="-Wall"/>
       <!--...except the unused variable warnings-->
       <arg value="-Wno-unused-variable"/>
+      <arg value="-Wno-unused-but-set-variable"/>
       <!--...and the unused function warnings-->
       <arg value="-Wno-unused-function"/>
       <!--count all warnings as errors -->
@@ -74,6 +75,7 @@
       <arg value="-Wall"/>
       <!--...except the unused variable warnings-->
       <arg value="-Wno-unused-variable"/>
+      <arg value="-Wno-unused-but-set-variable"/>
       <!--...and the unused function warnings-->
       <arg value="-Wno-unused-function"/>
       <!--count all warnings as errors -->
