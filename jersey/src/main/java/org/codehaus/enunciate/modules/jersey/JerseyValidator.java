@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.validation.ValidationResult;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -46,21 +47,20 @@ public class JerseyValidator extends BaseValidator {
     for (RootResource rootResource : rootResources) {
 
       if (rootResource.getDelegate() instanceof InterfaceDeclaration) {
-        result.addWarning(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
+        if (!isExternallyManagedLifecycle(rootResource)) {
+          result.addWarning(rootResource, "The Jersey runtime doesn't support interfaces as root resources. The @Path parameter will need to be applied to the " +
+            "implementation class. If the lifecycle of this root resource is to be managed externally (e.g. by Spring or something), then let Enunciate know by " +
+            "annotating this class with @" + ExternallyManagedLifecycle.class.getName() + ".");
+        }
       }
       else {
         List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
-        boolean springManaged = rootResource.getAnnotation(SpringManagedLifecycle.class) != null;
+        boolean externallyManagedLifecycle = isExternallyManagedLifecycle(rootResource);
         CONSTRUCTOR_LOOP:
         for (ConstructorDeclaration constructor : ((ClassDeclaration) rootResource.getDelegate()).getConstructors()) {
           if (constructor.getModifiers().contains(Modifier.PUBLIC)) {
             for (ParameterDeclaration constructorParam : constructor.getParameters()) {
-              if (springManaged) {
-                if (isSuppliableByJAXRS(constructorParam)) {
-                  result.addWarning(constructorParam, "Constructor parameter will not be supplied by JAX-RS if the lifecycle of this resource is Spring-managed.");
-                }
-              }
-              else if (!isSuppliableByJAXRS(constructorParam)) {
+              if (!externallyManagedLifecycle && !isSuppliableByJAXRS(constructorParam)) {
                 //none of those annotation are available. not a candidate constructor.
                 continue CONSTRUCTOR_LOOP;
               }
@@ -70,10 +70,10 @@ public class JerseyValidator extends BaseValidator {
           }
         }
 
-        if (candidates.isEmpty() && !springManaged) {
-          result.addError(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values. " +
-            "If the resource lifecycle is to be managed by Spring (which will handle the construction of the bean), then please apply the @" +
-            SpringManagedLifecycle.class.getName() + " annotation to the resource.");
+        if (candidates.isEmpty() && !externallyManagedLifecycle) {
+          result.addWarning(rootResource, "A JAX-RS root resource must have a public constructor for which the JAX-RS runtime can provide all parameter values. " +
+            "If the resource lifecycle is to be managed externally (e.g. by Spring or something), then please let Enunciate know by applying the @" +
+            ExternallyManagedLifecycle.class.getName() + " annotation to the resource.");
         }
         else {
           while (!candidates.isEmpty()) {
@@ -125,6 +125,10 @@ public class JerseyValidator extends BaseValidator {
     }
 
     return result;
+  }
+
+  private boolean isExternallyManagedLifecycle(RootResource rootResource) {
+    return rootResource.getAnnotation(SpringManagedLifecycle.class) != null && rootResource.getAnnotation(ExternallyManagedLifecycle.class) != null;
   }
 
   /**
