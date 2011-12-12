@@ -12,7 +12,7 @@ Template library for WADL.
 --]
 [#macro processWadl]
 [#-- assign the prefix variable for the "this" namespace --]
-[#assign wadl=prefix("http://research.sun.com/wadl/2006/10")]
+[#assign wadl=prefix("http://wadl.dev.java.net/2009/02")]
 [#-- assign the prefix variable for the schema namespace --]
 [#assign xs=prefix("http://www.w3.org/2001/XMLSchema")]
 [#t]
@@ -20,7 +20,7 @@ Template library for WADL.
 [#if wadlStylesheetUri??]
 <?xml-stylesheet type="text/xsl" href="${wadlStylesheetUri}"?>
 [/#if]
-<${wadl}:application xmlns:${wadl}="http://research.sun.com/wadl/2006/10" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
+<${wadl}:application xmlns:${wadl}="http://wadl.dev.java.net/2009/02" xmlns:${xs}="http://www.w3.org/2001/XMLSchema">
 
   <${wadl}:doc xmlns:enunciate="http://enunciate.codehaus.org/" enunciate:generatedBy="Enunciate-1.24"/>
   

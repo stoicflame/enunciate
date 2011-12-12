@@ -46,7 +46,7 @@ public class JerseyValidator extends BaseValidator {
     for (RootResource rootResource : rootResources) {
 
       if (rootResource.getDelegate() instanceof InterfaceDeclaration) {
-        result.addError(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
+        result.addWarning(rootResource, "Jersey doesn't support interfaces as root resources. The @Path parameter will need to be applied to the implementation class.");
       }
       else {
         List<ConstructorDeclaration> candidates = new ArrayList<ConstructorDeclaration>();
