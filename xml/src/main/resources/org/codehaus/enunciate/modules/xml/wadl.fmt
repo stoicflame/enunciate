@@ -55,7 +55,11 @@ Template library for WADL.
     <${wadl}:resource path="${subcontext}${resource.fullpath}">
               [#list resource.resourceParameters as parameter]
                 [#if parameter.pathParam!false]
-      <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!"custom"}">
+                  [#assign paramstyle=parameter.typeName!"plain"/]
+                  [#if paramstyle = "path"]
+                    [#assign paramstyle="template"/]
+                  [/#if]
+      <${wadl}:param name="${parameter.parameterName}" style="${paramstyle?lower_case}">
                   [#if parameter.docValue??]
         <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
                   [/#if]
