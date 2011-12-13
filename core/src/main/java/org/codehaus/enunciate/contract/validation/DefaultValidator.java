@@ -429,7 +429,7 @@ public class DefaultValidator extends BaseValidator implements ConfigurableRules
         result.addError(webMethod, "A BARE web method must not have more than one 'in' parameter.");
       }
       else if (inParams.isEmpty()) {
-        result.addError(webMethod, "A BARE web method must have one IN parameter.");
+        result.addWarning(webMethod, "A BARE web method should have one IN parameter.");
       }
 
       if (outParams.size() > 1) {
