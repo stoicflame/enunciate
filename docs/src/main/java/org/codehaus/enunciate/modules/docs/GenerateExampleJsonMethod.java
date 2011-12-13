@@ -206,7 +206,7 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
       JsonNode elementNode;
       if (!element.isCollectionType()) {
         String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? "..." : exampleInfo.value();
-        if (element.getRef() == null) {
+        if (!element.isElementRefs() && element.getRef() == null) {
           elementNode = generateExampleJson(element.getBaseType(), exampleValue, maxDepth);
         }
         else {
@@ -216,10 +216,10 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
       else {
         ArrayNode exampleChoices = JsonNodeFactory.instance.arrayNode();
         for (Element choice : element.getChoices()) {
-          QName ref = choice.getRef();
+          QName ref = choice.isElementRefs() ? null : choice.getRef();
           int iterations = "1".equals(choice.getMaxOccurs()) ? 1 : 2;
           for (int i = 0; i < iterations; i++) {
-            if (ref == null) {
+            if (!choice.isElementRefs() && ref == null) {
               String exampleValue = exampleInfo == null || "##default".equals(exampleInfo.value()) ? null : exampleInfo.value();
               XmlType xmlType = choice.getBaseType();
               if (i == 0) {
