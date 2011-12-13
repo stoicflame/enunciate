@@ -1,5 +1,6 @@
 package org.codehaus.enunciate.samples.genealogy.data;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URI;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import java.util.List;
  *
  * @author Ryan Heaton
  */
+@XmlRootElement
 public class PersonExt<E extends EventExt> extends Person<E> {
 
   private List<URI> links;

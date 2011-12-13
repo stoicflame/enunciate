@@ -106,14 +106,14 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
     return groups;
   }
 
-  private void gatherGroups(MethodDeclaration decl, Set<String> groups) {
+  private void gatherGroups(ResourceMethod decl, Set<String> groups) {
     if (decl != null) {
       DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
       if (documentationGroup != null) {
         groups.addAll(Arrays.asList(documentationGroup.value()));
       }
       else {
-        gatherGroups(decl.getDeclaringType(), groups);
+        gatherGroups(decl.getParent(), groups);
       }
     }
   }
