@@ -873,7 +873,7 @@
       <table>
       [#if attributeExists(type.@extendsType)]
         [#list docsxml.data.schema.types.type as candidate]
-          [#if attributeExists(candidate.@typeId) && (candidate.@typeId?string = type.@extendsType?string)]
+          [#if attributeExists(candidate.@id) && (candidate.@id?string = type.@extendsType?string)]
         <tr>
           <td align="right">Extends:</td>
           <td><a href="${candidate?parent?parent.@namespaceId}_${candidate.@name}.html">${candidate.@name}</a></td>
