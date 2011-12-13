@@ -266,12 +266,13 @@ public abstract class BaseAMFMapper<J, G> implements CustomAMFMapper<J, G> {
           + jaxbProperty.getName() + "' on class " + jaxbProperty.getReadMethod().getDeclaringClass());
       }
 
+      XmlJavaTypeAdapter typeAdapter = findTypeAdapter(jaxbProperty);
       AMFMapper mapper;
-      if (propertyValue instanceof AMFMapperAware) {
+      if (propertyValue instanceof AMFMapperAware && typeAdapter == null) {
         mapper = ((AMFMapperAware) propertyValue).loadAMFMapper();
       }
       else {
-        mapper = AMFMapperIntrospector.getAMFMapper(setter.getGenericParameterTypes()[0], findTypeAdapter(jaxbProperty), findXmlElement(jaxbProperty));
+        mapper = AMFMapperIntrospector.getAMFMapper(setter.getGenericParameterTypes()[0], typeAdapter, findXmlElement(jaxbProperty));
       }
 
       try {
