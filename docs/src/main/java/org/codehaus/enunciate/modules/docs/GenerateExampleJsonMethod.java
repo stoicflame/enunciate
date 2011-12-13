@@ -90,8 +90,7 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
       ObjectNode node = generateExampleJson(type, maxDepth);
       StringWriter sw = new StringWriter();
       JsonGenerator generator = new JsonFactory().createJsonGenerator(sw);
-      generator.useDefaultPrettyPrinter();
-      generator.disable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
+      configure(generator);
       node.serialize(generator, null);
       generator.flush();
       sw.flush();
@@ -100,6 +99,11 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  protected void configure(JsonGenerator generator) {
+    generator.useDefaultPrettyPrinter();
+    //generator.disable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
   }
 
   public ObjectNode generateExampleJson(TypeDefinition type, int maxDepth) {
@@ -142,9 +146,6 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
       }
       else {
         TYPE_DEF_STACK.get().push(type.getQualifiedName());
-        if (!jsonNode.has("@type") && type.getAnnotation(JsonTypeInfo.class) != null) {
-          jsonNode.put("@type", JsonNodeFactory.instance.textNode(type.getQname().toString()));
-        }
         for (Attribute attribute : type.getAttributes()) {
           generateExampleJson(attribute, jsonNode, maxDepth);
         }
