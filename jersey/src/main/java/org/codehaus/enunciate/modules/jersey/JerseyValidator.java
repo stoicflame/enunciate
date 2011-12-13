@@ -114,7 +114,7 @@ public class JerseyValidator extends BaseValidator {
 
         for (String method : resourceMethod.getHttpMethods()) {
           if ("GET".equalsIgnoreCase(method) && (resourceMethod.getRepresentationMetadata() == null)) {
-            result.addError(resourceMethod, "A resource method that is mapped to HTTP GET must have an output payload. (Does it return void?)");
+            result.addWarning(resourceMethod, "A resource method that is mapped to HTTP GET should probably have an output payload. (Does it return void?)");
           }
 
           if ("GET".equalsIgnoreCase(method) && resourceMethod.getEntityParameter() != null) {
