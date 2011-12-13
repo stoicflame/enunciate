@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.apt;
 
+import com.sun.mirror.util.SourcePosition;
 import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
@@ -66,5 +67,9 @@ public class ImplicitElementRef implements ImplicitSchemaElement {
     }
 
     return null;
+  }
+
+  public SourcePosition getPosition() {
+    return element.getPosition();
   }
 }

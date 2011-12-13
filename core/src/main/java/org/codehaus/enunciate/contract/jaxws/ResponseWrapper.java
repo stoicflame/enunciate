@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.sun.mirror.util.SourcePosition;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 
@@ -252,4 +253,7 @@ public class ResponseWrapper implements WebMessage, WebMessagePart, ImplicitRoot
     return "parameters";
   }
 
+  public SourcePosition getPosition() {
+    return webMethod.getPosition();
+  }
 }

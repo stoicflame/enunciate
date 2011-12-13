@@ -19,6 +19,7 @@ package org.codehaus.enunciate.contract.jaxws;
 import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.SourcePosition;
 import com.sun.mirror.util.TypeVisitor;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
@@ -357,5 +358,9 @@ public class WebResult extends DecoratedTypeMirror implements Adaptable, WebMess
   @Override
   public boolean isVoid() {
     return ((DecoratedTypeMirror) delegate).isVoid();
-  }  
+  }
+
+  public SourcePosition getPosition() {
+    return method.getPosition();
+  }
 }

@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.apt;
 
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.SourcePosition;
 import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
@@ -54,5 +55,9 @@ public class ImplicitChildElementRef extends ImplicitElementRef implements Impli
 
   public boolean isSwaRef() {
     return element.isSwaRef();
+  }
+
+  public SourcePosition getPosition() {
+    return element.getPosition();
   }
 }

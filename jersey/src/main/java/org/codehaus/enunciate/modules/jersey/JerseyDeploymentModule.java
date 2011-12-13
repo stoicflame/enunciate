@@ -119,6 +119,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
   private String resourceProviderFactory = null;
+  private String applicationClass = null;
   private String defaultNamespace = null;
   private final Map<String, String> servletInitParams = new HashMap<String, String>();
 
@@ -307,6 +308,9 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
     if (getResourceProviderFactory() != null) {
       initParams.put(JerseyAdaptedHttpServletRequest.PROPERTY_RESOURCE_PROVIDER_FACTORY, getResourceProviderFactory());
     }
+    if (getApplicationClass() != null) {
+      initParams.put("javax.ws.rs.Application", getApplicationClass());
+    }
     servletComponent.setInitParams(initParams);
 
     TreeSet<String> urlMappings = new TreeSet<String>();
@@ -419,6 +423,24 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   public void setResourceProviderFactory(String resourceProviderFactory) {
     this.resourceProviderFactory = resourceProviderFactory;
+  }
+
+  /**
+   * The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.
+   *
+   * @return The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.
+   */
+  public String getApplicationClass() {
+    return applicationClass;
+  }
+
+  /**
+   * The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.'
+   *
+   * @param applicationClass The fully-qualified classname of an instance of the implementation of javax.ws.rs.core.Application that jersey will use.
+   */
+  public void setApplicationClass(String applicationClass) {
+    this.applicationClass = applicationClass;
   }
 
   /**

@@ -21,6 +21,7 @@ import com.sun.mirror.type.ArrayType;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.PrimitiveType;
 import com.sun.mirror.type.TypeMirror;
+import com.sun.mirror.util.SourcePosition;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedClassDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
@@ -561,6 +562,10 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     public AdapterType getAdapterType() {
       return this.adaperType;
+    }
+
+    public SourcePosition getPosition() {
+      return property.getPosition();
     }
   }
 

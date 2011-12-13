@@ -73,7 +73,6 @@ public class ValidationResult {
    *
    * @param position The source position.
    * @param text     The text of the error message.
-   * @deprecated Use {@link #addError(com.sun.mirror.declaration.Declaration, String)}
    */
   public void addError(SourcePosition position, String text) {
     this.errors.add(new ValidationMessage(position, text));
@@ -151,7 +150,6 @@ public class ValidationResult {
    *
    * @param position The source position.
    * @param text     The text of the warning message.
-   * @deprecated Use {@link #addWarning(com.sun.mirror.declaration.Declaration, String)}
    */
   public void addWarning(SourcePosition position, String text) {
     this.warnings.add(new ValidationMessage(position, text));

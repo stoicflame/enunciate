@@ -16,6 +16,8 @@
 
 package org.codehaus.enunciate.contract.jaxb;
 
+import com.sun.mirror.util.SourcePosition;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -52,5 +54,12 @@ public interface ImplicitSchemaElement {
    * @return The qname of the type for this element, or null if it's an anonymous type.
    */
   QName getTypeQName();
+
+  /**
+   * The source position for this element, or null if none.
+   *
+   * @return The source position for this element, or null if none.
+   */
+  SourcePosition getPosition();
 
 }

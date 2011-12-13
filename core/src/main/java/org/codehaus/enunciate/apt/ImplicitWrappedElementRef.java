@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.apt;
 
+import com.sun.mirror.util.SourcePosition;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.Element;
@@ -55,5 +56,9 @@ public class ImplicitWrappedElementRef implements ImplicitRootElement {
 
   public QName getTypeQName() {
     return null;
+  }
+
+  public SourcePosition getPosition() {
+    return element.getPosition();
   }
 }

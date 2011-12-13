@@ -16,11 +16,14 @@
 
 package org.codehaus.enunciate.modules.xml;
 
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.config.SchemaInfo;
 import org.codehaus.enunciate.contract.jaxb.ImplicitSchemaElement;
 import org.codehaus.enunciate.contract.jaxws.*;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -29,6 +32,21 @@ import java.util.HashMap;
  * @author Ryan Heaton
  */
 public class XMLValidator extends BaseValidator {
+
+  @Override
+  public ValidationResult validate(EnunciateFreemarkerModel model) {
+    ValidationResult result = super.validate(model);
+
+    for (SchemaInfo schema : model.getNamespacesToSchemas().values()) {
+      for (ImplicitSchemaElement element : schema.getImplicitSchemaElements()) {
+        if (element.getElementName() == null || "".equals(element.getElementName())) {
+          result.addError(element.getPosition(), "Implicit schema elements must have a non-null and non-empty element name.");
+        }
+      }
+    }
+
+    return result;
+  }
 
   @Override
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {

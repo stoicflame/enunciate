@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.contract.jaxws;
 
+import com.sun.mirror.util.SourcePosition;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 import org.codehaus.enunciate.contract.jaxb.ImplicitRootElement;
 
@@ -236,4 +237,7 @@ public class RequestWrapper implements WebMessage, WebMessagePart, ImplicitRootE
     return "parameters";
   }
 
+  public SourcePosition getPosition() {
+    return webMethod.getPosition();
+  }
 }
