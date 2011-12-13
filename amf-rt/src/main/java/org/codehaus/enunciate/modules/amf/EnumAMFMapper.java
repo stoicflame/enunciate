@@ -28,11 +28,11 @@ public class EnumAMFMapper implements CustomAMFMapper<Enum, String> {
   }
 
   public String toAMF(Enum jaxbObject, AMFMappingContext context) throws AMFMappingException {
-    return jaxbObject.toString();
+    return jaxbObject == null ? null : jaxbObject.toString();
   }
 
   public Enum toJAXB(String amfObject, AMFMappingContext context) throws AMFMappingException {
-    return Enum.valueOf(enumClass, amfObject);
+    return amfObject == null ? null : Enum.valueOf(enumClass, amfObject);
   }
 
   public Class<? extends Enum> getJaxbClass() {
