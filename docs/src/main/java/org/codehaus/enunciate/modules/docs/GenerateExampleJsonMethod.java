@@ -36,6 +36,7 @@ import org.codehaus.jackson.node.ObjectNode;
 import javax.xml.namespace.QName;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -109,6 +110,29 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
     ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
     generateExampleJson(type, jsonNode, maxDepth);
     return jsonNode;
+  }
+
+  public JsonNode generateExampleJson(EnumTypeDefinition type) {
+    Map<String,Object> enumValues = type.getEnumValues();
+    Object example = null;
+    for (Object value : enumValues.values()) {
+      if (value != null) {
+        example = value;
+        break;
+      }
+    }
+
+    String exampleValue;
+    if (example == null) {
+      exampleValue = "...";
+    }
+    else if (type instanceof QNameEnumTypeDefinition && ((QNameEnumTypeDefinition)type).isUriBaseType()) {
+      exampleValue = ((QName) example).getNamespaceURI() + ((QName) example).getLocalPart();
+    }
+    else {
+      exampleValue = String.valueOf(enumValues.values().iterator().next());
+    }
+    return JsonNodeFactory.instance.textNode(exampleValue);
   }
 
   protected void generateExampleJson(TypeDefinition type, ObjectNode jsonNode, int maxDepth) {
@@ -217,7 +241,13 @@ public class GenerateExampleJsonMethod implements TemplateMethodModelEx {
 
   protected JsonNode generateExampleJson(XmlType type, String specifiedValue, int maxDepth) {
     if (type instanceof XmlClassType) {
-      return generateExampleJson(((XmlClassType) type).getTypeDefinition(), maxDepth);
+      TypeDefinition typeDef = ((XmlClassType) type).getTypeDefinition();
+      if (typeDef instanceof EnumTypeDefinition) {
+        return generateExampleJson((EnumTypeDefinition) typeDef);
+      }
+      else {
+        return generateExampleJson(typeDef, maxDepth);
+      }
     }
     else if (type instanceof MapXmlType) {
       XmlType keyType = ((MapXmlType) type).getKeyType();
