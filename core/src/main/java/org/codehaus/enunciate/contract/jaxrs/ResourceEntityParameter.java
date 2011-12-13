@@ -32,8 +32,13 @@ public class ResourceEntityParameter extends DecoratedDeclaration {
       try {
         Class hint = hintInfo.value();
         AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
-        TypeDeclaration type = env.getTypeDeclaration(hint.getName());
-        typeMirror = env.getTypeUtils().getDeclaredType(type);
+        if (TypeHint.NO_CONTENT.class.equals(hint)) {
+          typeMirror = env.getTypeUtils().getVoidType();
+        }
+        else {
+          TypeDeclaration type = env.getTypeDeclaration(hint.getName());
+          typeMirror = env.getTypeUtils().getDeclaredType(type);
+        }
       }
       catch (MirroredTypeException e) {
         typeMirror = e.getTypeMirror();

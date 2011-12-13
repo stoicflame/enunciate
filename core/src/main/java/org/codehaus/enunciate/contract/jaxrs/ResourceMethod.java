@@ -125,8 +125,13 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         try {
           Class hint = hintInfo.value();
           AnnotationProcessorEnvironment env = net.sf.jelly.apt.Context.getCurrentEnvironment();
-          TypeDeclaration type = env.getTypeDeclaration(hint.getName());
-          returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+          if (TypeHint.NO_CONTENT.class.equals(hint)) {
+            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getVoidType());
+          }
+          else {
+            TypeDeclaration type = env.getTypeDeclaration(hint.getName());
+            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+          }
         }
         catch (MirroredTypeException e) {
           returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(e.getTypeMirror());

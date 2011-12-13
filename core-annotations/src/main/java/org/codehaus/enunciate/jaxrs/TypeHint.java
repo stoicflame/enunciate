@@ -24,4 +24,9 @@ public @interface TypeHint {
    * @return The hint.
    */
   Class<?> value();
+
+  /**
+   * Class indicating "no content" for a resource type.
+   */
+  public static final class NO_CONTENT {}
 }
