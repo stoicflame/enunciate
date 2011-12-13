@@ -25,8 +25,10 @@ public class TestElementAnnotationOnAMap extends TestCase {
     JAXBContext context = JAXBContext.newInstance(ElementWithMapProperty.class);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     context.createMarshaller().marshal(el, out);
-    el = (ElementWithMapProperty) context.createUnmarshaller().unmarshal(new ByteArrayInputStream(out.toByteArray()));
-    //assertEquals("b", el.getStuff().get("a"));
-    //assertEquals("d", el.getStuff().get("c"));
+    byte[] bytes = out.toByteArray();
+    //System.out.println(new String(bytes, "utf-8"));
+    el = (ElementWithMapProperty) context.createUnmarshaller().unmarshal(new ByteArrayInputStream(bytes));
+    assertEquals("b", el.getStuff().get("a"));
+    assertEquals("d", el.getStuff().get("c"));
   }
 }

@@ -23,10 +23,8 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.jaxws.WebFault;
 import org.codehaus.enunciate.contract.jaxws.WebMethod;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
-import org.codehaus.enunciate.contract.validation.ConfigurableRules;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
 import org.codehaus.enunciate.template.freemarker.ClientClassnameForMethod;
-import org.codehaus.enunciate.util.MapType;
 
 import java.util.*;
 
@@ -35,19 +33,14 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class JavaClientValidator extends BaseValidator implements ConfigurableRules {
+public class JavaClientValidator extends BaseValidator {
 
   private final Set<String> serverSideTypesToUse;
   private final ClientClassnameForMethod clientConversion;
-  private final TreeSet<String> disabledRules = new TreeSet<String>();
 
   public JavaClientValidator(Set<String> serverSideTypesToUse, Map<String, String> packageConversions) {
     this.serverSideTypesToUse = serverSideTypesToUse;
     this.clientConversion = new ClientClassnameForMethod(packageConversions);
-  }
-
-  public void disableRules(Set<String> ruleIds) {
-    this.disabledRules.addAll(ruleIds);
   }
 
   @Override
@@ -57,12 +50,6 @@ public class JavaClientValidator extends BaseValidator implements ConfigurableRu
     String[] propOrder = complexType.getPropertyOrder();
     List<String> assertedProperties = propOrder != null ? new ArrayList<String>(Arrays.asList(propOrder)) : Collections.<String>emptyList();
     for (Element element : complexType.getElements()) {
-      if (!this.disabledRules.contains("jaxws.client.disallow.maps") && element.getAccessorType() instanceof MapType && !element.isAdapted()) {
-        result.addError(element, "Because of a bug in JAXB, an Map property can't have an @XmlElement annotation, which is required for the Java client. " +
-          "So you're going to have to use @XmlJavaTypeAdapter to supply your own adapter for the Map. Or disable the java-client module. For more information," +
-          " see https://jaxb.dev.java.net/issues/show_bug.cgi?id=268 and http://forums.java.net/jive/thread.jspa?messageID=361990");
-      }
-
       assertedProperties.remove(element.getSimpleName());
     }
     if (complexType.getAnyElement() != null) {
