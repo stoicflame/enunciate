@@ -18,8 +18,8 @@ package org.codehaus.enunciate.contract.jaxb;
 
 import com.sun.mirror.declaration.ClassDeclaration;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.validation.Validator;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -49,7 +49,7 @@ public class SimpleTypeDefinition extends TypeDefinition {
     return null;
   }
 
-  public ValidationResult accept(Validator validator) {
+  public ValidationResult accept(BaseValidator validator) {
     return validator.validateSimpleType(this);
   }
 

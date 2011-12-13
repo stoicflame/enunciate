@@ -20,8 +20,8 @@ import com.sun.mirror.declaration.ClassDeclaration;
 import org.codehaus.enunciate.contract.jaxb.TypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.validation.Validator;
 
 /**
  * Internal class used to inherit some functionality for determining whether a declaration is a simple type
@@ -33,7 +33,7 @@ class GenericTypeDefinition extends TypeDefinition {
     super(delegate);
   }
 
-  public ValidationResult accept(Validator validator) {
+  public ValidationResult accept(BaseValidator validator) {
     return new ValidationResult();
   }
 

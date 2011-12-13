@@ -16,70 +16,21 @@
 
 package org.codehaus.enunciate.contract.validation;
 
-import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
-import org.codehaus.enunciate.contract.jaxrs.RootResource;
-
-import java.util.Map;
-import java.util.List;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 
 /**
- * Validator for the contract classes.  A single validator will be assigned to one set of source classes.
- * This means that a validator may keep state without the fear that the methods will be called more than
- * once (or less than once, for that matter) per type declaration.
+ * Validator for the Enunciate model.
  *
  * @author Ryan Heaton
  */
 public interface Validator {
 
   /**
-   * Validates an endpoint interface.
+   * Validate the model.
    *
-   * @param ei The endpoint interface to validate.
-   * @return The result of the validation.
+   * @param model The model to validate.
+   * @return The validation result.
    */
-  ValidationResult validateEndpointInterface(EndpointInterface ei);
+  ValidationResult validate(EnunciateFreemarkerModel model);
 
-  /**
-   * Validate the JAX-RS root resources.
-   *
-   * @param rootResources The root resources to validate.
-   * @return The result of the validation.
-   */
-  ValidationResult validateRootResources(List<RootResource> rootResources);
-
-  /**
-   * Validate a complex type definition.
-   *
-   * @param complexType The complex type to validate.
-   * @return The results of the validation.
-   */
-  ValidationResult validateComplexType(ComplexTypeDefinition complexType);
-
-  /**
-   * Valiate a simple type definition.
-   *
-   * @param simpleType The simple type to validate.
-   * @return The results of the validation.
-   */
-  ValidationResult validateSimpleType(SimpleTypeDefinition simpleType);
-
-  /**
-   * Valiate an enum type definition.
-   *
-   * @param enumType The simple type to validate.
-   * @return The results of the validation.
-   */
-  ValidationResult validateEnumType(EnumTypeDefinition enumType);
-
-  /**
-   * Validate a global element declaration.
-   *
-   * @param rootElementDeclaration The global element declaration.
-   * @return The results of the validation.
-   */
-  ValidationResult validateRootElement(RootElementDeclaration rootElementDeclaration);
 }

@@ -705,47 +705,7 @@ public class EnunciateAnnotationProcessor extends FreemarkerProcessor {
    * @return The results of the validation.
    */
   protected ValidationResult validate(EnunciateFreemarkerModel model, Validator validator) {
-    ValidationResult validationResult = new ValidationResult();
-
-    for (EndpointInterface ei : model.endpointInterfaces) {
-      debug("Validating %s...", ei.getQualifiedName());
-      validationResult.aggregate(validator.validateEndpointInterface(ei));
-    }
-
-    for (TypeDefinition typeDefinition : model.typeDefinitions) {
-      debug("Validating %s...", typeDefinition.getQualifiedName());
-      validationResult.aggregate(typeDefinition.accept(validator));
-    }
-
-    for (RootElementDeclaration rootElement : model.rootElements) {
-      debug("Validating %s...", rootElement.getQualifiedName());
-      validationResult.aggregate(validator.validateRootElement(rootElement));
-    }
-
-    // TODO Validate JSON root elements
-
-    debug("Validating the REST API...");
-    validationResult.aggregate(validator.validateRootResources(model.getRootResources()));
-
-    //validate unique content type ids.
-    Set<String> uniqueContentTypeIds = new TreeSet<String>();
-    for (String contentType : model.getContentTypesToIds().keySet()) {
-      String id = model.getContentTypesToIds().get(contentType);
-      if (!uniqueContentTypeIds.add(id)) {
-        StringBuilder builder = new StringBuilder("All content types must have unique ids.  The id '").
-          append(id).append("' is assigned to the following content types: '").append(contentType).append("'");
-        for (String ct : model.getContentTypesToIds().keySet()) {
-          if (!contentType.equals(ct) && (id.equals(model.getContentTypesToIds().get(ct)))) {
-            builder.append(", '").append(ct).append("'");
-          }
-        }
-        builder.append(". Please use the Enunciate configuration to specify a unique id for each content type.");
-        validationResult.addError((Declaration) null, builder.toString());
-        break;
-      }
-    }
-
-    return validationResult;
+    return validator.validate(model);
   }
 
   //Inherited.

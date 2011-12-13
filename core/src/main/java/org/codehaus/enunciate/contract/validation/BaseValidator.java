@@ -16,14 +16,11 @@
 
 package org.codehaus.enunciate.contract.validation;
 
-import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
-import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
-import org.codehaus.enunciate.contract.jaxb.SimpleTypeDefinition;
-import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
+import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
+import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 
-import java.util.Map;
 import java.util.List;
 
 /**
@@ -32,6 +29,27 @@ import java.util.List;
  * @author Ryan Heaton
  */
 public class BaseValidator implements Validator {
+
+  public ValidationResult validate(EnunciateFreemarkerModel model) {
+    ValidationResult validationResult = new ValidationResult();
+
+    for (EndpointInterface ei : model.getEndpointInterfaces()) {
+      validationResult.aggregate(validateEndpointInterface(ei));
+    }
+
+    for (TypeDefinition typeDefinition : model.getTypeDefinitions()) {
+      validationResult.aggregate(typeDefinition.accept(this));
+    }
+
+    for (RootElementDeclaration rootElement : model.getRootElementDeclarations()) {
+      validationResult.aggregate(validateRootElement(rootElement));
+    }
+
+    // TODO Validate JSON root elements
+    validationResult.aggregate(validateRootResources(model.getRootResources()));
+
+    return validationResult;
+  }
 
   /**
    * @return An empty result.

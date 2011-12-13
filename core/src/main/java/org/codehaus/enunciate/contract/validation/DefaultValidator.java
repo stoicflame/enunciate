@@ -25,6 +25,7 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxrs.*;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
@@ -48,7 +49,7 @@ import java.util.*;
  *
  * @author Ryan Heaton
  */
-public class DefaultValidator implements Validator, ConfigurableRules {
+public class DefaultValidator extends BaseValidator implements ConfigurableRules {
 
   private final Set<String> disabledRules = new TreeSet<String>();
 
@@ -56,6 +57,31 @@ public class DefaultValidator implements Validator, ConfigurableRules {
     if (ruleIds != null) {
       this.disabledRules.addAll(ruleIds);
     }
+  }
+
+  @Override
+  public ValidationResult validate(EnunciateFreemarkerModel model) {
+    ValidationResult result = super.validate(model);
+
+    //validate unique content type ids.
+    Set<String> uniqueContentTypeIds = new TreeSet<String>();
+    for (String contentType : model.getContentTypesToIds().keySet()) {
+      String id = model.getContentTypesToIds().get(contentType);
+      if (!uniqueContentTypeIds.add(id)) {
+        StringBuilder builder = new StringBuilder("All content types must have unique ids.  The id '").
+          append(id).append("' is assigned to the following content types: '").append(contentType).append("'");
+        for (String ct : model.getContentTypesToIds().keySet()) {
+          if (!contentType.equals(ct) && (id.equals(model.getContentTypesToIds().get(ct)))) {
+            builder.append(", '").append(ct).append("'");
+          }
+        }
+        builder.append(". Please use the Enunciate configuration to specify a unique id for each content type.");
+        result.addError((Declaration) null, builder.toString());
+        break;
+      }
+    }
+
+    return result;
   }
 
   public ValidationResult validateEndpointInterface(EndpointInterface ei) {

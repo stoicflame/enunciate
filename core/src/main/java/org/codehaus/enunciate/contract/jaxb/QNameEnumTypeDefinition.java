@@ -20,6 +20,7 @@ import com.sun.mirror.declaration.EnumConstantDeclaration;
 import com.sun.mirror.declaration.EnumDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.TypeMirror;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.qname.XmlQNameEnum;
 import org.codehaus.enunciate.qname.XmlQNameEnumValue;
 import org.codehaus.enunciate.qname.XmlUnknownQNameEnumValue;
@@ -27,7 +28,6 @@ import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.validation.Validator;
 
 import javax.xml.namespace.QName;
 import java.net.URI;
@@ -156,7 +156,7 @@ public class QNameEnumTypeDefinition extends EnumTypeDefinition {
   }
 
   @Override
-  public ValidationResult accept(Validator validator) {
+  public ValidationResult accept(BaseValidator validator) {
     return new ValidationResult();
   }
 

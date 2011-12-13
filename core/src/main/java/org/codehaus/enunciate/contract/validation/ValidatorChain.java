@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.contract.validation;
 
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.EnumTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.RootElementDeclaration;
@@ -66,67 +67,12 @@ public class ValidatorChain implements Validator {
     this.validators.put(label, validator);
   }
 
-  // Inherited.
-  public ValidationResult validateEndpointInterface(EndpointInterface ei) {
+  //Inherited.
+  public ValidationResult validate(EnunciateFreemarkerModel model) {
     ValidationResult result = new ValidationResult();
 
     for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateEndpointInterface(ei));
-    }
-
-    return result;
-  }
-
-  // Inherited.
-  public ValidationResult validateRootResources(List<RootResource> rootResources) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRootResources(rootResources));
-    }
-
-    return result;
-  }
-
-  // Inherited.
-  public ValidationResult validateRootElement(RootElementDeclaration rootElementDeclaration) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateRootElement(rootElementDeclaration));
-    }
-
-    return result;
-  }
-
-  // Inherited.
-  public ValidationResult validateComplexType(ComplexTypeDefinition complexType) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateComplexType(complexType));
-    }
-
-    return result;
-  }
-
-  // Inherited.
-  public ValidationResult validateSimpleType(SimpleTypeDefinition simpleType) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateSimpleType(simpleType));
-    }
-
-    return result;
-  }
-
-  // Inherited.
-  public ValidationResult validateEnumType(EnumTypeDefinition enumType) {
-    ValidationResult result = new ValidationResult();
-
-    for (Map.Entry<String, Validator> validatorEntry : validators.entrySet()) {
-      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validateEnumType(enumType));
+      result.aggregate(validatorEntry.getKey(), validatorEntry.getValue().validate(model));
     }
 
     return result;

@@ -1550,6 +1550,24 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
   }
 
   /**
+   * The list of type definitions found in the model.
+   *
+   * @return The list of type definitions found in the model.
+   */
+  public List<TypeDefinition> getTypeDefinitions() {
+    return typeDefinitions;
+  }
+
+  /**
+   * The list of endpoint interfaces.
+   *
+   * @return The list of endpoint interfaces.
+   */
+  public List<EndpointInterface> getEndpointInterfaces() {
+    return endpointInterfaces;
+  }
+
+  /**
    * The list of root element declarations found in the model.
    *
    * @return The list of root element declarations found in the model.

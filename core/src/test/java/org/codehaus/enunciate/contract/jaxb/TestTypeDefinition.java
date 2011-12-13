@@ -24,8 +24,8 @@ import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.InAPTTestCase;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.validation.Validator;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import java.util.Collection;
@@ -93,7 +93,7 @@ public class TestTypeDefinition extends InAPTTestCase {
       super(delegate);
     }
 
-    public ValidationResult accept(Validator validator) {
+    public ValidationResult accept(BaseValidator validator) {
       return null;
     }
 

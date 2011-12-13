@@ -28,9 +28,9 @@ import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import org.codehaus.enunciate.ClientName;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
-import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.qname.XmlQNameEnumRef;
 
 import javax.xml.bind.annotation.*;
@@ -657,10 +657,11 @@ public abstract class TypeDefinition extends DecoratedClassDeclaration {
   /**
    * Accept a validator.
    *
+   *
    * @param validator The validator to accept.
    * @return The validation results.
    */
-  public abstract ValidationResult accept(Validator validator);
+  public abstract ValidationResult accept(BaseValidator validator);
 
   /**
    * The base type of this type definition.
