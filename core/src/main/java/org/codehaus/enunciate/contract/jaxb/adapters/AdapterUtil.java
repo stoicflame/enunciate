@@ -119,21 +119,12 @@ public class AdapterUtil {
       }
 
       AdapterType adapterType = new AdapterType(adapterTypeMirror);
-      ReferenceType actualTypeBeingAdapted;
-      if (adaptedType instanceof DeclaredType) {
-        actualTypeBeingAdapted = (DeclaredType) adaptedType;
-      }
-      else if (unwrappedAdaptedType instanceof ReferenceType) {
-        actualTypeBeingAdapted = (ReferenceType) unwrappedAdaptedType;
-      }
-      else {
-        throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": an XML adapter can only adapt a reference type (" + unwrappedAdaptedType + " cannot be adapted).");        
+      if ((adaptedType instanceof DeclaredType && adapterType.canAdapt((DeclaredType)adaptedType)) ||
+          (unwrappedAdaptedType instanceof ReferenceType && adapterType.canAdapt((ReferenceType) unwrappedAdaptedType))) {
+        return adapterType;
       }
 
-      if (!adapterType.canAdapt(actualTypeBeingAdapted)) {
-        throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + adaptedType);
-      }
-      return adapterType;
+      throw new ValidationException(referer.getPosition(), referer.getSimpleName() + ": adapter " + adapterTypeMirror.getDeclaration().getQualifiedName() + " does not adapt " + unwrappedAdaptedType);
     }
 
     return null;
