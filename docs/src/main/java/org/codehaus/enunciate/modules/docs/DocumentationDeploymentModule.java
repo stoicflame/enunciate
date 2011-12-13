@@ -191,7 +191,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeDefaultDownloads = true;
   private boolean includeExampleXml = true;
   private boolean includeExampleJson = true;
-  private boolean forceExampleJson = true;
+  private boolean forceExampleJson = false;
   private URL xsltURL;
   private URL freemarkerXMLProcessingTemplateURL;
   private String css;
