@@ -598,7 +598,7 @@
           <xs:element name="parameter" type="restParameter" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="inValue" type="entity" minOccurs="0" maxOccurs="1"/>
           <xs:element name="outValue" type="entity" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="error" type="restError" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="statusCode" type="restStatusCode" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restOp"/>
@@ -645,7 +645,7 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:complexType name="restError">
+  <xs:complexType name="restStatusCode">
     <xs:annotation>
       <xs:documentation>
         The documentation for a REST error.

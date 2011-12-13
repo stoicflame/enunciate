@@ -19,12 +19,24 @@ package org.codehaus.enunciate.contract.jaxrs;
 /**
  * @author Ryan Heaton
  */
-public interface ResponseCode {
+public class ResponseCode {
 
-  /**
-   * The error code.
-   *
-   * @return The error code.
-   */
-  int getErrorCode();
+  private int code;
+  private String condition;
+
+  public int getCode() {
+    return code;
+  }
+
+  public void setCode(int code) {
+    this.code = code;
+  }
+
+  public String getCondition() {
+    return condition;
+  }
+
+  public void setCondition(String condition) {
+    this.condition = condition;
+  }
 }

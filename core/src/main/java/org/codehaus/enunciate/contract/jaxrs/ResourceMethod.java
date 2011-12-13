@@ -24,6 +24,7 @@ import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.validation.ValidationException;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
 import org.codehaus.enunciate.rest.MimeType;
 
@@ -51,7 +52,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final ResourceEntityParameter entityParameter;
   private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
-  private final List<? extends ResponseCode> errors;
+  private final List<? extends ResponseCode> statusCodes;
   private final ResourceRepresentationMetadata representationMetadata;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
@@ -151,11 +152,32 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       outputPayload = loadOutputPayload(signatureOverride);
     }
 
+    ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+    StatusCodes codes = getAnnotation(StatusCodes.class);
+    if (codes != null) {
+      for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        statusCodes.add(rc);
+      }
+    }
+
+    codes = parent.getAnnotation(StatusCodes.class);
+    if (codes != null) {
+      for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        statusCodes.add(rc);
+      }
+    }
+
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
-    this.errors = new ArrayList<ResponseCode>();
+    this.statusCodes = statusCodes;
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
   }
@@ -470,12 +492,12 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   }
 
   /**
-   * The potential errors.
+   * The potential status codes.
    *
-   * @return The potential errors.
+   * @return The potential status codes.
    */
-  public List<? extends ResponseCode> getResourceErrors() {
-    return this.errors;
+  public List<? extends ResponseCode> getStatusCodes() {
+    return this.statusCodes;
   }
 
   /**

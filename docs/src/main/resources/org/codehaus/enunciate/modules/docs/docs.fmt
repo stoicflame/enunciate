@@ -650,9 +650,9 @@
       <p>${documentation}</p>
       [/#list]
     [/#list]
-    [#list operation.error as error]
-      [#if error_index = 0]
-      <h3>Errors</h3>
+    [#list operation.statusCode as statusCode]
+      [#if statusCode_index = 0]
+      <h3>Status Codes</h3>
       <table>
         <tr>
           <th>code</th>
@@ -660,10 +660,10 @@
         </tr>
       [/#if]
         <tr>
-          <td>${error.@code}</td>
-          <td>${error}</td>
+          <td>${statusCode.@code}</td>
+          <td>${statusCode}</td>
         </tr>
-      [#if !error_has_next]
+      [#if !statusCode_has_next]
       </table>
       [/#if]
     [/#list]

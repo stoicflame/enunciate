@@ -356,10 +356,10 @@
             <documentation><![CDATA[${resource.representationMetadata.docValue!"(no documentation provided)"}]]></documentation>
           </outValue>
         [/#if]
-        [#list resource.resourceErrors as error]
-          <error code="${error.errorCode}">
-            <![CDATA[${error.docValue!""}]]>
-          </error>
+        [#list resource.statusCodes as statusCode]
+          <statusCode code="${statusCode.code}">
+            <![CDATA[${statusCode.condition!""}]]>
+          </statusCode>
         [/#list]
         </operation>
       [#--[/#if]--]

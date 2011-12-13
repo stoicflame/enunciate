@@ -17,6 +17,8 @@
 package org.codehaus.enunciate.samples.genealogy.services.impl;
 
 import com.sun.jersey.multipart.FormDataParam;
+import org.codehaus.enunciate.jaxrs.ResponseCode;
+import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.samples.genealogy.data.*;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
@@ -41,6 +43,7 @@ import java.util.*;
   memoryThreshold = 40000L
 )
 @Path ("")
+@StatusCodes({@ResponseCode ( code = 401, condition = "If authentication is needed.")})
 public class PersonServiceImpl implements PersonService {
 
   public Person storePerson(Person person) {
