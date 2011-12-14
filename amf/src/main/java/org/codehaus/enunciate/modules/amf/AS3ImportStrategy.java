@@ -77,11 +77,29 @@ public class AS3ImportStrategy extends EnunciateTemplateLoopStrategy<String> {
         }
         for (Attribute attribute : typeDef.getAttributes()) {
           imports.add(classnameFor.convert(attribute));
-          addComponentTypes(attribute.getAccessorType(), imports);
+          TypeMirror accessorType;
+          if (attribute.isAdapted()) {
+              // If the attribute is adaptable, we need to use the adapting type
+              // else it will try to import the "real type" defined by the attribute.
+              accessorType = attribute.getAdapterType().getAdaptingType();
+          }
+          else {
+              accessorType = attribute.getAccessorType();
+          }
+          addComponentTypes(accessorType, imports);
         }
         for (Element element : typeDef.getElements()) {
           imports.add(classnameFor.convert(element));
-          addComponentTypes(element.getAccessorType(), imports);
+          TypeMirror accessorType;
+          if (element.isAdapted()) {
+              // If the element is adaptable, we need to use the adapting type
+              // else it will try to import the "real type" defined by the attribute.
+              accessorType = element.getAdapterType().getAdaptingType();
+          }
+          else {
+              accessorType = element.getAccessorType();
+          }
+          addComponentTypes(accessorType, imports);
         }
         Value value = typeDef.getValue();
         if (value != null) {
