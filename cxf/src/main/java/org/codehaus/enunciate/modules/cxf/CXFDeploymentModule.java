@@ -16,6 +16,7 @@
 
 package org.codehaus.enunciate.modules.cxf;
 
+import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.TemplateException;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.codehaus.enunciate.EnunciateException;
@@ -37,7 +38,13 @@ import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -85,7 +92,8 @@ import java.util.*;
  * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  * <li>The "useWsdlRedirectFilter" attribute is used to disable the use of the Enunciate-provided wsdl redirect filter that
  *     handles the requests to ?wsdl</li>
- * <li>The "useExtensionMappings" is used to specify whether CXF extension mappings should be used. See <a href="http://cxf.apache.org/docs/jax-rs.html">http://cxf.apache.org/docs/jax-rs.html</a></li>
+ * <li>The "jaxwsServletTransform" attribute is used to specify an XSLT transform file that will be used for additional customization of the Enunciate-generated cxf-jaxws-servlet.xml file. Default: none.</li>
+ * <li>The "jaxrsServletTransform" attribute is used to specify an XSLT transform file that will be used for additional customization of the Enunciate-generated cxf-jaxrs-servlet.xml file. Default: none.</li>
  * </ul>
  *
  * <p>The CXF module also supports a list of <tt>jaxws-property</tt> child elements that each support a 'name' and 'value' attribute. This can be used to configure the CXF
@@ -109,6 +117,8 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
   private boolean useWsdlRedirectFilter = true;
   private boolean useExtensionMappings = true;
   private final Map<String, String> jaxwsProperties = new TreeMap<String, String>();
+  private String jaxwsServletTransform = null;
+  private String jaxrsServletTransform = null;
 
   /**
    * @return "cxf"
@@ -311,7 +321,12 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
         }
       }
       jaxwsServletComponent.setUrlMappings(jaxwsUrlMappings);
-      getEnunciate().copyFile(new File(getGenerateDir(), "cxf-jaxws-servlet.xml"), new File(webinf, "cxf-jaxws-servlet.xml"));
+      File transform = null;
+      if (jaxwsServletTransform != null) {
+        transform = enunciate.resolvePath(jaxwsServletTransform);
+      }
+
+      transformAndCopy(new File(getGenerateDir(), "cxf-jaxws-servlet.xml"), new File(webinf, "cxf-jaxws-servlet.xml"), transform);
       jaxwsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxws-servlet.xml");
       servlets.add(jaxwsServletComponent);
       urlMappings.addAll(jaxwsUrlMappings);
@@ -356,7 +371,12 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       }
 
       jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
-      getEnunciate().copyFile(new File(getGenerateDir(), "cxf-jaxrs-servlet.xml"), new File(webinf, "cxf-jaxrs-servlet.xml"));
+      File transform = null;
+      if (jaxrsServletTransform != null) {
+        transform = enunciate.resolvePath(jaxrsServletTransform);
+      }
+
+      transformAndCopy(new File(getGenerateDir(), "cxf-jaxrs-servlet.xml"), new File(webinf, "cxf-jaxrs-servlet.xml"), transform);
       jaxrsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxrs-servlet.xml");
       servlets.add(jaxrsServletComponent);
       urlMappings.addAll(jaxrsUrlMappings);
@@ -371,6 +391,27 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
     webappFragment.setFilters(Arrays.asList(filterComponent));
 
     enunciate.addWebAppFragment(webappFragment);
+  }
+
+  protected void transformAndCopy(File src, File dest, File transform) throws EnunciateException, IOException {
+    if (transform != null) {
+      FileInputStream transformStream = new FileInputStream(transform);
+      try {
+        StreamSource source = new StreamSource(transformStream);
+        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+        debug("Transforming %s to %s.", src, dest);
+        transformer.transform(new StreamSource(new FileReader(src)), new StreamResult(dest));
+      }
+      catch (TransformerException e) {
+        throw new EnunciateException("Error during transformation of the web.xml (stylesheet " + transform + ", file " + src + ")", e);
+      }
+      finally {
+        transformStream.close();
+      }
+    }
+    else {
+      getEnunciate().copyFile(src, dest);
+    }
   }
 
   /**
@@ -442,6 +483,22 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
 
   public void setUseExtensionMappings(boolean useExtensionMappings) {
     this.useExtensionMappings = useExtensionMappings;
+  }
+
+  public String getJaxwsServletTransform() {
+    return jaxwsServletTransform;
+  }
+
+  public void setJaxwsServletTransform(String jaxwsServletTransform) {
+    this.jaxwsServletTransform = jaxwsServletTransform;
+  }
+
+  public String getJaxrsServletTransform() {
+    return jaxrsServletTransform;
+  }
+
+  public void setJaxrsServletTransform(String jaxrsServletTransform) {
+    this.jaxrsServletTransform = jaxrsServletTransform;
   }
 
   @Override

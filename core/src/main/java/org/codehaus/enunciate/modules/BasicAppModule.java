@@ -394,7 +394,7 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
     if ((webAppConfig != null) && (webAppConfig.getWebXMLTransformURL() != null || webAppConfig.getWebXMLTransform() != null)) {
       URL transformURL = webAppConfig.getWebXMLTransformURL();
       if (transformURL == null) {
-        transformURL = enunciate.resolvePath(webAppConfig.getWebXMLTransform()).toURL();
+        transformURL = enunciate.resolvePath(webAppConfig.getWebXMLTransform()).toURI().toURL();
       }
 
       debug("web.xml transform has been specified as %s.", transformURL);
