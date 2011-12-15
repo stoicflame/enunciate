@@ -216,7 +216,7 @@
       <ul>
       [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
         [#list docsxml.rest.groups.group?sort as group]
-          [@processResourceGroup group=group/]s
+          [@processResourceGroup group=group/]
         <li><a href="resource_${group}.html">${group}</a></li>
         [/#list]
       [#else]
