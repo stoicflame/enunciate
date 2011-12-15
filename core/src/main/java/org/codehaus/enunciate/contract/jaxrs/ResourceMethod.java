@@ -130,8 +130,19 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
             returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getVoidType());
           }
           else {
-            TypeDeclaration type = env.getTypeDeclaration(hint.getName());
-            returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+            String hintName = hint.getName();
+
+            if (TypeHint.NONE.class.equals(hint)) {
+              hintName = hintInfo.qualifiedName();
+            }
+
+            if (!"##NONE".equals(hintName)) {
+              TypeDeclaration type = env.getTypeDeclaration(hintName);
+              returnTypeMirror = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+            }
+            else {
+              returnTypeMirror = (DecoratedTypeMirror) getReturnType();
+            }
           }
         }
         catch (MirroredTypeException e) {

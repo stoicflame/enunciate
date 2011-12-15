@@ -8,7 +8,9 @@ import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.type.ClassType;
 import com.sun.mirror.type.MirroredTypeException;
 import com.sun.mirror.type.TypeMirror;
+import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.contract.jaxb.ElementDeclaration;
@@ -36,8 +38,19 @@ public class ResourceEntityParameter extends DecoratedDeclaration {
           typeMirror = env.getTypeUtils().getVoidType();
         }
         else {
-          TypeDeclaration type = env.getTypeDeclaration(hint.getName());
-          typeMirror = env.getTypeUtils().getDeclaredType(type);
+          String hintName = hint.getName();
+
+          if (TypeHint.NONE.class.equals(hint)) {
+            hintName = hintInfo.qualifiedName();
+          }
+
+          if (!"##NONE".equals(hintName)) {
+            TypeDeclaration type = env.getTypeDeclaration(hintName);
+            typeMirror = TypeMirrorDecorator.decorate(env.getTypeUtils().getDeclaredType(type));
+          }
+          else {
+            typeMirror = delegate.getType();
+          }
         }
       }
       catch (MirroredTypeException e) {

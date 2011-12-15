@@ -23,10 +23,19 @@ public @interface TypeHint {
    *
    * @return The hint.
    */
-  Class<?> value();
+  Class<?> value() default NONE.class;
+
+  /**
+   * The fully-qualified classname of the hint. (Used in the case that the hint isn't on the classpath of the resource method at build-time.)
+   *
+   * @return The fully-qualified classname of the hint.
+   */
+  String qualifiedName() default "##NONE";
 
   /**
    * Class indicating "no content" for a resource type.
    */
   public static final class NO_CONTENT {}
+
+  public static final class NONE {}
 }
