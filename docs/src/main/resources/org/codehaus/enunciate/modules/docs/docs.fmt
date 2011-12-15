@@ -214,9 +214,9 @@
         model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
       </p>
       <ul>
-      [#if groupRestResources!true && docsxml.rest.groups.group?size > 0]
+      [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
         [#list docsxml.rest.groups.group?sort as group]
-          [@processResourceGroup group=group/]
+          [@processResourceGroup group=group/]s
         <li><a href="resource_${group}.html">${group}</a></li>
         [/#list]
       [#else]

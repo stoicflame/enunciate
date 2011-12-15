@@ -205,7 +205,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String indexPageName = "index.html";
   private boolean disableRestMountpoint = false;
   private String defaultNamespace = null;
-  private boolean groupRestResources = true;
+  private String groupRestResources = "byDocumentationGroup";
 
   /**
    * @return "docs"
@@ -620,20 +620,23 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   }
 
   /**
-   * Whether to group the REST resources together.
+   * How to group the REST resources together.
    *
-   * @return Whether to group the REST resources together.
+   * @return How to group the REST resources together.
    */
-  public boolean isGroupRestResources() {
+  public String getGroupRestResources() {
     return groupRestResources;
   }
 
   /**
-   * Whether to group the REST resources together.
+   * How to group the REST resources together.
    *
-   * @param groupRestResources Whether to group the REST resources together.
+   * @param groupRestResources How to group the REST resources together.
    */
-  public void setGroupRestResources(boolean groupRestResources) {
+  public void setGroupRestResources(String groupRestResources) {
+    if ("false".equalsIgnoreCase(groupRestResources)) {
+      groupRestResources = "byPath";
+    }
     this.groupRestResources = groupRestResources;
   }
 
@@ -976,7 +979,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     model.put("apiRelativePath", getRelativePathToRootDir());
     model.put("indexPageName", getIndexPageName());
     model.put("disableRestMountpoint", isDisableRestMountpoint());
-    model.put("groupRestResources", isGroupRestResources());
+    model.put("groupRestResources", getGroupRestResources());
     try {
       processTemplate(freemarkerXMLProcessingTemplateURL, model);
     }
@@ -1029,7 +1032,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       transformer.setParameter("api-relative-path", getRelativePathToRootDir());
       transformer.setParameter("index-page-name", getIndexPageName());
       transformer.setParameter("disable-rest-mountpoint", isDisableRestMountpoint());
-      transformer.setParameter("group-rest-resources", isGroupRestResources());
+      transformer.setParameter("group-rest-resources", getGroupRestResources());
       File indexPage = new File(buildDir, getIndexPageName());
       debug("Transforming %s to %s.", docsXml, indexPage);
       transformer.transform(new StreamSource(docsXml), new StreamResult(indexPage));
