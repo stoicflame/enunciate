@@ -157,6 +157,8 @@ import java.util.*;
  * the soap paths dynamically. Default: "true".</li>
  *   <li>The "<b>applyWadlFilter</b>" attribute specifies whether to apply a filter for the WADL files that will attempt to resolve
  * the rest paths dynamically. Default: "true".</li>
+ *   <li>The "<b>groupRestResources</b>" attribute specifies how the documentation will group REST resources together. Current options
+ * include "byDocumentationGroup" and "byPath". Default: "byDocumentationGroup".</li>
  * </ul>
  *
  * <h3>The "download" element</h3>

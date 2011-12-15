@@ -242,7 +242,7 @@
 
       <h1>SOAP Endpoints</h1>
       <p>
-        This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
+        This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>N
         -compliant SOAP v1.1 endpoints. The API supports <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Pacakging (XOP)</a>
         and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
         for transmission of binary data. The SOAP API is described by the following endpoints:
