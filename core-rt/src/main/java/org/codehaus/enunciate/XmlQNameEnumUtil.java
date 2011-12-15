@@ -149,16 +149,33 @@ public class XmlQNameEnumUtil {
   }
 
   /**
-   * Convert a QName to a QName enum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   * Convert a URI to a QName enum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
    *
-   * @param qname The qname to convert.
+   * @param uri The uri to convert.
    * @param clazz The enum clazz.
-   * @return The matching enum, or the {@link XmlUnknownQNameEnumValue unknown enum} if unable to find an enum for the specified QName, or <code>null</code>
-   * if unable to find an enum for the specified QName and there is no unknown enum specified.
+   * @return The matching enum, or the {@link XmlUnknownQNameEnumValue unknown enum} if unable to find an enum for the specified URI, or <code>null</code>
+   * if unable to find an enum for the specified URI and there is no unknown enum specified.
    * @throws IllegalArgumentException If <code>clazz</code> isn't a QName enum.
    */
-  public static <Q extends Enum<Q>> Q fromURI(final URI qname, Class<Q> clazz) {
-    if (qname == null) {
+  public static <Q extends Enum<Q>> Q fromURI(final URI uri, Class<Q> clazz) {
+    if (uri == null) {
+      return null;
+    }
+
+    return fromURIValue(uri.toString(), clazz);
+  }
+
+  /**
+   * Convert a URI to a QName enum. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   *
+   * @param uriValue The value of the uri to convert.
+   * @param clazz The enum clazz.
+   * @return The matching enum, or the {@link XmlUnknownQNameEnumValue unknown enum} if unable to find an enum for the specified URI, or <code>null</code>
+   * if unable to find an enum for the specified URI and there is no unknown enum specified.
+   * @throws IllegalArgumentException If <code>clazz</code> isn't a QName enum.
+   */
+  public static <Q extends Enum<Q>> Q fromURIValue(String uriValue, Class<Q> clazz) {
+    if (uriValue == null) {
       return null;
     }
 
@@ -203,7 +220,7 @@ public class XmlQNameEnumUtil {
           }
         }
 
-        if ((ns + localPart).equals(qname.toString())) {
+        if ((ns + localPart).equals(uriValue)) {
           return Enum.valueOf(clazz, field.getName());
         }
       }
@@ -218,10 +235,10 @@ public class XmlQNameEnumUtil {
   }
 
   /**
-   * Convert an enum to a QName. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   * Convert an enum to a URI. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
    *
    * @param e The enum.
-   * @return The QName.
+   * @return The URI.
    * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
    * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
    * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
@@ -230,6 +247,25 @@ public class XmlQNameEnumUtil {
     if (e == null) {
       return null;
     }
+
+    return URI.create(toURIValue(e));
+  }
+
+  /**
+   * Convert an enum to a URI. See <a href="http://docs.codehaus.org/display/ENUNCIATE/QName+Enums">QName Enums</a>.
+   *
+   * @param e The enum.
+   * @return The URI.
+   * @throws IllegalArgumentException If <code>e</code> isn't of a valid QName enum type,
+   * or if <code>e</code> is the {@link XmlUnknownQNameEnumValue unknown enum},
+   * or if {@link org.codehaus.enunciate.qname.XmlQNameEnumValue#exclude() the enum is excluded as an enum value}.
+   */
+  public static String toURIValue(Enum e) {
+    if (e == null) {
+      return null;
+    }
+
+    String uriValue = null;
 
     Class<?> clazz = e.getDeclaringClass();
     XmlQNameEnum enumInfo = clazz.getAnnotation(XmlQNameEnum.class);
@@ -271,10 +307,15 @@ public class XmlQNameEnumUtil {
           }
         }
 
-        return URI.create(ns + localPart);
+        uriValue = ns + localPart;
+        break;
       }
     }
 
-    throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
+    if (uriValue == null) {
+      throw new IllegalStateException("Unable to find " + e.getDeclaringClass().getName() + "." + e + " as a QName enum value.");
+    }
+
+    return uriValue;
   }
 }
