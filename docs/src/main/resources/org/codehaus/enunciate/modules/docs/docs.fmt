@@ -23,7 +23,58 @@
   [/#list]
   [#return false/]
 [/#function]
-[#macro boilerplate title=docsxml.@title!"Web API" subnav={"Home" : indexPageName} codeblocks=false]
+
+[#--set up the subnavigation menus--]
+[#assign nav_sections = { "Data Model" : "model.html"} /]
+[#if soapAvailable]
+  [#assign nav_sections = nav_sections + { "SOAP" : "soap.html" }/]
+[/#if]
+[#if restAvailable]
+  [#assign nav_sections = nav_sections + { "REST" : "rest.html" }/]
+[/#if]
+[#if downloadsxml??]
+  [#assign nav_sections = nav_sections + { "Files and Libraries" : "downloads.html"} /]
+[/#if]
+
+[#assign nav_resource_groups = {}/]
+[#list docsxml.rest.groups.group?sort as group]
+  [#assign nav_resource_groups = nav_resource_groups + { group : "resource_" + group + ".html"}/]
+[/#list]
+
+[#assign nav_paths = {}/]
+[#list docsxml.rest.resources.resource?sort_by("@name") as resource]
+  [#assign nav_paths = nav_paths + {resource.@name?string : scrubPathToFilename(resource.@name)}/]
+[/#list]
+
+[#assign nav_wsdls = {}/]
+[#assign nav_eis_by_ns = {}/]
+[#list docsxml.soap.wsdls.wsdl as wsdl]
+  [#assign nav_wsdls = nav_wsdls + {wsdl.@namespaceId?string : "soap_" + wsdl.@namespaceId?string + ".html"}/]
+  [#assign nav_eis_by_ns = nav_eis_by_ns + {wsdl.@namespaceId?string : {}}/]
+  [#list wsdl.endpointInterface?sort_by("@name") as endpointInterface]
+    [#assign tmp = nav_eis_by_ns[wsdl.@namespaceId?string] + {endpointInterface.@name?string : "soap_" + wsdl.@namespaceId?string + "_" + endpointInterface.@name?string + ".html"}/]
+    [#assign nav_eis_by_ns = nav_eis_by_ns + {wsdl.@namespaceId?string : tmp}/]
+  [/#list]
+[/#list]
+
+[#assign nav_models = {}/]
+[#assign nav_typedefs_by_ns = {}/]
+[#assign nav_elements_by_ns = {}/]
+[#list docsxml.data.schema as schema]
+  [#assign nav_models = nav_models + {schema.@namespaceId?string : schema.@namespaceId?string + ".html"}/]
+  [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : {}}/]
+  [#list schema.elements.element?sort_by("@name") as element]
+    [#assign tmp = nav_elements_by_ns[schema.@namespaceId?string] + { element.@name?string : "el_" + schema.@namespaceId?string + "_" + element.@name?string + ".html"}/]
+    [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : tmp}/]
+  [/#list]
+  [#assign nav_typedefs_by_ns = nav_typedefs_by_ns + {schema.@namespaceId?string : {}}/]
+  [#list schema.types.type?sort_by("@name") as type]
+    [#assign tmp = nav_typedefs_by_ns[schema.@namespaceId?string] + {type.@name?string : schema.@namespaceId?string + "_" + type.@name?string + ".html"}/]
+    [#assign nav_typedefs_by_ns = nav_typedefs_by_ns + {schema.@namespaceId?string : tmp}/]
+  [/#list]
+[/#list]
+
+[#macro boilerplate title=docsxml.@title!"Web API" subnav=[{"title" : "Home", "href" : indexPageName}] codeblocks=false]
 <!doctype html>
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
@@ -71,10 +122,19 @@
             [/#if]
           </ul>
         </div>
-        <div id="secondary" class="column span-18 append-1 prepend-1 first last">
-          <ul class="navigation">
-          [#list subnav?keys as crumb]
-            <li><a href="${subnav[crumb]}">${crumb}</a>[#if crumb_has_next] &gt;[/#if]</li>
+        <div>
+          <ul class="xbreadcrumbs" id="breadcrumbs">
+          [#list subnav as crumb]
+            <li[#if !crumb_has_next] class="current"[/#if]>
+              <a href="${crumb.href}"[#if crumb_index = 0] class="home"[/#if]>${crumb.title}</a>[#if crumb_has_next] &gt;[/#if]
+              [#if crumb.subnav??]
+              <ul>
+                [#list crumb.subnav?keys as label]
+                <li><a href="${crumb.subnav[label]}">${label}</a></li>
+                [/#list]
+              </ul>
+              [/#if]
+            </li>
           [/#list]
           </ul>
         </div>
@@ -100,6 +160,14 @@
   <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if necessary -->
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
   <script>window.jQuery || document.write("<script src='js/libs/jquery-1.5.1.min.js'>\x3C/script>")</script>
+
+  <!--manage the navigation menu-->
+  <script src="js/libs/xbreadcrumbs.js"></script>
+  <script>
+    $(function() {
+      $('#breadcrumbs').xBreadcrumbs();
+    });
+  </script>
 
   [#if codeblocks]
 
@@ -275,7 +343,7 @@
   [/@boilerplate]
 [/@file]
 [@file name="model.html" charset="utf-8"]
-  [@boilerplate title="Data Model" subnav={"Home" : indexPageName, "Data Model" : "model.html"}]
+  [@boilerplate title="Data Model" subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}]]
     <h1>Data Model</h1>
 
     <p>
@@ -331,7 +399,7 @@
 [/@file]
 [#if downloadsxml??]
   [@file name="downloads.html" charset="utf-8"]
-    [@boilerplate title="Files and Libraries" subnav={"Home" : indexPageName, "Files and Libraries" : "downloads.html"} codeblocks=true]
+    [@boilerplate title="Files and Libraries" subnav=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html" , "subnav" : nav_sections}] codeblocks=true]
   <h1>Files and Libraries</h1>
 
   <p>The following files and libraries are available:</p>
@@ -375,7 +443,7 @@
 [/#if]
 [#if restAvailable]
   [@file name="rest.html" charset="utf-8"]
-    [@boilerplate title="REST" subnav={"Home" : indexPageName, "REST" : "rest.html"}]
+    [@boilerplate title="REST" subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}]]
   <h1>REST Resources</h1>
   <p>
     This API supports a <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">Representational State Transfer (REST)</a>
@@ -408,7 +476,7 @@
 [/#if]
 [#if soapAvailable]
   [@file name="soap.html" charset="utf-8"]
-    [@boilerplate title="SOAP" subnav={"Home" : indexPageName, "SOAP" : "soap.html"}]
+    [@boilerplate title="SOAP" subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections}]]
   <h1>SOAP Endpoints</h1>
   <p>
     This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
@@ -447,7 +515,7 @@
 [/#if]
 [#macro processWsdl wsdl]
   [@file name="soap_" + wsdl.@namespaceId + ".html" charset="utf-8"]
-    [@boilerplate title="SOAP: " + wsdl.@namespaceId subnav={"Home" : indexPageName, "SOAP" : "soap.html", wsdl.@namespaceId : "soap_" + wsdl.@namespaceId + ".html"}]
+    [@boilerplate title="SOAP: " + wsdl.@namespaceId subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections }, { "title" : wsdl.@namespaceId?string , "href" : "soap_" + wsdl.@namespaceId + ".html" }]]
   <h1>${wsdl.@namespaceId}</h1>
   <table>
     <tr>
@@ -472,7 +540,7 @@
 [/#macro]
 [#macro processResourceGroup group]
   [@file name="resource_" + group + ".html" charset="utf-8"]
-    [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", group : "resource_" + group + ".html"}]
+    [@boilerplate title=group subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : group , "href" : "resource_" + group + ".html", "subnav" : nav_resource_groups}]]
       <h1>${group}</h1>
 
       [#assign resources=[] /]
@@ -500,7 +568,7 @@
 [#macro processResource resource]
   [#assign resource_filename=scrubPathToFilename(resource.@name)/]
   [@file name=resource_filename charset="utf-8"]
-    [@boilerplate title=group subnav={"Home" : indexPageName, "REST" : "rest.html", resource.@name : resource_filename}]
+    [@boilerplate title=group subnav=[{"title" : "Home", "href" : indexPageName}, { "title" : "REST" , "href" : "rest.html", "subnav" : nav_sections }, {"title" : resource.@name , "href" : resource_filename, "subnav" : nav_paths}]]
       [@processRawResource resource=resource/]
     [/@boilerplate]
   [/@file]
@@ -671,7 +739,7 @@
 [/#macro]
 [#macro processEndpointInterface endpointInterface]
   [@file name="soap_" + endpointInterface?parent.@namespaceId + "_" + endpointInterface.@name + ".html" charset="utf-8"]
-    [@boilerplate title=endpointInterface.@name subnav={"Home" : indexPageName, "SOAP" : "soap.html", endpointInterface?parent.@namespaceId : "soap_" + endpointInterface?parent.@namespaceId + ".html", endpointInterface.@name : "soap_" + endpointInterface.@name + ".html"}]
+    [@boilerplate title=endpointInterface.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "SOAP" , "href" : "soap.html", "subnav" : nav_sections }, {"title" : endpointInterface?parent.@namespaceId , "href" : "soap_" + endpointInterface?parent.@namespaceId + ".html", "subnav" : nav_wsdls }, {"title" : endpointInterface.@name , "href" : "soap_" + endpointInterface.@name + ".html", "subnav" : nav_eis_by_ns[endpointInterface?parent.@namespaceId?string]}]]
       <h1>${endpointInterface.@name}</h1>
       [#if isDeprecated(endpointInterface)]
       <p class="alert">This endpoint has been deprecated.[#list endpointInterface.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
@@ -783,7 +851,7 @@
 [/#macro]
 [#macro processSchema schema]
   [@file name=schema.@namespaceId + ".html" charset="utf-8"]
-    [@boilerplate title="Namespace: " + schema.@namespaceId subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html"}]
+    [@boilerplate title="Namespace: " + schema.@namespaceId subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}]]
       <h1>Namespace ${schema.@namespaceId}</h1>
       <table>
         <tr>
@@ -825,7 +893,7 @@
 [#macro processElement element]
   [#assign schema=element?parent?parent/]
   [@file name="el_" + schema.@namespaceId + "_" + element.@name + ".html" charset="utf-8"]
-    [@boilerplate title=element.@name subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html", "Element " + element.@name : "el_" + schema.@namespaceId + "_" + element.@name + ".html"} codeblocks=true]
+    [@boilerplate title=element.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}, {"title" : "Element " + element.@name , "href" : "el_" + schema.@namespaceId + "_" + element.@name + ".html", "subnav" : nav_elements_by_ns[schema.@namespaceId?string]}] codeblocks=true]
       <h1>Element ${element.@name}</h1>
       [#if isDeprecated(element)]
       <p class="alert">This element has been deprecated.[#list element.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
@@ -865,7 +933,7 @@
 [#macro processType type]
   [#assign schema=type?parent?parent/]
   [@file name=schema.@namespaceId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name subnav={"Home" : indexPageName, schema.@namespaceId : schema.@namespaceId + ".html" , type.@name : schema.@namespaceId + "_" + type.@name + ".html"} codeblocks=true]
+    [@boilerplate title=type.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models} , {"title" : type.@name , "href" : schema.@namespaceId + "_" + type.@name + ".html", "subnav" : nav_typedefs_by_ns[schema.@namespaceId?string]}] codeblocks=true]
       <h1>${type.@name}</h1>
       [#if isDeprecated(type)]
       <p class="alert">This type has been deprecated.[#list type.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
@@ -1021,7 +1089,7 @@
 [/#macro]
 [#macro processJsonType type]
   [@file name="json_" + type?parent.@schemaId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name subnav={"Home" : indexPageName, "JSON" : "#", type.@name : "json_" + type?parent.@schemaId + "_" + type.@name + ".html"} codeblocks=true]
+    [@boilerplate title=type.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "JSON" , "href" : "#"}, {"title" : type.@name , "href" : "json_" + type?parent.@schemaId + "_" + type.@name + ".html"}] codeblocks=true]
       <h1>${type.@name}</h1>
 
       <table>

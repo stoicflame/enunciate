@@ -439,6 +439,97 @@ ul.navigation li {
 #secondary ul a:hover {
 	background: #fff4d0;
 }
+/*
+	xBreadcrumbs (Extended Breadcrumbs) jQuery Plugin
+	� 2009 ajaxBlender.com
+	For any questions please visit www.ajaxblender.com
+	or email us at support@ajaxblender.com
+*/
+.xbreadcrumbs {
+	position: relative;
+	z-index: 1000;
+}
+.xbreadcrumbs LI UL {
+	position: absolute;
+	float: left;
+}
+.xbreadcrumbs, .xbreadcrumbs LI, .xbreadcrumbs UL, .xbreadcrumbs UL LI {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.xbreadcrumbs { clear: both; }
+.xbreadcrumbs, .xbreadcrumbs LI {
+	float: left;
+}
+.xbreadcrumbs UL {
+	display: none;
+}
+
+/*  Base style of xBreadcrumbs  */
+/*  Top Level  */
+.xbreadcrumbs {
+	background: #FFDF73;
+	width: 100%;
+}
+.xbreadcrumbs LI {
+    border-right: none;
+    padding: 5px 15px 5px 10px;
+	height: 16px;
+}
+.xbreadcrumbs LI.current {
+	background: none;
+}
+.xbreadcrumbs LI UL LI {
+    background: none;
+}
+.xbreadcrumbs LI A {
+	font-size: 11px;
+	color: #515151;
+	text-decoration: none;
+    padding-right: 2em;
+}
+.xbreadcrumbs LI A.home {
+    background: url( home.gif ) no-repeat left center;
+    padding-left: 20px;
+}
+.xbreadcrumbs LI A:HOVER, .xbreadcrumbs LI.hover A {
+	color: #000;
+}
+/*  Top Level - Current Page  */
+.xbreadcrumbs LI.current A {
+	color: #333333;
+	font-weight: bold;
+}
+/*  Sub-level  */
+.xbreadcrumbs LI UL {
+	padding: 3px;
+	background: #fff4d0;
+	font-size: 11px;
+	min-width: 180px;
+    max-height: 500px;
+    overflow: auto;
+	top: 25px;
+}
+.xbreadcrumbs LI UL LI {
+	float: left;
+	width: 100%;
+	border-right: none;
+	height: auto;
+}
+.xbreadcrumbs LI UL LI A {
+	text-decoration: none;
+	color: #666666 !important;
+	display: block;
+	padding: 4px;
+	border-bottom: 1px dotted #666666;
+}
+.xbreadcrumbs LI UL LI:last-child A {
+	border-bottom: none;
+}
+.xbreadcrumbs LI UL LI A:HOVER {
+    background: #fffbee;
+}
 body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blog,body.code #nav-code,body.about #nav-about,body.documentation #nav-documentation{border-bottom: 6px solid #FFDF73;}
 /* @end */
 
