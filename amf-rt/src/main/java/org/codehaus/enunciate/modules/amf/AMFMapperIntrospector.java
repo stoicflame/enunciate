@@ -81,9 +81,10 @@ public class AMFMapperIntrospector {
     if (adapterInfo != null) {
       Type adaptingType = findAdaptingType(adapterInfo.value());
       AMFMapper adaptingMapper = getAMFMapper(adaptingType);
+      AMFMapper adaptedMapper = getAMFMapper(jaxbType);
       try {
         //if it's adapted, don't cache it (return it directly).
-        return new AdaptingAMFMapper(adapterInfo.value().newInstance(), adaptingMapper, narrowType(jaxbType), narrowType(adaptingType));
+        return new AdaptingAMFMapper(adapterInfo.value().newInstance(), adaptingMapper, adaptedMapper, narrowType(jaxbType), narrowType(adaptingType));
       }
       catch (Exception e) {
         throw new AMFMappingException(e);

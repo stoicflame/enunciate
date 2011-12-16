@@ -27,19 +27,21 @@ public class AdaptingAMFMapper implements CustomAMFMapper {
 
   private final XmlAdapter adapter;
   private final AMFMapper adaptingMapper;
+  private final AMFMapper adaptedMapper;
   private final Class jaxbClass;
   private final Class amfClass;
 
-  public AdaptingAMFMapper(XmlAdapter adapter, AMFMapper adaptingMapper, Class jaxbClass, Class amfClass) {
+  public AdaptingAMFMapper(XmlAdapter adapter, AMFMapper adaptingMapper, AMFMapper adaptedMapper, Class jaxbClass, Class amfClass) {
     this.adapter = adapter;
     this.adaptingMapper = adaptingMapper;
+    this.adaptedMapper = adaptedMapper;
     this.jaxbClass = jaxbClass;
     this.amfClass = amfClass;
   }
 
   public Object toAMF(Object jaxbObject, AMFMappingContext context) throws AMFMappingException {
     try {
-      return adaptingMapper.toAMF(adapter.marshal(jaxbObject), context);
+      return adaptingMapper.toAMF(adapter.marshal(adaptedMapper.toAMF(jaxbObject, context)), context);
     }
     catch (Exception e) {
       throw new AMFMappingException(e);
@@ -48,7 +50,7 @@ public class AdaptingAMFMapper implements CustomAMFMapper {
 
   public Object toJAXB(Object amfObject, AMFMappingContext context) throws AMFMappingException {
     try {
-      return adapter.unmarshal(adaptingMapper.toJAXB(amfObject, context));
+      return adaptedMapper.toJAXB(adapter.unmarshal(adaptingMapper.toJAXB(amfObject, context)), context);
     }
     catch (Exception e) {
       throw new AMFMappingException(e);
