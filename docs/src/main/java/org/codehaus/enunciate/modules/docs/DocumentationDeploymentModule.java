@@ -207,7 +207,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String indexPageName = "index.html";
   private boolean disableRestMountpoint = false;
   private String defaultNamespace = null;
-  private String groupRestResources = "byDocumentationGroup";
+  private String groupRestResources = null;
 
   /**
    * @return "docs"

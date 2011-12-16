@@ -2,7 +2,7 @@
 [#assign soapAvailable=docsxml.soap.wsdls.wsdl.endpointInterface?size > 0/]
 [#assign restAvailable=docsxml.rest.resources.resource?size > 0/]
 [#function scrubPathToFilename path]
-  [#return path?string?replace("/", ".")?replace(":","-")?replace("{", "-")?replace("}", "-")/]
+  [#return "path_" + path?string?replace("/", "_")?replace(":","-")?replace("{", "-")?replace("}", "-") + ".html"/]
 [/#function]
 [#function tocNeeded(nodelist)]
   [#return nodelist?size > 2/]
@@ -64,7 +64,7 @@
   [#assign nav_models = nav_models + {schema.@namespaceId?string : schema.@namespaceId?string + ".html"}/]
   [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : {}}/]
   [#list schema.elements.element?sort_by("@name") as element]
-    [#assign tmp = nav_elements_by_ns[schema.@namespaceId?string] + { element.@name?string : "el_" + schema.@namespaceId?string + "_" + element.@name?string + ".html"}/]
+    [#assign tmp = nav_elements_by_ns[schema.@namespaceId?string] + { element.@name?string + " element" : "el_" + schema.@namespaceId?string + "_" + element.@name?string + ".html"}/]
     [#assign nav_elements_by_ns = nav_elements_by_ns + {schema.@namespaceId?string : tmp}/]
   [/#list]
   [#assign nav_typedefs_by_ns = nav_typedefs_by_ns + {schema.@namespaceId?string : {}}/]
@@ -242,7 +242,7 @@
 
       <h1>SOAP Endpoints</h1>
       <p>
-        This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>N
+        This API is exposed through a set of <a href="http://www.ws-i.org/Profiles/BasicProfile-1.0.html">WSI Basic Profile</a>
         -compliant SOAP v1.1 endpoints. The API supports <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/">XML-binary Optimized Pacakging (XOP)</a>
         and <a href="http://www.w3.org/TR/2004/WD-soap12-mtom-20040608/">SOAP Message Transmission Optimization Mechanism (MTOM)</a>
         for transmission of binary data. The SOAP API is described by the following endpoints:
@@ -450,13 +450,13 @@
     model for accessing a set of resources through a fixed set of operations. The following resources are accessible through the RESTful model:
   </p>
   <ul>
-    [#if docsxml.rest.groups.group?size > 0]
+    [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
       [#list docsxml.rest.groups.group?sort as group]
-    <li><a href="resource_${group}.html">${group}</a></li>
+      <li><a href="resource_${group}.html">${group}</a></li>
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-    <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+      <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
       [/#list]
     [/#if]
   </ul>
@@ -851,7 +851,7 @@
 [/#macro]
 [#macro processSchema schema]
   [@file name=schema.@namespaceId + ".html" charset="utf-8"]
-    [@boilerplate title="Namespace: " + schema.@namespaceId subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}]]
+    [@boilerplate title="Namespace: " + schema.@namespaceId subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}]]
       <h1>Namespace ${schema.@namespaceId}</h1>
       <table>
         <tr>
@@ -893,8 +893,8 @@
 [#macro processElement element]
   [#assign schema=element?parent?parent/]
   [@file name="el_" + schema.@namespaceId + "_" + element.@name + ".html" charset="utf-8"]
-    [@boilerplate title=element.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}, {"title" : "Element " + element.@name , "href" : "el_" + schema.@namespaceId + "_" + element.@name + ".html", "subnav" : nav_elements_by_ns[schema.@namespaceId?string]}] codeblocks=true]
-      <h1>Element ${element.@name}</h1>
+    [@boilerplate title=element.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models}, {"title" : element.@name + " element" , "href" : "el_" + schema.@namespaceId + "_" + element.@name + ".html", "subnav" : nav_elements_by_ns[schema.@namespaceId?string]}] codeblocks=true]
+      <h1>${element.@name} element</h1>
       [#if isDeprecated(element)]
       <p class="alert">This element has been deprecated.[#list element.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
       [/#if]
@@ -933,7 +933,7 @@
 [#macro processType type]
   [#assign schema=type?parent?parent/]
   [@file name=schema.@namespaceId + "_" + type.@name + ".html" charset="utf-8"]
-    [@boilerplate title=type.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models} , {"title" : type.@name , "href" : schema.@namespaceId + "_" + type.@name + ".html", "subnav" : nav_typedefs_by_ns[schema.@namespaceId?string]}] codeblocks=true]
+    [@boilerplate title=type.@name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "Data Model" , "href" : "model.html", "subnav" : nav_sections}, {"title" : schema.@namespaceId , "href" : schema.@namespaceId + ".html", "subnav" : nav_models} , {"title" : type.@name , "href" : schema.@namespaceId + "_" + type.@name + ".html", "subnav" : nav_typedefs_by_ns[schema.@namespaceId?string]}] codeblocks=true]
       <h1>${type.@name}</h1>
       [#if isDeprecated(type)]
       <p class="alert">This type has been deprecated.[#list type.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
