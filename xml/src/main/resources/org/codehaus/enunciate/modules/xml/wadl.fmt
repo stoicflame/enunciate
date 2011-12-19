@@ -36,7 +36,7 @@ Template library for WADL.
     <${wadl}:resource path="${(resources?first).metaData.defaultSubcontext!"/rest"}[#if !(resources?first).fullpath?starts_with("/")]/[/#if]${(resources?first).fullpath}">
       [#list (resources?first).resourceParameters as parameter]
         [#if parameter.pathParam!false]
-      <${wadl}:param name="${parameter.parameterName}" style="${parameter.typeName!false}">
+      <${wadl}:param name="${parameter.parameterName}" style="template">
           [#if parameter.docValue??]
         <${wadl}:doc><![CDATA[${parameter.docValue}]]></${wadl}:doc>
           [/#if]
