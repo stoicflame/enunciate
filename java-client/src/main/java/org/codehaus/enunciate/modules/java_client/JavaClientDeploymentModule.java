@@ -185,15 +185,6 @@ public class JavaClientDeploymentModule extends FreemarkerDeploymentModule imple
     return 50;
   }
 
-  @Override
-  public void init(Enunciate enunciate) throws EnunciateException {
-    super.init(enunciate);
-
-    if (!isDisabled() && !enunciate.isModuleEnabled("xml")) {
-      throw new EnunciateException("The Java client module requires you to enable the XML module.");
-    }
-  }
-
   public void onClassesFound(Set<String> classes) {
     jacksonXcAvailable |= classes.contains("org.codehaus.jackson.xc.JaxbAnnotationIntrospector");
   }

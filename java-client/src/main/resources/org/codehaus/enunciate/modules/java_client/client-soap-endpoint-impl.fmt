@@ -25,12 +25,15 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   /**
    * Construct a ${endpointInterface.simpleName} that points to the endpoint at the specified host and port.
    *
+[#if !(wsdlFileName??)]
+   * @param wsdl The URL to the wsdl describing the interface for which this endpoint is a client.
+[/#if]
    * @param host The host.
    * @param port The port.
    * @param features The features (e.g. MTOM).
    */
-  public ${endpointInterface.simpleName}Impl(String host, int port, javax.xml.ws.WebServiceFeature... features) {
-    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate(getClass().getResource("/${wsdlFileName}"), new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
+  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String host, int port, javax.xml.ws.WebServiceFeature... features) {
+    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
     try {
       java.net.URL baseUrl = new java.net.URL("${baseDeploymentAddress}${endpointInterface.metaData.soapPath?default("/soap/" + endpointInterface.serviceName)}");
       _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, new java.net.URL(baseUrl.getProtocol(), host, port, baseUrl.getFile()).toString());
@@ -43,11 +46,14 @@ public class ${endpointInterface.simpleName}Impl implements ${endpointInterface.
   /**
    * Construct a ${endpointInterface.simpleName} that points to the specified endpoint.
    *
+[#if !(wsdlFileName??)]
+   * @param wsdl The URL to the wsdl describing the interface for which this endpoint is a client.
+[/#if]
    * @param endpoint The endpoint to point to.
    * @param features The features (e.g. MTOM).
    */
-  public ${endpointInterface.simpleName}Impl(String endpoint, javax.xml.ws.WebServiceFeature... features) {
-    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate(getClass().getResource("/${wsdlFileName}"), new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
+  public ${endpointInterface.simpleName}Impl([#if !(wsdlFileName??)]java.net.URL wsdl, [/#if]String endpoint, javax.xml.ws.WebServiceFeature... features) {
+    this.proxy = javax.xml.ws.spi.Provider.provider().createServiceDelegate([#if wsdlFileName??]getClass().getResource("/${wsdlFileName}")[#else]wsdl[/#if], new javax.xml.namespace.QName("${endpointInterface.targetNamespace}", "${endpointInterface.serviceName}"), javax.xml.ws.Service.class).getPort(${endpointInterface.simpleName}.class, features);
     _getBindingProvider().getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
   }
 
