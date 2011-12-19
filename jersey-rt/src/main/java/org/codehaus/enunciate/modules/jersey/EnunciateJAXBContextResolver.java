@@ -16,9 +16,6 @@
 
 package org.codehaus.enunciate.modules.jersey;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
@@ -32,6 +29,8 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Context resolver for JAXB.
@@ -41,7 +40,7 @@ import java.util.Set;
 @Provider
 public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext> {
 
-  private static final Log LOG = LogFactory.getLog(EnunciateJAXBContextResolver.class);
+  private static final Logger LOG = Logger.getLogger(EnunciateJAXBContextResolver.class.getName());
 
   private final JAXBContext context;
   private final Object prefixMapper;
@@ -83,13 +82,13 @@ public class EnunciateJAXBContextResolver implements ContextResolver<JAXBContext
             types.add(loadClass(line));
           }
           catch (Throwable e) {
-            LOG.error("Error loading jaxb type for jersey.", e);
+            LOG.log(Level.SEVERE, "Error loading jaxb type for jersey.", e);
           }
           line = reader.readLine();
         }
       }
       catch (Throwable e) {
-        LOG.error("Error reading jaxb types for jersey.", e);
+        LOG.log(Level.SEVERE, "Error reading jaxb types for jersey.", e);
       }
     }
 

@@ -6,8 +6,6 @@ import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -23,6 +21,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Enunciate-specific servlet container that adds additional Enunciate-supported functionality to the Jersey JAX-RS container. This additional functionality
@@ -39,12 +39,11 @@ import java.util.Properties;
  */
 public class EnunciateJerseyServletContainer extends ServletContainer {
 
-  private static final Log LOG = LogFactory.getLog(EnunciateJerseyServletContainer.class);
+  private static final Logger LOG = Logger.getLogger(EnunciateJerseyServletContainer.class.getName());
   private ResourceConfig resourceConfig;
   private String resourceProviderFactory = "org.codehaus.enunciate.modules.jersey.EnunciateSpringComponentProviderFactory";
   private WebApplication wa;
   private String servletPath;
-  private boolean doPathBasedConneg;
 
   @Override
   protected void configure(ServletConfig sc, ResourceConfig rc, WebApplication wa) {
@@ -61,7 +60,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
         }
       }
       catch (Throwable e) {
-        LOG.error("Error loading enunciate-provided provider class. Skipping...", e);
+        LOG.log(Level.SEVERE, "Error loading enunciate-provided provider class. Skipping...", e);
       }
     }
 
@@ -76,7 +75,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
         }
       }
       catch (Throwable e) {
-        LOG.error("Error loading enunciate-provided root resource class. Skipping...", e);
+        LOG.log(Level.SEVERE, "Error loading enunciate-provided root resource class. Skipping...", e);
       }
     }
 
@@ -84,14 +83,14 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
       rc.getClasses().add(loadClass("org.codehaus.enunciate.modules.amf.JAXRSProvider"));
     }
     catch (Throwable e) {
-      LOG.info("org.codehaus.enunciate.modules.amf.JAXRSProvider not found.");
+      LOG.log(Level.INFO, "org.codehaus.enunciate.modules.amf.JAXRSProvider not found.");
     }
 
     try {
       rc.getClasses().add(loadClass("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider"));
     }
     catch (Throwable e) {
-      LOG.info("org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider not loaded. Perhaps Jackson isn't on the classpath?");
+      LOG.log(Level.INFO, "org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider not loaded. Perhaps Jackson isn't on the classpath?");
     }
 
     String pathBasedConneg = sc.getInitParameter(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);
@@ -121,7 +120,6 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
 
     String servletPath = sc.getInitParameter(JerseyAdaptedHttpServletRequest.PROPERTY_SERVLET_PATH);
     this.servletPath = servletPath == null ? "" : servletPath;
-    this.doPathBasedConneg = rc.getFeature(JerseyAdaptedHttpServletRequest.FEATURE_PATH_BASED_CONNEG);
 
     super.configure(sc, rc, wa);
   }
@@ -151,7 +149,7 @@ public class EnunciateJerseyServletContainer extends ServletContainer {
         .newInstance(rc, getServletContext());
     }
     catch (Throwable e) {
-      LOG.info("Unable to load the spring component provider factory. Using the jersey default...");
+      LOG.log(Level.INFO, "Unable to load the spring component provider factory. Using the jersey default...");
       return null;
     }
   }
