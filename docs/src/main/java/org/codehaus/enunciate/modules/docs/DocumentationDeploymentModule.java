@@ -17,7 +17,6 @@
 package org.codehaus.enunciate.modules.docs;
 
 import com.sun.mirror.declaration.PackageDeclaration;
-import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.TemplateException;
@@ -56,6 +55,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -1018,7 +1018,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     StreamSource source = new StreamSource(xsltURL.openStream());
 
     try {
-      Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+      Transformer transformer = SAXTransformerFactory.newInstance().newTransformer(source);
       transformer.setURIResolver(new URIResolver() {
         public Source resolve(String href, String base) throws TransformerException {
           return new StreamSource(new File(getGenerateDir(), href));

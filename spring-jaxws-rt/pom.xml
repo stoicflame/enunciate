@@ -7,29 +7,13 @@
     <version>1.25-RC2</version>
   </parent>
 
+  <properties>
+    <spring.version>2.5.4</spring.version>
+  </properties>
+
   <artifactId>enunciate-spring-jaxws-rt</artifactId>
   <name>Enunciate - JAX-WS RI Runtime Spring Support</name>
   <description>The Enunciate JAX-WS Reference Implementation runtime libraries support the Spring-based JAX-WS RI-backed SOAP endpoints.</description>
-
-  <repositories>
-    <!--this has to be here to make sure the central m2-->
-    <!--repo gets consulted FIRST because if not, the-->
-    <!--crazy m2 server at java.net will return bogus artifacts-->
-    <!--when its really not supposed to return anything -->
-    <repository>
-      <id>m2.central</id>
-      <url>http://repo1.maven.org/maven2/</url>
-    </repository>
-    <repository>
-      <id>java.net.1</id>
-      <url>http://download.java.net/maven/1</url>
-      <layout>legacy</layout>
-    </repository>
-    <repository>
-      <id>java.net.2</id>
-      <url>http://download.java.net/maven/2</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
@@ -66,16 +50,95 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
     </dependency>
 
     <dependency>
+      <!--depending modules: spring-jaxws-rt-->
       <groupId>org.jvnet.jax-ws-commons.spring</groupId>
       <artifactId>jaxws-spring</artifactId>
+      <version>1.8</version>
+
+      <!--sigh. maybe someday someone will release a cleaned-up pom for jaxws-spring-->
+      <exclusions>
+        <exclusion>
+          <!--we'll use enunciate's version of jaxws-rt-->
+          <groupId>com.sun.xml.ws</groupId>
+          <artifactId>jaxws-rt</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--this should be optional-->
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of spring-->
+          <groupId>org.springframework</groupId>
+          <artifactId>spring</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of spring-->
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of spring-->
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-context</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of jsr181-->
+          <groupId>javax.jws</groupId>
+          <artifactId>jsr181-api</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of jaxb-->
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of activation-->
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of stax-->
+          <groupId>javax.xml.stream</groupId>
+          <artifactId>stax-api</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of staxex-->
+          <groupId>org.jvnet.staxex</groupId>
+          <artifactId>stax-ex</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of streambuffer-->
+          <groupId>com.sun.xml.stream.buffer</groupId>
+          <artifactId>streambuffer</artifactId>
+        </exclusion>
+
+        <exclusion>
+          <!--we'll use enunciate's version of sjsxp -->
+          <groupId>com.sun.xml.stream</groupId>
+          <artifactId>sjsxp</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

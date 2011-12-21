@@ -11,26 +11,6 @@
   <name>Enunciate - JAX-WS RI Runtime</name>
   <description>The JAX-WS RI runtime is a reference to all JAX-WS RI dependencies. There are no significant classes; just a reference to the runtime dependencies.</description>
 
-  <repositories>
-    <!--this has to be here to make sure the central m2-->
-    <!--repo gets consulted FIRST because if not, the-->
-    <!--crazy m2 server at java.net will return bogus artifacts-->
-    <!--when its really not supposed to return anything -->
-    <repository>
-      <id>m2.central</id>
-      <url>http://repo1.maven.org/maven2/</url>
-    </repository>
-    <repository>
-      <id>java.net.1</id>
-      <url>http://download.java.net/maven/1</url>
-      <layout>legacy</layout>
-    </repository>
-    <repository>
-      <id>java.net.2</id>
-      <url>http://download.java.net/maven/2</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -41,17 +21,7 @@
     <dependency>
       <groupId>com.sun.xml.ws</groupId>
       <artifactId>jaxws-rt</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jvnet.staxex</groupId>
-      <artifactId>stax-ex</artifactId>
-    </dependency>
-
-    <!--this dep is NOT optional; confirmed 8/09.-->
-    <dependency>
-      <groupId>com.sun.xml.stream.buffer</groupId>
-      <artifactId>streambuffer</artifactId>
+      <version>2.1.7</version>
     </dependency>
   </dependencies>
 

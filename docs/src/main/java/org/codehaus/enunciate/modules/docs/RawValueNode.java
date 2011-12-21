@@ -25,7 +25,12 @@ public class RawValueNode extends ValueNode {
   }
 
   public String getValueAsText() {
-    return rawValue;
+    return asText();
+  }
+
+  @Override
+  public String asText() {
+    return this.rawValue;
   }
 
   @Override

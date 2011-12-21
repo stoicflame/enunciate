@@ -33,14 +33,6 @@
     </plugins>
   </build>
 
-  <repositories>
-    <!--xsom library (for testing only) exists at java.net-->
-    <repository>
-      <id>java.net</id>
-      <url>http://download.java.net/maven/2</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -60,13 +52,14 @@
     <dependency>
       <groupId>com.sun.xsom</groupId>
       <artifactId>xsom</artifactId>
-
+      <version>20110809</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>wsdl4j</groupId>
       <artifactId>wsdl4j</artifactId>
+      <version>1.6.2</version>
 
       <scope>test</scope>
     </dependency>
@@ -74,6 +67,7 @@
     <dependency>
       <groupId>relaxngDatatype</groupId>
       <artifactId>relaxngDatatype</artifactId>
+      <version>20020414</version>
 
       <scope>test</scope>
     </dependency>

@@ -48,6 +48,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -113,7 +114,7 @@ public class TestFullXMLAPI extends TestCase {
 
     //make sure the wsdl is built correctly
     WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-    Definition definition = wsdlReader.readWSDL(null, fullWsdlFile.toURL().toString());
+    Definition definition = wsdlReader.readWSDL(null, fullWsdlFile.toURI().toURL().toString());
     assertEquals(FULL_NAMESPACE, definition.getTargetNamespace());
     Types types = definition.getTypes();
     List extensibilityElements = types.getExtensibilityElements();
@@ -148,7 +149,7 @@ public class TestFullXMLAPI extends TestCase {
     parser.setErrorHandler(new ThrowEverythingHandler()); //throw all errors and warnings.
 
     //make sure the schema included in the wsdl is correct.
-    parser.parse(tempSchemaFile.toURL());
+    parser.parse(tempSchemaFile.toURI().toURL());
     XSSchemaSet schemaSet = parser.getResult();
     XSSchema wsdlSchema = schemaSet.getSchema(FULL_NAMESPACE);
     assertNotNull(wsdlSchema);
@@ -706,7 +707,7 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(EXTENSION, eventType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = eventType.getAttributeUses();
-    assertEquals(1, attributes.size());
+    assertEquals(2, attributes.size());
     for (XSAttributeUse attribute : attributes) {
       XSAttributeDecl attributeDecl = attribute.getDecl();
       String attributeName = attributeDecl.getName();
@@ -714,6 +715,9 @@ public class TestFullXMLAPI extends TestCase {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
         assertQNameEquals(DATA_NAMESPACE, "eventType", attributeDecl.getType());
+      }
+      else if ("id".equals(attributeName)) {
+        //fall through...
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -733,8 +737,8 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("description".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
@@ -777,13 +781,13 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("contactName".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("emails".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         XSType emailListType = elementDecl.getType();
         assertEmailListType(emailListType);
       }
@@ -827,13 +831,13 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("location".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("email".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(CITE_NAMESPACE, "EMail", elementDecl.getType());
       }
       else {
@@ -876,23 +880,23 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("title".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("link".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("infoSets".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(CITE_NAMESPACE, "infoSet", elementDecl.getType());
       }
       else if ("repository".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertSame(sourceType.getOwnerSchema().getElementDecls().get("repository"), elementDecl);
       }
       else {
@@ -923,8 +927,8 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("text".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
@@ -967,23 +971,23 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("inferences".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "IDREF", elementDecl.getType());
       }
       else if ("contributor".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertSame(infosetType.getOwnerSchema().getElementDecls().get("contributor"), elementDecl);
       }
       else if ("source".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "IDREF", elementDecl.getType());
       }
       else if ("sourceReference".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
@@ -1026,38 +1030,38 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("gender".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "gender", elementDecl.getType());
       }
       else if ("names".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else if ("events".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "event", elementDecl.getType());
       }
       else if ("facts".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "fact", elementDecl.getType());
       }
       else if ("relationships".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(XSParticle.UNBOUNDED, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "relationship", elementDecl.getType());
       }
       else if ("picture".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "base64Binary", elementDecl.getType());
       }
       else if ("notes".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertNoteAnonymousType(elementDecl);
       }
       else {
@@ -1077,8 +1081,8 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(1, childElements.length);
     XSElementDecl entryElement = childElements[0].getTerm().asElementDecl();
     assertEquals("entry", entryElement.getName());
-    assertEquals(0, childElements[0].getMinOccurs());
-    assertEquals(XSParticle.UNBOUNDED, childElements[0].getMaxOccurs());
+    assertEquals(BigInteger.ZERO, childElements[0].getMinOccurs());
+    assertEquals(BigInteger.valueOf(XSParticle.UNBOUNDED), childElements[0].getMaxOccurs());
 
     particle = entryElement.getType().asComplexType().getContentType().asParticle();
     assertTrue(particle.getTerm().isModelGroup());
@@ -1088,14 +1092,14 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(2, childElements.length);
     XSElementDecl keyElement = childElements[0].getTerm().asElementDecl();
     assertEquals("key", keyElement.getName());
-    assertEquals(1, childElements[0].getMinOccurs());
-    assertEquals(1, childElements[0].getMaxOccurs());
+    assertEquals(BigInteger.ONE, childElements[0].getMinOccurs());
+    assertEquals(BigInteger.ONE, childElements[0].getMaxOccurs());
     assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", keyElement.getType());
 
     XSElementDecl valueElement = childElements[1].getTerm().asElementDecl();
     assertEquals("value", valueElement.getName());
-    assertEquals(1, childElements[1].getMinOccurs());
-    assertEquals(1, childElements[1].getMaxOccurs());
+    assertEquals(BigInteger.ONE, childElements[1].getMinOccurs());
+    assertEquals(BigInteger.ONE, childElements[1].getMaxOccurs());
     assertQNameEquals(CITE_NAMESPACE, "note", valueElement.getType());
   }
 
@@ -1104,7 +1108,7 @@ public class TestFullXMLAPI extends TestCase {
     assertFalse(relationshipType.isAbstract());
     assertQNameEquals(DATA_NAMESPACE, "assertion", relationshipType.getBaseType());
     assertEquals(EXTENSION, relationshipType.getDerivationMethod());
-    assertEquals(0, relationshipType.getAttributeUses().size());
+    assertEquals(1, relationshipType.getAttributeUses().size());
 
     XSContentType contentType = relationshipType.getExplicitContent();
     XSParticle particle = contentType.asParticle();
@@ -1119,19 +1123,19 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("type".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         XSType relationshipTypeType = elementDecl.getType();
         assertRelationshipTypeType(relationshipTypeType);
       }
       else if ("sourcePersonName".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else if ("targetPersonName".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(DATA_NAMESPACE, "name", elementDecl.getType());
       }
       else {
@@ -1145,7 +1149,7 @@ public class TestFullXMLAPI extends TestCase {
     assertFalse(nameType.isAbstract());
     assertQNameEquals(DATA_NAMESPACE, "assertion", nameType.getBaseType());
     assertEquals(EXTENSION, nameType.getDerivationMethod());
-    assertEquals(0, nameType.getAttributeUses().size());
+    assertEquals(1, nameType.getAttributeUses().size());
 
     XSContentType contentType = nameType.getExplicitContent();
     XSParticle particle = contentType.asParticle();
@@ -1160,8 +1164,8 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("value".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
@@ -1177,7 +1181,7 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(EXTENSION, genderType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = genderType.getAttributeUses();
-    assertEquals(1, attributes.size());
+    assertEquals(2, attributes.size());
     for (XSAttributeUse attribute : attributes) {
       XSAttributeDecl attributeDecl = attribute.getDecl();
       String attributeName = attributeDecl.getName();
@@ -1185,6 +1189,9 @@ public class TestFullXMLAPI extends TestCase {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
         assertQNameEquals(DATA_NAMESPACE, "genderType", attributeDecl.getType());
+      }
+      else if ("id".equals(attributeName)) {
+        //fall through...
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -1202,7 +1209,7 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(EXTENSION, factType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = factType.getAttributeUses();
-    assertEquals(1, attributes.size());
+    assertEquals(2, attributes.size());
     for (XSAttributeUse attribute : attributes) {
       XSAttributeDecl attributeDecl = attribute.getDecl();
       String attributeName = attributeDecl.getName();
@@ -1210,6 +1217,9 @@ public class TestFullXMLAPI extends TestCase {
         assertFalse(attribute.isRequired());
         assertNull(attributeDecl.getDefaultValue());
         assertQNameEquals(DATA_NAMESPACE, "factType", attributeDecl.getType());
+      }
+      else if ("id".equals(attributeName)) {
+        //fall through...
       }
       else {
         fail("Unknown attribute: " + attributeName);
@@ -1229,13 +1239,13 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("description".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("value".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
@@ -1278,13 +1288,13 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("note".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else if ("infoSet".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "IDREF", elementDecl.getType());
       }
       else {
@@ -1300,7 +1310,7 @@ public class TestFullXMLAPI extends TestCase {
     assertEquals(EXTENSION, assertionType.getDerivationMethod());
 
     Collection<? extends XSAttributeUse> attributes = assertionType.getAttributeUses();
-    assertEquals(0, attributes.size());
+    assertEquals(1, attributes.size());
 
     XSContentType contentType = assertionType.getExplicitContent();
     XSParticle particle = contentType.asParticle();
@@ -1315,13 +1325,13 @@ public class TestFullXMLAPI extends TestCase {
       XSElementDecl elementDecl = childElement.getTerm().asElementDecl();
       String childElementName = elementDecl.getName();
       if ("date".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "dateTime", elementDecl.getType());
       }
       else if ("place".equals(childElementName)) {
-        assertEquals(0, childElement.getMinOccurs());
-        assertEquals(1, childElement.getMaxOccurs());
+        assertEquals(BigInteger.ZERO, childElement.getMinOccurs());
+        assertEquals(BigInteger.ONE, childElement.getMaxOccurs());
         assertQNameEquals(W3C_XML_SCHEMA_NS_URI, "string", elementDecl.getType());
       }
       else {
