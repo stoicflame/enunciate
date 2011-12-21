@@ -67,9 +67,9 @@ namespace Jaxws.Ri.Rest {
       Person[] empty = personService.ReadPersons(null);
       Assert.IsTrue(empty == null || empty.Length == 0);
 
-      personService.DeletePerson("somebody");
+      personService.DeletePerson("somebody", "my message");
       try {
-        personService.DeletePerson(null);
+        personService.DeletePerson(null, null);
         Assert.Fail("Should have thrown the exception.");
       }
       catch (SoapException e) {

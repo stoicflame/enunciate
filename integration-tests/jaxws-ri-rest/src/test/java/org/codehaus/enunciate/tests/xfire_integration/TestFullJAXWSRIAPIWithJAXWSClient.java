@@ -104,9 +104,9 @@ public class TestFullJAXWSRIAPIWithJAXWSClient extends TestCase {
     Collection<Person> empty = personService.readPersons(null);
     assertTrue(empty == null || empty.isEmpty());
 
-    personService.deletePerson("somebody");
+    personService.deletePerson("somebody", "my message");
     try {
-      personService.deletePerson(null);
+      personService.deletePerson(null, null);
       fail("Should have thrown the exception.");
     }
     catch (ServiceException e) {
