@@ -68,9 +68,12 @@ public class ClientPackageForMethod implements TemplateMethodModelEx {
       throw new TemplateModelException("The convertPackage method must have the class or package as a parameter.");
     }
 
-    TemplateModel from = (TemplateModel) list.get(0);
-    Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
+    Object unwrapped = unwrap(list.get(0));
     return convertUnwrappedObject(unwrapped);
+  }
+
+  protected Object unwrap(Object first) throws TemplateModelException {
+    return BeansWrapper.getDefaultInstance().unwrap((TemplateModel) first);
   }
 
   /**

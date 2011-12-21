@@ -49,6 +49,7 @@ public class Person<E extends Event> {
   private DataHandler picture;
   private byte[] recording;
   private Map<QName, String> otherAttributes;
+  private SelfReferencingThing selfReferencingThing;
 
   /**
    * The person id.
@@ -204,5 +205,13 @@ public class Person<E extends Event> {
 
   public void setOtherAttributes(Map<QName, String> otherAttributes) {
     this.otherAttributes = otherAttributes;
+  }
+
+  public SelfReferencingThing getSelfReferencingThing() {
+    return selfReferencingThing;
+  }
+
+  public void setSelfReferencingThing(SelfReferencingThing selfReferencingThing) {
+    this.selfReferencingThing = selfReferencingThing;
   }
 }

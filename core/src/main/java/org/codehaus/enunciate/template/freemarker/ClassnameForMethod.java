@@ -18,20 +18,15 @@ package org.codehaus.enunciate.template.freemarker;
 
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
-import com.sun.mirror.type.ArrayType;
-import com.sun.mirror.type.DeclaredType;
-import com.sun.mirror.type.TypeMirror;
-import com.sun.mirror.type.WildcardType;
+import com.sun.mirror.declaration.TypeParameterDeclaration;
+import com.sun.mirror.type.*;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import org.codehaus.enunciate.contract.jaxb.Accessor;
 import org.codehaus.enunciate.contract.jaxb.ImplicitChildElement;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Used to output a reference for an accessor or parameter or declaration.
@@ -41,6 +36,7 @@ import java.util.Map;
 public class ClassnameForMethod extends ClientPackageForMethod {
 
   private static final ThreadLocal<Boolean> FORCE_NOT_15 = new ThreadLocal<Boolean>();
+  private final LinkedList<String> typeParameterDeclarationStack = new LinkedList<String>();
 
   private boolean jdk15 = false;
 
@@ -67,9 +63,33 @@ public class ClassnameForMethod extends ClientPackageForMethod {
     else if (unwrapped instanceof ImplicitChildElement) {
       return convert((ImplicitChildElement) unwrapped);
     }
+    else if (unwrapped instanceof TypeParameterDeclaration) {
+      return convert((TypeParameterDeclaration) unwrapped);
+    }
     else {
       return super.convertUnwrappedObject(unwrapped);
     }
+  }
+
+  /**
+   * Converts the specified type parameter declaration.
+   *
+   * @param typeParameterDeclaration The type parameter declaration.
+   * @return The type parameter declaration.
+   */
+  public String convert(TypeParameterDeclaration typeParameterDeclaration) throws TemplateModelException {
+    String conversion = typeParameterDeclaration.getSimpleName();
+    if (typeParameterDeclaration.getBounds() != null && !typeParameterDeclaration.getBounds().isEmpty() && !typeParameterDeclarationStack.contains(conversion)) {
+      typeParameterDeclarationStack.addFirst(conversion);
+      try {
+        conversion += " extends " + convert(typeParameterDeclaration.getBounds().iterator().next());
+      }
+      finally {
+        typeParameterDeclarationStack.removeFirst();
+      }
+    }
+
+    return conversion;
   }
 
   /**
@@ -105,6 +125,18 @@ public class ClassnameForMethod extends ClientPackageForMethod {
       }
       else {
         conversion = "? extends " + convert(wildCard.getUpperBounds().iterator().next());
+      }
+    }
+    else if (typeMirror instanceof TypeVariable) {
+      TypeParameterDeclaration declaration = ((TypeVariable) typeMirror).getDeclaration();
+      if (declaration != null && isJdk15()) {
+        conversion = declaration.getSimpleName();
+      }
+      else if (declaration != null && declaration.getBounds() != null && !declaration.getBounds().isEmpty()) {
+        conversion = convert(declaration.getBounds().iterator().next());
+      }
+      else {
+        conversion = convert(Object.class.getName());
       }
     }
     else {

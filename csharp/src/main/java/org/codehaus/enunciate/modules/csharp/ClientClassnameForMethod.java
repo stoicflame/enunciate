@@ -152,6 +152,15 @@ public class ClientClassnameForMethod extends org.codehaus.enunciate.template.fr
           return "System.Collections.Generic.List<" + convert(wildcardType.getUpperBounds().iterator().next()) + ">";
         }
       }
+      else if (typeArg instanceof TypeVariable) {
+        Collection<ReferenceType> bounds = ((TypeVariable) typeArg).getDeclaration().getBounds();
+        if (bounds == null || bounds.isEmpty()) {
+          return "System.Collections.ArrayList";
+        }
+        else {
+          return "System.Collections.Generic.List<" + convert(bounds.iterator().next()) + ">";
+        }
+      }
       else {
         return "System.Collections.Generic.List<" + convert(typeArg) + ">";
       }

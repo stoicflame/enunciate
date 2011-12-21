@@ -17,6 +17,7 @@
 package org.codehaus.enunciate.contract.jaxb.types;
 
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
+import com.sun.mirror.declaration.Declaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.type.ArrayType;
@@ -52,6 +53,14 @@ public class XmlTypeFactory {
    */
   public static XmlType findSpecifiedType(Adaptable adaptable) throws XmlTypeException {
     XmlType xmlType = null;
+
+    if (adaptable instanceof Accessor) {
+      XmlSchemaType specified = ((Accessor) adaptable).getAnnotation(XmlSchemaType.class);
+      if (specified != null) {
+        return new SpecifiedXmlType(specified);
+      }
+    }
+
     if (adaptable.isAdapted()) {
       xmlType = getXmlType(adaptable.getAdapterType().getAdaptingType());
     }

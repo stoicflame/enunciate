@@ -65,12 +65,7 @@ public class SimpleNameWithParamsMethod implements TemplateMethodModelEx {
       simpleNameWithParams += "<";
       Iterator<TypeParameterDeclaration> paramIt = declaration.getFormalTypeParameters().iterator();
       while (paramIt.hasNext()) {
-        TypeParameterDeclaration parameterDeclaration = paramIt.next();
-        simpleNameWithParams += parameterDeclaration.getSimpleName();
-        if (parameterDeclaration.getBounds() != null && parameterDeclaration.getBounds().size() > 0) {
-          simpleNameWithParams += " extends ";
-          simpleNameWithParams += this.typeConversion.convert(parameterDeclaration.getBounds().iterator().next());
-        }
+        simpleNameWithParams += this.typeConversion.convert(paramIt.next());
         if (paramIt.hasNext()) {
           simpleNameWithParams += ", ";
         }
