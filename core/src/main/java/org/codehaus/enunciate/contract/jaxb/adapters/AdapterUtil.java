@@ -120,7 +120,7 @@ public class AdapterUtil {
 
       AdapterType adapterType = new AdapterType(adapterTypeMirror);
       if ((adaptedType instanceof DeclaredType && adapterType.canAdapt((DeclaredType)adaptedType)) ||
-          (unwrappedAdaptedType instanceof ReferenceType && adapterType.canAdapt((ReferenceType) unwrappedAdaptedType))) {
+          (unwrappedAdaptedType != adaptedType && unwrappedAdaptedType instanceof ReferenceType && adapterType.canAdapt((ReferenceType) unwrappedAdaptedType))) {
         return adapterType;
       }
 

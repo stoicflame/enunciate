@@ -16,7 +16,9 @@
 
 package org.codehaus.enunciate.contract.jaxb.adapters;
 
+import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 import com.sun.mirror.declaration.ClassDeclaration;
+import com.sun.mirror.declaration.TypeParameterDeclaration;
 import com.sun.mirror.type.*;
 import com.sun.mirror.util.Types;
 import net.sf.jelly.apt.Context;
@@ -61,6 +63,20 @@ public class AdapterType extends DecoratedClassType {
     TypeMirror boundTypeMirror = formalTypeIt.next();
     if (!(boundTypeMirror instanceof ReferenceType)) {
       throw new ValidationException(adapterDeclaration.getPosition(), adapterDeclaration.getQualifiedName() + ": illegal XML adapter: not adapting a reference type (" + boundTypeMirror + ").");
+    }
+    else while (boundTypeMirror instanceof TypeVariable) {
+      //unwrap the type variable to find the bounds.
+      TypeParameterDeclaration declaration = ((TypeVariable) boundTypeMirror).getDeclaration();
+      if (declaration == null) {
+        throw new IllegalStateException(adapterDeclaration.getQualifiedName() + ": unable to find type parameter declaration for type variable " + boundTypeMirror + ".");
+      }
+      else if (declaration.getBounds() != null && !declaration.getBounds().isEmpty()) {
+        boundTypeMirror = declaration.getBounds().iterator().next();
+      }
+      else {
+        AnnotationProcessorEnvironment env = Context.getCurrentEnvironment();
+        boundTypeMirror = env.getTypeUtils().getDeclaredType(env.getTypeDeclaration(Object.class.getName()));
+      }
     }
 
     this.adaptedType = TypeMirrorDecorator.decorate((ReferenceType) boundTypeMirror);
