@@ -194,6 +194,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean includeExampleXml = true;
   private boolean includeExampleJson = true;
   private boolean forceExampleJson = false;
+  private String xslt;
   private URL xsltURL;
   private URL freemarkerXMLProcessingTemplateURL;
   private String css;
@@ -405,19 +406,10 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   /**
    * The stylesheet to use to generate the documentation.
    *
-   * @param xsltURL The stylesheet to use to generate the documentation.
+   * @param xslt The stylesheet to use to generate the documentation.
    */
-  public void setXslt(File xsltURL) throws MalformedURLException {
-    this.xsltURL = xsltURL.toURI().toURL();
-  }
-
-  /**
-   * The xslt to use.
-   *
-   * @return The xslt to use.
-   */
-  public URL getXsltURL() {
-    return xsltURL;
+  public void setXslt(String xslt) throws MalformedURLException {
+    this.xslt = xslt;
   }
 
   /**
@@ -946,7 +938,12 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     debug("Executing XML transformation.");
     URL xsltURL = this.xsltURL;
     if (xsltURL == null) {
-      xsltURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.xslt");
+      if (this.xslt != null) {
+        xsltURL = getEnunciate().resolvePath(this.xslt).toURI().toURL();
+      }
+      else {
+        xsltURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.xslt");
+      }
     }
 
     URL freemarkerXMLProcessingTemplateURL = this.freemarkerXMLProcessingTemplateURL;
