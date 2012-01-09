@@ -4,7 +4,7 @@
   <groupId>net.java.ws.addressbook</groupId>
   <artifactId>addressbook</artifactId>
   <packaging>war</packaging>
-  <version>1.25</version>
+  <version>1.26-SNAPSHOT</version>
   <name>Enunciate - Address Book Example</name>
 
   <properties>
@@ -74,7 +74,7 @@
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.25</version>
+        <version>6.1.26-SNAPSHOT</version>
       </plugin>
 
       <plugin>
