@@ -633,19 +633,21 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       TypeMirror type = ep.getType();
       if (type instanceof ClassType) {
         ClassDeclaration classDeclaration = ((ClassType) type).getDeclaration();
-        if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
-          //only add referenced type definitions for root elements.
-          final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
-          add(rootElement);
+        if (classDeclaration != null) {
+          if (classDeclaration.getAnnotation(XmlRootElement.class) != null) {
+            //only add referenced type definitions for root elements.
+            final RootElementDeclaration rootElement = new RootElementDeclaration(classDeclaration, createTypeDefinition(classDeclaration));
+            add(rootElement);
 
-          // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
-//          if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getConsumesMime(), MediaType.APPLICATION_JSON)) {
-//            addJsonRootElement(rootElement);
-//          }
-        }
+            // TODO Uncomment when jackson-jaxb detection is corrected or after 1.17 release.
+            //          if (jacksonAvailable() && contentTypeIncluded(resourceMethod.getConsumesMime(), MediaType.APPLICATION_JSON)) {
+            //            addJsonRootElement(rootElement);
+            //          }
+          }
 
-        if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
-          addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
+          if (classDeclaration.getAnnotation(JsonRootType.class) != null) {
+            addJsonRootElement(new JsonRootElementDeclaration(JsonTypeDefinition.createTypeDefinition(classDeclaration)));
+          }
         }
       }
       REFERENCE_STACK.get().removeFirst();
