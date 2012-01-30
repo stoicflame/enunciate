@@ -128,7 +128,7 @@ public class JerseyValidator extends BaseValidator {
   }
 
   private boolean isExternallyManagedLifecycle(RootResource rootResource) {
-    return rootResource.getAnnotation(SpringManagedLifecycle.class) != null && rootResource.getAnnotation(ExternallyManagedLifecycle.class) != null;
+    return rootResource.getAnnotation(SpringManagedLifecycle.class) != null || rootResource.getAnnotation(ExternallyManagedLifecycle.class) != null;
   }
 
   /**
