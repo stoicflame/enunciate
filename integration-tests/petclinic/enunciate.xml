@@ -1,7 +1,11 @@
 <enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
+
+  <api-classes>
+    <include pattern="com.mycompany.mypackage.**"/>
+  </api-classes>
   <services>
-    <rest>
+    <rest defaultRestSubcontext="/subcontext">
       <content-types>
         <content-type type="text/plain" id="txt"/>
       </content-types>
