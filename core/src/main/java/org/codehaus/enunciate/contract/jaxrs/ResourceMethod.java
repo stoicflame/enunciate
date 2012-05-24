@@ -78,7 +78,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     Set<String> consumes;
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes = new TreeSet<String>(Arrays.asList(consumesInfo.value()));
+      consumes = new TreeSet<String>(Arrays.asList(JAXRSUtils.value(consumesInfo)));
     }
     else {
       consumes = new TreeSet<String>(parent.getConsumesMime());
@@ -88,7 +88,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     Set<String> produces;
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces = new TreeSet<String>(Arrays.asList(producesInfo.value()));
+      produces = new TreeSet<String>(Arrays.asList(JAXRSUtils.value(producesInfo)));
     }
     else {
       produces = new TreeSet<String>(parent.getProducesMime());

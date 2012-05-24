@@ -36,6 +36,7 @@ import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 import org.codehaus.enunciate.contract.jaxb.types.XmlType;
+import org.codehaus.enunciate.contract.jaxrs.JAXRSUtils;
 import org.codehaus.enunciate.contract.jaxrs.ResourceEntityParameter;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
@@ -698,7 +699,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     Produces produces = declaration.getAnnotation(Produces.class);
     if (produces != null) {
-      for (String contentType : produces.value()) {
+      for (String contentType : JAXRSUtils.value(produces)) {
         try {
           addContentType(MimeType.parse(contentType).toString());
         }
@@ -710,7 +711,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
 
     Consumes consumes = declaration.getAnnotation(Consumes.class);
     if (consumes != null) {
-      for (String contentType : consumes.value()) {
+      for (String contentType : JAXRSUtils.value(consumes)) {
         try {
           addContentType(MimeType.parse(contentType).toString());
         }
