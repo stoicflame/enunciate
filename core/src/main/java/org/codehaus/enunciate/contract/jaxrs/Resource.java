@@ -49,7 +49,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     Set<String> consumes = new TreeSet<String>();
     Consumes consumesInfo = delegate.getAnnotation(Consumes.class);
     if (consumesInfo != null) {
-      consumes.addAll(Arrays.asList(consumesInfo.value()));
+      consumes.addAll(Arrays.asList(JAXRSUtils.value(consumesInfo)));
     }
     else {
       consumes.add("*/*");
@@ -59,7 +59,7 @@ public abstract class Resource extends DecoratedTypeDeclaration {
     Set<String> produces = new TreeSet<String>();
     Produces producesInfo = delegate.getAnnotation(Produces.class);
     if (producesInfo != null) {
-      produces.addAll(Arrays.asList(producesInfo.value()));
+      produces.addAll(Arrays.asList(JAXRSUtils.value(producesInfo)));
     }
     else {
       produces.add("*/*");
