@@ -12,7 +12,7 @@
   <name>Enunciate - JBoss Runtime</name>
 
   <properties>
-    <resteasy.version>2.0.0.GA</resteasy.version>
+    <resteasy.version>2.2.1.GA</resteasy.version>
   </properties>
 
   <dependencies>

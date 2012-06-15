@@ -36,6 +36,7 @@ import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.jboss.config.JBossRuleSet;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -216,6 +217,10 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
   protected void doBuild() throws EnunciateException, IOException {
     super.doBuild();
 
+    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
+    HashMap<String, String> jbossContextParameters = new HashMap<String, String>();
+    webappFragment.setContextParameters(jbossContextParameters);
+
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
     if (this.enableJaxws) {
       for (WsdlInfo wsdlInfo : getModelInternal().getNamespacesToWSDLs().values()) {
@@ -289,10 +294,11 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
       }
 
       jaxrsServletComponent.setUrlMappings(jaxrsUrlMappings);
-      jaxrsServletComponent.addInitParam("resteasy.resources", resources.toString());
-      jaxrsServletComponent.addInitParam("resteasy.providers", providers.toString());
+      jbossContextParameters.put(ResteasyContextParameters.RESTEASY_RESOURCES, resources.toString());
+      jbossContextParameters.put(ResteasyContextParameters.RESTEASY_PROVIDERS, providers.toString());
       String mappingPrefix = this.useSubcontext ? getRestSubcontext() : "";
       if (!"".equals(mappingPrefix)) {
+        jbossContextParameters.put("resteasy.servlet.mapping.prefix", mappingPrefix);
         jaxrsServletComponent.addInitParam("resteasy.servlet.mapping.prefix", mappingPrefix);
       }
       if (isUsePathBasedConneg()) {
@@ -307,14 +313,13 @@ public class JBossDeploymentModule extends FreemarkerDeploymentModule implements
               builder.append(", ");
             }
           }
-          jaxrsServletComponent.addInitParam("resteasy.media.type.mappings", builder.toString());
+          jbossContextParameters.put(ResteasyContextParameters.RESTEASY_MEDIA_TYPE_MAPPINGS, builder.toString());
         }
       }
-      jaxrsServletComponent.addInitParam("resteasy.scan", "false"); //turn off scanning because we've already done it.
+      jbossContextParameters.put(ResteasyContextParameters.RESTEASY_SCAN_RESOURCES, Boolean.FALSE.toString());
       servlets.add(jaxrsServletComponent);
     }
 
-    BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setServlets(servlets);
     if (!this.options.isEmpty()) {
       webappFragment.setContextParameters(this.options);
