@@ -207,7 +207,7 @@ public class GenerateExampleXmlMethod implements TemplateMethodModelEx {
     DocumentationExample exampleInfo = element.getAnnotation(DocumentationExample.class);
     if (exampleInfo == null || !exampleInfo.exclude()) {
       if (element.isWrapped()) {
-        String namespace = element.getNamespace();
+        String namespace = element.getWrapperNamespace();
         String prefix = namespace == null ? null : ((EnunciateFreemarkerModel) FreemarkerModel.get()).getNamespacesToPrefixes().get(namespace);
         Namespace jdomNS;
         if (Namespace.XML_NAMESPACE.getURI().equals(namespace)) {
