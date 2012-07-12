@@ -22,6 +22,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.MirroredTypeException;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedMethodDeclaration;
+import net.sf.jelly.apt.decorations.type.DecoratedClassType;
 import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
@@ -152,6 +153,19 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       }
       else {
         returnTypeMirror = (DecoratedTypeMirror) getReturnType();
+        
+        // in the case where the return type is com.sun.jersey.api.JResponse, 
+        // we can use the type argument to get the entity type
+        if (returnTypeMirror.isClass() && returnTypeMirror.isInstanceOf("com.sun.jersey.api.JResponse")) {
+        	DecoratedClassType jresponse = (DecoratedClassType) returnTypeMirror;
+        	if (!jresponse.getActualTypeArguments().isEmpty()) {
+        		DecoratedTypeMirror responseType = (DecoratedTypeMirror) TypeMirrorDecorator.decorate(jresponse.getActualTypeArguments().iterator().next());
+        		if (responseType.isDeclared()) {
+        			responseType.setDocComment(returnTypeMirror.getDocComment());
+        			returnTypeMirror = responseType;
+        		}
+        	}
+        }
       }
 
       outputPayload = returnTypeMirror.isVoid() ? null : new ResourceRepresentationMetadata(returnTypeMirror);
