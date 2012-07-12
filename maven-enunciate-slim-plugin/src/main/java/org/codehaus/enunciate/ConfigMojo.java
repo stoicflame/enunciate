@@ -436,6 +436,8 @@ public class ConfigMojo extends AbstractMojo {
         config.addApiExcludePattern(exclude);
       }
     }
+
+    config.setIncludeReferenceTrailInErrors(this.includeReferenceTrailInErrors);
   }
 
   /**
