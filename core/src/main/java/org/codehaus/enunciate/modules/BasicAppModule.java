@@ -16,36 +16,34 @@
 
 package org.codehaus.enunciate.modules;
 
-import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.ext.dom.NodeModel;
 import freemarker.template.TemplateException;
 import org.apache.commons.digester.RuleSet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.util.AntPatternMatcher;
-import org.codehaus.enunciate.util.PatternFileFilter;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.war.CopyResources;
+import org.codehaus.enunciate.config.war.IncludeExcludeLibs;
 import org.codehaus.enunciate.config.war.WebAppConfig;
 import org.codehaus.enunciate.config.war.WebAppResource;
-import org.codehaus.enunciate.config.war.IncludeExcludeLibs;
 import org.codehaus.enunciate.contract.validation.Validator;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.FileArtifact;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
 import org.codehaus.enunciate.main.webapp.WebAppFragment;
+import org.codehaus.enunciate.util.AntPatternMatcher;
+import org.codehaus.enunciate.util.PatternFileFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import sun.misc.Service;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
@@ -400,7 +398,7 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
       debug("web.xml transform has been specified as %s.", transformURL);
       try {
         StreamSource source = new StreamSource(transformURL.openStream());
-        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+        Transformer transformer = TransformerFactory.newInstance().newTransformer(source);
         debug("Transforming %s to %s.", mergedWebXml, destWebXML);
         transformer.transform(new StreamSource(new FileReader(mergedWebXml)), new StreamResult(destWebXML));
       }
@@ -743,7 +741,7 @@ public class BasicAppModule extends FreemarkerDeploymentModule {
       debug("%s is a known exclude because it appears to be rt.jar.", file);
       return true;
     }
-    else if (Service.providers(DeploymentModule.class, loader).hasNext()) {
+    else if (ServiceLoader.load(DeploymentModule.class, loader).iterator().hasNext()) {
       debug("%s is a known exclude because it appears to be an enunciate module.", file);
       //exclude by default any deployment module libraries.
       return true;

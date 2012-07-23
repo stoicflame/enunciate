@@ -60,8 +60,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
       <plugin>
@@ -120,31 +120,17 @@
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
-            <artifactId>java15</artifactId>
+            <artifactId>java16</artifactId>
             <version>1.0</version>
           </signature>
         </configuration>
         <executions>
           <execution>
-            <id>enforce-java-5</id>
+            <id>enforce-java-6</id>
             <phase>test</phase>
             <goals>
               <goal>check</goal>
             </goals>
-            <configuration>
-              <ignores>
-                <!--allow references to JAXB, JAX-WS, etc. since they can be referenced as external dependencies for Java 5-->
-                <ignore>javax.xml.bind.*</ignore>
-                <ignore>javax.xml.ws.*</ignore>
-                <ignore>javax.xml.stream.*</ignore>
-                <ignore>javax.jws.*</ignore>
-                <ignore>javax.activation.*</ignore>
-
-                <!--allow dependencies on internal Sun APIs for now. Someday fix these: http://jira.codehaus.org/browse/ENUNCIATE-437. -->
-                <ignore>sun.misc.*</ignore>
-                <ignore>com.sun.org.apache.xalan.internal.xsltc.trax.*</ignore>
-              </ignores>
-            </configuration>
           </execution>
         </executions>
       </plugin>

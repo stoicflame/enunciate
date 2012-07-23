@@ -29,13 +29,13 @@ import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.modules.DeploymentModule;
 import org.codehaus.enunciate.modules.BasicAppModule;
 import org.xml.sax.SAXException;
-import sun.misc.Service;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ServiceLoader;
 
 /**
  * Ant task for enunciate.
@@ -97,7 +97,7 @@ public class EnunciateTask extends MatchingTask {
         proxy.setBuildClasspath(loader.getClasspath());
         Thread.currentThread().setContextClassLoader(loader);
         ArrayList<DeploymentModule> modules = new ArrayList<DeploymentModule>();
-        Iterator discoveredModules = Service.providers(DeploymentModule.class, loader);
+        Iterator<DeploymentModule> discoveredModules = ServiceLoader.load(DeploymentModule.class, loader).iterator();
         getProject().log("Loading modules from the specified classpath....");
         while (discoveredModules.hasNext()) {
           DeploymentModule discoveredModule = (DeploymentModule) discoveredModules.next();

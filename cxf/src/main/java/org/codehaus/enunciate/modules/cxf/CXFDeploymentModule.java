@@ -16,13 +16,11 @@
 
 package org.codehaus.enunciate.modules.cxf;
 
-import com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;
 import freemarker.template.TemplateException;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.codehaus.enunciate.EnunciateException;
-import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
-import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateClasspathListener;
+import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
 import org.codehaus.enunciate.config.WsdlInfo;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
@@ -37,9 +35,11 @@ import org.codehaus.enunciate.modules.FreemarkerDeploymentModule;
 import org.codehaus.enunciate.modules.SpecProviderModule;
 import org.codehaus.enunciate.modules.spring_app.SpringAppDeploymentModule;
 import org.codehaus.enunciate.modules.spring_app.config.SpringImport;
+import org.codehaus.enunciate.webapp.WSDLRedirectFilter;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
@@ -398,7 +398,7 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       FileInputStream transformStream = new FileInputStream(transform);
       try {
         StreamSource source = new StreamSource(transformStream);
-        Transformer transformer = new TransformerFactoryImpl().newTransformer(source);
+        Transformer transformer = TransformerFactory.newInstance().newTransformer(source);
         debug("Transforming %s to %s.", src, dest);
         transformer.transform(new StreamSource(new FileReader(src)), new StreamResult(dest));
       }

@@ -30,7 +30,6 @@ import org.apache.commons.digester.Rule;
 import org.apache.commons.digester.RuleSet;
 import org.apache.commons.digester.parser.GenericParser;
 import org.xml.sax.*;
-import sun.misc.Service;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -99,8 +98,8 @@ public class EnunciateConfiguration implements ErrorHandler {
    * @return An iterator over the deployment modules.
    * @param loader The classloader, or null if none.
    */
-  protected Iterator discoverModules(ClassLoader loader) {
-    return loader == null ? Service.providers(DeploymentModule.class) : Service.providers(DeploymentModule.class, loader);
+  protected Iterator<DeploymentModule> discoverModules(ClassLoader loader) {
+    return loader == null ? ServiceLoader.load(DeploymentModule.class).iterator() : ServiceLoader.load(DeploymentModule.class, loader).iterator();
   }
 
   /**
