@@ -65,6 +65,8 @@
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
       <version>${resteasy.version}</version>
+
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -81,12 +83,14 @@
           <artifactId>sjsxp</artifactId>
         </exclusion>
       </exclusions>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jackson-provider</artifactId>
       <version>${resteasy.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
