@@ -91,12 +91,14 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
       target = Enunciate.Target.valueOf(stepTo.toUpperCase());
     }
 
-    try {
-      stepper.stepTo(target);
-      stepper.close();
-    }
-    catch (Exception e) {
-      throw new MojoExecutionException("Problem assembling the enunciate app.", e);
+    synchronized(ThreadSafety.lock) {
+      try {
+        stepper.stepTo(target);
+        stepper.close();
+        }
+        catch (Exception e) {
+        throw new MojoExecutionException("Problem assembling the enunciate app.", e);
+      }
     }
   }
 

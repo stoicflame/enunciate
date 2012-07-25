@@ -250,7 +250,7 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * List of source directories that are enunciate-added.
    */
-  private static final TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
+  private /*static final */ TreeSet<String> ENUNCIATE_ADDED = new TreeSet<String>();
 
   /**
    * A flag used to disable enunciate. This is primarily intended for usage from the command line to occasionally

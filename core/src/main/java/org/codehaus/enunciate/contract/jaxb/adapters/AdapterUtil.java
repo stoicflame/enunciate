@@ -67,6 +67,8 @@ public class AdapterUtil {
     }
     else if (declaration instanceof TypeDeclaration) {
       TypeDeclaration typeDeclaration = (TypeDeclaration) declaration;
+      
+      // Context usage is not thread-safe!!
       AnnotationProcessorEnvironment ape = Context.getCurrentEnvironment();
       typeDeclaration = ape.getTypeDeclaration(typeDeclaration.getQualifiedName()); //unwrap the decorated stuff as necessary...
       DeclaredType declaredType = ape.getTypeUtils().getDeclaredType(typeDeclaration);

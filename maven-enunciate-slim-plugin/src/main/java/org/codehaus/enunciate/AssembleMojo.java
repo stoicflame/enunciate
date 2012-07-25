@@ -66,12 +66,14 @@ public class AssembleMojo extends ConfigMojo {
       target = Enunciate.Target.valueOf(stepTo.toUpperCase());
     }
 
-    try {
-      stepper.stepTo(target);
-      stepper.close();
-    }
-    catch (Exception e) {
-      throw new MojoExecutionException("Problem assembling the enunciate app.", e);
+    synchronized(ThreadSafety.lock) {
+      try {
+        stepper.stepTo(target);
+        stepper.close();
+      }
+      catch (Exception e) {
+        throw new MojoExecutionException("Problem assembling the enunciate app.", e);
+      }
     }
 
     Enunciate enunciate = (Enunciate) getPluginContext().get(ConfigMojo.ENUNCIATE_PROPERTY);
