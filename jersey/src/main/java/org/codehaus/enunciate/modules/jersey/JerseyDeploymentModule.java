@@ -163,7 +163,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   @Override
   public Validator getValidator() {
-    return new JerseyValidator(!isUseSubcontext() && !isDisableWildcardServletError());
+    return new JerseyValidator(isUseSubcontext() || !isDisableWildcardServletError());
   }
 
   @Override
