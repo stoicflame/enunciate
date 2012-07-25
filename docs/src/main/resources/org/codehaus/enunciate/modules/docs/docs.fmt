@@ -37,8 +37,8 @@
 [/#if]
 
 [#assign nav_resource_groups = {}/]
-[#list docsxml.rest.groups.group?sort as group]
-  [#assign nav_resource_groups = nav_resource_groups + { group : "resource_" + group + ".html"}/]
+[#list docsxml.rest.groups.group?sort_by("name") as group]
+  [#assign nav_resource_groups = nav_resource_groups + { group.name : "resource_" + group.name + ".html"}/]
 [/#list]
 
 [#assign nav_paths = {}/]
@@ -215,9 +215,9 @@
       </p>
       <ul>
       [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
-        [#list docsxml.rest.groups.group?sort as group]
+        [#list docsxml.rest.groups.group?sort_by("name") as group]
           [@processResourceGroup group=group/]
-        <li><a href="resource_${group}.html">${group}</a></li>
+        <li><a href="resource_${group.name}.html">${group.name}</a></li>
         [/#list]
       [#else]
         [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
@@ -451,8 +451,8 @@
   </p>
   <ul>
     [#if ((groupRestResources!"byDocumentationGroup") != "byPath") && docsxml.rest.groups.group?size > 0]
-      [#list docsxml.rest.groups.group?sort as group]
-      <li><a href="resource_${group}.html">${group}</a></li>
+      [#list docsxml.rest.groups.group?sort_by("name") as group]
+      <li><a href="resource_${group.name}.html">${group.name}</a></li>
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
@@ -539,14 +539,17 @@
   [/@file]
 [/#macro]
 [#macro processResourceGroup group]
-  [@file name="resource_" + group + ".html" charset="utf-8"]
-    [@boilerplate title=group subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : group , "href" : "resource_" + group + ".html", "subnav" : nav_resource_groups}]]
-      <h1>${group}</h1>
+  [@file name="resource_" + group.name + ".html" charset="utf-8"]
+    [@boilerplate title=group.name subnav=[{"title" : "Home", "href" : indexPageName}, {"title" : "REST" , "href" : "rest.html", "subnav" : nav_sections}, {"title" : group.name , "href" : "resource_" + group.name + ".html", "subnav" : nav_resource_groups}]]
+      <h1>${group.name}</h1>
 
+      [#list group.documentation as documentation]
+      <p>${documentation}</p>
+      [/#list]
       [#assign resources=[] /]
       [#list docsxml.rest.resources.resource as resource]
         [#list resource.groups.group as rg]
-          [#if rg = group]
+          [#if rg = group.name]
             [#assign resources=resources + resource /]
             [#break/]
           [/#if]

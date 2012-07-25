@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
+ * The person service is used to access persons in the database.
+ *
  * @author Ryan Heaton
  */
 @WebService (

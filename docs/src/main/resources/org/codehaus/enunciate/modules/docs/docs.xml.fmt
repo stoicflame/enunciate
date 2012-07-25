@@ -38,7 +38,7 @@
         [/#if]
           <groups>
         [#list getGroups(type) as group]
-            <group>${group}</group>
+            <group>${group.name}</group>
         [/#list]
           </groups>
         [#if type.attributes?size > 0]
@@ -126,7 +126,7 @@
         [/#if]
           <groups>
         [#list getGroups(element) as group]
-            <group>${group}</group>
+            <group>${group.name}</group>
         [/#list]
           </groups>
         [#if includeExampleXml!false]
@@ -167,7 +167,10 @@
       </elements>
       <groups>
     [#list getGroups(schema) as group]
-        <group>${group}</group>
+        <group>
+          <name>${group.name}</name>
+          <documentation><![CDATA[${group.documentation!""}]]></documentation>
+        </group>
     [/#list]
       </groups>
     </schema>
@@ -186,7 +189,7 @@
       [/#if]
         <groups>
       [#list getGroups(type) as group]
-          <group>${group}</group>
+          <group>${group.name}</group>
       [/#list]
         </groups>
       [#if type.jsonProperties?? && type.jsonProperties?size > 0]
@@ -219,7 +222,10 @@
     [/#list]
       <groups>
     [#list getGroups(schema) as group]
-        <group>${group}</group>
+        <group>
+          <name>${group.name}</name>
+          <documentation><![CDATA[${group.documentation!""}]]></documentation>>
+        </group>
     [/#list]
       </groups>
     </jsonSchema>
@@ -247,7 +253,7 @@
     [/#if]
           <groups>
         [#list getGroups(endpointInterface) as group]
-            <group>${group}</group>
+            <group>${group.name}</group>
         [/#list]
           </groups>
     [#list endpointInterface.webMethods as method]
@@ -288,7 +294,10 @@
   [/@forEachEndpointInterface]
         <groups>
   [#list getGroups(wsdl) as group]
-          <group>${group}</group>
+          <group>
+            <name>${group.name}</name>
+            <documentation><![CDATA[${group.documentation!""}]]></documentation>
+          </group>
   [/#list]
         </groups>
       </wsdl>
@@ -301,7 +310,7 @@
       <resource name="${(resources?first).fullpath}" subcontext="${(resources?first).metaData.defaultSubcontext!"/rest"}">
         <groups>
   [#list getGroups(resources) as group]
-          <group>${group}</group>
+          <group>${group.name}</group>
   [/#list]
         </groups>
   [#list resources as resource]
@@ -370,7 +379,10 @@
     </resources>
     <groups>
   [#list getGroups("rest") as group]
-      <group>${group}</group>
+      <group>
+        <name>${group.name}</name>
+        <documentation><![CDATA[${group.documentation!""}]]></documentation>
+      </group>
   [/#list]
     </groups>
   </rest>

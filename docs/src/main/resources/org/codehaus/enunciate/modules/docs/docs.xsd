@@ -56,7 +56,7 @@
       <xs:element name="groups" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -65,6 +65,20 @@
     <xs:attribute name="namespace" type="xs:string"/>
     <xs:attribute name="namespaceId" type="xs:string"/>
     <xs:attribute name="file" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="group">
+
+    <xs:annotation>
+      <xs:documentation>
+        The element that contains the documentation for a group.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="documentation" type="xs:string"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="packages">
@@ -325,7 +339,7 @@
       <xs:element name="groups" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -423,7 +437,7 @@
       <xs:element name="groups" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -526,7 +540,7 @@
       <xs:element name="groups" minOccurs="0" maxOccurs="1">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="group" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="group" type="group" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

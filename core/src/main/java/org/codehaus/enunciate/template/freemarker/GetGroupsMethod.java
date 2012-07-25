@@ -16,13 +16,13 @@
 
 package org.codehaus.enunciate.template.freemarker;
 
-import com.sun.mirror.declaration.MethodDeclaration;
 import com.sun.mirror.declaration.PackageDeclaration;
 import com.sun.mirror.declaration.TypeDeclaration;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import net.sf.jelly.apt.decorations.JavaDoc;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.SchemaInfo;
@@ -35,8 +35,12 @@ import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.json.JsonSchemaInfo;
 import org.codehaus.enunciate.contract.json.JsonTypeDefinition;
 import org.codehaus.enunciate.doc.DocumentationGroup;
+import org.codehaus.enunciate.util.Group;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * List the groups for a given documentation component.
@@ -58,7 +62,7 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
 
     TemplateModel from = (TemplateModel) list.get(0);
     Object unwrapped = BeansWrapper.getDefaultInstance().unwrap(from);
-    Set<String> groups = new TreeSet<String>();
+    Set<Group> groups = new TreeSet<Group>();
     if (SchemaInfo.class.isInstance(unwrapped)) {
       SchemaInfo info = (SchemaInfo) unwrapped;
       for (TypeDefinition typeDef : info.getTypeDefinitions()) {
@@ -106,11 +110,13 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
     return groups;
   }
 
-  private void gatherGroups(ResourceMethod decl, Set<String> groups) {
+  private void gatherGroups(ResourceMethod decl, Set<Group> groups) {
     if (decl != null) {
       DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
       if (documentationGroup != null) {
-        groups.addAll(Arrays.asList(documentationGroup.value()));
+        for (String name : documentationGroup.value()) {
+          groups.add(new Group(name, new JavaDoc(null)));
+        }
       }
       else {
         gatherGroups(decl.getParent(), groups);
@@ -118,21 +124,25 @@ public class GetGroupsMethod implements TemplateMethodModelEx {
     }
   }
 
-  private void gatherGroups(TypeDeclaration decl, Set<String> groups) {
+  private void gatherGroups(TypeDeclaration decl, Set<Group> groups) {
     if (decl != null) {
       DocumentationGroup documentationGroup = decl.getAnnotation(DocumentationGroup.class);
       if (documentationGroup != null) {
-        groups.addAll(Arrays.asList(documentationGroup.value()));
+        for (String name : documentationGroup.value()) {
+          groups.add(new Group(name, new JavaDoc(decl.getDocComment())));
+        }
       }
       else {
         PackageDeclaration pkg = decl.getPackage();
         if (pkg != null) {
           documentationGroup = pkg.getAnnotation(DocumentationGroup.class);
           if (documentationGroup != null) {
-            groups.addAll(Arrays.asList(documentationGroup.value()));
+            for (String name : documentationGroup.value()) {
+              groups.add(new Group(name, new JavaDoc(pkg.getDocComment())));
+            }
           }
           else {
-            groups.add(decl.getSimpleName());
+            groups.add(new Group(decl.getSimpleName(), new JavaDoc(decl.getDocComment())));
           }
         }
       }
