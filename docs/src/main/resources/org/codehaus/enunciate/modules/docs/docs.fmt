@@ -795,12 +795,13 @@
       <table>
         <tr>
           <th>name</th>
-          <!--todo: add the parameter type and whether its a collection-->
+          <th>type</th>
           <th>description</th>
         </tr>
           [/#if]
         <tr>
           <td>${parameter.@name}</td>
+          <td>[#if attributeExists(parameter.@xmlTypeName)][#if attributeExists(parameter.@xmlTypeSchemaId)]<a href="${parameter.@xmlTypeSchemaId}_${parameter.@xmlTypeName}.html">${parameter.@xmlTypeName}</a>[#else]${parameter.@xmlTypeName}[/#if][#else](unknown)[/#if]</td>
           <td>${parameter}</td>
         </tr>
           [#if !parameter_has_next]
@@ -813,12 +814,13 @@
       <table>
         <tr>
           <th>name</th>
-          <!--todo: add the parameter type and whether its a collection-->
+          <th>type</th>
           <th>description</th>
         </tr>
           [/#if]
         <tr>
           <td>${parameter.@name}</td>
+          <td>[#if attributeExists(parameter.@xmlTypeName)][#if attributeExists(parameter.@xmlTypeSchemaId)]<a href="${parameter.@xmlTypeSchemaId}_${parameter.@xmlTypeName}.html">${parameter.@xmlTypeName}</a>[#else]${parameter.@xmlTypeName}[/#if][#else](unknown)[/#if]</td>
           <td>${parameter}</td>
         </tr>
           [#if !parameter_has_next]
@@ -827,6 +829,15 @@
         [/#list]
         [#list method.result as result]
       <h3>Return Value</h3>
+
+      [#if attributeExists(result.@xmlTypeName)]
+      <table>
+        <tr>
+          <td align="right">Type:</td>
+          <td>[#if attributeExists(result.@xmlTypeSchemaId)]<a href="${result.@xmlTypeSchemaId}_${result.@xmlTypeName}.html">${result.@xmlTypeName}</a>[#else]${result.@xmlTypeName}[/#if]</td>
+        </tr>
+      </table>
+      [/#if]
 
       <p>${result}</p>
         [/#list]

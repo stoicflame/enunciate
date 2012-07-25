@@ -487,7 +487,7 @@
       <xs:extension base="taggedDocumentation">
         <xs:sequence>
           <xs:element name="parameter" type="parameter" minOccurs="0" maxOccurs="unbounded"/>
-          <xs:element name="result" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="result" type="result" minOccurs="0" maxOccurs="1"/>
           <xs:element name="fault" type="fault" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
@@ -509,6 +509,27 @@
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="input" type="xs:boolean"/>
         <xs:attribute name="output" type="xs:boolean"/>
+        <xs:attribute name="output" type="xs:boolean"/>
+        <xs:attribute name="xmlTypeName" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeNamespace" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeSchemaId" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="result">
+
+    <xs:annotation>
+      <xs:documentation>
+        The result of a web method.
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="xmlTypeName" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeNamespace" type="xs:string" use="optional"/>
+        <xs:attribute name="xmlTypeSchemaId" type="xs:string" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>

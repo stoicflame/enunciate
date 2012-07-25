@@ -274,12 +274,12 @@
             <tag name="deprecated"/>
       [/#if]
       [#list method.webParameters as parameter]
-            <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}">
+            <parameter name="${parameter.partName}" input="${parameter.input?string}" output="${parameter.output?string}"[#if parameter.xmlType??] xmlTypeName="${parameter.xmlType.qname.localPart}" xmlTypeNamespace="${parameter.xmlType.qname.namespaceURI}"[#if schemaForNamespace(parameter.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(parameter.xmlType).id}"[/#if][/#if]>
               <![CDATA[${parameter.docValue!"(no documentation provided)"}]]>
             </parameter>
       [/#list]
       [#if ((!method.oneWay) && (!method.returnType.void))]
-            <result>
+            <result[#if method.webResult.xmlType??] xmlTypeName="${method.webResult.xmlType.qname.localPart}" xmlTypeNamespace="${method.webResult.xmlType.qname.namespaceURI}"[#if schemaForNamespace(method.webResult.xmlType)??] xmlTypeSchemaId="${schemaForNamespace(method.webResult.xmlType).id}"[/#if][/#if]>
               <![CDATA[${method.returnType.docValue!"(no documentation provided)"}]]>
             </result>
       [/#if]
