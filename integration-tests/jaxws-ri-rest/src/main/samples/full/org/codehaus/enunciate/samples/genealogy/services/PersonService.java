@@ -20,6 +20,7 @@ import com.sun.jersey.multipart.FormDataParam;
 import org.codehaus.enunciate.contract.jaxrs.ResourceMethodSignature;
 import org.codehaus.enunciate.jaxrs.ResponseCode;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
+import org.codehaus.enunciate.jaxrs.Warnings;
 import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.PersonExt;
 import org.codehaus.enunciate.samples.genealogy.data.RootElementMapWrapper;
@@ -61,6 +62,9 @@ public interface PersonService {
   @Path("/pedigree/personext/{id}")
   @StatusCodes ({
     @ResponseCode ( code = 404, condition = "The person is not found.")
+  })
+  @Warnings ({
+    @ResponseCode ( code = 299, condition = "The reason the person wasn't found.")
   })
   PersonExt readExtPerson(@PathParam("id") String id);
 

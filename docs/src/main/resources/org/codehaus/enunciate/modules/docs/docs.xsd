@@ -634,6 +634,7 @@
           <xs:element name="inValue" type="entity" minOccurs="0" maxOccurs="1"/>
           <xs:element name="outValue" type="entity" minOccurs="0" maxOccurs="1"/>
           <xs:element name="statusCode" type="restStatusCode" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="warning" type="restStatusCode" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="type" type="restOp"/>

@@ -370,6 +370,11 @@
             <![CDATA[${statusCode.condition!""}]]>
           </statusCode>
         [/#list]
+        [#list resource.warnings as warning]
+          <warning code="${warning.code}">
+            <![CDATA[${warning.condition!""}]]>
+          </warning>
+        [/#list]
         </operation>
       [#--[/#if]--]
     [/#if]

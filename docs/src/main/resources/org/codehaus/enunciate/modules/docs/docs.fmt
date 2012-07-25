@@ -738,6 +738,23 @@
       </table>
       [/#if]
     [/#list]
+    [#list operation.warning as warning]
+      [#if warning_index = 0]
+      <h3>Possible Warnings</h3>
+      <table>
+        <tr>
+          <th>code</th>
+          <th>description</th>
+        </tr>
+      [/#if]
+        <tr>
+          <td>${warning.@code}</td>
+          <td>${warning}</td>
+        </tr>
+      [#if !warning_has_next]
+      </table>
+      [/#if]
+    [/#list]
   [/#list]
 [/#macro]
 [#macro processEndpointInterface endpointInterface]

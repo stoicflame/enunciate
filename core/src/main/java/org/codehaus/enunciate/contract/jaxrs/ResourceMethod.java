@@ -27,6 +27,7 @@ import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.jaxrs.StatusCodes;
 import org.codehaus.enunciate.jaxrs.TypeHint;
+import org.codehaus.enunciate.jaxrs.Warnings;
 import org.codehaus.enunciate.rest.MimeType;
 
 import javax.ws.rs.*;
@@ -54,6 +55,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
   private final List<ResourceEntityParameter> declaredEntityParameters;
   private final Map<String, Object> metaData = new HashMap<String, Object>();
   private final List<? extends ResponseCode> statusCodes;
+  private final List<? extends ResponseCode> warnings;
   private final ResourceRepresentationMetadata representationMetadata;
 
   public ResourceMethod(MethodDeclaration delegate, Resource parent) {
@@ -178,6 +180,7 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
     }
 
     ArrayList<ResponseCode> statusCodes = new ArrayList<ResponseCode>();
+    ArrayList<ResponseCode> warnings = new ArrayList<ResponseCode>();
     StatusCodes codes = getAnnotation(StatusCodes.class);
     if (codes != null) {
       for (org.codehaus.enunciate.jaxrs.ResponseCode code : codes.value()) {
@@ -185,6 +188,16 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         rc.setCode(code.code());
         rc.setCondition(code.condition());
         statusCodes.add(rc);
+      }
+    }
+
+    Warnings warningInfo = getAnnotation(Warnings.class);
+    if (warningInfo != null) {
+      for (org.codehaus.enunciate.jaxrs.ResponseCode code : warningInfo.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        warnings.add(rc);
       }
     }
 
@@ -198,11 +211,22 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
       }
     }
 
+    warningInfo = parent.getAnnotation(Warnings.class);
+    if (warningInfo != null) {
+      for (org.codehaus.enunciate.jaxrs.ResponseCode code : warningInfo.value()) {
+        ResponseCode rc = new ResponseCode();
+        rc.setCode(code.code());
+        rc.setCondition(code.condition());
+        warnings.add(rc);
+      }
+    }
+
     this.entityParameter = entityParameter;
     this.resourceParameters = resourceParameters;
     this.subpath = subpath;
     this.parent = parent;
     this.statusCodes = statusCodes;
+    this.warnings = warnings;
     this.representationMetadata = outputPayload;
     this.declaredEntityParameters = declaredEntityParameters;
   }
@@ -523,6 +547,15 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    */
   public List<? extends ResponseCode> getStatusCodes() {
     return this.statusCodes;
+  }
+
+  /**
+   * The potential warnings.
+   *
+   * @return The potential warnings.
+   */
+  public List<? extends ResponseCode> getWarnings() {
+    return this.warnings;
   }
 
   /**
