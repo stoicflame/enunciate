@@ -117,6 +117,9 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
         if (ResourceParameter.isResourceParameter(parameterDeclaration)) {
           resourceParameters.add(new ResourceParameter(parameterDeclaration));
         }
+        else if (ResourceParameter.isFormBeanParameter(parameterDeclaration)) {
+          resourceParameters.addAll(ResourceParameter.getFormBeanParameters(parameterDeclaration));
+        }
         else if (parameterDeclaration.getAnnotation(Context.class) == null) {
           entityParameter = new ResourceEntityParameter(parameterDeclaration);
           declaredEntityParameters.add(entityParameter);

@@ -21,13 +21,11 @@ import org.codehaus.enunciate.samples.genealogy.data.Person;
 import org.codehaus.enunciate.samples.genealogy.data.RelationshipType;
 import org.codehaus.enunciate.samples.genealogy.services.PersonService;
 import org.codehaus.enunciate.samples.genealogy.services.ServiceException;
+import org.jboss.resteasy.annotations.Form;
 import org.joda.time.DateTime;
 
 import javax.jws.WebService;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.xml.ws.soap.MTOM;
 import java.util.*;
 
@@ -72,6 +70,12 @@ public class PersonServiceImpl implements PersonService {
     if (personId == null) {
       throw new ServiceException("a person id must be supplied", "no person id.");
     }
+  }
+
+  @POST
+  @Path("/pedigree/person/form")
+  public void submitPerson(@Form PersonForm personForm) {
+
   }
 
   public Map<RelationshipType, Person> readFamily(String personId) throws ServiceException {

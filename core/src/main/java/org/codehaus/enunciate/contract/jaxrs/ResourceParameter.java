@@ -16,11 +16,13 @@
 
 package org.codehaus.enunciate.contract.jaxrs;
 
-import com.sun.mirror.declaration.AnnotationMirror;
-import com.sun.mirror.declaration.AnnotationTypeDeclaration;
-import com.sun.mirror.declaration.Declaration;
-import com.sun.mirror.declaration.ParameterDeclaration;
+import com.sun.mirror.declaration.*;
+import com.sun.mirror.type.DeclaredType;
+import com.sun.mirror.type.TypeMirror;
+import net.sf.jelly.apt.decorations.DeclarationDecorator;
 import net.sf.jelly.apt.decorations.declaration.DecoratedDeclaration;
+import net.sf.jelly.apt.decorations.declaration.DecoratedTypeDeclaration;
+import net.sf.jelly.apt.decorations.declaration.PropertyDeclaration;
 import net.sf.jelly.apt.freemarker.FreemarkerModel;
 import org.codehaus.enunciate.apt.EnunciateFreemarkerModel;
 import org.codehaus.enunciate.config.EnunciateConfiguration;
@@ -29,6 +31,9 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeException;
 import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 
 import javax.ws.rs.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Parameter for a JAX-RS resource.
@@ -36,6 +41,8 @@ import javax.ws.rs.*;
  * @author Ryan Heaton
  */
 public class ResourceParameter extends DecoratedDeclaration {
+
+  public static final List<String> FORM_BEAN_ANNOTATIONS = Arrays.asList("org.jboss.resteasy.annotations.Form");
 
   private final String parameterName;
   private final String defaultValue;
@@ -173,6 +180,53 @@ public class ResourceParameter extends DecoratedDeclaration {
     }
 
     return false;
+  }
+
+  public static boolean isFormBeanParameter(Declaration candidate) {
+    for (AnnotationMirror annotation : candidate.getAnnotationMirrors()) {
+      AnnotationTypeDeclaration declaration = annotation.getAnnotationType().getDeclaration();
+      if (declaration != null) {
+        String fqn = declaration.getQualifiedName();
+        if (FORM_BEAN_ANNOTATIONS.contains(fqn)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static List<ResourceParameter> getFormBeanParameters(ParameterDeclaration parameterDeclaration) {
+    ArrayList<ResourceParameter> formBeanParameters = new ArrayList<ResourceParameter>();
+    gatherFormBeanParameters(parameterDeclaration.getType(), formBeanParameters);
+    return formBeanParameters;
+  }
+
+  private static void gatherFormBeanParameters(TypeMirror type, ArrayList<ResourceParameter> formBeanParameters) {
+    if (type instanceof DeclaredType) {
+      DecoratedTypeDeclaration typeDeclaration = (DecoratedTypeDeclaration) DeclarationDecorator.decorate(((DeclaredType) type).getDeclaration());
+      for (FieldDeclaration field : typeDeclaration.getFields()) {
+        if (isResourceParameter(field)) {
+          formBeanParameters.add(new ResourceParameter(field));
+        }
+        else if (isFormBeanParameter(field)) {
+          gatherFormBeanParameters(field.getType(), formBeanParameters);
+        }
+      }
+
+      for (PropertyDeclaration property : typeDeclaration.getProperties()) {
+        if (isResourceParameter(property)) {
+          formBeanParameters.add(new ResourceParameter(property));
+        }
+        else if (isFormBeanParameter(property)) {
+          gatherFormBeanParameters(property.getPropertyType(), formBeanParameters);
+        }
+      }
+
+      if (typeDeclaration instanceof ClassDeclaration) {
+        gatherFormBeanParameters(((ClassDeclaration) typeDeclaration).getSuperclass(), formBeanParameters);
+      }
+    }
   }
 
   /**
