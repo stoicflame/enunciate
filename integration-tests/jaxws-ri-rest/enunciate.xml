@@ -28,6 +28,7 @@
     </java-client>
     <docs splashPackage="org.codehaus.enunciate.samples.genealogy" title="MRCGS API" copyright="My Really Cool Genealogy Site">
       <download name="License" file="src/conf/dummy-license.txt" description="The license file governing these downloads."/>
+      <additional-css file="style-override.css"/>
     </docs>
     <spring-app disabled="true"/>
   </modules>

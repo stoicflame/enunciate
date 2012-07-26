@@ -32,6 +32,9 @@ public class DocsRuleSet extends RuleSetBase {
     digester.addObjectCreate("enunciate/modules/docs/download", DownloadConfig.class);
     digester.addSetProperties("enunciate/modules/docs/download");
     digester.addSetNext("enunciate/modules/docs/download", "addDownload");
+
+    digester.addCallMethod("enunciate/modules/docs/additional-css", "addAdditionalCss", 1);
+    digester.addCallParam("enunciate/modules/docs/additional-css", 0, "file");
   }
 
 }

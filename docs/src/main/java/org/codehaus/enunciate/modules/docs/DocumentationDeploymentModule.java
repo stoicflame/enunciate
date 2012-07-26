@@ -199,6 +199,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private String freemarkerXMLProcessingTemplate;
   private URL freemarkerXMLProcessingTemplateURL;
   private String css;
+  private final List<String> additionalCss = new ArrayList<String>();
   private String base;
   private final ArrayList<DownloadConfig> downloads = new ArrayList<DownloadConfig>();
   private String docsDir = null;
@@ -330,6 +331,24 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    */
   public Collection<DownloadConfig> getDownloads() {
     return downloads;
+  }
+
+  /**
+   * Adds an additional css file to the generated documentation.
+   *
+   * @param additionalCss The additional css.
+   */
+  public void addAdditionalCss(String additionalCss) {
+    this.additionalCss.add(additionalCss);
+  }
+
+  /**
+   * The additional css files.
+   *
+   * @return The additional css files.
+   */
+  public List<String> getAdditionalCss() {
+    return additionalCss;
   }
 
   /**
@@ -928,8 +947,17 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
       download.exportTo(buildDir, enunciate);
     }
 
+    Set<String> additionalCssFiles = new HashSet<String>();
+    for (String additionalCss : getAdditionalCss()) {
+      File additionalCssFile = enunciate.resolvePath(additionalCss);
+      debug("File %s to be added as an additional css file.", additionalCss);
+      enunciate.copyFile(additionalCssFile, new File(buildDir, additionalCssFile.getName()));
+      additionalCssFiles.add(additionalCssFile.getName());
+    }
+
     EnunciateFreemarkerModel model = getModel();
     model.put("downloads", downloads);
+    model.put("additionalCssFiles", additionalCssFiles);
   }
 
   /**
@@ -985,6 +1013,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
     model.put("indexPageName", getIndexPageName());
     model.put("disableRestMountpoint", isDisableRestMountpoint());
     model.put("groupRestResources", getGroupRestResources());
+    model.put("additionalCss", getAdditionalCss());
     try {
       processTemplate(freemarkerXMLProcessingTemplateURL, model);
     }

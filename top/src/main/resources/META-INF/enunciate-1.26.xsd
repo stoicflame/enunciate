@@ -918,6 +918,18 @@
               </xs:attribute>
             </xs:complexType>
           </xs:element>
+          <xs:element name="additional-css" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Adds an additional css to the generated documentation, e.g. to override existing styles.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="file" type="xs:string">
+                <xs:annotation>
+                  <xs:documentation>a file on the filesystem that is to be included as an additional css.</xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="docsDir" type="xs:string">
           <xs:annotation>
