@@ -80,6 +80,15 @@ public class Attribute extends Accessor {
     return form;
   }
 
+  /**
+   * Whether the form of this attribute is qualified.
+   *
+   * @return Whether the form of this attribute is qualified.
+   */
+  public boolean isFormQualified() {
+    return getForm() == XmlNsForm.QUALIFIED;
+  }
+
 
   /**
    * An attribute is a ref if its namespace differs from that of its type definition (JAXB spec 8.9.7.2).
@@ -88,13 +97,12 @@ public class Attribute extends Accessor {
    */
   @Override
   public QName getRef() {
-    boolean qualified = getForm() == XmlNsForm.QUALIFIED;
     String typeNamespace = getTypeDefinition().getNamespace();
     typeNamespace = typeNamespace == null ? "" : typeNamespace;
     String namespace = getNamespace();
     namespace = namespace == null ? "" : namespace;
 
-    if ((!namespace.equals(typeNamespace)) && (qualified || !"".equals(namespace))) {
+    if ((!namespace.equals(typeNamespace)) && (isFormQualified() || !"".equals(namespace))) {
       return new QName(namespace, getName());
     }
 
