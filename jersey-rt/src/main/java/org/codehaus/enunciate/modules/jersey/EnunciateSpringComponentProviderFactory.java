@@ -123,7 +123,7 @@ public class EnunciateSpringComponentProviderFactory extends SpringComponentProv
       factory = resourceFactories.get(resourceClass);
       if (factory == null) {
         factory = new AdvisedResourceFactory<T>(resourceClass);
-        if (interceptors != null) {
+        if (interceptors != null && !interceptors.isEmpty()) {
           for (Object interceptor : interceptors) {
             if (interceptor instanceof Advice) {
               factory.addAdvice((Advice) interceptor);

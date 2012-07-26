@@ -59,7 +59,7 @@ public class AdvisedResourceFactory<T> extends ProxyFactory {
   }
 
   public Object createAdvisedResource(T bareResource) {
-    if (!advising) {
+    if (!advising || getAdvisorsInternal().isEmpty()) {
       //we're not doing any advising, just return the bare resource.
       return bareResource;
     }
