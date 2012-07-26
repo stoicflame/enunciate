@@ -175,6 +175,10 @@ import java.util.*;
  *       the "artifact" attribute is set.</li>
  * </ul>
  *
+ * <h3>The "additional-css" element</h3>
+ *
+ * <p>You can apply additinoal css files to the generated documentation. Use the "file" attribute to specify the additional css file to apply.</p>
+ *
  * <h1><a name="artifacts">Artifacts</a></h1>
  *
  * <h3>docs</h3>
