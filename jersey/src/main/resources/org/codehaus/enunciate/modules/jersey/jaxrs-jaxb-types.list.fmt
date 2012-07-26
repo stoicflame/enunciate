@@ -7,6 +7,9 @@ ${forName(typeDef)}
     [#list schema.globalElements as element]
 ${forName(element)}
     [/#list]
+    [#list schema.registries as registry]
+${forName(registry)}
+    [/#list]
   [/#list]
   [@forEachWsdl]
   [@forEachWebFault]
