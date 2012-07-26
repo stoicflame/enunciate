@@ -196,6 +196,7 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
   private boolean forceExampleJson = false;
   private String xslt;
   private URL xsltURL;
+  private String freemarkerXMLProcessingTemplate;
   private URL freemarkerXMLProcessingTemplateURL;
   private String css;
   private String base;
@@ -427,8 +428,8 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
    *
    * @param freemarkerProcessingTemplate The Freemarker XML processing template file that will be used to transforms the docs.xml to the site documentation.
    */
-  public void setFreemarkerXMLProcessingTemplate(File freemarkerProcessingTemplate) throws MalformedURLException {
-    this.freemarkerXMLProcessingTemplateURL = freemarkerProcessingTemplate.toURI().toURL();
+  public void setFreemarkerXMLProcessingTemplate(String freemarkerProcessingTemplate) throws MalformedURLException {
+    this.freemarkerXMLProcessingTemplate = freemarkerProcessingTemplate;
   }
 
   /**
@@ -948,7 +949,12 @@ public class DocumentationDeploymentModule extends FreemarkerDeploymentModule im
 
     URL freemarkerXMLProcessingTemplateURL = this.freemarkerXMLProcessingTemplateURL;
     if (freemarkerXMLProcessingTemplateURL == null) {
-      freemarkerXMLProcessingTemplateURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.fmt");
+      if (this.freemarkerXMLProcessingTemplate != null) {
+        freemarkerXMLProcessingTemplateURL = getEnunciate().resolvePath(this.freemarkerXMLProcessingTemplate).toURI().toURL();
+      }
+      else {
+        freemarkerXMLProcessingTemplateURL = DocumentationDeploymentModule.class.getResource("/META-INF/enunciate/docs.fmt");
+      }
     }
 
     if (xsltURL == null && freemarkerXMLProcessingTemplateURL == null) {
