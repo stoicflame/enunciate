@@ -7,6 +7,7 @@ import java.util.List;
  * Extension for name.
  *
  * @author Ryan Heaton
+ * @deprecated Because I need to test the deprecated functionality.
  */
 public class EventExt extends Event {
 

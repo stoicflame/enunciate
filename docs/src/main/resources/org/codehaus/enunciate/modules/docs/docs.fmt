@@ -23,6 +23,21 @@
   [/#list]
   [#return false/]
 [/#function]
+[#function isResourceDeprecated resource]
+  [#list resource.operation as operation]
+    [#assign deprecationFound=false/]
+    [#list operation.tag as tag]
+      [#if tag.@name="deprecated"]
+        [#assign deprecationFound=true/]
+        [#break/]
+      [/#if]
+    [/#list]
+    [#if !deprecationFound]
+      [#return false/]
+    [/#if]
+  [/#list]
+  [#return true/]
+[/#function]
 
 [#--set up the subnavigation menus--]
 [#assign nav_sections = { "Data Model" : "model.html"} /]
@@ -225,7 +240,7 @@
       [#else]
         [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
           [@processResource resource=resource/]
-        <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
         [/#list]
       [/#if]
       </ul>
@@ -459,7 +474,7 @@
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-      <li><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+      <li[#if isResourceDeprecated(resource)] class="deprecated"[/#if]><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
       [/#list]
     [/#if]
   </ul>
@@ -561,7 +576,7 @@
       <p>The following resources are part of this group:</p>
       <ul>
         [#list resources as resource]
-        <li><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        <li[#if isResourceDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
         [/#list]
       </ul>
       [#list resources as resource]
@@ -581,6 +596,9 @@
 [/#macro]
 [#macro processRawResource resource]
       <h1>${resource.@name}</h1>
+  [#if isResourceDeprecated(resource)]
+  <p class="alert">This resource has been deprecated.</p>
+  [/#if]
   [#if attributeExists(resource.@subcontext) && !disableRestMountpoint!false]
       <p class="note">Mount Point: <a href="${apiRelativePath}${resource.@subcontext}${resource.@name}">${resource.@subcontext}${resource.@name}</a></p>
   [/#if]

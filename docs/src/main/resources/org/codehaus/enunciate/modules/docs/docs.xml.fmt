@@ -329,7 +329,17 @@
             [/#list]
           [/#if]
         [/#list]
+        [#list resource.parent.javaDoc?keys as tag]
+          [#if (("param" != tag) && ("throws" != tag) && ("exception" != tag) && ("return" != tag))]
+            [#list resource.parent.javaDoc[tag] as tagValue]
+          <tag name="${tag}"><![CDATA[${tagValue}]]></tag>
+            [/#list]
+          [/#if]
+        [/#list]
         [#if resource.annotations["java.lang.Deprecated"]??]
+          <tag name="deprecated"/>
+        [/#if]
+        [#if resource.parent.annotations["java.lang.Deprecated"]??]
           <tag name="deprecated"/>
         [/#if]
         [#if resource.httpMethods?size > 1]
