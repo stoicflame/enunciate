@@ -198,7 +198,7 @@
                   [@processAnonymousType type=elementChoice.baseType/]
                 </${xs}:element>
                 [#else]
-                <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"/>
+                <${xs}:element name="${elementChoice.name}" type="${elementChoice.baseType.qname}"[#if elementChoice.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${elementChoice.mimeType}"[/#if]/>
                 [/#if]
               [/#list]
               </${xs}:choice>
@@ -259,7 +259,7 @@
                 </${xs}:simpleType>
               </${xs}:element>
               [#else]
-              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if]>
+              <${xs}:element name="${element.name}" type="${element.baseType.qname}" minOccurs="${element.minOccurs}"[#if "1" != element.maxOccurs] maxOccurs="${element.maxOccurs}"[/#if][#if element.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${element.mimeType}"[/#if]>
                 [#if element.docValue?? || element.referencesQNameEnum!false]
               <${xs}:annotation>
                   [#if element.docValue??]
@@ -344,7 +344,7 @@
           [@processAnonymousType type=attribute.baseType/]
       </${xs}:attribute>
         [#else]
-      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}">
+      <${xs}:attribute name="${attribute.name}"[#if attribute.required] use="required"[/#if] type="${attribute.baseType.qname}"[#if attribute.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${attribute.mimeType}"[/#if]>
           [#if attribute.docValue?? || attribute.referencesQNameEnum!false]
         <${xs}:annotation>
             [#if attribute.docValue??]
@@ -423,7 +423,7 @@
 [#macro processImplicitElement implicitElement]
   [#if !isDefinedGlobally(implicitElement)]
     [#if implicitElement.typeQName??]
-<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}">
+<${xs}:element name="${implicitElement.elementName}" type="${implicitElement.typeQName}"[#if implicitElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitElement.mimeType}"[/#if]>
       [#if implicitElement.elementDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
@@ -445,7 +445,7 @@
 </${xs}:element>
     [#else]
       [#assign childElements=implicitElement.childElements]
-<${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"/>
+<${xs}:element name="${implicitElement.elementName}" type="[#if tns != ""]${tns}:[/#if]${implicitElement.elementName}"[#if implicitElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitElement.mimeType}"[/#if]/>
 <${xs}:complexType name="${implicitElement.elementName}">
       [#if implicitElement.elementDocs??]
   <${xs}:annotation>
@@ -456,7 +456,7 @@
       [/#if]
   <${xs}:sequence>
         [#list childElements as childElement]
-    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if]>
+    <${xs}:element name="${childElement.elementName}"[#if !childElement.xmlType.anonymous] type="${childElement.typeQName}"[/#if] minOccurs="${childElement.minOccurs}"[#if "1" != childElement.maxOccurs] maxOccurs="${childElement.maxOccurs}"[/#if][#if childElement.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${childElement.mimeType}"[/#if]>
           [#if childElement.elementDocs??]
       <${xs}:annotation>
         <${xs}:documentation>
@@ -487,7 +487,7 @@
   [@processTypeDef typeDef=implicitAttribute.anonymousTypeDefinition/]
 </${xs}:attribute>
  [#else]
-<${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}">
+<${xs}:attribute name="${implicitAttribute.attributeName}" type="${implicitAttribute.typeQName}"[#if implicitAttribute.mimeType??] xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="${implicitAttribute.mimeType}"[/#if]>
     [#if implicitAttribute.attributeDocs??]
   <${xs}:annotation>
     <${xs}:documentation>
