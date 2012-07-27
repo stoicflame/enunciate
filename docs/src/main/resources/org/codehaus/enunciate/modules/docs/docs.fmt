@@ -608,6 +608,10 @@
   [#if sinceTags?size > 0]
       <p class="note">Available Since: ${sinceTags[0]}</p>
   [/#if]
+  [#assign versionTags = getTagValues(resource, "version") /]
+  [#if versionTags?size > 0]
+      <p class="note">Version: ${versionTags[0]}</p>
+  [/#if]
   [#if tocNeeded(resource.operation)]
       <p>
         The following operations are supported on this resource:
@@ -630,6 +634,10 @@
     [#assign sinceTags = getTagValues(operation, "since") /]
     [#if sinceTags?size > 0]
       <p class="note">Available Since: ${sinceTags[0]}</p>
+    [/#if]
+    [#assign versionTags = getTagValues(operation, "version") /]
+    [#if versionTags?size > 0]
+      <p class="note">Version: ${versionTags[0]}</p>
     [/#if]
     [#if isDeprecated(operation)]
       <p class="alert">This operation has been deprecated. [#list operation.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
@@ -819,6 +827,13 @@
             <td>${sinceTags[0]}</td>
           </tr>
         [/#if]
+        [#assign versionTags = getTagValues(endpointInterface, "version") /]
+        [#if versionTags?size > 0]
+          <tr>
+            <td align="right">Version:</td>
+            <td>${versionTags[0]}</td>
+          </tr>
+        [/#if]
       </table>
       [#if endpointInterface.documentation?size > 0]
         [#list endpointInterface.documentation as documentation]
@@ -844,6 +859,10 @@
         [#assign sinceTags = getTagValues(method, "since") /]
         [#if sinceTags?size > 0]
       <p class="note">Available Since: ${sinceTags[0]}</p>
+        [/#if]
+        [#assign versionTags = getTagValues(method, "version") /]
+        [#if versionTags?size > 0]
+      <p class="note">Version: ${versionTags[0]}</p>
         [/#if]
         [#list method.documentation as documentation]
       <p>${documentation}</p>
@@ -995,6 +1014,13 @@
           <td>${sinceTags[0]}</td>
         </tr>
         [/#if]
+        [#assign versionTags = getTagValues(element, "version") /]
+        [#if versionTags?size > 0]
+        <tr>
+          <td align="right">Available Version:</td>
+          <td>${versionTags[0]}</td>
+        </tr>
+        [/#if]
       </table>
       [#list element.documentation as documentation]
       <p>${documentation}</p>
@@ -1045,6 +1071,13 @@
         <tr>
           <td align="right">Available Since:</td>
           <td>${sinceTags[0]}</td>
+        </tr>
+        [/#if]
+        [#assign versionTags = getTagValues(type, "version") /]
+        [#if versionTags?size > 0]
+        <tr>
+          <td align="right">Version:</td>
+          <td>${versionTags[0]}</td>
         </tr>
         [/#if]
       </table>
@@ -1197,6 +1230,13 @@
       <tr>
         <td align="right">Available Since:</td>
         <td>${sinceTags[0]}</td>
+      </tr>
+      [/#if]
+      [#assign versionTags = getTagValues(type, "version") /]
+      [#if versionTags?size > 0]
+      <tr>
+        <td align="right">Available Version:</td>
+        <td>${versionTags[0]}</td>
       </tr>
       [/#if]
       </table>
