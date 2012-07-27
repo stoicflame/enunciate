@@ -36,6 +36,7 @@ import java.util.*;
  * The person service is used to access persons in the database.
  *
  * @author Ryan Heaton
+ * @deprecated
  */
 @WebService (
   endpointInterface = "org.codehaus.enunciate.samples.genealogy.services.PersonService"

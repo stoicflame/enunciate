@@ -21,22 +21,22 @@
       [#return true/]
     [/#if]
   [/#list]
-  [#return false/]
-[/#function]
-[#function isResourceDeprecated resource]
-  [#list resource.operation as operation]
-    [#assign deprecationFound=false/]
-    [#list operation.tag as tag]
-      [#if tag.@name="deprecated"]
-        [#assign deprecationFound=true/]
-        [#break/]
+  [#if element?node_name = "resource"]
+    [#list element.operation as operation]
+      [#assign deprecationFound=false/]
+      [#list operation.tag as tag]
+        [#if tag.@name="deprecated"]
+          [#assign deprecationFound=true/]
+          [#break/]
+        [/#if]
+      [/#list]
+      [#if !deprecationFound]
+        [#return false/]
       [/#if]
     [/#list]
-    [#if !deprecationFound]
-      [#return false/]
-    [/#if]
-  [/#list]
-  [#return true/]
+    [#return true/]
+  [/#if]
+  [#return false/]
 [/#function]
 
 [#--set up the subnavigation menus--]
@@ -474,7 +474,7 @@
       [/#list]
     [#else]
       [#list docsxml.rest.resources.resource?sort_by("@name") as resource]
-      <li[#if isResourceDeprecated(resource)] class="deprecated"[/#if]><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+      <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
       [/#list]
     [/#if]
   </ul>
@@ -576,7 +576,7 @@
       <p>The following resources are part of this group:</p>
       <ul>
         [#list resources as resource]
-        <li[#if isResourceDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
+        <li[#if isDeprecated(resource)] class="deprecated"[/#if]><a href="#${scrubPathToFilename(resource.@name)}">${resource.@name}</a></li>
         [/#list]
       </ul>
       [#list resources as resource]
@@ -596,7 +596,7 @@
 [/#macro]
 [#macro processRawResource resource]
       <h1>${resource.@name}</h1>
-  [#if isResourceDeprecated(resource)]
+  [#if isDeprecated(resource)]
   <p class="alert">This resource has been deprecated.</p>
   [/#if]
   [#if attributeExists(resource.@subcontext) && !disableRestMountpoint!false]
