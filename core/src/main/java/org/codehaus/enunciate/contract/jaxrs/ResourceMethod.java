@@ -399,21 +399,23 @@ public class ResourceMethod extends DecoratedMethodDeclaration {
    * @param subpath The subpath.
    * @return The scrubbed path.
    */
-  protected String scrubParamNames(String subpath) {
+  protected static String scrubParamNames(String subpath) {
     StringBuilder builder = new StringBuilder(subpath.length());
     int charIndex = 0;
-    boolean inBrace = false;
+    int inBrace = 0;
     boolean definingRegexp = false;
     while (charIndex < subpath.length()) {
       char ch = subpath.charAt(charIndex++);
       if (ch == '{') {
-        inBrace = true;
+        inBrace++;
       }
       else if (ch == '}') {
-        inBrace = false;
-        definingRegexp = false;
+        inBrace--;
+        if (inBrace == 0) {
+          definingRegexp = false;
+        }
       }
-      else if (inBrace && ch == ':') {
+      else if (inBrace == 1 && ch == ':') {
         definingRegexp = true;
       }
 

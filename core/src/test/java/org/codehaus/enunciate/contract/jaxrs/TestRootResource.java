@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.codehaus.enunciate.contract.rs;
+package org.codehaus.enunciate.contract.jaxrs;
 
 import org.codehaus.enunciate.InAPTTestCase;
-import org.codehaus.enunciate.contract.jaxrs.*;
 import com.sun.mirror.declaration.TypeDeclaration;
 import com.sun.mirror.declaration.ClassDeclaration;
 
