@@ -90,14 +90,14 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * The output directory for the "generate" step.
    *
-   * @parameter expression="${project.build.directory}/enunciate/generate"
+   * @parameter expression="${enunciate.generateDir}" default-value="${project.build.directory}/enunciate/generate"
    */
   private File generateDir = null;
 
   /**
    * The output directory for the "compile" step.
    *
-   * @parameter expression="${project.build.directory}/enunciate/compile"
+   * @parameter expression="${enunciate.compileDir}" default-value="${project.build.directory}/enunciate/compile"
    */
   private File compileDir = null;
 
@@ -111,21 +111,21 @@ public class ConfigMojo extends AbstractMojo {
   /**
    * The output directory for the "build" step.
    *
-   * @parameter expression="${project.build.directory}/enunciate/build"
+   * @parameter expression="${enunciate.buildDir}" default-value="${project.build.directory}/enunciate/build"
    */
   private File buildDir = null;
 
   /**
    * The output directory for the "package" step.
    *
-   * @parameter expression="${project.build.directory}/enunciate/package"
+   * @parameter expression="${enunciate.packageDir}" default-value="${project.build.directory}/enunciate/package"
    */
   private File packageDir = null;
 
   /**
    * The directory where Enunciate puts scratch files.
    *
-   * @parameter expression="${project.build.directory}/enunciate-scratch"
+   * @parameter expression="${enunciate.scratchDir}" default-value="${project.build.directory}/enunciate-scratch"
    */
   private File scratchDir = null;
 

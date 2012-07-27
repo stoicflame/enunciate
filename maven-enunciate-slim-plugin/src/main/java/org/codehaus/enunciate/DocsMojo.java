@@ -31,7 +31,7 @@ public class DocsMojo extends ConfigMojo implements MavenReport {
   /**
    * The directory where the docs are put.
    *
-   * @parameter expression="${project.reporting.outputDirectory}/wsdocs"
+   * @parameter expression="${enunciate.docsDir}" default-value="${project.reporting.outputDirectory}/wsdocs"
    * @required
    */
   private String docsDir;

@@ -23,7 +23,7 @@ public class AssembleMojo extends ConfigMojo {
    * The directory where the webapp is built.  If using this goal along with "war" packaging, this must be configured to be the
    * same value as the "webappDirectory" parameter to the war plugin.
    *
-   * @parameter expression="target/${project.build.finalName}"
+   * @parameter expression="${enunciate.webappDirectory}" default-value="target/${project.build.finalName}"
    * @required
    */
   private String webappDirectory;
