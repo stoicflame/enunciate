@@ -95,6 +95,8 @@ import java.util.*;
  * <ul>
  * <li>The "useSubcontext" attribute is used to enable/disable mounting the JAX-RS resources at the rest subcontext. Default: "true".</li>
  * <li>The "usePathBasedConneg" attribute is used to enable/disable path-based conneg (see above). Default: "true".</a></li>
+ * <li>The "useWildcardServletMapping" attribute is used to tell Enunciate to use a wildcard to map to the jersey servlet. By default, Enunciate
+ * attempts to map each endpoint to a specific servlet mapping. Default: "false".</a></li>
  * <li>The "disableWildcardServletError" attribute is used to enable/disable the Enunciate "wildcard" resource check. Default: "false".</a></li>
  * <li>The "resourceProviderFactory" attribute is used to specify the fully-qualified classname of an instance of
  * com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory that jersey will use. The default is the spring-based factory or the
@@ -118,6 +120,7 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
   private boolean useSubcontext = true;
   private boolean usePathBasedConneg = true;
   private boolean disableWildcardServletError = false;
+  private boolean useWildcardServletMapping = false;
   private String resourceProviderFactory = null;
   private String applicationClass = null;
   private String defaultNamespace = null;
@@ -321,10 +324,10 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
           for (String subcontext : subcontextList) {
             String servletPattern;
             if ("".equals(subcontext)) {
-              servletPattern = resourceMethodPattern;
+              servletPattern = isUseWildcardServletMapping() ? "/*" : resourceMethodPattern;
             }
             else {
-              servletPattern = subcontext + resourceMethodPattern;
+              servletPattern = isUseWildcardServletMapping() ? subcontext + "/*" : subcontext + resourceMethodPattern;
             }
 
             if (urlMappings.add(servletPattern)) {
@@ -334,6 +337,11 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
           }
         }
       }
+    }
+
+    if (urlMappings.contains("/*")) {
+      urlMappings.clear();
+      urlMappings.add("/*");
     }
 
     servletComponent.setUrlMappings(urlMappings);
@@ -459,6 +467,24 @@ public class JerseyDeploymentModule extends FreemarkerDeploymentModule implement
    */
   public void setDisableWildcardServletError(boolean disableWildcardServletError) {
     this.disableWildcardServletError = disableWildcardServletError;
+  }
+
+  /**
+   * Whether to use the wildcard servlet mapping.
+   *
+   * @return Whether to use the wildcard servlet mapping.
+   */
+  public boolean isUseWildcardServletMapping() {
+    return useWildcardServletMapping;
+  }
+
+  /**
+   * Whether to use the wildcard servlet mapping.
+   *
+   * @param useWildcardServletMapping Whether to use the wildcard servlet mapping.
+   */
+  public void setUseWildcardServletMapping(boolean useWildcardServletMapping) {
+    this.useWildcardServletMapping = useWildcardServletMapping;
   }
 
   /**
