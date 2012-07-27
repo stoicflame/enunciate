@@ -9,6 +9,8 @@ import org.codehaus.enunciate.contract.jaxb.ComplexTypeDefinition;
 import org.codehaus.enunciate.contract.jaxb.Element;
 import org.codehaus.enunciate.contract.jaxb.types.KnownXmlType;
 
+import javax.xml.namespace.QName;
+
 /**
  * @author Ryan Heaton
  */
@@ -25,6 +27,20 @@ public class TestAdapterUtil extends InAPTTestCase {
     model.add(ct);
     Element el = ct.getElements().first();
     assertEquals(KnownXmlType.LONG.getQname(), el.getBaseType().getQname());
+//    assertEquals("org.codehaus.enunciate.samples.anotherschema.BeanTwo", ((DeclaredType) el.getAdapterType().getAdaptedType()).getDeclaration().getQualifiedName());
+  }
+
+  /**
+   * see https://jira.codehaus.org/browse/ENUNCIATE-514
+   */
+  public void testAdaptingIfaceToImpl() throws Exception {
+    TypeDeclaration decl = getDeclaration("org.codehaus.enunciate.samples.schema.BeanWithAdaptedIfaceAccessor");
+    ComplexTypeDefinition ct = new ComplexTypeDefinition((ClassDeclaration) decl);
+    EnunciateFreemarkerModel model = new EnunciateFreemarkerModel();
+    FreemarkerModel.set(model);
+    model.add(ct);
+    Element el = ct.getElements().first();
+    assertEquals(new QName("urn:adaptediface", "adaptediface"), el.getBaseType().getQname());
 //    assertEquals("org.codehaus.enunciate.samples.anotherschema.BeanTwo", ((DeclaredType) el.getAdapterType().getAdaptedType()).getDeclaration().getQualifiedName());
   }
 }

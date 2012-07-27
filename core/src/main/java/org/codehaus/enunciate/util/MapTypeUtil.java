@@ -25,6 +25,7 @@ import com.sun.mirror.apt.AnnotationProcessorEnvironment;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import net.sf.jelly.apt.Context;
 import org.codehaus.enunciate.contract.jaxb.adapters.AdapterType;
@@ -36,6 +37,13 @@ import org.codehaus.enunciate.contract.jaxb.adapters.AdapterUtil;
  * @author Ryan Heaton
  */
 public class MapTypeUtil {
+
+  private static ThreadLocal<LinkedList<String>> TYPE_STACK = new ThreadLocal<LinkedList<String>>() {
+    @Override
+    protected LinkedList<String> initialValue() {
+      return new LinkedList<String>();
+    }
+  };
 
   /**
    * Finds the map type for the specified type mirror, if it exists.
@@ -76,30 +84,39 @@ public class MapTypeUtil {
 
       return new MapType((InterfaceType) declaredType, keyType, valueType);
     }
+    else if (TYPE_STACK.get().contains(declaration.getQualifiedName())) {
+      return null;
+    }
     else {
-      AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
-      if (adapterType != null) {
-        return findMapType(adapterType.getAdaptingType());
-      }
-      else {
-        MapType mapType = null;
-        Collection<InterfaceType> superInterfaces = declaredType.getSuperinterfaces();
-        for (InterfaceType superInterface : superInterfaces) {
-          mapType = findMapType(superInterface);
-          if (mapType != null) {
-            break;
+      TYPE_STACK.get().push(declaration.getQualifiedName());
+      try {
+        AdapterType adapterType = AdapterUtil.findAdapterType(declaration);
+        if (adapterType != null) {
+          return findMapType(adapterType.getAdaptingType());
+        }
+        else {
+          MapType mapType = null;
+          Collection<InterfaceType> superInterfaces = declaredType.getSuperinterfaces();
+          for (InterfaceType superInterface : superInterfaces) {
+            mapType = findMapType(superInterface);
+            if (mapType != null) {
+              break;
+            }
           }
-        }
 
-        if ((mapType == null) && (declaredType instanceof ClassType)) {
-          mapType = findMapType(((ClassType) declaredType).getSuperclass());
-        }
+          if ((mapType == null) && (declaredType instanceof ClassType)) {
+            mapType = findMapType(((ClassType) declaredType).getSuperclass());
+          }
 
-        if (mapType != null) {
-          mapType.setOriginalType(declaredType);
-        }
+          if (mapType != null) {
+            mapType.setOriginalType(declaredType);
+          }
 
-        return mapType;
+          return mapType;
+        }
+      }
+      finally {
+        TYPE_STACK.get().pop();
       }
     }
   }
