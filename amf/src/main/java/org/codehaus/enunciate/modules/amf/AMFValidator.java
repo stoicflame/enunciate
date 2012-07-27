@@ -43,12 +43,14 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
 
   private final Set<String> unsupportedTypes = new HashSet<String>();
   private Set<String> disabledRules = new TreeSet<String>();
+  private final boolean enforceNoFieldAccessors;
 
-  public AMFValidator() {
+  public AMFValidator( boolean enforceNoFieldAccessors ) {
     unsupportedTypes.add(XMLGregorianCalendar.class.getName());
     unsupportedTypes.add(javax.xml.datatype.Duration.class.getName());
     unsupportedTypes.add(java.awt.Image.class.getName());
     unsupportedTypes.add(javax.xml.transform.Source.class.getName());
+    this.enforceNoFieldAccessors = enforceNoFieldAccessors;
   }
 
   @Override
@@ -104,7 +106,7 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
 
       for (Attribute attribute : complexType.getAttributes()) {
         if (!isAMFTransient(attribute)) {
-          if (attribute.getDelegate() instanceof FieldDeclaration) {
+          if ( (attribute.getDelegate() instanceof FieldDeclaration ) && enforceNoFieldAccessors ) {
             result.addError(attribute, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 
@@ -116,7 +118,7 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
 
       for (Element element : complexType.getElements()) {
         if (!isAMFTransient(element)) {
-          if (element.getDelegate() instanceof FieldDeclaration) {
+          if ( (element.getDelegate() instanceof FieldDeclaration ) && enforceNoFieldAccessors ) {
             result.addError(element, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 
@@ -129,7 +131,7 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
       Value value = complexType.getValue();
       if (value != null) {
         if (!isAMFTransient(value)) {
-          if (value.getDelegate() instanceof FieldDeclaration) {
+          if ( (value.getDelegate() instanceof FieldDeclaration ) && enforceNoFieldAccessors ) {
             result.addError(value, "If you're mapping to AMF, you can't use fields for your accessors. ");
           }
 

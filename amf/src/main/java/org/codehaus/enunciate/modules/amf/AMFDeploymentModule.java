@@ -115,6 +115,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * generated web application.  Default: "false".</li>
  * <li>The "mergeServicesConfigXML" attribute specifies the services-config.xml file that is to be merged into the Enunciate-generated 
  * services-config.xml file. No file will be merged if none is specified.</li>
+ * <li>The "enforceNoFieldAccessors" attribute specifies whether to enforce that a field accessor cannot be used for AMF mapping.
+ * <i>Note: whether this option is enabled or disabled, there currently MUST be a getter and setter for each accessor.  This option only
+ * disables the compile-time validation check.</i></li>
  * </ul>
  *
  * <h3>The "war" element</h3>
@@ -228,6 +231,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   private boolean asSourcesDownloadable = false;
   private boolean amfRtFound = false;
   private boolean springDIFound = false;
+  private boolean enforceNoFieldAccessors = true;
   private String mergeServicesConfigXML;
 
   /**
@@ -996,7 +1000,7 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
    */
   @Override
   public Validator getValidator() {
-    return new AMFValidator();
+    return new AMFValidator( this.enforceNoFieldAccessors );
   }
 
   @Override
@@ -1253,4 +1257,24 @@ public class AMFDeploymentModule extends FreemarkerDeploymentModule implements P
   public List<File> getProjectTestResourceDirectories() {
     return Collections.emptyList();
   }
+
+  /**
+   * Whether to enforce that field accessors can't be used.
+   *
+   * @return Whether to enforce that field accessors can't be used.
+   */
+  public boolean isEnforceNoFieldAccessors() {
+    return enforceNoFieldAccessors;
+  }
+
+  /**
+   * Whether to enforce that field accessors can't be used.
+   *
+   * @param enforceNoFieldAccessors Whether to enforce that field accessors can't be used.
+   */
+  public void setEnforceNoFieldAccessors(boolean enforceNoFieldAccessors) {
+    this.enforceNoFieldAccessors = enforceNoFieldAccessors;
+  }
+
+
 }
