@@ -48,6 +48,7 @@ public interface PersonService {
   /**
    * Stores a person in the database.
    *
+   * @since Version E
    * @param person The person to store in the database.
    * @return The person that was stored (presumably modified for storage).
    */

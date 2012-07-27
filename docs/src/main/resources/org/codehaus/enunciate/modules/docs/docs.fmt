@@ -604,6 +604,10 @@
   [#if attributeExists(resource.@subcontext) && !disableRestMountpoint!false]
       <p class="note">Mount Point: <a href="${apiRelativePath}${resource.@subcontext}${resource.@name}">${resource.@subcontext}${resource.@name}</a></p>
   [/#if]
+  [#assign sinceTags = getTagValues(resource, "since") /]
+  [#if sinceTags?size > 0]
+      <p class="note">Available Since: ${sinceTags[0]}</p>
+  [/#if]
   [#if tocNeeded(resource.operation)]
       <p>
         The following operations are supported on this resource:
@@ -623,6 +627,10 @@
     [#list operation.alias as alias]
       <p class="note">Alias: ${alias}</p>
     [/#list]
+    [#assign sinceTags = getTagValues(operation, "since") /]
+    [#if sinceTags?size > 0]
+      <p class="note">Available Since: ${sinceTags[0]}</p>
+    [/#if]
     [#if isDeprecated(operation)]
       <p class="alert">This operation has been deprecated. [#list operation.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
     [/#if]
@@ -804,6 +812,13 @@
             <td><a href="${apiRelativePath}${endpointInterface.@path}">${endpointInterface.@path}</a></td>
           </tr>
         [/#if]
+        [#assign sinceTags = getTagValues(endpointInterface, "since") /]
+        [#if sinceTags?size > 0]
+          <tr>
+            <td align="right">Available Since:</td>
+            <td>${sinceTags[0]}</td>
+          </tr>
+        [/#if]
       </table>
       [#if endpointInterface.documentation?size > 0]
         [#list endpointInterface.documentation as documentation]
@@ -825,6 +840,10 @@
       <h2>${method.@name}</h2>
         [#if isDeprecated(method)]
       <p class="alert">This method has been deprecated.[#list method.tag as tag][#if tag.@name="deprecated"] ${tag}[/#if][/#list]</p>
+        [/#if]
+        [#assign sinceTags = getTagValues(method, "since") /]
+        [#if sinceTags?size > 0]
+      <p class="note">Available Since: ${sinceTags[0]}</p>
         [/#if]
         [#list method.documentation as documentation]
       <p>${documentation}</p>
@@ -969,6 +988,13 @@
           <td><a href="${schema.@file}">${schema.@file}</a></td>
         </tr>
         [/#if]
+        [#assign sinceTags = getTagValues(element, "since") /]
+        [#if sinceTags?size > 0]
+        <tr>
+          <td align="right">Available Since:</td>
+          <td>${sinceTags[0]}</td>
+        </tr>
+        [/#if]
       </table>
       [#list element.documentation as documentation]
       <p>${documentation}</p>
@@ -1012,6 +1038,13 @@
         <tr>
           <td align="right">XML Schema:</td>
           <td><a href="${schema.@file}">${schema.@file}</a></td>
+        </tr>
+        [/#if]
+        [#assign sinceTags = getTagValues(type, "since") /]
+        [#if sinceTags?size > 0]
+        <tr>
+          <td align="right">Available Since:</td>
+          <td>${sinceTags[0]}</td>
         </tr>
         [/#if]
       </table>
@@ -1157,6 +1190,13 @@
       <tr>
         <td align="right">JSON Schema File:</td>
         <td><a href="${type?parent.@file}">${type?parent.@file}</a></td>
+      </tr>
+      [/#if]
+      [#assign sinceTags = getTagValues(type, "since") /]
+      [#if sinceTags?size > 0]
+      <tr>
+        <td align="right">Available Since:</td>
+        <td>${sinceTags[0]}</td>
       </tr>
       [/#if]
       </table>

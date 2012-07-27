@@ -643,8 +643,8 @@ body.advisories #nav-advisories,body.community #nav-community,body.blog #nav-blo
 /* @end */
 
 .update, .note, .notice, alert {
-margin: 10px 0px 20px;
-padding: 5px 20px;
+margin: 10px 0 20px;
+padding: 5px 20px 5px 20px;
 clear: both;
 }
 .note {
@@ -654,7 +654,7 @@ clear: both;
 }
 .update, .notice {
 	background: #92ED6B;
-	border-top: 2px solid #70ED3B;
+	border-top: 2px solid #2B8E00;
 	border-bottom: 2px solid #2B8E00;
 }
 .alert {
