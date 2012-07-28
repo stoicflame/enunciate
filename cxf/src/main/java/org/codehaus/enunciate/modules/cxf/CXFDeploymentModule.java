@@ -27,6 +27,8 @@ import org.codehaus.enunciate.contract.jaxrs.ResourceMethod;
 import org.codehaus.enunciate.contract.jaxrs.RootResource;
 import org.codehaus.enunciate.contract.jaxws.EndpointInterface;
 import org.codehaus.enunciate.contract.validation.Validator;
+import org.codehaus.enunciate.main.ClasspathHandler;
+import org.codehaus.enunciate.main.ClasspathResource;
 import org.codehaus.enunciate.main.Enunciate;
 import org.codehaus.enunciate.main.webapp.BaseWebAppFragment;
 import org.codehaus.enunciate.main.webapp.WebAppComponent;
@@ -153,29 +155,43 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
         List<DeploymentModule> enabledModules = enunciate.getConfig().getEnabledModules();
         for (DeploymentModule enabledModule : enabledModules) {
           if (enabledModule instanceof SpringAppDeploymentModule) {
-            List<SpringImport> springImports = ((SpringAppDeploymentModule) enabledModule).getSpringImports();
+            final List<SpringImport> springImports = ((SpringAppDeploymentModule) enabledModule).getSpringImports();
+            enunciate.addClasspathHandler(new ClasspathHandler() {
+              @Override
+              public void startPathEntry(File pathEntry) {
+              }
 
-            //standard cxf import.
-            SpringImport cxfImport = new SpringImport();
-            cxfImport.setUri("classpath:META-INF/cxf/cxf.xml");
-            springImports.add(cxfImport);
+              @Override
+              public void handleResource(ClasspathResource resource) {
+                String path = resource.getPath();
+                if ("META-INF/cxf/cxf.xml".equals(path)) {
+                  SpringImport cxfImport = new SpringImport();
+                  cxfImport.setUri("classpath:META-INF/cxf/cxf.xml");
+                  springImports.add(cxfImport);
+                }
+                else if ("META-INF/cxf/cxf-servlet.xml".equals(path)) {
+                  SpringImport cxfImport = new SpringImport();
+                  cxfImport.setUri("classpath:META-INF/cxf/cxf-servlet.xml");
+                  springImports.add(cxfImport);
+                }
+                else if (enableJaxws && "META-INF/cxf/cxf-extension-soap.xml".equals(path)) {
+                  SpringImport cxfImport = new SpringImport();
+                  cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-soap.xml");
+                  springImports.add(cxfImport);
+                }
+                else if (enableJaxrs && "META-INF/cxf/cxf-extension-jaxrs-binding.xml".equals(path)) {
+                  SpringImport cxfImport = new SpringImport();
+                  cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml");
+                  springImports.add(cxfImport);
+                }
 
-            //standard cxf import.
-            cxfImport = new SpringImport();
-            cxfImport.setUri("classpath:META-INF/cxf/cxf-servlet.xml");
-            springImports.add(cxfImport);
+              }
 
-            if (enableJaxws) {
-              cxfImport = new SpringImport();
-              cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-soap.xml");
-              springImports.add(cxfImport);
-            }
-
-            if (enableJaxrs) {
-              cxfImport = new SpringImport();
-              cxfImport.setUri("classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml");
-              springImports.add(cxfImport);
-            }
+              @Override
+              public boolean endPathEntry(File pathEntry) {
+                return false;
+              }
+            });
           }
         }
       }
