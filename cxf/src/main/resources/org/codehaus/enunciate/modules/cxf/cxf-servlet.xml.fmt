@@ -55,7 +55,7 @@
                            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
     [#if rootResources?? && rootResources?size > 0]
 
-  <jaxrs:server id="jaxrs" address="${restSubcontext!"/rest"}">
+  <jaxrs:server id="jaxrs">
     [#if loggingFeatureEnabled!false ]
     <jaxrs:features>
     	<cxf:logging/>

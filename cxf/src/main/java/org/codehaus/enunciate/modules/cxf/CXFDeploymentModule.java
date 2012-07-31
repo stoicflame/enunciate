@@ -310,7 +310,6 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
     BaseWebAppFragment webappFragment = new BaseWebAppFragment(getName());
     webappFragment.setBaseDir(webappDir);
 
-    Set<String> urlMappings = new TreeSet<String>();
     ArrayList<WebAppComponent> servlets = new ArrayList<WebAppComponent>();
     ArrayList<WebAppComponent> filters = new ArrayList<WebAppComponent>();
     if (enableJaxws) {
@@ -345,7 +344,12 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       transformAndCopy(new File(getGenerateDir(), "cxf-jaxws-servlet.xml"), new File(webinf, "cxf-jaxws-servlet.xml"), transform);
       jaxwsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxws-servlet.xml");
       servlets.add(jaxwsServletComponent);
-      urlMappings.addAll(jaxwsUrlMappings);
+
+      WebAppComponent filterComponent = new WebAppComponent();
+      filterComponent.setName("cxf-filter");
+      filterComponent.setClassname(CXFAdaptedServletFilter.class.getName());
+      filterComponent.setUrlMappings(jaxwsUrlMappings);
+      filters.add(filterComponent);
     }
 
     if (enableJaxrs) {
@@ -355,32 +359,9 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       TreeSet<String> jaxrsUrlMappings = new TreeSet<String>();
       for (RootResource rootResource : getModel().getRootResources()) {
         for (ResourceMethod resourceMethod : rootResource.getResourceMethods(true)) {
-          String resourceMethodPattern = resourceMethod.getServletPattern();
           for (Set<String> subcontextList : ((Map<String, Set<String>>) resourceMethod.getMetaData().get("subcontexts")).values()) {
             for (String subcontext : subcontextList) {
-              String servletPattern;
-              if ("".equals(subcontext)) {
-                servletPattern = resourceMethodPattern;
-              }
-              else {
-                servletPattern = subcontext + resourceMethodPattern;
-              }
-
-              if (jaxrsUrlMappings.add(servletPattern)) {
-                debug("Resource method %s of resource %s to be made accessible by servlet pattern %s.",
-                      resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPattern);
-
-                if (!servletPattern.endsWith("*") && isUseExtensionMappings()) {
-                  Map<String, String> contentTypesToIds = getModel().getContentTypesToIds();
-                  for (Map.Entry<String, String> entry : contentTypesToIds.entrySet()) {
-                    String servletPatternExt = servletPattern + "." + entry.getValue();
-                    if (jaxrsUrlMappings.add(servletPatternExt)) {
-                      debug("Content type %s of resource method %s of resource %s to be made accessible by servlet pattern %s.",
-                            entry.getKey(), resourceMethod.getSimpleName(), resourceMethod.getParent().getQualifiedName(), servletPatternExt);
-                    }
-                  }
-                }
-              }
+              jaxrsUrlMappings.add(subcontext + "/*");
             }
           }
         }
@@ -395,17 +376,9 @@ public class CXFDeploymentModule extends FreemarkerDeploymentModule implements E
       transformAndCopy(new File(getGenerateDir(), "cxf-jaxrs-servlet.xml"), new File(webinf, "cxf-jaxrs-servlet.xml"), transform);
       jaxrsServletComponent.addInitParam("config-location", "/WEB-INF/cxf-jaxrs-servlet.xml");
       servlets.add(jaxrsServletComponent);
-      urlMappings.addAll(jaxrsUrlMappings);
     }
     webappFragment.setServlets(servlets);
     webappFragment.setFilters(filters);
-
-    WebAppComponent filterComponent = new WebAppComponent();
-    filterComponent.setName("cxf-filter");
-    filterComponent.setClassname(CXFAdaptedServletFilter.class.getName());
-    filterComponent.setUrlMappings(urlMappings);
-    webappFragment.setFilters(Arrays.asList(filterComponent));
-
     enunciate.addWebAppFragment(webappFragment);
   }
 
