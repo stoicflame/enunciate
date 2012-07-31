@@ -1765,7 +1765,7 @@ public class EnunciateFreemarkerModel extends FreemarkerModel {
       if (classType instanceof AdapterType) {
         ((AdapterType) classType).getAdaptingType().accept(this);
       }
-      else {
+      else if (MapTypeUtil.findMapType(classType) == null) {
         DecoratedClassType decorated = (DecoratedClassType) TypeMirrorDecorator.decorate(classType);
         String qualifiedName = decorated.getDeclaration().getQualifiedName();
         if (decorated.getDeclaration() != null && Object.class.getName().equals(qualifiedName)) {

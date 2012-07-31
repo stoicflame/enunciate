@@ -21,6 +21,7 @@ import com.sun.mirror.type.DeclaredType;
 import com.sun.mirror.type.TypeMirror;
 import net.sf.jelly.apt.decorations.TypeMirrorDecorator;
 import net.sf.jelly.apt.decorations.type.DecoratedDeclaredType;
+import net.sf.jelly.apt.decorations.type.DecoratedTypeMirror;
 import org.codehaus.enunciate.contract.jaxb.*;
 import org.codehaus.enunciate.contract.jaxb.adapters.Adaptable;
 import org.codehaus.enunciate.contract.jaxws.EndpointImplementation;
@@ -140,6 +141,10 @@ public class AMFValidator extends BaseValidator implements ConfigurableRules {
           }
         }
       }
+    }
+
+    if (((DecoratedTypeMirror) complexType.getSuperclass()).isInstanceOf(Map.class.getName())) {
+      result.addError(complexType, "Enunciate can't generate AMF code that handles types that implement java.util.Map. I'm afraid you'll have to disable the AMF module or use @XmlJavaTypeAdapter to adapt the type.");
     }
 
     return result;

@@ -158,6 +158,9 @@ public class CSharpValidator extends BaseValidator {
       }
     }
 
+    if (((DecoratedTypeMirror) complexType.getSuperclass()).isInstanceOf(Map.class.getName())) {
+      result.addError(complexType, "Enunciate can't generate C# code that handles types that implement java.util.Map. I'm afraid you'll have to disable the C# module or use @XmlJavaTypeAdapter to adapt the type.");
+    }
 
     return result;
   }

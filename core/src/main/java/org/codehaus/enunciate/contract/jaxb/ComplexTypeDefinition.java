@@ -23,6 +23,7 @@ import org.codehaus.enunciate.contract.jaxb.types.XmlTypeFactory;
 import org.codehaus.enunciate.contract.validation.BaseValidator;
 import org.codehaus.enunciate.contract.validation.ValidationException;
 import org.codehaus.enunciate.contract.validation.ValidationResult;
+import org.codehaus.enunciate.util.MapTypeUtil;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 

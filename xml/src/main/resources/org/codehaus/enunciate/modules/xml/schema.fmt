@@ -165,8 +165,10 @@
     </${xs}:documentation>
   </${xs}:annotation>
     [/#if]
-    [#--complex type with complex content.--]
-    [#if typeDef.contentType.complex]
+    [#if typeDef.baseType?? && typeDef.baseType.map!false]
+      [@processMapTypeSequence mapType=typeDef.baseType/]
+</${xs}:complexType>
+    [#elseif typeDef.contentType.complex] [#--complex type with complex content.--]
       [#--if it's not implied, we need to declare the extension--]
       [#if !typeDef.baseObject]
   <${xs}:complexContent>
@@ -395,6 +397,11 @@
 [#t]
 [#macro processMapType mapType]
   <${xs}:complexType>
+    [@processMapTypeSequence mapType=mapType/]
+  </${xs}:complexType>
+[/#macro]
+[#t]
+[#macro processMapTypeSequence mapType]
     <${xs}:sequence>
       <${xs}:element name="entry" minOccurs="0" maxOccurs="unbounded">
         <${xs}:complexType>
@@ -417,7 +424,6 @@
         </${xs}:complexType>
       </${xs}:element>
     </${xs}:sequence>
-  </${xs}:complexType>
 [/#macro]
 [#t]
 [#macro processImplicitElement implicitElement]
