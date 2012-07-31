@@ -52,6 +52,7 @@ public class PrettyPrinter extends DefaultHandler {
   public void startDocument() throws SAXException {
     try {
       writer = new PrintWriter(new FileWriter(this.output));
+      writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     }
     catch (IOException e) {
       throw new SAXException(e);
