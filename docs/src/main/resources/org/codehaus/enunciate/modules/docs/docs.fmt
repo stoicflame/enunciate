@@ -702,12 +702,10 @@
           <td>(custom)</td>
         </tr>
       [/#if]
-      [#list inValue["contentType[consumable='true']"] as contentType]
         <tr>
-          <td align="right">consumable media type:</td>
-          <td>${contentType.@type}</td>
+          <td align="right">media types:</td>
+          <td>[#list operation.contentType as contentType][#if contentType.@consumable = "true"]${contentType.@type}[#if contentType_has_next]<br/>[/#if][/#if][/#list]</td>
         </tr>
-      [/#list]
       </table>
       [#list inValue.documentation as documentation]
       <p>${documentation}</p>
@@ -749,12 +747,10 @@
           <td>(custom)</td>
         </tr>
       [/#if]
-      [#list outValue["contentType[produceable='true']"] as contentType]
         <tr>
-          <td align="right">produceable media type:</td>
-          <td>${contentType.@type}</td>
+          <td align="right">media types:</td>
+          <td>[#list operation.contentType as contentType][#if contentType.@produceable = "true"]${contentType.@type}[#if contentType_has_next]<br/>[/#if][/#if][/#list]</td>
         </tr>
-      [/#list]
       </table>
       [#list outValue.documentation as documentation]
       <p>${documentation}</p>
