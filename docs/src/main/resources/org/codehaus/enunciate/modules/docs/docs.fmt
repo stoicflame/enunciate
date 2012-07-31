@@ -49,7 +49,7 @@
 [#if restAvailable]
   [#assign nav_sections = nav_sections + { "REST" : "rest.html" }/]
 [/#if]
-[#if downloadsxml??]
+[#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
   [#assign nav_sections = nav_sections + { "Files and Libraries" : "downloads.html"} /]
 [/#if]
 
@@ -137,7 +137,7 @@
             <li id="nav-rest"><a href="rest.html">REST</a></li>
             [/#if]
             <li id="nav-data"><a href="model.html">Data Model</a></li>
-            [#if downloadsxml??]
+            [#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
             <li id="nav-downloads"><a href="downloads.html">Files and Libraries</a></li>
             [/#if]
           </ul>
@@ -246,7 +246,7 @@
         [/#list]
       [/#if]
       </ul>
-      [#if downloadsxml??]
+      [#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
       <p>
         The REST resources expose a data model that is supported by a set of client-side libraries that are made available on the
         <a href="downloads.html">files and libraries</a> page.
@@ -290,7 +290,7 @@
       [/#list]
       </ul>
       [/#list]
-      [#if downloadsxml??]
+      [#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
       <p>
         The SOAP API is also accessible by a set of client-side libraries that can be downloaded from the <a href="downloads.html">files and libraries page</a>.
       </p>
@@ -417,7 +417,7 @@
     [/#list]
   [/@boilerplate]
 [/@file]
-[#if downloadsxml??]
+[#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
   [@file name="downloads.html" charset="utf-8"]
     [@boilerplate title="Files and Libraries" subnav=[{"title" : "Home", "href" : indexPageName}, { "title" : "Files and Libraries" , "href" : "downloads.html" , "subnav" : nav_sections}] codeblocks=true]
   <h1>Files and Libraries</h1>
@@ -480,7 +480,7 @@
       [/#list]
     [/#if]
   </ul>
-      [#if downloadsxml??]
+      [#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
   <p>
     The REST resources expose a data model that is supported by a set of client-side libraries that are made available on the
     <a href="downloads.html">files and libraries</a> page.
@@ -525,7 +525,7 @@
       [/#list]
   </ul>
       [/#list]
-      [#if downloadsxml??]
+      [#if ((downloadsxml??) && (downloadsxml.downloads?size > 0))]
   <p>
     The SOAP API is also accessible by a set of client-side libraries that can be downloaded from the <a href="downloads.html">files and libraries page</a>.
   </p>
