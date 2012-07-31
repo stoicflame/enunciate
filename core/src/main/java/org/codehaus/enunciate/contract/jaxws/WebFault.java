@@ -356,7 +356,7 @@ public class WebFault extends DecoratedClassDeclaration implements WebMessage, W
 
     for (PropertyDeclaration property : getAllFaultProperties(this)) {
       String propertyName = property.getPropertyName();
-      if (("cause".equals(propertyName)) || ("localizedMessage".equals(propertyName)) || ("stackTrace".equals(propertyName))) {
+      if (("cause".equals(propertyName)) || ("localizedMessage".equals(propertyName)) || ("stackTrace".equals(propertyName)) || "suppressed".equals(propertyName)) {
         continue;
       }
 
