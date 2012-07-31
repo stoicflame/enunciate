@@ -63,6 +63,13 @@ public interface WebAppFragment {
   List<WebAppComponent> getServlets();
 
   /**
+   * The error pages.
+   *
+   * @return The error pages.
+   */
+  List<WebAppComponent> getErrorPages();
+
+  /**
    * The mime mappings (extension-to-mime type).
    *
    * @return The mime mappings (extension-to-mime type).

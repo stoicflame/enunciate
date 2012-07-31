@@ -114,6 +114,24 @@
       [/#list]
     [/#if]
   [/#list]
+  [#list webAppFragments as fragment]
+    [#if fragment.errorPages?exists]
+      [#list fragment.errorPages?keys as errorPage]
+        [#list errorPage.urlMappings as location]
+
+  <error-page>
+          [#if errorPage.name??]
+    <error-code>${errorPage.name}</error-code>
+    <location>${location}</location>
+          [#elseif errorPage.classname??]
+    <exception-type>${errorPage.classname}</exception-type>
+    <location>${location}</location>
+          [/#if]
+  </error-page>
+        [/#list]
+      [/#list]
+    [/#if]
+  [/#list]
   [#if resourceEnvRefs?exists]
     [#list resourceEnvRefs as resourceEnvRef]
 

@@ -30,6 +30,7 @@ public class BaseWebAppFragment implements WebAppFragment {
   private List<WebAppComponent> filters;
   private List<String> listeners;
   private List<WebAppComponent> servlets;
+  private List<WebAppComponent> errorPages;
   private Map<String, String> mimeMappings;
   private File baseDir;
 
@@ -111,6 +112,24 @@ public class BaseWebAppFragment implements WebAppFragment {
    */
   public void setServlets(List<WebAppComponent> servlets) {
     this.servlets = servlets;
+  }
+
+  /**
+   * The error pages.
+   *
+   * @return The error pages.
+   */
+  public List<WebAppComponent> getErrorPages() {
+    return errorPages;
+  }
+
+  /**
+   * The error pages.
+   *
+   * @param errorPages The error pages.
+   */
+  public void setErrorPages(List<WebAppComponent> errorPages) {
+    this.errorPages = errorPages;
   }
 
   /**
